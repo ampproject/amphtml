@@ -1,6 +1,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {VisibilityState} from '#core/constants/visibility-state';
+import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
@@ -1095,6 +1096,23 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // Flush LCP again.
       toggleVisibility(perf, false);
 
+      // A textual paragraph
+      const p = document.createElement('p');
+      p.textContent = 'hello';
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              startTime: 25,
+              element: p,
+            },
+          ];
+        },
+      });
+      // Flush LCP again.
+      toggleVisibility(perf, false);
+
       const lcptEvents = perf.events_.filter(({label}) =>
         label.startsWith('lcpt')
       );
@@ -1105,6 +1123,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       expect(lcptEvents).deep.include({
         label: 'lcpt',
         delta: ELEMENT_TYPE.carousel,
+      });
+      expect(lcptEvents).deep.include({
+        label: 'lcpt',
+        delta: ELEMENT_TYPE.text,
       });
     });
   });
@@ -1373,7 +1395,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
   });
 });
 
-describes.realWin('log canonicalUrl', {amp: true}, (env) => {
+describes.realWin('log extraParams', {amp: true}, (env) => {
   let win;
   let perf;
   let viewerSendMessageStub;
@@ -1400,6 +1422,18 @@ describes.realWin('log canonicalUrl', {amp: true}, (env) => {
       expect(viewerSendMessageStub.lastCall.args[1].canonicalUrl).to.equal(
         canonicalUrl
       );
+    });
+  });
+
+  it('should add the random eventid to sendCsi', () => {
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('sendCsi');
+      const {eventid} = viewerSendMessageStub.lastCall.args[1];
+      expect(() => {
+        base64UrlDecodeToBytes(eventid);
+      }).not.to.throw();
     });
   });
 });

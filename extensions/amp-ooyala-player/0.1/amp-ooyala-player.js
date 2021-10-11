@@ -11,13 +11,14 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 
 const TAG = 'amp-ooyala-player';

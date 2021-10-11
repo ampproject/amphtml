@@ -18,6 +18,9 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {applyBreakpointClassname} from './breakpoints';
 import {Controls} from './controls';
 import {DirectionX, DirectionY, FLOAT_TOLERANCE, RectDef} from './def';
@@ -35,8 +38,6 @@ import {
 import {createViewportRect} from './viewport-rect';
 
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
-import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   PlayingStates,

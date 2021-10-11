@@ -2,9 +2,10 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {urls} from '../../../src/config';
-import {getData, listen} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {parseUrlDeprecated} from '../../../src/url';

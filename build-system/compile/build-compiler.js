@@ -11,6 +11,8 @@ async function buildCompiler() {
 
   await esbuild.build({
     entryPoints: ['src/compiler/index.js'],
+    // Use root-level tsconfig which has path configuration.
+    tsconfig: 'tsconfig.json',
     outfile: 'dist/compiler.js',
     bundle: true,
     define: {

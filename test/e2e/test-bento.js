@@ -1,14 +1,18 @@
-describes.endtoend(
-  'Bento',
-  {
+const attachesShadowRoot = {
+  'without v0.js': 'bento/minimal.html',
+  'without v0.js nor custom-elements-polyfill.js': 'bento/no-ce-polyfill.html',
+};
+
+for (const [name, fixture] of Object.entries(attachesShadowRoot)) {
+  const config = {
     environments: ['single'],
-    fixture: 'bento/minimal.html',
-  },
-  async function (env) {
-    it('attaches shadow root without v0.js', async () => {
+    fixture,
+  };
+  describes.endtoend('Bento', config, async function (env) {
+    it(`attaches shadow root ${name}`, async () => {
       // Set timeout lower than default in order to fail early, since the root
       // is attached as soon as possible.
-      // (Free to increase if flaky.)
+      // (Feel free to increase if flaky.)
       this.timeout(100);
 
       const shadowRoot = await env.controller.evaluate(
@@ -27,5 +31,5 @@ describes.endtoend(
       );
       await expect(shadowRoot).ok;
     });
-  }
-);
+  });
+}

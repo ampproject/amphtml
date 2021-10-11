@@ -6,9 +6,10 @@ import {toArray} from '#core/types/array';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {listenOncePromise} from '#utils/event-helper';
+
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
-import {listenOncePromise} from '../../src/event-helper';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.

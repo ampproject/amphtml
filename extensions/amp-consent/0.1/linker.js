@@ -4,7 +4,7 @@ import {
   base64UrlEncodeFromString,
 } from '#core/types/string/base64';
 import {crc32} from './crc32';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const {string} */
 const DELIMITER = '*';

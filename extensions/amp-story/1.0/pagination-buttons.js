@@ -7,7 +7,7 @@ import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';

@@ -7,7 +7,8 @@ import {Services} from '#service';
 import {Resource, ResourceState} from '#service/resource';
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
+
 import {getMode} from '../mode';
 import {Pass} from '../pass';
 import {registerServiceBuilderForDoc} from '../service-helpers';
