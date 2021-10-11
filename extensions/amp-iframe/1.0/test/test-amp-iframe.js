@@ -16,8 +16,11 @@ describes.realWin(
 
     async function waitRendered() {
       await whenUpgradedToCustomElement(element);
-      await element.buildInternal();
-      await waitFor(() => element.isConnected, 'element connected');
+      await element.mount();
+      await waitFor(
+        () => element.shadowRoot.querySelector('iframe'),
+        'iframe rendered'
+      );
     }
 
     beforeEach(() => {
@@ -34,9 +37,11 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await waitRendered();
+      const iframe = element.shadowRoot.querySelector('iframe');
 
       expect(element.parentNode).to.equal(doc.body);
       expect(element.getAttribute('src')).to.equal('https://www.wikipedia.org');
+      expect(iframe.getAttribute('src')).to.equal('https://www.wikipedia.org');
     });
   }
 );
