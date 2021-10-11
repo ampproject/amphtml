@@ -1,4 +1,4 @@
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
 /** @const {!Object<string, string>} */
 export const EventType = {

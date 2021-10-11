@@ -4,6 +4,7 @@ describes.fakeWin('pubmine', {}, (env) => {
   let win;
   const mockData = {
     siteid: '12345',
+    blogid: '23456',
     section: 1,
     pt: 2,
     ht: 2,
@@ -35,6 +36,7 @@ describes.fakeWin('pubmine', {}, (env) => {
       amp: true,
       consent: 0,
       siteid: 12345,
+      blogid: 23456,
     };
     pubmine(win, mockData);
     expect(win.__ATA_PP).to.deep.equal(expectedConfig);

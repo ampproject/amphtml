@@ -2,7 +2,7 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 
 /**
  * denylisted properties. Used mainly fot testing.

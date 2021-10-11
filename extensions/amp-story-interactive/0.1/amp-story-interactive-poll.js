@@ -4,7 +4,7 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
 import {computedStyle, setStyle} from '#core/dom/style';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
 

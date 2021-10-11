@@ -8,7 +8,7 @@ import {useMergeRefs} from '#preact/utils';
 import {
   DEFAULT_THRESHOLD,
   cloneEntryForCrossOrigin,
-} from '../../../src/utils/intersection-observer-3p-host';
+} from '#utils/intersection-observer-3p-host';
 import {postMessage} from '../../../src/iframe-helper';
 import {dict} from '#core/types/object';
 
@@ -72,7 +72,9 @@ export function BentoIframe({
 
   useEffect(() => {
     const iframe = iframeRef.current;
-    if (!iframe) {
+    // TODO(36239): Ensure that effects are properly isolated between test runs.
+    // Guarding for iframe truthiness should be enough.
+    if (!iframe?.ownerDocument.defaultView) {
       return;
     }
     const win = toWin(iframe.ownerDocument.defaultView);

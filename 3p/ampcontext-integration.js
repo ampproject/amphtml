@@ -1,9 +1,9 @@
 import {dict} from '#core/types/object';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {computeInMasterFrame} from './3p';
 import {AbstractAmpContext} from './ampcontext';
-
-import {dev, user, userAssert} from '../src/log';
 
 /**
  * Returns the "master frame" for all widgets of a given type.

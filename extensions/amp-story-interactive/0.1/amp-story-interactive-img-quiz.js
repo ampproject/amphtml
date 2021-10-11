@@ -6,7 +6,7 @@ import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
 import {LocalizedStringId} from '#service/localization/strings';
 import {buildImgTemplate} from './utils';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,

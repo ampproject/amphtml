@@ -2,7 +2,8 @@ import {tryResolve} from '#core/data-structures/promise';
 import {tryParseJson} from '#core/types/object/json';
 import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
+
 import {getMode} from '../../../src/mode';
 import {
   AmpA4A,

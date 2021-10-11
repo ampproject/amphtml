@@ -7,7 +7,7 @@ import {isInFie} from '../../../src/iframe-helper';
 import {isObject} from '#core/types';
 import {isProxyOrigin} from '../../../src/url';
 import {setCookie} from '../../../src/cookies';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-consent/cookie-writer';
 

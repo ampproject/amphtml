@@ -6,7 +6,7 @@
 import './polyfills';
 
 import {TickLabel} from '#core/constants/enums';
-import {whenDocumentComplete} from '#core/document-ready';
+import {whenDocumentComplete} from '#core/document/ready';
 import * as mode from '#core/mode';
 
 import {Services} from '#service';

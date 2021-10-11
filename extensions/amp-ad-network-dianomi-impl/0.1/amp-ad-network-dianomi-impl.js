@@ -2,7 +2,7 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
 import {addParamsToUrl} from 'src/url';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
 const REQUEST_PARAM_ID = new RegExp(/^.[0-9]*$/);

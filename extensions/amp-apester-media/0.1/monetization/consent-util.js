@@ -4,7 +4,7 @@ import {
   getConsentPolicyState,
 } from '../../../../src/consent';
 
-import {dev} from '../../../../src/log';
+import {dev} from '#utils/log';
 
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 

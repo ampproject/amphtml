@@ -3,7 +3,7 @@ import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {toArray} from '#core/types/array';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 export class AmpInlineGallerySlide extends AMP.BaseElement {
   /**

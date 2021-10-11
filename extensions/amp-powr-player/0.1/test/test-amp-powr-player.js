@@ -1,5 +1,6 @@
 import '../amp-powr-player';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
+
 import {parseUrlDeprecated} from '../../../../src/url';
 import {VideoEvents} from '../../../../src/video-interface';
 

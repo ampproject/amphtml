@@ -3,9 +3,9 @@ import {isEnumValue} from '#core/types/enum';
 import {dict} from '#core/types/object';
 import {dashToUnderline} from '#core/types/string';
 
-import {loadScript} from './3p';
+import {devAssert} from '#utils/log';
 
-import {devAssert} from '../src/log';
+import {loadScript} from './3p';
 
 /** @const @enum {string} */
 export const FacebookEmbedType = {

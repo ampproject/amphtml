@@ -1,4 +1,4 @@
-import {dev, user} from '../../../../../../../src/log';
+import {dev, user} from '#utils/log';
 
 dev().info(
   TAG,

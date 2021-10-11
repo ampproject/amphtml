@@ -2,6 +2,7 @@ import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
+import {isAmp4Email} from '#core/document/format';
 import {iterateCursor} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -14,14 +15,14 @@ import {deepEquals, parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import {BindEvents} from './bind-events';
 import {BindValidator} from './bind-validator';
 
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {reportError} from '../../../src/error-reporting';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
