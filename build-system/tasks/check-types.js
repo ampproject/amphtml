@@ -46,6 +46,7 @@ const getExtensionSrcPaths = () =>
 const TSC_TYPECHECK_TARGETS = {
   'compiler': 'src/compiler',
   'carousel': 'extensions/amp-carousel/0.1',
+  'core': 'src/core',
 };
 
 /**
