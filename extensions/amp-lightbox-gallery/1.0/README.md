@@ -82,12 +82,6 @@ import '@ampproject/bento-lightbox-gallery';
 To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section,
 then add the `lightbox` attribute on an `<img>` or `<bento-carousel>` element.
 
-[tip type="read-on"]
-
-To display other types of elements in a lightbox, use [`<bento-lightbox>`](../../amp-lightbox/1.0/README.md).
-
-[/tip]
-
 #### Add Captions
 
 Optionally, you can specify a caption for each element in the lightbox. these
@@ -245,7 +239,7 @@ function app() {
 
 [/example]
 
-For further examples of how to use the BentoLightboxGallery please check the storybook example found in (Basic.js)[../storybook/Basic.js].
+For further examples of how to use the BentoLightboxGallery please check the storybook example found in (Basic.js)[./storybook/Basic.js].
 
 ### Props for BentoLightboxGalleryProvider
 
