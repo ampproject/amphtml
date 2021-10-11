@@ -1,9 +1,9 @@
 import * as preact from /*OK*/ 'preact';
 
 /**
- * This file introduces a helper for draining Preact's queue of renders and effects to run.
+ * This file introduces a helper for draining Preact's queue of renders and effects.
  * We use this as part of the afterEach() cleanup in unit tests, to ensure no effects are run
- * subsequent tests.
+ * in subsequent tests.
  *
  * There is still a test isolation issue in that an effect can asynchronously schedule work
  * which cannot be guarded from at this layer. For that we'd likely need to refresh the window
@@ -35,20 +35,19 @@ let pendingRender;
  * @param {() => void} process
  * @return {Promise<void>}
  */
-function flushableRender(process) {
+async function flushableRender(process) {
   pendingRender = () => {
     pendingRender = null;
     return process();
   };
-  return Promise.resolve().then(pendingRender);
+  await Promise.resolve().then(pendingRender);
 }
 
 /**
- * Flushes all of Preact renders and effects
- * that have been queued up.
+ * Flushes Preact renders and effects.
  *
  * Effects may queue up further rerenders, etc. etc,
- * so this function will wait for everything to resolve.
+ * so this function will loop until everything to resolves.
  *
  * @return {Promise<void>}
  */
