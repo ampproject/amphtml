@@ -11,6 +11,8 @@
       "#core/constants/*": ["./constants/*"],
       "#core/data-structures": ["./data-structures"],
       "#core/data-structures/*": ["./data-structures/*"],
+      "#core/document": ["./document"],
+      "#core/document/*": ["./document/*"],
       "#core/error": ["./error"],
       "#core/error/*": ["./error/*"],
       "#core/mode": ["./mode"],
@@ -22,6 +24,7 @@
   "include": [
     "constants/**/*.js",
     "data-structures/**/*.js",
+    "document/**/*.js",
     "error/**/*.js",
     "mode/**/*.js",
     "types/**/*.js",

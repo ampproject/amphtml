@@ -40,7 +40,7 @@ export function isDocumentHidden(doc) {
 
 /**
  * @param {!Document} doc
- * @param {function()} handler
+ * @param {function():void} handler
  */
 export function addDocumentVisibilityChangeListener(doc, handler) {
   if (!doc.addEventListener) {
@@ -54,7 +54,7 @@ export function addDocumentVisibilityChangeListener(doc, handler) {
 
 /**
  * @param {!Document} doc
- * @param {function()} handler
+ * @param {function():void} handler
  */
 export function removeDocumentVisibilityChangeListener(doc, handler) {
   if (!doc.removeEventListener) {

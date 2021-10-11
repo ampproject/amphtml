@@ -1,10 +1,16 @@
+import {ReadyState} from '#core/constants/ready-state';
+
 /**
  * Whether the document is ready.
  * @param {!Document} doc
  * @return {boolean}
  */
 export function isDocumentReady(doc) {
-  return doc.readyState != 'loading' && doc.readyState != 'uninitialized';
+  return (
+    doc.readyState != ReadyState.LOADING &&
+    // IE11-only
+    /** @type {string} */ (doc.readyState) != 'uninitialized'
+  );
 }
 
 /**
@@ -13,13 +19,13 @@ export function isDocumentReady(doc) {
  * @return {boolean}
  */
 function isDocumentComplete(doc) {
-  return doc.readyState == 'complete';
+  return doc.readyState == ReadyState.COMPLETE;
 }
 
 /**
  * Calls the callback when document is ready.
  * @param {!Document} doc
- * @param {function(!Document)} callback
+ * @param {function(!Document):void} callback
  */
 export function onDocumentReady(doc, callback) {
   onDocumentState(doc, isDocumentReady, callback);
@@ -29,7 +35,7 @@ export function onDocumentReady(doc, callback) {
  * Calls the callback when document's state satisfies the stateFn.
  * @param {!Document} doc
  * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
+ * @param {function(!Document):void} callback
  */
 function onDocumentState(doc, stateFn, callback) {
   let ready = stateFn(doc);
