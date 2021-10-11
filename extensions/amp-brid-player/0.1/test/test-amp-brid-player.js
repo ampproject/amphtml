@@ -1,7 +1,8 @@
 import '../amp-brid-player';
 import {Services} from '#service';
 
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
+
 import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(

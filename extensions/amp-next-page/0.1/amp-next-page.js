@@ -12,6 +12,8 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {assertConfig} from './config';
 import {NextPageService} from './next-page-service';
 
@@ -22,7 +24,6 @@ import {
 } from '../../../src/batched-json';
 import {getConsentPolicyState} from '../../../src/consent';
 import {fetchDocument} from '../../../src/document-fetcher';
-import {dev, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-next-page';

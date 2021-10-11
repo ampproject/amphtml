@@ -1,8 +1,8 @@
 import {isExperimentOn} from '#experiments';
 
-import {BaseElement} from './base-element';
+import {userAssert} from '#utils/log';
 
-import {userAssert} from '../../../src/log';
+import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-timeago';

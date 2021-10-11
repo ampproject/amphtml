@@ -1,6 +1,6 @@
 import {getChildJsonConfig} from '#core/dom';
 import {hasOwn} from '#core/types/object';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 /**
  * @typedef {{output: string, section:Array, attribute:Object, vars:Object}}

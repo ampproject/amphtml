@@ -2,11 +2,11 @@ import {Layout} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {dev} from '../../../src/log';
 import {
   DomAncestorVisitor,
   VisitorCallbackTypeDef,
-} from '../../../src/utils/dom-ancestor-visitor';
+} from '#utils/dom-ancestor-visitor';
+import {dev} from '#utils/log';
 
 /** @const @enum {number} */
 const FULL_WIDTH_SIGNALS = {

@@ -16,9 +16,11 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
-import {Animation} from '../../../src/animation';
-import {createCustomEvent, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
@@ -26,7 +28,6 @@ import {
   SwipeXYRecognizer,
   TapRecognizer,
 } from '../../../src/gesture-recognizers';
-import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);

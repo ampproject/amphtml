@@ -3,9 +3,9 @@ import {tryPlay} from '#core/dom/video';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {loadScript} from './3p';
+import {getData} from '#utils/event-helper';
 
-import {getData} from '../src/event-helper';
+import {loadScript} from './3p';
 
 const libSourceUrl = dict({
   'canvas':

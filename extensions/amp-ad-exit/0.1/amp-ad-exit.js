@@ -12,6 +12,9 @@ import {HostServices} from '#inabox/host-services';
 
 import {Services} from '#service';
 
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {createFilter} from './filters/factory';
@@ -19,8 +22,6 @@ import {FilterType} from './filters/filter';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 
 import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getData} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {getTopWindow} from '../../../src/service-helpers';

@@ -15,8 +15,9 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {dev, user, userAssert} from '../../../src/log';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */

@@ -4,7 +4,8 @@ import {getHistoryState} from '#core/window/history';
 
 import {Services} from '#service';
 
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
+
 import {getMode} from '../mode';
 import {
   getService,

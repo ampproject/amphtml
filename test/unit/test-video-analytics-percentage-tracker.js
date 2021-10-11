@@ -5,7 +5,8 @@ import {
   PERCENTAGE_INTERVAL,
 } from '#service/video-manager-impl';
 
-import {createCustomEvent} from '../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
+
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 
 describes.fakeWin(

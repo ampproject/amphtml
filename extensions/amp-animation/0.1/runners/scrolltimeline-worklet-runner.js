@@ -2,10 +2,10 @@ import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {AnimationRunner} from './animation-runner';
 import {getTotalDuration} from './utils';
-
-import {dev} from '../../../../src/log';
 
 const moduleName = 'amp-animation-worklet';
 let workletModulePromise;

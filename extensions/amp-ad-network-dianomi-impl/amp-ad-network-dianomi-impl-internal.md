@@ -8,6 +8,11 @@ The Dianomi fast fetch implementation for serving AMP ads, using `<amp-ad>`.
 
 -   `data-request-param-id` : A Dianomi provided SmartAd ID.
 
+### Optional parameters
+
+-   `data-dianomi-type` : The type of Dianomi ad to be served.
+-   `data-dianomi-env` : The Dianomi environment from which to serve the ad.
+
 #### Example configuration:
 
 ```html
@@ -15,6 +20,7 @@ The Dianomi fast fetch implementation for serving AMP ads, using `<amp-ad>`.
   width="400"
   height="450"
   type="dianomi"
-  data-request-param-id="5519">
+  data-request-param-id="5519"
+  data-dianomi-type="smartads">
 </amp-ad>
 ```

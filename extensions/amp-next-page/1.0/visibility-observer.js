@@ -11,7 +11,7 @@ import {
   PositionObserverFidelity,
 } from '#service/position-observer/position-observer-worker';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /** @enum {number} */
 export const ViewportRelativePos = {

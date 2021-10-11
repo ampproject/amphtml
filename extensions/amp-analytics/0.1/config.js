@@ -3,7 +3,7 @@ import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '#service/extension-script';
 import {deepMerge, dict, hasOwn} from '#core/types/object';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getChildJsonConfig} from '#core/dom';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '#core/types';
