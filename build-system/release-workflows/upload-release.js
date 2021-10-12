@@ -105,25 +105,7 @@ function logProgress_(totalFiles, uploadedFiles) {
  * @return {Promise<void>}
  */
 async function uploadFiles_() {
-  const {GCLOUD_SERVICE_KEY} = process.env;
-  if (!GCLOUD_SERVICE_KEY) {
-    throw new Error(
-      'CircleCI job is missing the GCLOUD_SERVICE_KEY env variable'
-    );
-  }
-
-  const credentials = JSON.parse(GCLOUD_SERVICE_KEY);
-  if (
-    !credentials.client_email ||
-    !credentials.private_key ||
-    !credentials.project_id
-  ) {
-    throw new Error(
-      'GCLOUD_SERVICE_KEY is not a Google Cloud JSON service key'
-    );
-  }
-
-  const storage = new Storage({credentials, projectId: credentials.project_id});
+  const storage = new Storage();
   const bucket = storage.bucket('org-cdn');
 
   let totalFiles = 0;

@@ -469,6 +469,9 @@ jobs:
     steps:
       - setup_vm
       - run:
+          name: 'Authenticate Google Cloud SDK'
+          command: echo "${GCLOUD_SERVICE_KEY}" | gcloud auth activate-service-account --key-file=-
+      - run:
           name: '⭐ Upload Release Artifacts ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
