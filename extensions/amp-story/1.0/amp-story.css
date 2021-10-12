@@ -23,6 +23,24 @@ amp-story, amp-story-page, amp-story-cta-layer {
   -webkit-touch-callout: none !important;
 }
 
+body {
+  animation:none !important;
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -ms-animation: none !important;
+}
+
+amp-story[standalone], amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type,
+amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type amp-story-grid-layer {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+}
+
+amp-story:not(.i-amphtml-story-loaded) amp-story-page:not([active]) {
+  transform: none !important;
+}
+
 amp-story-grid-layer {
   contain: size layout !important;
   -webkit-touch-callout: none !important;
