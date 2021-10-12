@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.2.2
-  gcp-cli: circleci/gcp-cli@2.2.0
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -24,7 +23,6 @@ release_builds_only: &release_builds_only
       only:
         - nightly
         - /^amp-release-.*$/
-        - pull/36321  # DO NOT MERGE
 
 pr_builds_only: &pr_builds_only
   filters:
@@ -470,8 +468,6 @@ jobs:
       name: node-docker-medium
     steps:
       - setup_vm
-      - gcp-cli/install
-      - gcp-cli/initialize
       - run:
           name: '⭐ Upload Release Artifacts ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
@@ -629,7 +625,7 @@ workflows:
           name: '<< matrix.flavor >> << matrix.esm >>'
           matrix:
             parameters:
-              flavor: ['experimentA', 'experimentB', 'experimentC']  # DO NOT MERGE restore 'base' flavor
+              flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
               esm: ['no-esm', 'esm']
           <<: *release_builds_only
           requires:
