@@ -999,7 +999,7 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /**
    * @param {string} eventType
-   * @param {!Object} vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
