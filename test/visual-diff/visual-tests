@@ -355,7 +355,8 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-info-dialog"
-      ]
+      ],
+      "loading_complete_delay_ms": 300,
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
@@ -525,7 +526,8 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-info-dialog"
-      ]
+      ],
+      "loading_complete_delay_ms": 300,
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
