@@ -24,9 +24,10 @@ function flushableRaf(cb) {
 }
 
 function flushRaf(ts = performance.now()) {
-  while (rafs.length) {
-    rafs.shift()(ts);
+  for (const raf of rafs) {
+    raf(ts);
   }
+  rafs.length = 0;
 }
 
 let pendingRender;
@@ -52,7 +53,7 @@ async function flushableRender(process) {
  * @return {Promise<void>}
  */
 export async function flush() {
-  await flushRaf();
+  flushRaf();
   while (pendingRender) {
     await pendingRender();
     await flushRaf();
