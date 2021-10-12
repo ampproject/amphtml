@@ -1,4 +1,4 @@
-name: Sync configuration to the CDN
+name: CDN config sync
 
 on:
   push:
