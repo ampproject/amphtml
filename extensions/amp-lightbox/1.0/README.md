@@ -220,16 +220,16 @@ The content to show within this lightbox.
 
 ##### **closeButtonAs**
 
-An attribute which takes a function (passed as a render prop) to specify a custom close button.
+A prop which takes a function (as a render prop) to specify a custom close button.
 
 ##### **onBeforeOpen**
 
-An attribute which takes a function which is executed before the lightbox is opened.
+A prop which takes a function which is executed before the lightbox is opened.
 
 ##### **onAfterOpen**
 
-An attribute which takes a function which is executed after the lightbox is opened.
+A prop which takes a function which is executed after the lightbox is opened.
 
 ##### **onAfterClose**
 
-An attribute which takes a function which is executed after the lightbox is closed.
+A prop which takes a function which is executed after the lightbox is closed.
