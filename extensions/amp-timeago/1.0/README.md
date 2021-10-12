@@ -94,7 +94,7 @@ The required `datetime` attribute sets the date and time. The value must be an [
 
 ##### `locale` (optional)
 
-The local default is `en`. Add the `locale` attribute and specify one of the following values to chance the local.
+Add the `locale` attribute to specify one of the following values to change the locale. The default value is `en`.
 
 -   `ar` (Arabic)
 -   `be` (Belarusian)
@@ -193,7 +193,7 @@ The required `datetime` prop sets the date and time. The value must be an [ISO d
 
 ##### `locale` (optional)
 
-The local default is `en`. Add the `locale` prop and specify one of the following values to change the local.
+Add the `locale` prop to one of the following values to change the locale. The default value is `en`.
 
 -   `ar` (Arabic)
 -   `be` (Belarusian)
@@ -246,4 +246,4 @@ Add the `cutoff` prop to display the date specified in the `datetime` prop after
 
 ##### `placeholder`
 
-`placeholder` props displays the fallback text that will be replaced with the calculated timestamp.
+Add the `placeholder` props to display the fallback text. The calculated timestamp will replace the placeholder text once ready.
