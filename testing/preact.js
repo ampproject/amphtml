@@ -56,7 +56,7 @@ export async function flush() {
   flushRaf();
   while (pendingRender) {
     await pendingRender();
-    await flushRaf();
+    flushRaf();
   }
 }
 
