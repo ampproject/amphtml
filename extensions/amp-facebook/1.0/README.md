@@ -1,11 +1,3 @@
----
-$category@: layout
-formats:
-  - websites
-teaser:
-  text: Displays a Facebook post, video, or comment.
----
-
 # Bento Facebook
 
 ## Usage
