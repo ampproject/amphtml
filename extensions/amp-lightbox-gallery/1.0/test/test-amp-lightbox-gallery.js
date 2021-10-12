@@ -10,8 +10,8 @@ import {ActionInvocation} from '#service/action-impl';
 
 import * as analytics from '#utils/analytics';
 
+import {waitFor, whenCalled} from '#testing/helpers/service-helpers';
 import {poll} from '#testing/iframe';
-import {waitFor, whenCalled} from '#testing/test-helper';
 
 import {installLightboxGallery} from '../amp-lightbox-gallery';
 

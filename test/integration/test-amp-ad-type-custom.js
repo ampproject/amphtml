@@ -1,4 +1,4 @@
-import {BrowserController} from '#testing/test-helper';
+import {BrowserController} from '#testing/helpers/service-helpers';
 
 describes.integration(
   'amp-ad type=custom',

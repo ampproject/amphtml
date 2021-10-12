@@ -17,7 +17,7 @@ import {createCustomEvent} from '#utils/event-helper';
 import {user} from '#utils/log';
 import * as xhrUtils from '#utils/xhr-utils';
 
-import {whenCalled} from '#testing/test-helper';
+import {whenCalled} from '#testing/helpers/service-helpers';
 
 import {
   createFormDataWrapper,

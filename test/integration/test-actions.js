@@ -1,5 +1,5 @@
+import {BrowserController} from '#testing/helpers/service-helpers';
 import {poll} from '#testing/iframe';
-import {BrowserController} from '#testing/test-helper';
 
 describes.integration(
   'on="..."',

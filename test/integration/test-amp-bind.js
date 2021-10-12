@@ -1,5 +1,5 @@
+import {BrowserController} from '#testing/helpers/service-helpers';
 import {poll as classicPoll} from '#testing/iframe';
-import {BrowserController} from '#testing/test-helper';
 
 const TIMEOUT = 10000;
 

@@ -11,7 +11,7 @@ import {installExtensionsService} from '#service/extensions-impl';
 import {loadPromise} from '#utils/event-helper';
 
 import {FakeWindow} from '#testing/fake-dom';
-import {isAnimationNone} from '#testing/test-helper';
+import {isAnimationNone} from '#testing/helpers/service-helpers';
 
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';

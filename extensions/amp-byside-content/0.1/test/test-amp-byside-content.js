@@ -1,5 +1,5 @@
 import '../amp-byside-content';
-import {mockServiceForDoc} from '#testing/test-helper';
+import {mockServiceForDoc} from '#testing/helpers/service-helpers';
 
 describes.realWin(
   'amp-byside-content',

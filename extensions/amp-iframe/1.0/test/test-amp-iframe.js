@@ -1,7 +1,7 @@
 import '../amp-iframe';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service-helpers';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {flush} from '#testing/preact';
 

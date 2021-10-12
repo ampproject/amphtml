@@ -6,7 +6,7 @@ import {Services} from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 
-import {createPointerEvent} from '#testing/test-helper';
+import {createPointerEvent} from '#testing/helpers/service-helpers';
 
 describes.realWin(
   'amp-pan-zoom',

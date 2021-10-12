@@ -7,7 +7,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 import {subscribe} from '#core/context';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service-helpers';
 
 describes.realWin(
   'amp-inline-gallery',

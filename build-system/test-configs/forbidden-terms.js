@@ -312,7 +312,7 @@ const forbiddenTermsGlobal = {
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
       'src/utils/display-observer.js',
-      'testing/test-helper.js',
+      'testing/helpers/service-helpers.js',
     ],
   },
   'initLogConstructor|setReportError': {

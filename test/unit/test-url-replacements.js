@@ -16,8 +16,11 @@ import {
 
 import {user} from '#utils/log';
 
+import {
+  mockWindowInterface,
+  stubServiceForDoc,
+} from '#testing/helpers/service-helpers';
 import {createIframePromise} from '#testing/iframe';
-import {mockWindowInterface, stubServiceForDoc} from '#testing/test-helper';
 
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {setCookie} from '../../src/cookies';

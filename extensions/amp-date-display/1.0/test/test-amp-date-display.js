@@ -6,7 +6,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {user} from '#utils/log';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service-helpers';
 
 describes.realWin(
   'amp-date-display 1.0',
