@@ -30,7 +30,7 @@ body {
   -ms-animation: none !important;
 }
 
-amp-story[standalone], amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type,
+:root:not(.i-amphtml-story-vertical) amp-story, amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type,
 amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type amp-story-grid-layer {
   position: absolute !important;
   top: 0;
