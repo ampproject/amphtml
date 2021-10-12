@@ -354,7 +354,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-info-dialog"
+        ".i-amphtml-story-info-dialog-visible"
       ]
     },
     {
@@ -524,7 +524,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-info-dialog"
+        ".i-amphtml-story-info-dialog-visible"
       ]
     },
     {
