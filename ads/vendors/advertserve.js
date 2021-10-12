@@ -46,7 +46,9 @@ export function advertserve(global, data) {
     '&random=' +
     Math.floor(89999999 * Math.random() + 10000000) +
     '&millis=' +
-    Date.now();
+    Date.now() +
+    '&referrer=' +
+    encodeURIComponent(global.context.canonicalUrl || global.context.sourceUrl);
 
   writeScript(global, url);
 }
