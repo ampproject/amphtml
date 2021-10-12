@@ -4,16 +4,17 @@ import './polyfills';
 import {dict, hasOwn} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {loadScript} from './3p';
-import {IframeMessagingClient} from './iframe-messaging-client';
-
 import {
   dev,
   devAssert,
   initLogConstructor,
   setReportError,
   user,
-} from '../src/log';
+} from '#utils/log';
+
+import {loadScript} from './3p';
+import {IframeMessagingClient} from './iframe-messaging-client';
+
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 

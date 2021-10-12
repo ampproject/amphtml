@@ -3,7 +3,7 @@ import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '#core/types/function';
 import {registerServiceBuilder} from '../../../src/service-helpers';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';

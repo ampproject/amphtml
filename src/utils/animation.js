@@ -4,7 +4,7 @@ import {TimestampDef} from '#core/types/date';
 
 import {Services} from '#service';
 
-import {dev} from './log';
+import {dev} from '#utils/log';
 
 const TAG_ = 'Animation';
 

@@ -15,7 +15,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 import {whenCalled} from '#testing/test-helper';
 
 describes.realWin(

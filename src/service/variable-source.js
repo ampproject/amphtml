@@ -1,11 +1,11 @@
-import {whenDocumentComplete} from '#core/document-ready';
+import {isAmp4Email} from '#core/document/format';
+import {whenDocumentComplete} from '#core/document/ready';
 import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
-import {loadPromise} from '../event-helper';
-import {isAmp4Email} from '../format';
-import {devAssert} from '../log';
+import {loadPromise} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;

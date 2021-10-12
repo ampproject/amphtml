@@ -10,6 +10,9 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen, listenOncePromise} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {
   getConsentMetadata,
@@ -17,14 +20,12 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
 import {
   createFrameFor,
   objOrParseJson,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {userAssert} from '../../../src/log';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 /** @const */
@@ -208,7 +209,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     this.unregisterEventHandlers_();
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.pauseHelper_.updatePlaying(false);
 
     return true;

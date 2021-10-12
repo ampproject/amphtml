@@ -5,13 +5,14 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import {getData, listenOncePromise} from '#utils/event-helper';
+
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
 } from '#testing/iframe';
 
-import {getData, listenOncePromise} from '../../src/event-helper';
 import {
   VideoAnalyticsEvents,
   VideoEvents,

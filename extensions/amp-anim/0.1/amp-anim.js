@@ -1,6 +1,6 @@
 import * as st from '#core/dom/style';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
@@ -96,7 +96,7 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.viewportCallback_(false);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;

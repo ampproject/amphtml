@@ -1,14 +1,14 @@
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
 import {MessageType} from '#core/3p-frame-messaging';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
 import {
   DEFAULT_THRESHOLD,
   cloneEntryForCrossOrigin,
-} from '../../../src/utils/intersection-observer-3p-host';
+} from '#utils/intersection-observer-3p-host';
 import {postMessage} from '../../../src/iframe-helper';
 import {dict} from '#core/types/object';
 
@@ -63,7 +63,7 @@ export function BentoIframe({
       return;
     }
     targetOriginRef.current = event.origin;
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     observerRef.current = new win.IntersectionObserver(viewabilityCb, {
       threshold: DEFAULT_THRESHOLD,
     });
@@ -75,7 +75,7 @@ export function BentoIframe({
     if (!iframe) {
       return;
     }
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     win.addEventListener('message', handleSendIntersectionsPostMessage);
     let observer = observerRef.current;
 
@@ -150,7 +150,7 @@ export function BentoIframe({
     if (!iframe) {
       return;
     }
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     if (!win) {
       return;
     }

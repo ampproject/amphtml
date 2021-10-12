@@ -1,7 +1,10 @@
 import purify from 'dompurify';
 
 import {devAssertElement} from '#core/assert';
+import {isAmp4Email} from '#core/document/format';
 import {removeElement} from '#core/dom';
+
+import {user} from '#utils/log';
 
 import {
   ALLOWLISTED_ATTRS,
@@ -14,9 +17,6 @@ import {
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
-
-import {isAmp4Email} from '../format';
-import {user} from '../log';
 
 /** @private @const {string} */
 const TAG = 'purifier';

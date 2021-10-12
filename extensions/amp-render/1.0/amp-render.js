@@ -7,7 +7,7 @@ import {
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {computedStyle, setStyles} from '#core/dom/style';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {toArray} from '#core/types/array';

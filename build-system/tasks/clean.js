@@ -47,6 +47,8 @@ async function clean() {
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
   }
+  // User configuration files
+  // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
   const customConfigs = [
     'build-system/global-configs/custom-config.json',
     'build-system/global-configs/custom-flavors-config.json',

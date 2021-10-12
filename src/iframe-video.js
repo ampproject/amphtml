@@ -7,7 +7,8 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {dev} from './log';
+import {dev} from '#utils/log';
+
 import {VideoEvents} from './video-interface';
 
 /** @enum {string} */

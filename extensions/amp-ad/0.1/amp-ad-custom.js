@@ -9,7 +9,7 @@ import {
 } from '#core/dom/query';
 import {hasOwn} from '#core/types/object';
 import {removeChildren} from '#core/dom';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';

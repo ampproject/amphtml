@@ -4,9 +4,9 @@ import {manageWin, setInViewportForTesting} from '#3p/environment';
 
 import {Services} from '#service';
 
-import {createIframePromise} from '#testing/iframe';
+import {loadPromise} from '#utils/event-helper';
 
-import {loadPromise} from '../../src/event-helper';
+import {createIframePromise} from '#testing/iframe';
 
 describes.sandboxed('3p environment', {}, () => {
   let testWin;

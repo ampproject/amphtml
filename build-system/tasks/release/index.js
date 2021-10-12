@@ -116,6 +116,18 @@ const CHANNEL_CONFIGS = {
   '25': {type: 'experimentC', configBase: 'prod'}, // Spec name: 'inabox-experimentC'
 };
 
+/** @type {ReadonlySet<string>} */
+const V0_DEDUP_RTV_PREFIXES = new Set([
+  '00',
+  '02',
+  '03',
+  '04',
+  '05',
+  '20',
+  '22',
+  '24',
+]);
+
 /**
  * Path to custom flavors config, see: build-system/global-configs/README.md
  */
@@ -233,10 +245,7 @@ function discoverDistFlavors_() {
  * @return {Promise<void>}
  */
 async function compileDistFlavors_(flavorType, command, tempDir) {
-  // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-  if (argv.esm === undefined) {
-    command = `${command} --esm && ${command}`;
-  } else if (argv.esm) {
+  if (argv.esm) {
     command += ' --esm';
   }
   log('Compiling flavor', green(flavorType), 'using', cyan(command));
@@ -363,6 +372,27 @@ async function populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir) {
 }
 
 /**
+ * Removes the V0 directory from all RTVs except for the Stable (01-prefixed) channel,
+ *
+ * @param {!Array<string>} rtvPrefixes list of 2-digit RTV prefixes to generate.
+ * @param {string} outputDir full directory path to emplace artifacts in.
+ * @return {Promise<void>}
+ */
+async function dedupV0_(rtvPrefixes, outputDir) {
+  await Promise.all(
+    rtvPrefixes
+      .filter((rtvPrefix) => V0_DEDUP_RTV_PREFIXES.has(rtvPrefix))
+      .map((rtvPrefix) => {
+        const rtvNumber = `${rtvPrefix}${VERSION}`;
+        const v0Path = path.join(outputDir, 'org-cdn/rtv', rtvNumber, 'v0');
+        return fs.rm(v0Path, {recursive: true});
+      })
+  );
+
+  logSeparator_();
+}
+
+/**
  * Generates a listing of all files in each org-cdn/rtv/ subdirectory.
 
  * @param {string} outputDir full directory path to emplace artifacts in.
@@ -439,19 +469,11 @@ async function prependConfig_(outputDir) {
     };
 
     // Mapping of entry file names to a dictionary of AMP_CONFIG additions.
-    const targetsToConfig = MINIFIED_TARGETS.flatMap((minifiedTarget) => {
-      const targets = [];
-      // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-      if (!argv.esm) {
-        // For explicit --no-esm or when no ESM flag is passed.
-        targets.push({file: `${minifiedTarget}.js`, config: {}});
-      }
-      if (argv.esm === undefined || argv.esm) {
-        // For explicit --esm or when no ESM flag is passed.
-        targets.push({file: `${minifiedTarget}.mjs`, config: {esm: 1}});
-      }
-      return targets;
-    });
+    const targetsToConfig = MINIFIED_TARGETS.map((minifiedTarget) =>
+      argv.esm
+        ? {file: `${minifiedTarget}.mjs`, config: {esm: 1}}
+        : {file: `${minifiedTarget}.js`, config: {}}
+    );
 
     allPrependPromises.push(
       ...targetsToConfig.map(async (target) => {
@@ -531,6 +553,11 @@ async function release() {
 
     log('Copying from temporary directory to', cyan('org-cdn'));
     await populateOrgCdn_(flavorType, rtvPrefixes, tempDir, outputDir);
+
+    if (argv.dedup_v0) {
+      log('Deduplicating', cyan('v0/'), 'directory...');
+      await dedupV0_(rtvPrefixes, outputDir);
+    }
   }
 
   log('Generating', cyan('files.txt'), 'files in', cyan('org-cdn/rtv/*'));
@@ -562,7 +589,7 @@ release.flags = {
     'Directory path to emplace release files (defaults to "./release")',
   'flavor':
     'Limit this release build to a single flavor (can be used to split the release work across multiple build machines)',
-  'esm':
-    // TODO(danielrozenberg): remove undefined case when the release automation platform explicitly handles it.
-    'Compile with --esm if true, without --esm if false, and with + without --esm if left unset',
+  'esm': 'Compile with --esm if true, without --esm if false or unspecified',
+  'dedup_v0':
+    'Removes duplicate copies of the v0/ subdirectory when they are the same files as those in the Stable (01-prefixed) channel',
 };
