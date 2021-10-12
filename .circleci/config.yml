@@ -470,8 +470,8 @@ jobs:
       name: node-docker-medium
     steps:
       - setup_vm
-      - run:
-          gcp-cli/install_and_initialize_cli
+      - gcp-cli/install
+      - gcp-cli/initialize
       - run:
           name: '⭐ Upload Release Artifacts ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
