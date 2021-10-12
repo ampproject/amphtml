@@ -227,7 +227,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {
@@ -304,7 +304,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /**
    * @param {number} pos
-   * @param {function(!Element)} callback
+   * @param {function(!Element):void} callback
    * @private
    */
   withinWindow_(pos, callback) {
