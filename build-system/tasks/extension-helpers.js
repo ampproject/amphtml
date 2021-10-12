@@ -481,7 +481,7 @@ async function buildExtension(
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
-    await buildNpmBinaries(extDir, options);
+    await buildNpmBinaries(extDir, name, options);
     await buildNpmCss(extDir, options);
   }
   if (options.binaries) {
@@ -603,37 +603,24 @@ function buildExtensionCss(extDir, name, version, options) {
 
 /**
  * @param {string} extDir
+ * @param {string} name
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildNpmBinaries(extDir, options) {
+function buildNpmBinaries(extDir, name, options) {
   let {npm} = options;
   if (npm === true) {
-    // Default to the standard/expected entrypoint
     npm = {
-      'component.js': {
-        'preact': 'component-preact.js',
-        'react': 'component-react.js',
-      },
-    };
-  }
-  const keys = Object.keys(npm);
-  const promises = keys.flatMap((entryPoint) => {
-    const {preact, react} = npm[entryPoint];
-    const binaries = [];
-    if (preact) {
-      binaries.push({
-        entryPoint,
-        outfile: preact,
+      preact: {
+        entryPoint: 'component.js',
+        outfile: 'component-preact.js',
         external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
         remap: {'preact/dom': 'preact'},
         wrapper: '',
-      });
-    }
-    if (react) {
-      binaries.push({
-        entryPoint,
-        outfile: react,
+      },
+      react: {
+        entryPoint: 'component.js',
+        outfile: 'component-react.js',
         external: ['react', 'react-dom'],
         remap: {
           'preact': 'react',
@@ -642,11 +629,16 @@ function buildNpmBinaries(extDir, options) {
           'preact/dom': 'react-dom',
         },
         wrapper: '',
-      });
-    }
-    return buildBinaries(extDir, binaries, options);
-  });
-  return Promise.all(promises);
+      },
+      web: {
+        entryPoint: `${name}.js`,
+        outfile: 'web-component.js',
+        wrapper: wrappers.web,
+      },
+    };
+  }
+  const binaries = Object.values(npm);
+  return buildBinaries(extDir, binaries, options);
 }
 
 /**

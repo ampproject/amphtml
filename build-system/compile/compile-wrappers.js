@@ -150,4 +150,15 @@ function bento(name, version, latest, isModule, loadPriority) {
 
 exports.bento = bento;
 
+/**
+ * Wraps the CDN build with a defineElement function for the
+ * user to invoke
+ */
+exports.web =
+  'export function defineElement(){(function(AMP,_){<%= contents %>})' +
+  '({registerElement:function(n,b,s){if(s){document.head.appendChild(' +
+  "document.createElement('style')).textContent=s;}" +
+  "customElements.define(n.replace(/^amp-/,'bento-')," +
+  'b.CustomElement(b));},})}';
+
 exports.none = '<%= contents %>';
