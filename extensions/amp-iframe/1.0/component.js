@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
 import {MessageType} from '#core/3p-frame-messaging';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
@@ -63,7 +63,7 @@ export function BentoIframe({
       return;
     }
     targetOriginRef.current = event.origin;
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     observerRef.current = new win.IntersectionObserver(viewabilityCb, {
       threshold: DEFAULT_THRESHOLD,
     });
@@ -72,12 +72,10 @@ export function BentoIframe({
 
   useEffect(() => {
     const iframe = iframeRef.current;
-    // TODO(36239): Ensure that effects are properly isolated between test runs.
-    // Guarding for iframe truthiness should be enough.
-    if (!iframe?.ownerDocument.defaultView) {
+    if (!iframe) {
       return;
     }
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     win.addEventListener('message', handleSendIntersectionsPostMessage);
     let observer = observerRef.current;
 
@@ -152,7 +150,7 @@ export function BentoIframe({
     if (!iframe) {
       return;
     }
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     if (!win) {
       return;
     }

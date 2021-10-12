@@ -407,7 +407,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;
