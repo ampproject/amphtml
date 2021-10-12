@@ -35,7 +35,9 @@ import '@ampproject/bento-timeago';
   <script async custom-element="bento-timeago" src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"></script>
   <style data-bento-boilerplate>
     bento-timeago {
-      display: none !important;
+      display: block;
+      overflow: hidden;
+      position: relative;
     }
   </style>
 </head>
@@ -74,7 +76,9 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 ```html
 <style data-bento-boilerplate>
   bento-timeago {
-    display: none !important;
+    display: block;
+    overflow: hidden;
+    position: relative;
   }
 </style>
 ```
@@ -140,3 +144,106 @@ The local default is `en`. Add the `locale` attribute and specify one of the fol
 ##### `cutoff`
 
 Add the `cutoff` attribute to display the date specified in the `datatime` attribute after passing the specified date in seconds.
+
+### Preact/React Component
+
+The examples below demonstrates use of the `<BentoTimeago>` as a functional component usable with the Preact or React libraries.
+
+#### Example: Import via npm
+
+[example preview="top-frame" playground="false"]
+
+Install via npm:
+
+```sh
+npm install @ampproject/bento-date-display
+```
+
+```javascript
+import React from 'react';
+import { BentoTimeago } from '@ampproject/bento-timeago/react';
+import '@ampproject/bento-timeago/styles.css';
+
+function App() {
+  return (
+    <BentoTimeago
+      datetime={dateTime}
+      locale={locale}
+      cutoff={cutoff}
+      placeholder={placeholder}
+    />
+  );
+}
+```
+
+[/example]
+
+#### Layout and style
+
+The Bento Date Display Preact/React component allows consumers to render their own templates. These templates may use inline styles, `<style>` tags, Preact/React components that import their own stylesheets.
+
+##### Props
+
+##### `datetime`
+
+The required `datetime` prop sets the date and time. The value must be an [ISO datetime](https://www.w3.org/QA/Tips/iso-date).
+
+-   Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
+-   Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
+
+##### `locale` (optional)
+
+The local default is `en`. Add the `locale` prop and specify one of the following values to change the local.
+
+-   `ar` (Arabic)
+-   `be` (Belarusian)
+-   `bg` (Bulgarian)
+-   `bn-IN` (Bangla)
+-   `ca` (Catalan)
+-   `cs` (Czech)
+-   `da` (Danish)
+-   `de` (German)
+-   `el` (Greek)
+-   `en` (English)
+-   `en-short` (English - short)
+-   `es` (Spanish)
+-   `eu` (Basque)
+-   `fa` (Persian - Farsi)
+-   `fi` (Finnish)
+-   `fr` (French)
+-   `gl` (Galician)
+-   `he` (Hebrew)
+-   `hi-IN` (Hindi)
+-   `hu` (Hungarian)
+-   `id-ID` (Malay)
+-   `it` (Italian)
+-   `ja` (Japanese)
+-   `ka` (Georgian)
+-   `ko` (Korean)
+-   `ml` (Malayalam)
+-   `my` (Burmese - Myanmar)
+-   `nb-NO` (Norwegian Bokmål)
+-   `nl` (Dutch)
+-   `nn-NO` (Norwegian Nynorsk)
+-   `pl` (Polish)
+-   `pt-BR` (Portuguese)
+-   `ro` (Romanian)
+-   `ru` (Russian)
+-   `sq` (Albanian)
+-   `sr` (Serbian)
+-   `sv` (Swedish)
+-   `ta` (Tamil)
+-   `th` (Thai)
+-   `tr` (Turkish)
+-   `uk` (Ukrainian)
+-   `vi` (Vietnamese)
+-   `zh-CN` (Chinese)
+-   `zh-TW` (Taiwanese)
+
+##### `cutoff`
+
+Add the `cutoff` prop to display the date specified in the `datetime` prop after passing the specified date in seconds.
+
+##### `placeholder`
+
+`placeholder` props displays the fallback text that will be replaced with the calculated timestamp.
