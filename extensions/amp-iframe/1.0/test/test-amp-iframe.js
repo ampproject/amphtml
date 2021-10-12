@@ -3,6 +3,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {flush} from '#testing/preact';
 
 describes.realWin(
   'amp-iframe-v1.0',
@@ -17,10 +18,8 @@ describes.realWin(
     async function waitRendered() {
       await whenUpgradedToCustomElement(element);
       await element.mount();
-      await waitFor(
-        () => element.shadowRoot.querySelector('iframe'),
-        'iframe rendered'
-      );
+      await flush();
+      await waitFor(() => element.shadowRoot.querySelector('iframe'));
     }
 
     beforeEach(() => {
