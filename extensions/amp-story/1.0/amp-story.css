@@ -17,11 +17,6 @@
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
   font-size: calc(2.5 * var(--story-page-vh, 8px));
 }
-amp-story, amp-story-page, amp-story-cta-layer {
-  contain: strict !important;
-  overflow: hidden !important;
-  -webkit-touch-callout: none !important;
-}
 
 body {
   animation:none !important;
@@ -30,15 +25,10 @@ body {
   -ms-animation: none !important;
 }
 
-:root:not(.i-amphtml-story-vertical) amp-story, amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type,
-amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type amp-story-grid-layer {
-  position: absolute !important;
-  top: 0;
-  left: 0;
-}
-
-amp-story:not(.i-amphtml-story-loaded) amp-story-page:not([active]) {
-  transform: none !important;
+amp-story, amp-story-page, amp-story-cta-layer {
+  contain: strict !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none !important;
 }
 
 amp-story-grid-layer {
@@ -262,6 +252,10 @@ amp-story-page[distance="2"] {
   transform: translateY(100vh) !important;
 }
 
+amp-story:not(.i-amphtml-story-loaded) amp-story-page:not([active]) {
+  transform: none !important;
+}
+
 amp-story-page [data-text-background-color] {
   border-radius: 3px !important;
   line-height: 1.5em !important;
@@ -295,6 +289,13 @@ amp-story-grid-layer {
   z-index: 2 !important;
   /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
+}
+
+:root:not(.i-amphtml-story-vertical) amp-story, amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type,
+amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type amp-story-grid-layer {
+  position: absolute !important;
+  top: 0;
+  left: 0;
 }
 
 amp-story-grid-layer[anchor*="left"] {
