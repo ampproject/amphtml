@@ -23,9 +23,9 @@ To use `amp-lightbox-gallery`, ensure the required script is included in your
 [tip type="read-on"]
 
 For showing individual images in a lightbox, there's also the
-[`<amp-image-lightbox>`](../amp-image-lightbox/amp-image-lightbox.md)
+[`<amp-image-lightbox>`](../../amp-image-lightbox/amp-image-lightbox.md)
 component. To display other types of elements in a lightbox, use
-[`<amp-lightbox>`](../amp-lightbox/amp-lightbox.md).
+[`<amp-lightbox>`](../../amp-lightbox/amp-lightbox.md).
 
 [/tip]
 
@@ -243,5 +243,5 @@ You can track this event using the following code snippet:
 
 ## Validation
 
-See [`amp-image-lightbox-gallery` rules](validator-amp-lightbox-gallery.protoascii)
+See [`amp-image-lightbox-gallery` rules](../validator-amp-lightbox-gallery.protoascii)
 in the AMP validator specification.
