@@ -13,7 +13,7 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {devAssert} from '#utils/log';
 
-import {Option, Selector} from './component';
+import {BentoSelector, BentoSelectorOption} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -112,7 +112,7 @@ function getOptions(element, mu) {
       if (selected) {
         value.push(option);
       }
-      const optionChild = <Option {...props} />;
+      const optionChild = <BentoSelectorOption {...props} />;
       options.push(option);
       children.push(optionChild);
     });
@@ -120,7 +120,7 @@ function getOptions(element, mu) {
 }
 
 /**
- * @param {!SelectorDef.OptionProps} props
+ * @param {!BentoSelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
 export function OptionShim({
@@ -174,7 +174,7 @@ export function OptionShim({
 }
 
 /**
- * @param {!SelectorDef.Props} props
+ * @param {!BentoSelectorDef.Props} props
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
@@ -251,7 +251,7 @@ function SelectorShim({
 }
 
 /** @override */
-BaseElement['Component'] = Selector;
+BaseElement['Component'] = BentoSelector;
 
 /** @override */
 BaseElement['detached'] = true;

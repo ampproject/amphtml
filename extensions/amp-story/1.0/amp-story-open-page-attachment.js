@@ -12,7 +12,7 @@ import {
   maybeMakeProxyUrl,
 } from './utils';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * @enum {string}
@@ -238,7 +238,7 @@ export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
     'background-color': accentColor,
   });
 
-  const win = toWin(attachmentEl.ownerDocument.defaultView);
+  const win = getWin(attachmentEl);
   const styles = computedStyle(win, attachmentEl);
   const rgb = getRGBFromCssColorValue(styles['background-color']);
   contrastColor = getTextColorForRGB(rgb);
