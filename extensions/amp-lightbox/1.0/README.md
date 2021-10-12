@@ -35,7 +35,7 @@ import '@ampproject/bento-lightbox';
   <script async custom-element="bento-lightbox" src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"></script>
   <style data-bento-boilerplate>
     bento-lightbox {
-  display: none !important;
+      display: none !important;
     }
   </style>
 </head>
@@ -121,7 +121,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 ```html
 <style data-bento-boilerplate>
   bento-lightbox {
-  display: none !important;
+    display: none !important;
   }
 </style>
 ```
