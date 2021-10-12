@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.2.2
+  gcp-cli: circleci/gcp-cli@2.2.0
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -470,8 +471,7 @@ jobs:
     steps:
       - setup_vm
       - run:
-          name: 'Authenticate Google Cloud SDK'
-          command: echo "${GCLOUD_SERVICE_KEY}" | gcloud auth activate-service-account --key-file=-
+          gcp-cli/install_and_initialize_cli
       - run:
           name: '⭐ Upload Release Artifacts ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
