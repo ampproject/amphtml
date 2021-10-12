@@ -1,15 +1,24 @@
 import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
-import {useEffect, useRef} from '#preact';
+import {useCallback, useEffect, useRef} from '#preact';
+import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
 
+import {getData} from '#utils/event-helper';
+
+const MATCHES_MESSAGING_ORIGIN = (origin) => {
+  return origin === 'https://w.soundcloud.com';
+};
+
 /**
- * @param {!SoundcloudDef.Props} props
+ * @param {!BentoSoundcloudDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Soundcloud({
+export function BentoSoundcloud({
   color,
+  onLoad,
   playlistId,
   secretToken,
   trackId,
@@ -18,6 +27,7 @@ export function Soundcloud({
 }) {
   // Property and Reference Variables
   const iframeRef = useRef(null);
+  const onLoadRef = useValueRef(onLoad);
 
   useEffect(() => {
     /** Unmount Procedure */
@@ -33,6 +43,16 @@ export function Soundcloud({
     };
   }, []);
 
+  const messageHandler = useCallback(
+    (event) => {
+      const data = parseJson(getData(event));
+      if (data.method === 'ready') {
+        onLoadRef.current?.();
+      }
+    },
+    [onLoadRef]
+  );
+
   // Checking for valid props
   if (!checkProps(trackId, playlistId)) {
     return null;
@@ -47,7 +67,7 @@ export function Soundcloud({
   // Extract Media ID
   const mediaId = trackId ?? playlistId;
 
-  // Prepare Soundcloud Widget URL for iFrame
+  // Prepare BentoSoundcloud Widget URL for iFrame
   let iframeSrc =
     'https://w.soundcloud.com/player/?' +
     'url=' +
@@ -73,6 +93,8 @@ export function Soundcloud({
       scrolling="no"
       src={iframeSrc}
       title={'Soundcloud Widget - ' + mediaId}
+      messageHandler={messageHandler}
+      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       {...rest}
     />
   );

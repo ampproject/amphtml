@@ -1,7 +1,6 @@
 import {
   createViewportObserver,
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
+  observeIntersections,
 } from '#core/dom/layout/viewport-observer';
 
 describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
@@ -78,63 +77,102 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       ioCallback([{target: el, isIntersecting: inViewport}]);
     }
 
-    it('observed element should have its callback fired each time it enters/exist the viewport.', () => {
+    it('observed element should have its callback fired each time it enters/exits the viewport.', () => {
       const viewportEvents = [];
-      observeWithSharedInOb(el1, (inViewport) =>
-        viewportEvents.push(inViewport)
-      );
+      observeIntersections(el1, (entry) => viewportEvents.push(entry));
       toggleViewport(el1, true);
       toggleViewport(el1, false);
 
-      expect(viewportEvents).eql([true, false]);
+      expect(viewportEvents[0].target).to.eql(el1);
+      expect(viewportEvents[0].isIntersecting).to.be.true;
+      expect(viewportEvents[1].target).to.eql(el1);
+      expect(viewportEvents[1].isIntersecting).to.be.false;
     });
 
     it('can independently observe multiple elements', () => {
       const el1Events = [];
       const el2Events = [];
 
-      observeWithSharedInOb(el1, (inViewport) => el1Events.push(inViewport));
-      observeWithSharedInOb(el2, (inViewport) => el2Events.push(inViewport));
+      observeIntersections(el1, (entry) =>
+        el1Events.push(entry.isIntersecting)
+      );
+      observeIntersections(el2, (entry) =>
+        el2Events.push(entry.isIntersecting)
+      );
       toggleViewport(el1, false);
       toggleViewport(el2, true);
       toggleViewport(el1, true);
 
-      expect(el1Events).eql([false, true]);
-      expect(el2Events).eql([true]);
+      expect(el1Events).to.eql([false, true]);
+      expect(el2Events).to.eql([true]);
     });
 
     it('once unobserved, the callback is no longer fired', () => {
       const el1Events = [];
 
-      observeWithSharedInOb(el1, (inViewport) => el1Events.push(inViewport));
+      const unobserveIntersections = observeIntersections(el1, (entry) =>
+        el1Events.push(entry.isIntersecting)
+      );
       toggleViewport(el1, false);
 
-      unobserveWithSharedInOb(el1);
+      unobserveIntersections();
       toggleViewport(el1, true);
       toggleViewport(el1, false);
 
-      expect(el1Events).eql([false]);
-    });
-
-    it('Observing twice with the same callback is fine, but unique ones throw', () => {
-      const noop = () => {};
-      observeWithSharedInOb(el1, noop);
-      observeWithSharedInOb(el1, noop);
-
-      allowConsoleError(() => {
-        expect(() => observeWithSharedInOb(el1, () => {})).throws(
-          'Assertion failed'
-        );
-      });
+      expect(el1Events).to.eql([false]);
     });
 
     it('A quick observe and unobserve pair should not cause an error or fire the callback', () => {
       const spy = env.sandbox.spy();
-      observeWithSharedInOb(el1, spy);
-      unobserveWithSharedInOb(el1);
+      const unobserveIntersections = observeIntersections(el1, spy);
+      unobserveIntersections();
       toggleViewport(el1, true);
 
       expect(spy).not.called;
+    });
+
+    it('can have multiple obsevers for the same element', () => {
+      let elInObEntries = [];
+
+      observeIntersections(el1, (entry) => elInObEntries.push(entry));
+      observeIntersections(el1, (entry) => elInObEntries.push(entry));
+      toggleViewport(el1, true);
+
+      expect(elInObEntries).to.have.lengthOf(2);
+      expect(elInObEntries[0].target).to.eql(el1);
+      expect(elInObEntries[0].isIntersecting).to.be.true;
+      expect(elInObEntries[1].target).to.eql(el1);
+      expect(elInObEntries[1].isIntersecting).to.be.true;
+
+      elInObEntries = [];
+      toggleViewport(el1, false);
+      expect(elInObEntries).to.have.lengthOf(2);
+      expect(elInObEntries[0].isIntersecting).to.be.false;
+      expect(elInObEntries[1].isIntersecting).to.be.false;
+    });
+
+    it('can observe and unobserve an element with multiple callbacks', () => {
+      const cb1 = env.sandbox.spy();
+      const cb2 = env.sandbox.spy();
+      const unobserveIntersectionsCb1 = observeIntersections(el1, cb1);
+      const unobserveIntersectionsCb2 = observeIntersections(el1, cb2);
+      toggleViewport(el1, true);
+      expect(cb1).to.be.called;
+      expect(cb2).to.be.called;
+
+      cb1.resetHistory();
+      cb2.resetHistory();
+      unobserveIntersectionsCb2();
+      toggleViewport(el1, true);
+      expect(cb1).to.be.called;
+      expect(cb2).not.to.be.called;
+
+      cb1.resetHistory();
+      cb2.resetHistory();
+      unobserveIntersectionsCb1();
+      toggleViewport(el1, true);
+      expect(cb1).not.to.be.called;
+      expect(cb2).not.to.be.called;
     });
   });
 });

@@ -1,0 +1,22 @@
+FAIL
+|  <!--
+|    Test Description:
+|      This is an amp document with no JavaScript and no CSS boilerplate.
+|      It includes runtime dependencies implicitly defined in v0.js: amp-img and amp-pixel.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width">
+|  </head>
+|  <body>
+|    <amp-img src="lemur.png" width=100 height=100></amp-img>
+|    <amp-pixel src="tracking-pixel.png"></amp-pixel>
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/implicit_runtime_dependencies.html:17:6 The tag 'amphtml javascript runtime (v0.js)' is missing or incorrect, but required by 'amp-img'. (see https://amp.dev/documentation/components/amp-img/)
+>>       ^~~~~~~~~
+feature_tests/implicit_runtime_dependencies.html:17:6 The tag 'amphtml javascript runtime (v0.js)' is missing or incorrect, but required by 'amp-pixel'. (see https://amp.dev/documentation/components/amp-pixel/)

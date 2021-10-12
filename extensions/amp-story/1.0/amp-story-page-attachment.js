@@ -6,11 +6,16 @@ import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {
+  allowlistFormActions,
+  getResponseAttributeElements,
+  setupResponseAttributeElements,
+} from './amp-story-form';
 import {removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
 
@@ -119,22 +124,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    if (this.doesContainFormElement_()) {
-      // Page attachments that contain forms must display the page's publisher
-      // domain above the attachment's contents. This enables users to gauge
-      // the trustworthiness of publishers before sending data to them.
-      this.headerEl.append(this.createDomainLabelElement_());
-      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
-    }
-
     const closeButtonEl = htmlFor(this.element)`
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
           </button>`;
     const localizationService = getLocalizationService(devAssert(this.element));
-
-    const titleEl = htmlFor(this.element)`
-    <span class="i-amphtml-story-page-attachment-title"></span>`;
 
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
@@ -143,16 +137,49 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       closeButtonEl.setAttribute('aria-label', localizedCloseString);
     }
 
-    if (this.element.hasAttribute('data-title')) {
-      titleEl.textContent = this.element.getAttribute('data-title');
-    }
-
     const titleAndCloseWrapperEl = this.headerEl.appendChild(
       htmlFor(this.element)`
             <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
     );
     titleAndCloseWrapperEl.appendChild(closeButtonEl);
-    titleAndCloseWrapperEl.appendChild(titleEl);
+
+    const titleText =
+      this.element.getAttribute('title') ||
+      this.element.getAttribute('data-title');
+    if (titleText) {
+      const titleEl = htmlFor(this.element)`
+        <span class="i-amphtml-story-page-attachment-title"></span>`;
+      titleEl.textContent = titleText;
+      titleAndCloseWrapperEl.appendChild(titleEl);
+    }
+
+    const forms = this.element.querySelectorAll('form');
+    if (forms.length > 0) {
+      allowlistFormActions(this.win);
+      forms.forEach((form) => {
+        setupResponseAttributeElements(this.win, form);
+        // Scroll each response attribute element into view, when displayed.
+        getResponseAttributeElements(form).forEach((el) => {
+          new this.win.ResizeObserver((e) => {
+            if (
+              this.state === DrawerState.OPEN &&
+              e[0].contentRect.height > 0
+            ) {
+              el./*OK*/ scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+              });
+            }
+          }).observe(el);
+        });
+      });
+
+      // Page attachments that contain forms must display the page's publisher
+      // domain above the attachment's contents. This enables users to gauge
+      // the trustworthiness of publishers before sending data to them.
+      this.headerEl.append(this.createDomainLabelElement_());
+      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
+    }
 
     const templateEl = this.element.querySelector(
       '.i-amphtml-story-draggable-drawer'
@@ -460,16 +487,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
     domainLabelEl.textContent = this.getPublisherOrigin_();
     return domainLabelEl;
-  }
-
-  /**
-   * Returns whether a form element exists within this page attachment.
-   * @return {boolean} True, only if a form element exists as a descendant of
-   *     this page attachment.
-   * @private
-   */
-  doesContainFormElement_() {
-    return Boolean(this.element.querySelector('form'));
   }
 
   /**

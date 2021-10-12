@@ -4,7 +4,7 @@ import {dashToUnderline} from '#core/types/string';
 import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-facebook';
@@ -40,7 +40,6 @@ class AmpFacebook extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'onReady': () => this.togglePlaceholder(false),
       'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }

@@ -15,9 +15,9 @@ import {
 } from '#service/action-impl';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 
-import {whenCalled} from '#testing/test-helper';
+import {createCustomEvent} from '#utils/event-helper';
 
-import {createCustomEvent} from '../../src/event-helper';
+import {whenCalled} from '#testing/test-helper';
 
 /**
  * @return {!ActionService}
@@ -1787,6 +1787,12 @@ describes.realWin(
 
       it('should supply default actions allowlist', () => {
         const i = getActionInvocation(target, 'toggleClass', 'AMP');
+        action.invoke_(i);
+        expect(spy).to.be.calledWithExactly(i);
+      });
+
+      it('should supply default actions allowlist', () => {
+        const i = getActionInvocation(target, 'toggleChecked', 'AMP');
         action.invoke_(i);
         expect(spy).to.be.calledWithExactly(i);
       });

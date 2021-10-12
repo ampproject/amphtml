@@ -1,6 +1,6 @@
-import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/amp-layout';
+import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/build-dom';
 
-import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/amp-fit-text';
+import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/build-dom';
 
 const builderMap = {
   'v0': {
@@ -13,11 +13,11 @@ const builderMap = {
 
 /**
  * Returns the set of component builders needed to server-render an AMP Document.
- *
- * @param {!./types.VersionsDef} versions
- * @return {Object<string, !./types.BuildDomDef>} builders
+ * @param {import('./types').Versions} versions
+ * @return {import('./types').BuilderMap}
  */
 export function getBuilders(versions) {
+  /** @type {import('./types').BuilderMap} */
   const builders = {};
 
   for (const tag of Object.keys(versions)) {

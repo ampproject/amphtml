@@ -23,7 +23,7 @@ import {
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -870,9 +870,11 @@ export class AmpStoryEmbeddedComponent {
     this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
-        [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState)
-          ? this.focusedStateOverlay_.setAttribute('desktop', '')
-          : this.focusedStateOverlay_.removeAttribute('desktop');
+        const isDesktop = [
+          UIType.DESKTOP_FULLBLEED,
+          UIType.DESKTOP_ONE_PANEL,
+        ].includes(uiState);
+        this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
       }
     );
   }

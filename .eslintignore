@@ -13,7 +13,6 @@ build-system/dist
 build-system/server/new-server/transforms/dist
 build-system/tasks/performance/cache
 build-system/tasks/performance/results.json
-build-system/global-configs/custom-config.json
 dist
 dist.3p
 dist.tools
@@ -28,7 +27,13 @@ test/coverage-e2e
 validator/**/dist
 validator/export
 
+# User configuration files
+# Keep this list in sync with .gitignore, .prettierignore, and build-system/tasks/clean.js
+build-system/global-configs/custom-config.json
+build-system/global-configs/custom-flavors-config.json
+
 # Files and directories explicitly ignored by eslint
+**/node_modules/**
 build-system/babel-plugins/**/fixtures/**/*.js
 build-system/babel-plugins/**/fixtures/**/*.mjs
 build-system/tasks/make-extension/template/**/*

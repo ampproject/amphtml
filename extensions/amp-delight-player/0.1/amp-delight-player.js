@@ -1,10 +1,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 import {PauseHelper} from '#core/dom/video/pause-helper';
@@ -13,6 +10,9 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen, listenOncePromise} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {
   getConsentMetadata,
@@ -20,14 +20,12 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
 import {
   createFrameFor,
   objOrParseJson,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {userAssert} from '../../../src/log';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 /** @const */
@@ -132,6 +130,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -168,9 +169,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(
+    this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (isInViewport) => (this.isInViewport_ = isInViewport)
+      ({isIntersecting}) => (this.isInViewport_ = isIntersecting)
     );
     const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);
@@ -207,7 +208,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     this.unregisterEventHandlers_();
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.pauseHelper_.updatePlaying(false);
 
     return true;

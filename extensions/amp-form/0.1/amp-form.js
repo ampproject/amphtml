@@ -6,6 +6,7 @@ import {
 } from '#core/constants/async-input';
 import {Keys} from '#core/constants/key-codes';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {isAmp4Email} from '#core/document/format';
 import {
   createElementWithAttributes,
   iterateCursor,
@@ -27,6 +28,11 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInit, setupInput} from '#utils/xhr-utils';
+
 import {AmpFormTextarea} from './amp-form-textarea';
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
@@ -40,11 +46,7 @@ import {
 } from './form-verifiers';
 
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -54,11 +56,6 @@ import {
   isProxyOrigin,
   serializeQueryString,
 } from '../../../src/url';
-import {
-  setupAMPCors,
-  setupInit,
-  setupInput,
-} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-form';

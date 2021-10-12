@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var SoundcloudDef = {};
+var BentoSoundcloudDef = {};
 
 /**
  * @typedef {{
@@ -10,6 +10,7 @@ var SoundcloudDef = {};
  *   secretToken: (string|undefined),
  *   trackId: (string|undefined),
  *   visual: boolean,
+ *   onLoad: (function():undefined|undefined),
  * }}
  */
-SoundcloudDef.Props;
+BentoSoundcloudDef.Props;

@@ -2,6 +2,8 @@ import {AmpEvents} from '#core/constants/amp-events';
 import {Layout} from '#core/dom/layout';
 import {childElementByAttr} from '#core/dom/query';
 
+import {user, userAssert} from '#utils/log';
+
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
@@ -9,7 +11,6 @@ import {
 } from './live-list-manager';
 
 import {CSS} from '../../../build/amp-live-list-0.1.css';
-import {user, userAssert} from '../../../src/log';
 
 /**
  * @enum {string}

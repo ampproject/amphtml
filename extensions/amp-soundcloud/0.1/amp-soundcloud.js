@@ -17,7 +17,8 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
+
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpSoundcloud extends AMP.BaseElement {

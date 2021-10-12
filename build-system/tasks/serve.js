@@ -2,7 +2,7 @@
 
 const connect = require('gulp-connect');
 const debounce = require('../common/debounce');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
@@ -21,7 +21,7 @@ const {
   buildNewServer,
 } = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
@@ -57,7 +57,7 @@ let url = null;
 let quiet = !!argv.quiet;
 
 // Used for live reload.
-const serverFiles = globby.sync([
+const serverFiles = fastGlob.sync([
   'build-system/server/**',
   `!${SERVER_TRANSFORM_PATH}/dist/**`,
 ]);

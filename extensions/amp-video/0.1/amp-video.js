@@ -1,3 +1,4 @@
+import {tryPlay} from '#core/dom/video';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
@@ -11,14 +12,15 @@ import {
   childElementsByTag,
   matches,
 } from '#core/dom/query';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
+import {descendsFromStory} from '#utils/story';
+import {dev, devAssert, user} from '#utils/log';
 import {
   addAttributesToElement,
   dispatchCustomEvent,
   insertAfterOrAtStart,
   removeElement,
 } from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {fetchCachedSources} from './video-cache';
 import {
   fullscreenEnter,
@@ -30,7 +32,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isExperimentOn} from '#experiments';
-import {listen, listenOncePromise} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '#utils/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
@@ -605,6 +607,7 @@ export class AmpVideo extends AMP.BaseElement {
     tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+    this.setUpCaptions_();
 
     if (this.video_.changedSources) {
       this.video_.changedSources();
@@ -745,6 +748,29 @@ export class AmpVideo extends AMP.BaseElement {
     listenOncePromise(this.video_, 'loadedmetadata').then(() =>
       this.onVideoLoaded_()
     );
+    this.setUpCaptions_();
+  }
+
+  /**
+   * Connects to amp-story-captions component.
+   * @private
+   */
+  setUpCaptions_() {
+    const captionsId = this.element.getAttribute('captions-id');
+    if (!captionsId) {
+      return;
+    }
+    const captionsElement = this.win.document.querySelector(
+      `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
+    );
+    if (!captionsElement) {
+      return;
+    }
+    captionsElement.getImpl().then((impl) => {
+      if (impl.setVideoElement) {
+        impl.setVideoElement(this.video_);
+      }
+    });
   }
 
   /** @private */
@@ -792,17 +818,7 @@ export class AmpVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    const ret = this.video_.play();
-
-    if (ret && ret.catch) {
-      ret.catch(() => {
-        // Empty catch to prevent useless unhandled promise rejection logging.
-        // Play can fail for many reasons such as video getting paused before
-        // play() is finished.
-        // We use events to know the state of the video and do not care about
-        // the success or failure of the play()'s returned promise.
-      });
-    }
+    tryPlay(this.video_);
   }
 
   /**

@@ -5,8 +5,10 @@ import {dashToCamelCase} from '#core/types/string';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {getTimeZoneName} from '../format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -38,6 +40,8 @@ const DEFAULT_DATETIME_OPTIONS = {
   minute: number,
   second: number,
   iso: string,
+  timeZoneName: string,
+  timeZoneNameShort: string,
 }} */
 let VariablesDef;
 
@@ -268,6 +272,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
       second: date.getSeconds(),
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptions),
+      timeZoneName: getTimeZoneName(date, locale, localeOptions),
+      timeZoneNameShort: getTimeZoneName(date, locale, localeOptions, 'short'),
     };
   }
 
@@ -308,6 +314,13 @@ export class AmpDateDisplay extends AMP.BaseElement {
       second: date.getUTCSeconds(),
       iso: date.toISOString(),
       localeString: this.getLocaleString_(date, locale, localeOptionsInUTC),
+      timeZoneName: getTimeZoneName(date, locale, localeOptionsInUTC),
+      timeZoneNameShort: getTimeZoneName(
+        date,
+        locale,
+        localeOptionsInUTC,
+        'short'
+      ),
     };
   }
 

@@ -3,7 +3,8 @@ import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
+
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {getSourceOrigin} from '../url';
 

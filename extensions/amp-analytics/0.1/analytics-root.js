@@ -5,7 +5,7 @@ import {
   matches,
   scopedQuerySelector,
 } from '#core/dom/query';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {getMode} from '../../../src/mode';
 import {isArray} from '#core/types';

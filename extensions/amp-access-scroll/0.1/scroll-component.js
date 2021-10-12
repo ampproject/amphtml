@@ -4,7 +4,7 @@ import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /** @abstract */
 export class ScrollComponent {
@@ -89,6 +89,20 @@ export class ScrollComponent {
       classes.add(className);
     } else {
       classes.remove(className);
+    }
+  }
+
+  /**
+   * Action toggleChecked.
+   * @param {boolean} condition
+   * @protected
+   */
+  toggleChecked(condition) {
+    const input = devAssert(this.root_);
+    if (condition) {
+      input.checked = true;
+    } else {
+      input.checked = false;
     }
   }
 

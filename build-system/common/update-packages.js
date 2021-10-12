@@ -4,7 +4,7 @@ const checkDependencies = require('check-dependencies');
 const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, red} = require('./colors');
+const {cyan, red} = require('kleur/colors');
 const {execOrDie} = require('./exec');
 const {getOutput} = require('./process');
 const {isCiBuild} = require('./ci');
@@ -17,7 +17,10 @@ const {runNpmChecks} = require('./npm-checks');
  * @param {string} file Contents to write
  */
 function writeIfUpdated(patchedName, file) {
-  if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
+  if (
+    !fs.existsSync(patchedName) ||
+    fs.readFileSync(patchedName, 'utf8') != file
+  ) {
     fs.writeFileSync(patchedName, file);
     logLocalDev('Patched', cyan(patchedName));
   }

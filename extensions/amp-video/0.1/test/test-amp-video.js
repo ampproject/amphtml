@@ -6,7 +6,7 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {dispatchCustomEvent} from '#core/dom';
 import {installPerformanceService} from '#service/performance-impl';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {toggleExperiment} from '#experiments';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
@@ -521,24 +521,6 @@ describes.realWin(
       const impl = await v.getImpl(false);
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback).to.have.been.calledWith(true);
-    });
-
-    it('play() should not log promise rejections', async () => {
-      const playPromise = Promise.reject('The play() request was interrupted');
-      const catchSpy = env.sandbox.spy(playPromise, 'catch');
-      await getVideo(
-        {
-          src: 'video.mp4',
-          width: 160,
-          height: 90,
-        },
-        null,
-        function (element, impl) {
-          env.sandbox.stub(impl.video_, 'play').returns(playPromise);
-          impl.play();
-        }
-      );
-      expect(catchSpy.called).to.be.true;
     });
 
     it('decode error retries the next source', async () => {

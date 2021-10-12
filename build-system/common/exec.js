@@ -6,7 +6,7 @@
 
 const childProcess = require('child_process');
 const {log} = require('./logging');
-const {red} = require('./colors');
+const {red} = require('kleur/colors');
 const {spawnProcess} = require('./process');
 
 const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';

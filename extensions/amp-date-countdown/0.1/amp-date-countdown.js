@@ -4,7 +4,7 @@ import {isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

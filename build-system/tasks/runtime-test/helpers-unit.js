@@ -1,12 +1,12 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
-const {cyan, green} = require('../../common/colors');
+const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMain} = require('../../common/git');
@@ -204,7 +204,7 @@ function unitTestsToRun() {
    * @return {string[]}
    */
   function getTestsFor(srcFiles) {
-    const allUnitTests = globby.sync(unitTestPaths);
+    const allUnitTests = fastGlob.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {
       return shouldRunTest(testFile, srcFiles);
     });

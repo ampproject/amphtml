@@ -392,7 +392,7 @@ To run the tests that are affected by the changes on your feature branch:
 amp unit --local_changes
 ```
 
-By default, all tests are run on Chrome. Pass one of the following flags to run tests on a different browser: `--firefox`, `--safari`, `--edge`, `--ie`.
+By default, all tests are run on Chrome. Pass one of the following flags to run tests on a different browser: `--firefox`, `--safari`, `--edge`.
 
 If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 

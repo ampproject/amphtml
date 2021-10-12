@@ -1,7 +1,6 @@
-import {devAssert} from '#core/assert';
 import {isIframed} from '#core/dom';
-import * as mode from '#core/mode';
-import {toWin} from '#core/window';
+import {removeItem} from '#core/types/array';
+import {getWin} from '#core/window';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
@@ -31,7 +30,7 @@ export function createViewportObserver(ioCallback, win, opts = {}) {
 /** @type {!WeakMap<!Window, !IntersectionObserver>} */
 const viewportObservers = new WeakMap();
 
-/** @type {!WeakMap<!Element, function(boolean)>} */
+/** @type {!WeakMap<!Element, !Array<function(IntersectionObserverEntry)>>} */
 const viewportCallbacks = new WeakMap();
 
 /**
@@ -39,18 +38,11 @@ const viewportCallbacks = new WeakMap();
  * enter and exit the viewport. Fires viewportCallback when this happens.
  *
  * @param {!Element} element
- * @param {function(boolean)} viewportCallback
+ * @param {function(IntersectionObserverEntry)} callback
+ * @return {!UnlistenDef} clean up closure to unobserve the element
  */
-export function observeWithSharedInOb(element, viewportCallback) {
-  // There should never be two unique observers of the same element.
-  if (mode.isLocalDev()) {
-    devAssert(
-      !viewportCallbacks.has(element) ||
-        viewportCallbacks.get(element) === viewportCallback
-    );
-  }
-
-  const win = toWin(element.ownerDocument.defaultView);
+export function observeIntersections(element, callback) {
+  const win = getWin(element);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
@@ -58,16 +50,37 @@ export function observeWithSharedInOb(element, viewportCallback) {
       (viewportObserver = createViewportObserver(ioCallback, win))
     );
   }
-  viewportCallbacks.set(element, viewportCallback);
+  let callbacks = viewportCallbacks.get(element);
+  if (!callbacks) {
+    callbacks = [];
+    viewportCallbacks.set(element, callbacks);
+  }
+  callbacks.push(callback);
   viewportObserver.observe(element);
+  return () => {
+    unobserveIntersections(element, callback);
+  };
 }
 
 /**
- * Unobserve an element.
+ * Unsubscribes a callback from receiving IntersectionObserver updates for an element.
+ *
  * @param {!Element} element
+ * @param {function(IntersectionObserverEntry)} callback
  */
-export function unobserveWithSharedInOb(element) {
-  const win = toWin(element.ownerDocument.defaultView);
+function unobserveIntersections(element, callback) {
+  const callbacks = viewportCallbacks.get(element);
+  if (!callbacks) {
+    return;
+  }
+  if (!removeItem(callbacks, callback)) {
+    return;
+  }
+  if (callbacks.length) {
+    return;
+  }
+  // If an element has no more observer callbacks, then unobserve it.
+  const win = getWin(element);
   const viewportObserver = viewportObservers.get(win);
   viewportObserver?.unobserve(element);
   viewportCallbacks.delete(element);
@@ -80,8 +93,21 @@ export function unobserveWithSharedInOb(element) {
  * @param {!Array<!IntersectionObserverEntry>} entries
  */
 function ioCallback(entries) {
-  for (let i = 0; i < entries.length; i++) {
-    const {isIntersecting, target} = entries[i];
-    viewportCallbacks.get(target)?.(isIntersecting);
+  const seen = new Set();
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const entry = entries[i];
+    const {target} = entry;
+    if (seen.has(target)) {
+      continue;
+    }
+    seen.add(target);
+    const callbacks = viewportCallbacks.get(target);
+    if (!callbacks) {
+      continue;
+    }
+    for (let k = 0; k < callbacks.length; k++) {
+      const callback = callbacks[k];
+      callback(entry);
+    }
   }
 }

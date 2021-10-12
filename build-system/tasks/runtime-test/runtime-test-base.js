@@ -18,7 +18,7 @@ const {
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {customLaunchers} = require('./custom-launchers');
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
@@ -110,8 +110,6 @@ class RuntimeTestConfig {
       ? 'EdgeCustom'
       : argv.firefox
       ? 'FirefoxCustom'
-      : argv.ie
-      ? 'IECustom'
       : argv.safari
       ? 'SafariCustom'
       : 'ChromeCustom';

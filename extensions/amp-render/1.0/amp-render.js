@@ -7,7 +7,7 @@ import {
 import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {computedStyle, setStyles} from '#core/dom/style';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {toArray} from '#core/types/array';
@@ -275,58 +275,46 @@ export class AmpRender extends BaseElement {
         ? this.element.getAttribute('aria-live')
         : 'polite',
       'getJson': this.getFetchJsonFn(),
-      'onLoading': () => {
-        this.toggleLoading(true);
-      },
-      'onReady': () => {
-        this.toggleLoading(false);
-        if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
-          this.togglePlaceholder(false);
-          return;
-        }
+    });
+  }
 
-        let componentHeight, contentHeight;
-        // TODO(dmanek): Look into using measureIntersection instead
-        this.measureMutateElement(
-          () => {
-            componentHeight = computedStyle(
-              this.getAmpDoc().win,
-              this.element
-            ).getPropertyValue('height');
-            contentHeight = this.element.querySelector(
-              '[i-amphtml-rendered]'
-            )./*OK*/ scrollHeight;
-          },
-          () => {
-            setStyles(this.element, {
-              'overflow': 'hidden',
-              'height': componentHeight,
-            });
-          }
-        ).then(() => {
-          return this.attemptChangeHeight(contentHeight)
-            .then(() => {
-              this.togglePlaceholder(false);
-              setStyles(this.element, {
-                'overflow': '',
-              });
-            })
-            .catch(() => {
-              this.togglePlaceholder(false);
-            });
+  /** @override */
+  handleOnLoad() {
+    this.toggleLoading(false);
+    if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+      this.togglePlaceholder(false);
+      return;
+    }
+
+    let componentHeight, contentHeight;
+    // TODO(dmanek): Look into using measureIntersection instead
+    this.measureMutateElement(
+      () => {
+        componentHeight = computedStyle(
+          this.getAmpDoc().win,
+          this.element
+        ).getPropertyValue('height');
+        contentHeight = this.element.querySelector(
+          '[i-amphtml-rendered]'
+        )./*OK*/ scrollHeight;
+      },
+      () => {
+        setStyles(this.element, {
+          'overflow': 'hidden',
+          'height': componentHeight,
         });
-      },
-      'onError': () => {
-        this.toggleLoading(false);
-        // If the content fails to load and there's a fallback element, display the fallback.
-        // Otherwise, continue displaying the placeholder.
-        if (this.getFallback()) {
+      }
+    ).then(() => {
+      return this.attemptChangeHeight(contentHeight)
+        .then(() => {
           this.togglePlaceholder(false);
-          this.toggleFallback(true);
-        } else {
-          this.togglePlaceholder(true);
-        }
-      },
+          setStyles(this.element, {
+            'overflow': '',
+          });
+        })
+        .catch(() => {
+          this.togglePlaceholder(false);
+        });
     });
   }
 

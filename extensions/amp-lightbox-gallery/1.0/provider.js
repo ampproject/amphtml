@@ -13,10 +13,10 @@ import {
 import {forwardRef} from '#preact/compat';
 
 import {PADDING_ALLOWANCE, useStyles} from './component.jss';
-import {LightboxGalleryContext} from './context';
+import {BentoLightboxGalleryContext} from './context';
 
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {Lightbox} from '../../amp-lightbox/1.0/component';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {BentoLightbox} from '../../amp-lightbox/1.0/component';
 
 /** @const {string} */
 const DEFAULT_GROUP = 'default';
@@ -38,11 +38,11 @@ const CAPTION_PROPS = {
 };
 
 /**
- * @param {!LightboxGalleryDef.Props} props
+ * @param {!BentoLightboxGalleryDef.Props} props
  * @param {{current: ?LightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function LightboxGalleryProviderWithRef(
+export function BentoLightboxGalleryProviderWithRef(
   {
     children,
     onAfterClose,
@@ -181,8 +181,8 @@ export function LightboxGalleryProviderWithRef(
 
   return (
     <>
-      <Lightbox
-        className={objstr({
+      <BentoLightbox
+        class={objstr({
           [classes.lightbox]: true,
           [classes.showControls]: showControls,
           [classes.hideControls]: !showControls,
@@ -193,7 +193,7 @@ export function LightboxGalleryProviderWithRef(
         onAfterClose={onAfterClose}
         ref={lightboxRef}
       >
-        <div className={classes.controlsPanel}>
+        <div class={classes.controlsPanel}>
           <ToggleViewIcon
             onClick={() => {
               if (showCarousel) {
@@ -204,10 +204,10 @@ export function LightboxGalleryProviderWithRef(
             showCarousel={showCarousel}
           />
         </div>
-        <BaseCarousel
+        <BentoBaseCarousel
           arrowPrevAs={NavButtonIcon}
           arrowNextAs={NavButtonIcon}
-          className={classes.gallery}
+          class={classes.gallery}
           defaultSlide={mod(index, count.current[group]) || 0}
           hidden={!showCarousel}
           loop
@@ -216,10 +216,10 @@ export function LightboxGalleryProviderWithRef(
           ref={carouselRef}
         >
           {carouselElements.current[group]}
-        </BaseCarousel>
+        </BentoBaseCarousel>
         <div
           hidden={!showCarousel}
-          className={objstr({
+          class={objstr({
             [classes.caption]: true,
             [classes.control]: true,
             [classes[captionState]]: true,
@@ -240,7 +240,7 @@ export function LightboxGalleryProviderWithRef(
               })}
         >
           <div
-            className={objstr({
+            class={objstr({
               [classes.captionText]: true,
               [EXPOSED_CAPTION_CLASS]: true,
             })}
@@ -250,23 +250,23 @@ export function LightboxGalleryProviderWithRef(
           </div>
         </div>
         {!showCarousel && (
-          <div
-            className={objstr({[classes.gallery]: true, [classes.grid]: true})}
-          >
+          <div class={objstr({[classes.gallery]: true, [classes.grid]: true})}>
             {gridElements.current[group]}
           </div>
         )}
-      </Lightbox>
-      <LightboxGalleryContext.Provider value={context}>
+      </BentoLightbox>
+      <BentoLightboxGalleryContext.Provider value={context}>
         {render ? render() : children}
-      </LightboxGalleryContext.Provider>
+      </BentoLightboxGalleryContext.Provider>
     </>
   );
 }
 
-const LightboxGalleryProvider = forwardRef(LightboxGalleryProviderWithRef);
-LightboxGalleryProvider.displayName = 'LightboxGalleryProvider';
-export {LightboxGalleryProvider};
+const BentoLightboxGalleryProvider = forwardRef(
+  BentoLightboxGalleryProviderWithRef
+);
+BentoLightboxGalleryProvider.displayName = 'BentoLightboxGalleryProvider';
+export {BentoLightboxGalleryProvider};
 /**
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
@@ -276,7 +276,7 @@ function CloseButtonIcon({onClick}) {
   return (
     <svg
       aria-label="Close the lightbox"
-      className={objstr({
+      class={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
         [classes.closeButton]: true,
@@ -298,7 +298,7 @@ function CloseButtonIcon({onClick}) {
 }
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
@@ -306,7 +306,7 @@ function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
   return (
     <svg
       aria-disabled={ariaDisabled}
-      className={objstr({
+      class={objstr({
         [classes.arrow]: true,
         [classes.control]: true,
         [classes.prevArrow]: by < 0,
@@ -332,7 +332,7 @@ function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
 }
 
 /**
- * @param {!BaseCarouselDef.ArrowProps} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function ToggleViewIcon({onClick, showCarousel}) {
@@ -342,7 +342,7 @@ function ToggleViewIcon({onClick, showCarousel}) {
       aria-label={
         showCarousel ? 'Switch to grid view' : 'Switch to carousel view'
       }
-      className={objstr({
+      class={objstr({
         [classes.control]: true,
         [classes.topControl]: true,
       })}
@@ -383,7 +383,7 @@ function ToggleViewIcon({onClick, showCarousel}) {
 }
 
 /**
- * @param {!LightboxGalleryDef.ThumbnailProps} props
+ * @param {!BentoLightboxGalleryDef.ThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
 function Thumbnail({onClick, render}) {
@@ -391,7 +391,7 @@ function Thumbnail({onClick, render}) {
   return (
     <div
       aria-label="View in carousel"
-      className={classes.thumbnail}
+      class={classes.thumbnail}
       onClick={onClick}
       role="button"
       tabIndex="0"

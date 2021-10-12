@@ -1,4 +1,4 @@
-import {whenDocumentReady} from '#core/document-ready';
+import {whenDocumentReady} from '#core/document/ready';
 
 import {toggleExperiment} from '#experiments';
 

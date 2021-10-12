@@ -7,11 +7,12 @@ import {fetchPolyfill} from '#polyfills/fetch';
 import {Services} from '#service';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
+import {user} from '#utils/log';
+import {assertSuccess} from '#utils/xhr-utils';
+
 import {getCookie} from '../../src/cookies';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
-import {user} from '../../src/log';
 import * as mode from '../../src/mode';
-import {assertSuccess} from '../../src/utils/xhr-utils';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describes.sandboxed

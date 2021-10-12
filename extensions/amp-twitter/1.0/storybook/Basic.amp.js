@@ -142,3 +142,35 @@ export const MutatedTweetId = () => {
     </>
   );
 };
+
+export const SwapPlaceholder = () => {
+  return (
+    <>
+      <button on="tap:AMP.setState({tweetid: '495719809695621121'})">
+        Load tweet
+      </button>
+      <amp-state id="tweetid">
+        <script type="application/json">1356304203044499462</script>
+      </amp-state>
+      <amp-twitter
+        width="375"
+        height="472"
+        layout="responsive"
+        data-amp-bind-data-tweetid="tweetid"
+      >
+        <blockquote placeholder class="twitter-tweet" data-lang="en">
+          <p>Placeholder is shown until the tweet is loaded.</p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            aliquip ex ea commodo consequat. Duis aute irure dolor in
+            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+            culpa qui officia deserunt mollit anim id est laborum.
+          </p>
+        </blockquote>
+      </amp-twitter>
+    </>
+  );
+};

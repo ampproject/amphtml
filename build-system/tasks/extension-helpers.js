@@ -1,8 +1,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const debounce = require('../common/debounce');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -26,7 +26,7 @@ const {
 } = require('../compile/internal-version');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {jssOptions} = require('../babel-config/jss-config');
@@ -92,6 +92,7 @@ const ExtensionOptionDef = {};
  *   outfile: string,
  *   external?: Array<string>
  *   remap?: Record<string, string>
+ *   wrapper?: string,
  * }}
  */
 const ExtensionBinaryDef = {};
@@ -418,7 +419,8 @@ async function watchExtension(
 
   const cssDeps = `${extDir}/**/*.css`;
   const jisonDeps = `${extDir}/**/*.jison`;
-  watch([cssDeps, jisonDeps]).on(
+  const ignored = /dist/; //should not watch npm dist folders.
+  watch([cssDeps, jisonDeps], {ignored}).on(
     'change',
     debounce(watchFunc, watchDebounceDelay)
   );
@@ -505,7 +507,7 @@ async function buildExtension(
  */
 async function buildNpmCss(extDir, options) {
   const startCssTime = Date.now();
-  const filenames = await globby(path.join(extDir, '**', '*.jss.js'));
+  const filenames = await fastGlob(path.join(extDir, '**', '*.jss.js'));
   if (!filenames.length) {
     return;
   }
@@ -625,6 +627,7 @@ function buildNpmBinaries(extDir, options) {
         outfile: preact,
         external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
         remap: {'preact/dom': 'preact'},
+        wrapper: '',
       });
     }
     if (react) {
@@ -638,6 +641,7 @@ function buildNpmBinaries(extDir, options) {
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
+        wrapper: '',
       });
     }
     return buildBinaries(extDir, binaries, options);
@@ -655,7 +659,7 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, external, outfile, remap} = binary;
+    const {entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
     return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
@@ -666,6 +670,7 @@ function buildBinaries(extDir, binaries, options) {
       outputFormat: esm ? 'esm' : 'cjs',
       externalDependencies: external,
       remapDependencies: remap,
+      wrapper: wrapper ?? options.wrapper,
     });
   });
   return Promise.all(promises);
@@ -715,12 +720,27 @@ async function buildExtensionJs(extDir, name, version, latestVersion, options) {
 
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
-  if (isAliased) {
+
+  const aliases = [
+    isAliased ? [name, aliasBundle.aliasedVersion] : null,
+    // TODO(alanorozco): We'd like to provide bento-foo.js binaries that only
+    // contain a Bento Custom Element like <bento-foo>.
+    // In the meantime, amp-foo.js and bento-foo.js are identical, and work on
+    // both AMP mode and Bento mode. Once we provide a unique bento-foo.js,
+    // we should remove the code that duplicates the binaries.
+    wrapperName === 'bento' ? [name.replace(/^amp-/, 'bento-'), version] : null,
+  ];
+
+  for (const aliasOptional of aliases) {
+    if (!aliasOptional) {
+      continue;
+    }
+    const [aliasedName, aliasedVersion] = aliasOptional;
     const src = maybeToEsmName(
       `${name}-${version}${options.minify ? '' : '.max'}.js`
     );
     const dest = maybeToEsmName(
-      `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${aliasedName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);

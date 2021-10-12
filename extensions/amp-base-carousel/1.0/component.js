@@ -15,8 +15,9 @@ import {WithAmpContext} from '#preact/context';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {isRTL} from '#core/dom';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {
+  cloneElement,
   useCallback,
   useContext,
   useEffect,
@@ -67,7 +68,7 @@ const generateCarouselKey = sequentialIdGenerator();
  * @param {{current: ?BaseCarouselDef.CarouselApi}} ref
  * @return {PreactDef.Renderable}
  */
-function BaseCarouselWithRef(
+function BentoBaseCarouselWithRef(
   {
     advanceCount = 1,
     arrowPrevAs,
@@ -158,7 +159,7 @@ function BaseCarouselWithRef(
     if (!shouldAutoAdvance || !containRef.current) {
       return;
     }
-    const win = toWin(containRef.current.ownerDocument.defaultView);
+    const win = getWin(containRef.current);
     const interval = win.setInterval(() => {
       const autoAdvanced = autoAdvance();
       if (!autoAdvanced) {
@@ -320,7 +321,7 @@ function BaseCarouselWithRef(
           by={-advanceCount}
           disabled={disableForDir(-1)}
           outsetArrows={outsetArrows}
-          rtl={rtl.toString()}
+          rtl={rtl}
         />
       )}
       <Scroller
@@ -348,7 +349,7 @@ function BaseCarouselWithRef(
               renderable={index == currentSlide}
               playable={index == currentSlide}
             >
-              {child}
+              {cloneElement(child, {...child.props, thumbnailSrc: undefined})}
             </WithAmpContext>
           );
         })}
@@ -360,13 +361,13 @@ function BaseCarouselWithRef(
           as={arrowNextAs}
           disabled={disableForDir(1)}
           outsetArrows={outsetArrows}
-          rtl={rtl.toString()}
+          rtl={rtl}
         />
       )}
     </ContainWrapper>
   );
 }
 
-const BaseCarousel = forwardRef(BaseCarouselWithRef);
-BaseCarousel.displayName = 'BaseCarousel'; // Make findable for tests.
-export {BaseCarousel};
+const BentoBaseCarousel = forwardRef(BentoBaseCarouselWithRef);
+BentoBaseCarousel.displayName = 'BentoBaseCarousel'; // Make findable for tests.
+export {BentoBaseCarousel};

@@ -6,8 +6,9 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {user} from '#utils/log';
+
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {user} from '../log';
 import {getMode} from '../mode';
 import {
   getCorsUrl,
@@ -56,7 +57,8 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  * `ArrayBuffer` and `Blob` are already supported by the structured clone
  * algorithm. Other serialization-needing types such as `URLSearchParams`
  * (which is not supported in IE and Safari) and `FederatedCredentials` are
- * not used in AMP runtime.
+ * not used in AMP runtime. `init.body` can also be a string
+ * (application/x-www-form-urlencoded) but that doesn't require serialization.
  *
  * @param {string} input The URL of the XHR to convert to structured
  *     cloneable.

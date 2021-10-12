@@ -119,7 +119,9 @@ describes.realWin(
     it('should append new page from server to client in update', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
       ampStory.buildCallback();
-      expect(ampStory.element.children.length).to.equal(2);
+      expect(
+        ampStory.element.querySelectorAll('amp-story-page').length
+      ).to.equal(2);
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
 

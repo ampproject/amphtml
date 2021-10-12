@@ -9,8 +9,8 @@ import {
   getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
 import {Services} from '#service';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,

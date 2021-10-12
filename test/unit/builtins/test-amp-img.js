@@ -8,10 +8,11 @@ import {Layout, LayoutPriority} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+
 import {createIframePromise} from '#testing/iframe';
 
 import {BaseElement} from '../../../src/base-element';
-import {createCustomEvent} from '../../../src/event-helper';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;
@@ -175,6 +176,18 @@ describes.sandboxed('amp-img', {}, (env) => {
       expect(img.getAttribute('sizes')).to.equal(
         '(max-width: 320px) 640px, 100vw'
       );
+    });
+  });
+
+  it('should propagate importance', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      importance: 'high',
+      width: 320,
+      height: 240,
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('importance')).to.equal('high');
     });
   });
 

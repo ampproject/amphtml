@@ -15,8 +15,9 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {dev, user, userAssert} from '../../../src/log';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -104,7 +105,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
-    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad')) {
+    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad-v3')) {
       return null;
     }
 
@@ -119,7 +120,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     const adType = (ad.getAttribute('type') || '').toLowerCase();
     if (adType == 'doubleclick' || adType == 'adsense') {
-      addExperimentIdToElement(enableConversion ? '31061856' : '31061855', ad);
+      addExperimentIdToElement(enableConversion ? '31062661' : '31062660', ad);
     }
 
     if (!enableConversion) {
@@ -130,10 +131,13 @@ class AmpStickyAd extends AMP.BaseElement {
     }
 
     ad.setAttribute('sticky', 'bottom');
-    this.element.parentElement.replaceChild(ad, this.element);
+
+    // Rebuild the ad element since the attributes have changed
+    const newAd = ad.cloneNode();
+    this.element.parentElement.replaceChild(newAd, this.element);
     return Services.extensionsFor(this.win)
       .loadElementClass('amp-ad', '0.1')
-      .then((AmpAd) => new AmpAd(ad));
+      .then((AmpAd) => new AmpAd(newAd));
   }
 
   /** @override */

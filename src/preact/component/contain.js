@@ -38,7 +38,7 @@ function ContainWrapperWithRef(
   {
     as: Comp = 'div',
     children,
-    'className': className,
+    'class': className,
     contentAs: ContentComp = 'div',
     contentClassName,
     contentProps,
@@ -60,7 +60,7 @@ function ContainWrapperWithRef(
     <Comp
       {...rest}
       ref={ref}
-      className={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
+      class={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
       style={{
         ...style,
         ...wrapperStyle,
@@ -70,7 +70,7 @@ function ContainWrapperWithRef(
       <ContentComp
         {...contentProps}
         ref={contentRef}
-        className={contentClassName}
+        class={contentClassName}
         style={{
           ...(size && SIZE_CONTENT_STYLE),
           'overflow': paint ? 'hidden' : 'visible',

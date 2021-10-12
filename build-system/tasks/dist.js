@@ -1,6 +1,6 @@
-const colors = require('../common/colors');
+const colors = require('kleur/colors');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {
   bootstrapThirdPartyFrames,
@@ -23,6 +23,10 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
+const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
@@ -116,10 +120,14 @@ async function dist() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else {
-    await buildExperiments();
-    await buildLoginDone('0.1');
-    await buildWebPushPublisherFiles();
-    await compileAllJs(options);
+    await Promise.all([
+      writeVersionFiles(),
+      buildExperiments(),
+      buildLoginDone('0.1'),
+      buildWebPushPublisherFiles(),
+      buildCompiler(),
+      compileAllJs(options),
+    ]);
   }
 
   // This step internally parses the various extension* flags.
@@ -141,6 +149,26 @@ async function dist() {
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
+}
+
+/**
+ * Writes the verion.txt file.
+ * @return {!Promise}
+ */
+async function writeVersionFiles() {
+  // TODO: determine which of these are necessary and trim the rest via an I2D.
+  const paths = [
+    'dist',
+    'dist/v0',
+    'dist/v0/examples',
+    'dist.tools/experiments',
+    `dist.3p/${internalRuntimeVersion}`,
+    `dist.3p/${internalRuntimeVersion}/vendor`,
+  ].map((p) => path.join(...p.split('/'), 'version.txt'));
+
+  return Promise.all(
+    paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
+  );
 }
 
 /**
@@ -241,7 +269,7 @@ async function preBuildWebPushPublisherFiles() {
       const js = await fs.readFile(`${srcPath}/${fileName}.js`, 'utf8');
       const builtName = `${fileName}.js`;
       await fs.outputFile(`${destPath}/${builtName}`, js);
-      const jsFiles = await globby(`${srcPath}/*.js`);
+      const jsFiles = await fastGlob(`${srcPath}/*.js`);
       await Promise.all(
         jsFiles.map((jsFile) => {
           return fs.copy(jsFile, `${destPath}/${path.basename(jsFile)}`);
@@ -304,7 +332,7 @@ async function preBuildExperiments() {
   const js = await fs.readFile(jsSrcPath, 'utf8');
   const builtName = 'experiments.max.js';
   await fs.outputFile(`${jsDir}/${builtName}`, js);
-  const jsFiles = await globby(`${expDir}/*.js`);
+  const jsFiles = await fastGlob(`${expDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${jsDir}/${path.basename(jsFile)}`);
@@ -346,7 +374,7 @@ async function preBuildLoginDoneVersion(version) {
   const js = await fs.readFile(jsPath, 'utf8');
   const builtName = `amp-login-done-${version}.max.js`;
   await fs.outputFile(`${buildDir}/${builtName}`, js);
-  const jsFiles = await globby(`${srcDir}/*.js`);
+  const jsFiles = await fastGlob(`${srcDir}/*.js`);
   await Promise.all(
     jsFiles.map((jsFile) => {
       return fs.copy(jsFile, `${buildDir}/${path.basename(jsFile)}`);

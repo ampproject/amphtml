@@ -9,14 +9,8 @@ import {
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {
-  intersectionEntryToJson,
-  measureIntersection,
-} from '#core/dom/layout/intersection';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {setStyle} from '#core/dom/style';
 import {duplicateErrorIfNecessary} from '#core/error';
@@ -27,12 +21,16 @@ import {padStart} from '#core/types/string';
 import {utf8Decode} from '#core/types/string/bytes';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
-import {getExperimentBranch, isExperimentOn} from '#experiments';
-import {ADS_INITIAL_INTERSECTION_EXP} from '#experiments/ads-initial-intersection-exp';
+import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {DomTransformStream} from '#utils/dom-tranform-stream';
+import {listenOnce} from '#utils/event-helper';
+import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
@@ -51,14 +49,12 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {listenOnce} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
@@ -66,10 +62,8 @@ import {
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -286,9 +280,6 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
-    /** @private {Promise<!IntersectionObserverEntry>} */
-    this.initialIntersectionPromise_ = null;
-
     /**
      * Note(keithwrightbos) - ensure the default here is null so that ios
      * uses safeframe when response header is not specified.
@@ -376,8 +367,8 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.transferDomBody_ = null;
 
-    /** @private {function(boolean)} */
-    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -418,14 +409,18 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
 
-    const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() => {
-        this.getSigningServiceNames().forEach((signingServiceName) => {
-          verifier.loadKeyset(signingServiceName);
+    // Disable crypto key fetching if we are not going to use it in no-signing path.
+    // TODO(ccordry): clean up with no-signing launch.
+    if (!this.isInNoSigningExp()) {
+      const verifier = signatureVerifierFor(this.win);
+      this.keysetPromise_ = this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.getSigningServiceNames().forEach((signingServiceName) => {
+            verifier.loadKeyset(signingServiceName);
+          });
         });
-      });
+    }
 
     this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
     if (this.a4aAnalyticsConfig_) {
@@ -439,13 +434,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
-
-    const asyncIntersection =
-      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
-      ADS_INITIAL_INTERSECTION_EXP.experiment;
-    this.initialIntersectionPromise_ = asyncIntersection
-      ? measureIntersection(this.element)
-      : Promise.resolve(this.element.getIntersectionChangeEntry());
   }
 
   /** @override */
@@ -1327,7 +1315,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.destroyFrame(true);
     }
     return this.attemptToRenderCreative().then(() => {
-      observeWithSharedInOb(this.element, this.boundViewportCallback_);
+      this.unobserveIntersections_ = observeIntersections(
+        this.element,
+        ({isIntersecting}) => this.viewportCallback(isIntersecting)
+      );
     });
   }
 
@@ -1428,7 +1419,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.tearDownSlot();
     return true;
   }
@@ -1509,12 +1501,11 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  // TODO: Rename to viewportCallback once BaseElement.viewportCallback has been removed.
   /**
    * @param {boolean}  inViewport
    * @protected
    */
-  viewportCallbackTemp(inViewport) {
+  viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -1897,6 +1888,9 @@ export class AmpA4A extends AMP.BaseElement {
           'allowtransparency': '',
           'scrolling': 'no',
           'title': this.getIframeTitle(),
+          'role': 'region',
+          'aria-label': 'Advertisement',
+          'tabindex': '0',
         })
       )
     );
@@ -2022,6 +2016,9 @@ export class AmpA4A extends AMP.BaseElement {
         'height': this.creativeSize_.height,
         'width': this.creativeSize_.width,
         'title': this.getIframeTitle(),
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     );
 
@@ -2100,16 +2097,15 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    return this.initialIntersectionPromise_.then((intersection) => {
-      contextMetadata['_context']['initialIntersection'] =
-        intersectionEntryToJson(intersection);
-      return this.iframeRenderHelper_(
-        dict({
-          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-          'name': JSON.stringify(contextMetadata),
-        })
-      );
-    });
+    const intersection = this.element.getIntersectionChangeEntry();
+    contextMetadata['_context']['initialIntersection'] =
+      intersectionEntryToJson(intersection);
+    return this.iframeRenderHelper_(
+      dict({
+        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        'name': JSON.stringify(contextMetadata),
+      })
+    );
   }
 
   /**
@@ -2176,21 +2172,20 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      return this.initialIntersectionPromise_.then((intersection) => {
-        contextMetadata['initialIntersection'] =
-          intersectionEntryToJson(intersection);
-        if (method == XORIGIN_MODE.NAMEFRAME) {
-          contextMetadata['creative'] = creative;
-          name = JSON.stringify(contextMetadata);
-        } else if (method == XORIGIN_MODE.SAFEFRAME) {
-          contextMetadata = JSON.stringify(contextMetadata);
-          name =
-            `${this.safeframeVersion};${creative.length};${creative}` +
-            `${contextMetadata}`;
-        }
+      const intersection = this.element.getIntersectionChangeEntry();
+      contextMetadata['initialIntersection'] =
+        intersectionEntryToJson(intersection);
+      if (method == XORIGIN_MODE.NAMEFRAME) {
+        contextMetadata['creative'] = creative;
+        name = JSON.stringify(contextMetadata);
+      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+        contextMetadata = JSON.stringify(contextMetadata);
+        name =
+          `${this.safeframeVersion};${creative.length};${creative}` +
+          `${contextMetadata}`;
+      }
 
-        return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
-      });
+      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
 

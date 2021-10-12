@@ -1,11 +1,11 @@
 import {Services} from '#service';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 
 import {getAdContainer} from '../../../src/ad-helper';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {setStyle, setStyles} from '#core/dom/style';
 
 const TAG = 'amp-ad-ui';
@@ -23,6 +23,8 @@ const TOP_STICKY_AD_TRIGGER_THRESHOLD = 200;
 const StickyAdPositions = {
   TOP: 'top',
   BOTTOM: 'bottom',
+  LEFT: 'left',
+  RIGHT: 'right',
   BOTTOM_RIGHT: 'bottom-right',
 };
 
@@ -63,6 +65,11 @@ export class AmpAdUIHandler {
         this.element_.getAttribute(STICKY_AD_PROP) ||
         StickyAdPositions.BOTTOM_RIGHT;
       this.element_.setAttribute(STICKY_AD_PROP, this.stickyAdPosition_);
+
+      if (!Object.values(StickyAdPositions).includes(this.stickyAdPosition_)) {
+        user().error(TAG, `Invalid sticky ad type: ${this.stickyAdPosition_}`);
+        this.stickyAdPosition_ = null;
+      }
     }
 
     /**
@@ -275,7 +282,10 @@ export class AmpAdUIHandler {
    * When a sticky ad is shown, the close button should be rendered at the same time.
    */
   onResizeSuccess() {
-    if (this.isStickyAd() && !this.topStickyAdScrollListener_) {
+    if (
+      this.stickyAdPosition_ == StickyAdPositions.TOP &&
+      !this.topStickyAdScrollListener_
+    ) {
       const doc = this.element_.getAmpDoc();
       this.topStickyAdScrollListener_ = Services.viewportForDoc(doc).onScroll(
         () => {

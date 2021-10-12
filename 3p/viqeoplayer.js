@@ -1,8 +1,9 @@
+import {tryPlay} from '#core/dom/video';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
-import {loadScript} from './3p';
+import {getData} from '#utils/event-helper';
 
-import {getData} from '../src/event-helper';
+import {loadScript} from './3p';
 
 /**
  * @param {Window} global
@@ -76,7 +77,7 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
       return;
     }
     if (action === 'play') {
-      viqeoPlayerInstance.play();
+      tryPlay(viqeoPlayerInstance);
     } else if (action === 'pause') {
       viqeoPlayerInstance.pause();
     } else if (action === 'stop') {
