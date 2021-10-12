@@ -14,27 +14,6 @@ export default {
   decorators: [withKnobs],
 };
 
-export const _test = () => {
-  return (
-    <>
-      <BentoLightboxGalleryProvider>
-        <style>{`
-        img {
-          width: 240px;
-          height: 160px;
-        }
-        .amp-lightbox-gallery-caption {
-          color: red;
-        }
-      `}</style>
-        <WithBentoLightboxGallery>
-          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
-        </WithBentoLightboxGallery>
-      </BentoLightboxGalleryProvider>
-    </>
-  );
-};
-
 export const _default = () => {
   return (
     <>

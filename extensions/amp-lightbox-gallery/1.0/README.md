@@ -37,14 +37,11 @@ import '@ampproject/bento-lightbox-gallery';
     <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style data-bento-boilerplate>
-    </style>
-    <script async src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"></script>
-    <style>
-      bento-lightbox-gallery {
-        width: 360px;
-        height: 240px;
+      bento-lightbox-gallery[hidden] {
+        display: none !important;
       }
     </style>
+    <script async src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"></script>
   </head>
 
   <figure>
@@ -130,43 +127,26 @@ its description, showing "picture of cn tower".
 >
 ```
 
-#### Implement Thumbnail Previews
+### Interactivity and API usage
 
-Lightboxed items have a thumbnail gallery view. you can optionally specify a
-thumbnail item for your lightboxed element via the attribute
-`lightbox-thumbnail-id` that references the `id` of an `<img>` element with
-`layout="nodisplay"`.
+Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
 
-```html
-<bento-youtube
-  width="480"
-  height="270"
-  layout="responsive"
-  data-videoid="lbtcb7yls8y"
-  lightbox-thumbnail-id="my-thumbnail-img"
->
-</bento-youtube>
-
-<img
-  id="my-thumbnail-img"
-  width="200"
-  height="200"
-  layout="nodisplay"
-  src="https://picsum.photos/200/200?image=1074"
->
+```javascript
+await customElements.whenDefined('bento-lightbox-gallery');
+const api = await lightboxGallery.getApi();
 ```
-
-If no thumbnail is specified, `<img>` elements will be cropped per
-`object-fit: cover`, `<bento-video>` will use the image `src` specified in its
-`poster` attribute, and placeholder images will be used for lightboxed elements
-that have one.
 
 ### Actions
 
+The `bento-lightbox-gallery` API allows you to perform the following action:
+
 ### `open`
 
-Opens the lightbox gallery. can be triggered by tapping another element, if you
-specify the image `id`: `on="tap:amp-lightbox-gallery.open(id='image-id')"`.
+Opens the lightbox gallery.
+
+```javascript
+api.open();
+```
 
 ### Layout And Style
 
@@ -189,19 +169,19 @@ npm install @ampproject/bento-lightbox-gallery
 ```
 
 ```javascript
-import react from 'react';
+import React from 'react';
 import {
-  bentolightboxgalleryprovider,,
-  withbentolightboxgallery,
+  BentoLightboxGalleryProvider,,
+  WithBentoLightboxGallery,
 } from '@ampproject/bento-lightbox-gallery/react';
 
-function app() {
+function App() {
   return (
-      <bentolightboxgalleryprovider>
-        <withbentolightboxgallery>
+      <BentoLightboxGalleryProvider>
+        <WithBentoLightboxGallery>
           <img src="https://images.unsplash.com/photo-1562907550-096d3bf9b25c"/>
-        </withbentolightboxgallery>
-      </bentolightboxgalleryprovider>
+        </WithBentoLightboxGallery>
+      </BentoLightboxGalleryProvider>
   );
 }
 
@@ -211,19 +191,19 @@ function app() {
 
 #### Example Using BentoBaseCarousel
 
-`<BentoLightboxGallery>` can be used with a `<BentoBaseCarousel>` child in order to lightbox all of the carousel's children. As you navigate throught the carousel items in the lightbox, the original carousel slides are synchronised so that when the lightbox is closed, the user ends up on the same slide as they were originally on. Currently, only the `type='slides'` carousel is supported.
+`<BentoLightboxGallery>` can be used with a `<BentoBaseCarousel>` child in order to lightbox all of the carousel's children. As you navigate throught the carousel items in the lightbox, the original carousel slides are synchronised so that when the lightbox is closed, the user ends up on the same slide as they were originally on.
 
 [example preview="top-frame" playground="false"]
 
 ```javascript
-import react from 'react';
+import React from 'react';
 import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {
-  bentolightboxgalleryprovider,,
-  withbentolightboxgallery,
+  BentoLightboxGalleryProvider,,
+  WithBentoLightboxGallery,
 } from '@ampproject/bento-lightbox-gallery/react';
 
-function app() {
+function App() {
   return (
        <BentoLightboxGalleryProvider>
         <BentoBaseCarousel lightbox style={{width: '240px', height: '160px'}}>
@@ -245,30 +225,30 @@ For further examples of how to use the BentoLightboxGallery please check the sto
 
 #### **onBeforeOpen**
 
-An attribute which takes a function which is executed before the lightbox is opened.
+A prop which takes a function which is executed before the lightbox is opened.
 
 #### **onAfterOpen**
 
-An attribute which takes a function which is executed after the lightbox is opened.
+A prop which takes a function which is executed after the lightbox is opened.
 
 #### **onAfterClose**
 
-An attribute which takes a function which is executed after the lightbox is closed.
+A prop which takes a function which is executed after the lightbox is closed.
 
 ##### **onViewGrid**
 
-An attribute which takes a function which is executed when the user enters the grid view.
+A prop which takes a function which is executed when the user enters the grid view.
 
 #### **onToggleCaption**
 
-An attribute which takes a function which is executed when the captions are toggled.
+A prop which takes a function which is executed when the captions are toggled.
 
 ### Props for WithBentoLightboxGallery
 
 #### **enableActivation**
 
-A boolean attribute which defaults to true which lets the child image activate the lightbox experience.
+A boolean prop which defaults to true which lets the child image activate the lightbox experience.
 
 #### **onClick**
 
-An attribute which takes a functhion which is executed when the image is clicked.
+A prop which takes a functhion which is executed when the image is clicked.
