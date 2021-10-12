@@ -18,13 +18,6 @@ describes.sandboxed('DOM - layout', {}, () => {
     div = document.createElement('div');
   });
 
-  function removeWhitespace(value) {
-    if (!value) {
-      return value;
-    }
-    return value.replace(/\s/g, '');
-  }
-
   it('parseLayout', () => {
     expect(parseLayout('nodisplay')).to.equal('nodisplay');
     expect(parseLayout('fixed')).to.equal('fixed');
