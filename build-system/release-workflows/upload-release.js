@@ -113,13 +113,17 @@ async function uploadFiles_() {
   }
 
   const credentials = JSON.parse(GCLOUD_SERVICE_KEY);
-  if (!credentials.client_email || !credentials.private_key) {
+  if (
+    !credentials.client_email ||
+    !credentials.private_key ||
+    !credentials.project_id
+  ) {
     throw new Error(
       'GCLOUD_SERVICE_KEY is not a Google Cloud JSON service key'
     );
   }
 
-  const storage = new Storage({credentials});
+  const storage = new Storage({credentials, projectId: credentials.project_id});
   const bucket = storage.bucket('org-cdn');
 
   let totalFiles = 0;
