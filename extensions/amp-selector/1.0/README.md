@@ -35,33 +35,27 @@ import '@ampproject/bento-selector';
   <style data-bento-boilerplate>
     bento-selector {
       display: block;
-      overflow: hidden;
-      position: relative;
     }
   </style>
   <script async src="https://cdn.ampproject.org/v0/bento-selector-1.0.js"></script>
-  <style>
-    bento-selector{
-      width: 375px;
-      height: 472px;
-    }
-  </style>
 </head>
 
-<bento-selector class="sample-selector" layout="container">
-  <bento-selector-option option="1">Option 1</bento-selector-option>
-  <bento-selector-option option="2">Option 2</bento-selector-option>
-  <bento-selector-option option="3">Option 3</bento-selector-option>
-  <bento-selector-option option="4">Option 4</bento-selector-option>
-</bento-selector
+<bento-selector class="sample-selector">
+  <ul>
+    <li option="1">Option 1</li>
+    <li option="2">Option 2</li>
+    <li option="3">Option 3</li>
+    <li option="4">Option 4</li>
+  </ul>
+</bento-selector>
 ```
 
 [/example]
 
 #### Usage notes
 
--   An `bento-selector` can contain any arbitrary HTML elements or AMP components (e.g., `bento-carousel`, etc.).
--   An `bento-selector` cannot contain any nested `bento-selector` controls.
+-   A `bento-selector` can contain any arbitrary HTML elements or AMP components (e.g., `bento-carousel`, etc.).
+-   A `bento-selector` cannot contain any nested `bento-selector` controls.
 -   Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option="value"></li>`).
 -   Disabled options can be set by adding the `disabled` attribute to the element (e.g., `<li option="d" disabled></li>`).
 -   Preselected options can be set by adding the `selected` attribute to the element (e.g., `<li option="b" selected></li>`).
@@ -79,8 +73,6 @@ You may also make the light-weight pre-upgrade styles available inline:
 <style data-bento-boilerplate>
   bento-selector{
     display: block;
-    overflow: hidden;
-    position: relative;
   }
 </style>
 ```
@@ -107,9 +99,9 @@ The `keyboard-select-mode` attribute dictates the keyboard navigation behavior f
   </li>
 </ul>
 
-#### Attributes on `<bento-selector-option>`
+#### Attributes on option elements
 
-**option**
+**option (required)**
 
 Indicates that the option is selectable. If a value is specified, the contents of the value is submitted with the form.
 
@@ -180,7 +172,7 @@ import '@ampproject/bento-selector/styles.css';
 
 function App() {
   return (
-    <BentoSelector aria-label="Option menu">
+    <BentoSelector>
       <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
       <BentoSelectorOption option="2">Option 2</BentoSelectorOption>
       <BentoSelectorOption option="3">Option 3</BentoSelectorOption>
@@ -194,33 +186,43 @@ function App() {
 
 #### Layout and Style
 
-Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+**Container type**
 
-```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-facebook-1.0.css">
+The `BentoSelector` component can be styled with standard CSS.
+
+The `width` and `height` of the `BentoSelector` may both be set in order to adjust the default size of the component.
+To ensure the component renders how you want it to, be sure to apply a size to the component. These can be applied inline:
+
+```jsx
+<BentoSelector style={{width: "100px", height:"400px"}}>
+  <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
+</BentoSelector>
 ```
 
-Alternatively, you may also make the light-weight pre-upgrade styles available inline:
+Or via `className`:
 
-```html
-<style data-bento-boilerplate>
- BentoSelector{
-    display: block;
-    overflow: hidden;
-    position: relative;
-  }
-</style>
+```jsx
+<BentoSelector className='custom-styles'>
+  <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
+</BentoSelector>
 ```
 
-#### Attributes on `<BentoSelector>`
+```css
+.custom-styles {
+  width: "100px";
+  height: "400px";
+}
+```
+
+#### Props for `<BentoSelector>`
 
 **disabled, form, multiple, name**
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
-**keyboard-select-mode**
+**keyboardSelectMode**
 
-The `keyboard-select-mode` attribute dictates the keyboard navigation behavior for options inside `<BentoSelector>`.
+The `keyboardSelectMode` attribute dictates the keyboard navigation behavior for options inside `<BentoSelector>`.
 
 <ul>
   <li>
@@ -234,7 +236,7 @@ The `keyboard-select-mode` attribute dictates the keyboard navigation behavior f
   </li>
 </ul>
 
-#### Attributes on `<BentoSelectorOption>`
+#### Props for `<BentoSelectorOption>`
 
 **option**
 
@@ -244,6 +246,27 @@ Indicates that the option is selectable. If a value is specified, the contents o
 
 The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
 
+#### Interactivity and API usage
+
+Bento components are highly interactive through their API. The `BentoSelector` component API is accessible by passing a `ref`:
+
+```javascript
+import React, {createRef} from 'react';
+const ref = createRef();
+
+
+function App() {
+  return (
+    <BentoSelector ref={ref}>
+      <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
+      <BentoSelectorOption option="2">Option 2</BentoSelectorOption>
+      <BentoSelectorOption option="3">Option 3</BentoSelectorOption>
+      <BentoSelectorOption option="4">Option 4</BentoSelectorOption>
+    </BentoSelector>
+  );
+}
+```
+
 #### Actions
 
 The `BentoSelector` API allows you to perform the following actions:
@@ -252,36 +275,22 @@ The `BentoSelector` API allows you to perform the following actions:
 Closes the selector.
 
 ```js
-api.selectBy(1); // Select next option in DOM sequence.
-api.selectBy(-2); // Select the option that is two previous in DOM sequence.
+ref.selectBy(1); // Select next option in DOM sequence.
+ref.selectBy(-2); // Select the option that is two previous in DOM sequence.
 ```
 
 **toggle(optionValue: string, opt_select: boolean|undefined)**
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
 ```js
-api.toggle("a"); // Toggle the item with the attribute `option="a"`.
-api.toggle("1", true); // Select the item with the attribute `option="1"`.
+ref.toggle("1"); // Toggle the item with the attribute `option="1"`.
+ref.toggle("2", true); // Select the item with the attribute `option="2"`.
 ```
 
 #### Events
-
-The `BentoSelector` API allows you to register and respond to the following events:
 
 **select**
 
 This event is triggered when the user selects an option.
 Multi-selectors and single-selectors fire this when selecting or unselecting options.
 Tapping disabled options does not trigger the `select` event.
-
-<ul>
-  <li>
-  `event.data.targetOption` contains the `option` attribute value of the selected element.</li>
-  <li>
-  `event.data.selectedOptions` contains an array of the `option` attribute values of all selected elements.
-  </li>
-</ul>
-
-```js
-selector.addEventListener("select", (e) => console.log(e.data.targetOption))
-```
