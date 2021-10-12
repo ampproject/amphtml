@@ -35,13 +35,11 @@ import '@ampproject/bento-lightbox';
   <script async custom-element="bento-lightbox" src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"></script>
   <style data-bento-boilerplate>
     bento-lightbox {
-      display: block;
-      overflow: hidden;
-      position: relative;
+  display: none !important;
     }
   </style>
 </head>
-<bento-lightbox id="my-lightbox" layout="nodisplay">
+<bento-lightbox id="my-lightbox">
   Lightboxed content
   <button id="close-button">Close lightbox</button>
 </bento-lightbox>
@@ -123,9 +121,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 ```html
 <style data-bento-boilerplate>
   bento-lightbox {
-    display: block;
-    overflow: hidden;
-    position: relative;
+  display: none !important;
   }
 </style>
 ```
@@ -136,9 +132,9 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 
 A unique identifier for the lightbox.
 
-##### `layout` (required)
+##### `hidden`
 
-Must be set to `nodisplay`.
+Must be present when the lightbox is closed and the contents should not be displayed, such as on first layout.
 
 ##### `animation`
 
@@ -150,16 +146,6 @@ be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 
 When the `scrollable` attribute is present, the content of the lightbox can
 scroll when overflowing the height of the lightbox.
-
-#### Actions
-
-##### `open` (default)
-
-Opens the lightbox.
-
-##### `close`
-
-Closes the lightbox.
 
 ### Preact/React Component
 
