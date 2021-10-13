@@ -558,7 +558,7 @@ async function getCssForJssFile(jssFile) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensionCss(extDir, name, version, options) {
+async function buildExtensionCss(extDir, name, version, options) {
   /**
    * Writes CSS binaries
    *
@@ -576,8 +576,8 @@ function buildExtensionCss(extDir, name, version, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
 
-  const promises = [];
   const mainCssPromise = jsifyCssAsync(`${extDir}/${name}.css`);
+
   const mainCssBinaryPromise = mainCssPromise.then((mainCss) => {
     writeCssBinaries(`${name}-${version}.css`, mainCss);
     if (isAliased) {
@@ -585,10 +585,21 @@ function buildExtensionCss(extDir, name, version, options) {
     }
   });
 
+  const parallel = [mainCssBinaryPromise];
+
+  // Currently JSON.stringifying to allow arrays and strings:
+  // {"wrapper": "bento"} and {"wrapper": ["bento"]}
+  // TODO(alanorozco): We might need a `bento` flag instead.
+  if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
+    const bentoCssPromise = mainCssPromise.then((mainCss) =>
+      buildBentoCss(name, mainCss)
+    );
+    parallel.push(bentoCssPromise);
+  }
+
   if (Array.isArray(options.cssBinaries)) {
-    promises.push.apply(
-      promises,
-      options.cssBinaries.map(function (name) {
+    parallel.push(
+      ...options.cssBinaries.map((name) => {
         return jsifyCssAsync(`${extDir}/${name}.css`).then((css) => {
           writeCssBinaries(`${name}-${version}.css`, css);
           if (isAliased) {
@@ -598,22 +609,23 @@ function buildExtensionCss(extDir, name, version, options) {
       })
     );
   }
-  promises.push(mainCssBinaryPromise);
 
-  // Currently JSON.stringifying to allow arrays and strings:
-  // {"wrapper": "bento"} and {"wrapper": ["bento"]}
-  // TODO(alanorozco): We might need a `bento` flag instead.
-  if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
-    // This is fairly fast, so we don't cache the result.
-    const promise = mainCssPromise.then(async (css) => {
-      const bentoName = name.replace(/^amp-/, 'bento-');
-      const renamedCss = await renameSelectorsToBentoTagNames(css);
-      await fs.writeFile(`dist/v0/${bentoName}.css`, renamedCss);
-    });
-    promises.push(promise);
-  }
+  await Promise.all(parallel);
+}
 
-  return Promise.all(promises);
+/**
+ * Build bento-*.css using the compiled amp-* result as source.
+ * It replaces all selectors for elements <amp-*> with <bento-*>.
+ * As a result of taking already minified code as source, this function is
+ * fairly fast and not cached.
+ * @param {string} name
+ * @param {string} minifiedAmpCss
+ * @return {!Promise}
+ */
+async function buildBentoCss(name, minifiedAmpCss) {
+  const bentoName = name.replace(/^amp-/, 'bento-');
+  const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
+  await fs.writeFile(`dist/v0/${bentoName}.css`, renamedCss);
 }
 
 /**
