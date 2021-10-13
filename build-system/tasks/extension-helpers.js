@@ -626,8 +626,8 @@ async function buildExtensionCss(extDir, name, version, options) {
 async function buildBentoCss(name, version, minifiedAmpCss) {
   const bentoName = name.replace(/^amp-/, 'bento-');
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
-  await fs.writeFile(`build/${bentoName}-${version}.css`, renamedCss);
-  await fs.writeFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
+  await fs.outputFile(`build/${bentoName}-${version}.css`, renamedCss);
+  await fs.outputFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
 }
 
 /**
