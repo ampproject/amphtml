@@ -269,7 +269,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         );
         expect(containerElem.children[0].textContent).to.equal('SHOP');
         expect(containerElem.children[0].target).to.equal('_blank');
-        expect(containerElem.children[0].tagName).to.equal('a');
+        expect(containerElem.children[0].tagName).to.equal('A');
       });
     });
 
