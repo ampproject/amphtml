@@ -718,7 +718,7 @@ function arrayOrItemToArray(itemOrArray) {
  * Build the JavaScript for the extension specified
  *
  * @param {string} sourceDir Path to the extension's directory
- * @param {string} sourceName Name of the extension. Must be the sub directory in
+ * @param {string} name Name of the extension. Must be the sub directory in
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
@@ -728,7 +728,7 @@ function arrayOrItemToArray(itemOrArray) {
  */
 async function buildExtensionJs(
   sourceDir,
-  sourceName,
+  name,
   version,
   latestVersion,
   options
@@ -737,35 +737,39 @@ async function buildExtensionJs(
 
   const wrapperNames = arrayOrItemToArray(options.wrapper || 'extension');
 
-  const builds = wrapperNames.map((wrapperName) => {
+  const builds = wrapperNames.map(async (wrapperName) => {
+    // TODO(alanorozco): Use a `bento` option instead. The outer function can
+    // then be called twice at a higher level.
+    const isBento = wrapperName === 'bento';
+
+    const resolvedName = isBento ? name.replace(/^amp-/, 'bento-') : name;
+    const resolvedFilename = isBento
+      ? await getBentoFilename(sourceDir, resolvedName, version, options)
+      : `${resolvedName}.js`;
+
     const wrapperOrFn = wrappers[wrapperName];
     if (!wrapperOrFn) {
       throw new Error(
-        `Unknown options.wrapper "${wrapperName}" (${sourceName}:${version})\n` +
+        `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
           `Expected one of: ${Object.keys(wrappers).join(', ')}`
       );
     }
     const wrapper =
       typeof wrapperOrFn === 'function'
         ? wrapperOrFn(
-            sourceName,
+            resolvedName,
             version,
             isLatest,
             argv.esm,
             options.loadPriority
           )
         : wrapperOrFn;
-    // TODO(alanorozco): Is there a nicer way to specify this rather than
-    // hardcoding based on the wrapper name? Maybe. Does it matter? idk
-    const outputName =
-      wrapperName === 'bento'
-        ? sourceName.replace(/^amp-/, 'bento-')
-        : sourceName;
+
     return buildExtensionJsWithWrapper(
       wrapper,
       sourceDir,
-      sourceName,
-      outputName,
+      resolvedName,
+      resolvedFilename,
       version,
       isLatest,
       options
@@ -776,10 +780,60 @@ async function buildExtensionJs(
 }
 
 /**
+ * Extensions may specify their own bento-install.js to install multiple
+ * elements or otherwise specify custom install logic. Otherwise, we provide
+ * an installer with the most common configuration.
+ * @param {string} sourceDir
+ * @param {string} name
+ * @param {string} version
+ * @param {Object} options
+ * @return {Promise<string>}
+ */
+async function getBentoFilename(sourceDir, name, version, options) {
+  const optionalSpecified = `${name}.js`;
+  if (await fs.pathExists(`${sourceDir}/${optionalSpecified}`)) {
+    return sourceDir;
+  }
+  const source = `
+import {BaseElement} from '../base-element';
+${
+  options.hasCss
+    ? `import {CSS} from '../${getBentoCssImportPath(
+        sourceDir,
+        name,
+        version
+      )}';`
+    : 'let CSS;' // undefined, gets DCE'd
+}
+AMP.registerElement('${name}', BaseElement, CSS);
+  `.trim();
+  const written = `build/${name}.js`;
+  // Include code in extension directory outside /build
+  options.extraGlobs = [...(options.extraGlobs || []), `${sourceDir}/**/*.js`];
+  await fs.writeFile(`${sourceDir}/${written}`, source);
+  return written;
+}
+
+/**
+ * @param {string} sourceDir
+ * @param {string} name
+ * @param {string} version
+ * @return {string}
+ */
+function getBentoCssImportPath(sourceDir, name, version) {
+  // TODO(alanorozco): This should instead be the bento-*.css output that
+  // should be available after this is submitted:
+  // https://github.com/ampproject/amphtml/pull/36221
+  const ampName = name.replace(/^bento-/, 'amp-');
+  const root = sourceDir.split('/').fill('..').join('/');
+  return `${root}/build/${ampName}-${version}.css`;
+}
+
+/**
  * @param {string} wrapper
  * @param {string} sourceDir
- * @param {string} sourceName
- * @param {string} outputName
+ * @param {string} name
+ * @param {string} filename
  * @param {string} version
  * @param {boolean} isLatest
  * @param {!Object} options
@@ -788,17 +842,17 @@ async function buildExtensionJs(
 async function buildExtensionJsWithWrapper(
   wrapper,
   sourceDir,
-  sourceName,
-  outputName,
+  name,
+  filename,
   version,
   isLatest,
   options
 ) {
-  await compileJs(`${sourceDir}/`, `${sourceName}.js`, './dist/v0', {
+  await compileJs(`${sourceDir}/`, filename, './dist/v0', {
     ...options,
-    toName: `${outputName}-${version}.max.js`,
-    minifiedName: `${outputName}-${version}.js`,
-    latestName: isLatest ? `${outputName}-latest.js` : '',
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: isLatest ? `${name}-latest.js` : '',
     wrapper,
   });
 
@@ -807,22 +861,22 @@ async function buildExtensionJsWithWrapper(
     return;
   }
 
-  const aliasBundle = extensionAliasBundles[sourceName];
+  const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
 
   if (isAliased) {
     const {aliasedVersion} = aliasBundle;
     const src = maybeToEsmName(
-      `${outputName}-${version}${options.minify ? '' : '.max'}.js`
+      `${name}-${version}${options.minify ? '' : '.max'}.js`
     );
     const dest = maybeToEsmName(
-      `${outputName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
 
-  if (sourceName === 'amp-script') {
+  if (name === 'amp-script') {
     await copyWorkerDomResources(version);
     await buildSandboxedProxyIframe(options.minify);
   }
