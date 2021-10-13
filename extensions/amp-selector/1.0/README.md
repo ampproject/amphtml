@@ -275,16 +275,16 @@ The `BentoSelector` API allows you to perform the following actions:
 Closes the selector.
 
 ```js
-ref.selectBy(1); // Select next option in DOM sequence.
-ref.selectBy(-2); // Select the option that is two previous in DOM sequence.
+ref.current.selectBy(1); // Select next option in DOM sequence.
+ref.current.selectBy(-2); // Select the option that is two previous in DOM sequence.
 ```
 
 **toggle(optionValue: string, opt_select: boolean|undefined)**
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
 ```js
-ref.toggle("1"); // Toggle the item with the attribute `option="1"`.
-ref.toggle("2", true); // Select the item with the attribute `option="2"`.
+ref.current.toggle("1"); // Toggle the item with the attribute `option="1"`.
+ref.current.toggle("2", true); // Select the item with the attribute `option="2"`.
 ```
 
 #### Events
