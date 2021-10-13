@@ -1317,12 +1317,14 @@ export class AmpStoryPlayer {
   maybeGetCacheUrl_(url) {
     const ampCache = this.element_.getAttribute('amp-cache');
 
-    if (
-      !ampCache ||
-      isProxyOrigin(url) ||
-      !SUPPORTED_CACHES.includes(ampCache)
-    ) {
+    if (!ampCache || !SUPPORTED_CACHES.includes(ampCache)) {
       return Promise.resolve(url);
+    }
+
+    if (isProxyOrigin(url)) {
+      // Ensures serving type is 'viewer' (/v/) when publishers provide their
+      // own cached URL.
+      return Promise.resolve(url.replace('/c/', '/v/'));
     }
 
     return ampToolboxCacheUrl
