@@ -24,7 +24,10 @@
     },
     "canary": {
       "type": "number",
-      "enum": [0, 1]
+      "enum": [
+        0,
+        1
+      ]
     }
   },
   "patternProperties": {
