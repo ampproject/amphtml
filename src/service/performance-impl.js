@@ -1,10 +1,11 @@
+import {getCLS, getFCP, getFID, getLCP} from 'web-vitals';
+
 import {TickLabel} from '#core/constants/enums';
-import {VisibilityState} from '#core/constants/visibility-state';
+// import {VisibilityState} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
 import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
-import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
@@ -25,9 +26,6 @@ import {getService, registerServiceBuilder} from '../service-helpers';
  * be forwarded to the actual `tick` function when it is set.
  */
 const QUEUE_LIMIT = 50;
-
-const CLS_SESSION_GAP = 1000;
-const CLS_SESSION_MAX = 5000;
 
 const TAG = 'Performance';
 
@@ -145,22 +143,6 @@ export class Performance {
      */
     this.shiftScoresTicked_ = 0;
 
-    /**
-     * The collection of layout shift events from the Layout Instability API,
-     * used for normalized windowed sessions according to the latest CWV
-     * implementation. This uses 5s max window with a 1s session gap as the
-     * session size.
-     * See https://github.com/GoogleChrome/web-vitals/blob/main/src/getCLS.ts
-     * @private {Array<LayoutShift>}
-     */
-    this.layoutShiftEntries_ = [];
-
-    /**
-     * The sum of all layout shifts.
-     * @private {number}
-     */
-    this.layoutShiftSum_ = 0;
-
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
@@ -228,25 +210,6 @@ export class Performance {
      */
     this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
-    /**
-     * The latest reported largest contentful paint time. Uses entry.startTime,
-     * which equates to: renderTime ?? loadTime. We can't always use one or the other
-     * because:
-     * - loadTime is 0 for non-remote resources (text)
-     * - renderTime is undefined for crossorigin resources
-     *
-     * @private {?number}
-     */
-    this.largestContentfulPaint_ = null;
-
-    /**
-     * Which type of element was chosen as the LCP.
-     * @private {ELEMENT_TYPE}
-     */
-    this.largestContentfulPaintType_ = null;
-
-    this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
-
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
 
@@ -265,20 +228,10 @@ export class Performance {
      */
     this.googleFontExpRecorded_ = false;
 
-    /**
-     * This is called to ensure we'll report the current cls window's value
-     * after the window closes. Its debounce time is intentionally longer than
-     * the max session time so that we're certain the sesssion has closed
-     * (since a PerfOb is async, entries that belong in the current window may
-     * arrive later).
-     */
-    this.debouncedFlushLayoutShiftScore_ = debounce(
-      win,
-      () => {
-        this.flushLayoutShiftScore_();
-      },
-      CLS_SESSION_MAX + 1000
-    );
+    getCLS(this.tickCumulativeLayoutShiftScore_);
+    getFCP(this.tickFirstContentfulPaint_);
+    getLCP(this.tickLargestContentfulPaint_);
+    getFID(this.tickFirstInputDelay_);
   }
 
   /**
@@ -310,14 +263,6 @@ export class Performance {
       this.tick(TickLabel.ON_FIRST_VISIBLE);
       this.flush();
     });
-
-    const registerVisibilityChangeListener =
-      this.supportsLargestContentfulPaint_ || this.supportsLayoutShift_;
-    // Register a handler to record metrics when the page enters the hidden
-    // lifecycle state.
-    if (registerVisibilityChangeListener) {
-      this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
-    }
 
     // We don't check `isPerformanceTrackingOn` here since there are some
     // events that we call on the viewer even though performance tracking
@@ -395,38 +340,11 @@ export class Performance {
     // These state vars ensure that we only report a given value once, because
     // the backend doesn't support updates.
     let recordedFirstPaint = false;
-    let recordedFirstContentfulPaint = false;
-    let recordedFirstInputDelay = false;
     let recordedNavigation = false;
     const processEntry = (entry) => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta(TickLabel.FIRST_PAINT, entry.startTime + entry.duration);
         recordedFirstPaint = true;
-      } else if (
-        entry.name == 'first-contentful-paint' &&
-        !recordedFirstContentfulPaint
-      ) {
-        const value = entry.startTime + entry.duration;
-        this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
-        this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
-        recordedFirstContentfulPaint = true;
-      } else if (
-        entry.entryType === 'first-input' &&
-        !recordedFirstInputDelay
-      ) {
-        const value = entry.processingStart - entry.startTime;
-        this.tickDelta(TickLabel.FIRST_INPUT_DELAY, value);
-        recordedFirstInputDelay = true;
-      } else if (entry.entryType === 'layout-shift') {
-        // Ignore layout shift that occurs within 500ms of user input, as it is
-        // likely in response to the user's action.
-        if (!entry.hadRecentInput) {
-          this.tickLayoutShiftScore_(entry);
-          this.layoutShiftSum_ += entry.value;
-        }
-      } else if (entry.entryType === 'largest-contentful-paint') {
-        this.largestContentfulPaint_ = entry.startTime;
-        this.largestContentfulPaintType_ = getElementType(entry.element);
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
@@ -454,21 +372,6 @@ export class Performance {
     if (this.supportsEventTiming_) {
       this.createPerformanceObserver_(processEntry, {
         type: 'first-input',
-        buffered: true,
-      });
-    }
-
-    if (this.supportsLayoutShift_) {
-      this.createPerformanceObserver_(processEntry, {
-        type: 'layout-shift',
-        buffered: true,
-      });
-    }
-
-    if (this.supportsLargestContentfulPaint_) {
-      // lcpObserver
-      this.createPerformanceObserver_(processEntry, {
-        type: 'largest-contentful-paint',
         buffered: true,
       });
     }
@@ -507,121 +410,17 @@ export class Performance {
     }
   }
 
-  /**
-   * Whether the AMP doc is hidden.
-   * @return {boolean}
-   */
-  isVisibilityHidden_() {
-    const state = this.ampdoc_.getVisibilityState();
-    return (
-      state === VisibilityState.INACTIVE || state === VisibilityState.HIDDEN
-    );
-  }
-
-  /**
-   * When the viewer visibility state of the document changes to inactive or hidden,
-   * send the layout score.
-   * @private
-   */
-  onAmpDocVisibilityChange_() {
-    if (this.isVisibilityHidden_()) {
-      this.tickCumulativeMetrics_();
-      this.flushLayoutShiftScore_();
-    }
-  }
-
-  /**
-   * Tick the metrics whose values change over time.
-   * @private
-   */
-  tickCumulativeMetrics_() {
-    if (this.supportsLayoutShift_) {
-      if (!this.googleFontExpRecorded_) {
-        this.googleFontExpRecorded_ = true;
-        const {win} = this;
-        const googleFontExp = parseInt(
-          computedStyle(win, win.document.body).getPropertyValue(
-            '--google-font-exp'
-          ),
-          10
-        );
-        if (googleFontExp >= 0) {
-          this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
-        }
-      }
-
-      this.tickCumulativeLayoutShiftScore_();
-    }
-    if (this.supportsLargestContentfulPaint_) {
-      this.tickLargestContentfulPaint_();
-    }
-  }
-
-  /**
-   * Tick the layout shift metric, following the latest CWV standard. This uses
-   * a 5s maximum window with a 1s gap between events to define a "session".
-   * We report the maximum session value over the lifetime of the page as the CLS.
-   *
-   * @param {!LayoutShift} entry
-   */
-  tickLayoutShiftScore_(entry) {
-    if (!this.ampdoc_) {
-      return;
-    }
-
-    if (this.isVisibilityHidden_()) {
-      return;
-    }
-
-    const entries = this.layoutShiftEntries_;
-    if (entries.length > 0) {
-      const first = entries[0];
-      const last = entries[entries.length - 1];
-      if (
-        entry.startTime - last.startTime < CLS_SESSION_GAP &&
-        entry.startTime - first.startTime < CLS_SESSION_MAX
-      ) {
-        // This entry continues the current CLS window.
-        entries.push(entry);
-        return;
-      }
-      // This entry is the start of a new CLS window, but we haven't flushed the old value yet.
-      this.flushLayoutShiftScore_();
-    }
-    entries.push(entry);
-    // Ensure we report the CLS when the session closes. We're not guaranteed
-    // to get more LayoutShift entires, so we need some setTimeout magic to
-    // ensure it happens.
-    this.debouncedFlushLayoutShiftScore_();
-  }
-
-  /**
-   * Records the normalized CLS score, following the latest CWV standard.
-   * See https://web.dev/evolving-cls/
-   */
-  flushLayoutShiftScore_() {
-    const entries = this.layoutShiftEntries_;
-    const old = this.metrics_.get(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
-    let union = 0;
-    let sum = 0;
-    for (const entry of entries) {
-      if (entry.sources) {
-        for (const source of entry.sources) {
-          union |= getElementType(source.node);
-        }
-      }
-      sum += entry.value;
-    }
-    entries.length = 0;
-    if (old == null || sum > old) {
-      // We'll record the largest windowed CLS.
-      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
-      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION);
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, sum);
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
-      this.flush();
-    }
-  }
+  // TODO: forward this to chrome/web-vitals.
+  // /**
+  //  * Whether the AMP doc is hidden.
+  //  * @return {boolean}
+  //  */
+  // isVisibilityHidden_() {
+  //   const state = this.ampdoc_.getVisibilityState();
+  //   return (
+  //     state === VisibilityState.INACTIVE || state === VisibilityState.HIDDEN
+  //   );
+  // }
 
   /**
    * Tick the layout shift score metric.
@@ -634,39 +433,79 @@ export class Performance {
    * Since we can't reliably detect when a page session finally ends,
    * recording the value for these first two events should provide a fair
    * amount of visibility into this metric.
+   * @param {{value: number, entries}} metric
    */
-  tickCumulativeLayoutShiftScore_() {
+  tickCumulativeLayoutShiftScore_(metric) {
+    const {entries, value: cls} = metric;
+    if (!this.googleFontExpRecorded_) {
+      this.googleFontExpRecorded_ = true;
+      const {win} = this;
+      const googleFontExp = parseInt(
+        computedStyle(win, win.document.body).getPropertyValue(
+          '--google-font-exp'
+        ),
+        10
+      );
+      if (googleFontExp >= 0) {
+        this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
+      }
+    }
+
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, this.layoutShiftSum_);
+      // Calculate element type union and only emit on the first report.
+      let union = 0;
+      for (const entry of entries) {
+        if (entry.sources) {
+          for (const source of entry.sources) {
+            union |= getElementType(source.node);
+          }
+        }
+      }
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, cls);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, this.layoutShiftSum_);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
       this.flush();
       this.shiftScoresTicked_ = 2;
     }
   }
 
   /**
-   * Tick the largest contentful paint metrics.
+   *
+   * @param {{value: number}} metric
    */
-  tickLargestContentfulPaint_() {
-    if (this.largestContentfulPaint_ == null) {
-      return;
-    }
+  tickFirstInputDelay_(metric) {
+    this.tickDelta(TickLabel.FIRST_INPUT_DELAY, metric.value);
+    this.flush();
+  }
 
+  /**
+   * Tick the largest contentful paint metrics.
+   * @param {{name: 'FCP', value: number}} metric
+   */
+  tickFirstContentfulPaint_(metric) {
+    this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, metric.value);
+    this.tickSinceVisible(
+      TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE,
+      metric.value
+    );
+    this.flush();
+  }
+
+  /**
+   * Tick the largest contentful paint metrics.
+   * @param {{name: 'LCP', value: number, entries: PeformanceEntry[]}} metric
+   */
+  tickLargestContentfulPaint_(metric) {
+    const {entries, value: lcp} = metric;
     this.tickDelta(
       TickLabel.LARGEST_CONTENTFUL_PAINT_TYPE,
-      this.largestContentfulPaintType_
+      getElementType(entries[0])
     );
-    this.tickDelta(
-      TickLabel.LARGEST_CONTENTFUL_PAINT,
-      this.largestContentfulPaint_
-    );
-    this.tickSinceVisible(
-      TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
-      this.largestContentfulPaint_
-    );
+    this.tickDelta(TickLabel.LARGEST_CONTENTFUL_PAINT, lcp);
+    this.tickSinceVisible(TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE, lcp);
     this.flush();
   }
 
