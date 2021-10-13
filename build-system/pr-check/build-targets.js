@@ -43,6 +43,7 @@ const Targets = {
   IGNORE_LIST: 'IGNORE_LIST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   INVALID_WHITESPACES: 'INVALID_WHITESPACES',
+  JSON_FILES: 'JSON_FILES',
   LINT: 'LINT',
   LINT_RULES: 'LINT_RULES',
   OWNERS: 'OWNERS',
@@ -209,6 +210,9 @@ const targetMatchers = {
       file == 'build-system/tasks/check-invalid-whitespaces.js' ||
       file.startsWith('build-system/test-configs')
     );
+  },
+  [Targets.JSON_FILES]: (file) => {
+    return file.endsWith('.json');
   },
   [Targets.LINT]: (file) => {
     if (isOwnersFile(file)) {

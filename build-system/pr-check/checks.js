@@ -19,6 +19,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp validate-html-fixtures');
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
+  timedExecOrDie('amp check-json-schemas');
   timedExecOrDie('amp ava');
   timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp check-ignore-lists');
@@ -67,6 +68,10 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.PRETTIFY)) {
     timedExecOrDie('amp prettify');
+  }
+
+  if (buildTargetsInclude(Targets.JSON_FILES)) {
+    timedExecOrDie('amp check-json-schemas');
   }
 
   if (buildTargetsInclude(Targets.AVA)) {
