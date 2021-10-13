@@ -762,7 +762,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
       'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
       'extensions/amp-youtube/1.0/storybook/Basic.js',
-      'src/builtins/storybook/amp-layout-with-aspect-ratio-css.amp.js',
       'src/builtins/storybook/amp-layout.amp.js',
       'src/preact/storybook/Context.js',
       'src/preact/storybook/Wrappers.js',

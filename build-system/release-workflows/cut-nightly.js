@@ -10,6 +10,9 @@ const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
 const params = {owner: 'ampproject', repo: 'amphtml'};
 
+// Permanent job ID as assigned by the GitHub Actions runner.
+const GITHUB_ACTION_ID = 3867805908;
+
 /**
  * Get last green commit
  * @param {Octokit} octokit
@@ -35,7 +38,11 @@ async function getCommit(octokit) {
         ref: sha,
       })
     ).data;
-    if (checkRuns.some(({status}) => status != 'completed')) {
+    if (
+      checkRuns
+        .filter(({id}) => id !== GITHUB_ACTION_ID)
+        .some(({status}) => status != 'completed')
+    ) {
       log(
         'Not all check runs for commit',
         cyan(sha),
