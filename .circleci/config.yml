@@ -463,14 +463,14 @@ jobs:
           name: '⭐ amp release ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
       - teardown_vm
-  archive_release:
+  upload_release:
     executor:
       name: node-docker-medium
     steps:
       - setup_vm
       - run:
-          name: '⭐ Archive Release Artifacts ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/archive-release.js
+          name: '⭐ Upload Release Artifacts ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
           path: /tmp/release.tar.gz
       - teardown_vm
@@ -630,8 +630,10 @@ workflows:
           <<: *release_builds_only
           requires:
             - 'Initialize Repository'
-      - archive_release:
-          name: 'Archive Release'
+      - upload_release:
+          name: 'Upload Release'
           <<: *release_builds_only
           requires:
             - amp_release
+          context:
+            - release-build-uploader
