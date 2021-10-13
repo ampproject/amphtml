@@ -473,7 +473,7 @@ export class Performance {
   }
 
   /**
-   *
+   * Tick the first input delay metric.
    * @param {{value: number}} metric
    */
   tickFirstInputDelay_(metric) {
@@ -486,11 +486,9 @@ export class Performance {
    * @param {{name: 'FCP', value: number}} metric
    */
   tickFirstContentfulPaint_(metric) {
-    this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, metric.value);
-    this.tickSinceVisible(
-      TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE,
-      metric.value
-    );
+    const {value: fcp} = metric;
+    this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, fcp);
+    this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, fcp);
     this.flush();
   }
 
