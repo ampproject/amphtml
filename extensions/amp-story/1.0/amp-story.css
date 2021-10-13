@@ -232,7 +232,7 @@ amp-story-page:not(:first-of-type):not([distance]):not([active]) {
   transform: translateY(1000vh) !important;
 }
 
-amp-story-page:not([active]) {
+amp-story.i-amphtml-story-loaded amp-story-page:not([active]) {
   transform: translateY(1000vh) !important;
 }
 
@@ -250,10 +250,6 @@ amp-story.i-amphtml-experiment-story-load-inactive-outside-viewport:not([desktop
   amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
 amp-story-page[distance="2"] {
   transform: translateY(100vh) !important;
-}
-
-amp-story:not(.i-amphtml-story-loaded) amp-story-page:not([active]) {
-  transform: none !important;
 }
 
 amp-story-page [data-text-background-color] {
@@ -291,8 +287,8 @@ amp-story-grid-layer {
   pointer-events: none !important;
 }
 
-:root:not(.i-amphtml-story-vertical) amp-story, amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type,
-amp-story:not(.i-amphtml-story-loaded) amp-story-page:first-of-type amp-story-grid-layer {
+/* Make the story element fullpage. */
+:root:not(.i-amphtml-story-vertical) amp-story {
   position: absolute !important;
   top: 0;
   left: 0;
