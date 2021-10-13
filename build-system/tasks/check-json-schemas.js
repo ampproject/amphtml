@@ -1,29 +1,44 @@
 'use strict';
 
+const fs = require('fs');
+const json5 = require('json5');
 const path = require('path');
-const schemas = require('../json-schemas/_schemas.json');
 const {cyan, green, red} = require('kleur/colors');
 const {default: addFormats} = require('ajv-formats');
 const {default: Ajv} = require('ajv');
 const {log} = require('../common/logging');
 
 /**
- * Checks JSON files against their JSON Schemas.
- * @return {Promise<void>}
+ * Fetches the content of a JSON/JSON5 file.
+ *
+ * @param {string} file repo root relative.
+ * @return {any}
  */
-async function checkJsonSchemas() {
+function getJsonFile(file) {
+  return json5.parse(
+    fs.readFileSync(path.join(__dirname, '../..', file), 'utf8')
+  );
+}
+
+/**
+ * Checks JSON files against their JSON Schemas.
+ */
+function checkJsonSchemas() {
   log('Validating JSON files');
   const ajv = new Ajv({allErrors: true});
   addFormats(ajv);
 
-  for (const [schemaFile, jsonFiles] of Object.entries(schemas)) {
+  const vscodeSettings = getJsonFile('.vscode/settings.json');
+  const schemas = vscodeSettings['json.schemas'];
+
+  for (const {fileMatch, url: schemaFile} of schemas.values()) {
     log('Using schema', `${cyan(schemaFile)}:`);
-    const schemaJson = require(`../json-schemas/${schemaFile}`);
+    const schemaJson = getJsonFile(schemaFile);
     const validate = ajv.compile(schemaJson);
 
-    for (const jsonFile of jsonFiles) {
+    for (const jsonFile of fileMatch) {
       try {
-        const jsonData = require(path.join(__dirname, '../..', jsonFile));
+        const jsonData = getJsonFile(jsonFile);
         if (validate(jsonData)) {
           log('⤷', cyan(jsonFile), '-', green('valid'));
         } else {
