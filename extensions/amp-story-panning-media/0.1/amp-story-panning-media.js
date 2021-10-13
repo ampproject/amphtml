@@ -295,6 +295,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           right: 'auto',
           top: '0',
           bottom: '0',
+          width: 'auto',
+          height: '100%',
         });
         setImportantStyles(imgEl, {
           width: 'auto',
@@ -306,6 +308,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           right: '0',
           top: 'auto',
           bottom: 'auto',
+          width: '100%',
+          height: 'auto',
         });
         setImportantStyles(imgEl, {
           width: '100%',
