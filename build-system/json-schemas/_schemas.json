@@ -2,5 +2,8 @@
   "amp-config.json": [
     "build-system/global-configs/canary-config.json",
     "build-system/global-configs/prod-config.json"
+  ],
+  "client-side-experiments-config.json": [
+    "build-system/global-configs/client-side-experiments-config.json"
   ]
 }
