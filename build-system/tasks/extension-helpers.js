@@ -738,8 +738,8 @@ async function buildExtensionJs(
   const wrapperNames = arrayOrItemToArray(options.wrapper || 'extension');
 
   const builds = wrapperNames.map(async (wrapperName) => {
-    // TODO(alanorozco): Use a `bento` option instead. The outer function can
-    // then be called twice at a higher level.
+    // TODO(https://go.amp.dev/issue/36351): Use a `bento` flag instead.
+    // The outer function can then be called twice at a higher level.
     const isBento = wrapperName === 'bento';
 
     const resolvedName = isBento ? name.replace(/^amp-/, 'bento-') : name;
