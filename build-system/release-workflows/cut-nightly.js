@@ -10,8 +10,8 @@ const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
 const params = {owner: 'ampproject', repo: 'amphtml'};
 
-// Permanent job ID as assigned by the GitHub Actions runner.
-const GITHUB_ACTION_ID = 3867805908;
+// Permanent external ID as assigned by the GitHub Actions runner.
+const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
 
 /**
  * Get last green commit
@@ -40,7 +40,7 @@ async function getCommit(octokit) {
     ).data;
     if (
       checkRuns
-        .filter(({id}) => id !== GITHUB_ACTION_ID)
+        .filter(({'external_id': id}) => id !== GITHUB_EXTERNAL_ID)
         .some(({status}) => status != 'completed')
     ) {
       log(
