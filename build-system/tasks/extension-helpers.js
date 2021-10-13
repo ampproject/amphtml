@@ -589,7 +589,7 @@ async function buildExtensionCss(extDir, name, version, options) {
 
   // Currently JSON.stringifying to allow arrays and strings:
   // {"wrapper": "bento"} and {"wrapper": ["bento"]}
-  // TODO(alanorozco): We might need a `bento` flag instead.
+  // TODO(https://go.amp.dev/issue/36351): Use a `bento` flag instead.
   if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
     const bentoCssPromise = mainCssPromise.then((mainCss) =>
       buildBentoCss(name, mainCss)

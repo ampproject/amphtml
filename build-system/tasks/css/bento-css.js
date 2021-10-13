@@ -14,8 +14,7 @@ function renameTagNamesInSelector(selector) {
       continue;
     }
     if (node.type === 'element') {
-      // TODO(alanorozco): This is repeated enough times that it should be a
-      // utility function.
+      // TODO(https://go.amp.dev/issue/36351): Use shared utility function
       node.name = node.name.replace(/^amp-/, 'bento-');
     }
     if (Array.isArray(node.nodes)) {
