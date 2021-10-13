@@ -33,15 +33,11 @@
       "url": "./build-system/json-schemas/amp-config.json"
     },
     {
-      "fileMatch": [
-        "build-system/tasks/bundle-size/APPROVERS.json"
-      ],
+      "fileMatch": ["build-system/tasks/bundle-size/APPROVERS.json"],
       "url": "./build-system/json-schemas/APPROVERS.json"
     },
     {
-      "fileMatch": [
-        "build-system/global-configs/caches.json"
-      ],
+      "fileMatch": ["build-system/global-configs/caches.json"],
       "url": "./build-system/json-schemas/caches.json"
     },
     {
@@ -51,9 +47,7 @@
       "url": "./build-system/json-schemas/client-side-experiments-config.json"
     },
     {
-      "fileMatch": [
-        "build-system/tasks/bundle-size/filesize.json"
-      ],
+      "fileMatch": ["build-system/tasks/bundle-size/filesize.json"],
       "url": "./build-system/json-schemas/filesize.json"
     }
   ]
