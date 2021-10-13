@@ -3,6 +3,9 @@
     "build-system/global-configs/canary-config.json",
     "build-system/global-configs/prod-config.json"
   ],
+  "caches.json": [
+    "build-system/global-configs/caches.json"
+  ],
   "client-side-experiments-config.json": [
     "build-system/global-configs/client-side-experiments-config.json"
   ]
