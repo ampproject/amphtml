@@ -409,7 +409,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(fetchStub).to.not.be.called;
   });
 
-  it('request entitlements with metering params if URL params are present and timestamp is valid', async () => {
+  it('requests entitlements with metering params if URL params are present and timestamp is valid', async () => {
     env.sandbox
       .stub(viewer, 'getReferrerUrl')
       .callsFake(() => Promise.resolve('http://localhost'));
