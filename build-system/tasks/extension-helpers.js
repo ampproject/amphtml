@@ -592,7 +592,7 @@ async function buildExtensionCss(extDir, name, version, options) {
   // TODO(https://go.amp.dev/issue/36351): Use a `bento` flag instead.
   if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
     const bentoCssPromise = mainCssPromise.then((mainCss) =>
-      buildBentoCss(name, mainCss)
+      buildBentoCss(name, version, mainCss)
     );
     parallel.push(bentoCssPromise);
   }
@@ -619,13 +619,14 @@ async function buildExtensionCss(extDir, name, version, options) {
  * As a result of taking already minified code as source, this function is
  * fairly fast and not cached.
  * @param {string} name
+ * @param {string} version
  * @param {string} minifiedAmpCss
  * @return {!Promise}
  */
-async function buildBentoCss(name, minifiedAmpCss) {
+async function buildBentoCss(name, version, minifiedAmpCss) {
   const bentoName = name.replace(/^amp-/, 'bento-');
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
-  await fs.writeFile(`dist/v0/${bentoName}.css`, renamedCss);
+  await fs.writeFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
 }
 
 /**
