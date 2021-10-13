@@ -213,5 +213,5 @@ class AmpSocialShare extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSocialShare, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

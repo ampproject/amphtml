@@ -139,6 +139,6 @@ export function installLightboxGallery(ampdoc) {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpLightboxGallery, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
   Services.extensionsFor(AMP.win).addDocFactory(installLightboxGallery);
 });

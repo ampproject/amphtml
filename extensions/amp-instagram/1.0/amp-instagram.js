@@ -31,5 +31,5 @@ class AmpInstagram extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpInstagram, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

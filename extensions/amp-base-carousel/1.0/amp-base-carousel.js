@@ -56,5 +56,5 @@ class AmpBaseCarousel extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBaseCarousel, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

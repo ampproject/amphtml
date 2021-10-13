@@ -77,5 +77,5 @@ class AmpDateCountdown extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpDateCountdown);
+  AMP.registerElement(TAG, BaseElement);
 });

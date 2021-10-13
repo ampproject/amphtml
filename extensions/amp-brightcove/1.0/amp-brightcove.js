@@ -63,7 +63,7 @@ class AmpBrightcove extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBrightcove, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });
 
 /**

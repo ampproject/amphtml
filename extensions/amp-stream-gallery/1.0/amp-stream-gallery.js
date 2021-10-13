@@ -56,5 +56,5 @@ class AmpStreamGallery extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpStreamGallery, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

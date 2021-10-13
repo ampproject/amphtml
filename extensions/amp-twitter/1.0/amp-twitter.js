@@ -74,5 +74,5 @@ class AmpTwitter extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpTwitter);
+  AMP.registerElement(TAG, BaseElement);
 });

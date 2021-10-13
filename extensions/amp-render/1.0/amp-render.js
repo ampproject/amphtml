@@ -425,5 +425,5 @@ export class AmpRender extends BaseElement {
 AmpRender['layoutSizeDefined'] = false;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpRender);
+  AMP.registerElement(TAG, BaseElement);
 });

@@ -111,5 +111,5 @@ AmpVideoIframe['staticProps'] = dict({
 });
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpVideoIframe, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

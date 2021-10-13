@@ -22,5 +22,5 @@ class AmpVimeo extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpVimeo, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

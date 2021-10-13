@@ -32,5 +32,5 @@ class AmpWordPressEmbed extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpWordPressEmbed);
+  AMP.registerElement(TAG, BaseElement);
 });

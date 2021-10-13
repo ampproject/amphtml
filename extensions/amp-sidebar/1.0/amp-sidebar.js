@@ -84,5 +84,5 @@ class AmpSidebar extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSidebar, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

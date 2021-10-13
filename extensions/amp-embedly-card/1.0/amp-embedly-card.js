@@ -36,6 +36,6 @@ class AmpEmbedlyCard extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpEmbedlyCard);
-  AMP.registerElement(KEY_TAG, AmpEmbedlyKey);
+  AMP.registerElement(TAG, BaseElement);
+  AMP.registerElement(KEY_TAG, BaseElement);
 });

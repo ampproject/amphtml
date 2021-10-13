@@ -99,8 +99,8 @@ class AmpFacebookPage extends AmpFacebook {}
 AmpFacebookPage['staticProps'] = {'embedAs': 'page'};
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFacebook);
-  AMP.registerElement(COMMENTS_TAG, AmpFacebookComments);
-  AMP.registerElement(LIKE_TAG, AmpFacebookLike);
-  AMP.registerElement(PAGE_TAG, AmpFacebookPage);
+  AMP.registerElement(TAG, BaseElement);
+  AMP.registerElement(COMMENTS_TAG, BaseElement);
+  AMP.registerElement(LIKE_TAG, BaseElement);
+  AMP.registerElement(PAGE_TAG, BaseElement);
 });

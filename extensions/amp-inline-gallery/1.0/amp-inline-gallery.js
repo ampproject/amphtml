@@ -28,11 +28,11 @@ class AmpInlineGallery extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpInlineGallery);
+  AMP.registerElement(TAG, BaseElement);
   AMP.registerElement(
     PAGINATION_TAG,
-    AmpInlineGalleryPagination,
+    BaseElement,
     PAGINATION_CSS
   );
-  AMP.registerElement(THUMBNAILS_TAG, AmpInlineGalleryThumbnails);
+  AMP.registerElement(THUMBNAILS_TAG, BaseElement);
 });

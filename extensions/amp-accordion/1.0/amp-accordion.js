@@ -61,5 +61,5 @@ class AmpAccordion extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpAccordion, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

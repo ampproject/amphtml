@@ -19,5 +19,5 @@ class AmpFitText extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFitText, CSS);
+  AMP.registerElement(TAG, BaseElement, CSS);
 });

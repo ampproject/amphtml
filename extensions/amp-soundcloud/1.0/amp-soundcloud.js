@@ -20,5 +20,5 @@ class AmpSoundcloud extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSoundcloud);
+  AMP.registerElement(TAG, BaseElement);
 });

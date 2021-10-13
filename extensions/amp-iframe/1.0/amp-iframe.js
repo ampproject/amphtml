@@ -90,5 +90,5 @@ class AmpIframe extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpIframe);
+  AMP.registerElement(TAG, BaseElement);
 });
