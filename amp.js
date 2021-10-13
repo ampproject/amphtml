@@ -30,6 +30,7 @@ createTask('check-build-system', 'checkBuildSystem');
 createTask('check-exact-versions', 'checkExactVersions');
 createTask('check-ignore-lists', 'checkIgnoreLists');
 createTask('check-invalid-whitespaces', 'checkInvalidWhitespaces');
+createTask('check-json-schemas', 'checkJsonSchemas');
 createTask('check-links', 'checkLinks');
 createTask('check-owners', 'checkOwners');
 createTask('check-renovate-config', 'checkRenovateConfig');
