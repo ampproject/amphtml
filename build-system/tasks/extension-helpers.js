@@ -810,7 +810,7 @@ AMP.registerElement('${name}', BaseElement, CSS);
   const written = `build/${name}.js`;
   // Include code in extension directory outside /build
   options.extraGlobs = [...(options.extraGlobs || []), `${sourceDir}/**/*.js`];
-  await fs.writeFile(`${sourceDir}/${written}`, source);
+  await fs.outputFile(`${sourceDir}/${written}`, source);
   return written;
 }
 
