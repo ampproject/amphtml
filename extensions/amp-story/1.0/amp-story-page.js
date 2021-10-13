@@ -595,7 +595,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     return Promise.all([
       this.beforeVisible(),
-      this.waitForMediaLayout_(),
+      this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
       this.mediaPoolPromise_,
     ]);
   }
@@ -707,7 +707,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
+    return Promise.all(mediaPromises);
   }
 
   /**
@@ -1467,7 +1467,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    this.waitForPlaybackMediaLayout_.then(() =>
+    this.waitForMediaLayout_().then(() =>
       Array.prototype.some.call(
         ampVideoEls,
         (video) => !video.hasAttribute('noaudio')
