@@ -1,2 +1,6 @@
 {
+  "amp-config.json": [
+    "build-system/global-configs/canary-config.json",
+    "build-system/global-configs/prod-config.json"
+  ]
 }
