@@ -1467,14 +1467,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    const videosBuiltPromise = Promise.all(
-      Array.prototype.map.call(ampVideoEls, (videoEl) =>
-        whenUpgradedToCustomElement(videoEl).then((video) =>
-          video.getImpl(/* waitForBuild */ true)
-        )
-      )
-    );
-    return videosBuiltPromise.then(() =>
+    this.waitForPlaybackMediaLayout_.then(() =>
       Array.prototype.some.call(
         ampVideoEls,
         (video) => !video.hasAttribute('noaudio')
