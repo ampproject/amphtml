@@ -604,14 +604,11 @@ function buildExtensionCss(extDir, name, version, options) {
   // {"wrapper": "bento"} and {"wrapper": ["bento"]}
   // TODO(alanorozco): We might need a `bento` flag instead.
   if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
-    // TODO(alanorozco): Use a TransformCache
+    // This is fairly fast, so we don't cache the result.
     const promise = mainCssPromise.then(async (css) => {
-      const startTime = Date.now();
-
       const bentoName = name.replace(/^amp-/, 'bento-');
       const renamedCss = await renameSelectorsToBentoTagNames(css);
       await fs.writeFile(`dist/v0/${bentoName}.css`, renamedCss);
-      endBuildStep('Transformed', `${bentoName}.css`, startTime);
     });
     promises.push(promise);
   }
