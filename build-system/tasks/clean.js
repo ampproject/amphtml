@@ -15,6 +15,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * @return {Promise<void>}
  */
 async function clean() {
+  // TODO(https://go.amp.dev/issue/36354): We can simplify this list
   const pathsToDelete = [
     // Local cache directories
     // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
