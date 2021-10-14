@@ -1,5 +1,5 @@
 import '../amp-dailymotion';
-import {htmlFor} from '../../../../src/static-template';
+import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/test-helper';
 
