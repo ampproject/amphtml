@@ -10,15 +10,6 @@ import {
 } from '#core/dom/layout';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle, setStyles, toggle} from '#core/dom/style';
-import {toWin} from '#core/window';
-
-import {isExperimentOn} from '#experiments';
-
-/**
- * Whether aspect-ratio CSS can be used to implement responsive layouts.
- * @type {?boolean}
- */
-let aspectRatioCssCache = null;
 
 /**
  * The set of elements with natural dimensions, that is, elements
@@ -37,29 +28,6 @@ export const naturalDimensions_ = {
   'AMP-AUDIO': null,
   'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
-
-/** @visibleForTesting */
-export function resetShouldUseAspectRatioCssForTesting() {
-  aspectRatioCssCache = null;
-}
-
-/**
- * Whether aspect-ratio CSS can be used to implement responsive layouts.
- *
- * @param {!Window} win
- * @return {boolean}
- */
-function shouldUseAspectRatioCss(win) {
-  if (aspectRatioCssCache == null) {
-    aspectRatioCssCache =
-      (isExperimentOn(win, 'layout-aspect-ratio-css') &&
-        win.CSS &&
-        win.CSS.supports &&
-        win.CSS.supports('aspect-ratio: 1/1')) ||
-      false;
-  }
-  return aspectRatioCssCache;
-}
 
 /**
  * Determines whether the tagName is a known element that has natural dimensions
@@ -171,22 +139,14 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.FIXED_HEIGHT) {
     setStyle(element, 'height', devAssertString(height));
   } else if (layout == Layout.RESPONSIVE) {
-    if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
-      setStyle(
-        element,
-        'aspect-ratio',
-        `${getLengthNumeral(width)}/${getLengthNumeral(height)}`
-      );
-    } else {
-      const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-      sizer.setAttribute('slot', 'i-amphtml-svc');
-      setStyles(sizer, {
-        paddingTop:
-          (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
-      });
-      element.insertBefore(sizer, element.firstChild);
-      element.sizerElement = sizer;
-    }
+    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    sizer.setAttribute('slot', 'i-amphtml-svc');
+    setStyles(sizer, {
+      paddingTop:
+        (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
+    });
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement = sizer;
   } else if (layout == Layout.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work because other things expect the

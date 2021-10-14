@@ -4,7 +4,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';
 
 /** @type {string} */

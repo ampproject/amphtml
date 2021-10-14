@@ -9,11 +9,12 @@ import {clamp} from '#core/math';
 
 import {Services} from '#service';
 
+import {listen, loadPromise} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
-import {listen, loadPromise} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {dev, user, userAssert} from '../../../src/log';
 
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
@@ -747,7 +748,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.unregisterEvents_();
     return true;
   }

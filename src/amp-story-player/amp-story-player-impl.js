@@ -12,13 +12,14 @@ import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
+import {createCustomEvent, listenOnce} from '#utils/event-helper';
+
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
 import {urls} from '../config';
-import {createCustomEvent, listenOnce} from '../event-helper';
 import {getMode} from '../mode';
 import {
   addParamsToUrl,

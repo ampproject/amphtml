@@ -16,7 +16,7 @@ import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {clamp} from '#core/math';
 import {computedStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
@@ -35,7 +35,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -396,7 +396,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
         const intersection = this.element.getIntersectionChangeEntry();
         const iframe = getIframe(
-          toWin(this.element.ownerDocument.defaultView),
+          getWin(this.element),
           this.element,
           this.type_,
           opt_context,
@@ -438,7 +438,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
 
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();

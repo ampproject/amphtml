@@ -38,6 +38,8 @@ jobs:
           ref: ${{ github.events.inputs.ampversion }}
       - uses: actions/setup-node@v2
         with:
+          check-latest: true
+          registry-url: https://registry.npmjs.org
           node-version: lts/*
       - name: Get latest scripts
         run: |

@@ -1,4 +1,4 @@
-import {LogLevel, dev} from '../../../src/log';
+import {LogLevel, dev} from '#utils/log';
 import {Services} from '#service';
 import {isArray} from '#core/types';
 import {removeChildren} from '#core/dom';

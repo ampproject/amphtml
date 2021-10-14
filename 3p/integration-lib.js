@@ -3,18 +3,19 @@ import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
 
+import {
+  initLogConstructor,
+  isUserErrorMessage,
+  setReportError,
+  userAssert,
+} from '#utils/log';
+
 import {run, setExperimentToggles} from './3p';
 import {IntegrationAmpContext} from './ampcontext-integration';
 import {installEmbedStateListener, manageWin} from './environment';
 import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 
 import {urls} from '../src/config';
-import {
-  initLogConstructor,
-  isUserErrorMessage,
-  setReportError,
-  userAssert,
-} from '../src/log';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 
 /**

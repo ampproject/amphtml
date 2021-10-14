@@ -15,7 +15,7 @@ import {WithAmpContext} from '#preact/context';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {isRTL} from '#core/dom';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {
   cloneElement,
   useCallback,
@@ -159,7 +159,7 @@ function BentoBaseCarouselWithRef(
     if (!shouldAutoAdvance || !containRef.current) {
       return;
     }
-    const win = toWin(containRef.current.ownerDocument.defaultView);
+    const win = getWin(containRef.current);
     const interval = win.setInterval(() => {
       const autoAdvanced = autoAdvance();
       if (!autoAdvanced) {

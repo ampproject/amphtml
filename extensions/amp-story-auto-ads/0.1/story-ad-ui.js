@@ -4,9 +4,10 @@ import {dict, map} from '#core/types/object';
 import {getExperimentBranch} from '#experiments';
 import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 
+import {dev, user} from '#utils/log';
+
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
-import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertHttpsUrl} from '../../../src/url';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -204,8 +205,15 @@ function createPageOutlink_(doc, uiMetadata, container) {
   const pageOutlink = doc.createElement('amp-story-page-outlink');
   pageOutlink.setAttribute('layout', 'nodisplay');
 
-  const pageAnchorTag = doc.createElement('a');
-  pageAnchorTag.href = uiMetadata[A4AVarNames.CTA_URL];
+  const pageAnchorTag = createElementWithAttributes(
+    doc,
+    'a',
+    dict({
+      'class': 'i-amphtml-story-ad-link',
+      'target': '_blank',
+      'href': uiMetadata[A4AVarNames.CTA_URL],
+    })
+  );
   pageAnchorTag.textContent = uiMetadata[A4AVarNames.CTA_TYPE];
 
   pageOutlink.appendChild(pageAnchorTag);
@@ -222,7 +230,7 @@ function createPageOutlink_(doc, uiMetadata, container) {
   pageOutlink.className = 'i-amphtml-story-page-outlink-container';
 
   container.appendChild(pageOutlink);
-  return container;
+  return pageAnchorTag;
 }
 
 /**
@@ -263,6 +271,8 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
   const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
   const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
 
+  // TODO(#36035): we should be using this element in createPageOutlink_
+  // instead of creating it and dropping.
   const a = createElementWithAttributes(
     doc,
     'a',

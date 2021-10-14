@@ -5,19 +5,20 @@ import {
   actionTrustToString,
 } from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
+import {isAmp4Email} from '#core/document/format';
 import {isEnabled} from '#core/dom';
 import {isFiniteNumber} from '#core/types';
 import {isArray, toArray} from '#core/types/array';
 import {debounce, throttle} from '#core/types/function';
 import {dict, getValueForExpr, hasOwn, map} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {getDetail} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {reportError} from '../error-reporting';
-import {getDetail} from '../event-helper';
-import {isAmp4Email} from '../format';
-import {dev, devAssert, user, userAssert} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
@@ -467,7 +468,7 @@ export class ActionService {
     const queuedInvocations = target[ACTION_QUEUE_];
     if (isArray(queuedInvocations)) {
       // Invoke and clear all queued invocations now handler is installed.
-      Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
+      Services.timerFor(getWin(target)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         queuedInvocations.forEach((invocation) => {
           try {

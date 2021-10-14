@@ -70,13 +70,13 @@ import {
 import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
 import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '../../../src/event-helper';
+import {getDetail} from '#utils/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
@@ -295,6 +295,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?BackgroundBlur} */
     this.backgroundBlur_ = null;
+
+    /** @private {?UIType} */
+    this.uiState_ = null;
   }
 
   /** @override */
@@ -365,7 +368,8 @@ export class AmpStory extends AMP.BaseElement {
     this.initializePageIds_();
     this.initializeStoryPlayer_();
 
-    this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
+    this.uiState_ = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
     if (this.isLandscapeSupported_()) {
       this.win.document.documentElement.setAttribute(
         'data-story-supports-landscape',
@@ -473,8 +477,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeStandaloneStory_() {
-    const html = this.win.document.documentElement;
-    html.classList.add('i-amphtml-story-standalone');
     // Lock body to prevent overflow.
     this.lockBody_();
     // Standalone CSS affects sizing of the entire page.
@@ -1585,12 +1587,11 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    const uiState = this.getUIType_();
-    this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+    this.uiState_ = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
-
     this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
   }
 
@@ -1720,6 +1721,18 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
+    if (
+      this.uiState_ === UIType.MOBILE &&
+      this.androidSoftKeyboardIsProbablyOpen_()
+    ) {
+      // The opening of the Android soft keyboard triggers a viewport resize
+      // that can cause the story's dimensions to appear to be those of a
+      // desktop. Here, we assume that the soft keyboard is open if the latest
+      // UI state is mobile while an input element has focus, and we then
+      // ensure that the UI type does not unintentionally alter.
+      return UIType.MOBILE;
+    }
+
     if (this.platform_.isBot()) {
       return UIType.VERTICAL;
     }
@@ -1734,6 +1747,23 @@ export class AmpStory extends AMP.BaseElement {
 
     // Desktop one panel UI (default).
     return UIType.DESKTOP_ONE_PANEL;
+  }
+
+  /**
+   * Returns whether the Android soft keyboard is most likely open, as
+   * calculated using multiple factors. Note that this calculation will
+   * incorrectly return true in cases where the user has manually dismissed the
+   * keyboard while retaining focus on a text field.
+   * @return {boolean}
+   * @private
+   */
+  androidSoftKeyboardIsProbablyOpen_() {
+    const platformIsAndroid = this.platform_.isAndroid();
+    const tagNamesThatTriggerKeyboard = ['INPUT', 'TEXTAREA'];
+    const textFieldHasFocus = tagNamesThatTriggerKeyboard.includes(
+      this.win.document.activeElement?.tagName
+    );
+    return platformIsAndroid && textFieldHasFocus;
   }
 
   /**

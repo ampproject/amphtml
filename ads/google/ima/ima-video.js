@@ -1,7 +1,7 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 import {loadScript} from '#3p/3p';
