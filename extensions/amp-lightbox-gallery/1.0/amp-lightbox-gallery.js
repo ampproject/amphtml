@@ -6,11 +6,12 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox-gallery';

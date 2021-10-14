@@ -1,9 +1,11 @@
-
-
 /**
  * Vertical scrolling rendering, so the pages are visible to search engine
  * indexing tools, and not stacked on top of each other.
  */
+
+html.i-amphtml-story-vertical {
+  --story-page-vh: 1.78vw !important;
+}
 
 amp-story[standalone][i-amphtml-vertical] {
   height: auto !important;

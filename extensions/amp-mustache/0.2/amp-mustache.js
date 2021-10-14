@@ -4,7 +4,7 @@ import {dict} from '#core/types/object';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {iterateCursor, templateContentClone} from '#core/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 import mustache from '#third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';

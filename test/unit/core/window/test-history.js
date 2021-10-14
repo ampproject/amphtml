@@ -8,7 +8,8 @@ import {
 } from '#service/history-impl';
 import {installTimerService} from '#service/timer-impl';
 
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
+
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.fakeWin(

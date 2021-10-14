@@ -9,10 +9,10 @@ import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
 
-import {FakeMutationObserver, FakeWindow} from '#testing/fake-dom';
+import {Animation} from '#utils/animation';
+import {user} from '#utils/log';
 
-import {Animation} from '../../src/animation';
-import {user} from '../../src/log';
+import {FakeMutationObserver, FakeWindow} from '#testing/fake-dom';
 
 describes.sandboxed('FixedLayer', {}, (env) => {
   let parentApi;

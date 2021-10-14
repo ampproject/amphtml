@@ -1,8 +1,9 @@
 import '../amp-nexxtv-player';
 import {createElementWithAttributes} from '#core/dom';
 
+import {listenOncePromise} from '#utils/event-helper';
+
 import * as consent from '../../../../src/consent';
-import {listenOncePromise} from '../../../../src/event-helper';
 import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(

@@ -289,16 +289,10 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-dailymotion",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "npm": true,
-      "wrapper": "bento",
-      "hasCss": true
-    }
+    "name": "amp-date-countdown",
+    "version": "0.1",
+    "latestVersion": "0.1"
   },
-  {"name": "amp-date-countdown", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-countdown",
     "version": "1.0",
@@ -314,7 +308,6 @@
     "version": "0.1",
     "latestVersion": "0.1"
   },
-  {"name": "amp-date-display", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-date-display",
     "version": "1.0",
@@ -486,6 +479,8 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
+      "npm": true,
       "wrapper": "bento"
     }
   },
@@ -675,6 +670,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-mathml",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "wrapper": "bento",
+      "npm": true
     }
   },
   {
@@ -967,6 +972,7 @@
       "cssBinaries": [
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
+        "amp-story-form",
         "amp-story-hint",
         "amp-story-info-dialog",
         "amp-story-open-page-attachment",
@@ -1071,7 +1077,9 @@
     "name": "amp-stream-gallery",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true}
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-stream-gallery",

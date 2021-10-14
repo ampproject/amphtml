@@ -11,6 +11,8 @@ import {
 } from '#service/core-services';
 import {installExtensionsService} from '#service/extensions-impl';
 
+import {dev} from '#utils/log';
+
 import {FakeLocation} from './fake-dom';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
@@ -18,7 +20,6 @@ import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
-import {dev} from '../src/log';
 
 let iframeCount = 0;
 

@@ -11,7 +11,7 @@ import {isAdLike} from '../../../../src/iframe-helper';
 import {macroTask} from '#testing/helpers';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 import {whenCalled} from '#testing/test-helper';
 
 /** @const {number} */

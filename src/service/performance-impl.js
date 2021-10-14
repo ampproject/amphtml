@@ -1,19 +1,23 @@
 import {TickLabel} from '#core/constants/enums';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
-import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
+import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
+import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
+import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../event-helper';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+import {isStoryDocument} from '#utils/story';
+
 import {whenContentIniLoad} from '../ini-load';
-import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
-import {isStoryDocument} from '../utils/story';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -21,6 +25,9 @@ import {isStoryDocument} from '../utils/story';
  * be forwarded to the actual `tick` function when it is set.
  */
 const QUEUE_LIMIT = 50;
+
+const CLS_SESSION_GAP = 1000;
+const CLS_SESSION_MAX = 5000;
 
 const TAG = 'Performance';
 
@@ -38,14 +45,46 @@ let TickEventDef;
 /**
  * @enum {number}
  */
-export const LCP_ELEMENT_TYPE = {
+export const ELEMENT_TYPE = {
   other: 0,
-  image: 1,
-  video: 2,
-  ad: 3,
-  carousel: 4,
-  bcarousel: 5,
+  image: 1 << 0,
+  video: 1 << 1,
+  ad: 1 << 2,
+  carousel: 1 << 3,
+  bcarousel: 1 << 4,
+  text: 1 << 5,
 };
+
+/**
+ * @param {?Node} node
+ * @return {ELEMENT_TYPE}
+ */
+function getElementType(node) {
+  if (node == null) {
+    return ELEMENT_TYPE.other;
+  }
+  const outer = getOutermostAmpElement(node);
+  const {nodeName} = outer;
+  if (nodeName === 'IMG' || nodeName === 'AMP-IMG') {
+    return ELEMENT_TYPE.image;
+  }
+  if (nodeName === 'VIDEO' || nodeName === 'AMP-VIDEO') {
+    return ELEMENT_TYPE.video;
+  }
+  if (nodeName === 'AMP-CAROUSEL') {
+    return ELEMENT_TYPE.carousel;
+  }
+  if (nodeName === 'AMP-BASE-CAROUSEL') {
+    return ELEMENT_TYPE.bcarousel;
+  }
+  if (nodeName === 'AMP-AD') {
+    return ELEMENT_TYPE.ad;
+  }
+  if (!nodeName.startsWith('AMP-') && outer.textContent) {
+    return ELEMENT_TYPE.text;
+  }
+  return ELEMENT_TYPE.other;
+}
 
 /**
  * Performance holds the mechanism to call `tick` to stamp out important
@@ -59,6 +98,11 @@ export class Performance {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {string} */
+    this.eventid_ = base64UrlEncodeFromBytes(
+      getCryptoRandomBytesArray(win, 16)
+    );
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -102,10 +146,20 @@ export class Performance {
     this.shiftScoresTicked_ = 0;
 
     /**
-     * The collection of layout shift events from the Layout Instability API.
+     * The collection of layout shift events from the Layout Instability API,
+     * used for normalized windowed sessions according to the latest CWV
+     * implementation. This uses 5s max window with a 1s session gap as the
+     * session size.
+     * See https://github.com/GoogleChrome/web-vitals/blob/main/src/getCLS.ts
      * @private {Array<LayoutShift>}
      */
-    this.layoutShifts_ = [];
+    this.layoutShiftEntries_ = [];
+
+    /**
+     * The sum of all layout shifts.
+     * @private {number}
+     */
+    this.layoutShiftSum_ = 0;
 
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
@@ -129,10 +183,11 @@ export class Performance {
     this.supportsLayoutShift_ = supportedEntryTypes.includes('layout-shift');
 
     if (!this.supportsLayoutShift_) {
-      this.metrics_.rejectSignal(
-        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        dev().createExpectedError('Cumulative Layout Shift not supported')
+      const e = dev().createExpectedError(
+        'Cumulative Layout Shift not supported'
       );
+      this.metrics_.rejectSignal(TickLabel.CUMULATIVE_LAYOUT_SHIFT, e);
+      this.metrics_.rejectSignal(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, e);
     }
 
     /**
@@ -186,7 +241,7 @@ export class Performance {
 
     /**
      * Which type of element was chosen as the LCP.
-     * @private {LCP_ELEMENT_TYPE}
+     * @private {ELEMENT_TYPE}
      */
     this.largestContentfulPaintType_ = null;
 
@@ -209,6 +264,21 @@ export class Performance {
      * @private {boolean}
      */
     this.googleFontExpRecorded_ = false;
+
+    /**
+     * This is called to ensure we'll report the current cls window's value
+     * after the window closes. Its debounce time is intentionally longer than
+     * the max session time so that we're certain the sesssion has closed
+     * (since a PerfOb is async, entries that belong in the current window may
+     * arrive later).
+     */
+    this.debouncedFlushLayoutShiftScore_ = debounce(
+      win,
+      () => {
+        this.flushLayoutShiftScore_();
+      },
+      CLS_SESSION_MAX + 1000
+    );
   }
 
   /**
@@ -350,30 +420,13 @@ export class Performance {
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.
-        // 1000 here is a magic number to prevent unbounded growth. We don't expect it to be reached.
-        if (!entry.hadRecentInput && this.layoutShifts_.length < 1000) {
-          this.layoutShifts_.push(entry);
+        if (!entry.hadRecentInput) {
+          this.tickLayoutShiftScore_(entry);
+          this.layoutShiftSum_ += entry.value;
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
-        if (entry.element) {
-          const {tagName} = getOutermostAmpElement(entry.element);
-          if (tagName === 'IMG' || tagName === 'AMP-IMG') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.image;
-          } else if (tagName === 'VIDEO' || tagName === 'AMP-VIDEO') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.video;
-          } else if (tagName === 'AMP-CAROUSEL') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.carousel;
-          } else if (tagName === 'AMP-BASE-CAROUSEL') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.bcarousel;
-          } else if (tagName === 'AMP-AD') {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.ad;
-          } else {
-            this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.other;
-          }
-        } else {
-          this.largestContentfulPaintType_ = LCP_ELEMENT_TYPE.other;
-        }
+        this.largestContentfulPaintType_ = getElementType(entry.element);
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
@@ -455,17 +508,25 @@ export class Performance {
   }
 
   /**
+   * Whether the AMP doc is hidden.
+   * @return {boolean}
+   */
+  isVisibilityHidden_() {
+    const state = this.ampdoc_.getVisibilityState();
+    return (
+      state === VisibilityState.INACTIVE || state === VisibilityState.HIDDEN
+    );
+  }
+
+  /**
    * When the viewer visibility state of the document changes to inactive or hidden,
    * send the layout score.
    * @private
    */
   onAmpDocVisibilityChange_() {
-    const state = this.ampdoc_.getVisibilityState();
-    if (
-      state === VisibilityState.INACTIVE ||
-      state === VisibilityState.HIDDEN
-    ) {
+    if (this.isVisibilityHidden_()) {
       this.tickCumulativeMetrics_();
+      this.flushLayoutShiftScore_();
     }
   }
 
@@ -489,7 +550,7 @@ export class Performance {
         }
       }
 
-      this.tickLayoutShiftScore_();
+      this.tickCumulativeLayoutShiftScore_();
     }
     if (this.supportsLargestContentfulPaint_) {
       this.tickLargestContentfulPaint_();
@@ -497,9 +558,75 @@ export class Performance {
   }
 
   /**
+   * Tick the layout shift metric, following the latest CWV standard. This uses
+   * a 5s maximum window with a 1s gap between events to define a "session".
+   * We report the maximum session value over the lifetime of the page as the CLS.
+   *
+   * @param {!LayoutShift} entry
+   */
+  tickLayoutShiftScore_(entry) {
+    if (!this.ampdoc_) {
+      return;
+    }
+
+    if (this.isVisibilityHidden_()) {
+      return;
+    }
+
+    const entries = this.layoutShiftEntries_;
+    if (entries.length > 0) {
+      const first = entries[0];
+      const last = entries[entries.length - 1];
+      if (
+        entry.startTime - last.startTime < CLS_SESSION_GAP &&
+        entry.startTime - first.startTime < CLS_SESSION_MAX
+      ) {
+        // This entry continues the current CLS window.
+        entries.push(entry);
+        return;
+      }
+      // This entry is the start of a new CLS window, but we haven't flushed the old value yet.
+      this.flushLayoutShiftScore_();
+    }
+    entries.push(entry);
+    // Ensure we report the CLS when the session closes. We're not guaranteed
+    // to get more LayoutShift entires, so we need some setTimeout magic to
+    // ensure it happens.
+    this.debouncedFlushLayoutShiftScore_();
+  }
+
+  /**
+   * Records the normalized CLS score, following the latest CWV standard.
+   * See https://web.dev/evolving-cls/
+   */
+  flushLayoutShiftScore_() {
+    const entries = this.layoutShiftEntries_;
+    const old = this.metrics_.get(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
+    let union = 0;
+    let sum = 0;
+    for (const entry of entries) {
+      if (entry.sources) {
+        for (const source of entry.sources) {
+          union |= getElementType(source.node);
+        }
+      }
+      sum += entry.value;
+    }
+    entries.length = 0;
+    if (old == null || sum > old) {
+      // We'll record the largest windowed CLS.
+      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
+      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, sum);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
+      this.flush();
+    }
+  }
+
+  /**
    * Tick the layout shift score metric.
    *
-   * A value of the metric is recorded in under two names, `cls` and `cls-2`,
+   * A value of the metric is recorded in under two names, `cls-1` and `cls-2`,
    * for the first two times the page transitions into a hidden lifecycle state
    * (when the page is navigated a way from, the tab is backgrounded for
    * another tab, or the user backgrounds the browser application).
@@ -508,15 +635,13 @@ export class Performance {
    * recording the value for these first two events should provide a fair
    * amount of visibility into this metric.
    */
-  tickLayoutShiftScore_() {
-    const cls = this.layoutShifts_.reduce((sum, entry) => sum + entry.value, 0);
-
+  tickCumulativeLayoutShiftScore_() {
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, cls);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, this.layoutShiftSum_);
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, cls);
+      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, this.layoutShiftSum_);
       this.flush();
       this.shiftScoresTicked_ = 2;
     }
@@ -717,6 +842,7 @@ export class Performance {
         dict({
           'ampexp': this.ampexp_,
           'canonicalUrl': this.documentInfo_.canonicalUrl,
+          'eventid': this.eventid_,
         }),
         /* cancelUnsent */ true
       );
@@ -807,8 +933,8 @@ export class Performance {
  * Traverse node ancestors and return the highest level amp element.
  * Returns the given node if none are found.
  *
- * @param {!HTMLElement} node
- * @return {!HTMLElement}
+ * @param {!Node} node
+ * @return {!Node}
  */
 function getOutermostAmpElement(node) {
   let max = node;

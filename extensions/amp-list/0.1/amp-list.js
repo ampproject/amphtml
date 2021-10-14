@@ -1,6 +1,7 @@
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
+import {isAmp4Email} from '#core/document/format';
 import {removeChildren, tryFocus} from '#core/dom';
 import {
   Layout,
@@ -29,6 +30,10 @@ import {
 
 import {Services} from '#service';
 
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
+
 import {setDOM} from '#third_party/set-dom/set-dom';
 
 import {LoadMoreService} from './service/load-more-service';
@@ -39,18 +44,10 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Pass} from '../../../src/pass';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';

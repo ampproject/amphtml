@@ -17,14 +17,15 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {dev, devAssert} from '#utils/log';
+
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
 
-import {Animation} from '../../animation';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {dev, devAssert} from '../../log';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
