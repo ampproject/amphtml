@@ -7,7 +7,7 @@ import {
   measureElementStub,
   measureMutateElementStub,
   mutateElementStub,
-} from '#testing/helpers/service-helpers';
+} from '#testing/helpers/service';
 
 import {AmpList} from '../amp-list';
 

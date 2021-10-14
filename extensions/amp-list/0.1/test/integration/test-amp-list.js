@@ -1,4 +1,4 @@
-import {BrowserController} from '#testing/helpers/service-helpers';
+import {BrowserController} from '#testing/helpers/service';
 
 const TIMEOUT = 15000;
 

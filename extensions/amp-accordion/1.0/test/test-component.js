@@ -3,7 +3,7 @@ import {mount} from 'enzyme';
 import * as Preact from '#preact';
 import {useAmpContext} from '#preact/context';
 
-import {waitFor} from '#testing/helpers/service-helpers';
+import {waitFor} from '#testing/helpers/service';
 
 import {
   BentoAccordion,

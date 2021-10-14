@@ -93,7 +93,7 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
-import {stubService} from './helpers/service-helpers';
+import {stubService} from './helpers/service';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {TestConfig} from './test-config';
 

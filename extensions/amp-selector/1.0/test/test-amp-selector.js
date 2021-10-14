@@ -6,7 +6,7 @@ import {toggleExperiment} from '#experiments';
 
 import {ActionInvocation} from '#service/action-impl';
 
-import {waitFor} from '#testing/helpers/service-helpers';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-selector:1.0',

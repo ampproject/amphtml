@@ -4,7 +4,7 @@ import * as Preact from '#preact';
 import {createRef} from '#preact';
 import {WithAmpContext} from '#preact/context';
 
-import {waitFor} from '#testing/helpers/service-helpers';
+import {waitFor} from '#testing/helpers/service';
 
 import {BentoInstagram} from '../component';
 

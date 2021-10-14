@@ -12,7 +12,7 @@ import {Slot} from '#preact/slot';
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 import {getSchedulerForDoc} from '#service/scheduler';
 
-import {waitFor} from '#testing/helpers/service-helpers';
+import {waitFor} from '#testing/helpers/service';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {

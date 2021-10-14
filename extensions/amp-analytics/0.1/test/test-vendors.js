@@ -5,7 +5,7 @@ import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
-} from '#testing/helpers/service-helpers';
+} from '#testing/helpers/service';
 import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
 import {macroTask} from '#testing/helpers';

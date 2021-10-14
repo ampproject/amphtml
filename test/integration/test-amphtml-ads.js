@@ -2,7 +2,7 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
-import {RequestBank} from '#testing/helpers/service-helpers';
+import {RequestBank} from '#testing/helpers/service';
 import {maybeSwitchToMinifiedJs} from '#testing/iframe';
 
 // TODO(wg-monetization, #29112): Unskip on Safari.

@@ -3,7 +3,7 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
 
-import {waitFor} from '#testing/helpers/service-helpers';
+import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 
 describes.realWin(

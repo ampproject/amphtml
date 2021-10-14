@@ -4,7 +4,7 @@ import {ClickEventTracker, VisibilityTracker} from '../events';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
-} from '#testing/helpers/service-helpers';
+} from '#testing/helpers/service';
 import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '#service';

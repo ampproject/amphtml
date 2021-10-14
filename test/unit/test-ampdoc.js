@@ -15,7 +15,7 @@ import {
   AmpDocSingle,
 } from '#service/ampdoc-impl';
 
-import {waitFor} from '#testing/helpers/service-helpers';
+import {waitFor} from '#testing/helpers/service';
 
 import {
   getServiceForDoc,

@@ -1,4 +1,4 @@
-import {BrowserController} from '#testing/helpers/service-helpers';
+import {BrowserController} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
 
 describes.integration(

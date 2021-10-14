@@ -1,5 +1,5 @@
 import {createLinker, parseLinker} from '../linker';
-import {mockWindowInterface} from '#testing/helpers/service-helpers';
+import {mockWindowInterface} from '#testing/helpers/service';
 
 const TAG = '[amp-consent/linker]';
 
