@@ -115,7 +115,7 @@ export function applyStaticLayout(element) {
       toggle(element, false);
       // TODO(jridgewell): Temporary hack while SSR still adds an inline
       // `display: none`
-      setStyle(element, 'display', '');
+      setStyle(element, 'display', ''); // eslint-disable-line local/no-style-display
     }
     return layout;
   }
@@ -136,7 +136,7 @@ export function applyStaticLayout(element) {
     toggle(element, false);
     // TODO(jridgewell): Temporary hack while SSR still adds an inline
     // `display: none`
-    setStyle(element, 'display', '');
+    setStyle(element, 'display', ''); // eslint-disable-line local/no-style-display
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: devAssertString(width),
