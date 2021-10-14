@@ -20,8 +20,9 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {getData, listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {addParamsToUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
 

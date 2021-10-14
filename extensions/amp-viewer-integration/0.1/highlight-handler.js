@@ -1,4 +1,4 @@
-import {whenDocumentReady} from '#core/document-ready';
+import {whenDocumentReady} from '#core/document/ready';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
 import {once} from '#core/types/function';
@@ -8,9 +8,9 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
-import {findSentences, markTextRangeList} from './findtext';
+import {listenOnce} from '#utils/event-helper';
 
-import {listenOnce} from '../../../src/event-helper';
+import {findSentences, markTextRangeList} from './findtext';
 
 /**
  * The message name sent by viewers to dismiss highlights.

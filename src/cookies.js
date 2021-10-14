@@ -1,8 +1,9 @@
 import {endsWith} from '#core/types/string';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
+import {userAssert} from '#utils/log';
+
 import {urls} from './config';
-import {userAssert} from './log';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from './url';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';

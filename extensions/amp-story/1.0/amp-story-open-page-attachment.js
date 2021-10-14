@@ -4,7 +4,7 @@
 import {AttachmentTheme} from './amp-story-page-attachment';
 import {LocalizedStringId} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {
   getRGBFromCssColorValue,
@@ -12,7 +12,7 @@ import {
   maybeMakeProxyUrl,
 } from './utils';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * @enum {string}
@@ -238,7 +238,7 @@ export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
     'background-color': accentColor,
   });
 
-  const win = toWin(attachmentEl.ownerDocument.defaultView);
+  const win = getWin(attachmentEl);
   const styles = computedStyle(win, attachmentEl);
   const rgb = getRGBFromCssColorValue(styles['background-color']);
   contrastColor = getTextColorForRGB(rgb);

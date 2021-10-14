@@ -3,8 +3,9 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {listenFor} from '../../../src/iframe-helper';
-import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 

@@ -1,20 +1,23 @@
 import {TickLabel} from '#core/constants/enums';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
-import {whenDocumentComplete, whenDocumentReady} from '#core/document-ready';
+import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
+import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
+import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../event-helper';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+import {isStoryDocument} from '#utils/story';
+
 import {whenContentIniLoad} from '../ini-load';
-import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
-import {isStoryDocument} from '../utils/story';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -95,6 +98,11 @@ export class Performance {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {string} */
+    this.eventid_ = base64UrlEncodeFromBytes(
+      getCryptoRandomBytesArray(win, 16)
+    );
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -834,6 +842,7 @@ export class Performance {
         dict({
           'ampexp': this.ampexp_,
           'canonicalUrl': this.documentInfo_.canonicalUrl,
+          'eventid': this.eventid_,
         }),
         /* cancelUnsent */ true
       );

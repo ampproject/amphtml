@@ -12,8 +12,8 @@ import {
   childElementsByTag,
   matches,
 } from '#core/dom/query';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
+import {descendsFromStory} from '#utils/story';
+import {dev, devAssert, user} from '#utils/log';
 import {
   addAttributesToElement,
   dispatchCustomEvent,
@@ -32,7 +32,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isExperimentOn} from '#experiments';
-import {listen, listenOncePromise} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '#utils/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
@@ -836,8 +836,11 @@ export class AmpVideo extends AMP.BaseElement {
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
-    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    if (!src) {
+      return;
+    }
+    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     setInitialDisplay(poster, 'block');
     setStyles(poster, {
       'background-image': `url(${src})`,

@@ -2,7 +2,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
-import {isDocumentReady} from '#core/document-ready';
+import {isDocumentReady} from '#core/document/ready';
 import {escapeHtml} from '#core/dom';
 import {layoutRectLtwh, moveLayoutRect} from '#core/dom/layout/rect';
 import {
@@ -14,7 +14,7 @@ import {
 } from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
 import * as mode from '#core/mode';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {install as installAbortController} from '#polyfills/abort-controller';
 import {install as installCustomElements} from '#polyfills/custom-elements';
@@ -26,11 +26,12 @@ import {Services} from '#service';
 import {installAmpdocServicesForEmbed} from '#service/core-services';
 import {installTimerInEmbedWindow} from '#service/timer-impl';
 
+import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {urls} from './config';
-import {loadPromise} from './event-helper';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
-import {dev, devAssert, userAssert} from './log';
 import {getMode} from './mode';
 import {
   disposeServicesForEmbed,
@@ -139,7 +140,7 @@ export function installFriendlyIframeEmbed(
   opt_preinstallCallback // TODO(#22733): remove "window" argument.
 ) {
   /** @const {!Window} */
-  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
+  const win = getTopWindow(getWin(iframe));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensionsService = Services.extensionsFor(win);
   /** @const {!./service/ampdoc-impl.AmpDocService} */
@@ -722,7 +723,7 @@ export class Installers {
     opt_installComplete
   ) {
     const childWin = ampdoc.win;
-    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    const parentWin = getWin(childWin.frameElement);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
 

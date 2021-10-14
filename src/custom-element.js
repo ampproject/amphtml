@@ -13,11 +13,13 @@ import {MediaQueryProps} from '#core/dom/media-query-props';
 import * as query from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 import {ResourceState} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
 import {startupChunk} from './chunk';
 import {shouldBlockOnConsentByMeta} from './consent';
@@ -29,7 +31,6 @@ import {
   isCancellation,
   reportError,
 } from './error-reporting';
-import {dev, devAssert, user, userAssert} from './log';
 import {getMode} from './mode';
 import {applyStaticLayout} from './static-layout';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
@@ -570,7 +571,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           if (this.actionQueue_) {
             // Only schedule when the queue is not empty, which should be
             // the case 99% of the time.
-            Services.timerFor(toWin(this.ownerDocument.defaultView)).delay(
+            Services.timerFor(getWin(this)).delay(
               this.dequeueActions_.bind(this),
               1
             );
@@ -1166,7 +1167,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const win = toWin(this.ownerDocument.defaultView);
+        const win = getWin(this);
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;

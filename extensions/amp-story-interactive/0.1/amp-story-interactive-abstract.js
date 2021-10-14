@@ -27,7 +27,7 @@ import {
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';

@@ -11,3 +11,15 @@
 export function toWin(winOrNull) {
   return /** @type {!Window} */ (winOrNull);
 }
+
+/**
+ * Returns the associated Window for a node.
+ *
+ * @param {!Node} node
+ * @return {!Window}
+ */
+export function getWin(node) {
+  return toWin(
+    (node.ownerDocument || /** @type {!Document} */ (node)).defaultView
+  );
+}

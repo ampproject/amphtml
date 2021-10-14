@@ -3,11 +3,12 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {getData} from '#utils/event-helper';
+
 import {ENDPOINTS} from './constants';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
 
-import {getData} from '../../../src/event-helper';
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 

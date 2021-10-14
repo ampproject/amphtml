@@ -1,6 +1,6 @@
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '#core/dom';
-import {devAssert, user} from '../../../src/log';
+import {devAssert, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '#core/types/object';
 import * as mode from '#core/mode';
