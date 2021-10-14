@@ -32,6 +32,7 @@ const {jsifyCssAsync} = require('./css/jsify-css');
 const {jssOptions} = require('../babel-config/jss-config');
 const {log} = require('../common/logging');
 const {parse: pathParse} = require('path');
+const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
 
@@ -557,7 +558,7 @@ async function getCssForJssFile(jssFile) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensionCss(extDir, name, version, options) {
+async function buildExtensionCss(extDir, name, version, options) {
   /**
    * Writes CSS binaries
    *
@@ -571,23 +572,34 @@ function buildExtensionCss(extDir, name, version, options) {
     fs.writeFileSync(jsName, jsCss, 'utf-8');
     fs.writeFileSync(cssName, css, 'utf-8');
   }
+
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
 
-  const promises = [];
-  const mainCssBinary = jsifyCssAsync(extDir + '/' + name + '.css').then(
-    (mainCss) => {
-      writeCssBinaries(`${name}-${version}.css`, mainCss);
-      if (isAliased) {
-        writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
-      }
+  const mainCssPromise = jsifyCssAsync(`${extDir}/${name}.css`);
+
+  const mainCssBinaryPromise = mainCssPromise.then((mainCss) => {
+    writeCssBinaries(`${name}-${version}.css`, mainCss);
+    if (isAliased) {
+      writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
     }
-  );
+  });
+
+  const parallel = [mainCssBinaryPromise];
+
+  // Currently JSON.stringifying to allow arrays and strings:
+  // {"wrapper": "bento"} and {"wrapper": ["bento"]}
+  // TODO(https://go.amp.dev/issue/36351): Use a `bento` flag instead.
+  if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
+    const bentoCssPromise = mainCssPromise.then((mainCss) =>
+      buildBentoCss(name, version, mainCss)
+    );
+    parallel.push(bentoCssPromise);
+  }
 
   if (Array.isArray(options.cssBinaries)) {
-    promises.push.apply(
-      promises,
-      options.cssBinaries.map(function (name) {
+    parallel.push(
+      ...options.cssBinaries.map((name) => {
         return jsifyCssAsync(`${extDir}/${name}.css`).then((css) => {
           writeCssBinaries(`${name}-${version}.css`, css);
           if (isAliased) {
@@ -597,8 +609,25 @@ function buildExtensionCss(extDir, name, version, options) {
       })
     );
   }
-  promises.push(mainCssBinary);
-  return Promise.all(promises);
+
+  await Promise.all(parallel);
+}
+
+/**
+ * Build bento-*.css using the compiled amp-* result as source.
+ * It replaces all selectors for elements <amp-*> with <bento-*>.
+ * As a result of taking already minified code as source, this function is
+ * fairly fast and not cached.
+ * @param {string} name
+ * @param {string} version
+ * @param {string} minifiedAmpCss
+ * @return {!Promise}
+ */
+async function buildBentoCss(name, version, minifiedAmpCss) {
+  const bentoName = name.replace(/^amp-/, 'bento-');
+  const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
+  await fs.outputFile(`build/${bentoName}-${version}.css`, renamedCss);
+  await fs.outputFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
 }
 
 /**
