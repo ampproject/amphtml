@@ -4,6 +4,8 @@ const {writeDiffOrFail} = require('../common/diff');
 const ignoreFile = '.gitignore';
 const syncIgnoreFiles = ['.prettierignore', '.eslintignore'];
 
+const ignoreListFiles = [ignoreFile, ...syncIgnoreFiles];
+
 const header = '# [GLOBALLY IGNORED]';
 
 /**
@@ -36,6 +38,7 @@ checkIgnoreLists.flags = {
 
 module.exports = {
   checkIgnoreLists,
+  ignoreListFiles,
   ignoreFile,
   splitIgnoreListByHeader,
 };
