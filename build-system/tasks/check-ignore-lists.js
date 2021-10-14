@@ -35,7 +35,7 @@ checkIgnoreLists.flags = {
 };
 
 module.exports = {
-  checkIgnoreList: checkIgnoreLists,
+  checkIgnoreLists,
   ignoreFile,
   splitIgnoreListByHeader,
 };
