@@ -3,7 +3,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {cyan, yellow} = require('kleur/colors');
 const {ignoreFile, splitIgnoreListByHeader} = require('./check-ignore-list');
