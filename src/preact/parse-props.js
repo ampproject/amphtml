@@ -150,17 +150,13 @@ export function collectProps(
     props['as'] = lightDomTag;
   }
 
-  // Class.
-  if (className) {
-    props['className'] = className;
-  }
-
   // Common styles.
   if (layoutSizeDefined) {
     if (Ctor['usesShadowDom']) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
-      props['className'] =
+      // `class` is preferred to `className` for Preact
+      props['class'] =
         `i-amphtml-fill-content ${className || ''}`.trim() || null;
     }
   }
