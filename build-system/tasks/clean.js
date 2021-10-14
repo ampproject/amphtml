@@ -3,11 +3,30 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
+const globby = require('globby');
 const path = require('path');
 const {cyan, yellow} = require('kleur/colors');
+const {ignoreFile, splitIgnoreListByHeader} = require('./check-ignore-list');
 const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
+
+/**
+ * @return {Promise<string[]>}
+ */
+async function getPathsToDelete() {
+  const [, below] = splitIgnoreListByHeader(
+    await fs.readFile(ignoreFile, 'utf8')
+  );
+  return (
+    below
+      .split('\n')
+      // Comments and empty lines
+      .filter((line) => line.trim().length > 0 && !line.startsWith('#'))
+      // Recursive globs
+      .map((line) => (line.startsWith('/') ? line.substr(1) : `**/${line}`))
+  );
+}
 
 /**
  * Cleans up various cache and output directories. Optionally cleans up inner
@@ -15,65 +34,49 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * @return {Promise<void>}
  */
 async function clean() {
-  // TODO(https://go.amp.dev/issue/36354): We can simplify this list
-  const pathsToDelete = [
-    // Local cache directories
-    // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
-    '.babel-cache',
-    '.css-cache',
-    '.jss-cache',
-    '.pre-closure-cache',
-
-    // Output directories
-    // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
-    '.amp-dep-check',
-    'build',
-    'build-system/dist',
-    'build-system/server/new-server/transforms/dist',
-    'build-system/tasks/performance/cache',
-    'build-system/tasks/performance/results.json',
-    'dist',
-    'dist.3p',
-    'dist.tools',
-    'export',
-    'examples/storybook',
-    'extensions/**/build',
-    'extensions/**/dist',
-    'release',
-    'result-reports',
-    'test/coverage',
-    'test/coverage-e2e',
-    'validator/**/dist',
-    'validator/export',
+  const pathsToDeleteFromIgnore = [
+    ...(await getPathsToDelete()),
+    '!**/third_party',
+    '!**/node_modules',
   ];
+  const pathsToDelete = [];
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
   }
-  // User configuration files
-  // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
-  const customConfigs = [
-    'build-system/global-configs/custom-config.json',
-    'build-system/global-configs/custom-flavors-config.json',
-  ];
-  if (argv.include_custom_configs) {
-    pathsToDelete.push(...customConfigs);
-  } else {
-    for (const customConfig of customConfigs) {
-      if (fs.existsSync(customConfig)) {
-        log(yellow('Skipping path:'), cyan(customConfig));
+
+  // Ignore user configuration files if flag is not set.
+  const ignoredCustomConfigPaths = pathsToDeleteFromIgnore.filter((path, i) => {
+    if (/build-system\/global-configs\/custom.*\.json/.test(path)) {
+      if (!argv.include_custom_configs) {
+        pathsToDeleteFromIgnore[i] = '';
+        return true;
       }
     }
+    return false;
+  });
+
+  if (ignoredCustomConfigPaths.length) {
+    const ignored = await globby(ignoredCustomConfigPaths);
+    for (const customConfig of ignored) {
+      log(yellow('Skipping path:'), cyan(customConfig));
+    }
   }
+
   if (argv.exclude) {
     const excludes = argv.exclude.split(',');
     for (const exclude of excludes) {
       pathsToDelete.push(`!${exclude}`);
     }
   }
-  const deletedPaths = await del(pathsToDelete, {
+
+  const delOptions = {
     expandDirectories: false,
     dryRun: argv.dry_run,
-  });
+  };
+  const deletedPaths = [
+    ...(await del(pathsToDeleteFromIgnore.filter(Boolean), delOptions)),
+    ...(await del(pathsToDelete, delOptions)),
+  ].sort();
   if (deletedPaths.length > 0) {
     log(argv.dry_run ? "Paths that would've been deleted:" : 'Deleted paths:');
     deletedPaths.forEach((deletedPath) => {
