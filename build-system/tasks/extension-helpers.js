@@ -753,7 +753,7 @@ async function generateBentoEntryPointSource(name, options) {
     ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
     : null;
 
-  const source = dedent(`
+  return dedent(`
     import {BaseElement} from '../base-element';
     
     function defineElement() {
@@ -773,7 +773,6 @@ async function generateBentoEntryPointSource(name, options) {
   `)
     .replace('__css__', JSON.stringify(css))
     .replace('__name__', JSON.stringify(name));
-  return source;
 }
 
 /**
