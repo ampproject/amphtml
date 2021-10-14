@@ -349,6 +349,7 @@
       ]
     },
     {
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
       "viewport": {"width": 320, "height": 480},
@@ -519,6 +520,7 @@
       ]
     },
     {
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.rtl.html",
       "name": "amp-story: info dialog (rtl)",
       "viewport": {"width": 320, "height": 480},
