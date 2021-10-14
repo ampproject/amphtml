@@ -131,7 +131,6 @@ export function collectProps(
   mediaQueryProps
 ) {
   const {
-    'className': className,
     'layoutSizeDefined': layoutSizeDefined,
     'lightDomTag': lightDomTag,
     'props': propDefs,
@@ -156,8 +155,7 @@ export function collectProps(
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
       // `class` is preferred to `className` for Preact
-      props['class'] =
-        `i-amphtml-fill-content ${className || ''}`.trim() || null;
+      props['class'] = 'i-amphtml-fill-content';
     }
   }
 
