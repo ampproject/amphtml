@@ -746,9 +746,9 @@ function defineElement() {
   ${
     css
       ? `
-const style = document.createElement('style');
-style.textContent = ${JSON.stringify(css)};
-document.head.appendChild(style);
+  const style = document.createElement('style');
+  style.textContent = ${JSON.stringify(css)};
+  document.head.appendChild(style);
   `.trim()
       : ''
   }
