@@ -1,7 +1,6 @@
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {isAmp4Email} from '#core/document/format';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {toggleAttribute} from '#core/dom';
 
 const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
@@ -19,17 +18,14 @@ export class BaseCarousel extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
+    /** @private {?HTMLDivElement} */
     this.prevButton_ = null;
 
-    /** @private {?Element} */
+    /** @private {?HTMLDivElement} */
     this.nextButton_ = null;
 
     /** @private {boolean} */
     this.showControls_ = false;
-
-    /** @private {?UnlistenDef} */
-    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -73,8 +69,8 @@ export class BaseCarousel extends AMP.BaseElement {
   /**
    * Builds a carousel button for next/prev.
    * @param {string} className
-   * @param {function()} onInteraction
-   * @return {?Element}
+   * @param {function():void} onInteraction
+   * @return {?HTMLDivElement}
    */
   buildButton(className, onInteraction) {
     const button = this.element.ownerDocument.createElement('div');
@@ -168,9 +164,9 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   setControlsState() {
     this.prevButton_.classList.toggle('amp-disabled', !this.hasPrev());
-    this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
+    this.prevButton_.setAttribute('aria-disabled', String(!this.hasPrev()));
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
-    this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
+    this.nextButton_.setAttribute('aria-disabled', String(!this.hasNext()));
     this.prevButton_.tabIndex = this.hasPrev() ? 0 : -1;
     this.nextButton_.tabIndex = this.hasNext() ? 0 : -1;
   }
@@ -230,18 +226,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    this.unobserveIntersections_ = observeIntersections(
-      this.element,
-      ({isIntersecting}) => this.viewportCallback(isIntersecting)
-    );
-    return Promise.resolve();
-  }
-
-  /** @override */
   unlayoutCallback() {
-    this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
     return true;
   }
 
@@ -250,6 +235,7 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   hasPrev() {
     // Subclasses may override.
+    return false;
   }
 
   /**
@@ -257,6 +243,7 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   hasNext() {
     // Subclasses may override.
+    return false;
   }
 
   /**

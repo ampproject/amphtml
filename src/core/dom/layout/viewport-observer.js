@@ -1,6 +1,6 @@
 import {isIframed} from '#core/dom';
 import {removeItem} from '#core/types/array';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
@@ -42,7 +42,7 @@ const viewportCallbacks = new WeakMap();
  * @return {!UnlistenDef} clean up closure to unobserve the element
  */
 export function observeIntersections(element, callback) {
-  const win = toWin(element.ownerDocument.defaultView);
+  const win = getWin(element);
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
@@ -80,7 +80,7 @@ function unobserveIntersections(element, callback) {
     return;
   }
   // If an element has no more observer callbacks, then unobserve it.
-  const win = toWin(element.ownerDocument.defaultView);
+  const win = getWin(element);
   const viewportObserver = viewportObservers.get(win);
   viewportObserver?.unobserve(element);
   viewportCallbacks.delete(element);

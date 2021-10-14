@@ -1,5 +1,5 @@
 import {isEsm} from '#core/mode';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * @param {T} klass
@@ -43,7 +43,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
       this.element = element;
 
       /** @const {!Window} */
-      this.win = toWin(element.ownerDocument.defaultView);
+      this.win = getWin(element);
     }
 
     /**

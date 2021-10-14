@@ -2,7 +2,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -47,9 +47,7 @@ export function insertAnalyticsElement(
   // Force load analytics extension if script not included in page.
   if (loadAnalytics) {
     // Get Extensions service and force load analytics extension.
-    const extensions = Services.extensionsFor(
-      toWin(parentElement.ownerDocument.defaultView)
-    );
+    const extensions = Services.extensionsFor(getWin(parentElement));
     const ampdoc = Services.ampdoc(parentElement);
     extensions./*OK*/ installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {

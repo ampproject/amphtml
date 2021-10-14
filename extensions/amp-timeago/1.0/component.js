@@ -1,6 +1,6 @@
 import {devAssertElement} from '#core/assert';
 import {getDate} from '#core/types/date';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import * as Preact from '#preact';
 import {useCallback, useRef, useState} from '#preact';
@@ -47,7 +47,7 @@ export function BentoTimeago({
       }
       const node = devAssertElement(ref.current);
       let {lang} = node.ownerDocument.documentElement;
-      const win = toWin(node.ownerDocument?.defaultView);
+      const win = getWin(node);
       if (lang === 'unknown') {
         lang = win.navigator?.language || DEFAULT_LOCALE;
       }
