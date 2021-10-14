@@ -755,10 +755,9 @@ async function generateBentoEntryPointSource(name, options) {
 
   const source = dedent(`
     import {BaseElement} from '../base-element';
-
-    const css = __css__;
-
+    
     function defineElement() {
+      const css = __css__;
       if (css) {
         const style = document.createElement('style');
         style.textContent = css;
