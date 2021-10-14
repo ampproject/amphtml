@@ -349,6 +349,7 @@
       ]
     },
     {
+      // TODO(#36358, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
@@ -520,6 +521,7 @@
       ]
     },
     {
+      // TODO(#36358, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.rtl.html",
       "name": "amp-story: info dialog (rtl)",
