@@ -44,21 +44,19 @@ async function clean() {
     pathsToDelete.push('**/node_modules', '!node_modules');
   }
 
-  // Ignore user configuration files if flag is not set.
-  const ignoredCustomConfigPaths = pathsToDeleteFromIgnore.filter((path, i) => {
-    if (/build-system\/global-configs\/custom.*\.json/.test(path)) {
-      if (!argv.include_custom_configs) {
-        pathsToDeleteFromIgnore[i] = '';
-        return true;
+  // User configuration files
+  // Keep this list in sync with .gitignore
+  const customConfigs = [
+    'build-system/global-configs/custom-config.json',
+    'build-system/global-configs/custom-flavors-config.json',
+  ];
+  if (argv.include_custom_configs) {
+    pathsToDelete.push(...customConfigs);
+  } else {
+    for (const customConfig of customConfigs) {
+      if (fs.existsSync(customConfig)) {
+        log(yellow('Skipping path:'), cyan(customConfig));
       }
-    }
-    return false;
-  });
-
-  if (ignoredCustomConfigPaths.length) {
-    const ignored = await globby(ignoredCustomConfigPaths);
-    for (const customConfig of ignored) {
-      log(yellow('Skipping path:'), cyan(customConfig));
     }
   }
 
@@ -74,7 +72,7 @@ async function clean() {
     dryRun: argv.dry_run,
   };
   const deletedPaths = [
-    ...(await del(pathsToDeleteFromIgnore.filter(Boolean), delOptions)),
+    ...(await del(pathsToDeleteFromIgnore, delOptions)),
     ...(await del(pathsToDelete, delOptions)),
   ].sort();
   if (deletedPaths.length > 0) {

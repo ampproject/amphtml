@@ -15,7 +15,7 @@ firebase
 firebase.json
 
 # User configuration files
-# These should be listed on clean.js 
+# Keep this list in sync with clean.js
 /build-system/global-configs/custom-config.json
 /build-system/global-configs/custom-flavors-config.json
 
