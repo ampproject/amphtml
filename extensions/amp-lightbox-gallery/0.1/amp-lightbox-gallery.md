@@ -2,10 +2,9 @@
 $category@: layout
 formats:
   - websites
+  - ads
 teaser:
   text: Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.
-experimental: true
-bento: true
 ---
 
 # amp-lightbox-gallery
@@ -24,9 +23,9 @@ To use `amp-lightbox-gallery`, ensure the required script is included in your
 [tip type="read-on"]
 
 For showing individual images in a lightbox, there's also the
-[`<amp-image-lightbox>`](../amp-image-lightbox/amp-image-lightbox.md)
+[`<amp-image-lightbox>`](../../amp-image-lightbox/amp-image-lightbox.md)
 component. To display other types of elements in a lightbox, use
-[`<amp-lightbox>`](../amp-lightbox/amp-lightbox.md).
+[`<amp-lightbox>`](../../amp-lightbox/amp-lightbox.md).
 
 [/tip]
 
@@ -242,11 +241,7 @@ You can track this event using the following code snippet:
 </amp-analytics>
 ```
 
-### Standalone use outside valid AMP documents
-
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/). To find the standalone version of `amp-lightbox-gallery`, see [`bento-lightbox-gallery`](./1.0/README.md).
-
 ## Validation
 
-See [`amp-image-lightbox-gallery` rules](validator-amp-lightbox-gallery.protoascii)
+See [`amp-image-lightbox-gallery` rules](../validator-amp-lightbox-gallery.protoascii)
 in the AMP validator specification.
