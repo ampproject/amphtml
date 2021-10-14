@@ -66,6 +66,9 @@ const SIZE_DEFINED_STYLE = {
   'height': '100%',
 };
 
+/** @const {string} */
+const FILL_CONTENT_CLASS = 'i-amphtml-fill-content';
+
 /**
  * This is an internal property that marks light DOM nodes that were rendered
  * by AMP/Preact bridge and thus must be ignored by the mutation observer to
@@ -155,7 +158,7 @@ export function collectProps(
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
       // `class` is preferred to `className` for Preact
-      props['class'] = 'i-amphtml-fill-content';
+      props['class'] = FILL_CONTENT_CLASS;
     }
   }
 
