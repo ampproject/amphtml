@@ -16,10 +16,7 @@ validator/**
 # The rules below are synced between .gitignore and .prettierignore, and are
 # removed by `amp clean`.
 
-# Local cache directories
 .*cache
-
-# Output directories
 .amp-dep-check
 build
 build-system/tasks/performance/cache
