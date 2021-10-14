@@ -20,14 +20,14 @@ import {isAutoplaySupported} from '#core/dom/video';
 export function getDailymotionIframeSrc(
   win,
   videoId,
-  autoplay,
-  endscreenEnable,
-  info,
-  mute,
-  sharingEnable,
+  autoplay = false,
+  endscreenEnable = true,
+  info = true,
+  mute = false,
+  sharingEnable = true,
   start,
   uiHighlight,
-  uiLogo,
+  uiLogo = true,
   implicitParams
 ) {
   return addParamsToUrl(

@@ -5,13 +5,13 @@ var BentoDailymotionDef = {};
  * @typedef {{
  *   videoId: (string),
  *   autoplay: (boolean|undefined),
- *   endscreenEnable: (string|undefined),
- *   info: (string|undefined),
- *   mute: (string|undefined),
- *   sharingEnable: (string|undefined),
+ *   endscreenEnable: (boolean|undefined),
+ *   info: (boolean|undefined),
+ *   mute: (boolean|undefined),
+ *   sharingEnable: (boolean|undefined),
  *   start: (string|undefined),
  *   uiHighlight: (string|undefined),
- *   uiLogo: (string|undefined),
+ *   uiLogo: (boolean|undefined),
  * }}
  */
 BentoDailymotionDef.Props;

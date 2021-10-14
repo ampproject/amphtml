@@ -61,7 +61,7 @@ export function BentoDailymotionWithRef(
     sharingEnable,
     start,
     uiHighlight,
-    uiLog,
+    uiLogo,
     videoId,
     ...rest
   },
@@ -79,7 +79,7 @@ export function BentoDailymotionWithRef(
         sharingEnable,
         start,
         uiHighlight,
-        uiLog
+        uiLogo
       ),
     [
       videoId,
@@ -90,7 +90,7 @@ export function BentoDailymotionWithRef(
       sharingEnable,
       start,
       uiHighlight,
-      uiLog,
+      uiLogo,
     ]
   );
 
