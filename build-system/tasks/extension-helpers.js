@@ -1,6 +1,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const debounce = require('../common/debounce');
+const dedent = require('dedent');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const path = require('path');
@@ -736,33 +737,44 @@ async function getBentoFilename(dir, name, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const css = options.hasCss
-    ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
-    : null;
-  const generatedSource = `
-import {BaseElement} from '../base-element';
-
-function defineElement() {
-  ${
-    css
-      ? `
-  const style = document.createElement('style');
-  style.textContent = ${JSON.stringify(css)};
-  document.head.appendChild(style);
-  `.trim()
-      : ''
-  }
-  customElements.define(
-    ${JSON.stringify(name)},
-    BaseElement.CustomElement(BaseElement)
-  );
-}
-
-defineElement();
-  `.trim();
+  const generatedSource = await generateBentoEntryPointSource(name, options);
   const generatedFilename = `build/${name}.js`;
   await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
   return generatedFilename;
+}
+
+/**
+ * @param {string} name
+ * @param {Object} options
+ * @return {Promise<string>}
+ */
+async function generateBentoEntryPointSource(name, options) {
+  const css = options.hasCss
+    ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
+    : null;
+
+  const source = dedent(`
+    import {BaseElement} from '../base-element';
+
+    const css = __css__;
+
+    function defineElement() {
+      if (css) {
+        const style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+      }
+      customElements.define(
+        __name__,
+        BaseElement.CustomElement(BaseElement)
+      );
+    }
+
+    defineElement();
+  `)
+    .replace('__css__', JSON.stringify(css))
+    .replace('__name__', JSON.stringify(name));
+  return source;
 }
 
 /**
