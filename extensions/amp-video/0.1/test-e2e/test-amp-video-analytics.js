@@ -17,7 +17,8 @@ describes.endtoend(
       return controller.getElementProperty(elem, 'paused');
     }
 
-    it('control buttons should manipulate video box behavior', async () => {
+    // TODO(#36355): Re-enable this test.
+    it.skip('control buttons should manipulate video box behavior', async () => {
       const videoElem1 = await controller.findElement('#myVideo video');
       const videoElem2 = await controller.findElement('#myVideo2 video');
       const playBtn1 = await controller.findElement('#playBtn1');
