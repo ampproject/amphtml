@@ -17,7 +17,7 @@ function splitIgnoreListByHeader(source) {
 /**
  * @return {!Promise}
  */
-async function checkIgnoreList() {
+async function checkIgnoreLists() {
   const [, below] = splitIgnoreListByHeader(await readFile(ignoreFile, 'utf8'));
 
   for (const file of syncIgnoreFiles) {
@@ -27,14 +27,15 @@ async function checkIgnoreList() {
   }
 }
 
-checkIgnoreList.description = 'Check ignore lists to make sure they are in sync';
+checkIgnoreLists.description =
+  'Check ignore lists to make sure they are in sync';
 
-checkIgnoreList.flags = {
+checkIgnoreLists.flags = {
   'fix': `Fix files out of sync`,
 };
 
 module.exports = {
-  checkIgnoreList,
+  checkIgnoreList: checkIgnoreLists,
   ignoreFile,
   splitIgnoreListByHeader,
 };

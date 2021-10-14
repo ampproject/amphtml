@@ -5,7 +5,7 @@ const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
 const {cyan, yellow} = require('kleur/colors');
-const {ignoreFile, splitIgnoreListByHeader} = require('./check-ignore-list');
+const {ignoreFile, splitIgnoreListByHeader} = require('./check-ignore-lists');
 const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
