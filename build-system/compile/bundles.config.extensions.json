@@ -678,7 +678,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "wrapper": "bento",
+      "wrapper": ["extension", "bento"],
       "npm": true
     }
   },
