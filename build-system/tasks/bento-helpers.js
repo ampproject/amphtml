@@ -3,7 +3,7 @@
  * @return {string}
  */
 function getBentoName(name) {
-  return `bento-${name.replace(/^amp-/, '')}`;
+  return name.replace(/^amp-/, 'bento-');
 }
 
 module.exports = {getBentoName};
