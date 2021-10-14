@@ -1450,6 +1450,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   checkPageHasAudio_() {
     this.hasVideoWithAudio_().then((hasVideoWithAudio) => {
+      console.log('has video with audio', hasVideoWithAudio);
       const pageHasAudio =
         this.element.hasAttribute('background-audio') ||
         this.element.querySelector('amp-audio') ||
@@ -1467,7 +1468,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    this.waitForMediaLayout_().then(() =>
+    return this.waitForMediaLayout_().then(() =>
       Array.prototype.some.call(
         ampVideoEls,
         (video) => !video.hasAttribute('noaudio')
