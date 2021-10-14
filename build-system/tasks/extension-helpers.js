@@ -781,8 +781,8 @@ async function buildExtensionJs(
 
 /**
  * Extensions may specify their own bento-install.js to install multiple
- * elements or otherwise specify custom install logic. Otherwise, we provide
- * an installer with the most common configuration.
+ * elements or to specify custom install logic. Otherwise, we generate an
+ * install script with the default configuration.
  * @param {string} sourceDir
  * @param {string} name
  * @param {string} version
