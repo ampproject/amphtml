@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var SelectorDef = {};
+var BentoSelectorDef = {};
 
 /**
  * @typedef {{
@@ -17,7 +17,7 @@ var SelectorDef = {};
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SelectorDef.Props;
+BentoSelectorDef.Props;
 
 /**
  * Note: `index` must be a positive integer to use
@@ -35,7 +35,7 @@ SelectorDef.Props;
  *   style: (!Object|undefined),
  * }}
  */
-SelectorDef.OptionProps;
+BentoSelectorDef.OptionProps;
 
 /**
  * @typedef {{
@@ -48,10 +48,10 @@ SelectorDef.OptionProps;
  *   selectOption: (function(*):undefined|undefined),
  * }}
  */
-SelectorDef.ContextProps;
+BentoSelectorDef.ContextProps;
 
 /** @interface */
-SelectorDef.SelectorApi = class {
+BentoSelectorDef.SelectorApi = class {
   clear() {}
 
   /**
