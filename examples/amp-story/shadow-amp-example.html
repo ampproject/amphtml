@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>JS Bin</title>
+    <!-- Asynchronously load the AMP-with-Shadow-DOM runtime library. -->
+    <script async src="https://cdn.ampproject.org/shadow-v0.js"></script>
+    <style>
+      #container {
+        border: 1px solid black;
+        height: 500px;
+        overflow: hidden;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>before</h1>
+    <div id="container"></div>
+    <h1>after</h1>
+    
+    <script>    
+      (window.AMP = window.AMP || []).push((AMP) => {
+        // AMP is now available.
+        
+        function fetchDocument(url) {
+          // unfortunately fetch() does not support retrieving documents,
+          // so we have to resort to good old XMLHttpRequest.
+          var xhr = new XMLHttpRequest();
+
+          return new Promise(function(resolve, reject) {
+            xhr.open('GET', url, true);
+            xhr.responseType = 'document';
+            xhr.setRequestHeader('Accept', 'text/html');
+            xhr.onload = function() {
+              // .responseXML contains a ready-to-use Document object
+              resolve(xhr.responseXML);
+            };
+            console.log('Sending the XHR request!');
+            xhr.send();
+          });
+        }
+
+        // This can be any DOM element
+        var container = document.getElementById('container');
+
+        // The AMP page you want to display
+        var url = "http://0.0.0.0:8000/examples/amp-story/attachment.html";
+
+        // Use our fetchDocument method to get the doc
+        fetchDocument(url).then(function(doc) {
+          // Let AMP take over and render the page
+          console.log('Attaching the shadow doc!');
+          var ampedDoc = AMP.attachShadowDoc(container, doc, url);
+        });
+      });
+    </script>
+  </body>
+</html>
