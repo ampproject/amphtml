@@ -713,10 +713,13 @@ function buildBinaries(extDir, binaries, options) {
  */
 async function buildBentoExtensionJs(dir, name, options) {
   const bentoName = name.replace(/^amp-/, 'bento-');
-  options = {...options};
-  options.wrapper = 'none';
-  options.filename = await getBentoFilename(dir, bentoName, options);
-  return buildExtensionJs(dir, bentoName, options);
+  return buildExtensionJs(dir, bentoName, {
+    ...options,
+    wrapper: 'none',
+    filename: await getBentoFilename(dir, bentoName, options),
+    // Include extension directory since our entrypoint may be elsewhere.
+    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
+  });
 }
 
 /**
@@ -759,10 +762,6 @@ defineElement();
   `.trim();
   const generatedFilename = `build/${name}.js`;
   await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
-
-  // Include code in extension directory outside /build
-  options.extraGlobs = [...(options.extraGlobs || []), `${dir}/**/*.js`];
-
   return generatedFilename;
 }
 
