@@ -13,7 +13,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 /**
  * @return {Promise<string[]>}
  */
-async function getPathsToDelete() {
+async function getPathsFromIgnoreList() {
   const [, below] = splitIgnoreListByHeader(
     await fs.readFile(ignoreFile, 'utf8')
   );
@@ -33,14 +33,16 @@ async function getPathsToDelete() {
  * @return {Promise<void>}
  */
 async function clean() {
-  const pathsToDeleteFromIgnore = [
-    ...(await getPathsToDelete()),
+  const pathsFromIgnoreList = [
+    ...(await getPathsFromIgnoreList()),
     '!**/third_party',
     '!**/node_modules',
   ];
-  const pathsToDelete = [];
+
+  const pathsFromArgv = [];
+
   if (argv.include_subpackages) {
-    pathsToDelete.push('**/node_modules', '!node_modules');
+    pathsFromArgv.push('**/node_modules', '!node_modules');
   }
 
   // User configuration files
@@ -50,7 +52,7 @@ async function clean() {
     'build-system/global-configs/custom-flavors-config.json',
   ];
   if (argv.include_custom_configs) {
-    pathsToDelete.push(...customConfigs);
+    pathsFromArgv.push(...customConfigs);
   } else {
     for (const customConfig of customConfigs) {
       if (fs.existsSync(customConfig)) {
@@ -59,21 +61,18 @@ async function clean() {
     }
   }
 
-  if (argv.exclude) {
-    const excludes = argv.exclude.split(',');
-    for (const exclude of excludes) {
-      pathsToDelete.push(`!${exclude}`);
-    }
-  }
+  const excludes =
+    argv.exclude?.split(',').map((exclude) => `!${exclude}`) ?? [];
 
   const delOptions = {
     expandDirectories: false,
     dryRun: argv.dry_run,
   };
   const deletedPaths = [
-    ...(await del(pathsToDeleteFromIgnore, delOptions)),
-    ...(await del(pathsToDelete, delOptions)),
+    ...(await del([...pathsFromIgnoreList, ...excludes], delOptions)),
+    ...(await del([...pathsFromArgv, ...excludes], delOptions)),
   ].sort();
+
   if (deletedPaths.length > 0) {
     log(argv.dry_run ? "Paths that would've been deleted:" : 'Deleted paths:');
     deletedPaths.forEach((deletedPath) => {
