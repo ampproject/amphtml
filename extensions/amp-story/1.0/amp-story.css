@@ -232,7 +232,7 @@ amp-story-page:not(:first-of-type):not([distance]):not([active]) {
   transform: translateY(1000vh) !important;
 }
 
-amp-story.i-amphtml-story-loaded amp-story-page:not([active]) {
+amp-story-page[distance]:not([active]) {
   transform: translateY(1000vh) !important;
 }
 
