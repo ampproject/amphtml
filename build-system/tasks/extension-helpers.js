@@ -790,11 +790,12 @@ async function buildExtensionJs(
  * @return {Promise<string>}
  */
 async function getBentoFilename(sourceDir, name, version, options) {
-  const optionalSpecified = `${name}.js`;
-  if (await fs.pathExists(`${sourceDir}/${optionalSpecified}`)) {
-    return sourceDir;
+  const filename = `${name}.js`;
+  if (await fs.pathExists(`${sourceDir}/${filename}`)) {
+    return filename;
   }
-  const source = `
+  const generatedFilename = `build/${filename}`;
+  const generatedSource = `
 import {BaseElement} from '../base-element';
 ${
   options.hasCss
@@ -807,11 +808,11 @@ ${
 }
 AMP.registerElement('${name}', BaseElement, CSS);
   `.trim();
-  const written = `build/${name}.js`;
+
   // Include code in extension directory outside /build
   options.extraGlobs = [...(options.extraGlobs || []), `${sourceDir}/**/*.js`];
-  await fs.outputFile(`${sourceDir}/${written}`, source);
-  return written;
+  await fs.outputFile(`${sourceDir}/${generatedFilename}`, generatedSource);
+  return generatedFilename;
 }
 
 /**
@@ -821,12 +822,8 @@ AMP.registerElement('${name}', BaseElement, CSS);
  * @return {string}
  */
 function getBentoCssImportPath(sourceDir, name, version) {
-  // TODO(alanorozco): This should instead be the bento-*.css output that
-  // should be available after this is submitted:
-  // https://github.com/ampproject/amphtml/pull/36221
-  const ampName = name.replace(/^bento-/, 'amp-');
   const root = sourceDir.split('/').fill('..').join('/');
-  return `${root}/build/${ampName}-${version}.css`;
+  return `${root}/build/${name}-${version}.css`;
 }
 
 /**
