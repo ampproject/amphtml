@@ -27,9 +27,7 @@ async function checkIgnoreList() {
   }
 }
 
-checkIgnoreList.description = `Checks that ignore files (${syncIgnoreFiles.join(
-  ', '
-)}) are in sync using ${ignoreFile} as the source of truth.`;
+checkIgnoreList.description = 'Check ignore lists to make sure they are in sync';
 
 checkIgnoreList.flags = {
   'fix': `Fix files out of sync`,
