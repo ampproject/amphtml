@@ -706,40 +706,32 @@ function buildBinaries(extDir, binaries, options) {
 }
 
 /**
- * Build the JavaScript file for an extension in Bento standalone mode.
- *
- * @param {string} sourceDir Path to the extension's directory
- * @param {string} name Name of the extension. Must be the sub directory in
- *     the extensions directory and the name of the JS and optional CSS file.
+ * @param {string} dir
+ * @param {string} name
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildBentoExtensionJs(sourceDir, name, options) {
-  const bentoOptions = {
-    ...options,
-    wrapper: 'none',
-  };
+async function buildBentoExtensionJs(dir, name, options) {
   const bentoName = name.replace(/^amp-/, 'bento-');
-  const bentoSourceDir = await getBentoSourceDir(
-    sourceDir,
-    bentoName,
-    bentoOptions
-  );
-  return buildExtensionJs(bentoSourceDir, bentoName, bentoOptions);
+  options = {...options};
+  options.wrapper = 'none';
+  options.filename = await getBentoFilename(dir, bentoName, options);
+  return buildExtensionJs(dir, bentoName, options);
 }
 
 /**
- * Extensions may specify their own bento-install.js to install multiple
- * elements or to specify custom install logic. Otherwise, we generate an
- * install script with the default configuration.
- * @param {string} sourceDir
+ * Bento extensions may specify their own bento-*.js file to specify custom
+ * install logic. Otherwise, we generate an install script with the default
+ * configuration.
+ * @param {string} dir
  * @param {string} name
  * @param {Object} options
  * @return {Promise<string>}
  */
-async function getBentoSourceDir(sourceDir, name, options) {
-  if (await fs.pathExists(`${sourceDir}/${name}.js`)) {
-    return sourceDir;
+async function getBentoFilename(dir, name, options) {
+  const filename = `${name}.js`;
+  if (await fs.pathExists(`${dir}/${filename}`)) {
+    return filename;
   }
   let css;
   if (options.hasCss) {
@@ -766,47 +758,52 @@ document.head.appendChild(style);
 
 defineElement();
   `.trim();
-  const generatedSourceDir = `${sourceDir}/build`;
-  await fs.outputFile(`${generatedSourceDir}/${name}.js`, generatedSource);
+  const generatedFilename = `build/${name}.js`;
+  await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
 
   // Include code in extension directory outside /build
-  options.extraGlobs = [...(options.extraGlobs || []), `${sourceDir}/**/*.js`];
+  options.extraGlobs = [...(options.extraGlobs || []), `${dir}/**/*.js`];
 
-  return generatedSourceDir;
+  return generatedFilename;
 }
 
 /**
  * Build the JavaScript for the extension specified
  *
- * @param {string} sourceDir Path to the extension's directory
+ * @param {string} dir Path to the extension's directory
  * @param {string} name Name of the extension. Must be the sub directory in
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildExtensionJs(sourceDir, name, options) {
-  const {latestVersion, version} = options;
+async function buildExtensionJs(dir, name, options) {
+  const {
+    latestVersion,
+    version,
+    filename = `${name}.js`,
+    wrapper = 'extension',
+  } = options;
+
   const isLatest = version === latestVersion;
 
-  const wrapperName = options.wrapper || 'extension';
-  const wrapperOrFn = wrappers[wrapperName];
+  const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {
     throw new Error(
-      `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
+      `Unknown options.wrapper "${wrapper}" (${name}:${version})\n` +
         `Expected one of: ${Object.keys(wrappers).join(', ')}`
     );
   }
-  const wrapper =
+  const resolvedWrapper =
     typeof wrapperOrFn === 'function'
       ? wrapperOrFn(name, version, isLatest, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
-  await compileJs(`${sourceDir}/`, `${name}.js`, './dist/v0', {
+  await compileJs(`${dir}/`, filename, './dist/v0', {
     ...options,
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
     latestName: isLatest ? `${name}-latest.js` : '',
-    wrapper,
+    wrapper: resolvedWrapper,
   });
 
   // If an incremental watch build fails, simply return.
