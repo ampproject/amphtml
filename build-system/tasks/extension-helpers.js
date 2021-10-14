@@ -794,17 +794,15 @@ async function getBentoFilename(sourceDir, name, version, options) {
   if (await fs.pathExists(`${sourceDir}/${filename}`)) {
     return filename;
   }
+  const sourceDirToRoot = sourceDir.split('/').fill('..').join('/');
   const generatedFilename = `build/${filename}`;
   const generatedSource = `
 import {BaseElement} from '../base-element';
 ${
   options.hasCss
-    ? `import {CSS} from '../${getBentoCssImportPath(
-        sourceDir,
-        name,
-        version
-      )}';`
-    : 'let CSS;' // undefined, gets DCE'd
+    ? `import {CSS} from '../${sourceDirToRoot}/build/${name}-${version}.css';`
+    : // undefined, gets DCE'd:
+      'let CSS;'
 }
 AMP.registerElement('${name}', BaseElement, CSS);
   `.trim();
@@ -813,17 +811,6 @@ AMP.registerElement('${name}', BaseElement, CSS);
   options.extraGlobs = [...(options.extraGlobs || []), `${sourceDir}/**/*.js`];
   await fs.outputFile(`${sourceDir}/${generatedFilename}`, generatedSource);
   return generatedFilename;
-}
-
-/**
- * @param {string} sourceDir
- * @param {string} name
- * @param {string} version
- * @return {string}
- */
-function getBentoCssImportPath(sourceDir, name, version) {
-  const root = sourceDir.split('/').fill('..').join('/');
-  return `${root}/build/${name}-${version}.css`;
 }
 
 /**
