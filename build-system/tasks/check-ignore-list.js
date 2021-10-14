@@ -4,7 +4,7 @@ const {writeDiffOrFail} = require('../common/diff');
 const ignoreFile = '.gitignore';
 const syncIgnoreFiles = ['.prettierignore', '.eslintignore'];
 
-const header = '# Globally ignored below';
+const header = '# [GLOBALLY IGNORED]';
 
 /**
  * @param {string} source
