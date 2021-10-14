@@ -496,7 +496,10 @@ async function buildExtension(
     return;
   }
 
-  await buildExtensionJs(extDir, name, version, latestVersion, options);
+  if (options.bento) {
+    await buildBentoExtensionJs(extDir, name, options);
+  }
+  await buildExtensionJs(extDir, name, options);
 }
 
 /**
@@ -587,10 +590,7 @@ async function buildExtensionCss(extDir, name, version, options) {
 
   const parallel = [mainCssBinaryPromise];
 
-  // Currently JSON.stringifying to allow arrays and strings:
-  // {"wrapper": "bento"} and {"wrapper": ["bento"]}
-  // TODO(https://go.amp.dev/issue/36351): Use a `bento` flag instead.
-  if (options.wrapper && JSON.stringify(options.wrapper).includes('"bento"')) {
+  if (options.bento) {
     const bentoCssPromise = mainCssPromise.then((mainCss) =>
       buildBentoCss(name, version, mainCss)
     );
@@ -706,77 +706,23 @@ function buildBinaries(extDir, binaries, options) {
 }
 
 /**
- * @param {T|T[]} itemOrArray
- * @return {T[]}
- * @template T
- */
-function arrayOrItemToArray(itemOrArray) {
-  return Array.isArray(itemOrArray) ? itemOrArray : [itemOrArray];
-}
-
-/**
- * Build the JavaScript for the extension specified
+ * Build the JavaScript file for an extension in Bento standalone mode.
  *
  * @param {string} sourceDir Path to the extension's directory
  * @param {string} name Name of the extension. Must be the sub directory in
  *     the extensions directory and the name of the JS and optional CSS file.
- * @param {string} version Version of the extension. Must be identical to
- *     the sub directory inside the extension directory
- * @param {string} latestVersion Latest version of the extension.
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildExtensionJs(
-  sourceDir,
-  name,
-  version,
-  latestVersion,
-  options
-) {
-  const isLatest = version === latestVersion;
-
-  const wrapperNames = arrayOrItemToArray(options.wrapper || 'extension');
-
-  const builds = wrapperNames.map(async (wrapperName) => {
-    // TODO(https://go.amp.dev/issue/36351): Use a `bento` flag instead.
-    // The outer function can then be called twice at a higher level.
-    const isBento = wrapperName === 'bento';
-
-    const resolvedName = isBento ? name.replace(/^amp-/, 'bento-') : name;
-    const resolvedFilename = isBento
-      ? await getBentoFilename(sourceDir, resolvedName, version, options)
-      : `${resolvedName}.js`;
-
-    const wrapperOrFn = wrappers[wrapperName];
-    if (!wrapperOrFn) {
-      throw new Error(
-        `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
-          `Expected one of: ${Object.keys(wrappers).join(', ')}`
-      );
-    }
-    const wrapper =
-      typeof wrapperOrFn === 'function'
-        ? wrapperOrFn(
-            resolvedName,
-            version,
-            isLatest,
-            argv.esm,
-            options.loadPriority
-          )
-        : wrapperOrFn;
-
-    return buildExtensionJsWithWrapper(
-      wrapper,
-      sourceDir,
-      resolvedName,
-      resolvedFilename,
-      version,
-      isLatest,
-      options
-    );
-  });
-
-  await Promise.all(builds);
+async function buildBentoExtensionJs(sourceDir, name, options) {
+  const bentoOptions = {...options, wrapper: 'bento'};
+  const bentoName = name.replace(/^amp-/, 'bento-');
+  const bentoSourceDir = await getBentoSourceDir(
+    sourceDir,
+    bentoName,
+    bentoOptions
+  );
+  return buildExtensionJs(bentoSourceDir, bentoName, bentoOptions);
 }
 
 /**
@@ -785,54 +731,57 @@ async function buildExtensionJs(
  * install script with the default configuration.
  * @param {string} sourceDir
  * @param {string} name
- * @param {string} version
  * @param {Object} options
  * @return {Promise<string>}
  */
-async function getBentoFilename(sourceDir, name, version, options) {
-  const filename = `${name}.js`;
-  if (await fs.pathExists(`${sourceDir}/${filename}`)) {
-    return filename;
+async function getBentoSourceDir(sourceDir, name, options) {
+  if (await fs.pathExists(`${sourceDir}/${name}.js`)) {
+    return sourceDir;
   }
-  const sourceDirToRoot = sourceDir.split('/').fill('..').join('/');
-  const generatedFilename = `build/${filename}`;
+  let css;
+  if (options.hasCss) {
+    css = await fs.readFile(`build/${name}-${options.version}.css`, 'utf8');
+  }
   const generatedSource = `
 import {BaseElement} from '../base-element';
-${
-  options.hasCss
-    ? `import {CSS} from '../${sourceDirToRoot}/build/${name}-${version}.css';`
-    : // undefined, gets DCE'd:
-      'let CSS;'
-}
-AMP.registerElement('${name}', BaseElement, CSS);
+AMP.registerElement('${name}', BaseElement, ${JSON.stringify(css)});
   `.trim();
+  const generatedSourceDir = `${sourceDir}/build`;
+  await fs.outputFile(`${generatedSourceDir}/${name}.js`, generatedSource);
 
   // Include code in extension directory outside /build
   options.extraGlobs = [...(options.extraGlobs || []), `${sourceDir}/**/*.js`];
-  await fs.outputFile(`${sourceDir}/${generatedFilename}`, generatedSource);
-  return generatedFilename;
+
+  return generatedSourceDir;
 }
 
 /**
- * @param {string} wrapper
- * @param {string} sourceDir
- * @param {string} name
- * @param {string} filename
- * @param {string} version
- * @param {boolean} isLatest
+ * Build the JavaScript for the extension specified
+ *
+ * @param {string} sourceDir Path to the extension's directory
+ * @param {string} name Name of the extension. Must be the sub directory in
+ *     the extensions directory and the name of the JS and optional CSS file.
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildExtensionJsWithWrapper(
-  wrapper,
-  sourceDir,
-  name,
-  filename,
-  version,
-  isLatest,
-  options
-) {
-  await compileJs(`${sourceDir}/`, filename, './dist/v0', {
+async function buildExtensionJs(sourceDir, name, options) {
+  const {latestVersion, version} = options;
+  const isLatest = version === latestVersion;
+
+  const wrapperName = options.wrapper || 'extension';
+  const wrapperOrFn = wrappers[wrapperName];
+  if (!wrapperOrFn) {
+    throw new Error(
+      `Unknown options.wrapper "${wrapperName}" (${name}:${version})\n` +
+        `Expected one of: ${Object.keys(wrappers).join(', ')}`
+    );
+  }
+  const wrapper =
+    typeof wrapperOrFn === 'function'
+      ? wrapperOrFn(name, version, isLatest, argv.esm, options.loadPriority)
+      : wrapperOrFn;
+
+  await compileJs(`${sourceDir}/`, `${name}.js`, './dist/v0', {
     ...options,
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,

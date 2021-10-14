@@ -279,10 +279,7 @@ async function makeExtensionFromTemplates(
     bundleConfig.options = {...bundleConfig.options, hasCss: true};
   }
   if (options.bento) {
-    bundleConfig.options = {
-      ...bundleConfig.options,
-      wrapper: ['extension', 'bento'],
-    };
+    bundleConfig.options = {...bundleConfig.options, bento: true};
   }
 
   await insertExtensionBundlesConfig(

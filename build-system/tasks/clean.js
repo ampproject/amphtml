@@ -36,6 +36,7 @@ async function clean() {
     'dist.tools',
     'export',
     'examples/storybook',
+    'extensions/**/build',
     'extensions/**/dist',
     'release',
     'result-reports',
