@@ -14,22 +14,22 @@ export function andbeyond(global, data) {
     global,
     'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
     () => {
-      // loadScript(
-      //   global,
-      // 'https://cdn.andbeyond.media/' + data.siteid + '/amp.js',
-      //   () => {
-      //     window.andbeyond.initAmp(
-      //       global,
-      //       data.width,
-      //       data.height,
-      //       data.siteid,
-      //       data.slotpath,
-      //       data.totalampslots,
-      //       data.jsontargeting,
-      //       data.extras
-      //     );
-      //   }
-      // );
+      loadScript(
+        global,
+      'https://cdn.andbeyond.media/' + data.siteid + '/amp.js',
+        () => {
+          window.andbeyond.initAmp(
+            global,
+            data.width,
+            data.height,
+            data.siteid,
+            data.slotpath,
+            data.totalampslots,
+            data.jsontargeting,
+            data.extras
+          );
+        }
+      );
     }
   );
 }
