@@ -1032,7 +1032,7 @@ describes.realWin(
             const clickEvent = new MouseEvent('click', {clientX: 200});
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
+              if (sendMessageStub.called) {
                 expect(sendMessageStub).to.be.calledWithExactly(
                   'selectDocument',
                   {
@@ -1088,7 +1088,7 @@ describes.realWin(
             const clickEvent = new MouseEvent('click', {clientX: 10});
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
+              if (sendMessageStub.called) {
                 expect(sendMessageStub).to.be.calledWithExactly(
                   'selectDocument',
                   {
