@@ -135,7 +135,13 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
       }
 
       let type = source['type'];
-      type += source['codec'] ? '; codecs=' + source['codec'] : '';
+      // If the codec information is available, add it to the type attribute.
+      // We do not append H.264 codec strings because, unlike their synonymous
+      // AVC codec strings (e.g., "avc1.4d002a"), "h264" is not recognized as a
+      // playable type by the browser.
+      if (source['codec'] && source['codec'] !== 'h264') {
+        type += '; codecs=' + source['codec'];
+      }
       const sourceEl = createElementWithAttributes(
         videoEl.ownerDocument,
         'source',
