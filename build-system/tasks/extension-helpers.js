@@ -715,7 +715,10 @@ function buildBinaries(extDir, binaries, options) {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(sourceDir, name, options) {
-  const bentoOptions = {...options, wrapper: 'bento'};
+  const bentoOptions = {
+    ...options,
+    wrapper: 'none',
+  };
   const bentoName = name.replace(/^amp-/, 'bento-');
   const bentoSourceDir = await getBentoSourceDir(
     sourceDir,
@@ -744,7 +747,24 @@ async function getBentoSourceDir(sourceDir, name, options) {
   }
   const generatedSource = `
 import {BaseElement} from '../base-element';
-AMP.registerElement('${name}', BaseElement, ${JSON.stringify(css)});
+
+function defineElement() {
+  ${
+    css
+      ? `
+const style = document.createElement('style');
+style.textContent = ${JSON.stringify(css)};
+document.head.appendChild(style);
+  `.trim()
+      : ''
+  }
+  customElements.define(
+    ${JSON.stringify(name)},
+    BaseElement.CustomElement(BaseElement)
+  );
+}
+
+defineElement();
   `.trim();
   const generatedSourceDir = `${sourceDir}/build`;
   await fs.outputFile(`${generatedSourceDir}/${name}.js`, generatedSource);

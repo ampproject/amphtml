@@ -1,11 +1,5 @@
 const {VERSION} = require('./internal-version');
 
-const removeWhitespace = (str) =>
-  str
-    .replace(/\s+/g, '')
-    // <%=contents%> is ignored down the line, so we restore its whitespace
-    .replace('<%=contents%>', '<%= contents %>');
-
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
 // If "AMP" is already an object then that means another runtime has already
@@ -86,31 +80,5 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
     '}'
   );
 }
-
-/**
- * Wraps extension code to install a Bento component.
- *
- * On Bento documents, the extension's function (f) is executed immediately.
- * In this case, a barebones `AMP.registerElement` is also provided.
- * It uses a CustomElement implementation provided by the extension class
- * itself, and installs extension-specific CSS as soon as possible.
- *
- * The provided AMP.registerElement function has the same signature as
- * `Extensions.addElement` on extensions-impl.js. In order:
- * - `name` (n): the name of the custom element tag
- * - `Ctor` (c): the constructor function (class) for the custom element
- * - `style` (s): optional string to install CSS for the custom element
- */
-exports.bento = removeWhitespace(`
-  (function(AMP,_){<%= contents %>})({
-    registerElement: function (n, b, s) {
-      if (s)
-        document.head.appendChild(
-          document.createElement("style")
-        ).textContent = s;
-      customElements.define(n, b.CustomElement(b));
-    },
-  });
-`);
 
 exports.none = '<%= contents %>';
