@@ -4,7 +4,7 @@ import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
-import {whenCalled} from '#testing/test-helper';
+import {whenCalled} from '#testing/helpers/service';
 import {Services} from '#service/';
 
 describes.realWin(

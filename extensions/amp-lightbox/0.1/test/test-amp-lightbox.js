@@ -4,7 +4,7 @@ import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {whenCalled} from '#testing/test-helper';
+import {whenCalled} from '#testing/helpers/service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(
