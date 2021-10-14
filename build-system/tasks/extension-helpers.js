@@ -733,10 +733,9 @@ async function getBentoFilename(dir, name, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  let css;
-  if (options.hasCss) {
-    css = await fs.readFile(`build/${name}-${options.version}.css`, 'utf8');
-  }
+  const css = options.hasCss
+    ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
+    : null;
   const generatedSource = `
 import {BaseElement} from '../base-element';
 
