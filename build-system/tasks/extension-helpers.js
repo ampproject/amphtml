@@ -28,7 +28,6 @@ const {
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, red} = require('kleur/colors');
-const {getBentoName} = require('./bento-helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {jssOptions} = require('../babel-config/jss-config');
@@ -626,7 +625,7 @@ async function buildExtensionCss(extDir, name, version, options) {
  * @return {!Promise}
  */
 async function buildBentoCss(name, version, minifiedAmpCss) {
-  const bentoName = getBentoName(name);
+  const bentoName = name.replace(/^amp-/, 'bento-');
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
   await fs.outputFile(`build/${bentoName}-${version}.css`, renamedCss);
   await fs.outputFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
@@ -714,7 +713,7 @@ function buildBinaries(extDir, binaries, options) {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
-  const bentoName = getBentoName(name);
+  const bentoName = name.replace(/^amp-/, 'bento-');
   return buildExtensionJs(dir, bentoName, {
     ...options,
     wrapper: 'none',
