@@ -56,7 +56,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -199,7 +199,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -233,7 +233,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -299,7 +299,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento",
+      "bento": true,
       "hasCss": true
     }
   },
@@ -314,7 +314,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento",
+      "bento": true,
       "hasCss": true
     }
   },
@@ -351,7 +351,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -374,7 +374,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -407,7 +407,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -481,7 +481,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -548,7 +548,7 @@
         "amp-inline-gallery-pagination"
       ],
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -571,7 +571,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -614,7 +614,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -632,7 +632,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -678,7 +678,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "wrapper": "bento",
+      "bento": true,
       "npm": true
     }
   },
@@ -827,7 +827,7 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -863,7 +863,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -892,7 +892,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -927,7 +927,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -942,7 +942,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1088,7 +1088,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1127,7 +1127,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1154,7 +1154,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1177,7 +1177,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1200,7 +1200,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1227,7 +1227,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1265,7 +1265,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1285,7 +1285,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   }
 ]

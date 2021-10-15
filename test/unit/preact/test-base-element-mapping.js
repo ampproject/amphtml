@@ -9,7 +9,7 @@ import {Slot} from '#preact/slot';
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 
 import {testElementR1} from '#testing/element-v1';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 
