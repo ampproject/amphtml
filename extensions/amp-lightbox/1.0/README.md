@@ -147,6 +147,20 @@ be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 When the `scrollable` attribute is present, the content of the lightbox can
 scroll when overflowing the height of the lightbox.
 
+#### Analytics
+
+Use the `open` and `close` events to report analytics. For example, metrics can be reported to Google Analytics as follows:
+
+```js
+lightbox.addEventListener('open', (e) => {
+  ga('send', {
+    hitType: 'event',
+    eventAction: 'lightbox-open',
+    ...
+  });
+});
+```
+
 ### Preact/React Component
 
 The examples below demonstrates use of the `<BentoLightbox>` as a functional component usable with the Preact or React libraries.
