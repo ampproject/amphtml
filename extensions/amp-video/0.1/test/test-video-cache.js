@@ -153,7 +153,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
             sources: [
               {
                 'url': 'video1.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 700,
                 type: 'video/mp4',
               },
@@ -188,7 +188,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const srcCodec2 = addedSources[2]
         .getAttribute('type')
         .match(codecRegex)[0];
-      expect(srcCodec0).to.equal('vp09.02.30.11');
+      expect(srcCodec0).to.equal('vp09.00.30.08');
       expect(srcCodec1).to.equal('h264');
       expect(srcCodec2).to.equal('unknown');
     });
@@ -200,19 +200,19 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
             sources: [
               {
                 'url': 'video1.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 700,
                 type: 'video/mp4',
               },
               {
                 'url': 'video2.mp4',
-                'codec': 'vp09.00.15.08',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 2000,
                 type: 'video/mp4',
               },
               {
                 'url': 'video3.mp4',
-                'codec': 'vp09.00.25.00',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 1500,
                 type: 'video/mp4',
               },
@@ -243,13 +243,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
               },
               {
                 'url': 'video2.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 1000,
                 type: 'video/mp4',
               },
               {
                 'url': 'video3.mp4',
-                'codec': 'vp09.00.15.08',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 2000,
                 type: 'video/mp4',
               },
@@ -283,10 +283,10 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         .match(codecRegex)[0];
 
       expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
-      expect(srcCodec0).to.equal('vp09.00.15.08');
+      expect(srcCodec0).to.equal('vp09.00.30.08');
 
       expect(addedSources[1].getAttribute('data-bitrate')).to.equal('1000');
-      expect(srcCodec1).to.equal('vp09.02.30.11');
+      expect(srcCodec1).to.equal('vp09.00.30.08');
 
       expect(addedSources[2].getAttribute('data-bitrate')).to.equal('3000');
       expect(srcCodec2).to.equal('h264');
