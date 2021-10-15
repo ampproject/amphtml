@@ -16,7 +16,7 @@ export function andbeyond(global, data) {
     () => {
       loadScript(
         global,
-      'https://rtbcdn.andbeyond.media/prod-global-' + data.siteid + '.js',
+        'https://rtbcdn.andbeyond.media/prod-global-' + data.siteid + '.js',
         () => {
           window.andbeyond.initAmp(
             global,
