@@ -57,10 +57,10 @@ export function getNaturalDimensions(element) {
     const temp = /** @type {!HTMLElement} */ (
       doc.createElement(naturalTagName)
     );
+
     // For audio, should no-op elsewhere.
-    if (naturalTagName === 'audio') {
-      /** @type {HTMLAudioElement}*/ (temp).controls = true;
-    }
+    /** @type {*} */ (temp).controls = true;
+
     setStyles(temp, {
       position: 'absolute',
       visibility: 'hidden',
