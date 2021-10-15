@@ -296,14 +296,14 @@ ref.current.toggle("2", true); // Select the item with the attribute `option="2"
 This event is triggered when a selector option is selected or deselected.
 The `onChange` prop gives you two key options:
 
--   `option` which returns the value of the `option` prop of the `BentoSelectorOption` which was clicked.
+-   `option` which returns the value of the `option` prop of the `BentoSelectorOption` which was selected or deselected.
 -   `value` which returns an array of which `BentoSelectorOptions` are currently selected in the order they were selected.
 
 ```jsx
     <BentoSelector
       as="ul"
       multiple
-      onChange={(option, value) => console.log(option, value)}
+      onChange={({option, value}) => console.log(option, value)}
     >
       <BentoSelectorOption as="li" option="1">
         Option 1
