@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 # Seedtag
 
 ## Example
@@ -42,10 +43,12 @@ Supported parameters:
 -   `data-placement` mandatory
 
 ## Testing
+
 You can force a creative for test using this parameters
+
 -   `data-force-creative` optional
 
-Currently you can test those format : 
+Currently you can test those format :
 | Format | value |
 | ------ | ----- |
 | display 300x250 | https://creatives.seedtag.com/vast/ssp-responses/display-OM300x250.json |
@@ -55,7 +58,8 @@ Currently you can test those format :
 | display 970x250 | https://creatives.seedtag.com/vast/ssp-responses/display-OM970x250.json |
 | video outstream | https://creatives.seedtag.com/vast/ssp-responses/video-cov.json |
 
-this way : 
+this way :
+
 ```html
   <amp-ad
     width="320"
