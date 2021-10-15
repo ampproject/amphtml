@@ -4,7 +4,7 @@ import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {assertScreenReaderElement} from '#testing/test-helper';
+import {assertScreenReaderElement} from '#testing/helpers/service';
 import {clearModalStack, getModalStackLength} from '#core/dom/modal';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';

@@ -2,7 +2,7 @@ import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {map} from '#core/types/object';
-import {stubService} from '#testing/test-helper';
+import {stubService} from '#testing/helpers/service';
 import {user} from '#utils/log';
 
 describes.realWin(
