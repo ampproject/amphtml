@@ -247,7 +247,7 @@ class AmpDailymotion extends AMP.BaseElement {
       this.element.hasAttribute('autoplay'),
       endscreenEnable !== 'false',
       info !== 'false',
-      mute !== 'true',
+      mute,
       sharingEnable !== 'false',
       start,
       uiHighlight,
