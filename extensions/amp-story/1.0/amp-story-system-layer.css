@@ -185,7 +185,7 @@
   background-color: #fbc02d !important;
   height: 100% !important;
   position: relative !important;
-  top: -2px !important;
+  top: -100% !important;
   transform-origin: left !important;
   width: 100% !important;
 }
