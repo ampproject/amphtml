@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { loadScript, validateData } from '#3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -34,8 +34,5 @@ export function seedtag(global, data) {
     global._seedtag_amp.allowed_data
   );
 
-  loadScript(
-    global,
-    'https://config.seedtag.com/omid/bridge/bridge.js'
-  );
+  loadScript(global, 'https://config.seedtag.com/omid/bridge/bridge.js');
 }

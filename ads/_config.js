@@ -1092,7 +1092,7 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
     renderStartImplemented: true,
   },
-  
+
   'sekindo': {
     renderStartImplemented: true,
   },

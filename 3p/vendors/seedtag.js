@@ -17,10 +17,10 @@
 // src/polyfills.js must be the first import.
 import '#3p/polyfills';
 
-import { register } from '#3p/3p';
-import { draw3p, init } from '#3p/integration-lib';
+import {register} from '#3p/3p';
+import {draw3p, init} from '#3p/integration-lib';
 
-import { seedtag } from '#ads/vendors/seedtag';
+import {seedtag} from '#ads/vendors/seedtag';
 
 init(window);
 register('seedtag', seedtag);
