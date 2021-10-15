@@ -59,7 +59,7 @@ export function getNaturalDimensions(element) {
     );
 
     // For audio, should no-op elsewhere.
-    /** @type {*} */ (temp).controls = true;
+    /** @type {HTMLAudioElement} */ (temp).controls = true;
 
     setStyles(temp, {
       position: 'absolute',
