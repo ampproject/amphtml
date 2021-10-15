@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
 # Seedtag
 
 ## Example
@@ -47,9 +46,9 @@ You can force a creative for test using this parameters
 -   `data-force-creative` optional
 
 Currently you can test those format : 
-| Format        | value         |
-| ------------- | ------------- |
-| display 300x250  | https://creatives.seedtag.com/vast/ssp-responses/display-OM300x250.json  |
+| Format | value |
+| ------ | ----- |
+| display 300x250 | https://creatives.seedtag.com/vast/ssp-responses/display-OM300x250.json |
 | display 300x50 | https://creatives.seedtag.com/vast/ssp-responses/display-OM300x50.json |
 | display 320x480 | https://creatives.seedtag.com/vast/ssp-responses/display-OM320x480.json |
 | display 970x90 | https://creatives.seedtag.com/vast/ssp-responses/display-OM970x90.json |
