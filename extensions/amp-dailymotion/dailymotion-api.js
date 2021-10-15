@@ -36,15 +36,18 @@ export function getDailymotionIframeSrc(
     )}?api=1&html=1&app=amp`,
     Object.assign(
       dict({
-        'endscreen-enable': endscreenEnable,
-        'info': info,
+        // In the dailymotion API endscreenEnable, info, sharingEnable, and uiLogo
+        // all default to true, so if the attr is not marked as false do not add it to the URL
+        'endscreen-enable':
+          endscreenEnable !== true ? endscreenEnable : undefined,
+        'info': info !== true ? info : undefined,
         // In order to support autoplay the video needs to be muted on load so we
         // dont receive an unmute event which prevents the video from autoplay.
         'mute': mute || (autoplay && isAutoplaySupported(win)) ? 1 : undefined,
-        'sharing-enable': sharingEnable,
+        'sharing-enable': sharingEnable !== true ? sharingEnable : undefined,
         'start': start,
         'ui-highlight': uiHighlight,
-        'ui-logo': uiLogo,
+        'ui-logo': uiLogo !== true ? uiLogo : undefined,
       }),
       implicitParams
     )
