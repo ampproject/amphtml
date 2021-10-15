@@ -167,7 +167,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     this.unobserveIntersections_ = null;
 
     /** @private {CarouselControls} */
-    this.carouselControls_ = new CarouselControls({
+    this.controls_ = new CarouselControls({
       element,
       go: this.go.bind(this),
       ariaRole: 'button',
@@ -362,7 +362,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   viewportCallback(inViewport) {
     if (inViewport) {
       this.autoplay_();
-      this.carouselControls_.hintControls();
+      this.controls_.hintControls();
     } else {
       this.clearAutoplayTimer_();
     }
@@ -437,8 +437,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.carouselControls_.initialize();
     this.buildCarousel();
+    this.controls_.buildDom();
+    this.controls_.initialize();
   }
 
   /** @override */
@@ -718,8 +719,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     const prevIndex = this.getPrevIndex_(this.slideIndex_);
     const index = prevIndex == null ? 0 : prevIndex;
     return (
-      this.carouselControls_.getPrevButtonTitle() +
-      this.getButtonTitleSuffix_(index)
+      this.controls_.getPrevButtonTitle() + this.getButtonTitleSuffix_(index)
     );
   }
 
@@ -728,8 +728,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     const nextIndex = this.getNextIndex_(this.slideIndex_);
     const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
     return (
-      this.carouselControls_.getNextButtonTitle() +
-      this.getButtonTitleSuffix_(index)
+      this.controls_.getNextButtonTitle() + this.getButtonTitleSuffix_(index)
     );
   }
 
@@ -874,8 +873,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
       }
     }
     this.hideRestOfTheSlides_(showIndexArr);
-    this.carouselControls_.setControlsState();
-    this.carouselControls_.updateButtonTitles(
+    this.controls_.setControlsState();
+    this.controls_.updateButtonTitles(
       this.getPrevButtonTitle(),
       this.getNextButtonTitle()
     );

@@ -23,17 +23,17 @@ export class CarouselControls {
    * }} param0
    */
   constructor({ariaRole, element, go, hasNext, hasPrev}) {
-    /** @type {!AmpElement} */
-    this.element = element;
+    /** @private @type {!AmpElement} */
+    this.element_ = element;
 
-    /** @type {!GoFunctionDef} */
-    this.go = go;
+    /** @private @type {!GoFunctionDef} */
+    this.go_ = go;
 
-    /** @type {'button' | 'presentation'} */
-    this.ariaRole = ariaRole;
+    /** @private @type {'button' | 'presentation'} */
+    this.ariaRole_ = ariaRole;
 
-    /** @type {!Window} */
-    this.win = getWin(element);
+    /** @private @type {!Window} */
+    this.win_ = getWin(element);
 
     /** @private {?HTMLDivElement} */
     this.prevButton_ = null;
@@ -52,28 +52,37 @@ export class CarouselControls {
   }
 
   /**
-   * Initialize controls, meant to be called during buildCallback
-   * after services have initialized.
+   * Runs side effects to initialize controls.
+   * Meant to be called during carousel's buildCallback().
    */
   initialize() {
-    const input = Services.inputFor(this.win);
-    const doc = /** @type {!Document} */ (this.element.ownerDocument);
+    const input = Services.inputFor(this.win_);
+    const doc = /** @type {!Document} */ (this.element_.ownerDocument);
 
-    if (isAmp4Email(doc) || this.element.hasAttribute('controls')) {
+    if (isAmp4Email(doc) || this.element_.hasAttribute('controls')) {
       this.showControls_ = true;
-      this.element.classList.add(_HAS_CONTROL_CLASS);
     } else {
       input.onMouseDetected((mouseDetected) => {
         if (mouseDetected) {
           this.showControls_ = true;
           toggleAttribute(
-            this.element,
+            this.element_,
             _CONTROL_HIDE_ATTRIBUTE,
             !this.showControls_
           );
-          this.element.classList.add(_HAS_CONTROL_CLASS);
+          this.element_.classList.add(_HAS_CONTROL_CLASS);
         }
       }, true);
+    }
+  }
+
+  /**
+   * Meant to be called as part of carousel's buildCallback().
+   */
+  buildDom() {
+    const doc = this.element_.ownerDocument;
+    if (isAmp4Email(doc) || this.element_.hasAttribute('controls')) {
+      this.element_.classList.add(_HAS_CONTROL_CLASS);
     }
     this.buildButtons();
     this.setControlsState();
@@ -86,11 +95,11 @@ export class CarouselControls {
    * @return {?HTMLDivElement}
    */
   buildButton(className, onInteraction) {
-    const button = this.element.ownerDocument.createElement('div');
+    const button = this.element_.ownerDocument.createElement('div');
     button.tabIndex = 0;
     button.classList.add('amp-carousel-button');
     button.classList.add(className);
-    button.setAttribute('role', this.ariaRole);
+    button.setAttribute('role', this.ariaRole_);
     button.onkeydown = (event) => {
       if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
         if (!event.defaultPrevented) {
@@ -111,13 +120,13 @@ export class CarouselControls {
     this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
       this.interactionPrev();
     });
-    this.element.appendChild(this.prevButton_);
+    this.element_.appendChild(this.prevButton_);
 
     this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
     });
     this.updateButtonTitles();
-    this.element.appendChild(this.nextButton_);
+    this.element_.appendChild(this.nextButton_);
   }
 
   /**
@@ -140,16 +149,15 @@ export class CarouselControls {
       return;
     }
 
-    const ampdoc = Services.ampdocServiceFor(this.win).getAmpDoc(this.element);
-    const mutator = Services.mutatorForDoc(ampdoc);
-    Services.vsyncFor(this.win).mutate(() => {
+    Services.vsyncFor(this.win_).mutate(() => {
       const className = 'i-amphtml-carousel-button-start-hint';
       const hideAttribute = 'i-amphtml-carousel-hide-buttons';
-      this.element.classList.add(className);
-      Services.timerFor(this.win).delay(() => {
-        mutator.measureMutateElement(this.element, /* measurer*/ null, () => {
-          this.element.classList.remove(className);
-          toggleAttribute(this.element, hideAttribute, !this.showControls_);
+      this.element_.classList.add(className);
+      Services.timerFor(this.win_).delay(() => {
+        const mutator = Services.mutatorForDoc(this.element_);
+        mutator.measureMutateElement(this.element_, /* measurer*/ null, () => {
+          this.element_.classList.remove(className);
+          toggleAttribute(this.element_, hideAttribute, !this.showControls_);
         });
       }, 4000);
     });
@@ -172,7 +180,7 @@ export class CarouselControls {
    */
   getNextButtonTitle() {
     return (
-      this.element.getAttribute('data-next-button-aria-label') ||
+      this.element_.getAttribute('data-next-button-aria-label') ||
       'Next item in carousel'
     );
   }
@@ -182,7 +190,7 @@ export class CarouselControls {
    */
   getPrevButtonTitle() {
     return (
-      this.element.getAttribute('data-prev-button-aria-label') ||
+      this.element_.getAttribute('data-prev-button-aria-label') ||
       'Previous item in carousel'
     );
   }
@@ -192,7 +200,7 @@ export class CarouselControls {
    */
   interactionNext() {
     if (!this.nextButton_.classList.contains('amp-disabled')) {
-      this.go(/* dir */ 1, /* animate */ true, /* autoplay */ false);
+      this.go_(/* dir */ 1, /* animate */ true, /* autoplay */ false);
     }
   }
 
@@ -201,7 +209,7 @@ export class CarouselControls {
    */
   interactionPrev() {
     if (!this.prevButton_.classList.contains('amp-disabled')) {
-      this.go(/* dir */ -1, /* animate */ true, /* autoplay */ false);
+      this.go_(/* dir */ -1, /* animate */ true, /* autoplay */ false);
     }
   }
 }

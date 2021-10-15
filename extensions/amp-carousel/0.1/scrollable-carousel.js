@@ -37,7 +37,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.unobserveIntersections_ = null;
 
     /** @private {CarouselControls} */
-    this.carouselControls_ = new CarouselControls({
+    this.controls_ = new CarouselControls({
       element,
       go: this.go.bind(this),
       hasPrev: () => this.hasPrev(),
@@ -110,8 +110,9 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.carouselControls_.initialize();
     this.buildCarousel();
+    this.controls_.buildDom();
+    this.controls_.initialize();
   }
 
   /** @override */
@@ -123,7 +124,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
-    this.carouselControls_.setControlsState();
+    this.controls_.setControlsState();
     return Promise.resolve();
   }
 
@@ -141,7 +142,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
   viewportCallback(inViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
     if (inViewport) {
-      this.carouselControls_.hintControls();
+      this.controls_.hintControls();
     }
   }
 
@@ -306,7 +307,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
     this.oldPos_ = pos;
     this.pos_ = pos;
-    this.carouselControls_.setControlsState();
+    this.controls_.setControlsState();
   }
 
   /**
