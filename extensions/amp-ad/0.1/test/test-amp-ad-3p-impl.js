@@ -12,7 +12,7 @@ import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
 import {macroTask} from '#testing/helpers';
-import {stubServiceForDoc} from '#testing/test-helper';
+import {stubServiceForDoc} from '#testing/helpers/service';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {

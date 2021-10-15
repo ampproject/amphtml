@@ -1,7 +1,10 @@
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ClickEventTracker, VisibilityTracker} from '../events';
-import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '#testing/helpers/service';
 import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '#service';
