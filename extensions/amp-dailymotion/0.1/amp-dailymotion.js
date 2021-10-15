@@ -247,11 +247,7 @@ class AmpDailymotion extends AMP.BaseElement {
       this.element.hasAttribute('autoplay'),
       endscreenEnable !== 'false',
       info !== 'false',
-<<<<<<< HEAD
-      mute !== 'false',
-=======
       mute !== 'true',
->>>>>>> bento-dailymotion
       sharingEnable !== 'false',
       start,
       uiHighlight,

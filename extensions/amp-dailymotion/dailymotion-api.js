@@ -23,11 +23,7 @@ export function getDailymotionIframeSrc(
   autoplay = false,
   endscreenEnable = true,
   info = true,
-<<<<<<< HEAD
-  mute = true,
-=======
   mute = false,
->>>>>>> bento-dailymotion
   sharingEnable = true,
   start,
   uiHighlight,
