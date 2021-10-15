@@ -297,6 +297,12 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://srv.clickfuse.com',
     renderStartImplemented: true,
   },
+
+  'andbeyond': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.andbeyond.media',
+  },
+
   'aniview': {
     renderStartImplemented: true,
   },

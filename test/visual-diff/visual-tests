@@ -349,13 +349,15 @@
       ]
     },
     {
+      // TODO(#36358, @ampproject/wg-stories): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-info-dialog"
-      ]
+      ],
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
@@ -519,13 +521,15 @@
       ]
     },
     {
+      // TODO(#36358, @ampproject/wg-stories): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/info-dialog.rtl.html",
       "name": "amp-story: info dialog (rtl)",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-info-dialog"
-      ]
+      ],
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",

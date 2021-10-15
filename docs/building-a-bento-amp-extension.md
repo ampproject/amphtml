@@ -204,13 +204,6 @@ The configurations which bridge the Preact implementation of the component and i
 -   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will not update or re-render the component on DOM mutation. Can be used in lieu of init().
 -   **Example Usage**: n/a
 
-#### PreactBaseElement['className']
-
--   **Default**: Optional.
--   **Override**: Rarely.
--   **Usage**: Specify an exact className prop to Preact.
--   **Example Usage**: n/a
-
 #### PreactBaseElement['layoutSizeDefined']
 
 -   **Default**: Optional.
