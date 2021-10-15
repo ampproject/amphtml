@@ -357,7 +357,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-info-dialog"
-      ]
+      ],
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
@@ -529,7 +529,7 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-info-dialog"
-      ]
+      ],
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
