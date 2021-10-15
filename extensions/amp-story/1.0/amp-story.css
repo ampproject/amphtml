@@ -242,7 +242,7 @@ amp-story-page[distance]:not([active]) {
  */
 amp-story-page[active],
 amp-story-page[distance="0"],
-amp-story-page[distance="1"][distance] {
+amp-story-page[distance="1"][distance][distance] {
   transform: translateY(0) !important;
 }
 
