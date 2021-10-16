@@ -4,6 +4,7 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
+import {dict, hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -175,14 +176,17 @@ export class Placement {
    * Add custom amp-analytics element
    */
   addCustomAmpAnalytics_() {
-    if (this.customAnalytics_) {
-      insertAnalyticsElement(
-        this.getAdElement(),
-        this.customAnalytics_,
-        /* loadAnalytics */ false,
-        /* disableImmediate */ false,
-        /* opt_useUrlConfig */ true
-      );
+    if (this.customAnalytics_ && hasOwn(this.customAnalytics_, 'config')) {
+      fetch(this.customAnalytics_.config)
+        .then((response) => response.json())
+        .then((analyticsConfig) => {
+          insertAnalyticsElement(
+            this.getAdElement(),
+            analyticsConfig,
+            /* loadAnalytics */ false,
+            /* disableImmediate */ false
+          );
+        });
     }
   }
 

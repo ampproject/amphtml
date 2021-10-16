@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+import {dict, hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -92,14 +93,17 @@ export class AnchorAdStrategy {
    * @param {HTMLElement} adElement
    */
   addCustomAmpAnalytics_(adElement) {
-    if (this.customAnalytics_) {
-      insertAnalyticsElement(
-        adElement,
-        this.customAnalytics_,
-        /* loadAnalytics */ false,
-        /* disableImmediate */ false,
-        /* opt_useUrlConfig */ true
-      );
+    if (this.customAnalytics_ && hasOwn(this.customAnalytics_, 'config')) {
+      fetch(this.customAnalytics_.config)
+        .then((response) => response.json())
+        .then((analyticsConfig) => {
+          insertAnalyticsElement(
+            adElement,
+            analyticsConfig,
+            /* loadAnalytics */ false,
+            /* disableImmediate */ false
+          );
+        });
     }
   }
 

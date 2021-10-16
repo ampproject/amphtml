@@ -16,15 +16,13 @@ import {devAssert, user} from '#utils/log';
  * @param {!JsonObject|null} config
  * @param {boolean=} loadAnalytics
  * @param {boolean=} disableImmediate
- * @param {boolean=} opt_useUrlConfig
  * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
   parentElement,
   config,
   loadAnalytics = false,
-  disableImmediate = false,
-  opt_useUrlConfig = false
+  disableImmediate = false
 ) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
 
@@ -35,35 +33,25 @@ export function insertAnalyticsElement(
     );
   }
 
-  if (opt_useUrlConfig && !hasOwn(config, 'config')) {
-    return user().error(
-      'AMP-ANALYTICS',
-      'No config URL defined in the object configuration'
-    );
-  }
-
   const analyticsElem = createElementWithAttributes(
     doc,
     'amp-analytics',
-    opt_useUrlConfig
-      ? deepMerge(config, {'trigger': disableImmediate ? '' : 'immediate'})
-      : dict({
-          'sandbox': 'true',
-          'trigger': disableImmediate ? '' : 'immediate',
-        })
+    dict({
+      'sandbox': 'true',
+      'trigger': disableImmediate ? '' : 'immediate',
+    })
   );
-  if (!opt_useUrlConfig) {
-    const scriptElem = createElementWithAttributes(
-      doc,
-      'script',
-      dict({
-        'type': 'application/json',
-      })
-    );
-    scriptElem.textContent = JSON.stringify(config);
-    analyticsElem.appendChild(scriptElem);
-    analyticsElem.CONFIG = config;
-  }
+
+  const scriptElem = createElementWithAttributes(
+    doc,
+    'script',
+    dict({
+      'type': 'application/json',
+    })
+  );
+  scriptElem.textContent = JSON.stringify(config);
+  analyticsElem.appendChild(scriptElem);
+  analyticsElem.CONFIG = config;
 
   // Force load analytics extension if script not included in page.
   if (loadAnalytics) {
