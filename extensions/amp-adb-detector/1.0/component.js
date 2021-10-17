@@ -1,14 +1,9 @@
+import objStr from 'obj-str';
+
 import {loadScript} from '#3p/3p';
 
 import * as Preact from '#preact';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
+import {useEffect, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 import {useStyles} from './component.jss';
@@ -17,46 +12,50 @@ import {useStyles} from './component.jss';
  * @param {!BentoAdbDetector.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BentoAdbDetector({exampleTagNameProp, ...rest}) {
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState('Checking for Ad Blocker');
-  const exampleRef = useRef(null);
-  const styles = useStyles();
+export function BentoAdbDetector({...rest}) {
+  /** States */
+  const [isBlockerDetected, setIsBlockerDetected] = useState(false);
+  const [detectionStatusString, setdetectionStatusString] = useState(
+    'Checking for Ad Blocker'
+  );
 
-  useCallback(() => {
-    /* Do things */
-  }, []);
+  /** Style Classes */
+  const classes = useStyles();
+
   useEffect(() => {
+    // Tru to load `adsbygoogle.js` and check whether it is blocked or not.
     loadScript(
       global,
       'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
       (e) => {
         console /*OK*/
-          .log('------> OK');
+          .log('------> No ad-blocker detected :)');
         console /*OK*/
           .log(e);
-        setExampleValue('No Ad Blocker Detected :)');
+        setIsBlockerDetected(false);
+        setdetectionStatusString('No Ad Blocker Detected :)');
       },
       (e) => {
         console /*OK*/
-          .log('------> ERROR');
+          .log('------> Ad-blocker detected :(');
         console /*OK*/
           .log(e);
-        setExampleValue('Ad Blocker Detected :(');
+        setIsBlockerDetected(true);
+        setdetectionStatusString('Ad Blocker Detected :(');
       }
     );
-  }, []);
-  useLayoutEffect(() => {
-    /* Do things */
-  }, []);
-  useMemo(() => {
-    /* Do things */
   }, []);
 
   return (
     <ContainWrapper layout size paint {...rest}>
-      <div>{exampleValue}</div>
+      <div
+        class={objStr({
+          [classes.blockerDetected]: isBlockerDetected,
+          [classes.blockerNotDetected]: !isBlockerDetected,
+        })}
+      >
+        {detectionStatusString}
+      </div>
     </ContainWrapper>
   );
 }

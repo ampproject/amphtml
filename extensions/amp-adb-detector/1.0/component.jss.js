@@ -1,12 +1,18 @@
 import {createUseStyles} from 'react-jss';
 
-// DO NOT SUBMIT: Example class used for styling
-const exampleContentHidden = {
-  display: 'none',
+const blockerDetected = {
+  color: 'darksalmon',
+  background: 'darkred',
+};
+
+const blockerNotDetected = {
+  color: 'greenyellow',
+  background: 'darkgreen',
 };
 
 const JSS = {
-  exampleContentHidden,
+  blockerDetected,
+  blockerNotDetected,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

@@ -1,9 +1,10 @@
-import * as Preact from '#preact';
-import {BentoAdbDetector} from '../component';
 import {mount} from 'enzyme';
 
-describes.sandboxed('BentoAdbDetector preact component v1.0', {}, (env) => {
-  // DO NOT SUBMIT: This is example code only.
+import * as Preact from '#preact';
+
+import {BentoAdbDetector} from '../component';
+
+describes.sandboxed('BentoAdbDetector preact component v1.0', {}, () => {
   it('should render', () => {
     const wrapper = mount(<BentoAdbDetector testProp={true} />);
 
