@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>JS Bin</title>
+    <title>Shadow AMP Investigation</title>
     <!-- Asynchronously load the AMP-with-Shadow-DOM runtime library. -->
     <script async src="https://cdn.ampproject.org/shadow-v0.js"></script>
     <style>
@@ -37,7 +37,6 @@
               // .responseXML contains a ready-to-use Document object
               resolve(xhr.responseXML);
             };
-            console.log('Sending the XHR request!');
             xhr.send();
           });
         }
@@ -51,7 +50,6 @@
         // Use our fetchDocument method to get the doc
         fetchDocument(url).then(function(doc) {
           // Let AMP take over and render the page
-          console.log('Attaching the shadow doc!');
           var ampedDoc = AMP.attachShadowDoc(container, doc, url);
         });
       });

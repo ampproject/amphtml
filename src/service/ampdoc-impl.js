@@ -125,10 +125,8 @@ export class AmpDocService {
    * @return {?AmpDoc}
    */
   getAmpDocIfAvailable(node) {
-    console.log('getAmpDocIfAvailable');
     let n = node;
     while (n) {
-      console.log('  START, n: ' + n);
       // A custom element may already have the reference. If we are looking
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
@@ -136,19 +134,16 @@ export class AmpDocService {
 
       const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
       if (cachedAmpDoc) {
-        console.log('    Returning cached AMP doc');
         return cachedAmpDoc;
       }
 
       // Root note: it's either a document, or a shadow document.
       const rootNode = rootNodeFor(n);
       if (!rootNode) {
-        console.log('    Breaking because there is no root node');
         break;
       }
       const ampdoc = rootNode[AMPDOC_PROP];
       if (ampdoc) {
-        console.log('    Returning the AMP doc from the rootnode[AMPDOC_PROP]');
         return ampdoc;
       }
 
@@ -156,14 +151,11 @@ export class AmpDocService {
       // First try the shadow root's host.
       if (rootNode.host) {
         n = rootNode.host;
-        console.log('    Setting n to rootNode.host: ' + n);
       } else {
         // Then, traverse the boundary of a friendly iframe.
         n = getParentWindowFrameElement(rootNode, this.win);
-        console.log('    Setting n to parent window frame element: ' + n);
       }
     }
-    console.log('    Returning null');
 
     return null;
   }
@@ -182,7 +174,6 @@ export class AmpDocService {
   getAmpDoc(node) {
     const ampdoc = this.getAmpDocIfAvailable(node);
     if (!ampdoc) {
-      console.log('  Throwing error!!!');
       throw dev().createError('No ampdoc found for', node);
     }
     return ampdoc;

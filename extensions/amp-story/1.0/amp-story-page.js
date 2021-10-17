@@ -233,7 +233,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.openAttachmentEl_ = null;
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(element));
 
     const deferred = new Deferred();
 
