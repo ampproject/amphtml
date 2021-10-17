@@ -118,6 +118,15 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-adb-detector",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-addthis",
     "version": "0.1",
     "latestVersion": "0.1",
