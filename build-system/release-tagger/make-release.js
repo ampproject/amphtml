@@ -12,7 +12,6 @@ const {
   getRelease,
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
-const {GraphQlQueryResponseData} = require('@octokit/graphql');
 
 const prereleaseConfig = {
   'beta-percent': true,
