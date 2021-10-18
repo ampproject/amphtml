@@ -83,8 +83,8 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
     /** @private  {string} */
     this.storyUrl_ = '';
 
-    /** @private {!Array} */
-    this.errorList_ = [];
+    /** @private {?Array} */
+    this.errorList_ = null;
   }
 
   /** @override */
@@ -96,6 +96,25 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
   buildCallback() {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
+    return this.tryValidatingDocument_();
+  }
+
+  /** @override */
+  layoutCallback() {
+    return this.tryValidatingDocument_().finally(() =>
+      this.buildDebugContent_()
+    );
+  }
+
+  /**
+   * Attempts to load the validator, fetch the document and run the validator.
+   * Can reject due to network conditions or validator initialization.
+   * @return {!Promise}
+   */
+  tryValidatingDocument_() {
+    if (this.errorList_ != null) {
+      return Promise.resolve();
+    }
     return loadScript(this.element.ownerDocument, `${urls.cdn}/v0/validator.js`)
       .then(() =>
         this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_)
@@ -103,12 +122,8 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
       .then((errorList) => {
         this.errorList_ = errorList;
         this.updateDebugTabIcon(errorList);
-      });
-  }
-
-  /** @override */
-  layoutCallback() {
-    return this.buildDebugContent_();
+      })
+      .catch(() => {});
   }
 
   /**
@@ -134,9 +149,6 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
           error.message = validator.renderErrorMessage(error);
           return error;
         });
-      })
-      .catch((error) => {
-        user().error(TAG, error);
       });
   }
 
@@ -145,7 +157,7 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
    * @return {!Promise}
    */
   buildDebugContent_() {
-    const debugContainer = this.errorList_.length
+    const debugContainer = this.errorList_?.length
       ? this.createErrorsList_()
       : buildSuccessMessageTemplate(this.element);
     debugContainer.prepend(this.buildDebugTitle_(this.errorList_.length));
