@@ -3,6 +3,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {dirname, relative} = require('path');
 const {execOrDie} = require('../common/exec');
+const {sync: globbySync} = require('globby');
 
 const testFiles = [
   'build-system/release-tagger/test/*test*.js',
@@ -16,7 +17,7 @@ const testFiles = [
 ];
 
 let thisFile;
-let testedDirs;
+let targetFiles;
 
 /**
  * Determines whether to trigger ava by a file change adjacent to a test file.
@@ -32,12 +33,13 @@ function shouldTriggerAva(changedFile) {
   if (changedFile === thisFile) {
     return true;
   }
-  if (!testedDirs) {
-    testedDirs = testFiles.map(
+  if (!targetFiles) {
+    const targetFilePatterns = testFiles.map(
       (pattern) => dirname(pattern).replace(/\/test$/, '') + '/'
     );
+    targetFiles = new Set(globbySync(targetFilePatterns));
   }
-  return testedDirs.some((pattern) => changedFile.startsWith(pattern));
+  return targetFiles.has(changedFile);
 }
 
 /**
