@@ -233,14 +233,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.openAttachmentEl_ = null;
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(element));
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.element));
 
     const deferred = new Deferred();
 
-    /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
-    this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
-      this.win
-    );
+    // /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
+    // this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
+    //   this.win
+    // );
 
     /** @private {!Array<!HTMLMediaElement>} */
     this.performanceTrackedVideos_ = [];

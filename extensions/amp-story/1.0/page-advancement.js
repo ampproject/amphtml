@@ -270,7 +270,7 @@ export class ManualAdvancement extends AdvancementConfig {
     this.pausedState_ = false;
 
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = getAmpdoc(win.document);
+    this.ampdoc_ = getAmpdoc(element);
 
     this.startListening_();
 
