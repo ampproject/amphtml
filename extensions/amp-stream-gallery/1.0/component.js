@@ -1,8 +1,8 @@
 import * as Preact from '#preact';
 import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {forwardRef} from '#preact/compat';
+import {forwardRef, toChildArray} from '#preact/compat';
 import {setStyle} from '#core/dom/style';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {
   useCallback,
   useImperativeHandle,
@@ -17,11 +17,11 @@ const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
 
 /**
- * @param {!StreamGalleryDef.Props} props
+ * @param {!BentoStreamGalleryDef.Props} props
  * @param {{current: (!BentoBaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function StreamGalleryWithRef(props, ref) {
+function BentoStreamGalleryWithRef(props, ref) {
   const {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
@@ -40,7 +40,7 @@ function StreamGalleryWithRef(props, ref) {
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
-
+  const {length} = toChildArray(children);
   const measure = useCallback(
     (containerWidth) =>
       getVisibleCount(
@@ -48,7 +48,7 @@ function StreamGalleryWithRef(props, ref) {
         minItemWidth,
         maxVisibleCount,
         minVisibleCount,
-        children.length,
+        length,
         outsetArrows,
         peek,
         containerWidth,
@@ -59,7 +59,7 @@ function StreamGalleryWithRef(props, ref) {
       minItemWidth,
       maxVisibleCount,
       minVisibleCount,
-      children.length,
+      length,
       outsetArrows,
       peek,
     ]
@@ -86,7 +86,7 @@ function StreamGalleryWithRef(props, ref) {
       return;
     }
     // Use local window.
-    const win = toWin(node.ownerDocument.defaultView);
+    const win = getWin(node);
     if (!win) {
       return undefined;
     }
@@ -119,12 +119,12 @@ function StreamGalleryWithRef(props, ref) {
   );
 }
 
-const StreamGallery = forwardRef(StreamGalleryWithRef);
-StreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
-export {StreamGallery};
+const BentoStreamGallery = forwardRef(BentoStreamGalleryWithRef);
+BentoStreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
+export {BentoStreamGallery};
 
 /**
- * @param {!StreamGalleryDef.ArrowProps} props
+ * @param {!BentoStreamGalleryDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({

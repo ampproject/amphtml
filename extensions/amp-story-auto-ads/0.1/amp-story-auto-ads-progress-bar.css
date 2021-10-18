@@ -1,5 +1,3 @@
-
-
 .i-amphtml-story-ad-progress-background {
   background: hsla(0, 0%, 100%, 0.4) !important;
   border-radius: 1px !important;
@@ -16,16 +14,6 @@
 .i-amphtml-story-ad-progress-background[ad-showing] {
   opacity: 1 !important;
   visibility: visible !important;
-}
-
-.i-amphtml-story-ad-progress-background[desktop-panels] {
-  /* On desktop a story page has a width of 45vh. */
-  /* And a height of 75 vh. */
-  left: calc(50vw - 22.5vh + 4px) !important;
-  top: 12.5vh !important;
-  width: calc(45vh - 8px) !important;
-  /* Have to wait for page to slide in. */
-  transition: opacity 0.1s linear 0.3s;
 }
 
 .i-amphtml-story-ad-progress-background[desktop-one-panel] {

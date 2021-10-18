@@ -1,4 +1,4 @@
-const {cyan} = require('../common/colors');
+const {cyan} = require('kleur/colors');
 const {matchForbiddenTerms} = require('../test-configs/forbidden-terms');
 const {relative} = require('path');
 

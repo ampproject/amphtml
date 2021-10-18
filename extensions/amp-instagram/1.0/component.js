@@ -7,18 +7,18 @@ import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
 
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 
 const NO_HEIGHT_STYLE = dict();
 const MATCHES_MESSAGING_ORIGIN = (origin) =>
   origin === 'https://www.instagram.com';
 
 /**
- * @param {!InstagramDef.Props} props
- * @param {{current: ?InstagramDef.Api}} ref
+ * @param {!BentoInstagramDef.Props} props
+ * @param {{current: ?BentoInstagramDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-function InstagramWithRef(
+function BentoInstagramWithRef(
   {captioned, onLoad, requestResize, shortcode, title = 'Instagram', ...rest},
   ref
 ) {
@@ -45,7 +45,6 @@ function InstagramWithRef(
 
   return (
     <IframeEmbed
-      allowTransparency
       iframeStyle={{opacity}}
       matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
       messageHandler={messageHandler}
@@ -64,6 +63,6 @@ function InstagramWithRef(
   );
 }
 
-const Instagram = forwardRef(InstagramWithRef);
-Instagram.displayName = 'Instagram'; // Make findable for tests.
-export {Instagram};
+const BentoInstagram = forwardRef(BentoInstagramWithRef);
+BentoInstagram.displayName = 'Instagram'; // Make findable for tests.
+export {BentoInstagram};

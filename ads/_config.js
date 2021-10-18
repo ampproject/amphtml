@@ -100,7 +100,8 @@ const adConfig = jsonConfiguration({
   'adform': {},
 
   'adfox': {
-    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 
@@ -292,6 +293,15 @@ const adConfig = jsonConfiguration({
       'https://v.amoad.com',
     ],
   },
+  'amplified': {
+    preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
+  },
+
+  'andbeyond': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.andbeyond.media',
+  },
 
   'aniview': {
     renderStartImplemented: true,
@@ -347,6 +357,10 @@ const adConfig = jsonConfiguration({
   'bringhub': {
     renderStartImplemented: true,
     preconnect: ['https://static.bh-cdn.com', 'https://core-api.bringhub.io'],
+  },
+
+  'broadbandy': {
+    renderStartImplemented: true,
   },
 
   'broadstreetads': {
@@ -826,6 +840,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myua': {
+    renderStartImplemented: true,
+  },
+
   'mywidget': {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -1060,6 +1078,10 @@ const adConfig = jsonConfiguration({
 
   'runative': {
     prefetch: 'https://cdn.run-syndicate.com/sdk/v1/n.js',
+    renderStartImplemented: true,
+  },
+
+  'sabavision': {
     renderStartImplemented: true,
   },
 
@@ -1372,7 +1394,8 @@ const adConfig = jsonConfiguration({
   },
 
   'yandex': {
-    prefetch: 'https://an.yandex.ru/system/context_amp.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 

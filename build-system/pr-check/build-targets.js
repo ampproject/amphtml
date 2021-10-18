@@ -9,7 +9,7 @@ const config = require('../test-configs/config');
 const fastGlob = require('fast-glob');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('../common/colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMain} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
@@ -116,6 +116,7 @@ const targetMatchers = {
       file == 'build-system/tasks/ava.js' ||
       file.startsWith('build-system/release-tagger/') ||
       file.startsWith('build-system/server/') ||
+      file.startsWith('build-system/tasks/css/') ||
       file.startsWith('build-system/tasks/get-zindex/') ||
       file.startsWith('build-system/tasks/make-extension/') ||
       file.startsWith('build-system/tasks/markdown-toc/') ||

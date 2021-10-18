@@ -1,6 +1,6 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
-import {dev, user, userAssert} from '../../../src/log';
+import {Animation} from '#utils/animation';
+import {dev, user, userAssert} from '#utils/log';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {bezierCurve} from '#core/data-structures/curve';
@@ -8,7 +8,7 @@ import {
   closestAncestorElementBySelector,
   realChildElements,
 } from '#core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '#utils/event-helper';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {getStyle, setStyle} from '#core/dom/style';
@@ -20,11 +20,8 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 import {BaseCarousel} from './base-carousel';
 
 /** @const {string} */
@@ -165,6 +162,9 @@ export class AmpSlideScroll extends BaseCarousel {
     this.hasFirstResizedOccured_ = false;
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -342,8 +342,8 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     if (inViewport) {
       this.autoplay_();
     } else {
@@ -404,7 +404,7 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /**
-   * @param {!../layout-rect.LayoutSizeDef} size
+   * @param {!LayoutSize} size
    * @private
    */
   onResized_(size) {
@@ -414,8 +414,9 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallbackTemp(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
 
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
@@ -460,7 +461,8 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.slideIndex_ = null;
     return super.unlayoutCallback();
   }
@@ -529,7 +531,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {

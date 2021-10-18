@@ -5,9 +5,10 @@ import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {Services} from '#service';
 import {Resource} from '#service/resource';
 
+import {listenOncePromise} from '#utils/event-helper';
+
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
-import {listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('BaseElement', {amp: true}, (env) => {
   let win, doc;

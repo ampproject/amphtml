@@ -11,8 +11,8 @@ import {isAdLike} from '../../../../src/iframe-helper';
 import {macroTask} from '#testing/helpers';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
-import {user} from '../../../../src/log';
-import {whenCalled} from '#testing/test-helper';
+import {user} from '#utils/log';
+import {whenCalled} from '#testing/helpers/service';
 
 /** @const {number} */
 const IFRAME_MESSAGE_TIMEOUT = 50;

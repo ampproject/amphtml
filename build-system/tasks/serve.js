@@ -21,7 +21,7 @@ const {
   buildNewServer,
 } = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');

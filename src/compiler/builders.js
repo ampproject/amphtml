@@ -13,11 +13,11 @@ const builderMap = {
 
 /**
  * Returns the set of component builders needed to server-render an AMP Document.
- *
- * @param {!./types.VersionsDef} versions
- * @return {Object<string, !./types.BuildDomDef>} builders
+ * @param {import('./types').Versions} versions
+ * @return {import('./types').BuilderMap}
  */
 export function getBuilders(versions) {
+  /** @type {import('./types').BuilderMap} */
   const builders = {};
 
   for (const tag of Object.keys(versions)) {

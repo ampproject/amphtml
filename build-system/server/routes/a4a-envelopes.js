@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
-const {red} = require('../../common/colors');
+const {red} = require('kleur/colors');
 
 const app = express.Router();
 

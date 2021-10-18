@@ -1,12 +1,10 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-accordion-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [
       {name: 'amp-bind', version: '0.1'},
@@ -14,17 +12,16 @@ export default {
     ],
     experiments: ['bento'],
   },
+  args: {
+    'expand-single-section': false,
+    animate: false,
+  },
 };
 
-export const withAmpBind = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const withAmpBind = (args) => {
   return (
     <main>
-      <amp-accordion
-        expand-single-section={expandSingleSection}
-        animate={animate}
-      >
+      <amp-accordion {...args}>
         <section data-amp-bind-expanded="section1">
           <h2>Section 1</h2>
           <div>Puppies are cute.</div>

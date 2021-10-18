@@ -466,9 +466,9 @@ class AmpInstagram extends AMP.BaseElement {
   // ...
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.getWin().document.createElement('div');
+    const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    const image = this.getWin().document.createElement('amp-img');
+    const image = this.win.document.createElement('amp-img');
     // This is always the same URL that is actually used inside of the embed.
     // This lets us avoid loading the image twice and make use of browser cache.
 

@@ -1,10 +1,10 @@
-import {Brightcove} from './component';
+import {BentoBrightcove} from './component';
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Brightcove;
+BaseElement['Component'] = BentoBrightcove;
 
 /** @override */
 BaseElement['props'] = {

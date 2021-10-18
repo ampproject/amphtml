@@ -1,7 +1,7 @@
 'use strict';
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -106,16 +106,6 @@ exports.jsBundles = {
       externs: [],
       include3pDirectories: true,
       includePolyfills: true,
-    },
-  },
-  'compiler.js': {
-    srcDir: './src/compiler/',
-    srcFilename: 'index.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      minifiedName: 'compiler.js',
-      extraGlobs: ['src/builtins/**/*.js', 'extensions/amp-fit-text/**/*.js'],
     },
   },
   'amp-viewer-host.max.js': {

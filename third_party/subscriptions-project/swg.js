@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.182 */
+/** Version: 0.1.22.188 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -110,6 +110,7 @@ const AnalyticsEvent = {
   EVENT_OFFERED_METER: 3011,
   EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_INELIGIBLE_PAYWALL: 3013,
+  EVENT_UNLOCKED_FOR_CRAWLER: 3014,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -1355,6 +1356,59 @@ class LinkingInfoResponse {
 /**
  * @implements {Message}
  */
+class OpenDialogRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.urlPath_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUrlPath() {
+    return this.urlPath_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUrlPath(value) {
+    this.urlPath_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.urlPath_, // field 1 - url_path
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'OpenDialogRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class SkuSelectedResponse {
   /**
    * @param {!Array<*>=} data
@@ -1809,6 +1863,7 @@ const PROTO_MAP = {
   'FinishedLoggingResponse': FinishedLoggingResponse,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
+  'OpenDialogRequest': OpenDialogRequest,
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse$1,
@@ -3343,6 +3398,9 @@ class JwtHelper {
 /** Source for Google-provided metering entitlements. */
 const GOOGLE_METERING_SOURCE = 'google:metering';
 
+/** Source for privileged entitlements. */
+const PRIVILEGED_SOURCE = 'privileged';
+
 /** Subscription token for dev mode entitlements. */
 const DEV_MODE_TOKEN = 'GOOGLE_DEV_MODE_TOKEN';
 
@@ -3631,17 +3689,17 @@ class Entitlement {
     if (eq != -1) {
       // Wildcard product (publication:*) unlocks on any entitlement matching publication
       const publication = product.substring(0, eq + 1);
-      if(
+      if (
         publication + '*' == product &&
-        this.products.filter((candidate) => candidate.substring(0, eq + 1) == publication).length >= 1
+        this.products.filter(
+          (candidate) => candidate.substring(0, eq + 1) == publication
+        ).length >= 1
       ) {
         debugLog('enabled with wildcard productId');
         return true;
       }
       // Wildcard entitlement allows any product matching this publication
-      if (
-        this.products.includes(publication + '*')
-      ) {
+      if (this.products.includes(publication + '*')) {
         debugLog('enabled with wildcard entitlement');
         return true;
       }
@@ -3792,6 +3850,7 @@ class SubscribeResponse {
    * @param {?string=} oldSku
    * @param {?string=} swgUserToken
    * @param {?number=} paymentRecurrence
+   * @param {?Object=} requestMetadata
    */
   constructor(
     raw,
@@ -3802,7 +3861,8 @@ class SubscribeResponse {
     completeHandler,
     oldSku = null,
     swgUserToken = null,
-    paymentRecurrence = null
+    paymentRecurrence = null,
+    requestMetadata = null
   ) {
     /** @const {string} */
     this.raw = raw;
@@ -3822,6 +3882,8 @@ class SubscribeResponse {
     this.swgUserToken = swgUserToken;
     /** @const {?number} */
     this.paymentRecurrence = paymentRecurrence;
+    /** @const {?Object} */
+    this.requestMetadata = requestMetadata;
   }
 
   /**
@@ -4651,9 +4713,19 @@ function adsUrl(url) {
  * @param {Object<string, string>=} params List of extra params to append to the URL.
  * @return {string} The complete URL.
  */
-function feUrl(url, prefix = '', params) {
+function feUrl(
+  url,
+  params = {},
+  usePrefixedHostPath = false,
+  prefix = ''
+) {
   // Add cache param.
-  url = feCached(`${getSwgMode().frontEnd}${prefix}/swg/_/ui/v1${url}`);
+  const prefixed = prefix
+    ? usePrefixedHostPath
+      ? `swg/${prefix}`
+      : `${prefix}/swg`
+    : 'swg';
+  url = feCached(`${getSwgMode().frontEnd}/${prefixed}/_/ui/v1${url}`);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
   const query = parseQueryString(self.location.hash);
@@ -4683,7 +4755,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.182',
+    '_client': 'SwG 0.1.22.188',
   });
 }
 
@@ -5003,6 +5075,7 @@ class PayCompleteFlow {
       'isSubscriptionUpdate': !!response['oldSku'],
       'isOneTime': !!response['paymentRecurrence'],
     };
+
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
       args['idToken'] = response.userData.idToken;
@@ -5019,17 +5092,32 @@ class PayCompleteFlow {
       args['loginHint'] = response.userData && response.userData.email;
     }
 
-    let confirmFeUrl;
+    const /* {!Object<string, string>} */ urlParams = {};
     if (args.productType === ProductType.VIRTUAL_GIFT) {
-      confirmFeUrl = feUrl('/payconfirmiframe', '', {
+      Object.assign(urlParams, {
         productType: args.productType,
         publicationId: args.publicationId,
         offerId: this.sku_,
         origin: parseUrl(this.win_.location.href).origin,
       });
-    } else {
-      confirmFeUrl = feUrl('/payconfirmiframe');
+      if (response.requestMetadata) {
+        urlParams.canonicalUrl = response.requestMetadata.contentId;
+        urlParams.isAnonymous = response.requestMetadata.anonymous;
+      }
+
+      // Add feArgs to be passed via activities.
+      if (response.swgUserToken) {
+        args.swgUserToken = response.swgUserToken;
+      }
+      const orderId = parseOrderIdFromPurchaseDataSafe(response.purchaseData);
+      if (orderId) {
+        args.orderId = orderId;
+      }
     }
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      urlParams.hl = this.clientConfigManager_.getLanguage();
+    }
+    const confirmFeUrl = feUrl('/payconfirmiframe', urlParams);
 
     return (this.activityIframeViewPromise_ = this.clientConfigManager_
       .getClientConfig()
@@ -5173,6 +5261,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
   let paymentRecurrence = null;
+  let requestMetadata = null;
 
   if (data) {
     if (typeof data == 'string') {
@@ -5187,10 +5276,10 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
         raw = json['integratorClientCallbackData'];
       }
       if ('paymentRequest' in data) {
-        oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
-        paymentRecurrence = (data['paymentRequest']['swg'] || {})[
-          'paymentRecurrence'
-        ];
+        const swgObj = data['paymentRequest']['swg'] || {};
+        oldSku = swgObj['oldSku'];
+        paymentRecurrence = swgObj['paymentRecurrence'];
+        requestMetadata = swgObj['metadata'];
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
@@ -5216,8 +5305,9 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     productType,
     completeHandler,
     oldSku,
+    swgData['swgUserToken'],
     paymentRecurrence,
-    swgData['swgUserToken']
+    requestMetadata
   );
 }
 
@@ -5265,6 +5355,16 @@ function parseEntitlements(deps, swgData) {
 function parseSkuFromPurchaseDataSafe(purchaseData) {
   return /** @type {?string} */ (
     getPropertyFromJsonString(purchaseData.raw, 'productId') || null
+  );
+}
+
+/**
+ * @param {!PurchaseData} purchaseData
+ * @return {?string}
+ */
+function parseOrderIdFromPurchaseDataSafe(purchaseData) {
+  return /** @type {?string} */ (
+    getPropertyFromJsonString(purchaseData.raw, 'orderId') || null
   );
 }
 
@@ -5386,7 +5486,7 @@ class OffersFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              feUrl(this.getUrl_(clientConfig)),
+              this.getUrl_(clientConfig),
               feArgsObj,
               /* shouldFadeBody */ true
             )
@@ -5524,14 +5624,22 @@ class OffersFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
+   * Returns the full URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
    * @return {string}
    */
   getUrl_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
-      ? '/subscriptionoffersiframe'
-      : '/offersiframe';
+    if (!clientConfig.useUpdatedOfferFlows) {
+      return feUrl('/offersiframe');
+    }
+
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      return feUrl('/subscriptionoffersiframe', {
+        'hl': this.clientConfigManager_.getLanguage(),
+      });
+    }
+
+    return feUrl('/subscriptionoffersiframe');
   }
 
   /**
@@ -5951,7 +6059,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.182',
+        '_client': 'SwG 0.1.22.188',
         'supportsEventManager': true,
       },
       args || {}
@@ -6830,7 +6938,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.182');
+    context.setClientVersion('SwG 0.1.22.188');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7092,10 +7200,16 @@ const SWG_I18N_STRINGS = {
     'en': 'Subscribe with Google',
     'ar': 'Google اشترك مع',
     'de': 'Abonnieren mit Google',
+    'en-au': 'Subscribe with Google',
+    'en-ca': 'Subscribe with Google',
+    'en-gb': 'Subscribe with Google',
+    'en-us': 'Subscribe with Google',
     'es': 'Suscríbete con Google',
+    'es-419': 'Suscríbete con Google',
     'es-latam': 'Suscríbete con Google',
     'es-latn': 'Suscríbete con Google',
     'fr': "S'abonner avec Google",
+    'fr-ca': "S'abonner avec Google",
     'hi': 'Google के ज़रिये सदस्यता',
     'id': 'Berlangganan dengan Google',
     'it': 'Abbonati con Google',
@@ -7118,10 +7232,16 @@ const SWG_I18N_STRINGS = {
     'en': 'Contribute with Google',
     'ar': 'المساهمة باستخدام Google',
     'de': 'Mit Google beitragen',
+    'en-au': 'Contribute with Google',
+    'en-ca': 'Contribute with Google',
+    'en-gb': 'Contribute with Google',
+    'en-us': 'Contribute with Google',
     'es': '	Contribuye con Google',
+    'es-419': 'Contribuir con Google',
     'es-latam': 'Contribuir con Google',
     'es-latn': 'Contribuye con Google',
     'fr': 'Contribuer avec Google',
+    'fr-ca': 'Contribuer avec Google',
     'hi': 'Google खाते की मदद से योगदान करें',
     'id': 'Berkontribusi dengan Google',
     'it': 'Contribuisci con Google',
@@ -8101,24 +8221,24 @@ class UiPredicates {
  */
 class ClientConfig {
   /**
-   * @param {!./auto-prompt-config.AutoPromptConfig=} autoPromptConfig
-   * @param {string=} paySwgVersion
-   * @param {boolean=} useUpdatedOfferFlows
-   * @param {./auto-prompt-config.UiPredicates=} uiPredicates
-   * @param {./attribution-params.AttributionParams=} attributionParams
+   * @param {ClientConfigOptions} options
    */
-  constructor(
+  constructor({
+    attributionParams,
     autoPromptConfig,
     paySwgVersion,
-    useUpdatedOfferFlows,
     uiPredicates,
-    attributionParams
-  ) {
-    /** @const {!./auto-prompt-config.AutoPromptConfig|undefined} */
+    usePrefixedHostPath,
+    useUpdatedOfferFlows,
+  } = {}) {
+    /** @const {./auto-prompt-config.AutoPromptConfig|undefined} */
     this.autoPromptConfig = autoPromptConfig;
 
     /** @const {string|undefined} */
     this.paySwgVersion = paySwgVersion;
+
+    /** @const {boolean} */
+    this.usePrefixedHostPath = usePrefixedHostPath || false;
 
     /** @const {boolean} */
     this.useUpdatedOfferFlows = useUpdatedOfferFlows || false;
@@ -8232,7 +8352,7 @@ class ClientConfigManager {
 
   /**
    * Gets the language the UI should be displayed in. See
-   * src/api/basic-subscriptions.ClientOptions.lang. This
+   * src/api/basic-subscriptions.ClientOptions.lang.
    * @return {string}
    */
   getLanguage() {
@@ -8246,6 +8366,19 @@ class ClientConfigManager {
    */
   getTheme() {
     return this.clientOptions_.theme || ClientTheme.LIGHT;
+  }
+
+  /**
+   * Returns whether iframes should also use the language specified in the
+   * client options, rather than the default of letting the iframes decide the
+   * display language. Note that this will return false if the lang option is
+   * not set, even if forceLangInIframes was set.
+   * @return {boolean}
+   */
+  shouldForceLangInIframes() {
+    return (
+      !!this.clientOptions_.forceLangInIframes && !!this.clientOptions_.lang
+    );
   }
 
   /**
@@ -8330,13 +8463,14 @@ class ClientConfigManager {
       );
     }
 
-    return new ClientConfig(
+    return new ClientConfig({
       autoPromptConfig,
       paySwgVersion,
-      json['useUpdatedOfferFlows'],
+      usePrefixedHostPath: json['usePrefixedHostPath'],
+      useUpdatedOfferFlows: json['useUpdatedOfferFlows'],
       uiPredicates,
-      attributionParams
-    );
+      attributionParams,
+    });
   }
 }
 
@@ -8396,7 +8530,7 @@ class ContributionsFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              feUrl(this.getUrl_(clientConfig)),
+              this.getUrl_(clientConfig),
               feArgs({
                 'productId': deps.pageConfig().getProductId(),
                 'publicationId': deps.pageConfig().getPublicationId(),
@@ -8486,14 +8620,22 @@ class ContributionsFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
+   * Gets the complete URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
    * @return {string}
    */
   getUrl_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
-      ? '/contributionoffersiframe'
-      : '/contributionsiframe';
+    if (!clientConfig.useUpdatedOfferFlows) {
+      return feUrl('/contributionsiframe');
+    }
+
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      return feUrl('/contributionoffersiframe', {
+        'hl': this.clientConfigManager_.getLanguage(),
+      });
+    }
+
+    return feUrl('/contributionoffersiframe');
   }
 
   /**
@@ -9274,9 +9416,15 @@ class Dialog {
     const desktopDialogConfig = dialogConfig.desktopConfig || {};
     const supportsWideScreen = !!desktopDialogConfig.supportsWideScreen;
 
+    const defaultIframeCssClass = `swg-dialog ${
+      supportsWideScreen ? 'swg-wide-dialog' : ''
+    }`;
+    const iframeCssClass =
+      dialogConfig.iframeCssClassOverride || defaultIframeCssClass;
+
     /** @private @const {!FriendlyIframe} */
     this.iframe_ = new FriendlyIframe(doc.getWin().document, {
-      'class': `swg-dialog ${supportsWideScreen ? 'swg-wide-dialog' : ''}`,
+      'class': iframeCssClass,
     });
 
     /** @private @const {!Graypane} */
@@ -9361,6 +9509,24 @@ class Dialog {
     } else {
       this.show_();
     }
+
+    return iframe.whenReady().then(() => {
+      this.buildIframe_();
+      return this;
+    });
+  }
+
+  /**
+   * Opens the iframe embedded in the given container element.
+   * @param {!Element} containerEl
+   */
+  openInContainer(containerEl) {
+    const iframe = this.iframe_;
+    if (iframe.isConnected()) {
+      throw new Error('already opened');
+    }
+
+    containerEl.appendChild(iframe.getElement());
 
     return iframe.whenReady().then(() => {
       this.buildIframe_();
@@ -10882,20 +11048,19 @@ class EntitlementsManager {
     let source = null;
 
     switch (event.eventOriginator) {
-      // The indicates the publisher reported it via subscriptions.setShowcaseEntitlement
+      // Publisher JS logged this event.
       case EventOriginator.SHOWCASE_CLIENT:
         source = EntitlementSource.PUBLISHER_ENTITLEMENT;
         break;
-      case EventOriginator.SWG_CLIENT: // Fallthrough, these are the same
-      case EventOriginator.SWG_SERVER:
+      // Swgjs logged this event.
+      case EventOriginator.SWG_CLIENT:
         if (result == EntitlementResult.UNLOCKED_METER) {
-          // Meters from Google require a valid jwt, which is sent by
-          // an entitlement.
+          // The `consumeMeter_` method already tracks this.
           return;
         }
+
         source = EntitlementSource.GOOGLE_SUBSCRIBER_ENTITLEMENT;
         break;
-      // Permission to pingback other sources was not requested
       default:
         return;
     }
@@ -11219,13 +11384,14 @@ class EntitlementsManager {
 
     const params = new EventParams();
     params.setIsUserRegistered(true);
-    this.deps_
-      .eventManager()
-      .logSwgEvent(
-        AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
-        false,
-        params
-      );
+
+    // Log unlock event.
+    const eventType =
+      entitlement.source === PRIVILEGED_SOURCE
+        ? AnalyticsEvent.EVENT_UNLOCKED_FOR_CRAWLER
+        : AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION;
+    this.deps_.eventManager().logSwgEvent(eventType, false, params);
+
     // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
     return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       const toastWasShown = value === '1';
@@ -11344,7 +11510,11 @@ class EntitlementsManager {
         }
 
         // Add metering params.
-        if (this.publicationId_ && params?.metering?.state) {
+        if (
+          this.publicationId_ &&
+          params?.metering?.state &&
+          queryStringHasFreshGaaParams(this.win_.location.search)
+        ) {
           const meteringStateId = params.metering.state.id;
           if (
             typeof meteringStateId === 'string' &&
@@ -12231,6 +12401,9 @@ class LinkCompleteFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
+    /** @private @const {!./client-config-manager.ClientConfigManager} */
+    this.clientConfigManager_ = deps.clientConfigManager();
+
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
@@ -12244,17 +12417,31 @@ class LinkCompleteFlow {
     this.callbacks_ = deps.callbacks();
 
     const index = (response && response['index']) || '0';
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/linkconfirmiframe', '/u/' + index),
-      feArgs({
-        'productId': deps.pageConfig().getProductId(),
-        'publicationId': deps.pageConfig().getPublicationId(),
-      }),
-      /* shouldFadeBody */ true
-    );
+
+    /** @private {?ActivityIframeView} */
+    this.activityIframeView_ = null;
+
+    /** @private @const {!Promise<!ActivityIframeView>} */
+    this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then(
+        (clientConfig) =>
+          new ActivityIframeView(
+            this.win_,
+            this.activityPorts_,
+            feUrl(
+              '/linkconfirmiframe',
+              {},
+              clientConfig.usePrefixedHostPath,
+              'u/' + index
+            ),
+            feArgs({
+              'productId': deps.pageConfig().getProductId(),
+              'publicationId': deps.pageConfig().getPublicationId(),
+            }),
+            /* shouldFadeBody */ true
+          )
+      );
 
     /** @private {?function()} */
     this.completeResolver_ = null;
@@ -12270,32 +12457,36 @@ class LinkCompleteFlow {
    * @return {!Promise}
    */
   start() {
-    const promise = this.activityIframeView_.acceptResultAndVerify(
-      feOrigin(),
-      /* requireOriginVerified */ true,
-      /* requireSecureChannel */ true
-    );
-    promise
-      .then((response) => {
-        this.complete_(response);
-      })
-      .catch((reason) => {
-        // Rethrow async.
-        setTimeout(() => {
-          throw reason;
+    return this.activityIframeViewPromise_.then((activityIframeView) => {
+      this.activityIframeView_ = activityIframeView;
+
+      const promise = this.activityIframeView_.acceptResultAndVerify(
+        feOrigin(),
+        /* requireOriginVerified */ true,
+        /* requireSecureChannel */ true
+      );
+      promise
+        .then((response) => {
+          this.complete_(response);
+        })
+        .catch((reason) => {
+          // Rethrow async.
+          setTimeout(() => {
+            throw reason;
+          });
+        })
+        .then(() => {
+          // The flow is complete.
+          this.dialogManager_.completeView(this.activityIframeView_);
         });
-      })
-      .then(() => {
-        // The flow is complete.
-        this.dialogManager_.completeView(this.activityIframeView_);
-      });
-    this.deps_
-      .eventManager()
-      .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
-    this.deps_
-      .eventManager()
-      .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
-    return this.dialogManager_.openView(this.activityIframeView_);
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
+      return this.dialogManager_.openView(this.activityIframeView_);
+    });
   }
 
   /**
@@ -15914,7 +16105,7 @@ const PAY_ORIGIN = {
 
 /** @return {string} */
 function payUrl() {
-  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
+  return feCached(PAY_ORIGIN[getSwgMode().payEnv] + '/gp/p/ui/pay');
 }
 
 /**
@@ -16005,7 +16196,7 @@ class PayClient {
     this.client_ = this.createClient_(
       /** @type {!PaymentOptions} */
       ({
-        environment: 'PRODUCTION',
+        environment: getSwgMode().payEnv,
         'i': {
           'redirectKey': this.redirectVerifierHelper_.restoreKey(),
         },

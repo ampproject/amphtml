@@ -1,4 +1,4 @@
-const colors = require('../common/colors');
+const colors = require('kleur/colors');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const path = require('path');
@@ -23,6 +23,10 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
+const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
@@ -116,10 +120,14 @@ async function dist() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else {
-    await buildExperiments();
-    await buildLoginDone('0.1');
-    await buildWebPushPublisherFiles();
-    await compileAllJs(options);
+    await Promise.all([
+      writeVersionFiles(),
+      buildExperiments(),
+      buildLoginDone('0.1'),
+      buildWebPushPublisherFiles(),
+      buildCompiler(),
+      compileAllJs(options),
+    ]);
   }
 
   // This step internally parses the various extension* flags.
@@ -141,6 +149,26 @@ async function dist() {
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
+}
+
+/**
+ * Writes the verion.txt file.
+ * @return {!Promise}
+ */
+async function writeVersionFiles() {
+  // TODO: determine which of these are necessary and trim the rest via an I2D.
+  const paths = [
+    'dist',
+    'dist/v0',
+    'dist/v0/examples',
+    'dist.tools/experiments',
+    `dist.3p/${internalRuntimeVersion}`,
+    `dist.3p/${internalRuntimeVersion}/vendor`,
+  ].map((p) => path.join(...p.split('/'), 'version.txt'));
+
+  return Promise.all(
+    paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
+  );
 }
 
 /**

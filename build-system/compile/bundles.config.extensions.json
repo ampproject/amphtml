@@ -56,7 +56,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -199,7 +199,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -233,7 +233,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -299,7 +299,8 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "bento": true,
+      "hasCss": true
     }
   },
   {
@@ -313,7 +314,8 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "wrapper": "bento"
+      "bento": true,
+      "hasCss": true
     }
   },
   {
@@ -347,8 +349,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -371,7 +374,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -404,7 +407,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -476,7 +479,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "wrapper": "bento"
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -543,7 +548,7 @@
         "amp-inline-gallery-pagination"
       ],
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -566,7 +571,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -609,7 +614,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -627,7 +632,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -665,6 +670,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-mathml",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "bento": true,
+      "npm": true
     }
   },
   {
@@ -812,7 +827,7 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -848,7 +863,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -876,7 +891,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "wrapper": "bento"
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -911,7 +927,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -924,8 +940,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -955,6 +972,7 @@
       "cssBinaries": [
         "amp-story-consent",
         "amp-story-draggable-drawer-header",
+        "amp-story-form",
         "amp-story-hint",
         "amp-story-info-dialog",
         "amp-story-open-page-attachment",
@@ -962,8 +980,7 @@
         "amp-story-share-menu",
         "amp-story-system-layer",
         "amp-story-tooltip",
-        "amp-story-unsupported-browser-layer",
-        "amp-story-viewport-warning-layer"
+        "amp-story-unsupported-browser-layer"
       ]
     }
   },
@@ -995,6 +1012,14 @@
     "name": "amp-story-auto-analytics",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-story-captions",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-story-dev-tools",
@@ -1063,7 +1088,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1102,7 +1127,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1129,7 +1154,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1151,7 +1176,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "wrapper": "bento"
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -1174,7 +1200,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1201,7 +1227,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1237,8 +1263,9 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
+      "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   },
   {
@@ -1258,7 +1285,7 @@
     "options": {
       "hasCss": true,
       "npm": true,
-      "wrapper": "bento"
+      "bento": true
     }
   }
 ]

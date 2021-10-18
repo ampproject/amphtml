@@ -4,7 +4,7 @@ import {hasOwn, map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';
 
-import {dev, user} from '../log';
+import {dev, user} from '#utils/log';
 
 /** @enum {number} Allowed fetch responses. */
 const allowedFetchTypes = {

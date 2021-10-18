@@ -1,8 +1,8 @@
 import {dict} from '#core/types/object';
 
-import {getUniqueId} from './utils';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {getUniqueId} from './utils';
 
 /** @const {string} */
 export const STORY_AD_ANALYTICS = 'story-ad-analytics';

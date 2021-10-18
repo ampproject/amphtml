@@ -68,12 +68,15 @@ import {
   randomlySelectUnsetExperiments,
 } from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {Navigation} from '#service/navigation';
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
+
+import {dev, devAssert, user} from '#utils/log';
 
 import {
   FlexibleAdSlotDataTypeDef,
@@ -90,7 +93,6 @@ import {
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dev, devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   AmpA4A,
@@ -497,6 +499,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
     }
 
+    const storyAdPageOutlinkExpId = getExperimentBranch(
+      this.win,
+      StoryAdPageOutlink.ID
+    );
+    if (storyAdPageOutlinkExpId) {
+      addExperimentIdToElement(storyAdPageOutlinkExpId, this.element);
+    }
+
     const autoAdvanceExpBranch = getExperimentBranch(
       this.win,
       StoryAdAutoAdvance.ID
@@ -712,6 +722,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
+      'ppid': (this.jsonTargeting && this.jsonTargeting['ppid']) || null,
       ...googleBlockParameters(this),
     };
   }
@@ -946,6 +957,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           ).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
+        }
+        if (rtcResponse.response['ppid']) {
+          this.jsonTargeting['ppid'] = rtcResponse.response['ppid'];
         }
       }
     });
@@ -1225,8 +1239,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1628,16 +1642,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return;
         }
         // Create amp-pixel and append to document to send impression.
-        this.win.document.body.appendChild(
-          createElementWithAttributes(
-            this.win.document,
-            'amp-pixel',
-            dict({
-              'src': url,
-              'referrerpolicy': scrubReferer ? 'no-referrer' : '',
-            })
-          )
-        );
+        this.getAmpDoc()
+          .getBody()
+          .appendChild(
+            createElementWithAttributes(
+              this.win.document,
+              'amp-pixel',
+              dict({
+                'src': url,
+                'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+              })
+            )
+          );
       } catch (unusedError) {}
     });
   }

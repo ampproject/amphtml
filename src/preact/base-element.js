@@ -937,13 +937,6 @@ PreactBaseElement['layoutSizeDefined'] = false;
 PreactBaseElement['lightDomTag'] = '';
 
 /**
- * An override to specify an exact className prop to Preact.
- *
- * @protected {string}
- */
-PreactBaseElement['className'] = '';
-
-/**
  * Whether this element uses "templates" system.
  *
  * @protected {boolean}

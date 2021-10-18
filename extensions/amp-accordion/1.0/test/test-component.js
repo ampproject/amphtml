@@ -3,13 +3,13 @@ import {mount} from 'enzyme';
 import * as Preact from '#preact';
 import {useAmpContext} from '#preact/context';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionSection,
+  BentoAccordion,
+  BentoAccordionContent,
+  BentoAccordionHeader,
+  BentoAccordionSection,
 } from '../component';
 
 const ContextReader = (props) => {
@@ -21,17 +21,16 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
   describe('standalone accordion section', () => {
     it('should render a default section', () => {
       const wrapper = mount(
-        <AccordionSection>
-          <AccordionHeader>
+        <BentoAccordionSection>
+          <BentoAccordionHeader>
             <h1>header1</h1>
-          </AccordionHeader>
-          <AccordionContent>content1</AccordionContent>
-        </AccordionSection>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>content1</BentoAccordionContent>
+        </BentoAccordionSection>
       );
 
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
-      expect(dom).to.not.have.attribute('expanded');
       expect(dom.children).to.have.lengthOf(2);
 
       const header = dom.children[0];
@@ -47,16 +46,15 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should render an expanded section', () => {
       const wrapper = mount(
-        <AccordionSection expanded>
-          <AccordionHeader>
+        <BentoAccordionSection expanded>
+          <BentoAccordionHeader>
             <h1>header1</h1>
-          </AccordionHeader>
-          <AccordionContent>content1</AccordionContent>
-        </AccordionSection>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>content1</BentoAccordionContent>
+        </BentoAccordionSection>
       );
 
       const dom = wrapper.getDOMNode();
-      expect(dom).to.have.attribute('expanded');
 
       const header = dom.children[0];
       expect(header.localName).to.equal('div');
@@ -71,45 +69,42 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should toggle expanded state', () => {
       const wrapper = mount(
-        <AccordionSection>
-          <AccordionHeader>
+        <BentoAccordionSection>
+          <BentoAccordionHeader>
             <h1>header1</h1>
-          </AccordionHeader>
-          <AccordionContent>content1</AccordionContent>
-        </AccordionSection>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>content1</BentoAccordionContent>
+        </BentoAccordionSection>
       );
       const dom = wrapper.getDOMNode();
       const header = dom.children[0];
       const content = dom.children[1];
 
       // Start unexpanded.
-      expect(dom).to.not.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('false');
       expect(content.className.includes('content-hidden')).to.be.true;
 
       // Click on header to expand.
       wrapper.find('div').at(0).simulate('click');
-      expect(dom).to.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('true');
       expect(content.className.includes('content-hidden')).to.be.false;
 
       // Click on header again to collapse.
       wrapper.find('div').at(0).simulate('click');
-      expect(dom).to.not.have.attribute('expanded');
       expect(header.getAttribute('aria-expanded')).to.equal('false');
       expect(content.className.includes('content-hidden')).to.be.true;
     });
 
     it('should propagate renderable/playable context when expanded', () => {
       const wrapper = mount(
-        <AccordionSection expanded>
-          <AccordionHeader>
+        <BentoAccordionSection expanded>
+          <BentoAccordionHeader>
             <h1>header1</h1>
-          </AccordionHeader>
-          <AccordionContent>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>
             <ContextReader id="content" />
-          </AccordionContent>
-        </AccordionSection>
+          </BentoAccordionContent>
+        </BentoAccordionSection>
       );
       const dom = wrapper.getDOMNode();
       expect(
@@ -119,14 +114,14 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should propagate renderable/playable context when collapsed', () => {
       const wrapper = mount(
-        <AccordionSection>
-          <AccordionHeader>
+        <BentoAccordionSection>
+          <BentoAccordionHeader>
             <h1>header1</h1>
-          </AccordionHeader>
-          <AccordionContent>
+          </BentoAccordionHeader>
+          <BentoAccordionContent>
             <ContextReader id="content" />
-          </AccordionContent>
-        </AccordionSection>
+          </BentoAccordionContent>
+        </BentoAccordionSection>
       );
       const dom = wrapper.getDOMNode();
       expect(
@@ -140,20 +135,20 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     beforeEach(() => {
       wrapper = mount(
-        <Accordion>
-          <AccordionSection key={1} expanded>
-            <AccordionHeader>header1</AccordionHeader>
-            <AccordionContent>content1</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={2}>
-            <AccordionHeader>header2</AccordionHeader>
-            <AccordionContent>content2</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={3}>
-            <AccordionHeader>header3</AccordionHeader>
-            <AccordionContent>content3</AccordionContent>
-          </AccordionSection>
-        </Accordion>
+        <BentoAccordion>
+          <BentoAccordionSection key={1} expanded>
+            <BentoAccordionHeader>header1</BentoAccordionHeader>
+            <BentoAccordionContent>content1</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={2}>
+            <BentoAccordionHeader>header2</BentoAccordionHeader>
+            <BentoAccordionContent>content2</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={3}>
+            <BentoAccordionHeader>header3</BentoAccordionHeader>
+            <BentoAccordionContent>content3</BentoAccordionContent>
+          </BentoAccordionSection>
+        </BentoAccordion>
       );
     });
 
@@ -161,17 +156,16 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(3);
 
       // Expanded state.
-      expect(sections.at(0).getDOMNode()).to.have.attribute('expanded');
-      expect(sections.at(1).getDOMNode()).to.not.have.attribute('expanded');
-      expect(sections.at(2).getDOMNode()).to.not.have.attribute('expanded');
-
       const header0 = sections.at(0).find('div').at(0).getDOMNode();
+      expect(header0.getAttribute('aria-expanded')).to.equal('true');
       const header1 = sections.at(1).find('div').at(0).getDOMNode();
+      expect(header1.getAttribute('aria-expanded')).to.equal('false');
       const header2 = sections.at(2).find('div').at(0).getDOMNode();
+      expect(header2.getAttribute('aria-expanded')).to.equal('false');
       const content0 = sections.at(0).find('div').at(1).getDOMNode();
       const content1 = sections.at(1).find('div').at(1).getDOMNode();
       const content2 = sections.at(2).find('div').at(1).getDOMNode();
@@ -205,7 +199,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(3);
 
       const header0 = sections.at(0).find('div').at(0).getDOMNode();
@@ -266,26 +260,26 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should not overwrite existing header and content ids', () => {
       wrapper = mount(
-        <Accordion>
-          <AccordionSection key={1} expanded>
-            <AccordionHeader id="h1">header1</AccordionHeader>
-            <AccordionContent id="c1">content1</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={2}>
-            <AccordionHeader id="h2">header2</AccordionHeader>
-            <AccordionContent>content2</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={3}>
-            <AccordionHeader>header3</AccordionHeader>
-            <AccordionContent id="c3">content3</AccordionContent>
-          </AccordionSection>
-        </Accordion>
+        <BentoAccordion>
+          <BentoAccordionSection key={1} expanded>
+            <BentoAccordionHeader id="h1">header1</BentoAccordionHeader>
+            <BentoAccordionContent id="c1">content1</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={2}>
+            <BentoAccordionHeader id="h2">header2</BentoAccordionHeader>
+            <BentoAccordionContent>content2</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={3}>
+            <BentoAccordionHeader>header3</BentoAccordionHeader>
+            <BentoAccordionContent id="c3">content3</BentoAccordionContent>
+          </BentoAccordionSection>
+        </BentoAccordion>
       );
 
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(3);
 
       const header0 = sections.at(0).find('div').at(0).getDOMNode();
@@ -323,22 +317,22 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should default role attribute unless role prop provided', () => {
       wrapper = mount(
-        <Accordion>
-          <AccordionSection key={1} expanded>
-            <AccordionHeader role="cat">header1</AccordionHeader>
-            <AccordionContent role="dog">content1</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={2}>
-            <AccordionHeader>header2</AccordionHeader>
-            <AccordionContent>content2</AccordionContent>
-          </AccordionSection>
-        </Accordion>
+        <BentoAccordion>
+          <BentoAccordionSection key={1} expanded>
+            <BentoAccordionHeader role="cat">header1</BentoAccordionHeader>
+            <BentoAccordionContent role="dog">content1</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={2}>
+            <BentoAccordionHeader>header2</BentoAccordionHeader>
+            <BentoAccordionContent>content2</BentoAccordionContent>
+          </BentoAccordionSection>
+        </BentoAccordion>
       );
 
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(2);
 
       const header0 = sections.at(0).find('div').at(0).getDOMNode();
@@ -361,15 +355,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(3);
 
       // Click to expand.
       sections.at(1).find('div').at(0).simulate('click');
 
       // Expanded state.
-      expect(sections.at(0).getDOMNode()).to.have.attribute('expanded');
-      expect(sections.at(1).getDOMNode()).to.have.attribute('expanded');
+      const header0 = sections.at(0).find('div').at(0).getDOMNode();
+      expect(header0.getAttribute('aria-expanded')).to.equal('true');
+      const header1 = sections.at(1).find('div').at(0).getDOMNode();
+      expect(header1.getAttribute('aria-expanded')).to.equal('true');
 
       // Contents.
       expect(sections.at(0).find('div').at(1).getDOMNode().hidden).to.be.false;
@@ -380,7 +376,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(3);
 
       // Click to expand.
@@ -404,16 +400,16 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
 
       function countExpanded() {
-        const nodes = [
-          sections.at(0).getDOMNode(),
-          sections.at(1).getDOMNode(),
-          sections.at(2).getDOMNode(),
+        const headers = [
+          sections.at(0).find('div').first().getDOMNode(),
+          sections.at(1).find('div').first().getDOMNode(),
+          sections.at(2).find('div').first().getDOMNode(),
         ];
-        return nodes
-          .map((section) => section.hasAttribute('expanded'))
+        return headers
+          .map((header) => header.getAttribute('aria-expanded') === 'true')
           .reduce((sum, v) => sum + (v ? 1 : 0), 0);
       }
 
@@ -436,20 +432,20 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     beforeEach(() => {
       wrapper = mount(
-        <Accordion expandSingleSection>
-          <AccordionSection key={1} expanded>
-            <AccordionHeader>header1</AccordionHeader>
-            <AccordionContent>content1</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={2}>
-            <AccordionHeader>header2</AccordionHeader>
-            <AccordionContent>content2</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={3}>
-            <AccordionHeader>header3</AccordionHeader>
-            <AccordionContent>content3</AccordionContent>
-          </AccordionSection>
-        </Accordion>
+        <BentoAccordion expandSingleSection>
+          <BentoAccordionSection key={1} expanded>
+            <BentoAccordionHeader>header1</BentoAccordionHeader>
+            <BentoAccordionContent>content1</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={2}>
+            <BentoAccordionHeader>header2</BentoAccordionHeader>
+            <BentoAccordionContent>content2</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={3}>
+            <BentoAccordionHeader>header3</BentoAccordionHeader>
+            <BentoAccordionContent>content3</BentoAccordionContent>
+          </BentoAccordionSection>
+        </BentoAccordion>
       );
     });
 
@@ -461,16 +457,18 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(3);
-      expect(sections.at(0).getDOMNode()).to.have.attribute('expanded');
+      const header0 = sections.at(0).find('div').first().getDOMNode();
+      expect(header0.getAttribute('aria-expanded')).to.equal('true');
 
       // Click to expand.
       sections.at(1).find('div').at(0).simulate('click');
 
       // Expanded state.
-      expect(sections.at(0).getDOMNode()).to.not.have.attribute('expanded');
-      expect(sections.at(1).getDOMNode()).to.have.attribute('expanded');
+      expect(header0.getAttribute('aria-expanded')).to.equal('false');
+      const header1 = sections.at(1).find('div').first().getDOMNode();
+      expect(header1.getAttribute('aria-expanded')).to.equal('true');
 
       // Contents.
       expect(
@@ -495,14 +493,15 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
 
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       expect(sections).to.have.lengthOf(3);
 
       // Click to expand.
       sections.at(0).find('div').at(0).simulate('click');
 
       // Expanded state.
-      expect(sections.at(0).getDOMNode()).to.not.have.attribute('expanded');
+      const header0 = sections.at(0).find('div').first().getDOMNode();
+      expect(header0.getAttribute('aria-expanded')).to.equal('false');
 
       // Contents.
       expect(
@@ -523,16 +522,16 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     beforeEach(() => {
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       wrapper = mount(
-        <Accordion animate>
-          <AccordionSection key={1} expanded>
-            <AccordionHeader>header1</AccordionHeader>
-            <AccordionContent>content1</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={2}>
-            <AccordionHeader>header2</AccordionHeader>
-            <AccordionContent>content2</AccordionContent>
-          </AccordionSection>
-        </Accordion>
+        <BentoAccordion animate>
+          <BentoAccordionSection key={1} expanded>
+            <BentoAccordionHeader>header1</BentoAccordionHeader>
+            <BentoAccordionContent>content1</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={2}>
+            <BentoAccordionHeader>header2</BentoAccordionHeader>
+            <BentoAccordionContent>content2</BentoAccordionContent>
+          </BentoAccordionSection>
+        </BentoAccordion>
       );
       document.body.appendChild(wrapper.getDOMNode());
     });
@@ -544,7 +543,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     it('should animate expand on change', () => {
       const animation = {};
       animateStub.returns(animation);
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       const section = sections.at(1);
       const content = section.find('div').at(1).getDOMNode();
 
@@ -552,7 +551,8 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       section.find('div').at(0).simulate('click');
 
       // The state is immediately reflected.
-      expect(section.getDOMNode()).to.have.attribute('expanded');
+      const header0 = section.find('div').first().getDOMNode();
+      expect(header0.getAttribute('aria-expanded')).to.equal('true');
       expect(content.hidden).to.be.false;
       expect(content).to.have.display('block');
 
@@ -574,16 +574,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     it('should animate collapse on change', () => {
       const animation = {};
       animateStub.returns(animation);
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       const section = sections.at(0);
       const content = section.find('div').at(1).getDOMNode();
 
       // Click to expand.
       section.find('div').at(0).simulate('click');
 
-      // The state is NOT immediately reflected: expanded attribute is removed,
-      // but `content[hidden]` is deferred until animation is complete.
-      expect(section.getDOMNode()).to.not.have.attribute('expanded');
+      // The state is NOT immediately reflected: `aria-expanded` is updated, but
+      // `content[hidden]` is deferred until animation is complete.
+      const header0 = section.find('div').at(0).getDOMNode();
+      expect(header0.getAttribute('aria-expanded')).to.equal('false');
       expect(content.className.includes('i-amphtml-animating')).to.be.true;
       expect(content).to.have.display('block');
 
@@ -612,7 +613,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         cancel: env.sandbox.spy(),
       };
       animateStub.onFirstCall().returns(animation).onSecondCall().returns({});
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       const section = sections.at(0);
       const content = section.find('div').at(1).getDOMNode();
 
@@ -634,7 +635,7 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
     it('should ignore animations if not available on the platform', () => {
       animateStub./*OK*/ restore();
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
       const section = sections.at(0);
       const content = section.find('div').at(1).getDOMNode();
       env.sandbox.stub(content, 'animate').value(null);
@@ -657,30 +658,30 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       ref = Preact.createRef();
 
       wrapper = mount(
-        <Accordion ref={ref}>
-          <AccordionSection key={1} expanded>
-            <AccordionHeader>header1</AccordionHeader>
-            <AccordionContent>content1</AccordionContent>
-          </AccordionSection>
-          <AccordionSection
+        <BentoAccordion ref={ref}>
+          <BentoAccordionSection key={1} expanded>
+            <BentoAccordionHeader>header1</BentoAccordionHeader>
+            <BentoAccordionContent>content1</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection
             key={2}
             id="section2"
             onExpandStateChange={onExpandStateChange}
           >
-            <AccordionHeader>header2</AccordionHeader>
-            <AccordionContent>content2</AccordionContent>
-          </AccordionSection>
-          <AccordionSection key={3}>
-            <AccordionHeader>header3</AccordionHeader>
-            <AccordionContent>content3</AccordionContent>
-          </AccordionSection>
-        </Accordion>
+            <BentoAccordionHeader>header2</BentoAccordionHeader>
+            <BentoAccordionContent>content2</BentoAccordionContent>
+          </BentoAccordionSection>
+          <BentoAccordionSection key={3}>
+            <BentoAccordionHeader>header3</BentoAccordionHeader>
+            <BentoAccordionContent>content3</BentoAccordionContent>
+          </BentoAccordionSection>
+        </BentoAccordion>
       );
       document.body.appendChild(wrapper.getDOMNode());
     });
 
     it('should fire events on click', async () => {
-      const sections = wrapper.find(AccordionSection);
+      const sections = wrapper.find(BentoAccordionSection);
 
       // Expand
       sections.at(1).find('div').at(0).simulate('click');
@@ -766,34 +767,34 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
     let wrapper;
     let ref;
 
-    let section1;
-    let section2;
-    let section3;
+    let header0;
+    let header1;
+    let header2;
 
     describe('multi-expand accordion', () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Accordion ref={ref}>
-            <AccordionSection key={1} expanded id="section1">
-              <AccordionHeader>header1</AccordionHeader>
-              <AccordionContent>content1</AccordionContent>
-            </AccordionSection>
-            <AccordionSection key={2} id="section2">
-              <AccordionHeader>header2</AccordionHeader>
-              <AccordionContent>content2</AccordionContent>
-            </AccordionSection>
-            <AccordionSection key={3}>
-              <AccordionHeader>header3</AccordionHeader>
-              <AccordionContent>content3</AccordionContent>
-            </AccordionSection>
-          </Accordion>
+          <BentoAccordion ref={ref}>
+            <BentoAccordionSection key={1} expanded id="section1">
+              <BentoAccordionHeader>header1</BentoAccordionHeader>
+              <BentoAccordionContent>content1</BentoAccordionContent>
+            </BentoAccordionSection>
+            <BentoAccordionSection key={2} id="section2">
+              <BentoAccordionHeader>header2</BentoAccordionHeader>
+              <BentoAccordionContent>content2</BentoAccordionContent>
+            </BentoAccordionSection>
+            <BentoAccordionSection key={3}>
+              <BentoAccordionHeader>header3</BentoAccordionHeader>
+              <BentoAccordionContent>content3</BentoAccordionContent>
+            </BentoAccordionSection>
+          </BentoAccordion>
         );
 
-        const sections = wrapper.find(AccordionSection);
-        section1 = sections.at(0).getDOMNode();
-        section2 = sections.at(1).getDOMNode();
-        section3 = sections.at(2).getDOMNode();
+        const sections = wrapper.find(BentoAccordionSection);
+        header0 = sections.at(0).find('div').first().getDOMNode();
+        header1 = sections.at(1).find('div').first().getDOMNode();
+        header2 = sections.at(2).find('div').first().getDOMNode();
       });
 
       it('toggle all', () => {
@@ -801,9 +802,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // All sections are toggled
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.have.attribute('expanded');
-        expect(section3).to.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('true');
+        expect(header2.getAttribute('aria-expanded')).to.equal('true');
       });
 
       it('toggle one section', async () => {
@@ -811,9 +812,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // Only section 1 is toggled
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('expand all', async () => {
@@ -821,9 +822,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // All sections are expanded
-        expect(section1).to.have.attribute('expanded');
-        expect(section2).to.have.attribute('expanded');
-        expect(section3).to.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('true');
+        expect(header1.getAttribute('aria-expanded')).to.equal('true');
+        expect(header2.getAttribute('aria-expanded')).to.equal('true');
       });
 
       it('expand one section', async () => {
@@ -836,9 +837,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // Only the first section is expanded
-        expect(section1).to.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('true');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('collapse all', async () => {
@@ -846,9 +847,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // All sections are collapsed
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('collapse one section', async () => {
@@ -856,9 +857,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // Only the first section is collapsed
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
     });
 
@@ -866,23 +867,26 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Accordion ref={ref} expandSingleSection>
-            <AccordionSection key={1} expanded header="header1" id="section1">
-              content1
-            </AccordionSection>
-            <AccordionSection key={2} header="header2" id="section2">
-              content2
-            </AccordionSection>
-            <AccordionSection key={3} header="header3">
-              content3
-            </AccordionSection>
-          </Accordion>
+          <BentoAccordion ref={ref} expandSingleSection>
+            <BentoAccordionSection key={1} expanded id="section1">
+              <BentoAccordionHeader>header1</BentoAccordionHeader>
+              <BentoAccordionContent>content1</BentoAccordionContent>
+            </BentoAccordionSection>
+            <BentoAccordionSection key={2} id="section2">
+              <BentoAccordionHeader>header2</BentoAccordionHeader>
+              <BentoAccordionContent>content2</BentoAccordionContent>
+            </BentoAccordionSection>
+            <BentoAccordionSection key={3}>
+              <BentoAccordionHeader>header3</BentoAccordionHeader>
+              <BentoAccordionContent>content3</BentoAccordionContent>
+            </BentoAccordionSection>
+          </BentoAccordion>
         );
 
-        const sections = wrapper.find(AccordionSection);
-        section1 = sections.at(0).getDOMNode();
-        section2 = sections.at(1).getDOMNode();
-        section3 = sections.at(2).getDOMNode();
+        const sections = wrapper.find(BentoAccordionSection);
+        header0 = sections.at(0).find('div').first().getDOMNode();
+        header1 = sections.at(1).find('div').first().getDOMNode();
+        header2 = sections.at(2).find('div').first().getDOMNode();
       });
 
       it('toggle all', async () => {
@@ -891,9 +895,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
         // Accordion is unchanged (toggle does nothing for single-expand
         // accordion)
-        expect(section1).to.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('true');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('toggle one section', async () => {
@@ -902,17 +906,17 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
         // Verify that the second section is expanded and the first
         // section is un-expanded
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('true');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
 
         ref.current.toggle('section2');
         wrapper.update();
 
         // Verify that the second section is collapsed
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('expand all', async () => {
@@ -921,9 +925,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
         // Accordion is unchanged (expand does nothing for single-expand
         // accordion)
-        expect(section1).to.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('true');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('expand one section', async () => {
@@ -932,9 +936,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
 
         // Verify that the second section is expanded and the first
         // section is un-expanded
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('true');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('collapse all', async () => {
@@ -942,9 +946,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // All sections are collapsed
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
 
       it('collapse one section', async () => {
@@ -952,9 +956,9 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
         wrapper.update();
 
         // Section 1 is collapsed
-        expect(section1).to.not.have.attribute('expanded');
-        expect(section2).to.not.have.attribute('expanded');
-        expect(section3).to.not.have.attribute('expanded');
+        expect(header0.getAttribute('aria-expanded')).to.equal('false');
+        expect(header1.getAttribute('aria-expanded')).to.equal('false');
+        expect(header2.getAttribute('aria-expanded')).to.equal('false');
       });
     });
   });
