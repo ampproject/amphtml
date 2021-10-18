@@ -638,7 +638,7 @@ async function buildBentoCss(name, version, minifiedAmpCss) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildNpmBinaries(extDir, name, options) {
+async function buildNpmBinaries(extDir, name, options) {
   let {npm} = options;
   if (npm === true) {
     npm = {
@@ -662,9 +662,9 @@ function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
       bento: {
-        entryPoint: `${name}.js`,
+        entryPoint: await getBentoWebComponentFilename(extDir, name, options),
         outfile: 'web-component.js',
-        wrapper: wrappers.bentoFunction,
+        wrapper: '',
       },
     };
   }
@@ -750,22 +750,56 @@ async function generateBentoEntryPointSource(name, options) {
     import {BaseElement} from '../base-element';
     
     function defineElement() {
-      const css = __css__;
+      const css = ${JSON.stringify(css)};
       if (css) {
         const style = document.createElement('style');
         style.textContent = css;
         document.head.appendChild(style);
       }
       customElements.define(
-        __name__,
+        ${JSON.stringify(name)},
         BaseElement.CustomElement(BaseElement)
       );
     }
 
     defineElement();
-  `)
-    .replace('__css__', JSON.stringify(css))
-    .replace('__name__', JSON.stringify(name));
+  `);
+}
+
+/**
+ * @param {string} dir
+ * @param {string} name
+ * @param {Object} options
+ * @return {Promise<string>}
+ */
+async function getBentoWebComponentFilename(dir, name, options) {
+  const filename = 'web-component.js';
+  if (await fs.pathExists(`${dir}/${filename}`)) {
+    return filename;
+  }
+  const generatedSource = generateBentoWebComponentSource(name, options);
+  const generatedFilename = `build/${filename}`;
+  await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
+  return generatedFilename;
+}
+
+/**
+ * @param {string} name
+ * @param {Object} options
+ * @return {string}
+ */
+function generateBentoWebComponentSource(name, options) {
+  return dedent(`
+    import {BaseElement} from '../base-element';
+    import {CSS} from '../../../../build/${name}-${options.version}.css';
+    
+    export default function defineElement() {
+      const style = document.createElement('style');
+      style.textContent = CSS;
+      document.head.appendChild(style);
+      customElements.define('${getBentoName(name)}', BaseElement);
+    }
+  `);
 }
 
 /**
