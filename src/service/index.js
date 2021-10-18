@@ -606,7 +606,7 @@ export function storageForDoc(elementOrAmpDoc) {
  * TODO(dmanek): Add tests for this method.
  */
 export function storageForTopLevelDoc(elementOrAmpDoc) {
-  const thisAmpdoc = ampdoc(elementOrAmpDoc);
+  const thisAmpdoc = getAmpdoc(elementOrAmpDoc);
   const ampdocService = ampdocServiceFor(thisAmpdoc.win);
   const topAmpdoc = ampdocService.isSingleDoc()
     ? ampdocService.getSingleDoc()
