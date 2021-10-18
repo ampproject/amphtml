@@ -2,7 +2,7 @@ import {dict} from '#core/types/object';
 
 import {ViewerCidApi} from '#service/viewer-cid-api';
 
-import {mockServiceForDoc} from '#testing/test-helper';
+import {mockServiceForDoc} from '#testing/helpers/service';
 
 describes.realWin('viewerCidApi', {amp: true}, (env) => {
   let ampdoc;

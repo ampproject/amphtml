@@ -7,7 +7,7 @@ import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {toggleExperiment} from '#experiments';
 import {useStyles} from '../component.jss';
-import {waitFor, whenCalled} from '#testing/test-helper';
+import {waitFor, whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-base-carousel:1.0',

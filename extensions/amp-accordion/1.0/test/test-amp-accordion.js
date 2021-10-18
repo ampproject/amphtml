@@ -9,7 +9,7 @@ import {CanRender} from '#preact/contextprops';
 
 import {ActionInvocation} from '#service/action-impl';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-accordion:1.0',

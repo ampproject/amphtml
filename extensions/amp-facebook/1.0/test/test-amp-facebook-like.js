@@ -5,7 +5,7 @@ import {resetServiceForTesting} from '../../../../src/service-helpers';
 import {serializeMessage} from '#core/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-facebook-like',
