@@ -68,9 +68,6 @@ function prBuildWorkflow() {
   ) {
     timedExecOrDie(`amp e2e --nobuild --minified --browsers=${browser}`);
   }
-  if (buildTargetsInclude(Targets.IGNORE_LIST)) {
-    timedExecOrDie(`amp check-ignore-lists`);
-  }
 }
 
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

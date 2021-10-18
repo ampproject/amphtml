@@ -51,6 +51,10 @@ function prBuildWorkflow() {
     timedExecOrDie('amp check-invalid-whitespaces');
   }
 
+  if (buildTargetsInclude(Targets.IGNORE_LIST)) {
+    timedExecOrDie(`amp check-ignore-lists`);
+  }
+
   if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
     timedExecOrDie('amp validate-html-fixtures');
   }
