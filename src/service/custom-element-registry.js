@@ -94,9 +94,9 @@ function upgradeOrRegisterElementReady(win, name, toClass) {
  */
 function tryUpgradeElement(element, toClass) {
   // try {
-  //   element.upgrade(toClass);
+    element.upgrade(toClass);
   // } catch (e) {
-    reportError(e, element);
+    // reportError(e, element);
   // }
 }
 

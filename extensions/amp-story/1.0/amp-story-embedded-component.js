@@ -462,14 +462,17 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = getAmpdoc(storyEl);
+
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
     /** @private @const {!../../../src/service/owners-interface.OwnersInterface} */
-    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
+    this.owners_ = Services.ownersForDoc(this.ampdoc_);
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -504,9 +507,7 @@ export class AmpStoryEmbeddedComponent {
     );
 
     /** @type {!../../../src/service/history-impl.History} */
-    this.historyService_ = Services.historyForDoc(
-      getAmpdoc(this.win_.document)
-    );
+    this.historyService_ = Services.historyForDoc(this.ampdoc_);
 
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
