@@ -1,3 +1,4 @@
+const dedent = require('dedent');
 const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
@@ -85,11 +86,13 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
  * Wraps the CDN build with a defineElement function for the
  * user to invoke
  */
-exports.bentoFunction =
-  'export function defineElement(){(function(AMP,_){<%= contents %>})' +
-  '({registerElement:function(n,b,s){if(s){document.head.appendChild(' +
-  "document.createElement('style')).textContent=s;}" +
-  "customElements.define(n.replace(/^amp-/,'bento-')," +
-  'b.CustomElement(b));},})}';
+exports.bentoFunction = dedent`\
+  import{getBentoName}from'../../../../build-system/tasks/bento-helpers';\
+  import{BaseElement}from'../base-element';\
+  export function defineElement(){(function(AMP, _){<%= contents %>})({\
+  registerElement:function(n,b,s){if(s){\
+  document.head.appendChild(document.createElement('style')).textContent=s;}\
+  customElements.define(getBentoName(n),BaseElement.CustomElement(BaseElement)\
+  );},});}`;
 
 exports.none = '<%= contents %>';
