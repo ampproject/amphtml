@@ -661,10 +661,10 @@ function buildNpmBinaries(extDir, name, options) {
         },
         wrapper: '',
       },
-      web: {
+      bento: {
         entryPoint: `${name}.js`,
         outfile: 'web-component.js',
-        wrapper: wrappers.web,
+        wrapper: wrappers.bentoFunction,
       },
     };
   }

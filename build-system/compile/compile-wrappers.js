@@ -85,7 +85,7 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
  * Wraps the CDN build with a defineElement function for the
  * user to invoke
  */
-exports.web =
+exports.bentoFunction =
   'export function defineElement(){(function(AMP,_){<%= contents %>})' +
   '({registerElement:function(n,b,s){if(s){document.head.appendChild(' +
   "document.createElement('style')).textContent=s;}" +
