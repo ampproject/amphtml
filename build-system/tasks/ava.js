@@ -16,7 +16,6 @@ const testFiles = [
   'build-system/tasks/prepend-global/prepend-global.test.js',
 ];
 
-let thisFile;
 let targetFiles;
 
 /**
@@ -27,17 +26,12 @@ let targetFiles;
  * @return {boolean}
  */
 function shouldTriggerAva(changedFile) {
-  if (!thisFile) {
-    thisFile = relative(process.cwd(), __filename);
-  }
-  if (changedFile === thisFile) {
-    return true;
-  }
   if (!targetFiles) {
-    const targetFilePatterns = testFiles.map(
+    const thisFile = relative(process.cwd(), __filename);
+    const patterns = testFiles.map(
       (pattern) => dirname(pattern).replace(/\/test$/, '') + '/'
     );
-    targetFiles = new Set(globbySync(targetFilePatterns));
+    targetFiles = new Set([thisFile, ...globbySync(patterns)]);
   }
   return targetFiles.has(changedFile);
 }
