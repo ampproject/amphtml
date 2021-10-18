@@ -1,4 +1,3 @@
-const dedent = require('dedent');
 const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
