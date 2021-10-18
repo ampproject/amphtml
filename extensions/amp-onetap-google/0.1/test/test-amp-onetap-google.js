@@ -38,10 +38,11 @@ describes.realWin(
         );
       });
 
+    // TODO(36400): remove method in favor of inlining stubs.
     function stubServiceMethods(serviceGetterName, methods) {
       for (const method in methods) {
         env.sandbox
-          .stub(Services[serviceGetterName](env.win.document.body), method)
+          .stub(Services[serviceGetterName](env.win.document.body), method) // eslint-disable-line import/namespace
           .callsFake(methods[method]);
       }
       return methods;

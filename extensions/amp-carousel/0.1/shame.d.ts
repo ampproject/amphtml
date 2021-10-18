@@ -19,7 +19,11 @@ declare module '#experiments' {
 }
 
 declare module '#service' {
-  export var Services: any;
+  export var actionServiceForDoc: any;
+  export var inputFor: any;
+  export var ownersForDoc: any;
+  export var platformFor: any;
+  export var timerFor: any;
 }
 declare module '#utils/analytics' {
   export var triggerAnalyticsEvent: any;

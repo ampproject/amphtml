@@ -1,5 +1,7 @@
 import {parseQueryString} from '#core/types/string/url';
 
+import * as Services from '#service';
+
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import helpersFactory from './helpers';
 
@@ -40,9 +42,9 @@ describes.fakeWin(
       env.sandbox
         .stub(env.ampdoc.win.document, 'referrer')
         .value('referrer_url');
-      helpers.mockServiceGetter('documentInfoForDoc', {
-        canonicalUrl: 'canonical_url',
-      });
+      env.sandbox
+        .stub(Services, 'documentInfoForDoc')
+        .returns({canonicalUrl: 'canonical_url'});
       env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns('-120');
       waypoint = new Waypoint(
         env.ampdoc,

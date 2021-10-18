@@ -1,5 +1,3 @@
-import * as Services from '#service';
-
 import {DEFAULT_SKIM_OPTIONS} from './constants';
 
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
@@ -27,11 +25,6 @@ const helpersFactory = (env) => {
       return {
         fetchJson: env.sandbox.stub().returns(Promise.resolve(response)),
       };
-    },
-
-    mockServiceGetter(getterName, returnValue) {
-      env.sandbox.stub(Services, getterName);
-      Services[getterName].returns(returnValue);
     },
 
     stubCustomEventReporterBuilder() {

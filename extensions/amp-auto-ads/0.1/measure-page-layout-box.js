@@ -1,7 +1,7 @@
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {getWin} from '#core/window';
 
-import {Services} from '.../../../src/service';
+import * as Services from '#service';
 
 /**
  * @param {!Element} element
