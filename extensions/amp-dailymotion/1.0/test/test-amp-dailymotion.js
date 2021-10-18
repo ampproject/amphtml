@@ -1,7 +1,8 @@
 import '../amp-dailymotion';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
+import {expect} from 'chai';
 
 describes.realWin(
   'amp-dailymotion-v1.0',
@@ -14,6 +15,14 @@ describes.realWin(
     let win;
     let doc;
     let html;
+
+    const waitForRender = async (element) => {
+      await element.buildInternal();
+      const loadPromise = element.layoutCallback();
+      const shadow = element.shadowRoot;
+      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
+    };
 
     beforeEach(async () => {
       win = env.win;
@@ -60,8 +69,10 @@ describes.realWin(
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe).to.not.be.null;
+      // VideoId attr
+      expect(iframe.src).to.contain('x3rdtfy');
       // Mute Attr
-      expect(iframe.src).to.contain('mute=true');
+      expect(iframe.src).to.contain('mute=1');
       // Enscreen Enable attr
       expect(iframe.src).to.contain('endscreen-enable=true');
       // Sharing Enable attr

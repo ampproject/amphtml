@@ -9,7 +9,7 @@ BaseElement['Component'] = BentoDailymotion;
 /** @override */
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'videoid': {attr: 'data-videoid'},
+  'videoId': {attr: 'data-videoid'},
   'mute': {attr: 'data-mute'},
   'endscreenEnable': {attr: 'data-endscreen-enable'},
   'sharingEnable': {attr: 'data-sharing-enable'},
