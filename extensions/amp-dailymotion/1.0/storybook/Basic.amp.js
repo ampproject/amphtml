@@ -9,15 +9,28 @@ export default {
     experiments: ['bento'],
   },
   args: {
-    'data-example-property': 'example string property argument',
+    width: 300,
+    height: 200,
+    'data-videoid': 'x3rdtfy',
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const _default = (args) => {
-  return (
-    <amp-dailymotion width="300" height="200" {...args}>
-      This text is inside.
-    </amp-dailymotion>
-  );
+const Template = ({...args}) => <amp-dailymotion {...args}></amp-dailymotion>;
+
+export const _default = (args) => <Template {...args} />;
+
+export const _customSettings = (args) => <Template {...args} />;
+
+_customSettings.args = {
+  'data-endscreen-enable': false,
+  'data-sharing-enable': false,
+  'data-ui-highlight': '444444',
+  'data-ui-logo': false,
+  'data-info': false,
+};
+
+export const _autoplay = (args) => <Template {...args} />;
+
+_autoplay.args = {
+  autoplay: true,
 };
