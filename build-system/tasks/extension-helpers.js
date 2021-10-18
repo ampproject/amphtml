@@ -750,20 +750,22 @@ async function generateBentoEntryPointSource(name, options) {
     import {BaseElement} from '../base-element';
     
     function defineElement() {
-      const css = ${JSON.stringify(css)};
+      const css = __css__;
       if (css) {
         const style = document.createElement('style');
         style.textContent = css;
         document.head.appendChild(style);
       }
       customElements.define(
-        ${JSON.stringify(name)},
+        __name__,
         BaseElement.CustomElement(BaseElement)
       );
     }
 
     defineElement();
-  `);
+  `)
+    .replace('__css__', JSON.stringify(css))
+    .replace('__name__', JSON.stringify(name));
 }
 
 /**
