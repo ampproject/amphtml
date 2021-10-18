@@ -7,7 +7,7 @@ import {isExperimentOn, toggleExperiment} from '#experiments';
 import {shouldLoadPolyfill as shouldLoadInObPolyfill} from '#polyfills/stubs/intersection-observer-stub';
 import {shouldLoadPolyfill as shouldLoadResObPolyfill} from '#polyfills/stubs/resize-observer-stub';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   installAmpdocServices,
   installRuntimeServices,

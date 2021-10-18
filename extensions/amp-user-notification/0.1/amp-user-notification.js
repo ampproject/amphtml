@@ -3,7 +3,7 @@ import {toggle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,

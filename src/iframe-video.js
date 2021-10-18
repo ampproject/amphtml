@@ -5,7 +5,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

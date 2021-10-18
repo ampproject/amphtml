@@ -10,7 +10,7 @@ import {
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData, listen} from '#utils/event-helper';

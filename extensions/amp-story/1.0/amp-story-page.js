@@ -35,7 +35,7 @@ import {Layout} from '#core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
 import {MediaPool} from './media-pool';
-import {Services} from '#service';
+import * as Services from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {addAttributesToElement, iterateCursor} from '#core/dom';

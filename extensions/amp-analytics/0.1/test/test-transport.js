@@ -4,7 +4,7 @@ import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '#testing/helpers/service';
-import {Services} from '#service';
+import * as Services from '#service';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
 import {installDocService} from '#service/ampdoc-impl';

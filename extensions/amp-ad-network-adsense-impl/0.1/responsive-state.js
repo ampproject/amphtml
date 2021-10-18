@@ -14,7 +14,7 @@ import {getWin} from '#core/window';
 
 import {randomlySelectUnsetExperiments} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';

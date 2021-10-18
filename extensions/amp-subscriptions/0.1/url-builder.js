@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {getValueForExpr} from '#core/types/object';
 
 export class UrlBuilder {

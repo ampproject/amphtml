@@ -1,6 +1,6 @@
 import {parseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user} from '#utils/log';
 import {

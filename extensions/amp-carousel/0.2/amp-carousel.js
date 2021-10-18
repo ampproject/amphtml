@@ -4,7 +4,7 @@ import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   closestAncestorElementBySelector,
   realChildElements,

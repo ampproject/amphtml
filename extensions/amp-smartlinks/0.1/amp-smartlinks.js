@@ -1,7 +1,7 @@
 import {CommonSignals} from '#core/constants/common-signals';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData} from '#utils/event-helper';
 

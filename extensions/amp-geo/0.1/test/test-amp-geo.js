@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {vsyncForTesting} from '#service/vsync-impl';
 
 import {user} from '#utils/log';

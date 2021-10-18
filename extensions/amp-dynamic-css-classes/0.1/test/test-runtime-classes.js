@@ -1,5 +1,5 @@
 import '../amp-dynamic-css-classes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {vsyncForTesting} from '#service/vsync-impl';
 
 const tcoReferrer = 'http://t.co/xyzabc123';

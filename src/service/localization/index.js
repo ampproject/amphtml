@@ -1,6 +1,6 @@
 import {closest} from '#core/dom/query';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {
   LocalizedStringBundleDef,

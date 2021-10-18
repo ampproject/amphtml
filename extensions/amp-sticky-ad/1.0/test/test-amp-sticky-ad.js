@@ -2,7 +2,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
 import {createElementWithAttributes} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {macroTask} from '#testing/helpers';
 import {poll} from '#testing/iframe';

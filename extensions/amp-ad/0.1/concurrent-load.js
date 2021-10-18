@@ -14,7 +14,7 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
+import * as Services from '#service';
 import {user, userAssert} from '#utils/log';
 
 /**

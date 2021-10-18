@@ -3,7 +3,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {PositionObserver} from '#service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 

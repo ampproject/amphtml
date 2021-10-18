@@ -1,5 +1,5 @@
 import {API_SERVER} from '../constants';
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {addParamsToUrl} from '../../../../src/url';
 import {dict} from '#core/types/object';

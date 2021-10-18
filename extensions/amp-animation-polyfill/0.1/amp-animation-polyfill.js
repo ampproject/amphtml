@@ -1,6 +1,6 @@
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a

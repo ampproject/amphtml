@@ -1,7 +1,7 @@
 import {isIframed} from '#core/dom';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {FixedLayer} from '#service/fixed-layer';
 
 import {getData, listen, listenOnce} from '#utils/event-helper';

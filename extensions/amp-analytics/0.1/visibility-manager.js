@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '#utils/log';
 import {dict, map} from '#core/types/object';

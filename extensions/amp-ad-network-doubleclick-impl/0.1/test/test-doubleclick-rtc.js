@@ -5,7 +5,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {createElementWithAttributes} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 import {RTC_ERROR_ENUM} from '#service/real-time-config/real-time-config-impl';
 

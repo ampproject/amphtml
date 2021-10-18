@@ -1,7 +1,7 @@
 import '../amp-bind';
 import {ActionTrust} from '#core/constants/action-constants';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {UrlReplacementPolicy} from '../../../../src/batched-json';
 

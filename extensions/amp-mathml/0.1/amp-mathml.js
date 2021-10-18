@@ -2,7 +2,7 @@ import {removeElement} from '#core/dom';
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {setStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {CSS} from '../../../build/amp-mathml-0.1.css';
 import {getIframe} from '../../../src/3p-frame';

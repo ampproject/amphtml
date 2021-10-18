@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {getScopeElements, isElementInScope} from './scope';

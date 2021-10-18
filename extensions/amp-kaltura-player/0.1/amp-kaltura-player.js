@@ -4,7 +4,7 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {userAssert} from '#utils/log';
 

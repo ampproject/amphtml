@@ -8,7 +8,7 @@ import {
 } from '#core/dom/query';
 import {toArray} from '#core/types/array';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, userAssert} from '#utils/log';
 

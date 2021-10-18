@@ -25,7 +25,7 @@ import {setStyle} from '#core/dom/style';
 import {isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData, listen} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

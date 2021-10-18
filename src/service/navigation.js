@@ -5,7 +5,7 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
 

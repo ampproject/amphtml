@@ -1,6 +1,6 @@
 import {adConfig} from '#ads/_config';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

@@ -1,7 +1,7 @@
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {setIsMediaComponent} from '../../../src/video-interface';
 

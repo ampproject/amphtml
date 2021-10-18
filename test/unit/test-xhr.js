@@ -4,7 +4,7 @@ import {toggleExperiment} from '#experiments';
 
 import {fetchPolyfill} from '#polyfills/fetch';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 
 import {user} from '#utils/log';

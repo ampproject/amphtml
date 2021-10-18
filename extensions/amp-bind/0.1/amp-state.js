@@ -6,7 +6,7 @@ import {toggle} from '#core/dom/style';
 import {dict, map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';

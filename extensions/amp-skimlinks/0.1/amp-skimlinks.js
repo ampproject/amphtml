@@ -1,7 +1,7 @@
 import {CommonSignals} from '#core/constants/common-signals';
 import {once} from '#core/types/function';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AffiliateLinkResolver} from './affiliate-link-resolver';
 import {SKIMLINKS_REWRITER_ID} from './constants';

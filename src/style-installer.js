@@ -5,7 +5,7 @@ import {setStyles} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
 import {map} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert} from '#utils/log';
 

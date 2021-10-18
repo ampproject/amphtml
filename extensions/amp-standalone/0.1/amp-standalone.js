@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';

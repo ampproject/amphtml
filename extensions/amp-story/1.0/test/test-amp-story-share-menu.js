@@ -4,7 +4,7 @@ import {
   StateProperty,
 } from '../amp-story-store-service';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
 import {getStyle} from '#core/dom/style';

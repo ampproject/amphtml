@@ -3,7 +3,7 @@ import {isLayoutSizeDefined} from '#core/dom/layout';
 import {isAutoplaySupported, resetIsAutoplaySupported} from '#core/dom/video';
 import {toArray} from '#core/types/array';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {listenOncePromise} from '#utils/event-helper';

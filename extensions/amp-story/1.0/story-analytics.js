@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {getVariableService} from './variable-service';

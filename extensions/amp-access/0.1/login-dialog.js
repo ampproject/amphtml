@@ -1,6 +1,6 @@
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData, listen} from '#utils/event-helper';
 import {dev, userAssert} from '#utils/log';

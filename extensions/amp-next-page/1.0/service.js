@@ -16,7 +16,7 @@ import {setStyles, toggle} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {dev, devAssert, user, userAssert} from '#utils/log';

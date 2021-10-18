@@ -3,7 +3,7 @@ import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-pol
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import * as Services from '#service';
 import {addConfigToInteractive, getMockInteractiveData} from './helpers';
 import {measureMutateElementStub} from '#testing/helpers/service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';

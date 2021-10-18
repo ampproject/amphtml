@@ -1,6 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /** @const {function()} */
 const NOOP_CALLBACK_ = function () {};

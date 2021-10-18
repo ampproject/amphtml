@@ -1,6 +1,6 @@
 import {createElementWithAttributes} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {maybeExpandUrlParamsForTesting} from '#service/navigation';
 import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
 

@@ -17,7 +17,7 @@
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user} from '#utils/log';
 

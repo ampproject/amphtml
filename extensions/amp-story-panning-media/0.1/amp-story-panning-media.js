@@ -6,7 +6,7 @@ import {closest} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {deepEquals} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user} from '#utils/log';
 

@@ -11,7 +11,7 @@ import {srcsetFromElement, srcsetFromSrc} from '#core/dom/srcset';
 import {toArray} from '#core/types/array';
 import {map} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert, userAssert} from '#utils/log';
 

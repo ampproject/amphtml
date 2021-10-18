@@ -11,7 +11,7 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {htmlFor} from '#core/dom/static-template';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData, listen} from '#utils/event-helper';

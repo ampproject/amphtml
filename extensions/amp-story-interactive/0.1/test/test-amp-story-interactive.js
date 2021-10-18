@@ -13,7 +13,7 @@ import {
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
 import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import * as Services from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {
   addConfigToInteractive,

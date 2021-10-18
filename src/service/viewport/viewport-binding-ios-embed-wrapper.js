@@ -6,7 +6,7 @@ import {computedStyle, px, setImportantStyles} from '#core/dom/style';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

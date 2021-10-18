@@ -2,7 +2,7 @@ import {whenDocumentReady} from '#core/document/ready';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {installPlatformService} from '#service/platform-impl';
 import {ViewportBindingIosEmbedWrapper_} from '#service/viewport/viewport-binding-ios-embed-wrapper';

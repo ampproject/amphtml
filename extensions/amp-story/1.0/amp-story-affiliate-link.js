@@ -2,7 +2,7 @@
  * @fileoverview Affiliate link component that expands when clicked.
  */
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {getAmpdoc} from '../../../src/service-helpers';

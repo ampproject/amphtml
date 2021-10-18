@@ -1,6 +1,6 @@
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * Helper method to trigger analytics event if amp-analytics is available.

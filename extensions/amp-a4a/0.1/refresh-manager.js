@@ -1,6 +1,6 @@
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {devAssert, user, userAssert} from '#utils/log';
 

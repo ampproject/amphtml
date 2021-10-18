@@ -1,6 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Promise>} */
 const polyfillPromiseMap = new WeakMap();

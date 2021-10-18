@@ -11,7 +11,7 @@ import {
 import {tryPlay} from '#core/dom/video';
 import {once} from '#core/types/function';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent, listen} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';

@@ -2,7 +2,7 @@ import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDocService, AmpDocSingle} from '#service/ampdoc-impl';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {installHistoryServiceForDoc} from '#service/history-impl';

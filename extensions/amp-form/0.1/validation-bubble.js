@@ -1,7 +1,7 @@
 import {removeChildren} from '#core/dom';
 import {setStyles, toggle} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';

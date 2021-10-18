@@ -7,7 +7,7 @@ import {setStyle} from '#core/dom/style';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData, listen, listenOncePromise} from '#utils/event-helper';

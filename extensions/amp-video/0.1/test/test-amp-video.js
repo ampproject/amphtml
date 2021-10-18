@@ -1,6 +1,6 @@
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {Services} from '#service';
+import * as Services from '#service';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {dispatchCustomEvent} from '#core/dom';

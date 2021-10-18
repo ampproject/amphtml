@@ -6,7 +6,7 @@ import '#polyfills';
 import {TickLabel} from '#core/constants/enums';
 import * as mode from '#core/mode';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   installBuiltinElements,

@@ -15,7 +15,7 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {loadPromise} from '#utils/event-helper';
 import {dev} from '#utils/log';

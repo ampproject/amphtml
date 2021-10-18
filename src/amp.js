@@ -9,7 +9,7 @@ import {TickLabel} from '#core/constants/enums';
 import {whenDocumentComplete} from '#core/document/ready';
 import * as mode from '#core/mode';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,

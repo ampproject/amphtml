@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';

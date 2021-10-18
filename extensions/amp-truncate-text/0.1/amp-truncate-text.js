@@ -8,7 +8,7 @@ import {toArray} from '#core/types/array';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

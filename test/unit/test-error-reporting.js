@@ -1,6 +1,6 @@
 import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import * as analytics from '#utils/analytics';
 import {user, userAssert} from '#utils/log';

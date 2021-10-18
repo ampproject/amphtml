@@ -1,7 +1,7 @@
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
 import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import * as Services from '#service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-consent', {amp: true}, (env) => {

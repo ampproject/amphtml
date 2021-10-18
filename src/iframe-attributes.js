@@ -6,7 +6,7 @@ import {dict} from '#core/types/object';
 
 import {experimentToggles, isCanary} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {urls} from './config';
 import {getModeObject} from './mode-object';

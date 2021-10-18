@@ -1,5 +1,5 @@
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
+import * as Services from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';

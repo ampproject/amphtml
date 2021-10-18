@@ -1,7 +1,7 @@
 import {CommonSignals} from '#core/constants/common-signals';
 import {LayoutPriority} from '#core/dom/layout';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {getSchedulerForDoc} from '#service/scheduler';
 
 import {BaseElement} from '../../src/base-element';

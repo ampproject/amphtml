@@ -1,6 +1,6 @@
 import {pushIfNotExist, removeItem} from '#core/types/array';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {LoadingIndicatorImpl} from '#service/loading-indicator';
 
 describes.realWin('LoadingIndicatorImpl', {amp: true}, (env) => {

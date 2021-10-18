@@ -15,7 +15,7 @@ import * as tr from '#core/dom/transition';
 import {boundValue, clamp, distance, magnitude} from '#core/math';
 import {WindowInterface} from '#core/window/interface';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {Animation} from '#utils/animation';
 import {isLoaded} from '#utils/event-helper';

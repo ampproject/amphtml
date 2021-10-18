@@ -1,7 +1,7 @@
 import '../amp-mowplayer';
 import {createElementWithAttributes} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 

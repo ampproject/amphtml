@@ -1,7 +1,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {removeItem} from '#core/types/array';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {
   whenContentIniLoadInOb,

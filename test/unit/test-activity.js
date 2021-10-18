@@ -1,6 +1,6 @@
 import {Observable} from '#core/data-structures/observable';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {markElementScheduledForTesting} from '#service/custom-element-registry';
 import {installPlatformService} from '#service/platform-impl';

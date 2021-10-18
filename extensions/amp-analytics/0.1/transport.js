@@ -6,7 +6,7 @@ import {
   defaultSerializer,
 } from './transport-serializer';
 import {IframeTransport} from './iframe-transport';
-import {Services} from '#service';
+import * as Services from '#service';
 import {WindowInterface} from '#core/window/interface';
 import {
   assertHttpsUrl,

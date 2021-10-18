@@ -3,7 +3,7 @@ import {Layout, applyFillContent} from '#core/dom/layout';
 import {isEnumValue} from '#core/types';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData, listen} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

@@ -10,7 +10,7 @@ import {map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listen} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';

@@ -5,7 +5,7 @@ import {computedStyle, toggle} from '#core/dom/style';
 import {isFiniteNumber} from '#core/types';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
 

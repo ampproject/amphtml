@@ -3,7 +3,7 @@ import {
   getJitter,
 } from '#core/types/function/exponential-backoff';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * Poller with backoff functionality.

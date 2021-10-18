@@ -1,6 +1,6 @@
 import {Observable} from '#core/data-structures/observable';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {installCryptoService} from '#service/crypto-impl';

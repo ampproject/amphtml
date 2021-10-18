@@ -2,7 +2,7 @@ import {isAmp4Email} from '#core/document/format';
 import {whenDocumentComplete} from '#core/document/ready';
 import {isFiniteNumber} from '#core/types';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {loadPromise} from '#utils/event-helper';
 import {devAssert} from '#utils/log';

@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {dev} from '#utils/log';
 import {dict} from '#core/types/object';

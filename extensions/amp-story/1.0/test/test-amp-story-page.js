@@ -6,7 +6,7 @@ import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Deferred} from '#core/data-structures/promise';
 import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
-import {Services} from '#service';
+import * as Services from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';

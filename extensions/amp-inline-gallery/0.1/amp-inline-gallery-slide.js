@@ -1,5 +1,5 @@
 import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
+import * as Services from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {toArray} from '#core/types/array';

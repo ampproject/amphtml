@@ -10,7 +10,7 @@ import {
 import {computedStyle, toggle} from '#core/dom/style';
 import {toWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert} from '#utils/log';
 

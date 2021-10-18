@@ -1,5 +1,5 @@
 import {DEFAULT_CONFIG} from './default-config';
-import {Services} from '#service';
+import * as Services from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '#service/extension-script';
 import {deepMerge, dict, hasOwn} from '#core/types/object';

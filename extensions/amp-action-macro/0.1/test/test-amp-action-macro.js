@@ -1,6 +1,6 @@
 import {ActionTrust} from '#core/constants/action-constants';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {ActionInvocation} from '#service/action-impl';
 
 import {AmpActionMacro} from '../amp-action-macro';

@@ -15,7 +15,7 @@ import {once} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 import {dashToCamelCase} from '#core/types/string';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent, listen} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';

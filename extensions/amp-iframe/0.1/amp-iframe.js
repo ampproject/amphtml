@@ -9,7 +9,7 @@ import {
 } from '#core/dom/layout';
 import {MessageType} from '#core/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
+import * as Services from '#service';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
 import {createCustomEvent, getData, listen} from '#utils/event-helper';
 import {user, userAssert} from '#utils/log';

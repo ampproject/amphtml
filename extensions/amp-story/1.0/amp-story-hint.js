@@ -6,7 +6,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
+import * as Services from '#service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';

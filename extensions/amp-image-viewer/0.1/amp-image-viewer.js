@@ -24,7 +24,7 @@ import * as tr from '#core/dom/transition';
 import {boundValue, distance, magnitude} from '#core/math';
 import {WindowInterface} from '#core/window/interface';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {Animation} from '#utils/animation';
 import {createCustomEvent, loadPromise} from '#utils/event-helper';

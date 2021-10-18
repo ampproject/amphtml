@@ -2,7 +2,7 @@ import {WindowInterface} from '#core/window/interface';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {PageConfig} from '#third_party/subscriptions-project/config';
 import {

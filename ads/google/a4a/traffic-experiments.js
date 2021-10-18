@@ -11,7 +11,7 @@ import {
   EXPERIMENT_ATTRIBUTE,
   mergeExperimentIds,
 } from './utils';
-import {Services} from '#service';
+import * as Services from '#service';
 import {parseQueryString} from '#core/types/string/url';
 
 /** @typedef {{

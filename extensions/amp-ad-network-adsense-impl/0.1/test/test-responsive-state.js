@@ -10,7 +10,7 @@ import {toWin} from '#core/window';
 
 import {forceExperimentBranch} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {
   AD_SIZE_OPTIMIZATION_EXP,

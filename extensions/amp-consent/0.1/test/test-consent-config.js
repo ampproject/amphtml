@@ -5,7 +5,7 @@ import {
   expandPolicyConfig,
 } from '../consent-config';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '#service';
+import * as Services from '#service';
 import {dict} from '#core/types/object';
 import {macroTask} from '#testing/helpers';
 

@@ -1,6 +1,6 @@
 import {ActionTrust} from '#core/constants/action-constants';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getDetail} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

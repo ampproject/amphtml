@@ -3,7 +3,7 @@ import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {Layout} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}

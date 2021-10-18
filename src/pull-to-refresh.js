@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * Installs "pull-to-refresh" (P2R) blocker if viewer has requested. P2R can

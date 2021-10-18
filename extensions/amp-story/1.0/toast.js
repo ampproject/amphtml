@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getWin} from '#core/window';
 

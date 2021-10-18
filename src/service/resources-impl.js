@@ -8,7 +8,7 @@ import {remove} from '#core/types/array';
 import {throttle} from '#core/types/function';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listen, loadPromise} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';

@@ -2,7 +2,7 @@ import {removeElement} from '#core/dom';
 import {rethrowAsync} from '#core/error';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
 

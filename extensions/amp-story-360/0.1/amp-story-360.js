@@ -9,7 +9,7 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {LocalizedStringId} from '#service/localization/strings';
 
 import {listenOncePromise} from '#utils/event-helper';

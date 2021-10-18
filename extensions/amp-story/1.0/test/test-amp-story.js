@@ -15,7 +15,7 @@ import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Performance} from '#service/performance-impl';
-import {Services} from '#service';
+import * as Services from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {createElementWithAttributes} from '#core/dom';

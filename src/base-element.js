@@ -4,7 +4,7 @@ import {Layout, LayoutPriority} from '#core/dom/layout';
 import {isArray} from '#core/types';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData, listen, loadPromise} from '#utils/event-helper';
 import {devAssert, user, userAssert} from '#utils/log';

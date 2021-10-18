@@ -4,7 +4,7 @@ import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, userAssert} from '#utils/log';
 

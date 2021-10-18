@@ -6,7 +6,7 @@ import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listenOnce} from '#utils/event-helper';
 

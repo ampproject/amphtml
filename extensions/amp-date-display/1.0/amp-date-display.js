@@ -2,7 +2,7 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, userAssert} from '#utils/log';
 

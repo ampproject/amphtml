@@ -4,7 +4,7 @@ import {dict, isObject, map} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

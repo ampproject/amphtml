@@ -12,7 +12,7 @@ import {resetEvtListenerOptsSupportForTesting} from '#core/dom/event-helper-list
 
 import {resetExperimentTogglesForTesting} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,

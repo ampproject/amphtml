@@ -8,7 +8,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {parseSrcset} from '#core/dom/srcset';
 import {WindowInterface} from '#core/window/interface';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {ActionService} from '#service/action-impl';
 
 import {ImageViewer} from '../amp-image-lightbox';

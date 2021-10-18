@@ -15,7 +15,7 @@ import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, userAssert} from '#utils/log';
 

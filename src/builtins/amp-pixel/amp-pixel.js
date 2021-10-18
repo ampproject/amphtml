@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
 import {dev, userAssert} from '#utils/log';

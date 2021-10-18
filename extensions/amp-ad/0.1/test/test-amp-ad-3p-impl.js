@@ -8,7 +8,7 @@ import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {LayoutPriority} from '#core/dom/layout';
-import {Services} from '#service';
+import * as Services from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
 import {macroTask} from '#testing/helpers';

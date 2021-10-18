@@ -22,7 +22,7 @@ import {setStyles} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user, userAssert} from '#utils/log';
 

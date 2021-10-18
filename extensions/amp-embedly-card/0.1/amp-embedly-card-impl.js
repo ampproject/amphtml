@@ -1,7 +1,7 @@
 import {removeElement} from '#core/dom';
 import {Layout, applyFillContent} from '#core/dom/layout';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {userAssert} from '#utils/log';
 

@@ -4,7 +4,7 @@ import {
 } from '#experiments/story-ad-progress-segment';
 import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   StateProperty,
   UIType,

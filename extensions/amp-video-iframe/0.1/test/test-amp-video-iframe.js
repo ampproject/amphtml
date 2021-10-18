@@ -2,7 +2,7 @@ import '../amp-video-iframe';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 

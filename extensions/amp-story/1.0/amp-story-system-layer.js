@@ -13,7 +13,7 @@ import {
 } from './development-ui';
 import {LocalizedStringId} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '#service';
+import * as Services from '#service';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,

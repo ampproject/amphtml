@@ -1,6 +1,6 @@
 import {AmpEvents} from '#core/constants/amp-events';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {Priority} from '#service/navigation';
 
 import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';

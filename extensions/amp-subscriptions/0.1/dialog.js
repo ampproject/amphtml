@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
 

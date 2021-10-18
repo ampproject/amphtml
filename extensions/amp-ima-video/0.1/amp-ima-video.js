@@ -13,7 +13,7 @@ import {isEnumValue, isObject} from '#core/types';
 import {toArray} from '#core/types/array';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData, listen} from '#utils/event-helper';

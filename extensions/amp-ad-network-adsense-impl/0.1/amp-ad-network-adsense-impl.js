@@ -47,7 +47,7 @@ import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {Navigation} from '#service/navigation';
 
 import {getData} from '#utils/event-helper';

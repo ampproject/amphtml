@@ -2,7 +2,7 @@
 
 import {listenParent} from '#3p/messaging';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createIframePromise} from '#testing/iframe';
 

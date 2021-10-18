@@ -3,7 +3,7 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';

@@ -5,7 +5,7 @@ import {Signals} from '#core/data-structures/signals';
 import {LayoutPriority} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {Resource, ResourceState} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';

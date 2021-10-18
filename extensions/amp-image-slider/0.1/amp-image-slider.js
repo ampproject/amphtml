@@ -7,7 +7,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listen, loadPromise} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';

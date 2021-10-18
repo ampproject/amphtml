@@ -3,7 +3,7 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listen} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';

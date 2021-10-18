@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {Crypto} from '#service/crypto-impl';
 import {installExtensionsService} from '#service/extensions-impl';

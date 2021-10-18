@@ -1,5 +1,5 @@
 import {ScrollManager} from './scroll-manager';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   closestAncestorElementBySelector,
   matches,

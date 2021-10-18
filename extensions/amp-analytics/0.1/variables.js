@@ -1,5 +1,5 @@
 import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
-import {Services} from '#service';
+import * as Services from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {asyncStringReplace} from '#core/types/string';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';

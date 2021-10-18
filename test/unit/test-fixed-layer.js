@@ -1,7 +1,7 @@
 import {toggle} from '#core/dom/style';
 import {endsWith} from '#core/types/string';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
 import {FixedLayer} from '#service/fixed-layer';
 import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';

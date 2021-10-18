@@ -17,7 +17,7 @@ import {
 import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
-import {Services} from '#service';
+import * as Services from '#service';
 import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
 import {Transport} from './transport';
 import {dev, devAssert, user} from '#utils/log';

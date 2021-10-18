@@ -3,7 +3,7 @@ import * as dom from '#core/dom';
 import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {whenCalled} from '#testing/helpers/service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 

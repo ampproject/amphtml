@@ -1,5 +1,5 @@
 import {Doc} from '#third_party/subscriptions-project/config';
-import {Services} from '#service';
+import * as Services from '#service';
 import {dev} from '#utils/log';
 
 /**

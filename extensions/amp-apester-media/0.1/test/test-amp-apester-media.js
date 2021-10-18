@@ -1,5 +1,5 @@
 import '../amp-apester-media';
-import {Services} from '#service';
+import * as Services from '#service';
 
 describes.realWin(
   'amp-apester-media',

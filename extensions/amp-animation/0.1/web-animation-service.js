@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {WebAnimationBuilderOptionsDef} from './web-animation-types';

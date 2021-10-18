@@ -2,7 +2,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {manageWin, setInViewportForTesting} from '#3p/environment';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {loadPromise} from '#utils/event-helper';
 

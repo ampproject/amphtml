@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * Strips everything but the domain from referrer string.

@@ -1,7 +1,7 @@
 import {parseJson} from '#core/types/object/json';
 import {bytesToString, stringToBytes} from '#core/types/string/bytes';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

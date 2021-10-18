@@ -1,7 +1,7 @@
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

@@ -1,5 +1,5 @@
 import '../../../amp-ad/0.1/amp-ad';
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';

@@ -4,7 +4,7 @@ import {computedStyle, px, setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {throttle} from '#core/types/function';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listen, listenOncePromise} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';

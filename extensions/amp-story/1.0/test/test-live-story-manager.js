@@ -4,7 +4,7 @@ import {AmpStoryPage} from '../amp-story-page';
 import {CommonSignals} from '#core/constants/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
 import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import * as Services from '#service';
 import {addAttributesToElement} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 

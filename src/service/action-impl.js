@@ -13,7 +13,7 @@ import {debounce, throttle} from '#core/types/function';
 import {dict, getValueForExpr, hasOwn, map} from '#core/types/object';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getDetail} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';

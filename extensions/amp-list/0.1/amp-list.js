@@ -28,7 +28,7 @@ import {
   markElementForDiffing,
 } from '#purifier/sanitation';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent, listen} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';

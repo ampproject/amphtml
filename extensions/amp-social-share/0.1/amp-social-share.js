@@ -4,7 +4,7 @@ import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
 

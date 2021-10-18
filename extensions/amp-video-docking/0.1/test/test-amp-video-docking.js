@@ -3,7 +3,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {htmlFor} from '#core/dom/static-template';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {PlayingStates} from '../../../../src/video-interface';
 import {

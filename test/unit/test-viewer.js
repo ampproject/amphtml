@@ -1,6 +1,6 @@
 import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 import {installPlatformService} from '#service/platform-impl';

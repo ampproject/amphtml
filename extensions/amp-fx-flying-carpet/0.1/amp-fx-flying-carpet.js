@@ -3,7 +3,7 @@ import {Layout} from '#core/dom/layout';
 import {realChildElements, realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, userAssert} from '#utils/log';
 

@@ -1,5 +1,5 @@
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {isAmp4Email} from '#core/document/format';
 import {toggleAttribute} from '#core/dom';
 

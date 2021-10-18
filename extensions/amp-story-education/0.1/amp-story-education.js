@@ -5,7 +5,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {LocalizedStringId} from '#service/localization/strings';
 
 import {dev} from '#utils/log';

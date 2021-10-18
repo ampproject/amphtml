@@ -4,7 +4,7 @@ import {elementByTag} from '#core/dom/query';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {userAssert} from '#utils/log';

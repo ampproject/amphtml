@@ -35,7 +35,7 @@ import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
 import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
-import {Services} from '#service';
+import * as Services from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';

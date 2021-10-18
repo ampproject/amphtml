@@ -2,7 +2,7 @@ import {isIframeVideoPlayerComponent} from '#core/dom/layout';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles, setStyle} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {CSS} from '../../../build/amp-loader-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';

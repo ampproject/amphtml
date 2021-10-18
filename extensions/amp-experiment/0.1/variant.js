@@ -2,7 +2,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {isObject} from '#core/types';
 import {hasOwn} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, userAssert} from '#utils/log';
 

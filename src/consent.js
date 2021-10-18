@@ -3,7 +3,7 @@ import {
 } from '#core/constants/consent-state';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * Returns a promise that resolve when all consent state the policy wait

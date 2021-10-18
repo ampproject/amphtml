@@ -15,7 +15,7 @@ import {setStyle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {ResourceState} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
 

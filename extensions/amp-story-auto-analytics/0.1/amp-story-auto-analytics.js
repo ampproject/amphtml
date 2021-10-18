@@ -1,6 +1,6 @@
 import {htmlFor} from '#core/dom/static-template';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {devAssert} from '#utils/log';
 

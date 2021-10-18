@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {fetchDocument} from '../../src/document-fetcher';
 

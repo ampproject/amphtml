@@ -4,7 +4,7 @@ import {
   presets,
   setStyleForPreset,
 } from './animation-presets';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,

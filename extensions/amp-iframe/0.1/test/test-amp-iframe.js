@@ -2,7 +2,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {CommonSignals} from '#core/constants/common-signals';
 import {LayoutPriority} from '#core/dom/layout';
-import {Services} from '#service';
+import * as Services from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 

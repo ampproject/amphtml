@@ -1,6 +1,6 @@
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 

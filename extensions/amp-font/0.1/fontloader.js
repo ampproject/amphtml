@@ -1,7 +1,7 @@
 import {removeElement} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * @typedef {{

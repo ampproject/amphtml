@@ -4,7 +4,7 @@ import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyle, toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 

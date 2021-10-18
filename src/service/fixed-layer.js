@@ -14,7 +14,7 @@ import {
 import {remove} from '#core/types/array';
 import {endsWith} from '#core/types/string';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {Animation} from '#utils/animation';
 import {dev, user} from '#utils/log';

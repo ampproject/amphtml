@@ -16,7 +16,7 @@ import {once} from '#core/types/function';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData, listen} from '#utils/event-helper';

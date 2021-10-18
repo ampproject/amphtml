@@ -10,7 +10,7 @@ import {
 } from '#core/dom/query';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user} from '#utils/log';
 

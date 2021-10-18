@@ -12,7 +12,7 @@ import {dict} from '#core/types/object';
 
 import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {isLoadErrorMessage} from '#utils/event-helper';

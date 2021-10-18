@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import helpersFactory from './helpers';

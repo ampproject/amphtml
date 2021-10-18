@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   AnalyticsPercentageTracker,
   PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS,

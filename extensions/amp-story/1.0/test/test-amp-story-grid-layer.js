@@ -3,7 +3,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
 import {MediaType} from '../media-pool';
-import {Services} from '#service';
+import * as Services from '#service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {setStyles} from '#core/dom/style';
 import {CSS} from '../../../../build/amp-story-1.0.css';

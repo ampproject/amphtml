@@ -13,7 +13,7 @@ import {debounce} from '#core/types/function';
 import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
 import {deepEquals, parseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent, getDetail} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';

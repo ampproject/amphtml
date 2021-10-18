@@ -6,7 +6,7 @@
 import {whenDocumentComplete} from '#core/document/ready';
 import {htmlFor} from '#core/dom/static-template';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

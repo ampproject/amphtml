@@ -10,7 +10,7 @@ import {utf8Encode} from '#core/types/string/bytes';
 
 import {Purifier} from '#purifier';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {calculateExtensionScriptUrl} from '#service/extension-script';
 
 import {dev, user, userAssert} from '#utils/log';

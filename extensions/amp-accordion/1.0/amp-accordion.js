@@ -3,7 +3,7 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

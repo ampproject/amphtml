@@ -11,7 +11,7 @@ import {
   resetBodyForOverlay,
 } from '#inabox/inabox-viewport';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installPlatformService} from '#service/platform-impl';
 
 import * as iframeHelper from '../../../src/iframe-helper';

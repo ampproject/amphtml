@@ -10,7 +10,7 @@ import {parseJson} from '#core/types/object/json';
 
 import {HostServices} from '#inabox/host-services';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';

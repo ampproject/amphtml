@@ -2,7 +2,7 @@ import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
-import {Services} from '#service';
+import * as Services from '#service';
 import {devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';

@@ -1,6 +1,6 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createIframePromise} from '#testing/iframe';
 

@@ -1,7 +1,7 @@
 import {isArray, isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {parseExtensionUrl} from '#service/extension-script';
 
 import {dev} from '#utils/log';

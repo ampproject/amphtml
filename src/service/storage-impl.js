@@ -1,7 +1,7 @@
 import {dict, recreateNonProtoObject} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert} from '#utils/log';
 

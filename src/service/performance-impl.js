@@ -9,7 +9,7 @@ import {dict, map} from '#core/types/object';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';

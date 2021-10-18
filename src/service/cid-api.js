@@ -1,7 +1,7 @@
 import {dict} from '#core/types/object';
 import {WindowInterface} from '#core/window/interface';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

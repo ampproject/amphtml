@@ -16,7 +16,7 @@ import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
 

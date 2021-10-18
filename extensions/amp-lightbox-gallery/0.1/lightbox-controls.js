@@ -2,7 +2,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {devAssert} from '#utils/log';

@@ -1,6 +1,6 @@
 import {InaboxMutator} from '#inabox/inabox-mutator';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 describes.realWin('inabox-mutator', {amp: true}, (env) => {
   let mutator;

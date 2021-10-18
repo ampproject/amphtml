@@ -10,7 +10,7 @@ import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {toArray} from '#core/types/array';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user} from '#utils/log';
 

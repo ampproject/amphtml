@@ -5,7 +5,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {isArray} from '#core/types';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {

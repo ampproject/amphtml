@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';

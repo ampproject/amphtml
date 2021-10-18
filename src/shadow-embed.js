@@ -9,7 +9,7 @@ import {
 import {toArray} from '#core/types/array';
 import {getWin, toWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert} from '#utils/log';
 

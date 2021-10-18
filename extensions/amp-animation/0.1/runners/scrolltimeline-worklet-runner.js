@@ -1,6 +1,6 @@
 import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

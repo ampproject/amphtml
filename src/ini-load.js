@@ -1,6 +1,6 @@
 import {isIframed} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 
 /** @const {!Array<string>} */

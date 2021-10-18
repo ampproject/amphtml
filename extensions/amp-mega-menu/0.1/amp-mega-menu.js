@@ -12,7 +12,7 @@ import {
 import {mod} from '#core/math';
 import {toArray} from '#core/types/array';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, userAssert} from '#utils/log';
 

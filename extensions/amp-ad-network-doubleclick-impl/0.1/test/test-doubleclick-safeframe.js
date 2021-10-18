@@ -5,7 +5,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {createElementWithAttributes} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {

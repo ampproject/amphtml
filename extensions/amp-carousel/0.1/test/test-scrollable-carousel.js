@@ -1,7 +1,7 @@
 import '../amp-carousel';
 import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
-import {Services} from '#service';
+import * as Services from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';

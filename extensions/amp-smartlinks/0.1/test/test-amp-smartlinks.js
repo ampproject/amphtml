@@ -1,6 +1,6 @@
 import * as DocumentReady from '#core/document/ready';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {AmpSmartlinks} from '../amp-smartlinks';

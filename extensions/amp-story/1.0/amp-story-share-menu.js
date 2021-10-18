@@ -12,7 +12,7 @@ import {
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
 import {Keys} from '#core/constants/key-codes';
 import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
+import * as Services from '#service';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';

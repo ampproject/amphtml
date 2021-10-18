@@ -1,6 +1,6 @@
 import {rootNodeFor} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {processHead} from '../head-validation';
 

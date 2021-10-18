@@ -7,7 +7,7 @@ import {
   upgradePolyfill,
 } from '#polyfills/stubs/intersection-observer-stub';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 class NativeIntersectionObserver {
   constructor(callback, options) {

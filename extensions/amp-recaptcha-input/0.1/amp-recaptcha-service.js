@@ -6,7 +6,7 @@
 import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {Services} from '#service';
+import * as Services from '#service';
 import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';

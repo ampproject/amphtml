@@ -26,7 +26,7 @@ import {tryParseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 import {toWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {createCustomEvent} from '#utils/event-helper';

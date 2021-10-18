@@ -6,7 +6,7 @@ import {
 } from '#core/document/visibility';
 import {rethrowAsync} from '#core/error';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert} from '#utils/log';
 

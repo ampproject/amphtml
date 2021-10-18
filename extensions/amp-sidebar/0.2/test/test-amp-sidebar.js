@@ -2,7 +2,7 @@ import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {assertScreenReaderElement} from '#testing/helpers/service';
 import {clearModalStack, getModalStackLength} from '#core/dom/modal';
 import {createElementWithAttributes} from '#core/dom';

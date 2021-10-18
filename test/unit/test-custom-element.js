@@ -4,7 +4,7 @@ import {AmpEvents} from '#core/constants/amp-events';
 import {CommonSignals} from '#core/constants/common-signals';
 import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {elementConnectedCallback} from '#service/custom-element-registry';
 import {Resource, ResourceState} from '#service/resource';
 

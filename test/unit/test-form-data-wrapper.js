@@ -1,6 +1,6 @@
 import {fromIterator} from '#core/types/array';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {
   PolyfillFormDataWrapper,

@@ -6,7 +6,7 @@ import {
   installVariableServiceForTesting,
   variableServiceForDoc,
 } from '../variables';
-import {Services} from '#service';
+import * as Services from '#service';
 import {forceExperimentBranch} from '#experiments';
 import {
   installLinkerReaderService,

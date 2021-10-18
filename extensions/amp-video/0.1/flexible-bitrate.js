@@ -1,6 +1,6 @@
 import {tryPlay} from '#core/dom/video';
 import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
-import {Services} from '#service';
+import * as Services from '#service';
 import {childElement, childElementsByTag} from '#core/dom/query';
 import {dev, devAssert} from '#utils/log';
 import {isExperimentOn} from '#experiments';

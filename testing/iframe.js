@@ -3,7 +3,7 @@ import {AmpEvents} from '#core/constants/amp-events';
 
 import {install as installCustomElements} from '#polyfills/custom-elements';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,

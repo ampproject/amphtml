@@ -3,7 +3,7 @@ import {Observable} from '#core/data-structures/observable';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';

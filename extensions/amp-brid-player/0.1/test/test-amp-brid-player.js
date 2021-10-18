@@ -1,5 +1,5 @@
 import '../amp-brid-player';
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 

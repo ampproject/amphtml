@@ -6,7 +6,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {ActionService} from '#service/action-impl';
 import {AmpDocService} from '#service/ampdoc-impl';
 

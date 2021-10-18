@@ -13,7 +13,7 @@ import {
 import {px, resetStyles, setImportantStyles} from '#core/dom/style';
 import {throttle} from '#core/types/function';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {ViewportBindingDef} from '#service/viewport/viewport-binding-def';
 import {ViewportInterface} from '#service/viewport/viewport-interface';
 

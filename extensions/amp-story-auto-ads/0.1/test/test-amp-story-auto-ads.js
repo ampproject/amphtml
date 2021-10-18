@@ -3,7 +3,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {forceExperimentBranch} from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {macroTask} from '#testing/helpers';
 

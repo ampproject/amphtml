@@ -77,7 +77,7 @@ import {install as installCustomElements} from '#polyfills/custom-elements';
 import {install as installIntersectionObserver} from '#polyfills/intersection-observer';
 import {install as installResizeObserver} from '#polyfills/resize-observer';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,

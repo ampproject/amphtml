@@ -6,7 +6,7 @@ import {waitForChild} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {BaseElement} from '../../../../src/base-element';
 

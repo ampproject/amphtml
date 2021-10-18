@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {AutoFullscreenManager} from '#service/video-manager-impl';
 
 import {PlayingStates} from '../../src/video-interface';

@@ -23,7 +23,7 @@ import {tryDecodeUriComponent} from '#core/types/string/url';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 

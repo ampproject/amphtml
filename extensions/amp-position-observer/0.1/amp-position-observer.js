@@ -12,7 +12,7 @@ import {
 } from '#core/dom/layout/rect';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 

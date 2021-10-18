@@ -1,6 +1,6 @@
 import {Action, getStoreService} from '../amp-story-store-service';
 import {ProgressBar} from '../progress-bar';
-import {Services} from '#service';
+import * as Services from '#service';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 import {expect} from 'chai';
 import {forceExperimentBranch} from '#experiments';

@@ -1,6 +1,6 @@
 import {endsWith} from '#core/types/string';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

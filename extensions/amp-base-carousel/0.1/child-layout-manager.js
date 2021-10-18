@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * Used for tracking whether or not an item is near the viewport. This is set

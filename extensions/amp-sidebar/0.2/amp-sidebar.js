@@ -4,7 +4,7 @@ import {CSS} from '../../../build/amp-sidebar-0.2.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
 import {

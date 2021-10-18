@@ -3,7 +3,7 @@ import {detectIsAutoplaySupported} from '#core/dom/video';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData, listenOncePromise} from '#utils/event-helper';
 

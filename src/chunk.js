@@ -1,6 +1,6 @@
 import {PriorityQueue} from '#core/data-structures/priority-queue';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev} from '#utils/log';

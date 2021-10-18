@@ -4,7 +4,7 @@ import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {applyFillContent} from '#core/dom/layout';
 import {

@@ -2,7 +2,7 @@ import '../amp-pan-zoom';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 

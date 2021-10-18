@@ -17,7 +17,7 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData, listen} from '#utils/event-helper';
 import {user, userAssert} from '#utils/log';

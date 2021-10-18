@@ -12,7 +12,7 @@ import {
   LayoutPriority,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {Services} from '#service';
+import * as Services from '#service';
 import {adConfig} from '#ads/_config';
 import {clamp} from '#core/math';
 import {computedStyle, setStyle} from '#core/dom/style';

@@ -1,7 +1,7 @@
 import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {LocalizationService} from '#service/localization';
 import {getSliderInteractiveData} from './helpers';

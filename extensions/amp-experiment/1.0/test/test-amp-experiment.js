@@ -1,6 +1,6 @@
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AmpExperiment} from '../amp-experiment';
 import * as applyExperiment from '../apply-experiment';

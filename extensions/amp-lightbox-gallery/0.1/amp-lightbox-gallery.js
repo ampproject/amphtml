@@ -18,7 +18,7 @@ import {toArray} from '#core/types/array';
 
 import {isExperimentOn} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {getData, getDetail, isLoaded, listen} from '#utils/event-helper';

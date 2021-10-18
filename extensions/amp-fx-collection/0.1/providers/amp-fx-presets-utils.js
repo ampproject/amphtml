@@ -5,7 +5,7 @@
 
 import {mapRange} from '#core/math';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {userAssert} from '#utils/log';
 

@@ -1,7 +1,7 @@
 import {getStyle} from '#core/dom/style';
 import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';

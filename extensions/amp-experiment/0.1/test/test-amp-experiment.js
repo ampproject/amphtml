@@ -1,6 +1,6 @@
 import {hasOwn} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';

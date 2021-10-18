@@ -7,7 +7,7 @@ import * as Style from '#core/dom/style';
 import * as log from '#utils/log';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
-import {Services} from '#service';
+import * as Services from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {waitFor} from '#testing/helpers/service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';

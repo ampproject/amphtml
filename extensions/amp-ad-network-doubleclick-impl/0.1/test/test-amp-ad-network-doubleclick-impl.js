@@ -16,7 +16,7 @@ import * as bytesUtils from '#core/types/string/bytes';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {

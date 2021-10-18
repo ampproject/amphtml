@@ -2,7 +2,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '#utils/animation';
 import {BaseCarousel} from './base-carousel';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {dev} from '#utils/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
 import {listen} from '#utils/event-helper';

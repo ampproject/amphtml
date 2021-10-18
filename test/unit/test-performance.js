@@ -3,7 +3,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
   ELEMENT_TYPE,

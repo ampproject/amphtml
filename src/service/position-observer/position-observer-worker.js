@@ -5,7 +5,7 @@ import {
   rectsOverlap,
 } from '#core/dom/layout/rect';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {devAssert} from '#utils/log';
 

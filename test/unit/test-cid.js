@@ -1,6 +1,6 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   cidServiceForDocForTesting,

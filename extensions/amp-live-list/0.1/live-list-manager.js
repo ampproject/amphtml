@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {extensionScriptsInNode} from '#service/extension-script';
 
 import {userAssert} from '#utils/log';

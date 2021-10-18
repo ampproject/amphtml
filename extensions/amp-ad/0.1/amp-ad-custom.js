@@ -1,7 +1,7 @@
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '#core/constants/common-signals';
 import {LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';
-import {Services} from '#service';
+import * as Services from '#service';
 import {addParamToUrl} from '../../../src/url';
 import {
   childElementByTag,

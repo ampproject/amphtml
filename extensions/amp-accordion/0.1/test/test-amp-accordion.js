@@ -6,7 +6,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {htmlFor} from '#core/dom/static-template';
 import {computedStyle} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {ActionService} from '#service/action-impl';
 
 import {poll} from '#testing/iframe';

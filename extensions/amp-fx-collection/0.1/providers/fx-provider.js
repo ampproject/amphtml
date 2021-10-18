@@ -4,7 +4,7 @@ import {
   setStyles,
 } from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
 

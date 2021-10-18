@@ -4,7 +4,7 @@ import {WindowInterface} from '#core/window/interface';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user} from '#utils/log';
 

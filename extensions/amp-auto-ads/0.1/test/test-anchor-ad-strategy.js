@@ -1,7 +1,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {waitForChild} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AnchorAdStrategy} from '../anchor-ad-strategy';
 

@@ -1,5 +1,5 @@
 import {CommonSignals} from '#core/constants/common-signals';
-import {Services} from '#service';
+import * as Services from '#service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /**

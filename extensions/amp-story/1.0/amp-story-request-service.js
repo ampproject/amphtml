@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '#core/types/function';

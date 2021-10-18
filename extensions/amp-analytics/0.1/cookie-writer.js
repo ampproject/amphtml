@@ -2,7 +2,7 @@ import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
 import {SameSite, setCookie} from '../../../src/cookies';
-import {Services} from '#service';
+import * as Services from '#service';
 import {hasOwn} from '#core/types/object';
 import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '#core/types';

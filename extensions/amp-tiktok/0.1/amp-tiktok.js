@@ -1,6 +1,6 @@
 import {CSS} from '../../../build/amp-tiktok-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
+import * as Services from '#service';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {debounce} from '#core/types/function';

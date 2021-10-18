@@ -1,7 +1,7 @@
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {devAssert, userAssert} from '#utils/log';
 

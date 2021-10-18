@@ -9,7 +9,7 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   addParamsToUrl,
   appendPathToUrl,

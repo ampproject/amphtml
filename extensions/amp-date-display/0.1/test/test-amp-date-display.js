@@ -2,7 +2,7 @@ import '../amp-date-display';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {expect} from 'chai';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

@@ -1,7 +1,7 @@
 import {iterateCursor} from '#core/dom';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev} from '#utils/log';

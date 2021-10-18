@@ -22,7 +22,7 @@ import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '#service/notification-ui-manager';
-import {Services} from '#service';
+import * as Services from '#service';
 import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,

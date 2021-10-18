@@ -8,7 +8,7 @@ import {isEnumValue} from '#core/types';
 import {areEqualOrdered, toArray} from '#core/types/array';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, userAssert} from '#utils/log';

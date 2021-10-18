@@ -2,7 +2,7 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
 

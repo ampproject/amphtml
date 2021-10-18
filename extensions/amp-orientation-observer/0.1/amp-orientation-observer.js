@@ -2,7 +2,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {clamp, sum} from '#core/math';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

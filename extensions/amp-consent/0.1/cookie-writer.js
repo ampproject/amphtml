@@ -1,6 +1,6 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
 import {ConsentLinkerReader} from './linker-reader';
-import {Services} from '#service';
+import * as Services from '#service';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '#core/types/object';
 import {isInFie} from '../../../src/iframe-helper';

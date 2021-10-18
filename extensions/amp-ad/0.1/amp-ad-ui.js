@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {devAssert, user, userAssert} from '#utils/log';

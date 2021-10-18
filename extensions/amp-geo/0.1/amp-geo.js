@@ -27,7 +27,7 @@ import {getHashParams} from '#core/types/string/url';
 
 import {isCanary} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * GOOGLE AND THE AMP PROJECT ARE PROVIDING THIS INFORMATION AS A COURTESY BUT

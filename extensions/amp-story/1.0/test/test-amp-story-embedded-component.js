@@ -7,7 +7,7 @@ import {
 import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
 import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import * as Services from '#service';
 import {StoryAnalyticsEvent} from '../story-analytics';
 import {addAttributesToElement} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';

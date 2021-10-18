@@ -5,7 +5,7 @@ import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '#core/constants/key-codes';
 import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
+import * as Services from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,

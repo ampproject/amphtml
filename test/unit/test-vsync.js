@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';
 import {installTimerService} from '#service/timer-impl';
 import {Vsync} from '#service/vsync-impl';

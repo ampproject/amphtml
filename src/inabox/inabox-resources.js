@@ -3,7 +3,7 @@ import {Observable} from '#core/data-structures/observable';
 import {Deferred} from '#core/data-structures/promise';
 import {hasNextNodeInDocumentOrder} from '#core/dom';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {Resource, ResourceState} from '#service/resource';
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 

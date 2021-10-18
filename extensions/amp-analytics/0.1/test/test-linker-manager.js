@@ -5,7 +5,7 @@ import {
   isWildCardMatch,
 } from '../linker-manager';
 import {Priority} from '#service/navigation';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,

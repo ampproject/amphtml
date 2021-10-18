@@ -1,6 +1,6 @@
 import {isArray} from '#core/types';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user, userAssert} from '#utils/log';
 

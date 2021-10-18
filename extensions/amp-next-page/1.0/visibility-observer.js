@@ -1,7 +1,7 @@
 import {RelativePositions} from '#core/dom/layout/rect';
 import {throttle} from '#core/types/function';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,

@@ -2,7 +2,7 @@ import {CONSTANTS, MessageType} from '#core/3p-frame-messaging';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   SubscriptionApi,
   listenFor,

@@ -1,5 +1,5 @@
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {Services} from '#service';
+import * as Services from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {fetchCachedSources} from '../video-cache';
 import {installPerformanceService} from '#service/performance-impl';

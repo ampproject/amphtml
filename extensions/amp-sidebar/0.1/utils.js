@@ -1,7 +1,7 @@
 /**
  * @fileoverview Description of this file.
  */
-import {Services} from '#service';
+import * as Services from '#service';
 /**
  * Runs a delay after deferring to the event loop. This is useful to call from
  * within an animation frame, as you can be sure that at least duration

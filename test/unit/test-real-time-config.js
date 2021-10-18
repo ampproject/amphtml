@@ -6,7 +6,7 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {createElementWithAttributes} from '#core/dom';
 import {isFiniteNumber} from '#core/types';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   RTC_ERROR_ENUM,
   RealTimeConfigManager,

@@ -1,6 +1,6 @@
 import {bytesToString} from '#core/types/string/bytes';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {OriginExperiments, TokenMaster} from '#service/origin-experiments-impl';
 
 import {user} from '#utils/log';

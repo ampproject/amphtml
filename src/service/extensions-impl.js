@@ -2,7 +2,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {rethrowAsync} from '#core/error';
 import {map} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert, user} from '#utils/log';
 

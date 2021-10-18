@@ -3,7 +3,7 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {getA4AId, registerIniLoadListener} from '#inabox/utils';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import * as IniLoad from '../../../src/ini-load';
 

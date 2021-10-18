@@ -1,7 +1,7 @@
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '#service';
+import * as Services from '#service';
 import {childElementByTag} from '#core/dom/query';
 import {deepMerge, hasOwn, map} from '#core/types/object';
 import {devAssert, user, userAssert} from '#utils/log';

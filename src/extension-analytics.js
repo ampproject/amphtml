@@ -4,7 +4,7 @@ import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {devAssert} from '#utils/log';

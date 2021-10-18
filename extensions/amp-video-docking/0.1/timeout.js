@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 
 /** Timeout that can be postponed, repeated or cancelled. */
 export class Timeout {

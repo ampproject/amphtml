@@ -16,7 +16,7 @@ import {getInternalVideoElementFor} from '#core/dom/video';
 import {once} from '#core/types/function';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';

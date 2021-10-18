@@ -2,7 +2,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {Animation} from '#utils/animation';
 import {dev, user, userAssert} from '#utils/log';
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import * as Services from '#service';
 import {bezierCurve} from '#core/data-structures/curve';
 import {
   closestAncestorElementBySelector,

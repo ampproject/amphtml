@@ -14,7 +14,7 @@ import {clamp} from '#core/math';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {Animation} from '#utils/animation';
 import {createCustomEvent} from '#utils/event-helper';

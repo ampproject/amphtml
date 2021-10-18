@@ -2,7 +2,7 @@ import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /**
  * A fake ad network integration that is mainly used for testing

@@ -1,6 +1,6 @@
 import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

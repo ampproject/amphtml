@@ -1,6 +1,6 @@
 import {debounce} from '#core/types/function';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 export class ReadDepthTracker {
   /**

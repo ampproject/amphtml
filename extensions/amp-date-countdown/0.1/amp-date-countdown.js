@@ -2,7 +2,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user, userAssert} from '#utils/log';
 

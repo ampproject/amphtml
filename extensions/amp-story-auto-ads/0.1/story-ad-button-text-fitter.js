@@ -1,6 +1,6 @@
 import {px, setStyle, setStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 /** @const {number} Fixed button height from design spec. */
 const MAX_HEIGHT = 32;

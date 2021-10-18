@@ -1,6 +1,6 @@
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

@@ -13,7 +13,7 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

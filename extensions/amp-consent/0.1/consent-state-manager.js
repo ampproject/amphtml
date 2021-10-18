@@ -13,7 +13,7 @@ import {
   recalculateConsentStateValue,
 } from './consent-info';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
+import * as Services from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert} from '#utils/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';

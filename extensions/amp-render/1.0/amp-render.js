@@ -5,7 +5,7 @@ import {
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
+import * as Services from '#service';
 import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';

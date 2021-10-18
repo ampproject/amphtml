@@ -13,7 +13,7 @@ import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {
   createCustomEvent,

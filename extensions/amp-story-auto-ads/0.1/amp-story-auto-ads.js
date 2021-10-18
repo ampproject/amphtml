@@ -17,7 +17,7 @@ import {
   ViewerSetTimeToBranch,
 } from '#experiments/story-ad-progress-segment';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert, userAssert} from '#utils/log';
 

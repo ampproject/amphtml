@@ -3,7 +3,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {devAssert} from '#utils/log';
 

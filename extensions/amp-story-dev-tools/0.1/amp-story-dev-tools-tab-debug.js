@@ -1,7 +1,7 @@
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user, userAssert} from '#utils/log';
 

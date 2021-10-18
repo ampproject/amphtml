@@ -3,7 +3,7 @@ import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {parseUrlDeprecated} from '../../../src/url';
 

@@ -9,7 +9,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {fromIterator} from '#core/types/array';
 import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {ActionService} from '#service/action-impl';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 

@@ -3,7 +3,7 @@ import {Signals} from '#core/data-structures/signals';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDocFie} from '#service/ampdoc-impl';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {installExtensionsService} from '#service/extensions-impl';

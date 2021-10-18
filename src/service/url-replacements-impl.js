@@ -3,7 +3,7 @@ import {hasOwn} from '#core/types/object';
 import {getHashParams, parseQueryString} from '#core/types/string/url';
 import {WindowInterface} from '#core/window/interface';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
 

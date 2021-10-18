@@ -14,7 +14,7 @@ import {toWin} from '#core/window';
 import {forceExperimentBranch, toggleExperiment} from '#experiments';
 import * as experiments from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';

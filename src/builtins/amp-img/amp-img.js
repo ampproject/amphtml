@@ -7,7 +7,7 @@ import {scopedQuerySelector} from '#core/dom/query';
 import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
 import * as mode from '#core/mode';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
 import {listen} from '#utils/event-helper';

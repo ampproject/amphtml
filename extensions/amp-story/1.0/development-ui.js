@@ -1,5 +1,5 @@
 import {LogLevel, dev} from '#utils/log';
-import {Services} from '#service';
+import * as Services from '#service';
 import {isArray} from '#core/types';
 import {removeChildren} from '#core/dom';
 import {toggle} from '#core/dom/style';

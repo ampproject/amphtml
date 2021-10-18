@@ -2,7 +2,7 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user} from '#utils/log';
 

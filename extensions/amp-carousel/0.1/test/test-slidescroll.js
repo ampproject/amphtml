@@ -1,7 +1,7 @@
 import '../amp-carousel';
 import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
-import {Services} from '#service';
+import * as Services from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {user} from '#utils/log';

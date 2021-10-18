@@ -22,7 +22,7 @@ import {install as installDocContains} from '#polyfills/document-contains';
 import {installForChildWin as installIntersectionObserver} from '#polyfills/intersection-observer';
 import {installForChildWin as installResizeObserver} from '#polyfills/resize-observer';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {installAmpdocServicesForEmbed} from '#service/core-services';
 import {installTimerInEmbedWindow} from '#service/timer-impl';
 

@@ -14,7 +14,7 @@ import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
 
 import {toggleExperiment} from '#experiments';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {AmpDoc, installDocService} from '#service/ampdoc-impl';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {Extensions} from '#service/extensions-impl';

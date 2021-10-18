@@ -1,4 +1,4 @@
-import {Services} from '#service';
+import * as Services from '#service';
 import {batchedXhrServiceForTesting} from '#service/batched-xhr-impl';
 
 describes.sandboxed('BatchedXhr', {}, (env) => {

@@ -5,7 +5,7 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import * as Services from '#service';
 import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,

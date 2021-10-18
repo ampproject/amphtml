@@ -4,7 +4,7 @@ import {throttle} from '#core/types/function';
 import {dict, hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';

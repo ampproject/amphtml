@@ -5,7 +5,7 @@ import {
 } from '../amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {ProgressBar} from '../progress-bar';
-import {Services} from '#service';
+import * as Services from '#service';
 import {SystemLayer} from '../amp-story-system-layer';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 

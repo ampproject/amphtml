@@ -2,7 +2,7 @@ import {Keys} from '#core/constants/key-codes';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {getWin} from '#core/window';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {user, userAssert} from '#utils/log';
 

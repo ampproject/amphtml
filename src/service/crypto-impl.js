@@ -1,7 +1,7 @@
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {stringToBytes, utf8Encode} from '#core/types/string/bytes';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev, devAssert, user} from '#utils/log';
 

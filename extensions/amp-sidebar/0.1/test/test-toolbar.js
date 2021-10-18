@@ -1,5 +1,5 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {Services} from '#service';
+import * as Services from '#service';
 import {Toolbar} from '../toolbar';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '#testing/iframe';

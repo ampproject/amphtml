@@ -7,7 +7,7 @@ import {
 } from '#testing/helpers/service';
 import {LayoutPriority} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
-import {Services} from '#service';
+import * as Services from '#service';
 import {SessionManager} from '../session-manager';
 import {Transport} from '../transport';
 import {cidServiceForDocForTesting} from '#service/cid-impl';

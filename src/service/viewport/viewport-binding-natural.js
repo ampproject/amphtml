@@ -2,7 +2,7 @@ import {Observable} from '#core/data-structures/observable';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle, px, setImportantStyles} from '#core/dom/style';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 import {dev} from '#utils/log';
 

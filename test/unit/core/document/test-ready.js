@@ -5,7 +5,7 @@ import {
   whenDocumentReady,
 } from '#core/document/ready';
 
-import {Services} from '#service';
+import * as Services from '#service';
 
 describes.sandboxed('documentReady', {}, (env) => {
   let testDoc;

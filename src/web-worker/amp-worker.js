@@ -1,6 +1,6 @@
 import {devAssert} from '#core/assert';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {calculateEntryPointScriptUrl} from '#service/extension-script';
 
 import {dev} from '#utils/log';

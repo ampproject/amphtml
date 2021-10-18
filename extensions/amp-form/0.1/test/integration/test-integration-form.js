@@ -1,6 +1,6 @@
 import {AmpEvents} from '#core/constants/amp-events';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {stubElementsForDoc} from '#service/custom-element-registry';
 import {registerExtendedTemplateForDoc} from '#service/template-impl';
 

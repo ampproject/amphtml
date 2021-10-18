@@ -2,7 +2,7 @@ import {DEFAULT_ACTION} from '#core/constants/action-constants';
 import {LayoutPriority} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
-import {Services} from '#service';
+import * as Services from '#service';
 import {Resource} from '#service/resource';
 
 import {listenOncePromise} from '#utils/event-helper';
