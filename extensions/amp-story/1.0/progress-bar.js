@@ -13,6 +13,7 @@ import {
 import {debounce} from '#core/types/function';
 import {dev, devAssert} from '#utils/log';
 import {escapeCssSelectorNth} from '#core/dom/css-selectors';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getExperimentBranch} from 'src/experiments';
 import {hasOwn, map} from '#core/types/object';
 import {removeChildren} from '#core/dom';
@@ -86,7 +87,7 @@ export class ProgressBar {
     this.activeSegmentProgress_ = 1;
 
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = Services.ampdocServiceFor(this.win_).getSingleDoc();
+    this.ampdoc_ = getAmpdoc(storyEl);
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
