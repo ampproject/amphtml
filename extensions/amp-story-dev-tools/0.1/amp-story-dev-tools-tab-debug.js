@@ -80,8 +80,8 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
     /** @private  {string} */
     this.storyUrl_ = '';
 
-    /** @private {?Array} */
-    this.errorList_ = null;
+    /** @private {!Array} */
+    this.errorList_ = [];
   }
 
   /** @override */
@@ -104,8 +104,7 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
       .then((errorList) => {
         this.errorList_ = errorList;
         this.updateDebugTabIcon(errorList);
-      })
-      .catch(() => {});
+      });
   }
 
   /** @override */
@@ -144,7 +143,7 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
    * @return {!Promise}
    */
   buildDebugContent_() {
-    const debugContainer = this.errorList_?.length
+    const debugContainer = this.errorList_.length
       ? this.createErrorsList_()
       : buildSuccessMessageTemplate(this.element);
     debugContainer.prepend(this.buildDebugTitle_(this.errorList_.length));
