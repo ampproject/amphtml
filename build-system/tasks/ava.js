@@ -34,10 +34,7 @@ function shouldTriggerAva(changedFile) {
   }
   if (!testedDirs) {
     testedDirs = testFiles.map(
-      (pattern) =>
-        dirname(pattern)
-          .replace(/\/test\/?$/, '')
-          .replace(/\/$/, '') + '/'
+      (pattern) => dirname(pattern).replace(/\/test$/, '') + '/'
     );
   }
   return testedDirs.some((pattern) => changedFile.startsWith(pattern));
