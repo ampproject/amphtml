@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.186 */
+/** Version: 0.1.22.188 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -3850,6 +3850,7 @@ class SubscribeResponse {
    * @param {?string=} oldSku
    * @param {?string=} swgUserToken
    * @param {?number=} paymentRecurrence
+   * @param {?Object=} requestMetadata
    */
   constructor(
     raw,
@@ -3860,7 +3861,8 @@ class SubscribeResponse {
     completeHandler,
     oldSku = null,
     swgUserToken = null,
-    paymentRecurrence = null
+    paymentRecurrence = null,
+    requestMetadata = null
   ) {
     /** @const {string} */
     this.raw = raw;
@@ -3880,6 +3882,8 @@ class SubscribeResponse {
     this.swgUserToken = swgUserToken;
     /** @const {?number} */
     this.paymentRecurrence = paymentRecurrence;
+    /** @const {?Object} */
+    this.requestMetadata = requestMetadata;
   }
 
   /**
@@ -4709,9 +4713,19 @@ function adsUrl(url) {
  * @param {Object<string, string>=} params List of extra params to append to the URL.
  * @return {string} The complete URL.
  */
-function feUrl(url, prefix = '', params) {
+function feUrl(
+  url,
+  params = {},
+  usePrefixedHostPath = false,
+  prefix = ''
+) {
   // Add cache param.
-  url = feCached(`${getSwgMode().frontEnd}${prefix}/swg/_/ui/v1${url}`);
+  const prefixed = prefix
+    ? usePrefixedHostPath
+      ? `swg/${prefix}`
+      : `${prefix}/swg`
+    : 'swg';
+  url = feCached(`${getSwgMode().frontEnd}/${prefixed}/_/ui/v1${url}`);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
   const query = parseQueryString(self.location.hash);
@@ -4741,7 +4755,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.186',
+    '_client': 'SwG 0.1.22.188',
   });
 }
 
@@ -5061,6 +5075,7 @@ class PayCompleteFlow {
       'isSubscriptionUpdate': !!response['oldSku'],
       'isOneTime': !!response['paymentRecurrence'],
     };
+
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
       args['idToken'] = response.userData.idToken;
@@ -5077,17 +5092,32 @@ class PayCompleteFlow {
       args['loginHint'] = response.userData && response.userData.email;
     }
 
-    let confirmFeUrl;
+    const /* {!Object<string, string>} */ urlParams = {};
     if (args.productType === ProductType.VIRTUAL_GIFT) {
-      confirmFeUrl = feUrl('/payconfirmiframe', '', {
+      Object.assign(urlParams, {
         productType: args.productType,
         publicationId: args.publicationId,
         offerId: this.sku_,
         origin: parseUrl(this.win_.location.href).origin,
       });
-    } else {
-      confirmFeUrl = feUrl('/payconfirmiframe');
+      if (response.requestMetadata) {
+        urlParams.canonicalUrl = response.requestMetadata.contentId;
+        urlParams.isAnonymous = response.requestMetadata.anonymous;
+      }
+
+      // Add feArgs to be passed via activities.
+      if (response.swgUserToken) {
+        args.swgUserToken = response.swgUserToken;
+      }
+      const orderId = parseOrderIdFromPurchaseDataSafe(response.purchaseData);
+      if (orderId) {
+        args.orderId = orderId;
+      }
     }
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      urlParams.hl = this.clientConfigManager_.getLanguage();
+    }
+    const confirmFeUrl = feUrl('/payconfirmiframe', urlParams);
 
     return (this.activityIframeViewPromise_ = this.clientConfigManager_
       .getClientConfig()
@@ -5231,6 +5261,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
   let paymentRecurrence = null;
+  let requestMetadata = null;
 
   if (data) {
     if (typeof data == 'string') {
@@ -5245,10 +5276,10 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
         raw = json['integratorClientCallbackData'];
       }
       if ('paymentRequest' in data) {
-        oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
-        paymentRecurrence = (data['paymentRequest']['swg'] || {})[
-          'paymentRecurrence'
-        ];
+        const swgObj = data['paymentRequest']['swg'] || {};
+        oldSku = swgObj['oldSku'];
+        paymentRecurrence = swgObj['paymentRecurrence'];
+        requestMetadata = swgObj['metadata'];
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
@@ -5274,8 +5305,9 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     productType,
     completeHandler,
     oldSku,
+    swgData['swgUserToken'],
     paymentRecurrence,
-    swgData['swgUserToken']
+    requestMetadata
   );
 }
 
@@ -5323,6 +5355,16 @@ function parseEntitlements(deps, swgData) {
 function parseSkuFromPurchaseDataSafe(purchaseData) {
   return /** @type {?string} */ (
     getPropertyFromJsonString(purchaseData.raw, 'productId') || null
+  );
+}
+
+/**
+ * @param {!PurchaseData} purchaseData
+ * @return {?string}
+ */
+function parseOrderIdFromPurchaseDataSafe(purchaseData) {
+  return /** @type {?string} */ (
+    getPropertyFromJsonString(purchaseData.raw, 'orderId') || null
   );
 }
 
@@ -5444,7 +5486,7 @@ class OffersFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              feUrl(this.getUrl_(clientConfig)),
+              this.getUrl_(clientConfig),
               feArgsObj,
               /* shouldFadeBody */ true
             )
@@ -5582,14 +5624,22 @@ class OffersFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
+   * Returns the full URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
    * @return {string}
    */
   getUrl_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
-      ? '/subscriptionoffersiframe'
-      : '/offersiframe';
+    if (!clientConfig.useUpdatedOfferFlows) {
+      return feUrl('/offersiframe');
+    }
+
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      return feUrl('/subscriptionoffersiframe', {
+        'hl': this.clientConfigManager_.getLanguage(),
+      });
+    }
+
+    return feUrl('/subscriptionoffersiframe');
   }
 
   /**
@@ -6009,7 +6059,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.186',
+        '_client': 'SwG 0.1.22.188',
         'supportsEventManager': true,
       },
       args || {}
@@ -6888,7 +6938,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.186');
+    context.setClientVersion('SwG 0.1.22.188');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7150,10 +7200,16 @@ const SWG_I18N_STRINGS = {
     'en': 'Subscribe with Google',
     'ar': 'Google اشترك مع',
     'de': 'Abonnieren mit Google',
+    'en-au': 'Subscribe with Google',
+    'en-ca': 'Subscribe with Google',
+    'en-gb': 'Subscribe with Google',
+    'en-us': 'Subscribe with Google',
     'es': 'Suscríbete con Google',
+    'es-419': 'Suscríbete con Google',
     'es-latam': 'Suscríbete con Google',
     'es-latn': 'Suscríbete con Google',
     'fr': "S'abonner avec Google",
+    'fr-ca': "S'abonner avec Google",
     'hi': 'Google के ज़रिये सदस्यता',
     'id': 'Berlangganan dengan Google',
     'it': 'Abbonati con Google',
@@ -7176,10 +7232,16 @@ const SWG_I18N_STRINGS = {
     'en': 'Contribute with Google',
     'ar': 'المساهمة باستخدام Google',
     'de': 'Mit Google beitragen',
+    'en-au': 'Contribute with Google',
+    'en-ca': 'Contribute with Google',
+    'en-gb': 'Contribute with Google',
+    'en-us': 'Contribute with Google',
     'es': '	Contribuye con Google',
+    'es-419': 'Contribuir con Google',
     'es-latam': 'Contribuir con Google',
     'es-latn': 'Contribuye con Google',
     'fr': 'Contribuer avec Google',
+    'fr-ca': 'Contribuer avec Google',
     'hi': 'Google खाते की मदद से योगदान करें',
     'id': 'Berkontribusi dengan Google',
     'it': 'Contribuisci con Google',
@@ -8159,24 +8221,24 @@ class UiPredicates {
  */
 class ClientConfig {
   /**
-   * @param {!./auto-prompt-config.AutoPromptConfig=} autoPromptConfig
-   * @param {string=} paySwgVersion
-   * @param {boolean=} useUpdatedOfferFlows
-   * @param {./auto-prompt-config.UiPredicates=} uiPredicates
-   * @param {./attribution-params.AttributionParams=} attributionParams
+   * @param {ClientConfigOptions} options
    */
-  constructor(
+  constructor({
+    attributionParams,
     autoPromptConfig,
     paySwgVersion,
-    useUpdatedOfferFlows,
     uiPredicates,
-    attributionParams
-  ) {
-    /** @const {!./auto-prompt-config.AutoPromptConfig|undefined} */
+    usePrefixedHostPath,
+    useUpdatedOfferFlows,
+  } = {}) {
+    /** @const {./auto-prompt-config.AutoPromptConfig|undefined} */
     this.autoPromptConfig = autoPromptConfig;
 
     /** @const {string|undefined} */
     this.paySwgVersion = paySwgVersion;
+
+    /** @const {boolean} */
+    this.usePrefixedHostPath = usePrefixedHostPath || false;
 
     /** @const {boolean} */
     this.useUpdatedOfferFlows = useUpdatedOfferFlows || false;
@@ -8290,7 +8352,7 @@ class ClientConfigManager {
 
   /**
    * Gets the language the UI should be displayed in. See
-   * src/api/basic-subscriptions.ClientOptions.lang. This
+   * src/api/basic-subscriptions.ClientOptions.lang.
    * @return {string}
    */
   getLanguage() {
@@ -8304,6 +8366,19 @@ class ClientConfigManager {
    */
   getTheme() {
     return this.clientOptions_.theme || ClientTheme.LIGHT;
+  }
+
+  /**
+   * Returns whether iframes should also use the language specified in the
+   * client options, rather than the default of letting the iframes decide the
+   * display language. Note that this will return false if the lang option is
+   * not set, even if forceLangInIframes was set.
+   * @return {boolean}
+   */
+  shouldForceLangInIframes() {
+    return (
+      !!this.clientOptions_.forceLangInIframes && !!this.clientOptions_.lang
+    );
   }
 
   /**
@@ -8388,13 +8463,14 @@ class ClientConfigManager {
       );
     }
 
-    return new ClientConfig(
+    return new ClientConfig({
       autoPromptConfig,
       paySwgVersion,
-      json['useUpdatedOfferFlows'],
+      usePrefixedHostPath: json['usePrefixedHostPath'],
+      useUpdatedOfferFlows: json['useUpdatedOfferFlows'],
       uiPredicates,
-      attributionParams
-    );
+      attributionParams,
+    });
   }
 }
 
@@ -8454,7 +8530,7 @@ class ContributionsFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              feUrl(this.getUrl_(clientConfig)),
+              this.getUrl_(clientConfig),
               feArgs({
                 'productId': deps.pageConfig().getProductId(),
                 'publicationId': deps.pageConfig().getPublicationId(),
@@ -8544,14 +8620,22 @@ class ContributionsFlow {
   }
 
   /**
-   * Gets the URL that should be used for the activity iFrame view.
+   * Gets the complete URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
    * @return {string}
    */
   getUrl_(clientConfig) {
-    return clientConfig.useUpdatedOfferFlows
-      ? '/contributionoffersiframe'
-      : '/contributionsiframe';
+    if (!clientConfig.useUpdatedOfferFlows) {
+      return feUrl('/contributionsiframe');
+    }
+
+    if (this.clientConfigManager_.shouldForceLangInIframes()) {
+      return feUrl('/contributionoffersiframe', {
+        'hl': this.clientConfigManager_.getLanguage(),
+      });
+    }
+
+    return feUrl('/contributionoffersiframe');
   }
 
   /**
@@ -11426,7 +11510,11 @@ class EntitlementsManager {
         }
 
         // Add metering params.
-        if (this.publicationId_ && params?.metering?.state) {
+        if (
+          this.publicationId_ &&
+          params?.metering?.state &&
+          queryStringHasFreshGaaParams(this.win_.location.search)
+        ) {
           const meteringStateId = params.metering.state.id;
           if (
             typeof meteringStateId === 'string' &&
@@ -12313,6 +12401,9 @@ class LinkCompleteFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
+    /** @private @const {!./client-config-manager.ClientConfigManager} */
+    this.clientConfigManager_ = deps.clientConfigManager();
+
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
@@ -12326,17 +12417,31 @@ class LinkCompleteFlow {
     this.callbacks_ = deps.callbacks();
 
     const index = (response && response['index']) || '0';
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/linkconfirmiframe', '/u/' + index),
-      feArgs({
-        'productId': deps.pageConfig().getProductId(),
-        'publicationId': deps.pageConfig().getPublicationId(),
-      }),
-      /* shouldFadeBody */ true
-    );
+
+    /** @private {?ActivityIframeView} */
+    this.activityIframeView_ = null;
+
+    /** @private @const {!Promise<!ActivityIframeView>} */
+    this.activityIframeViewPromise_ = this.clientConfigManager_
+      .getClientConfig()
+      .then(
+        (clientConfig) =>
+          new ActivityIframeView(
+            this.win_,
+            this.activityPorts_,
+            feUrl(
+              '/linkconfirmiframe',
+              {},
+              clientConfig.usePrefixedHostPath,
+              'u/' + index
+            ),
+            feArgs({
+              'productId': deps.pageConfig().getProductId(),
+              'publicationId': deps.pageConfig().getPublicationId(),
+            }),
+            /* shouldFadeBody */ true
+          )
+      );
 
     /** @private {?function()} */
     this.completeResolver_ = null;
@@ -12352,32 +12457,36 @@ class LinkCompleteFlow {
    * @return {!Promise}
    */
   start() {
-    const promise = this.activityIframeView_.acceptResultAndVerify(
-      feOrigin(),
-      /* requireOriginVerified */ true,
-      /* requireSecureChannel */ true
-    );
-    promise
-      .then((response) => {
-        this.complete_(response);
-      })
-      .catch((reason) => {
-        // Rethrow async.
-        setTimeout(() => {
-          throw reason;
+    return this.activityIframeViewPromise_.then((activityIframeView) => {
+      this.activityIframeView_ = activityIframeView;
+
+      const promise = this.activityIframeView_.acceptResultAndVerify(
+        feOrigin(),
+        /* requireOriginVerified */ true,
+        /* requireSecureChannel */ true
+      );
+      promise
+        .then((response) => {
+          this.complete_(response);
+        })
+        .catch((reason) => {
+          // Rethrow async.
+          setTimeout(() => {
+            throw reason;
+          });
+        })
+        .then(() => {
+          // The flow is complete.
+          this.dialogManager_.completeView(this.activityIframeView_);
         });
-      })
-      .then(() => {
-        // The flow is complete.
-        this.dialogManager_.completeView(this.activityIframeView_);
-      });
-    this.deps_
-      .eventManager()
-      .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
-    this.deps_
-      .eventManager()
-      .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
-    return this.dialogManager_.openView(this.activityIframeView_);
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
+      return this.dialogManager_.openView(this.activityIframeView_);
+    });
   }
 
   /**

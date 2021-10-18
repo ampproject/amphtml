@@ -3,7 +3,7 @@ import {rethrowAsync} from '#core/error';
 import {hasOwn} from '#core/types/object';
 import {trimStart} from '#core/types/string';
 
-import {user} from '../../log';
+import {user} from '#utils/log';
 
 /** @private @const {string} */
 const PARSER_IGNORE_FLAG = '`';

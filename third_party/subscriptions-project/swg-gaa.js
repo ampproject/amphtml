@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.186 */
+/** Version: 0.1.22.188 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -881,6 +881,12 @@ const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
 /** ID for the Google Sign-In button element. */
 const GOOGLE_SIGN_IN_BUTTON_ID = 'swg-google-sign-in-button';
 
+/** ID for the third party Google Sign-In button element.  */
+const GOOGLE_3P_SIGN_IN_BUTTON_ID = 'swg-google-3p-sign-in-button';
+
+/** ID for the Google Sign-In button element. */
+const SIGN_IN_WITH_GOOGLE_BUTTON_ID = 'swg-sign-in-with-google-button';
+
 /** ID for the Publisher sign-in button element. */
 const PUBLISHER_SIGN_IN_BUTTON_ID = 'swg-publisher-sign-in-button';
 
@@ -954,7 +960,7 @@ const REGWALL_HTML = `
     margin: 0 0 8px;
     outline: none !important;
   }
-  
+
   .gaa-metering-regwall--description {
     color: #646464;
     display: block;
@@ -1073,46 +1079,57 @@ const CASL_HTML = `
 </div>
 `;
 
-/** Styles for the Google Sign-In button iframe. */
+/** Base styles for both the Google and Google 3p Sign-In button iframes. */
 const GOOGLE_SIGN_IN_IFRAME_STYLES = `
-body {
-  margin: 0;
-  overflow: hidden;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} {
-  margin: 0 auto;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} > div {
-  animation: fadeIn 0.32s;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+  body {
+    margin: 0;
+    overflow: hidden;
   }
-  to {
-    opacity: 1;
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID},
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID},
+  #${GOOGLE_SIGN_IN_BUTTON_ID} {
+    margin: 0 auto;
   }
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue {
-  background-color: #1A73E8;
-  box-shadow: none;
-  -webkit-box-shadow: none;
-  border-radius: 4px;
-  width: 100% !important;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
-  display: none;
-}
-/** Hides default "Sign in with Google" text. */
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_] {
-  font-size: 0 !important;
-}
-/** Renders localized "Sign in with Google" text instead. */
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before {
-  content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
-  font-size: 15px;
-}
-`;
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} > div,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} > div,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} > div {
+    animation: fadeIn 0.32s;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} .abcRioButton.abcRioButtonBlue,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue {
+    background-color: #1A73E8;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    border-radius: 4px;
+    width: 100% !important;
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
+    display: none;
+  }
+  /** Hides default "Sign in with Google" text. */
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID}  .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_],
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID}  .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_],
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_] {
+    font-size: 0 !important;
+  }
+  /** Renders localized "Sign in with Google" text instead. */
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before {
+    content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
+    font-size: 15px;
+  }`;
 
 /**
  * User object that Publisher JS receives after users sign in.
@@ -1703,6 +1720,144 @@ function callSwg(callback) {
   (self.SWG = self.SWG || []).push(callback);
 }
 
+/** Styles for the third party Google Sign-In button iframe. */
+const GOOGLE_3P_SIGN_IN_IFRAME_STYLES =
+  GOOGLE_SIGN_IN_IFRAME_STYLES +
+  `
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButtonContents {
+    font-family: Roboto,arial,sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .21px;
+    margin-left: 6px;
+    margin-right: 6px;
+    vertical-align: top;
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton {
+    border-radius: 1px;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 25%);
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-transition: background-color .218s,border-color .218s,box-shadow .218s;
+    transition: background-color .218s,border-color .218s,box-shadow .218s;
+    -webkit-user-select: none;
+    -webkit-appearance: none;
+    background-color: #fff;
+    background-image: none;
+    color: #262626;
+    cursor: pointer;
+    outline: none;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: auto;
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButtonBlue {
+    border: none;
+    color: #fff;
+  }
+  `;
+
+const GOOGLE_3P_SIGN_IN_BUTTON_HTML = `
+<div style="height:36px;width:180px;" class="abcRioButton abcRioButtonBlue">
+  <span style="font-size:15px;line-height:34px;" class="abcRioButtonContents">
+    <span id="not_signed_in">Sign in with Google</span>
+  </span>
+</div>
+`;
+
+class GaaGoogle3pSignInButton {
+  /**
+   * Renders the third party Google Sign-In button for external authentication.
+   * @nocollapse
+   * @param {{ allowedOrigins: !Array<string>, authorizationUrl: string }} params
+   */
+  static show({allowedOrigins, authorizationUrl}) {
+    // Optionally grab language code from URL.
+    const queryString = GaaUtils.getQueryString();
+    const queryParams = parseQueryString(queryString);
+    const languageCode = queryParams['lang'] || 'en';
+
+    // Apply iframe styles.
+    const styleEl = self.document.createElement('style');
+    styleEl./*OK*/ innerText = GOOGLE_3P_SIGN_IN_IFRAME_STYLES.replace(
+      '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
+      msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
+    );
+    self.document.head.appendChild(styleEl);
+
+    // Render the third party Google Sign-In button.
+    const buttonEl = self.document.createElement('div');
+    buttonEl.id = GOOGLE_3P_SIGN_IN_BUTTON_ID;
+    buttonEl.tabIndex = 0;
+    buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
+    buttonEl.onclick = () => {
+      self.open(authorizationUrl);
+    };
+    self.document.body.appendChild(buttonEl);
+
+    // Promise a function that sends messages to the parent frame.
+    // Note: A function is preferable to a reference to the parent frame
+    // because referencing the parent frame outside of the 'message' event
+    // handler throws an Error. A function defined within the handler can
+    // effectively save a reference to the parent frame though.
+    const sendMessageToParentFnPromise = new Promise((resolve) => {
+      self.addEventListener('message', (e) => {
+        if (
+          allowedOrigins.indexOf(e.origin) !== -1 &&
+          e.data.stamp === POST_MESSAGE_STAMP &&
+          e.data.command === POST_MESSAGE_COMMAND_INTRODUCTION
+        ) {
+          resolve((message) => {
+            e.source.postMessage(message, e.origin);
+          });
+        }
+      });
+    });
+
+    function sendErrorMessageToParent() {
+      sendMessageToParentFnPromise.then((sendMessageToParent) => {
+        sendMessageToParent({
+          stamp: POST_MESSAGE_STAMP,
+          command: POST_MESSAGE_COMMAND_ERROR,
+        });
+      });
+    }
+
+    // Validate origins.
+    for (let i = 0; i < allowedOrigins.length; i++) {
+      const allowedOrigin = allowedOrigins[i];
+      const url = new URL(allowedOrigin);
+
+      const isOrigin = url.origin === allowedOrigin;
+      const protocolIsValid =
+        url.protocol === 'http:' || url.protocol === 'https:';
+      const isValidOrigin = isOrigin && protocolIsValid;
+
+      if (!isValidOrigin) {
+        warn(
+          `[swg-gaa.js:GaaGoogle3pSignInButton.show]: You specified an invalid origin: ${allowedOrigin}`
+        );
+        sendErrorMessageToParent();
+        return;
+      }
+    }
+
+    // Relay message to the parent frame (GAA Intervention).
+    self.addEventListener('message', (e) => {
+      if (
+        allowedOrigins.indexOf(e.origin) !== -1 &&
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_USER
+      ) {
+        self.parent.postMessage(e.data, e.origin);
+      }
+    });
+  }
+}
+
 /**
  * Logs Showcase events.
  * @param {{
@@ -1744,4 +1899,4 @@ class GaaUtils {
   }
 }
 
-export { GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef };
+export { GaaGoogle3pSignInButton, GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef };

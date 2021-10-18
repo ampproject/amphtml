@@ -35,7 +35,7 @@ import {installDocService} from '#service/ampdoc-impl';
 import {installExtensionsService} from '#service/extensions-impl';
 import {installXhrService} from '#service/xhr-impl';
 import {toggleExperiment} from '#experiments';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);

@@ -13,8 +13,8 @@ import {
   requestForBatchFetch,
 } from '../../../src/batched-json';
 import {addParamToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
 import {
   dict,
   getValueForExpr,
@@ -30,11 +30,7 @@ import {tryParseJson} from '#core/types/object/json';
 import {mod} from '#core/math';
 import {once} from '#core/types/function';
 import {removeChildren, tryFocus} from '#core/dom';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
 import {toggle} from '#core/dom/style';
 import fuzzysearch from '#third_party/fuzzysearch';
 

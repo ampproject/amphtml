@@ -123,7 +123,11 @@ commands:
             - workspace
   install_chrome:
     steps:
+      - run:
+          name: 'Get Pinned Chrome Version'
+          command: ./.circleci/get_pinned_chrome_version.sh
       - browser-tools/install-chrome:
+          chrome-version: ${CHROME_VERSION}
           replace-existing: true
       - browser-tools/install-chromedriver
   install_firefox:
@@ -148,6 +152,10 @@ commands:
           path: result-reports
       - store_test_results:
           path: result-reports
+  store_filelist:
+    steps:
+      - store_artifacts:
+          path: /tmp/filelist.txt
   skip_on_push_builds:
     steps:
       - when:
@@ -299,6 +307,7 @@ jobs:
           name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   unminified_tests:
     executor:
@@ -354,6 +363,7 @@ jobs:
           name: '⭐ End-to-End Tests ⭐'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   browser_tests_safari:
     executor:
@@ -433,6 +443,7 @@ jobs:
           name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
+      - store_filelist
       - teardown_vm
   amp_release:
     executor:
@@ -456,14 +467,14 @@ jobs:
           name: '⭐ amp release ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
       - teardown_vm
-  archive_release:
+  upload_release:
     executor:
       name: node-docker-medium
     steps:
       - setup_vm
       - run:
-          name: '⭐ Archive Release Artifacts ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/archive-release.js
+          name: '⭐ Upload Release Artifacts ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
           path: /tmp/release.tar.gz
       - teardown_vm
@@ -623,8 +634,10 @@ workflows:
           <<: *release_builds_only
           requires:
             - 'Initialize Repository'
-      - archive_release:
-          name: 'Archive Release'
+      - upload_release:
+          name: 'Upload Release'
           <<: *release_builds_only
           requires:
             - amp_release
+          context:
+            - release-build-uploader

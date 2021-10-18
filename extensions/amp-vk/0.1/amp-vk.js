@@ -5,8 +5,9 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {getData, listen} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 
 /**

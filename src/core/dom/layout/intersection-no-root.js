@@ -1,6 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * @fileoverview
@@ -67,7 +67,7 @@ export function measureIntersectionNoRoot(el) {
     return intersectionDeferreds.get(el).promise;
   }
 
-  const inOb = getInOb(toWin(el.ownerDocument.defaultView));
+  const inOb = getInOb(getWin(el));
   inOb.observe(el);
 
   const deferred = new Deferred();

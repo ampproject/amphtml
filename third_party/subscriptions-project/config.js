@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.186 */
+/** Version: 0.1.22.188 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -875,9 +875,13 @@ class JsonLdParser {
       possibleConfigs = [possibleConfigs];
     }
 
-    const configs = /** @type {!Array<!JsonObject>} */ (possibleConfigs);
+    let configs = /** @type {!Array<!JsonObject>} */ (possibleConfigs);
     for (let i = 0; i < configs.length; i++) {
       const config = configs[i];
+
+      if (config['@graph'] && Array.isArray(config['@graph'])) {
+        configs = configs.concat(config['@graph']);
+      }
 
       // Must be an ALLOWED_TYPE
       if (!this.checkType_.checkValue(config['@type'], ALLOWED_TYPES)) {

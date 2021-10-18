@@ -2,8 +2,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
+const fs = require('fs-extra');
 const path = require('path');
-const {cyan} = require('kleur/colors');
+const {cyan, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
@@ -14,6 +15,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  * @return {Promise<void>}
  */
 async function clean() {
+  // TODO(https://go.amp.dev/issue/36354): We can simplify this list
   const pathsToDelete = [
     // Local cache directories
     // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
@@ -30,12 +32,12 @@ async function clean() {
     'build-system/server/new-server/transforms/dist',
     'build-system/tasks/performance/cache',
     'build-system/tasks/performance/results.json',
-    'build-system/global-configs/custom-config.json',
     'dist',
     'dist.3p',
     'dist.tools',
     'export',
     'examples/storybook',
+    'extensions/**/build',
     'extensions/**/dist',
     'release',
     'result-reports',
@@ -46,6 +48,21 @@ async function clean() {
   ];
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
+  }
+  // User configuration files
+  // Keep this list in sync with .gitignore, .eslintignore, and .prettierignore
+  const customConfigs = [
+    'build-system/global-configs/custom-config.json',
+    'build-system/global-configs/custom-flavors-config.json',
+  ];
+  if (argv.include_custom_configs) {
+    pathsToDelete.push(...customConfigs);
+  } else {
+    for (const customConfig of customConfigs) {
+      if (fs.existsSync(customConfig)) {
+        log(yellow('Skipping path:'), cyan(customConfig));
+      }
+    }
   }
   if (argv.exclude) {
     const excludes = argv.exclude.split(',');
@@ -73,5 +90,7 @@ clean.description = 'Clean up various cache and output directories';
 clean.flags = {
   'dry_run': 'Do a dry run without actually deleting anything',
   'include_subpackages': 'Also clean up inner node_modules package directories',
+  'include_custom_configs':
+    'Also clean up custom config files from build-system/global-configs',
   'exclude': 'Comma-separated list of directories to exclude from deletion',
 };
