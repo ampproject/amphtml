@@ -6,11 +6,13 @@
 const dedent = require('dedent');
 const {
   createRelease,
+  createTag,
   getPullRequestsBetweenCommits,
   getRef,
+  getRelease,
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
-const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
+const {GraphQlQueryResponseData} = require('@octokit/graphql');
 
 const prereleaseConfig = {
   'beta-percent': true,
@@ -190,14 +192,31 @@ function _createBody(head, base, prs) {
 }
 
 /**
- * Main function
+ * Fetch release if exists
+ * @param {string} head
+ * @return {!Promise}
+ */
+async function fetchRelease(head) {
+  try {
+    return await getRelease(head);
+  } catch {}
+}
+
+/**
+ * Make release
  * @param {string} head
  * @param {string} base
  * @param {string} channel
+ * @param {string} sha
  * @return {Promise<Object>}
  */
-async function makeRelease(head, base, channel) {
-  const {object: headRef} = await getRef(head);
+async function makeRelease(head, base, channel, sha) {
+  let headRef;
+  try {
+    headRef = (await getRef(head)).object;
+  } catch (_) {
+    headRef = (await createTag(head, sha)).object;
+  }
   const {object: baseRef} = await getRef(base);
   const prs = await getPullRequestsBetweenCommits(headRef.sha, baseRef.sha);
   const body = _createBody(head, base, prs);
@@ -205,4 +224,4 @@ async function makeRelease(head, base, channel) {
   return await createRelease(head, headRef.sha, body, prerelease);
 }
 
-module.exports = {makeRelease};
+module.exports = {fetchRelease, makeRelease};

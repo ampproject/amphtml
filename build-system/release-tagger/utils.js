@@ -270,9 +270,35 @@ async function getRef(tag) {
   return data;
 }
 
+/**
+ * Create git tag and ref
+ * @param {string} tag
+ * @param {string} sha
+ * @return {!Promise}
+ */
+async function createTag(tag, sha) {
+  await octokit.rest.git.createTag({
+    owner,
+    repo,
+    tag,
+    message: tag,
+    object: sha,
+    type: 'commit',
+  });
+
+  // once a tag object is created, create a reference
+  return octokit.rest.git.createRef({
+    owner,
+    repo,
+    ref: `refs/tags/${tag}`,
+    sha,
+  });
+}
+
 module.exports = {
   createIssue,
   createRelease,
+  createTag,
   getLabel,
   getIssue,
   getPullRequestsBetweenCommits,
