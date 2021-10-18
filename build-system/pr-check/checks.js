@@ -21,6 +21,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp ava');
   timedExecOrDie('amp check-build-system');
+  timedExecOrDie('amp check-ignore-list');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp caches-json');
   timedExecOrDie('amp check-exact-versions');
@@ -48,6 +49,10 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.INVALID_WHITESPACES)) {
     timedExecOrDie('amp check-invalid-whitespaces');
+  }
+
+  if (buildTargetsInclude(Targets.IGNORE_LIST)) {
+    timedExecOrDie(`amp check-ignore-lists`);
   }
 
   if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
