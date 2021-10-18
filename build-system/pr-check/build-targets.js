@@ -12,6 +12,7 @@ const path = require('path');
 const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMain} = require('../common/git');
+const {ignoreListFiles} = require('../tasks/check-ignore-lists');
 const {isCiBuild} = require('../common/ci');
 
 /**
@@ -38,6 +39,7 @@ const Targets = {
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
   HTML_FIXTURES: 'HTML_FIXTURES',
+  IGNORE_LIST: 'IGNORE_LIST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   INVALID_WHITESPACES: 'INVALID_WHITESPACES',
   LINT: 'LINT',
@@ -66,6 +68,7 @@ const nonRuntimeTargets = [
   Targets.DEV_DASHBOARD,
   Targets.DOCS,
   Targets.E2E_TEST,
+  Targets.IGNORE_LIST,
   Targets.INTEGRATION_TEST,
   Targets.OWNERS,
   Targets.RENOVATE_CONFIG,
@@ -186,6 +189,13 @@ const targetMatchers = {
       fileLists.htmlFixtureFiles.includes(file) ||
       file == 'build-system/tasks/validate-html-fixtures.js' ||
       file.startsWith('build-system/test-configs')
+    );
+  },
+  [Targets.IGNORE_LIST]: (file) => {
+    return (
+      ignoreListFiles.includes(file) ||
+      file === 'build-system/tasks/check-ignore-list.js' ||
+      file === 'build-system/tasks/clean.js'
     );
   },
   [Targets.INTEGRATION_TEST]: (file) => {
