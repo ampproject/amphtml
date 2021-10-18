@@ -156,7 +156,7 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
  * @param {boolean|undefined} hasAudio
  */
 function applyAudioInfoToVideo(videoEl, hasAudio) {
-  if (hasAudio == false) {
+  if (hasAudio === false) {
     videoEl.setAttribute('noaudio', '');
   }
 }
