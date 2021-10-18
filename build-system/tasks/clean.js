@@ -11,6 +11,23 @@ const {log} = require('../common/logging');
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
+ * Rewrite glob patterns according to .gitignore syntax relative to cwd.
+ * https://git-scm.com/docs/gitignore#_pattern_format
+ * @param {string} pattern In .gitignore format
+ * @return {string} Pattern in standard glob format
+ */
+function gitignoreToGlobPattern(pattern) {
+  // If there is a separator at the beginning or middle (or both) of the
+  // pattern, then the pattern is relative to the directory level of the
+  // particular .gitignore file itself.
+  if (pattern.startsWith('/')) {
+    return pattern.substr(1);
+  }
+  // Otherwise the pattern may also match at any level below the .gitignore level.
+  return `**/${pattern}`;
+}
+
+/**
  * @return {Promise<string[]>}
  */
 async function getPathsFromIgnoreList() {
@@ -22,8 +39,7 @@ async function getPathsFromIgnoreList() {
       .split('\n')
       // Comments and empty lines
       .filter((line) => line.trim().length > 0 && !line.startsWith('#'))
-      // Recursive globs
-      .map((line) => (line.startsWith('/') ? line.substr(1) : `**/${line}`))
+      .map((line) => gitignoreToGlobPattern(line))
   );
 }
 
