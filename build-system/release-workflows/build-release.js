@@ -12,7 +12,7 @@ const jobName = 'build-release.js';
 
 runReleaseJob(jobName, async () => {
   const {ESM, FLAVOR} = process.env;
-  timedExecOrThrow(`amp release --flavor=${FLAVOR} --${ESM}`);
+  timedExecOrThrow(`amp release --flavor=${FLAVOR} --${ESM} --dedup_v0`);
   fs.ensureDirSync(`/tmp/workspace/releases/${FLAVOR}/${ESM}`);
   fs.copySync('release/', `/tmp/workspace/releases/${FLAVOR}/${ESM}`);
 });

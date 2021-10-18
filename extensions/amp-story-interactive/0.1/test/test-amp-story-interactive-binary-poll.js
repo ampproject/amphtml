@@ -5,7 +5,7 @@ import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-servi
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {addConfigToInteractive, getMockInteractiveData} from './helpers';
-import {measureMutateElementStub} from '#testing/test-helper';
+import {measureMutateElementStub} from '#testing/helpers/service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

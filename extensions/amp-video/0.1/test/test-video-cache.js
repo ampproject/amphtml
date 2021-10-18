@@ -141,9 +141,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const addedSource = videoEl.querySelector('source');
       expect(addedSource.getAttribute('src')).to.equal('video1.mp4');
       expect(addedSource.getAttribute('data-bitrate')).to.equal('700');
-      expect(addedSource.getAttribute('type')).to.equal(
-        'video/mp4; codecs=h264'
-      );
+      expect(addedSource.getAttribute('type')).to.equal('video/mp4');
     });
 
     it('should add the sources sorted by codec priority', async () => {
@@ -153,7 +151,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
             sources: [
               {
                 'url': 'video1.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 700,
                 type: 'video/mp4',
               },
@@ -178,19 +176,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       const addedSources = videoEl.querySelectorAll('source');
-      const codecRegex = /(?<=codecs=)[A-Za-z0-9.]+/;
-      const srcCodec0 = addedSources[0]
-        .getAttribute('type')
-        .match(codecRegex)[0];
-      const srcCodec1 = addedSources[1]
-        .getAttribute('type')
-        .match(codecRegex)[0];
-      const srcCodec2 = addedSources[2]
-        .getAttribute('type')
-        .match(codecRegex)[0];
-      expect(srcCodec0).to.equal('vp09.02.30.11');
-      expect(srcCodec1).to.equal('h264');
-      expect(srcCodec2).to.equal('unknown');
+
+      const srcType0 = addedSources[0].getAttribute('type');
+      const srcType1 = addedSources[1].getAttribute('type');
+      const srcType2 = addedSources[2].getAttribute('type');
+      expect(srcType0).to.equal('video/mp4; codecs=vp09.00.30.08');
+      expect(srcType1).to.equal('video/mp4');
+      expect(srcType2).to.equal('video/mp4; codecs=unknown');
     });
 
     it('should add the sources sorted by bitrate, for any subset of sources whose codecs have equivalent priority', async () => {
@@ -200,19 +192,19 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
             sources: [
               {
                 'url': 'video1.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 700,
                 type: 'video/mp4',
               },
               {
                 'url': 'video2.mp4',
-                'codec': 'vp09.00.15.08',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 2000,
                 type: 'video/mp4',
               },
               {
                 'url': 'video3.mp4',
-                'codec': 'vp09.00.25.00',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 1500,
                 type: 'video/mp4',
               },
@@ -243,13 +235,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
               },
               {
                 'url': 'video2.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 1000,
                 type: 'video/mp4',
               },
               {
                 'url': 'video3.mp4',
-                'codec': 'vp09.00.15.08',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 2000,
                 type: 'video/mp4',
               },
@@ -268,31 +260,22 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       const addedSources = videoEl.querySelectorAll('source');
-      const codecRegex = /(?<=codecs=)[A-Za-z0-9.]+/;
-      const srcCodec0 = addedSources[0]
-        .getAttribute('type')
-        .match(codecRegex)[0];
-      const srcCodec1 = addedSources[1]
-        .getAttribute('type')
-        .match(codecRegex)[0];
-      const srcCodec2 = addedSources[2]
-        .getAttribute('type')
-        .match(codecRegex)[0];
-      const srcCodec3 = addedSources[3]
-        .getAttribute('type')
-        .match(codecRegex)[0];
+      const srcType0 = addedSources[0].getAttribute('type');
+      const srcType1 = addedSources[1].getAttribute('type');
+      const srcType2 = addedSources[2].getAttribute('type');
+      const srcType3 = addedSources[3].getAttribute('type');
 
       expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
-      expect(srcCodec0).to.equal('vp09.00.15.08');
+      expect(srcType0).to.equal('video/mp4; codecs=vp09.00.30.08');
 
       expect(addedSources[1].getAttribute('data-bitrate')).to.equal('1000');
-      expect(srcCodec1).to.equal('vp09.02.30.11');
+      expect(srcType1).to.equal('video/mp4; codecs=vp09.00.30.08');
 
       expect(addedSources[2].getAttribute('data-bitrate')).to.equal('3000');
-      expect(srcCodec2).to.equal('h264');
+      expect(srcType2).to.equal('video/mp4');
 
       expect(addedSources[3].getAttribute('data-bitrate')).to.equal('2000');
-      expect(srcCodec3).to.equal('h264');
+      expect(srcType3).to.equal('video/mp4');
     });
 
     it('should add video[src] as the last fallback source', async () => {
@@ -324,15 +307,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       const videoEl = createVideo([{src: 'video.mp4'}]);
       videoEl.setAttribute('src', 'video1.mp4');
-      videoEl.setAttribute('type', 'video/mp4; codecs=h264');
+      videoEl.setAttribute('type', 'video/mp4');
 
       await fetchCachedSources(videoEl, env.ampdoc);
 
       const lastSource = videoEl.querySelector('source:last-of-type');
       expect(lastSource.getAttribute('src')).to.equal('video1.mp4');
-      expect(lastSource.getAttribute('type')).to.equal(
-        'video/mp4; codecs=h264'
-      );
+      expect(lastSource.getAttribute('type')).to.equal('video/mp4');
     });
 
     it('should clear the unused sources when video[src]', async () => {

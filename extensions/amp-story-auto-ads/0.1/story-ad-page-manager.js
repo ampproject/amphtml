@@ -88,11 +88,11 @@ export class StoryAdPageManager {
    * Called when ad has failed or been placed and we should move to next ad.
    */
   discardCurrentAd() {
+    this.adsConsumed_++;
     this.analyticsEvent_(AnalyticsEvents.AD_DISCARDED, {
       [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
       [AnalyticsVars.AD_DISCARDED]: Date.now(),
     });
-    this.adsConsumed_++;
   }
 
   /**
@@ -216,11 +216,11 @@ export class StoryAdPageManager {
    *
    */
   currentAdInserted_() {
+    this.adsConsumed_++;
     this.analyticsEvent_(AnalyticsEvents.AD_INSERTED, {
       [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
       [AnalyticsVars.AD_INSERTED]: Date.now(),
     });
-    this.adsConsumed_++;
   }
 
   /**
