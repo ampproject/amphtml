@@ -595,6 +595,16 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-jwplayer",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "bento": true,
+      "npm": true
+    }
+  },
+  {
     "name": "amp-kaltura-player",
     "version": "0.1",
     "latestVersion": "0.1"
