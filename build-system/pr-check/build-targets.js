@@ -7,6 +7,8 @@
  */
 const config = require('../test-configs/config');
 const fastGlob = require('fast-glob');
+const fs = require('fs');
+const json5 = require('json5');
 const minimatch = require('minimatch');
 const path = require('path');
 const {cyan} = require('kleur/colors');
@@ -25,6 +27,7 @@ let buildTargets;
  * Used to prevent the repeated expansion of globs during PR jobs.
  */
 const fileLists = {};
+const jsonFilesWithSchemas = [];
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -202,7 +205,7 @@ const targetMatchers = {
   },
   [Targets.JSON_FILES]: (file) => {
     return (
-      file.endsWith('.json') ||
+      jsonFilesWithSchemas.includes(file) ||
       file == 'build-system/tasks/check-json-schemas.js'
     );
   },
@@ -394,6 +397,17 @@ function expandFileLists() {
     const fileListName = globName.replace('Globs', 'Files');
     fileLists[fileListName] = fastGlob.sync(config[globName], {dot: true});
   }
+
+  const vscodeSettings = json5.parse(
+    fs.readFileSync('.vscode/settings.json', 'utf8')
+  );
+  /** @type {Array<{fileMatch: string[], url: string}>} */
+  const schemas = vscodeSettings['json.schemas'];
+  const jsonGlobs = schemas.flatMap(({fileMatch, url}) => [
+    ...fileMatch,
+    path.normalize(url),
+  ]);
+  jsonFilesWithSchemas.push(fastGlob.sync(jsonGlobs, {dot: true}));
 }
 
 module.exports = {
