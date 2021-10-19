@@ -232,14 +232,16 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
 
+    const storyAmpdoc = getAmpdoc(this.element);
+
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.element));
+    this.mutator_ = Services.mutatorForDoc(storyAmpdoc);
 
     const deferred = new Deferred();
 
     // /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
     // this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
-    //   this.win
+    //   storyAmpdoc.win
     // );
 
     /** @private {!Array<!HTMLMediaElement>} */

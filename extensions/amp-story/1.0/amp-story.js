@@ -75,6 +75,7 @@ import {dict, map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '#utils/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -298,6 +299,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?UIType} */
     this.uiState_ = null;
+
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.storyAmpdoc_ = getAmpdoc(this.element);
   }
 
   /** @override */
@@ -406,7 +410,7 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
-      Services.performanceFor(this.win).addEnabledExperiment(
+      Services.performanceFor(this.storyAmpdoc_.win).addEnabledExperiment(
         'story-load-first-page-only'
       );
     }
