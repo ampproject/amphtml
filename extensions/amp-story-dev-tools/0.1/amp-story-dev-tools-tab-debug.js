@@ -109,7 +109,7 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.buildDebugContent_();
+    return this.buildDebugContent_();
   }
 
   /**
