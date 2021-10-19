@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from './service';
 import {devAssert} from './log';
-import {getServicePromise} from './service';
+import {getServicePromise} from './service-helpers';
 
 /**
  * A map of services that delay rendering. The key is the name of the service
@@ -112,7 +112,9 @@ export function hasRenderDelayingServices(win) {
  * @return {boolean}
  */
 export function isRenderDelayingService(service) {
-  const maybeRenderDelayingService = /** @type {!RenderDelayingService}*/ (service);
+  const maybeRenderDelayingService = /** @type {!RenderDelayingService}*/ (
+    service
+  );
   return typeof maybeRenderDelayingService.whenReady == 'function';
 }
 

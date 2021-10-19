@@ -15,12 +15,12 @@
  */
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {hasOwn} from '../../../src/core/types/object';
+import {hasOwn} from '#core/types/object';
 import {internalRuntimeVersion} from '../../../src/internal-version';
-import {toggle} from '../../../src/style';
+import {toggle} from '#core/dom/style';
 import {urls} from '../../../src/config';
 
 /** @private @const {string} */
@@ -199,30 +199,29 @@ export class IframeTransport {
     if (!isLongTaskApiSupported(this.ampWin_)) {
       return;
     }
-    IframeTransport.performanceObservers_[
-      this.type_
-    ] = new this.ampWin_.PerformanceObserver((entryList) => {
-      if (!entryList) {
-        return;
-      }
-      entryList.getEntries().forEach((entry) => {
-        if (
-          entry &&
-          entry['entryType'] == 'longtask' &&
-          entry['name'] == 'cross-origin-descendant' &&
-          entry.attribution
-        ) {
-          /** @type {!Array} */ (entry.attribution).forEach((attrib) => {
-            if (
-              this.frameUrl_ == attrib['containerSrc'] &&
-              ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0
-            ) {
-              user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
-            }
-          });
+    IframeTransport.performanceObservers_[this.type_] =
+      new this.ampWin_.PerformanceObserver((entryList) => {
+        if (!entryList) {
+          return;
         }
+        entryList.getEntries().forEach((entry) => {
+          if (
+            entry &&
+            entry['entryType'] == 'longtask' &&
+            entry['name'] == 'cross-origin-descendant' &&
+            entry.attribution
+          ) {
+            /** @type {!Array} */ (entry.attribution).forEach((attrib) => {
+              if (
+                this.frameUrl_ == attrib['containerSrc'] &&
+                ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0
+              ) {
+                user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
+              }
+            });
+          }
+        });
       });
-    });
     IframeTransport.performanceObservers_[this.type_].observe({
       entryTypes: ['longtask'],
     });

@@ -15,9 +15,9 @@
  */
 
 import '../amp-mega-menu';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {htmlFor} from '../../../../src/static-template';
-import {tryFocus} from '../../../../src/dom';
+import {Keys} from '#core/constants/key-codes';
+import {htmlFor} from '#core/dom/static-template';
+import {tryFocus} from '#core/dom';
 
 describes.realWin(
   'amp-mega-menu',

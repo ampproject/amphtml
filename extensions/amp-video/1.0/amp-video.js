@@ -15,8 +15,8 @@
  */
 
 import {CSS} from '../../../build/amp-video-1.0.css';
-import {VideoBaseElement} from './base-element';
-import {isExperimentOn} from '../../../src/experiments';
+import {VideoBaseElement} from './video-base-element';
+import {isExperimentOn} from '#experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

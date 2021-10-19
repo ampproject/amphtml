@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {useImperativeHandle} from '../';
+import {useImperativeHandle} from '#preact';
 
 /**
- * @param {{current: (T|null)}} ref
+ * @param {{current: ?T}} ref
  * @param {T} node
  * @template T
  */

@@ -15,12 +15,12 @@
  */
 
 import {Poller} from './poller';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
-import {extensionScriptsInNode} from '../../../src/service/extension-script';
+import {extensionScriptsInNode} from '#service/extension-script';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -120,10 +120,9 @@ export class LiveListManager {
    * @return {!Promise<!LiveListManager>}
    */
   static forDoc(element) {
-    return /** @type {!Promise<!LiveListManager>} */ (getServicePromiseForDoc(
-      element,
-      SERVICE_ID
-    ));
+    return /** @type {!Promise<!LiveListManager>} */ (
+      getServicePromiseForDoc(element, SERVICE_ID)
+    );
   }
 
   /**
@@ -217,9 +216,8 @@ export class LiveListManager {
     );
 
     return liveListsWithCustomSlots.map((id) => {
-      const customSlotId = this.liveLists_[id].element[
-        AMP_LIVE_LIST_CUSTOM_SLOT_ID
-      ];
+      const customSlotId =
+        this.liveLists_[id].element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
       return doc.getElementById(customSlotId);
     });
   }

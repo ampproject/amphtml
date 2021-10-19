@@ -99,6 +99,9 @@ tags: {  # <amp-accordion> > <section>
   }
   # amp-bind
   attrs: {
+    # this attribute is used in 1.0 only
+    # this is disabled in AMP4EMAIL which only uses 0.1
+    disabled_by: "amp4email"
     name: "[expanded]"
   }
   child_tags: {

@@ -23,16 +23,17 @@ import {
   TAG,
   WIDGET_TAG,
 } from './vars';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {openWindowDialog} from '../../../src/dom';
-import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {parseQueryString} from '#core/types/string/url';
+import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{
  *    isControllingFrame: boolean,
@@ -62,10 +63,9 @@ export let AmpWebPushConfig;
  * @return {!Promise<!./web-push-service.WebPushService>}
  */
 export function webPushServiceForDoc(element) {
-  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (getServicePromiseForDoc(
-    element,
-    SERVICE_TAG
-  ));
+  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (
+    getServicePromiseForDoc(element, SERVICE_TAG)
+  );
 }
 
 /**
@@ -910,9 +910,8 @@ export class WebPushService {
 
     const permissionDialogUrlHasQueryParams =
       this.config_['permission-dialog-url'].indexOf('?') !== -1;
-    const permissionDialogUrlQueryParamPrefix = permissionDialogUrlHasQueryParams
-      ? '&'
-      : '?';
+    const permissionDialogUrlQueryParamPrefix =
+      permissionDialogUrlHasQueryParams ? '&' : '?';
     // The permission dialog URL, containing the return URL above embedded in a
     // query parameter
     const openingPopupUrl =

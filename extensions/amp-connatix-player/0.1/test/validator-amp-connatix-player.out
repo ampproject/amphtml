@@ -19,7 +19,7 @@ FAIL
 |    Tests for the amp-connatix-player tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>amp-connatix-player example</title>

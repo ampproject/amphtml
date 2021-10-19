@@ -15,12 +15,12 @@
  */
 
 import * as Impression from '../../src/impression';
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {addParamToUrl} from '../../src/url';
-import {createElementWithAttributes} from '../../src/dom';
-import {installUrlReplacementsServiceForDoc} from '../../src/service/url-replacements-impl';
-import {macroTask} from '../../testing/yield';
-import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
+import {createElementWithAttributes} from '#core/dom';
+import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
+import {macroTask} from '#testing/yield';
+import {maybeExpandUrlParamsForTesting} from '#service/navigation';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;
@@ -897,9 +897,8 @@ describes.sandboxed('Navigation', {}, () => {
             // Navigation uses the UrlReplacements service scoped to the event
             // target, but for testing stub in the top-level service for simplicity.
             const {documentElement} = parentWin.document;
-            const urlReplacements = Services.urlReplacementsForDoc(
-              documentElement
-            );
+            const urlReplacements =
+              Services.urlReplacementsForDoc(documentElement);
             env.sandbox
               .stub(Services, 'urlReplacementsForDoc')
               .withArgs(anchor)

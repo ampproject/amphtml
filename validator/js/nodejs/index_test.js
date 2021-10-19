@@ -26,11 +26,11 @@ const JasmineRunner = require('jasmine');
 const {execFile} = require('child_process');
 const jasmine = new JasmineRunner();
 
-const ampValidator = require('./index.js');
+const ampValidator = require('./');
 
 it('deployed validator rejects the empty file', function(done) {
   // Note: This will fetch and use the validator from
-  // 'https://cdn.ampproject.org/v0/validator.js', since only one argument
+  // 'https://cdn.ampproject.org/v0/validator_wasm.js', since only one argument
   // is supplied to validateString.
   ampValidator.getInstance()
       .then(function(instance) {
@@ -163,7 +163,7 @@ it('handles syntax errors in validator file', function(done) {
       .catch(function(error) {
         expect(error.message)
             .toMatch(
-                /^Could not instantiate validator\.js -.*[Uu]nexpected token/);
+                /^Could not instantiate validator_wasm\.js -.*[Uu]nexpected token/);
         done();
       });
 });

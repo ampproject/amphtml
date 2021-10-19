@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {masterSelection} from '../../../3p/ampcontext-integration';
+import {masterSelection} from '#3p/ampcontext-integration';
 
 describes.fakeWin('#masterSelect', {}, (env) => {
   it('should allow sharing between configured networks', () =>

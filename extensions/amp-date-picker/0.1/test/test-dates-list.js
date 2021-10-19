@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../../../../third_party/react-dates/bundle';
+import '#third_party/react-dates/bundle';
 import {DatesList} from '../dates-list';
 import {requireExternal} from '../../../../src/module';
 

@@ -207,7 +207,7 @@ Below is an example of a "local" service configuration:
 
 #### URL variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [HTML URL Variable Substitutions](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md).
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [HTML URL Variable Substitutions](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md).
 
 [`amp-access`](../amp-access/amp-access.md) added the following subscriptions-specific variables:
 

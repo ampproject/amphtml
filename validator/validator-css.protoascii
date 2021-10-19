@@ -838,6 +838,8 @@ tags: {  # <style amp-custom>, [AMP]
            feature: 'min-device-pixel-ratio'
            feature: 'max-device-pixel-ratio2'
            feature: 'min-device-pixel-ratio2'
+           feature: 'min--moz-device-pixel-ratio'
+           feature: 'max--moz-device-pixel-ratio'
          }
       }
       at_rule_spec: { name: 'page' }

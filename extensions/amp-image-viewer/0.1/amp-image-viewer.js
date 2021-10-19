@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as st from '../../../src/style';
+import * as st from '#core/dom/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
-import {CommonSignals} from '../../../src/core/constants/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {
   DoubletapRecognizer,
   PinchRecognizer,
@@ -27,37 +27,39 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {WindowInterface} from '../../../src/window-interface';
-import {bezierCurve} from '../../../src/curve';
-import {boundValue, distance, magnitude} from '../../../src/utils/math';
-import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
+import {Layout} from '#core/dom/layout';
+import {Services} from '#service';
+import {WindowInterface} from '#core/window/interface';
+import {bezierCurve} from '#core/data-structures/curve';
+import {boundValue, distance, magnitude} from '#core/math';
+import {
+  closestAncestorElementBySelector,
+  elementByTag,
+  realChildElements,
+} from '#core/dom/query';
 import {continueMotion} from '../../../src/motion';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, loadPromise} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../../../src/layout-rect';
+} from '#core/dom/layout/rect';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {setStyles} from '../../../src/style';
-import {srcsetFromElement} from '../../../src/srcset';
+} from '#core/dom/layout/size-observer';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {setStyles} from '#core/dom/style';
+import {srcsetFromElement} from '#core/dom/srcset';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby', 'aria-labelledby'];
 const DEFAULT_MAX_SCALE = 2;
 
-const ELIGIBLE_TAGS = {
-  'amp-img': true,
-  'amp-anim': true,
-};
+const ELIGIBLE_TAGS = new Set(['AMP-IMG', 'AMP-ANIM', 'IMG']);
 
 export class AmpImageViewer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -122,7 +124,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.motion_ = null;
 
     /** @private {?Element} */
-    this.sourceAmpImage_ = null;
+    this.sourceImage_ = null;
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
@@ -133,7 +135,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.classList.add('i-amphtml-image-viewer');
-    const children = this.getRealChildren();
+    const children = realChildElements(this.element);
 
     userAssert(
       children.length == 1,
@@ -147,9 +149,9 @@ export class AmpImageViewer extends AMP.BaseElement {
       TAG
     );
 
-    this.sourceAmpImage_ = children[0];
+    this.sourceImage_ = children[0];
     Services.ownersForDoc(this.element).setOwner(
-      this.sourceAmpImage_,
+      this.sourceImage_,
       this.element
     );
   }
@@ -177,14 +179,16 @@ export class AmpImageViewer extends AMP.BaseElement {
     // TODO(sparhami, cathyxz) Refactor image viewer once auto sizes lands to
     // use the amp-img as-is, which means we can simplify this logic to just
     // wait for the layout signal.
-    const ampImg = dev().assertElement(this.sourceAmpImage_);
+    const img = dev().assertElement(this.sourceImage_);
     const haveImg = !!this.image_;
     const laidOutPromise = haveImg
       ? Promise.resolve()
-      : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
+      : img.tagName === 'IMG'
+      ? loadPromise(img)
+      : img.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
-      Services.ownersForDoc(this.element).scheduleLayout(this.element, ampImg);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, img);
     }
 
     this.loadPromise_ = laidOutPromise
@@ -269,7 +273,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   elementIsSupported_(element) {
-    return ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+    return ELIGIBLE_TAGS.has(element.tagName);
   }
 
   /**
@@ -305,9 +309,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     this.image_ = this.element.ownerDocument.createElement('img');
     this.image_.classList.add('i-amphtml-image-viewer-image');
-    const ampImg = dev().assertElement(this.sourceAmpImage_);
-    this.setSourceDimensions_(ampImg);
-    this.srcset_ = srcsetFromElement(ampImg);
+    const img = dev().assertElement(this.sourceImage_);
+    this.setSourceDimensions_(img);
+    this.srcset_ = srcsetFromElement(img);
 
     observeContentSize(this.element, this.onResize_);
 
@@ -318,11 +322,17 @@ export class AmpImageViewer extends AMP.BaseElement {
         width: 0,
         height: 0,
       });
-      st.toggle(ampImg, false);
+      st.toggle(img, false);
       this.element.appendChild(this.image_);
-      return ampImg.getImpl().then((ampImg) => {
-        ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
-      });
+      if (img.tagName === 'IMG') {
+        propagateAttributes(ARIA_ATTRIBUTES, img, this.image_);
+        return Promise.resolve();
+      }
+      return img
+        .getImpl()
+        .then((impl) =>
+          propagateAttributes(ARIA_ATTRIBUTES, impl.element, this.image_)
+        );
     });
   }
 
@@ -773,12 +783,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
-    return /** @type {!Promise|undefined} */ (this.set_(
-      newScale,
-      newPosX,
-      newPosY,
-      animate
-    ));
+    return /** @type {!Promise|undefined} */ (
+      this.set_(newScale, newPosX, newPosY, animate)
+    );
   }
 
   /**

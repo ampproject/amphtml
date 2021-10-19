@@ -19,7 +19,7 @@ import {
   rewriteAttributesForElement,
 } from '../../src/url-rewrite';
 
-describe('resolveUrlAttr', () => {
+describes.sandboxed('resolveUrlAttr', {}, () => {
   it('should throw if __amp_source_origin is set', () => {
     allowConsoleError(() => {
       expect(() =>
@@ -147,7 +147,7 @@ describe('resolveUrlAttr', () => {
     });
 });
 
-describe('rewriteAttributesForElement', () => {
+describes.sandboxed('rewriteAttributesForElement', {}, () => {
   let location = 'https://pub.com/';
   it('should not modify `target` on publisher origin', () => {
     const element = document.createElement('a');

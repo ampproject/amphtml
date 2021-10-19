@@ -171,8 +171,6 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
           <h1>The End</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-      </amp-story-bookend>
     </amp-story>
   </body>
 </html>
@@ -218,13 +216,12 @@ The `amp-story` component represents an entire story. The component itself imple
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
-  <amp-story-bookend src="./related.json"></amp-story-bookend>
 </amp-story>
 ```
 
 ### Metadata guidelines
 
-Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
+Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
 
 These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data to your Web Stories](https://developers.google.com/search/docs/guides/enable-web-stories#implement).
 
@@ -600,6 +597,8 @@ Every element inside an `<amp-story-page>` can have an entrance animation.
 
 You can configure animations by specifying a set of [animation attributes](#animation-attributes) on the element; no additional AMP extensions or configuration is needed.
 
+You can also create more advanced animations by using the `<amp-story-animation>` component. Read more on the [Advanced animations](#Advanced-animations).
+
 {% call callout('Note', type='note') %}
 Animations can help make your Web Story more visually exciting and engaging, but use them sparingly. Some users may find long, continuous animations distracting. Other users may have motion sensitivity and be adversely affected by excessive use of motion and parallax effects.
 {% endcall %}
@@ -831,6 +830,33 @@ You can apply multiple entrance animations on one element (for example, an eleme
 {% call callout('Note', type='note') %}
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
 {% endcall %}
+
+## Advanced animations
+
+You can create more advanced animations by using the `<amp-story-animation>` component. It lets you create [`<amp-animation>`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md)-type animations inside your Web Story.
+
+To use it, add a `<amp-story-animation layout="nodisplay" trigger="visibility">` tag under your `<amp-story-page>` with a child `<script type="application/json">` containing the JSON configuration describing your animation. In the following example, the "rotate with amp-story-animation" text will be rotated for 1 second using `<amp-story-animation>`:
+
+```html
+...
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <strong class="animate">rotate with amp-story-animation</strong>
+        </amp-story-grid-layer>
+
+        <amp-story-animation layout="nodisplay" trigger="visibility">
+          <script type="application/json">
+            {
+              "selector": ".animate",
+              "duration": "1s",
+              "keyframes": {"transform": "rotate(360deg)"}
+            }
+          </script>
+        </amp-story-animation>
+      </amp-story-page>
+```
+
+For more details on the animation configuration and options, please refer to the [`<amp-animation> docs`](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/amp-animation.md)
 
 ## Branching
 

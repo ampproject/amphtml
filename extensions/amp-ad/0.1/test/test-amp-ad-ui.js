@@ -15,12 +15,12 @@
  */
 
 import * as adHelper from '../../../../src/ad-helper';
-import * as dom from '../../../../src/dom';
+import * as domQuery from '#core/dom/query';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {macroTask} from '../../../../testing/yield';
-import {setStyles} from '../../../../src/style';
+import {createElementWithAttributes} from '#core/dom';
+import {macroTask} from '#testing/yield';
+import {setStyles} from '#core/dom/style';
 
 describes.realWin(
   'amp-ad-ui handler',
@@ -37,6 +37,7 @@ describes.realWin(
 
     beforeEach(() => {
       adElement = env.win.document.createElement('amp-ad');
+      adElement.ampdoc_ = env.win.document;
       adImpl = new BaseElement(adElement);
       uiHandler = new AmpAdUIHandler(adImpl);
       env.sandbox.stub(adHelper, 'getAdContainer').callsFake(() => {
@@ -67,7 +68,7 @@ describes.realWin(
             .stub(adImpl, 'collapse')
             .callsFake(() => {});
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -98,7 +99,7 @@ describes.realWin(
 
           const otherElement = env.win.document.createElement('div');
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -131,7 +132,7 @@ describes.realWin(
           adElement.remove();
           otherElement.appendChild(adElement);
 
-          env.sandbox.stub(dom, 'ancestorElementsByTag').callsFake(() => {
+          env.sandbox.stub(domQuery, 'ancestorElementsByTag').callsFake(() => {
             return [
               {
                 getImpl: () =>
@@ -330,12 +331,18 @@ describes.realWin(
         uiHandler.stickyAdPosition_ = 'bottom';
         uiHandler.onResizeSuccess();
         expect(uiHandler.closeButtonRendered_).to.be.true;
-        expect(uiHandler.unlisteners_.length).to.equal(1);
+        expect(uiHandler.unlisteners_.length).to.equal(2);
         expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
           .not.null;
 
         uiHandler.onResizeSuccess();
-        expect(uiHandler.unlisteners_.length).to.equal(1);
+        expect(uiHandler.unlisteners_.length).to.equal(2);
+      });
+
+      it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
+        uiHandler.stickyAdPosition_ = 'top';
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
       });
     });
   }

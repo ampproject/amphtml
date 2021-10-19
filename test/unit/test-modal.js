@@ -23,8 +23,8 @@ import {
   setModalAsClosed,
   setModalAsOpen,
 } from '../../src/modal';
-import {htmlFor} from '../../src/static-template';
-import {toArray} from '../../src/core/types/array';
+import {htmlFor} from '#core/dom/static-template';
+import {toArray} from '#core/types/array';
 
 describes.fakeWin('modal', {}, (env) => {
   let win;

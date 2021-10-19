@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../src/services';
+import {Services} from '#service';
 import {fetchDocument} from '../../src/document-fetcher';
 
 describes.realWin('DocumentFetcher', {amp: true}, function (env) {
@@ -150,7 +150,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function (env) {
         sendMessageAwaitResponse: getDefaultResponsePromise,
         whenFirstVisible: () => Promise.resolve(),
       };
-      sendMessageStub = window.sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      sendMessageStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
       sendMessageStub.returns(getDefaultResponsePromise());
       ampdocViewerStub.returns(viewer);
       interceptionEnabledWin = {

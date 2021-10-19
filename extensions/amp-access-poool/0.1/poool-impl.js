@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
-import {resetStyles, setStyle, setStyles} from '../../../src/style';
+import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 
 const TAG = 'amp-access-poool';
 
@@ -38,15 +38,15 @@ const AUTHORIZATION_TIMEOUT = 3000;
 /**
  * @typedef {{
  *   appId: string,
- *   pageType: (string),
- *   debug: (boolean|null),
- *   forceWidget: (string|null),
- *   loginButtonEnabled: (boolean),
- *   videoClient: (string|null),
- *   customSegment: (string|null),
- *   cookiesEnabled: (boolean),
- *   locale: (string|null),
- *   context: (string|null),
+ *   pageType: string,
+ *   debug: ?boolean,
+ *   forceWidget: ?string,
+ *   loginButtonEnabled: boolean,
+ *   videoClient: ?string,
+ *   customSegment: ?string,
+ *   cookiesEnabled: boolean,
+ *   locale: ?string,
+ *   context: ?string,
  * }}
  */
 let PooolConfigDef;

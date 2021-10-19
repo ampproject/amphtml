@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 /**
  * Created by Webedia on 07/03/16 - last updated on 11/10/16

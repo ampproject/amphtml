@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {Util} from './util';
 import {dev, userAssert} from '../../../src/log';
-import {openWindowDialog} from '../../../src/dom';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 
-import {toWin} from '../../../src/types';
+import {toWin} from '#core/window';
 
 // Popup options
 const POP =
@@ -210,7 +210,7 @@ export class SaveButton {
   /**
    * Determine the height of the contents to allow resizing after first layout.
    *
-   * @return {!Promise<number|null>}
+   * @return {!Promise<?number>}
    */
   height() {
     return Promise.resolve(null);

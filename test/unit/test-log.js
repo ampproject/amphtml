@@ -27,7 +27,7 @@ import {
   userAssert,
 } from '../../src/log';
 
-describe('Logging', () => {
+describes.sandboxed('Logging', {}, (env) => {
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
   const RETURNS_WARN = () => LogLevel.WARN;
@@ -43,8 +43,8 @@ describe('Logging', () => {
     mode = {};
     window.__AMP_MODE = mode;
 
-    logSpy = window.sandbox.spy();
-    timeoutSpy = window.sandbox.spy();
+    logSpy = env.sandbox.spy();
+    timeoutSpy = env.sandbox.spy();
     win = {
       console: {
         log: logSpy,
@@ -53,7 +53,7 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       __AMP_REPORT_ERROR: (error) => error,
     };
-    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
+    env.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake((error) => error);
   });
 
   afterEach(() => {
@@ -369,7 +369,14 @@ describe('Logging', () => {
       }
       expect(error).to.be.instanceof(Error);
       expect(error.message).to.equal('1 a 2 b 3' + USER_ERROR_SENTINEL);
-      expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
+      expect(error.messageArray).to.deep.equal([
+        1,
+        'a',
+        2,
+        'b',
+        3,
+        USER_ERROR_SENTINEL,
+      ]);
     });
 
     it('should add element and assert info', () => {
@@ -520,37 +527,6 @@ describe('Logging', () => {
       expect(() => log.assertNumber(null)).to.throw('Number expected: ');
       expect(() => log.assertNumber(undefined)).to.throw('Number expected: ');
       expect(() => log.assertNumber([])).to.throw('Number expected: ');
-    });
-  });
-
-  describe('assertEnumValue', () => {
-    let log;
-
-    beforeEach(() => {
-      log = new Log(win, RETURNS_FINE);
-    });
-
-    it('should return the enum value', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(log.assertEnumValue(enum1, 'value1')).to.equal('value1');
-      expect(log.assertEnumValue(enum1, 'value2')).to.equal('value2');
-    });
-
-    it('should fail with unknown enum value', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'value3')).to.throw(
-        'Unknown enum value: "value3"'
-      );
-      expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum')).to.throw(
-        'Unknown MyEnum value: "value3"'
-      );
-    });
-
-    it('should fail with values of different case', () => {
-      const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
-        'Unknown enum value: "VALUE1"'
-      );
     });
   });
 

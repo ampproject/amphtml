@@ -142,7 +142,7 @@ function maybeCopyImageToCache(configUrl, src) {
 
   touchDirs();
 
-  const filename = src.split('/').pop();
+  const filename = src.split('/').pop() ?? '';
   const destPath = path.join(IMG_CACHE_PATH, filename);
 
   if (!fs.existsSync(destPath)) {

@@ -17,9 +17,9 @@
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
-} from '../line-delimited-response-handler';
+} from '#ads/google/a4a/line-delimited-response-handler';
 
-describe('#line-delimited-response-handler', () => {
+describes.sandboxed('#line-delimited-response-handler', {}, (env) => {
   let chunkHandlerStub;
   let slotData;
   let win;
@@ -92,7 +92,7 @@ describe('#line-delimited-response-handler', () => {
   }
 
   beforeEach(() => {
-    chunkHandlerStub = window.sandbox.stub();
+    chunkHandlerStub = env.sandbox.stub();
   });
 
   describe('stream not supported', () => {
@@ -154,7 +154,7 @@ describe('#line-delimited-response-handler', () => {
     }
 
     beforeEach(() => {
-      readStub = window.sandbox.stub();
+      readStub = env.sandbox.stub();
       response = {
         text: () => Promise.resolve(),
         body: {

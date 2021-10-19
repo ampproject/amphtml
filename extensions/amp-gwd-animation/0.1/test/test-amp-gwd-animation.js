@@ -23,11 +23,11 @@ import {
   PlaybackCssClass,
 } from '../amp-gwd-animation-impl';
 import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {getServiceForDocOrNull} from '../../../../src/service';
+import {getServiceForDocOrNull} from '../../../../src/service-helpers';
 
-describes.sandboxed('AMP GWD Animation', {}, () => {
+describes.sandboxed('AMP GWD Animation', {}, (env) => {
   /**
    * Creates a test amp-gwd-animation element in the given document.
    * @param {!Document} root
@@ -503,9 +503,9 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
     let actionService;
 
     beforeEach(() => {
-      actionService = {setActions: window.sandbox.stub()};
+      actionService = {setActions: env.sandbox.stub()};
       element = document.createElement('div');
-      window.sandbox
+      env.sandbox
         .stub(Services, 'actionServiceForDoc')
         .withArgs(element)
         .returns(actionService);
@@ -541,7 +541,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       const target = document.createElement('div');
       target.setAttribute('on', 'event2:node2.hide');
       // FIE should have its own ActionService.
-      const fieActionService = {setActions: window.sandbox.stub()};
+      const fieActionService = {setActions: env.sandbox.stub()};
       Services.actionServiceForDoc.withArgs(target).returns(fieActionService);
       // Provide `target` as the service context to simulate FIE case.
       addAction(target, target, 'event1', 'node1.foo()');

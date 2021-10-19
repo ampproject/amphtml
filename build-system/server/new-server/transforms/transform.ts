@@ -18,7 +18,7 @@ import fs from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
 import transformModules from './modules/modules-transform';
-import transformScriptPaths from './scripts/scripts-transform';
+import transformCdnSrcs from './cdn/cdn-transform';
 import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
@@ -35,7 +35,7 @@ const defaultTransformConfig = {
 };
 
 const transforms = [
-  transformScriptPaths(defaultTransformConfig),
+  transformCdnSrcs(defaultTransformConfig),
 ];
 
 if (ESM) {

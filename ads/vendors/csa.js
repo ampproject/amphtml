@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {devAssert} from '../../src/log';
-import {getStyle, setStyle, setStyles} from '../../src/style';
-import {loadScript, validateData} from '../../3p/3p';
-import {tryParseJson} from '../../src/json.js';
+import {getStyle, setStyle, setStyles} from '#core/dom/style';
+import {loadScript, validateData} from '#3p/3p';
+import {tryParseJson} from '#core/types/object/json';
 
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;

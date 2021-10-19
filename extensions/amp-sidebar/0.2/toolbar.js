@@ -16,7 +16,7 @@
 
 import {dev, user, userAssert} from '../../../src/log';
 import {handleAutoscroll} from './autoscroll';
-import {toggle} from '../../../src/style';
+import {toggle} from '#core/dom/style';
 
 /**
  * Class representing toolbar behavior in sidebar
@@ -60,8 +60,9 @@ export class Toolbar {
    */
   onLayoutChange() {
     // Get if we match the current toolbar media
-    const matchesMedia = this.ampdoc_.win.matchMedia(this.toolbarMedia_)
-      .matches;
+    const matchesMedia = this.ampdoc_.win.matchMedia(
+      this.toolbarMedia_
+    ).matches;
 
     // Remove and add the toolbar dynamically
     if (matchesMedia) {

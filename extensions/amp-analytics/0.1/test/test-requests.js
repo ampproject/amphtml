@@ -19,9 +19,10 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import * as log from '../../../../src/log';
 import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {installLinkerReaderService} from '../linker-reader';
-import {macroTask} from '../../../../testing/yield';
+import {installSessionServiceForTesting} from '../session-manager';
+import {macroTask} from '#testing/yield';
 
 describes.realWin('Requests', {amp: 1}, (env) => {
   let ampdoc;
@@ -34,6 +35,7 @@ describes.realWin('Requests', {amp: 1}, (env) => {
     ampdoc = env.ampdoc;
     installLinkerReaderService(env.win);
     installVariableServiceForTesting(ampdoc);
+    installSessionServiceForTesting(ampdoc);
     ampdoc.defaultView = env.win;
     clock = fakeTimers.withGlobal(ampdoc.win).install();
     preconnectSpy = env.sandbox.spy();

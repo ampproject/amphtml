@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import mustache from '../../third_party/mustache/mustache';
+import mustache from '#third_party/mustache/mustache';
 
-describe('Mustache', () => {
+describes.sandboxed('Mustache', {}, () => {
   let savedSanitizer;
 
   beforeEach(() => {

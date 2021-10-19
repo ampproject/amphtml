@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '#service';
+import {removeElement} from '#core/dom';
+import {setStyles} from '#core/dom/style';
+
 /**
  * @typedef {{
  *  fontStyle: string,
@@ -30,10 +34,6 @@ const DEFAULT_FONTS_ = ['sans-serif', 'serif'];
 const TEST_STRING_ = 'MAxmTYklsjo190QW';
 
 const TOLERANCE_ = 2;
-
-import {Services} from '../../../src/services';
-import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
 
 export class FontLoader {
   /**
@@ -187,9 +187,8 @@ export class FontLoader {
    * @private
    */
   createFontComparators_() {
-    const containerElement = (this.container_ = this.document_.createElement(
-      'div'
-    ));
+    const containerElement = (this.container_ =
+      this.document_.createElement('div'));
     setStyles(containerElement, {
       // Use larger font-size to better detect font load.
       fontSize: '40px',

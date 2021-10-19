@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      pattern: 'package.json',
+      pattern: '{package.json,package-lock.json}',
       owners: [
         {name: 'ampproject/wg-infra', requestReviews: false},
         {name: 'ampproject/wg-performance', requestReviews: false},

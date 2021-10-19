@@ -16,7 +16,7 @@
 
 import {Attributes, getAttributesFromConfigObj} from '../attributes';
 
-describe('attributes', () => {
+describes.sandboxed('attributes', {}, () => {
   it('should ignore attributes field if an array', () => {
     const configObj = {
       attributes: ['val1', 'val2'],

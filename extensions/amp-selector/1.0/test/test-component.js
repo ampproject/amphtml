@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {Keys} from '../../../../src/core/constants/key-codes';
+import * as Preact from '#preact';
+import {Keys} from '#core/constants/key-codes';
 import {Option, Selector} from '../component';
 import {mount} from 'enzyme';
 
@@ -373,7 +373,7 @@ describes.sandboxed('Selector preact component', {}, () => {
 
     describe('single-expand accordion', () => {
       beforeEach(() => {
-        ref = Preact.useRef();
+        ref = Preact.createRef();
         wrapper = mount(
           <Selector ref={ref} defaultValue={['a']}>
             <Option key={1} option="a" index={1}>

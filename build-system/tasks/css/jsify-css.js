@@ -26,7 +26,7 @@ const {
   md5,
 } = require('../../common/transform-cache');
 const {log} = require('../../common/logging');
-const {red} = require('kleur/colors');
+const {red} = require('../../common/colors');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const browsersList = {

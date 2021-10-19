@@ -20,15 +20,15 @@ import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, parseQueryString} from '../../../src/url';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
+import {assertHttpsUrl} from '../../../src/url';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict, getValueForExpr} from '#core/types/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
-import {getValueForExpr} from '../../../src/json';
-import {isExperimentOn} from '../../../src/experiments';
-import {isObject} from '../../../src/core/types';
+import {isEnumValue, isObject} from '#core/types';
+import {isExperimentOn} from '#experiments';
+import {parseQueryString} from '#core/types/string/url';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
@@ -209,9 +209,11 @@ export class AccessSource {
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
-    let type = configJson['type']
-      ? user().assertEnumValue(AccessType, configJson['type'], 'access type')
-      : null;
+    let {'type': type} = configJson;
+    userAssert(
+      !type || isEnumValue(AccessType, type),
+      `Unknown access type: ${type}`
+    );
     if (!type) {
       if (configJson['vendor']) {
         type = AccessType.VENDOR;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
@@ -23,13 +23,12 @@ import {
 } from '../../../amp-accordion/1.0/component';
 import {Youtube} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-import {useRef, useState} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
+import {useRef, useState} from '#preact';
 
 export default {
   title: 'YouTube',
   component: Youtube,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const VIDEOID = 'IAvf-rkzNck';
@@ -59,7 +58,7 @@ export const _default = () => {
  * @param {*} props
  * @return {*}
  */
-function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
+function WithStateTable({autoplay, credentials, loop, params, style, videoid}) {
   const ref = useRef(null);
 
   const [stateTable, setStateTable] = useState(null);

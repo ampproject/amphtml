@@ -15,7 +15,7 @@
  */
 
 import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 import {listenOncePromise} from '../../../../src/event-helper';
 import AmpViqeoPlayer from '../amp-viqeo-player';
 
@@ -46,7 +46,7 @@ describes.realWin(
 
     it.skip('test-get-data', () => {
       return getViqeo().then((p) => {
-        const {viqeoElement, entry, viqeo} = p;
+        const {entry, viqeo, viqeoElement} = p;
         expect(entry.video.element).to.equal(viqeoElement);
         expect(entry.video instanceof AmpViqeoPlayer).to.equal(true);
         expect(entry.video).to.equal(viqeo);
@@ -116,13 +116,14 @@ describes.realWin(
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
         return getViqeo().then((p) => {
-          const img = p.viqeoElement.querySelector('amp-img');
+          const img = p.viqeoElement.querySelector('img');
           expect(img).to.not.be.null;
+          expect(img.getAttribute('loading')).to.equal('lazy');
           expect(img.getAttribute('src')).to.equal(
             'https://cdn.viqeo.tv/preview/922d04f30b66f1a32eb2.jpg'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
-          expect(img.hasAttribute('placeholder')).to.be.true;
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img).to.have.attribute('placeholder');
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
           expect(img.getAttribute('alt')).to.equal('Loading video');
         });
@@ -176,7 +177,7 @@ describes.realWin(
     });
 
     function getViqeo(params) {
-      const {id, viqeoProfileId, viqeoId, width, height, opt_params} = {
+      const {height, id, opt_params, viqeoId, viqeoProfileId, width} = {
         id: 'myVideo',
         viqeoProfileId: 184,
         viqeoId: '922d04f30b66f1a32eb2',

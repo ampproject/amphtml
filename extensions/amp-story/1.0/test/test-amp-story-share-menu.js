@@ -19,12 +19,12 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
-import {getStyle} from '../../../../src/style';
-import {registerServiceBuilder} from '../../../../src/service';
+import {getStyle} from '#core/dom/style';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let isSystemShareSupported;

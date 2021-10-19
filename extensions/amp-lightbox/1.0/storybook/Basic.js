@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {Lightbox} from '../component';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
-import {useRef} from '../../../../src/preact';
-import {withA11y} from '@storybook/addon-a11y';
+import {useRef} from '#preact';
 
 export default {
   title: 'Lightbox',
   component: Lightbox,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**

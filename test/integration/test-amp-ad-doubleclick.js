@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, poll, pollForLayout} from '../../testing/iframe';
+import {createFixtureIframe, poll, pollForLayout} from '#testing/iframe';
 
-describe
+describes.sandboxed
   .configure()
   .enableIe()
-  .run('Rendering of one ad', () => {
+  .run('Rendering of one ad', {}, () => {
     let fixture;
     let beforeHref;
 

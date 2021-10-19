@@ -25,6 +25,7 @@ const {watch} = require('chokidar');
 
 /**
  * Entry point for 'amp css'
+ * @return {Promise<void>}
  */
 async function css() {
   await compileCss();
@@ -74,10 +75,17 @@ const cssEntryPoints = [
     outCss: 'amp-story-player-iframe-v0.css',
     append: false,
   },
+  {
+    path: 'amp-ima-video-iframe.css',
+    outJs: 'amp-ima-video-iframe.css.js',
+    outCss: 'amp-ima-video-iframe-v0.css',
+    append: false,
+  },
 ];
 
 /**
  * Copies the css from the build folder to the dist folder
+ * @return {Promise<void>}
  */
 async function copyCss() {
   const startTime = Date.now();
@@ -101,6 +109,7 @@ async function copyCss() {
  * @param {string} jsFilename
  * @param {string} cssFilename
  * @param {boolean} append append CSS to existing file
+ * @return {Promise<void>}
  */
 async function writeCss(css, jsFilename, cssFilename, append) {
   await fs.ensureDir('build/css');
@@ -118,6 +127,7 @@ async function writeCss(css, jsFilename, cssFilename, append) {
  * @param {string} outJs
  * @param {string} outCss
  * @param {boolean} append
+ * @return {Promise<void>}
  */
 async function writeCssEntryPoint(path, outJs, outCss, append) {
   const css = await jsifyCssAsync(`css/${path}`);
@@ -128,7 +138,7 @@ async function writeCssEntryPoint(path, outJs, outCss, append) {
  * Compile all the css and drop in the build folder
  *
  * @param {Object=} options
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function compileCss(options = {}) {
   if (options.watch) {
@@ -140,7 +150,7 @@ async function compileCss(options = {}) {
 
   const startTime = Date.now();
   // Must be in order because some iterations write while others append.
-  for (const {path, outJs, outCss, append} of cssEntryPoints) {
+  for (const {append, outCss, outJs, path} of cssEntryPoints) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }
   await buildExtensions({compileOnlyCss: true});
@@ -154,4 +164,4 @@ module.exports = {
   cssEntryPoints,
 };
 
-css.description = 'Recompile css to build directory';
+css.description = 'Compile all css files to the build directory';

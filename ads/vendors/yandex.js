@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {loadScript, validateData} from '../../3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 const n = 'yandexContextAsyncCallbacks';
 const renderTo = 'yandex_rtb';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData, writeScript} from '../../3p/3p';
+import {loadScript, validateData, writeScript} from '#3p/3p';
 
 /* global adingoFluct: false */
 /* global fluctAdScript: false */

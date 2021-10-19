@@ -286,8 +286,8 @@ document is served directly from their origin while retaining dynamic
 configuration when served from a cache.
 
 Caches that wish to pre-render `amp-geo` should
-[open an issue](https://github.com/ampproject/amphtml/issues/new) requesting to
-be removed from the pre-render override.
+[open an issue](https://github.com/ampproject/amphtml/issues/new/choose)
+requesting to be removed from the pre-render override.
 
 ### Self Hosting
 
@@ -315,7 +315,7 @@ security reasons, to prevent sharing of geo-spoofing urls, this feature is only
 available to users who have enabled the
 [Experimental Channel](https://amp.dev/documentation/guides-and-tutorials/learn/experimental)
 or who are testing locally (i.e., `amp-geo.js` is served in development mode via
-[`amp serve`](https://github.com/ampproject/amphtml/blob/main/contributing/DEVELOPING.md)).
+[`amp serve`](https://github.com/ampproject/amphtml/blob/main/docs/developing.md)).
 
 [tip type="note"]
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {resolve, dirname, relative, join} = require('path').posix;
+const {dirname, join, relative, resolve} = require('path').posix;
 
 /**
  * Returns a new Map<string, {detected: boolean, removeable: Array<string>}
@@ -62,7 +62,7 @@ module.exports = function () {
       },
       ImportDeclaration({node}, state) {
         // Only remove the CallExpressions if this module imported the correct method ('dev') from '/log'.
-        const {specifiers, source} = node;
+        const {source, specifiers} = node;
         if (!source.value.endsWith('/log')) {
           return;
         }

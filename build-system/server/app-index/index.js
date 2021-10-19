@@ -15,15 +15,10 @@
  */
 'use strict';
 
-const api = require('./api/api');
 const basepathMappings = require('./basepath-mappings');
 const fs = require('fs');
 const path = require('path');
-const {
-  getListing,
-  isMainPageFromUrl,
-  formatBasepath,
-} = require('./util/listing');
+const {formatBasepath, getListing} = require('./util/listing');
 const {getServeMode} = require('../app-utils');
 const {join} = require('path');
 const {renderTemplate} = require('./template');
@@ -52,8 +47,7 @@ async function serveIndex({url}, res, next) {
 
   const renderedHtml = renderTemplate({
     fileSet,
-    selectModePrefix: '/',
-    isMainPage: isMainPageFromUrl(url),
+    htmlEnvelopePrefix: '/',
     basepath: formatBasepath(mappedPath),
     serveMode: getServeMode(),
     css,
@@ -68,8 +62,6 @@ async function serveIndex({url}, res, next) {
  * @param {*} app require('express')
  */
 function installExpressMiddleware(app) {
-  api.installExpressMiddleware(app);
-
   app.get(['/', '/*'], serveIndex);
 }
 

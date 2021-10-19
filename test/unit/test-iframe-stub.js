@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import {
-  createIframeWithMessageStub,
-  expectPostMessage,
-} from '../../testing/iframe';
+import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('test-iframe-createIframeWithMessageStub', () => {
+  .run('test-iframe-createIframeWithMessageStub', {}, () => {
     const data1 = {
       foo: 'bar',
       test: true,

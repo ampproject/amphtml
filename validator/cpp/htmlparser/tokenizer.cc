@@ -16,10 +16,16 @@
 
 #include "tokenizer.h"
 
+#include "absl/flags/flag.h"
 #include "atom.h"
 #include "atomutil.h"
 #include "defer.h"
 #include "strings.h"
+
+ABSL_FLAG(std::size_t, htmlparser_max_attributes_per_node,
+          1000,
+          "Protects out of memory errors by dropping insanely large amounts "
+          "of attributes per node.");
 
 namespace htmlparser {
 
@@ -644,12 +650,16 @@ void Tokenizer::ReadTag(bool save_attr, bool template_mode) {
     // Save pending_attribute if save_attr and that attribute has a non-empty
     // key.
     if (save_attr &&
+        // Skip excessive attributes.
+        attributes_.size() < ::absl::GetFlag(
+            FLAGS_htmlparser_max_attributes_per_node) &&
         std::get<0>(pending_attribute_).start !=
         std::get<0>(pending_attribute_).end) {
       attributes_.push_back(pending_attribute_);
     }
     SkipWhiteSpace();
   }
+  position_end_ = raw_.end;
 }
 
 void Tokenizer::ReadTagName() {
@@ -834,6 +844,7 @@ void Tokenizer::ReadTagAttributeValue() {
 }
 
 TokenType Tokenizer::Next(bool template_mode) {
+  position_ = raw_.end;
   raw_.start = raw_.end;
   data_.start = raw_.end;
   data_.end = raw_.end;
@@ -860,6 +871,7 @@ TokenType Tokenizer::Next(bool template_mode) {
     if (data_.end > data_.start) {
       token_type_ = TokenType::TEXT_TOKEN;
       convert_null_ = true;
+      position_end_ = data_.end;
       return token_type_;
     }
   }
@@ -907,6 +919,7 @@ TokenType Tokenizer::Next(bool template_mode) {
       // We know there is no \n so no line adjustment needed.
       current_line_col_.second -= 2;
       token_type_ = TokenType::TEXT_TOKEN;
+      position_end_ = data_.end;
       return token_type_;
     }
 
@@ -1035,7 +1048,7 @@ std::optional<std::tuple<Attribute, bool>> Tokenizer::TagAttr() {
             {.name_space = "",
              .key = std::move(key),
              .value = std::move(val),
-             .position_in_html_src = std::get<LineCol>(attr)},
+             .line_col_in_html_src = std::get<LineCol>(attr)},
             n_attributes_returned_ < attributes_.size());
       }
       default:
@@ -1066,6 +1079,7 @@ Token Tokenizer::token() {
         }
       }
       token_line_col_ = {line_number, column_number};
+      position_end_ = data_.end;
       break;
     }
     case TokenType::COMMENT_TOKEN:
@@ -1074,6 +1088,7 @@ Token Tokenizer::token() {
       t.is_manufactured = is_token_manufactured_;
       token_line_col_ = {current_line_col_.first,
                          current_line_col_.second - t.data.size()};
+      position_end_ = data_.end;
       break;
     case TokenType::START_TAG_TOKEN:
     case TokenType::SELF_CLOSING_TAG_TOKEN:
@@ -1107,7 +1122,8 @@ Token Tokenizer::token() {
       break;
   }
 
-  t.position_in_html_src = token_line_col_;
+  t.line_col_in_html_src = token_line_col_;
+  t.offsets_in_html_src = std::make_pair(position_, position_end_);
   return t;
 }
 

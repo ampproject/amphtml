@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../src/preact';
-import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Loading} from '../../../src/core/loading-instructions';
-import {ReadyState} from '../../../src/core/constants/ready-state';
-import {forwardRef} from '../../../src/preact/compat';
-import {useAmpContext, useLoading} from '../../../src/preact/context';
+import * as Preact from '#preact';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {Loading} from '#core/loading-instructions';
+import {ReadyState} from '#core/constants/ready-state';
+import {forwardRef} from '#preact/compat';
+import {useAmpContext, useLoading} from '#preact/context';
 import {
   useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
-} from '../../../src/preact';
+} from '#preact';
 
 const DEFAULT_MATCHES_MESSAGING_ORIGIN = () => false;
 const ABOUT_BLANK = 'about:blank';
@@ -42,7 +42,7 @@ const canResetSrc = (src) => src && src != ABOUT_BLANK && !src.includes('#');
 
 /**
  * @param {!IframeEmbedDef.Props} props
- * @param {{current: (!IframeEmbedDef.Api|null)}} ref
+ * @param {{current: ?IframeEmbedDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
 export function IframeEmbedWithRef(
@@ -92,6 +92,9 @@ export function IframeEmbedWithRef(
       // Standard Bento
       get readyState() {
         return loadedRef.current ? ReadyState.COMPLETE : ReadyState.LOADING;
+      },
+      get node() {
+        return iframeRef.current;
       },
     }),
     []

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../src/core/types/object';
-import {validateData, writeScript} from '../../3p/3p';
+import {hasOwn} from '#core/types/object';
+import {validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global

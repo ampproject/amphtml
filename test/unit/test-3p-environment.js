@@ -15,12 +15,12 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
+import {Services} from '#service';
+import {createIframePromise} from '#testing/iframe';
 import {loadPromise} from '../../src/event-helper';
-import {manageWin, setInViewportForTesting} from '../../3p/environment';
+import {manageWin, setInViewportForTesting} from '#3p/environment';
 
-describe('3p environment', () => {
+describes.sandboxed('3p environment', {}, () => {
   let testWin;
   let iframeCount;
   const timer = Services.timerFor(window);

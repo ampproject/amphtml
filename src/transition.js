@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import * as st from './style';
-import {assertNotDisplay, setStyle} from './style';
-import {getCurve} from './curve';
+import * as st from './core/dom/style';
+import {assertNotDisplay} from './assert-display';
+import {getCurve} from './core/data-structures/curve';
+import {setStyle} from './core/dom/style';
 
 export const NOOP = function (unusedTime) {
   return null;
@@ -62,12 +63,12 @@ export function concat(transitions, opt_delimiter = ' ') {
  * Returns the specified transition with the time curved via specified curve
  * function.
  * @param {!TransitionDef<RESULT>} transition
- * @param {!./curve.CurveDef|string} curve
+ * @param {!./core/data-structures/curve.CurveDef|string} curve
  * @return {!TransitionDef<RESULT>}
  * @template RESULT
  */
 export function withCurve(transition, curve) {
-  /** @const {?./curve.CurveDef} */
+  /** @const {?./core/data-structures/curve.CurveDef} */
   const curveFn = getCurve(curve);
   return (time, complete) => {
     return transition(complete ? 1 : curveFn(time), complete);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {LoaderService} from '../amp-loader';
-import {getStyle} from '../../../../src/style';
+import {getStyle} from '#core/dom/style';
 
 describes.fakeWin('amp-loader', {}, () => {
   let loaderService;

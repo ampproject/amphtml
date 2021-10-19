@@ -22,14 +22,19 @@
  * the new values that come from the browser.
  *
  * @template TYPE
- * @extends {Promise<TYPE>}
+ * @extends {Promise<?TYPE>}
  */
-class ControllerPromise {
+class ControllerPromise extends Promise {
   /**
-   * @param {!Promise<TYPE>|function(function(?TYPE):void, function(*):void):void} executorOrPromise
+   * @param {Promise<TYPE|null>|function(function(?TYPE):void, function(*):void):void} executorOrPromise
    * @param {undefined|function(TYPE,function(TYPE): ?TYPE): Promise<TYPE>} opt_waitForValue
    */
   constructor(executorOrPromise, opt_waitForValue) {
+    if (executorOrPromise instanceof Promise) {
+      super(executorOrPromise.then);
+    } else {
+      super(executorOrPromise);
+    }
     this.promise_ =
       typeof executorOrPromise == 'function'
         ? new Promise(executorOrPromise)

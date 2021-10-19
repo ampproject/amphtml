@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -234,9 +234,10 @@ export class RefreshManager {
     const thresholdString = String(threshold);
     return (
       observers[thresholdString] ||
-      (observers[
-        thresholdString
-      ] = new this.win_.IntersectionObserver(this.ioCallback_, {threshold}))
+      (observers[thresholdString] = new this.win_.IntersectionObserver(
+        this.ioCallback_,
+        {threshold}
+      ))
     );
   }
 

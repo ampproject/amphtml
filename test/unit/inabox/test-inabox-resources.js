@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Deferred} from '../../../src/core/data-structures/promise';
-import {InaboxResources} from '../../../src/inabox/inabox-resources';
-import {ResourceState} from '../../../src/service/resource';
-import {macroTask} from '../../../testing/yield';
-import {toggleExperiment} from '../../../src/experiments';
+import {Deferred} from '#core/data-structures/promise';
+import {InaboxResources} from '#inabox/inabox-resources';
+import {ResourceState} from '#service/resource';
+import {macroTask} from '#testing/yield';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
@@ -149,10 +149,10 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     expect(resource2.unload).to.be.calledOnce;
   });
 
-  it('should ignore V1 resources for layout pass', async () => {
+  it('should ignore R1 resources for layout pass', async () => {
     const element1 = env.createAmpElement('amp-foo');
     const element2 = env.createAmpElement('amp-bar');
-    env.sandbox.stub(element2, 'V1').returns(true);
+    env.sandbox.stub(element2, 'R1').returns(true);
 
     win.document.body.appendChild(element1);
     win.document.body.appendChild(element2);

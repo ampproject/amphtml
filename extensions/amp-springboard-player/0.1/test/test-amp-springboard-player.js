@@ -171,14 +171,14 @@ describes.realWin(
           'data-domain': 'test.com',
           'data-items': '10',
         }).then((kp) => {
-          const img = kp.querySelector('amp-img');
+          const img = kp.querySelector('img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
             'https://www.springboardplatform.com/storage/test.com' +
               '/snapshots/1578473.jpg'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
-          expect(img.hasAttribute('placeholder')).to.be.true;
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img).to.have.attribute('placeholder');
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
           expect(img.getAttribute('alt')).to.equal('Loading video');
         });
@@ -193,14 +193,14 @@ describes.realWin(
           'data-items': '10',
           'aria-label': 'sporty video',
         }).then((kp) => {
-          const img = kp.querySelector('amp-img');
+          const img = kp.querySelector('img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
             'https://www.springboardplatform.com/storage/test.com' +
               '/snapshots/1578473.jpg'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
-          expect(img.hasAttribute('placeholder')).to.be.true;
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img).to.have.attribute('placeholder');
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
           expect(img.getAttribute('aria-label')).to.equal('sporty video');
           expect(img.getAttribute('alt')).to.equal(
@@ -218,14 +218,14 @@ describes.realWin(
           'data-domain': 'test.com',
           'data-items': '10',
         }).then((kp) => {
-          const img = kp.querySelector('amp-img');
+          const img = kp.querySelector('img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
             'https://www.springboardplatform.com/storage/default/' +
               'snapshots/default_snapshot.png'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
-          expect(img.hasAttribute('placeholder')).to.be.true;
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img).to.have.attribute('placeholder');
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
         });
       });

@@ -44,7 +44,7 @@ arrow buttons.
 ### Media Queries
 
 The attributes for `<amp-base-carousel>` can be configured to use different
-options based on a [media query](./../../../spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
 ### Configuration Options
 

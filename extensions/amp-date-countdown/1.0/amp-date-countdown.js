@@ -15,11 +15,11 @@
  */
 
 import {BaseElement} from './base-element';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {dev, userAssert} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '#core/types/object';
+import {isExperimentOn} from '#experiments';
+import {isLayoutSizeDefined} from '#core/dom/layout';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

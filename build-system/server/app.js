@@ -23,7 +23,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
-const devDashboard = require('./app-index/index');
+const devDashboard = require('./app-index');
 const express = require('express');
 const fetch = require('node-fetch');
 const formidable = require('formidable');
@@ -36,6 +36,12 @@ const autocompleteEmailData = require('./autocomplete-test-data');
 const header = require('connect-header');
 const runVideoTestBench = require('./app-video-testbench');
 const {
+  getServeMode,
+  isRtvMode,
+  replaceUrls,
+  toInaboxDocument,
+} = require('./app-utils');
+const {
   getVariableRequest,
   runVariableSubstitution,
   saveVariableRequest,
@@ -45,12 +51,10 @@ const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
 } = require('./recaptcha-router');
-const {getServeMode} = require('./app-utils');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
-const {red} = require('kleur/colors');
+const {red} = require('../common/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls, isRtvMode} = require('./app-utils');
 
 /**
  * Respond with content received from a URL when SERVE_MODE is "cdn".
@@ -518,6 +522,7 @@ app.use('/form/verify-search-json/post', (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  * @param {string} mode
+ * @return {Promise<void>}
  */
 async function proxyToAmpProxy(req, res, mode) {
   const url =
@@ -558,12 +563,13 @@ async function proxyToAmpProxy(req, res, mode) {
           ' </script>'
       );
   }
-  body = replaceUrls(mode, body, urlPrefix, inabox);
   if (inabox) {
+    body = toInaboxDocument(body);
     // Allow CORS requests for A4A.
     const origin = req.headers.origin || urlPrefix;
     cors.enableCors(req, res, origin);
   }
+  body = replaceUrls(mode, body, urlPrefix);
   res.status(urlResponse.status).send(body);
 }
 
@@ -1044,12 +1050,15 @@ app.get(
           file = file.replace(/-latest.js/g, `-${componentVersion}.js`);
         }
 
-        if (inabox && req.headers.origin) {
+        if (inabox) {
+          file = toInaboxDocument(file);
           // Allow CORS requests for A4A.
-          cors.enableCors(req, res, req.headers.origin);
-        } else {
-          file = replaceUrls(mode, file, '', inabox);
+          if (req.headers.origin) {
+            cors.enableCors(req, res, req.headers.origin);
+          }
         }
+
+        file = replaceUrls(mode, file);
 
         const ampExperimentsOptIn = req.query['exp'];
         if (ampExperimentsOptIn) {
@@ -1560,7 +1569,7 @@ function generateInfo(filePath) {
 
 /**
  * @param {string} encryptedDocumentKey
- * @return {string|null}
+ * @return {?string}
  */
 function decryptDocumentKey(encryptedDocumentKey) {
   if (!encryptedDocumentKey) {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {endsWith} from '../../../src/core/types/string';
-import {measurePageLayoutBox} from '../../../src/utils/page-layout-box';
+import {Services} from '#service';
+import {endsWith} from '#core/types/string';
+import {measurePageLayoutBox} from './measure-page-layout-box';
 import {user} from '../../../src/log';
 
 /** @const */

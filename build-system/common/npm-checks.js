@@ -23,7 +23,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, red} = require('kleur/colors');
+const {cyan, red} = require('./colors');
 const {exec} = require('./exec');
 const {gitDiffColor, gitDiffNameOnly} = require('./git');
 const {log, logWithoutTimestamp} = require('./logging');

@@ -15,7 +15,7 @@
  */
 
 // Test `fetch-mock` integration in describes.
-describe('fetch-mock', () => {
+describes.sandboxed('fetch-mock', {}, () => {
   /** @param {!Object} env */
   function runTests(env) {
     it('should mock fetches', () => {
@@ -33,23 +33,35 @@ describe('fetch-mock', () => {
     });
   }
 
-  describes.realWin(
-    'on realWin',
-    {
-      mockFetch: true,
-    },
-    (env) => {
-      runTests(env);
-    }
-  );
+  describes.realWin('on realWin', {mockFetch: true}, (env) => {
+    runTests(env);
+  });
 
-  describes.fakeWin(
-    'on fakeWin',
-    {
-      mockFetch: true,
-    },
-    (env) => {
-      runTests(env);
-    }
-  );
+  describes.fakeWin('on fakeWin', {mockFetch: true}, (env) => {
+    runTests(env);
+  });
+});
+
+function runConfiguredDescribe() {
+  describe.configure().run('configure describe', () => {
+    it.configure().run('configure it', () => {
+      expect(2 + 2).to.equal(4);
+    });
+  });
+}
+
+describes.sandboxed.configure().run('configure sandboxed', {}, () => {
+  runConfiguredDescribe();
+});
+
+describes.fakeWin.configure().run('configure fakeWin', {}, () => {
+  runConfiguredDescribe();
+});
+
+describes.realWin.configure().run('configure realWin', {}, () => {
+  runConfiguredDescribe();
+});
+
+describes.integration.configure().run('configure integration', {}, () => {
+  runConfiguredDescribe();
 });

@@ -30,8 +30,9 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {addAttributesToElement, matches, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
+import {addAttributesToElement, removeElement} from '#core/dom';
+import {dict} from '#core/types/object';
+import {matches} from '#core/dom/query';
 import {user} from '../../../src/log';
 
 /**

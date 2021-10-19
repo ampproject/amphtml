@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/core/types/object';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-auto-ads';
@@ -87,15 +87,18 @@ export class AnchorAdStrategy {
    * @private
    */
   placeStickyAd_() {
+    const baseAttributes = this.baseAttributes_;
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
-      dict(),
-      this.baseAttributes_,
-      dict({
-        'width': String(viewportWidth),
-        'height': '100',
-      })
-    ));
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        baseAttributes,
+        dict({
+          'width': String(viewportWidth),
+          'height': baseAttributes.height || '100',
+        })
+      )
+    );
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
     const stickyAd = createElementWithAttributes(

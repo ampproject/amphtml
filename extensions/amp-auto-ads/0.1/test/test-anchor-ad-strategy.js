@@ -16,8 +16,8 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import {AnchorAdStrategy} from '../anchor-ad-strategy';
-import {Services} from '../../../../src/services';
-import {waitForChild} from '../../../../src/dom';
+import {Services} from '#service';
+import {waitForChild} from '#core/dom';
 
 describes.realWin(
   'anchor-ad-strategy',
@@ -114,9 +114,8 @@ describes.realWin(
       it('should not insert sticky ad if exists one', () => {
         configObj['optInStatus'].push(2);
 
-        const existingStickyAd = env.win.document.createElement(
-          'amp-sticky-ad'
-        );
+        const existingStickyAd =
+          env.win.document.createElement('amp-sticky-ad');
         env.win.document.body.appendChild(existingStickyAd);
 
         const anchorAdStrategy = new AnchorAdStrategy(

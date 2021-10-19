@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AmpForm, AmpFormService} from '../../amp-form';
 import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
-import {Services} from '../../../../../src/services';
+import {Services} from '#service';
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
-import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplateForDoc} from '../../../../../src/service/template-impl';
-import {stubElementsForDoc} from '../../../../../src/service/custom-element-registry';
+import {poll} from '#testing/iframe';
+import {registerExtendedTemplateForDoc} from '#service/template-impl';
+import {stubElementsForDoc} from '#service/custom-element-registry';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/core/constants/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '../../../src/log';
-import {dict, map} from '../../../src/core/types/object';
+import {dict, map} from '#core/types/object';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
@@ -251,7 +251,7 @@ export class FormDirtiness {
  * @return {boolean}
  */
 function shouldSkipDirtinessCheck(field) {
-  const {tagName, name, hidden} = field;
+  const {hidden, name, tagName} = field;
 
   if (!SUPPORTED_TAG_NAMES[tagName]) {
     return true;

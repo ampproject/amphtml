@@ -19,8 +19,8 @@ import {
   calculateExtensionScriptUrl,
   getExtensionScripts,
   parseExtensionUrl,
-} from '../../src/service/extension-script';
-import {createElementWithAttributes} from '../../src/dom';
+} from '#service/extension-script';
+import {createElementWithAttributes} from '#core/dom';
 import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
 
 describes.sandboxed('Extension Location', {}, () => {

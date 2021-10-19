@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {DateCountdown} from '../component';
 import {boolean, date, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'DateCountdown',
   component: DateCountdown,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 const LOCALE_CONFIGURATIONS = [

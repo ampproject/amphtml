@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
-import {SocialShare} from '../social-share';
+import * as Preact from '#preact';
+import {SocialShare} from '../component';
 import {color, object, select, text, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'SocialShare',
   component: SocialShare,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 export const _default = () => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 
 /**

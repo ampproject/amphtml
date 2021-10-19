@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '../../src/core/types/object';
-import {loadScript, validateData} from '../../3p/3p';
+import {hasOwn} from '#core/types/object';
+import {loadScript, validateData} from '#3p/3p';
 
 /**
  * Make an AdPlugg iframe.

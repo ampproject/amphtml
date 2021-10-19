@@ -40,7 +40,7 @@ single iframe:
     via the `srcdoc` attribute.
 -   An `amp-iframe` must not be in the same origin as the container unless they
     do not allow `allow-same-origin` in the `sandbox` attribute. See the
-    ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md)
+    ["Iframe origin policy"](../../docs/spec/amp-iframe-origin-policy.md)
     doc for further details on allowed origins for iframes.
 
 ```html

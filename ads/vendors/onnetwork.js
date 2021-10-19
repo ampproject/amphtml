@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, validateSrcPrefix, writeScript} from '../../3p/3p';
+import {validateData, validateSrcPrefix, writeScript} from '#3p/3p';
 
 // Valid OnNetwork movie and ad source hosts
 const hosts = {
@@ -31,7 +31,7 @@ const hosts = {
 export function onnetwork(global, data) {
   validateData(data, [['src', 'sid', 'mid']]);
   global.onnetwork = {ampData: data};
-  const {src, sid, mid} = data;
+  const {mid, sid, src} = data;
   let url;
 
   // Custom movie url using "data-src" attribute

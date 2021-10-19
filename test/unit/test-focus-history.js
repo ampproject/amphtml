@@ -15,9 +15,9 @@
  */
 
 import {FocusHistory} from '../../src/focus-history';
-import {installTimerService} from '../../src/service/timer-impl';
+import {installTimerService} from '#service/timer-impl';
 
-describe('FocusHistory', () => {
+describes.sandboxed('FocusHistory', {}, (env) => {
   let clock;
   let testDoc;
   let eventListeners;
@@ -26,7 +26,7 @@ describe('FocusHistory', () => {
   let focusHistory;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     eventListeners = {};
     testDoc = {

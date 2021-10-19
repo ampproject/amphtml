@@ -25,14 +25,11 @@ import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '../../../src/layout';
+import {Layout} from '#core/dom/layout';
 import {getDetail} from '../../../src/event-helper';
-import {
-  iterateCursor,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {toArray} from '../../../src/core/types/array';
+import {iterateCursor} from '#core/dom';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
+import {toArray} from '#core/types/array';
 
 /**
  * The selector of children to update the progress on as the gallery's carousel
@@ -82,9 +79,9 @@ class AmpInlineGallery extends AMP.BaseElement {
     Promise.all([
       scopedQuerySelector(this.element, CAROUSEL_SELECTOR).getImpl(),
       Promise.all(
-        toArray(
-          scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)
-        ).map((el) => el.getImpl())
+        toArray(scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)).map(
+          (el) => el.getImpl()
+        )
       ),
     ]).then((data) => {
       const carouselImpl = data[0];

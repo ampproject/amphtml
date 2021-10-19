@@ -38,7 +38,7 @@ describes.realWin('Synthetic Breakpoints', {amp: false}, (env) => {
       {width: 300, expected: large},
       {width: 400, expected: huge},
       {width: 200000, expected: huge},
-    ].forEach(({width, expected}) => {
+    ].forEach(({expected, width}) => {
       const unexpected = Object.values(breakpoints)
         .filter(({className}) => className != expected)
         .map(({className}) => className);

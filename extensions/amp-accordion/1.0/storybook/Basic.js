@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Preact from '../../../../src/preact';
+import * as Preact from '#preact';
 import {
   Accordion,
   AccordionContent,
@@ -22,12 +22,11 @@ import {
   AccordionSection,
 } from '../component';
 import {boolean, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 
 export default {
   title: 'Accordion',
   component: Accordion,
-  decorators: [withA11y, withKnobs],
+  decorators: [withKnobs],
 };
 
 /**

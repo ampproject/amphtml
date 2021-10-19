@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {VideoSessionManager} from '../../src/service/video-session-manager';
+import {VideoSessionManager} from '#service/video-session-manager';
 
 describes.sandboxed('VideoSessionManager', {}, (env) => {
   let manager;

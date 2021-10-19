@@ -160,7 +160,7 @@ While overflowing content is _visually_ truncated to fit the container, note tha
 ### Media Queries
 
 The attributes for `<amp-fit-text>` can be configured to use different
-options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### `min-font-size`
 

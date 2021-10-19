@@ -15,14 +15,12 @@
  */
 
 import '../amp-carousel';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
-import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust} from '#core/constants/action-constants';
+import {Services} from '#service';
+import {createElementWithAttributes} from '#core/dom';
 import {user} from '../../../../src/log';
+import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
 describes.realWin(
   'test-scrollable-carousel',
   {
@@ -114,9 +112,8 @@ describes.realWin(
         );
 
         // build child slides
-        const carouselSlideEls = container.getElementsByClassName(
-          'amp-carousel-slide'
-        );
+        const carouselSlideEls =
+          container.getElementsByClassName('amp-carousel-slide');
         expect(carouselSlideEls.length).to.equal(7);
         expect(carouselSlideEls[0]).to.have.display('inline-block');
 
@@ -140,9 +137,8 @@ describes.realWin(
       const container = carousel.getElementsByClassName(
         'i-amphtml-scrollable-carousel-container'
       )[0];
-      const carouselSlideEls = container.getElementsByClassName(
-        'amp-carousel-slide'
-      );
+      const carouselSlideEls =
+        container.getElementsByClassName('amp-carousel-slide');
 
       // show control buttons correctly
       expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;

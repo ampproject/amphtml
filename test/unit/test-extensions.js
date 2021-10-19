@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
+import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
-import {Extensions} from '../../src/service/extensions-impl';
-import {Services} from '../../src/services';
+import {Extensions} from '#service/extensions-impl';
+import {Services} from '#service';
 import {dev} from '../../src/log';
-import {dispatchCustomEvent} from '../../src/dom';
-import {getServiceForDoc} from '../../src/service';
+import {dispatchCustomEvent} from '#core/dom';
+import {getServiceForDoc} from '../../src/service-helpers';
 import {
   getTemplateClassForTesting,
   installTemplatesServiceForDoc,
-} from '../../src/service/template-impl';
-import {installTimerService} from '../../src/service/timer-impl';
+} from '#service/template-impl';
+import {installTimerService} from '#service/timer-impl';
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
@@ -397,20 +397,21 @@ describes.sandboxed('Extensions', {}, () => {
       expect(docFactoryStub).to.be.calledOnce.calledWith(ampdoc);
     });
 
-    it('should fail on timeout', () => {
+    it('should log on timeout', async () => {
+      expectAsyncConsoleError(/Waited over/);
+
       timeoutCallback = null;
-      const promise = extensions.waitForExtension('amp-ext', '0.1');
+      let promiseCompleted = false;
+      extensions.waitForExtension('amp-ext', '0.1').then(
+        () => (promiseCompleted = true),
+        () => (promiseCompleted = true)
+      );
+
       expect(timeoutCallback).to.be.a('function');
       timeoutCallback();
+      await new Promise(setTimeout);
 
-      return promise.then(
-        () => {
-          throw new Error('must have been rejected');
-        },
-        (reason) => {
-          expect(reason.message).to.match(/^Render timeout/);
-        }
-      );
+      expect(promiseCompleted).to.be.false; // Still waiting for extension to load.
     });
 
     it('should add element in registration', () => {

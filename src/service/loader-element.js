@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../services';
+import {Services} from '#service';
 
 /**
  * Gets a Promise for the LoaderService, initiating a request to download the

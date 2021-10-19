@@ -16,7 +16,9 @@
 
 import '../amp-date-display';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
+import {expect} from 'chai';
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'amp-date-display',
@@ -81,6 +83,7 @@ describes.realWin(
       expect(data.second).to.equal(6);
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
+      expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
     });
 
     it('provides all variables in local and English (default)', async () => {
@@ -108,6 +111,7 @@ describes.realWin(
       expect(data.second).to.equal(6);
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
+      expect(data.localeString).to.equal('Feb 3, 2001, 4:05 AM');
     });
 
     describe('correctly parses', () => {
@@ -173,6 +177,31 @@ describes.realWin(
           '2001-02-03T04:05:06.007Z'
         );
       });
+
+      it('locale and data-options-time-style', async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-time-style', 'short');
+        await element.buildInternal();
+
+        const data = impl.getDataForTemplate_();
+
+        expect(data.localeString).to.equal('上午4:05');
+      });
+
+      it('locale, data-options-time-style, and data-options-date-style', async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-date-style', 'full');
+        element.setAttribute('data-options-time-style', 'medium');
+        await element.buildInternal();
+
+        const data = impl.getDataForTemplate_();
+
+        expect(data.localeString).to.equal('2001年2月3日 星期六 上午4:05:06');
+      });
     });
 
     it('adds offset seconds', async () => {
@@ -205,6 +234,35 @@ describes.realWin(
       expect(data.monthNameShort).to.equal('úno');
       expect(data.dayName).to.equal('sobota');
       expect(data.dayNameShort).to.equal('so');
+    });
+
+    describe('invalid data-options-* settings', () => {
+      it('throws error when invalid data-options value is provided', async () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-time-style', 'invalid');
+
+        await element.buildInternal();
+        const data = impl.getDataForTemplate_();
+
+        expect(spy.args[0][1]).to.equal('localeOptions');
+        expect(spy.args[0][2]).to.match(/RangeError/);
+        expect(data.localeString).to.be.undefined;
+      });
+
+      it('ignores the attr when invalid data-options-attr is provided', async () => {
+        element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
+        element.setAttribute('display-in', 'UTC');
+        element.setAttribute('locale', 'zh-TW');
+        element.setAttribute('data-options-invalid', 'invalid');
+
+        await element.buildInternal();
+        const data = impl.getDataForTemplate_();
+
+        expect(data.localeString).to.equal('2001/2/3 上午4:05:06');
+      });
     });
   }
 );

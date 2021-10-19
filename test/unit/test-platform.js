@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Platform} from '../../src/service/platform-impl';
+import {Platform} from '#service/platform-impl';
 
-describe('Platform', () => {
+describes.sandboxed('Platform', {}, (env) => {
   let isIos;
   let isAndroid;
   let isChrome;
@@ -71,7 +71,7 @@ describe('Platform', () => {
         standalone: standAloneBoolean,
         userAgent: userAgentString,
       },
-      matchMedia: window.sandbox.stub().returns({matches: true}),
+      matchMedia: env.sandbox.stub().returns({matches: true}),
     });
     expect(platform.isStandalone()).to.equal(isStandalone);
   }

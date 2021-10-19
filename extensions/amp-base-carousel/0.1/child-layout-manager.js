@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 
 /**
  * Used for tracking whether or not an item is near the viewport. This is set
@@ -298,7 +298,7 @@ export class ChildLayoutManager {
    */
   processInViewportChanges_(entries) {
     entries.forEach((entry) => {
-      const {target, isIntersecting} = entry;
+      const {isIntersecting, target} = entry;
       target[IN_VIEWPORT_FLAG] = isIntersecting
         ? ViewportChangeState.ENTER
         : ViewportChangeState.LEAVE;

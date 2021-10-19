@@ -25,27 +25,47 @@ const open = require('open');
 const os = require('os');
 const path = require('path');
 const {
-  buildNewServer,
-  SERVER_TRANSFORM_PATH,
-} = require('../server/typescript-compile');
-const {
+  lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
-  lazyBuild3pVendor,
-  preBuildRuntimeFiles,
   preBuildExtensions,
+  preBuildRuntimeFiles,
 } = require('../server/lazy-build');
+const {
+  SERVER_TRANSFORM_PATH,
+  buildNewServer,
+} = require('../server/typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red} = require('../common/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
 
+/**
+ * @typedef {{
+ *   name: string,
+ *   port: string,
+ *   root: string,
+ *   host: string,
+ *   debug?: boolean,
+ *   silent?: boolean,
+ *   https?: boolean,
+ *   preferHttp1?: boolean,
+ *   liveReload?: boolean,
+ *   middleware?: function[],
+ *   startedcallback?: function,
+ *   serverInit?: function,
+ *   fallback?: string,
+ *   index: boolean | string | string[],
+ * }}
+ */
+let GulpConnectOptionsDef;
+
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
 const HOST = argv.host || '0.0.0.0';
-const PORT = argv.port || 8000;
+const PORT = argv.port || '8000';
 
 // Used for logging.
 let url = null;
@@ -86,6 +106,7 @@ function getMiddleware() {
  * @param {?Object} connectOptions
  * @param {?Object} serverOptions
  * @param {?Object} modeOptions
+ * @return {Promise<void>}
  */
 async function startServer(
   connectOptions = {},
@@ -105,6 +126,8 @@ async function startServer(
     started = resolve;
   });
   setServeMode(modeOptions);
+
+  /** @type {GulpConnectOptionsDef} */
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
@@ -157,6 +180,7 @@ function resetServerFiles() {
 
 /**
  * Stops the currently running server
+ * @return {Promise<void>}
  */
 async function stopServer() {
   if (url) {
@@ -168,6 +192,7 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
+ * @return {Promise<void>}
  */
 async function restartServer() {
   stopServer();
@@ -183,6 +208,7 @@ async function restartServer() {
 
 /**
  * Performs pre-build steps requested via command line args.
+ * @return {Promise<void>}
  */
 async function performPreBuildSteps() {
   await preBuildRuntimeFiles();
@@ -191,6 +217,7 @@ async function performPreBuildSteps() {
 
 /**
  * Entry point of the `amp serve` task.
+ * @return {Promise<void>}
  */
 async function serve() {
   await doServe();
@@ -199,6 +226,7 @@ async function serve() {
 /**
  * Starts a webserver at the repository root to serve built files.
  * @param {boolean=} lazyBuild
+ * @return {Promise<void>}
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
@@ -223,10 +251,10 @@ module.exports = {
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-serve.description = 'Starts a webserver at the project root directory';
+serve.description = 'Start a webserver at the project root directory';
 serve.flags = {
   host: 'Hostname or IP address to bind to (default: localhost)',
-  port: 'Specifies alternative port (default: 8000)',
+  port: 'Specify alternative port (default: 8000)',
   https: 'Use HTTPS server',
   quiet: "Run in quiet mode and don't log HTTP requests",
   cache: 'Make local resources cacheable by the browser',
@@ -236,6 +264,5 @@ serve.flags = {
   cdn: 'Serve current prod JS',
   rtv: 'Serve JS from the RTV provided',
   coverage:
-    'Serve instrumented code to collect coverage info; use ' +
-    '--coverage=live to auto-report coverage on page unload',
+    'Serve instrumented code to collect coverage info (use --coverage=live to auto-report coverage on page unload)',
 };

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import {LayoutPriority} from '../layout';
+import {LayoutPriority} from '#core/dom/layout';
 import {READY_SCAN_SIGNAL} from './resources-interface';
-import {VisibilityState} from '../core/constants/visibility-state';
-import {containsNotSelf, hasNextNodeInDocumentOrder, isIframed} from '../dom';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {removeItem} from '../core/types/array';
+import {VisibilityState} from '#core/constants/visibility-state';
+import {
+  containsNotSelf,
+  hasNextNodeInDocumentOrder,
+  isIframed,
+} from '#core/dom';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../service-helpers';
+import {removeItem} from '#core/types/array';
 
 const ID = 'scheduler';
 
@@ -244,7 +251,7 @@ export class Scheduler {
    */
   observed_(entries) {
     for (let i = 0; i < entries.length; i++) {
-      const {target, isIntersecting: isThisIntersecting} = entries[i];
+      const {isIntersecting: isThisIntersecting, target} = entries[i];
       const ampTarget = /** @type {!AmpElement} */ (target);
 
       const current = this.targets_.get(ampTarget);

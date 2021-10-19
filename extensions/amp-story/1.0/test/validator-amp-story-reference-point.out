@@ -19,7 +19,7 @@ FAIL
 |    Tests for the amp-story tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>STAMP examples</title>
@@ -38,7 +38,6 @@ FAIL
 amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |        </amp-story-grid-layer>
 |      </amp-story-page>
-|      <amp-story-bookend src="./related.json" layout="nodisplay"></amp-story-bookend>
 |    </amp-story>
 |  </body>
 |  </html>
