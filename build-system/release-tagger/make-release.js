@@ -191,11 +191,11 @@ function _createBody(head, base, prs) {
 }
 
 /**
- * Fetch release if exists
+ * Get release if exists
  * @param {string} head
  * @return {!Promise}
  */
-async function fetchRelease(head) {
+async function maybeGetRelease(head) {
   try {
     return await getRelease(head);
   } catch {}
@@ -223,4 +223,4 @@ async function makeRelease(head, base, channel, sha) {
   return await createRelease(head, headRef.sha, body, prerelease);
 }
 
-module.exports = {fetchRelease, makeRelease};
+module.exports = {maybeGetRelease, makeRelease};
