@@ -75,7 +75,7 @@ function createIssue(body, label, title) {
  * @return {Promise<Object>}
  */
 async function createRelease(tag, commit, body, prerelease) {
-  return await octokit.rest.repos.createRelease({
+  const {data} = await octokit.rest.repos.createRelease({
     owner,
     repo,
     name: tag,
@@ -84,6 +84,7 @@ async function createRelease(tag, commit, body, prerelease) {
     body,
     prerelease,
   });
+  return data;
 }
 
 /**
@@ -121,8 +122,8 @@ async function getRelease(tag) {
  * @param {'open' | 'closed'} state
  * @return {Promise<Object>}
  */
-function updateIssue(body, number, title, state = 'open') {
-  return octokit.rest.issues.update({
+async function updateIssue(body, number, title, state = 'open') {
+  const {data} = await octokit.rest.issues.update({
     owner,
     repo,
     'issue_number': number,
@@ -130,6 +131,7 @@ function updateIssue(body, number, title, state = 'open') {
     body,
     state,
   });
+  return data;
 }
 
 /**
@@ -139,12 +141,13 @@ function updateIssue(body, number, title, state = 'open') {
  * @return {Promise<Object>}
  */
 async function updateRelease(id, changes) {
-  return await octokit.rest.repos.updateRelease({
+  const {data} = await octokit.rest.repos.updateRelease({
     owner,
     repo,
     'release_id': id,
     ...changes,
   });
+  return data;
 }
 
 /**
@@ -268,9 +271,36 @@ async function getRef(tag) {
   return data;
 }
 
+/**
+ * Create git tag and ref
+ * @param {string} tag
+ * @param {string} sha
+ * @return {!Promise}
+ */
+async function createTag(tag, sha) {
+  await octokit.rest.git.createTag({
+    owner,
+    repo,
+    tag,
+    message: tag,
+    object: sha,
+    type: 'commit',
+  });
+
+  // once a tag object is created, create a reference
+  const {data} = await octokit.rest.git.createRef({
+    owner,
+    repo,
+    ref: `refs/tags/${tag}`,
+    sha,
+  });
+  return data;
+}
+
 module.exports = {
   createIssue,
   createRelease,
+  createTag,
   getLabel,
   getIssue,
   getPullRequestsBetweenCommits,
