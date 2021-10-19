@@ -15,9 +15,7 @@ const {log} = require('../common/logging');
  * @return {any}
  */
 function getJsonContents(file) {
-  return json5.parse(
-    fs.readFileSync(path.join(__dirname, '../..', file), 'utf8')
-  );
+  return json5.parse(fs.readFileSync(file, 'utf8'));
 }
 
 /**
@@ -64,4 +62,4 @@ module.exports = {
   checkJsonSchemas,
 };
 
-checkJsonSchemas.description = 'Checks JSON files against their JSON Schemas';
+checkJsonSchemas.description = 'Checks JSON files against their required schemas';
