@@ -14,6 +14,7 @@ const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMain} = require('../common/git');
 const {ignoreListFiles} = require('../tasks/check-ignore-lists');
 const {isCiBuild} = require('../common/ci');
+const {shouldTriggerAva} = require('../tasks/ava');
 
 /**
  * Used to prevent the repeated recomputing of build targets during PR jobs.
@@ -115,16 +116,7 @@ const targetMatchers = {
     if (isOwnersFile(file)) {
       return false;
     }
-    return (
-      file == 'build-system/tasks/ava.js' ||
-      file.startsWith('build-system/release-tagger/') ||
-      file.startsWith('build-system/server/') ||
-      file.startsWith('build-system/tasks/css/') ||
-      file.startsWith('build-system/tasks/get-zindex/') ||
-      file.startsWith('build-system/tasks/make-extension/') ||
-      file.startsWith('build-system/tasks/markdown-toc/') ||
-      file.startsWith('build-system/tasks/prepend-global/')
-    );
+    return shouldTriggerAva(file);
   },
   [Targets.BABEL_PLUGIN]: (file) => {
     if (isOwnersFile(file)) {
