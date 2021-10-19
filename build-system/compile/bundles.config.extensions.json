@@ -457,6 +457,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-gpt-ad",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "wrapper": "bento"
+    }
+  },
+  {
     "name": "amp-gwd-animation",
     "version": "0.1",
     "latestVersion": "0.1",
