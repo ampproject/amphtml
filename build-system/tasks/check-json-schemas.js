@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const json5 = require('json5');
-const path = require('path');
 const {cyan, green, red} = require('kleur/colors');
 const {default: addFormats} = require('ajv-formats');
 const {default: Ajv} = require('ajv');
@@ -62,4 +61,5 @@ module.exports = {
   checkJsonSchemas,
 };
 
-checkJsonSchemas.description = 'Checks JSON files against their required schemas';
+checkJsonSchemas.description =
+  'Checks JSON files against their required schemas';
