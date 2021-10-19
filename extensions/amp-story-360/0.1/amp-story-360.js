@@ -665,7 +665,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('layoutCallback');
     const ampImgEl = this.element.querySelector('amp-img');
     // Used to update the video in animate_.
     this.ampVideoEl_ = this.element.querySelector('amp-video');
