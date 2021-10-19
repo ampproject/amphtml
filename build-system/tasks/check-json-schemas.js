@@ -14,7 +14,7 @@ const {log} = require('../common/logging');
  * @param {string} file repo root relative.
  * @return {any}
  */
-function getJsonFile(file) {
+function getJsonContents(file) {
   return json5.parse(
     fs.readFileSync(path.join(__dirname, '../..', file), 'utf8')
   );
@@ -28,17 +28,17 @@ function checkJsonSchemas() {
   const ajv = new Ajv({allErrors: true});
   addFormats(ajv);
 
-  const vscodeSettings = getJsonFile('.vscode/settings.json');
+  const vscodeSettings = getJsonContents('.vscode/settings.json');
   const schemas = vscodeSettings['json.schemas'];
 
   for (const {fileMatch, url: schemaFile} of schemas.values()) {
     log('Using schema', `${cyan(schemaFile)}:`);
-    const schemaJson = getJsonFile(schemaFile);
+    const schemaJson = getJsonContents(schemaFile);
     const validate = ajv.compile(schemaJson);
 
     for (const jsonFile of fileMatch) {
       try {
-        const jsonData = getJsonFile(jsonFile);
+        const jsonData = getJsonContents(jsonFile);
         if (validate(jsonData)) {
           log('⤷', cyan(jsonFile), '-', green('valid'));
         } else {
