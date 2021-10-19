@@ -24,7 +24,6 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp check-ignore-lists');
   timedExecOrDie('amp babel-plugin-tests');
-  timedExecOrDie('amp caches-json');
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
@@ -84,10 +83,6 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
     timedExecOrDie('amp babel-plugin-tests');
-  }
-
-  if (buildTargetsInclude(Targets.CACHES_JSON)) {
-    timedExecOrDie('amp caches-json');
   }
 
   if (buildTargetsInclude(Targets.DOCS)) {

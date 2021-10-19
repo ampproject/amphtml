@@ -23,7 +23,6 @@ createTask('ava');
 createTask('babel-plugin-tests', 'babelPluginTests');
 createTask('build');
 createTask('bundle-size', 'bundleSize');
-createTask('caches-json', 'cachesJson');
 createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList');
 createTask('check-asserts', 'checkAsserts');
 createTask('check-build-system', 'checkBuildSystem');

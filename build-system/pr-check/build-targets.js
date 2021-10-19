@@ -35,7 +35,6 @@ const Targets = {
   AVA: 'AVA',
   BABEL_PLUGIN: 'BABEL_PLUGIN',
   BUILD_SYSTEM: 'BUILD_SYSTEM',
-  CACHES_JSON: 'CACHES_JSON',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
@@ -66,7 +65,6 @@ const Targets = {
  */
 const nonRuntimeTargets = [
   Targets.AVA,
-  Targets.CACHES_JSON,
   Targets.DEV_DASHBOARD,
   Targets.DOCS,
   Targets.E2E_TEST,
@@ -145,15 +143,6 @@ const targetMatchers = {
         (file.endsWith('.js') ||
           file.endsWith('.ts') ||
           file.endsWith('.json')))
-    );
-  },
-  [Targets.CACHES_JSON]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return (
-      file == 'build-system/tasks/caches-json.js' ||
-      file == 'build-system/global-configs/caches.json'
     );
   },
   [Targets.DOCS]: (file) => {
