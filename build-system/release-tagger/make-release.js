@@ -12,6 +12,7 @@ const {
   getRelease,
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
+const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 
 const prereleaseConfig = {
   'beta-percent': true,
