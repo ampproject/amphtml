@@ -1,19 +1,19 @@
-tags: {  # amp-gpt-ad
+tags: {  # amp-gpt
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-gpt-ad"
+    name: "amp-gpt"
     version: "1.0"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-gpt-ad>
+tags: {  # <amp-gpt>
   html_format: AMP
-  tag_name: "GPT-AD"
-  requires_extension: "amp-gpt-ad"
+  tag_name: "GPT"
+  requires_extension: "amp-gpt"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-gpt-ad/"
+  spec_url: "https://amp.dev/documentation/components/amp-gpt/"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL

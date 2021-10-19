@@ -457,11 +457,20 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-gpt-ad",
+    "name": "amp-gpt",
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
-      "wrapper": "bento"
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-gpt",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "bento": true
     }
   },
   {

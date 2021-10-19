@@ -1,12 +1,12 @@
 import {BaseElement} from './base-element';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
-const TAG = 'amp-gpt-ad';
+const TAG = 'amp-gpt';
 
-class AmpGptAd extends BaseElement {
+class AmpGpt extends BaseElement {
   /** @override */
   init() {
     // DO NOT SUBMIT: This is example code only.
@@ -24,13 +24,13 @@ class AmpGptAd extends BaseElement {
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-gpt-ad'),
-      'expected global "bento" or specific "bento-gpt-ad" experiment to be enabled'
+        isExperimentOn(this.win, 'bento-gpt'),
+      'expected global "bento" or specific "bento-gpt" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpGptAd);
+  AMP.registerElement(TAG, AmpGpt);
 });

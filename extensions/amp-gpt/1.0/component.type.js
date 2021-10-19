@@ -1,17 +1,17 @@
 /** @externs */
 
 /** @const */
-var BentoGptAdDef = {};
+var BentoGptDef = {};
 
 /**
  * @typedef {{
  *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
  * }}
  */
-BentoGptAdDef.Props;
+BentoGptDef.Props;
 
 /** @interface */
-BentoGptAdDef.BentoGptAdApi = class {
+BentoGptDef.BentoGptApi = class {
   /** Example: API method to toggle the component */
   exampleToggle() {} // DO NOT SUBMIT
 };

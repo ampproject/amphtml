@@ -15,7 +15,7 @@ teaser:
   * Remove this comment!
 -->
 
-# amp-gpt-ad
+# amp-gpt
 
 <!--
   If the component is relevant for more than one format and operates differently between these
@@ -30,12 +30,12 @@ One to three paragraphs explaining the component usage. List important functiona
 
 Below is an example for websites.
 
-[example preview="inline" playground="true" imports="amp-gpt-ad"]
+[example preview="inline" playground="true" imports="amp-gpt"]
 
 ```html
-<amp-gpt-ad required-attribute>
+<amp-gpt required-attribute>
   I am a hello world inline executable code sample for websites!
-</amp-gpt-ad>
+</amp-gpt>
 ```
 
 [/example][/filter]
@@ -49,12 +49,12 @@ Below is an example for websites.
 
 Below is an example for ads.
 
-[example preview=“inline” playground=“true” imports="amp-gpt-ad"]
+[example preview=“inline” playground=“true” imports="amp-gpt"]
 
 ```html
-<amp-gpt-ad required-attribute>
+<amp-gpt required-attribute>
   I am a hello world inline executable code sample for ads!
-</amp-gpt-ad>
+</amp-gpt>
 ```
 
 [/example][/filter]
@@ -67,7 +67,7 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 #### Example
 
-The example below demonstrates `amp-gpt-ad` component in standalone use.
+The example below demonstrates `amp-gpt` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
@@ -75,13 +75,13 @@ The example below demonstrates `amp-gpt-ad` component in standalone use.
 <head>
 ...
 <script async src="https://cdn.ampproject.org/v0.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-gpt-ad-1.0.css">
-<script async custom-element="amp-gpt-ad" src="https://cdn.ampproject.org/v0/amp-gpt-ad-1.0.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-gpt-1.0.css">
+<script async custom-element="amp-gpt" src="https://cdn.ampproject.org/v0/amp-gpt-1.0.js"></script>
 ...
 </head>
-<amp-gpt-ad>
+<amp-gpt>
   ...
-</amp-gpt-ad>
+</amp-gpt>
 <button id="element-id">
   Event Trigger
 </button>
@@ -96,14 +96,14 @@ The example below demonstrates `amp-gpt-ad` component in standalone use.
 
 Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
-The `amp-gpt-ad` component API is accessible by including the following script tag in your document:
+The `amp-gpt` component API is accessible by including the following script tag in your document:
 
 ```
-await customElements.whenDefined('amp-gpt-ad-component');
-const api = await GptAd.getApi();
+await customElements.whenDefined('amp-gpt-component');
+const api = await Gpt.getApi();
 ```
 
-The `amp-gpt-ad` API allows you to register and respond to the following events:
+The `amp-gpt` API allows you to register and respond to the following events:
 
 **event 1**
 Explanation of event, proper syntax/arguments.
@@ -131,14 +131,14 @@ example
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-gpt-ad-1.0.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-gpt-1.0.css">
 ```
 
 Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
 
 **Container type**
 
-The `amp-gpt-ad` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
+The `amp-gpt` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
 
 ```css
 example
@@ -146,7 +146,7 @@ example
 
 **style/layout guidelines 2 (optional)**
 
-Information on how to layout and style `amp-gpt-ad`.
+Information on how to layout and style `amp-gpt`.
 
 ```
 example
@@ -157,9 +157,9 @@ example
 What to do if they want behavior. How to work around it.
 
 ```html
-<amp-gpt-ad required-attribute>
+<amp-gpt required-attribute>
   Code sample of behavior or behavior workaround.
-</amp-gpt-ad>
+</amp-gpt>
 ```
 
 ### Behavior restrictions
@@ -172,24 +172,24 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
--   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-gpt-ad`.
--   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-gpt-ad`.
+-   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-gpt`.
+-   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-gpt`.
 
 ### `optional-attribute-name` (optional)
 
-Here, I write what `optional-attribute-name` will do to `amp-gpt-ad`.
+Here, I write what `optional-attribute-name` will do to `amp-gpt`.
 
 ## Actions (optional)
 
 ### `action-name`
 
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-gpt-ad` needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-gpt` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
 ### `event-name`
 
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-gpt-ad` needs to be identified with an `id` to work.
+Description of event. Use cases of event-name. Include all the nuances, such as: `amp-gpt` needs to be identified with an `id` to work.
 
 #### Valid AMP
 
@@ -200,18 +200,18 @@ Syntax and argument details for use in fully valid AMP pages.
 ```html
 <head>
   <script
-    custom-element="amp-gpt-ad"
+    custom-element="amp-gpt"
     async
-    src="https://cdn.ampproject.org/v0/amp-gpt-ad-latest.js"
+    src="https://cdn.ampproject.org/v0/amp-gpt-latest.js"
   ></script>
 </head>
 <body>
-  <amp-gpt-ad
+  <amp-gpt
     required-attribute
     on="event-name: my-button.show"
   >
     Hello World!
-  </amp-gpt-ad>
+  </amp-gpt>
   <button id="my-button" hidden>
     Here I am!
   </button>
@@ -242,7 +242,7 @@ Explain analytics.
 
 ## Accessibility (optional)
 
-Accessibility information related to `amp-gpt-ad`.
+Accessibility information related to `amp-gpt`.
 
 ## Version notes (optional)
 
@@ -250,4 +250,4 @@ Information on version differences and migration notes.
 
 ## Validation
 
-See [amp-gpt-ad rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-gpt-ad/validator-amp-gpt-ad.protoascii) in the AMP validator specification.
+See [amp-gpt rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-gpt/validator-amp-gpt.protoascii) in the AMP validator specification.
