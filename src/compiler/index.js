@@ -10,17 +10,22 @@ import {getBuilders} from './builders';
  * @return {import('./types').CompilerResponse}
  */
 function compile(request) {
+  if (!request || (!request.document && !request.nodes)) {
+    throw new Error('Must provide either document or nodes');
+  }
+
   // TODO(samouri): remove the defaults.
-  const document = request.document ?? {
-    root: 0,
-    tree: [{tagid: 92, children: []}],
-    'quirks_mode': false,
-  };
   const versions = request.versions ?? [
     {component: 'amp-layout', version: 'v0'},
   ];
 
-  return {document: compiler.renderAst(document, getBuilders(versions))};
+  const {document, nodes} = request;
+  if (document) {
+    return {
+      document: compiler.renderAstDocument(document, getBuilders(versions)),
+    };
+  }
+  return {nodes: compiler.renderAstNodes(nodes, getBuilders(versions))};
 }
 
 globalThis['compile'] = compile;
