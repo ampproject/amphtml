@@ -25,7 +25,7 @@ async function checkIgnoreLists() {
   for (const file of syncIgnoreFiles) {
     const [above] = splitIgnoreListByHeader(await readFile(file, 'utf8'));
     const tentative = [above, below].join(header);
-    await writeDiffOrFail('check-ignore-list', file, tentative);
+    await writeDiffOrFail('check-ignore-lists', file, tentative);
   }
 }
 
