@@ -94,6 +94,18 @@ class IssueTracker {
 }
 
 /**
+ * Get issue if it exists and whether it's a cherrypick
+ * @param {string} head
+ * @return {!Promise}
+ */
+async function setup(head) {
+  const issue = await getIssue(head);
+  return issue
+    ? {isCherrypick: false, issue}
+    : {isCherrypick: !head.endsWith('000'), issue: undefined};
+}
+
+/**
  * Create or update issue tracker
  * @param {string} head
  * @param {string} base
@@ -106,10 +118,7 @@ async function createOrUpdateTracker(head, base, channel, time) {
     new Date(`${time} UTC`).toLocaleString('en-US', {
       timeZone: 'America/Los_Angeles',
     }) + ' PT';
-  const isCherrypick = Number(head) - Number(base) < 1000;
-  const issue = isCherrypick
-    ? await getIssue(`Release ${base}`)
-    : await getIssue(`Release ${head}`);
+  const {isCherrypick, issue} = await setup(head);
 
   // create new tracker
   if (!issue) {
