@@ -186,7 +186,7 @@ const targetMatchers = {
   [Targets.IGNORE_LIST]: (file) => {
     return (
       ignoreListFiles.includes(file) ||
-      file === 'build-system/tasks/check-ignore-list.js' ||
+      file === 'build-system/tasks/check-ignore-lists.js' ||
       file === 'build-system/tasks/clean.js'
     );
   },
