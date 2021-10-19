@@ -21,8 +21,8 @@ import {VisibilityState} from '#core/constants/visibility-state';
 import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
 import {setImportantStyles} from '#core/dom/style';
+import {waitFor} from '#testing/helpers/service';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;

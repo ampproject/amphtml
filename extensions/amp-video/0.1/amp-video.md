@@ -58,6 +58,12 @@ Alternatively, you can present a click-to-play overlay.
 
 ### autoplay
 
+[filter formats="stories"]
+
+Required for videos inside stories.
+
+[/filter]<!-- formats="stories" -->
+
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
 to be played, [which are outlined in the Video in AMP spec](../../../docs/spec/amp-video-interface.md#autoplay).

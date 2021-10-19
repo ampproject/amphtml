@@ -33,7 +33,6 @@ function makeMethodMessage(method) {
  * @param {MessageEvent} event
  */
 function onMessage({currentTarget, data}) {
-  console.log(data);
   const parsedData = parseQueryString(/** @type {string} */ (data));
   const event = parsedData?.['event'];
   if (event === DailymotionEvents.PAUSE) {

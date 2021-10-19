@@ -69,11 +69,3 @@ describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
     expect(iframe.prop('src')).to.contain('mute=1');
   });
 });
-
-function mockMessage(win, source, data) {
-  const mockEvent = new CustomEvent('message');
-  mockEvent.data = JSON.stringify(data);
-  mockEvent.source = source;
-  win.dispatchEvent(mockEvent);
-  return mockEvent;
-}

@@ -16,7 +16,7 @@ export type BuildDom = (Element) => void;
 /**
  * Contains component versioning data via a map from tagName --> version.
  */
-export type Versions = {[tagName: string]: string};
+export type Versions = Array<{component: string; version: string}>;
 
 export type CompilerRequest = {document: TreeProto; versions: Versions};
 

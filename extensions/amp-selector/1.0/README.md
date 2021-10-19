@@ -275,22 +275,41 @@ The `BentoSelector` API allows you to perform the following actions:
 Closes the selector.
 
 ```js
-ref.selectBy(1); // Select next option in DOM sequence.
-ref.selectBy(-2); // Select the option that is two previous in DOM sequence.
+ref.current.selectBy(1); // Select next option in DOM sequence.
+ref.current.selectBy(-2); // Select the option that is two previous in DOM sequence.
 ```
 
 **toggle(optionValue: string, opt_select: boolean|undefined)**
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
 ```js
-ref.toggle("1"); // Toggle the item with the attribute `option="1"`.
-ref.toggle("2", true); // Select the item with the attribute `option="2"`.
+ref.current.toggle("1"); // Toggle the item with the attribute `option="1"`.
+ref.current.toggle("2", true); // Select the item with the attribute `option="2"`.
 ```
 
 #### Events
 
-**select**
+`BentoSelector` API allows you to register and respond to the following events:
 
-This event is triggered when the user selects an option.
-Multi-selectors and single-selectors fire this when selecting or unselecting options.
-Tapping disabled options does not trigger the `select` event.
+**onChange**
+
+This event is triggered when a selector option is selected or deselected.
+The `onChange` prop gives you two key options:
+
+-   `option` which returns the value of the `option` prop of the `BentoSelectorOption` which was selected or deselected.
+-   `value` which returns an array of which `BentoSelectorOptions` are currently selected in the order they were selected.
+
+```jsx
+    <BentoSelector
+      as="ul"
+      multiple
+      onChange={({option, value}) => console.log(option, value)}
+    >
+      <BentoSelectorOption as="li" option="1">
+        Option 1
+      </BentoSelectorOption>
+      <BentoSelectorOption as="li" option="2">
+        Option 2
+      </BentoSelectorOption>
+    </BentoSelector>
+```
