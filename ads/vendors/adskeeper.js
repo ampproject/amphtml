@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import {loadScript, validateData} from '../../3p/3p';
 export function adskeeper(global, data) {
   validateData(data, ['publisher', 'widget', 'container'], ['url', 'options']);
 
-  const scriptRoot = document.createElement('div');
+  const scriptRoot = global.document.createElement('div');
   scriptRoot.id = data.container;
 
-  document.body.appendChild(scriptRoot);
+  global.document.body.appendChild(scriptRoot);
 
   /**
    * Returns path for provided js filename
@@ -46,13 +46,13 @@ export function adskeeper(global, data) {
   global.uniqId = (
     '00000' + Math.round(Math.random() * 100000).toString(16)
   ).slice(-5);
-  window['ampOptions' + data.widget + '_' + global.uniqId] = data.options;
+  global['ampOptions' + data.widget + '_' + global.uniqId] = data.options;
 
   global.context.observeIntersection(function (changes) {
     /** @type {!Array} */ (changes).forEach(function (c) {
-      window['intersectionRect' + data.widget + '_' + global.uniqId] =
+      global['intersectionRect' + data.widget + '_' + global.uniqId] =
         c.intersectionRect;
-      window['boundingClientRect' + data.widget + '_' + global.uniqId] =
+      global['boundingClientRect' + data.widget + '_' + global.uniqId] =
         c.boundingClientRect;
     });
   });
