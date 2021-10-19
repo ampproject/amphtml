@@ -141,12 +141,13 @@ async function updateIssue(body, number, title, state = 'open') {
  * @return {Promise<Object>}
  */
 async function updateRelease(id, changes) {
-  return await octokit.rest.repos.updateRelease({
+  const {data} = await octokit.rest.repos.updateRelease({
     owner,
     repo,
     'release_id': id,
     ...changes,
   });
+  return data;
 }
 
 /**
@@ -287,12 +288,13 @@ async function createTag(tag, sha) {
   });
 
   // once a tag object is created, create a reference
-  return octokit.rest.git.createRef({
+  const {data} = await octokit.rest.git.createRef({
     owner,
     repo,
     ref: `refs/tags/${tag}`,
     sha,
   });
+  return data;
 }
 
 module.exports = {

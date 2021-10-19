@@ -42,14 +42,14 @@ async function _promote() {
 
   const release = await maybeGetRelease(head);
   if (!release) {
-    const {url} = await makeRelease(head, base, channel, sha);
+    const {'html_url': url} = await makeRelease(head, base, channel, sha);
     log('Created release', magenta(head), 'at', cyan(url));
   } else {
     log('Found release', magenta(head), 'at', cyan(release.url));
   }
 
   if (['stable', 'lts'].includes(channel)) {
-    const {url} = await publishRelease(head);
+    const {'html_url': url} = await publishRelease(head);
     log('Published release', magenta(head), 'at', cyan(url));
   }
 
