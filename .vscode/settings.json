@@ -23,7 +23,7 @@
   "[markdown]": {"editor.formatOnSave": true},
 
   // Validate JSON schemas on the fly. Also used by the `amp check-json-schemas`
-  // task.
+  // task. Do not use URLs from the web, they are unsupported by this task.
   "json.schemas": [
     {
       "fileMatch": [

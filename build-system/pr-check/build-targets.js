@@ -407,7 +407,12 @@ function expandFileLists() {
     ...fileMatch,
     path.normalize(url),
   ]);
-  jsonFilesWithSchemas.push(fastGlob.sync(jsonGlobs, {dot: true}));
+  jsonFilesWithSchemas.push(
+    fastGlob.sync(jsonGlobs, {
+      dot: true,
+      ignore: ['**/node_modules'],
+    })
+  );
 }
 
 module.exports = {

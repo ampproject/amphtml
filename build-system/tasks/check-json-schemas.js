@@ -1,5 +1,6 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
 const json5 = require('json5');
 const {cyan, green, red} = require('kleur/colors');
@@ -33,7 +34,12 @@ function checkJsonSchemas() {
     const schemaJson = getJsonContents(schemaFile);
     const validate = ajv.compile(schemaJson);
 
-    for (const jsonFile of fileMatch) {
+    const jsonFiles = fastGlob.sync(fileMatch, {
+      dot: true,
+      ignore: ['**/node_modules'],
+    });
+
+    for (const jsonFile of jsonFiles) {
       try {
         const jsonData = getJsonContents(jsonFile);
         if (validate(jsonData)) {
