@@ -201,7 +201,10 @@ const targetMatchers = {
     );
   },
   [Targets.JSON_FILES]: (file) => {
-    return file.endsWith('.json');
+    return (
+      file.endsWith('.json') ||
+      file == 'build-system/tasks/check-json-schemas.js'
+    );
   },
   [Targets.LINT]: (file) => {
     if (isOwnersFile(file)) {
