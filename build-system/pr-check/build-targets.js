@@ -7,6 +7,8 @@
  */
 const config = require('../test-configs/config');
 const fastGlob = require('fast-glob');
+const fs = require('fs');
+const json5 = require('json5');
 const minimatch = require('minimatch');
 const path = require('path');
 const {cyan} = require('kleur/colors');
@@ -25,6 +27,7 @@ let buildTargets;
  * Used to prevent the repeated expansion of globs during PR jobs.
  */
 const fileLists = {};
+const jsonFilesWithSchemas = [];
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -35,7 +38,6 @@ const Targets = {
   AVA: 'AVA',
   BABEL_PLUGIN: 'BABEL_PLUGIN',
   BUILD_SYSTEM: 'BUILD_SYSTEM',
-  CACHES_JSON: 'CACHES_JSON',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
@@ -43,6 +45,7 @@ const Targets = {
   IGNORE_LIST: 'IGNORE_LIST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   INVALID_WHITESPACES: 'INVALID_WHITESPACES',
+  JSON_FILES: 'JSON_FILES',
   LINT: 'LINT',
   LINT_RULES: 'LINT_RULES',
   OWNERS: 'OWNERS',
@@ -65,7 +68,6 @@ const Targets = {
  */
 const nonRuntimeTargets = [
   Targets.AVA,
-  Targets.CACHES_JSON,
   Targets.DEV_DASHBOARD,
   Targets.DOCS,
   Targets.E2E_TEST,
@@ -146,15 +148,6 @@ const targetMatchers = {
           file.endsWith('.json')))
     );
   },
-  [Targets.CACHES_JSON]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return (
-      file == 'build-system/tasks/caches-json.js' ||
-      file == 'build-system/global-configs/caches.json'
-    );
-  },
   [Targets.DOCS]: (file) => {
     if (isOwnersFile(file)) {
       return false;
@@ -208,6 +201,12 @@ const targetMatchers = {
       fileLists.invalidWhitespaceFiles.includes(file) ||
       file == 'build-system/tasks/check-invalid-whitespaces.js' ||
       file.startsWith('build-system/test-configs')
+    );
+  },
+  [Targets.JSON_FILES]: (file) => {
+    return (
+      jsonFilesWithSchemas.includes(file) ||
+      file == 'build-system/tasks/check-json-schemas.js'
     );
   },
   [Targets.LINT]: (file) => {
@@ -398,6 +397,22 @@ function expandFileLists() {
     const fileListName = globName.replace('Globs', 'Files');
     fileLists[fileListName] = fastGlob.sync(config[globName], {dot: true});
   }
+
+  const vscodeSettings = json5.parse(
+    fs.readFileSync('.vscode/settings.json', 'utf8')
+  );
+  /** @type {Array<{fileMatch: string[], url: string}>} */
+  const schemas = vscodeSettings['json.schemas'];
+  const jsonGlobs = schemas.flatMap(({fileMatch, url}) => [
+    ...fileMatch,
+    path.normalize(url),
+  ]);
+  jsonFilesWithSchemas.push(
+    fastGlob.sync(jsonGlobs, {
+      dot: true,
+      ignore: ['**/node_modules'],
+    })
+  );
 }
 
 module.exports = {
