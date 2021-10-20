@@ -22,8 +22,8 @@ exports.jsBundles = {
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      toName: 'bento.max.js',
       includePolyfills: false,
+      toName: 'bento.max.js',
       minifiedName: 'bento.js',
       // For backwards-compat:
       latestName: 'custom-elements-polyfill.js',
