@@ -32,7 +32,7 @@ import '@ampproject/bento-lightbox';
 
 ```html
 <head>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-lightbox-1.0.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css">
   <script async custom-element="bento-lightbox" src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"></script>
 </head>
 <bento-lightbox id="my-lightbox">
