@@ -33,7 +33,7 @@ let BaseElement;
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
-  const ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
+  let ExtendableHTMLElement;
   class CeBaseElement {
     /**
      * @param {!Element} element
@@ -51,6 +51,9 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
      * @return {typeof HTMLElement}
      */
     static 'CustomElement'(BaseElement) {
+      if (!ExtendableHTMLElement) {
+        ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
+      }
       return class CustomElement extends ExtendableHTMLElement {
         /** */
         constructor() {

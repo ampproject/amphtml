@@ -193,7 +193,10 @@ function setExtensionsToBuildFromDocuments(examples) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild(preBuild = false) {
-  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
+  extensionsToBuild =
+    argv.core_runtime_only || argv.bento_runtime_only
+      ? []
+      : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -501,7 +504,7 @@ async function buildExtension(
   if (options.bento) {
     await buildBentoExtensionJs(extDir, name, options);
   }
-  await buildExtensionJs(extDir, name, options);
+  await buildExtensionJs(extDir, name, {...options, bento: false});
 }
 
 /**
@@ -856,13 +859,21 @@ async function buildExtensionJs(dir, name, options) {
     const dest = maybeToEsmName(
       `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
-    fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
-    fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
+    try {
+      fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
+      fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
+    } catch (_) {
+      console./*OK*/ log(_);
+    }
   }
 
   if (name === 'amp-script') {
-    await copyWorkerDomResources(version);
-    await buildSandboxedProxyIframe(options.minify);
+    try {
+      await copyWorkerDomResources(version);
+      await buildSandboxedProxyIframe(options.minify);
+    } catch (_) {
+      console./*OK*/ log(_);
+    }
   }
 }
 
