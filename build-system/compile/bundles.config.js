@@ -16,15 +16,15 @@ exports.jsBundles = {
     destDir: './build/',
     minifiedDestDir: './build/',
   },
-  'custom-elements-polyfill.js': {
-    srcDir: 'src/polyfills/',
-    srcFilename: 'custom-elements-entrypoint.js',
+  'bento.js': {
+    srcDir: './src/',
+    srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      toName: 'custom-elements-polyfill.max.js',
+      toName: 'bento.max.js',
       includePolyfills: false,
-      minifiedName: 'custom-elements-polyfill.js',
+      minifiedName: 'bento.js',
     },
   },
   'alp.max.js': {
