@@ -15,6 +15,7 @@ const {
 } = require('../compile/internal-version');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('kleur/colors');
+const {generateBentoRuntime} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
@@ -132,6 +133,32 @@ async function compileCoreRuntime(options) {
 }
 
 /**
+ * @return {!Promise<void>}
+ */
+async function writeGeneratedBentoRuntime() {
+  // TODO(#35264): We define this function separate from compileBentoRuntime()
+  // in order to generate this file early, so that it can be consumed by the
+  // pre-closure-babel step.
+  // If we stop relying on Closure, esbuild will run babel as part of each
+  // build and we won't have to generate this file early. Thus, we'd be able to
+  // move the contents of this function into compileBentoRuntime(), and remove
+  // writeGeneratedBentoRuntime() from its call-sites in runPreBuildSteps() and
+  // runPreDistSteps().
+  const {srcDir, srcFilename} = jsBundles['bento.js'];
+  const filename = `${srcDir}/${srcFilename}`;
+  const fileSource = generateBentoRuntime();
+  await fs.outputFile(filename, fileSource);
+}
+
+/**
+ * @param {!Object} options
+ * @return {Promise<void>}
+ */
+async function compileBentoRuntime(options) {
+  await doBuildJs(jsBundles, 'bento.js', options);
+}
+
+/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  *
@@ -148,7 +175,7 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    doBuildJs(jsBundles, 'bento.js', options),
+    compileBentoRuntime(options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -421,7 +448,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   banner.js = config + banner.js + compiledFile;
 
   const babelPlugin = getEsbuildBabelPlugin(
-    options.minify ? 'minified' : 'unminified',
+    options.minify
+      ? 'minified'
+      : (options.bento ? 'bento-' : '') + 'unminified',
     /* enableCache */ true
   );
   const plugins = [babelPlugin];
@@ -804,6 +833,7 @@ function shouldUseClosure() {
 module.exports = {
   bootstrapThirdPartyFrames,
   compileAllJs,
+  compileBentoRuntime,
   compileCoreRuntime,
   compileJs,
   esbuildCompile,
@@ -817,4 +847,5 @@ module.exports = {
   printNobuildHelp,
   watchDebounceDelay,
   shouldUseClosure,
+  writeGeneratedBentoRuntime,
 };

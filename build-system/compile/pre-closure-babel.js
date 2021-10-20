@@ -79,7 +79,11 @@ async function preClosureBabel(file, outputFilename, options) {
   if (!filesToTransform) {
     filesToTransform = getFilesToTransform();
   }
-  const transformedFile = path.join(outputDir, file);
+  const transformedFile = path.join(
+    outputDir,
+    options.bento ? 'bento' : '',
+    file
+  );
   if (!filesToTransform.includes(file)) {
     if (!(await fs.pathExists(transformedFile))) {
       await fs.copy(file, transformedFile);
@@ -89,7 +93,9 @@ async function preClosureBabel(file, outputFilename, options) {
   try {
     debug(CompilationLifecycles['pre-babel'], file);
     const babelOptions =
-      babel.loadOptions({caller: {name: 'pre-closure'}}) || {};
+      babel.loadOptions({
+        caller: {name: (options.bento ? 'bento-' : '') + 'pre-closure'},
+      }) || {};
     const optionsHash = md5(
       JSON.stringify({babelOptions, argv: process.argv.slice(2)})
     );
