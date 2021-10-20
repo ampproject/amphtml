@@ -1,12 +1,7 @@
-import '#compiler';
+import {compile} from '#compiler/compile';
 
 describes.sandboxed('compile', {}, () => {
-  it('compile function should be added to global', () => {
-    expect(globalThis['compile']).ok;
-  });
-
   it('should throw if provided invalid input', () => {
-    const compile = globalThis['compile'];
     const errorMsg = /Must provide either document or nodes/;
 
     expect(() => compile()).throw(errorMsg);
@@ -16,7 +11,6 @@ describes.sandboxed('compile', {}, () => {
   });
 
   it('should return compiled document', () => {
-    const compile = globalThis['compile'];
     const document = {
       root: 0,
       tree: [{tagid: 92, children: []}],
@@ -26,7 +20,6 @@ describes.sandboxed('compile', {}, () => {
   });
 
   it('should return compiled nodes', () => {
-    const compile = globalThis['compile'];
     const nodes = [
       {tagid: 1, value: 'a', children: [], attributes: []},
       {tagid: 7, value: 'b', children: [], attributes: []},
