@@ -99,10 +99,21 @@ class IssueTracker {
  * @return {!Promise}
  */
 async function setup(head) {
-  const issue = await getIssue(head);
-  return issue
-    ? {isCherrypick: false, issue}
-    : {isCherrypick: !head.endsWith('000'), issue: undefined};
+  let issue = await getIssue(`Release ${head}`);
+  if (issue || head.endsWith('000')) {
+    return {isCherrypick: false, issue};
+  }
+
+  // is cherrypick, so find base issue tracker
+  let version = Number(head) - 1;
+  while (version % 1000 !== 1000) {
+    issue = await getIssue(`Release ${version}`);
+    if (issue) {
+      break;
+    }
+    version--;
+  }
+  return {isCherrypick: true, issue};
 }
 
 /**
