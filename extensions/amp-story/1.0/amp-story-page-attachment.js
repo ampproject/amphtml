@@ -222,10 +222,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     // For backwards compatibility if element is amp-story-page-outlink.
-    const hrefAttr =
-      isPageOutlink
-        ? this.element.querySelector('a').getAttribute('href')
-        : this.element.getAttribute('href');
+    const hrefAttr = isPageOutlink
+      ? this.element.querySelector('a').getAttribute('href')
+      : this.element.getAttribute('href');
 
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.
