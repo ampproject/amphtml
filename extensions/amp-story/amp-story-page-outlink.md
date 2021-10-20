@@ -53,12 +53,6 @@ When no attributes are set, the default UI will render:
 </amp-story-page-outlink>
 ```
 
-### `cta-text` (optional)
-
-String that customizes the button text. The default is "Swipe up".
-
-![amp-story-page-outlink-cta-text](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-cta-text.jpg)
-
 ```html
 <amp-story-page-outlink
   layout="nodisplay"
@@ -86,7 +80,7 @@ Contrast protection is automatically applied to ensure readability and a11y comp
 <amp-story-page-outlink
   layout="nodisplay"
   theme="dark">
-    <a href="https://www.google.com">Call To Action</a>
+    <a href="https://www.google.com"></a>
 </amp-story-page-outlink>
 ```
 

@@ -128,9 +128,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 
   // Append text & aria-label.
   const openLabelAttr =
-    anchorChild?.textContent ||
-    attachmentEl.getAttribute('cta-text') ||
-    attachmentEl.getAttribute('data-cta-text');
+    anchorChild?.textContent || attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
     ? openLabelAttr.trim()
     : getLocalizationService(pageEl).getLocalizedString(
