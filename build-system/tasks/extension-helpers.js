@@ -664,7 +664,7 @@ async function buildNpmBinaries(extDir, name, options) {
       bento: {
         entryPoint: await getBentoBuildFilename(
           extDir,
-          name,
+          getBentoName(name),
           'web-component',
           options
         ),
@@ -740,15 +740,15 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   const modes = {
     'standalone': {
       filename: `${name}.js`,
-      generateFn: generateBentoEntryPointSource,
+      toExport: false,
     },
     'web-component': {
       filename: 'web-component.js',
-      generateFn: generateBentoWebComponentSource,
+      toExport: true,
     },
   };
-  const {filename, generateFn} = modes[mode];
-  if (!filename || !generateFn) {
+  const {filename, toExport} = modes[mode];
+  if (!filename) {
     throw new Error(
       `Unknown bento mode "${mode}" (${name}:${options.version})\n` +
         `Expected one of: ${Object.keys(modes).join(', ')}`
@@ -758,18 +758,23 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = await generateFn(name, options);
-  const generatedFilename = `build/${name}.js`;
+  const generatedSource = await generateBentoEntryPointSource(
+    name,
+    toExport,
+    options
+  );
+  const generatedFilename = `build/${filename}`;
   await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
   return generatedFilename;
 }
 
 /**
  * @param {string} name
+ * @param {string} toExport
  * @param {Object} options
  * @return {Promise<string>}
  */
-async function generateBentoEntryPointSource(name, options) {
+async function generateBentoEntryPointSource(name, toExport, options) {
   const css = options.hasCss
     ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
     : null;
@@ -777,7 +782,7 @@ async function generateBentoEntryPointSource(name, options) {
   return dedent(`
     import {BaseElement} from '../base-element';
     
-    function defineElement() {
+    ${toExport ? 'export default' : ''} function defineElement() {
       const css = __css__;
       if (css) {
         const style = document.createElement('style');
@@ -790,29 +795,10 @@ async function generateBentoEntryPointSource(name, options) {
       );
     }
 
-    defineElement();
+    ${toExport ? '' : 'defineElement();'}
   `)
     .replace('__css__', JSON.stringify(css))
     .replace('__name__', JSON.stringify(name));
-}
-
-/**
- * @param {string} name
- * @param {Object} options
- * @return {string}
- */
-function generateBentoWebComponentSource(name, options) {
-  return dedent(`
-    import {BaseElement} from '../base-element';
-    import {CSS} from '../../../../build/${name}-${options.version}.css';
-    
-    export default function defineElement() {
-      const style = document.createElement('style');
-      style.textContent = CSS;
-      document.head.appendChild(style);
-      customElements.define('${getBentoName(name)}', BaseElement);
-    }
-  `);
 }
 
 /**
