@@ -662,7 +662,12 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
       bento: {
-        entryPoint: await getBentoWebComponentFilename(extDir, name, options),
+        entryPoint: await getBentoBuildFilename(
+          extDir,
+          name,
+          'web-component',
+          options
+        ),
         outfile: 'web-component.js',
         wrapper: '',
       },
@@ -710,7 +715,12 @@ async function buildBentoExtensionJs(dir, name, options) {
   return buildExtensionJs(dir, bentoName, {
     ...options,
     wrapper: 'none',
-    filename: await getBentoFilename(dir, bentoName, options),
+    filename: await getBentoBuildFilename(
+      dir,
+      bentoName,
+      'standalone',
+      options
+    ),
     // Include extension directory since our entrypoint may be elsewhere.
     extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
   });
@@ -722,15 +732,33 @@ async function buildBentoExtensionJs(dir, name, options) {
  * configuration.
  * @param {string} dir
  * @param {string} name
+ * @param {string} mode
  * @param {Object} options
  * @return {Promise<string>}
  */
-async function getBentoFilename(dir, name, options) {
-  const filename = `${name}.js`;
+async function getBentoBuildFilename(dir, name, mode, options) {
+  const modes = {
+    'standalone': {
+      filename: `${name}.js`,
+      generateFn: generateBentoEntryPointSource,
+    },
+    'web-component': {
+      filename: 'web-component.js',
+      generateFn: generateBentoWebComponentSource,
+    },
+  };
+  const {filename, generateFn} = modes[mode];
+  if (!filename || !generateFn) {
+    throw new Error(
+      `Unknown bento mode "${mode}" (${name}:${options.version})\n` +
+        `Expected one of: ${Object.keys(modes).join(', ')}`
+    );
+  }
+
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = await generateBentoEntryPointSource(name, options);
+  const generatedSource = await generateFn(name, options);
   const generatedFilename = `build/${name}.js`;
   await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
   return generatedFilename;
@@ -766,23 +794,6 @@ async function generateBentoEntryPointSource(name, options) {
   `)
     .replace('__css__', JSON.stringify(css))
     .replace('__name__', JSON.stringify(name));
-}
-
-/**
- * @param {string} dir
- * @param {string} name
- * @param {Object} options
- * @return {Promise<string>}
- */
-async function getBentoWebComponentFilename(dir, name, options) {
-  const filename = 'web-component.js';
-  if (await fs.pathExists(`${dir}/${filename}`)) {
-    return filename;
-  }
-  const generatedSource = generateBentoWebComponentSource(name, options);
-  const generatedFilename = `build/${filename}`;
-  await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
-  return generatedFilename;
 }
 
 /**
