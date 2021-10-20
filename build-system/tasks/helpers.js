@@ -163,7 +163,6 @@ async function compileAllJs(options) {
     doBuildJs(jsBundles, 'amp-inabox.js', options),
   ]);
   await compileCoreRuntime(options);
-
   endBuildStep(
     minify ? 'Minified' : 'Compiled',
     'all runtime JS files',
