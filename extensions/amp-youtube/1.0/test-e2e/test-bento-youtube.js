@@ -13,14 +13,12 @@ describes.endtoend(
     });
 
     it('should render a youtube video', async () => {
-      const bentoYoutube = await controller.findElement('bento-youtube');
-      await controller.switchToShadowRoot(bentoYoutube);
+      const element = await controller.findElement('bento-youtube');
+      await controller.switchToShadowRoot(element);
 
-      const iFrameYoutube = await controller.findElement('iframe');
+      const iframe = await controller.findElement('iframe');
 
-      await expect(
-        controller.getElementAttribute(iFrameYoutube, 'src')
-      ).to.equal(
+      await expect(controller.getElementAttribute(iframe, 'src')).to.equal(
         'https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1&amp=1&playsinline=1'
       );
     });
