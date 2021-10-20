@@ -78,6 +78,7 @@ export class CarouselControls {
 
   /**
    * Meant to be called as part of carousel's buildCallback().
+   * TODO(samouri): extract to build-dom.js file.
    */
   buildDom() {
     const doc = this.element_.ownerDocument;
