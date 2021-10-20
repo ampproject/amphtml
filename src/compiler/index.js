@@ -16,7 +16,9 @@ function compile(request) {
     tree: [{tagid: 92, children: []}],
     'quirks_mode': false,
   };
-  const versions = request.versions ?? {'amp-layout': 'v0'};
+  const versions = request.versions ?? [
+    {component: 'amp-layout', version: 'v0'},
+  ];
 
   return {document: compiler.renderAst(document, getBuilders(versions))};
 }

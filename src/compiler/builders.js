@@ -20,11 +20,10 @@ export function getBuilders(versions) {
   /** @type {import('./types').BuilderMap} */
   const builders = {};
 
-  for (const tag of Object.keys(versions)) {
-    const version = versions[tag];
-    const builder = builderMap?.[version]?.[tag];
+  for (const {component, version} of versions) {
+    const builder = builderMap?.[version]?.[component];
     if (builder) {
-      builders[tag] = builder;
+      builders[component] = builder;
     }
   }
 
