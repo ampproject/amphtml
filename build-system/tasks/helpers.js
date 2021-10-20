@@ -4,7 +4,6 @@ const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
-const globby = require('globby');
 const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
@@ -164,11 +163,6 @@ async function compileAllJs(options) {
     doBuildJs(jsBundles, 'amp-inabox.js', options),
   ]);
   await compileCoreRuntime(options);
-
-  // TODO(alanorozco): Is there a cleaner way to create this alias?
-  for (const file of await globby('dist/bento.*js')) {
-    await fs.copy(file, file.replace('/bento.', '/custom-elements-polyfill.'));
-  }
 
   endBuildStep(
     minify ? 'Minified' : 'Compiled',
