@@ -8,6 +8,7 @@ const blockerDetected = {
 const blockerNotDetected = {
   color: 'greenyellow',
   background: 'darkgreen',
+  display: 'none',
 };
 
 const JSS = {

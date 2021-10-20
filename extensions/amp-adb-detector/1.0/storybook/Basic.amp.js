@@ -18,19 +18,23 @@ export default {
 };
 
 export const _default = (args) => {
+  // <amp-adb-detector width="1" height="2" {...args} on="onblock:s2.hide">
+
   return (
     <>
-      <amp-ad
-        width="120"
-        height="600"
-        type="doubleclick"
-        data-slot="/21730346048/test-skyscraper"
-      >
-        <div placeholder></div>
-        <div fallback></div>
-      </amp-ad>
-      <amp-adb-detector width="300" height="200" {...args}>
-        This text is inside.
+      <amp-adb-detector layout="fixed" width="120" height="600" {...args}>
+        <amp-ad
+          width="120"
+          height="600"
+          type="doubleclick"
+          data-slot="/21730346048/test-skyscraper"
+          id="ampad1"
+        >
+          <div fallback>
+            <h2>Ad Blocker Detected</h2>
+            <p>Please allow ads to run on this page.</p>
+          </div>
+        </amp-ad>
       </amp-adb-detector>
     </>
   );

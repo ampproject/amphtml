@@ -10,7 +10,13 @@ BaseElement['Component'] = BentoAdbDetector;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
+  'onB': {attr: 'onBlock'},
+  ampAd: {
+    selector: 'amp-ad',
+    single: true,
+    as: true,
+    clone: true,
+  },
 };
 
 /** @override */

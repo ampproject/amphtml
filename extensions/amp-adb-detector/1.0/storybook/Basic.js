@@ -4,16 +4,31 @@ import {BentoAdbDetector} from '../component';
 
 export default {
   title: 'AdbDetector',
+  parameters: {
+    extensions: [{name: 'amp-adb-detector', version: '1.0'}],
+  },
   component: BentoAdbDetector,
   args: {
     'exampleProperty': 'example string property argument',
   },
 };
 
-export const _default = (args) => {
+export const _default = () => {
   return (
-    <BentoAdbDetector style={{width: 300, height: 200}} {...args}>
-      This text is inside.
-    </BentoAdbDetector>
+    <>
+      <BentoAdbDetector>
+        <amp-ad
+          width="120"
+          height="600"
+          type="doubleclick"
+          data-slot="/21730346048/test-skyscraper"
+          id="ampad1"
+        >
+          <div fallback>
+            This is a fallback -- do similar as image-slider for img tag slot
+          </div>
+        </amp-ad>
+      </BentoAdbDetector>
+    </>
   );
 };

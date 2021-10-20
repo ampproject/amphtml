@@ -1,4 +1,9 @@
+import {ActionTrust} from '#core/constants/action-constants';
+import {dict} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
@@ -10,6 +15,16 @@ import {CSS} from '../../../build/amp-adb-detector-1.0.css';
 const TAG = 'amp-adb-detector';
 
 class AmpAdbDetector extends BaseElement {
+  /** @override */
+  init() {
+    this.actions_ = Services.actionServiceForDoc(this.element);
+    return dict({
+      // Extra props passed by wrapper AMP component
+      'onBlock': () => {
+        this.actions_.trigger(this.element, 'onblock');
+      },
+    });
+  }
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
