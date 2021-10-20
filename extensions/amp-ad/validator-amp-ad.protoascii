@@ -52,8 +52,11 @@ tags: {  # <amp-ad>
   attrs: {
     name: "sticky"
     value: ""
-    value: "top"
     value: "bottom"
+    value: "bottom-right"
+    value: "left"
+    value: "right"
+    value: "top"
   }
   attrs: { name: "always-serve-npa" }
   attrs: { name: "block-rtc" }

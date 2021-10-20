@@ -171,6 +171,8 @@ Use to denote that this is a sticky ad unit and specify the position of this uni
 -   top
 -   bottom
 -   bottom-right
+-   left
+-   right
 
 ### `data-foo-bar`
 

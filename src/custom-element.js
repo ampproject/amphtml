@@ -13,6 +13,7 @@ import {MediaQueryProps} from '#core/dom/media-query-props';
 import * as query from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
+import {applyStaticLayout} from '#core/static-layout';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -32,7 +33,6 @@ import {
   reportError,
 } from './error-reporting';
 import {getMode} from './mode';
-import {applyStaticLayout} from './static-layout';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 
 const TAG = 'CustomElement';
