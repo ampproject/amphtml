@@ -313,16 +313,16 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
-  if (options.latestName) {
+  if (options.aliasName) {
     fs.copySync(
       destPath,
-      path.join(destDir, maybeToEsmName(options.latestName))
+      path.join(destDir, maybeToEsmName(options.aliasName))
     );
   }
 
   let name = minifiedName;
-  if (options.latestName) {
-    name += ` → ${maybeToEsmName(options.latestName)}`;
+  if (options.aliasName) {
+    name += ` → ${maybeToEsmName(options.aliasName)}`;
   }
   endBuildStep('Minified', name, timeInfo.startTime);
 }
@@ -359,17 +359,17 @@ function handleBundleError(err, continueOnError, destFilename) {
  */
 async function finishBundle(destDir, destFilename, options, startTime) {
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
-  let {latestName} = options;
-  if (latestName) {
+  let {aliasName} = options;
+  if (aliasName) {
     if (!options.minify) {
-      latestName = latestName.replace(/\.js$/, '.max.js');
+      aliasName = aliasName.replace(/\.js$/, '.max.js');
     }
-    latestName = maybeToEsmName(latestName);
+    aliasName = maybeToEsmName(aliasName);
     fs.copySync(
       path.join(destDir, destFilename),
-      path.join(destDir, latestName)
+      path.join(destDir, aliasName)
     );
-    endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
+    endBuildStep(logPrefix, `${destFilename} → ${aliasName}`, startTime);
   } else {
     const loggingName =
       options.npm && !destFilename.startsWith('amp-')
