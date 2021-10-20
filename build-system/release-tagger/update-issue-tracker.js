@@ -106,7 +106,7 @@ async function setup(head) {
 
   // is cherrypick, so find base issue tracker
   let version = Number(head) - 1;
-  while (version % 1000 !== 1000) {
+  while (version % 1000 !== 0) {
     issue = await getIssue(`Release ${version}`);
     if (issue) {
       break;
