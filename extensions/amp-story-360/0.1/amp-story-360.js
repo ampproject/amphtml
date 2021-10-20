@@ -18,11 +18,9 @@ import {dev, user, userAssert} from '#utils/log';
 import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {
-  Action,
-  StateProperty,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {timeStrToMillis} from '../../amp-story/1.0/utils';
+
+import {Action, StateProperty} from '#bento/components/amp-story';
+import {timeStrToMillis} from '#bento/components/amp-story/utils';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -260,7 +258,7 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {?Element} */
     this.activateButton_ = null;
 
-    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
     /** @private {?string} */

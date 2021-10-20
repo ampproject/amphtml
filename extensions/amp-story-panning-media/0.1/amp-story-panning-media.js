@@ -11,10 +11,11 @@ import {Services} from '#service';
 import {dev, user} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
+
 import {
   Action,
   StateProperty,
-} from '../../amp-story/1.0/amp-story-store-service';
+} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';
@@ -78,7 +79,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
 
-    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
     /** @private {?string} */

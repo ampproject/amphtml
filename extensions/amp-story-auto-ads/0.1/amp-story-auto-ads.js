@@ -36,12 +36,13 @@ import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
+
 import {
   StateProperty,
   UIType,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {EventType, dispatch} from '../../amp-story/1.0/events';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+} from '#bento/components/amp-story/amp-story-store-service';
+import {EventType, dispatch} from '#bento/components/amp-story/events';
+import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';
@@ -69,7 +70,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private */
     this.doc_ = this.win.document;
 
-    /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
+    /** @private {?../../../bento/components/amp-story/amp-story.AmpStory} */
     this.ampStory_ = null;
 
     /** @private {?StoryAdPage} */
@@ -87,7 +88,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?Element} */
     this.progressBarBackground_ = null;
 
-    /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
     /** @private {?StoryAdPlacementAlgorithm} */

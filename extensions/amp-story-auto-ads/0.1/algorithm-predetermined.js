@@ -1,6 +1,6 @@
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {StateProperty} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {number} */
 const BEGINNING_OF_STORY_BUFFER = 3;

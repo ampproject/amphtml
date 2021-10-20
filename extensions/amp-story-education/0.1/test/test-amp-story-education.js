@@ -3,12 +3,13 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryEducation, State} from '../amp-story-education';
+
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStoryEducation, State} from '../amp-story-education';
+} from '#bento/components/amp-story/amp-story-store-service';
 
 describes.realWin('amp-story-education', {amp: true}, (env) => {
   let ampdoc;

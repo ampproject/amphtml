@@ -1,13 +1,13 @@
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
-} from '../../amp-story/1.0/story-analytics';
+} from '#bento/components/amp-story/story-analytics';
 import {clamp} from '#core/math';
 import {
   Action,
   StateProperty,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
+} from '#bento/components/amp-story/amp-story-store-service';
+import {AnalyticsVariable} from '#bento/components/amp-story/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
 import {Services} from '#service';
 import {
@@ -25,7 +25,7 @@ import {closest} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   maybeMakeProxyUrl,
-} from '../../amp-story/1.0/utils';
+} from '#bento/components/amp-story/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
@@ -135,7 +135,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected @const {InteractiveType} */
     this.interactiveType_ = type;
 
-    /** @protected {?../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
+    /** @protected {?../../../bento/components/amp-story/story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = null;
 
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
@@ -174,16 +174,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @public {../../../src/service/localizationService} */
     this.localizationService = null;
 
-    /** @protected {?../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
+    /** @protected {?../../../bento/components/amp-story/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
 
-    /** @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @protected {?../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
     /** @protected {?../../../src/service/url-impl.Url} */
     this.urlService_ = null;
 
-    /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
+    /** @protected {?../../../bento/components/amp-story/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
   }
 

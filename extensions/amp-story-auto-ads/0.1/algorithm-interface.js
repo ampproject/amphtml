@@ -4,7 +4,7 @@
  */
 export class StoryAdPlacementAlgorithm {
   /**
-   * @param {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} unusedStoreService
+   * @param {?../../..bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} unusedStoreService
    * @param {!StoryAdPageManager} unusedPageManager
    */
   constructor(unusedStoreService, unusedPageManager) {

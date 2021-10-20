@@ -1,16 +1,17 @@
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
-import {
-  Action,
-  getStoreService,
-} from '../../../amp-story/1.0/amp-story-store-service';
 import {
   PredeterminedPositionAlgorithm,
   getAdPositions,
   getNumberOfAds,
 } from '../algorithm-predetermined';
 import {StoryAdPageManager} from '../story-ad-page-manager';
+
+import {AmpStory} from '#bento/components/amp-story/amp-story';
+import {
+  Action,
+  getStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
 
 describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
   let storeService;

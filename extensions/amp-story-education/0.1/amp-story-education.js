@@ -11,13 +11,14 @@ import {LocalizedStringId} from '#service/localization/strings';
 import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-education-0.1.css';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
+
+import {getLocalizationService} from '#bento/components/amp-story/amp-story-localization-service';
 import {
   Action,
   StateProperty,
   UIType,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+} from '#bento/components/amp-story/amp-story-store-service';
+import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
 
 /** @type {string} */
 const TAG = 'amp-story-education';
@@ -72,9 +73,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
     /** @private {!State} */
     this.state_ = State.HIDDEN;
 
-    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {!../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ =
-      /** @type {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */ (
+      /** @type {!../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */ (
         Services.storyStoreService(this.win)
       );
 

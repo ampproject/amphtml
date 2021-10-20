@@ -1,8 +1,9 @@
 import {macroTask} from '#testing/helpers';
 
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {StoryAdPage} from '../story-ad-page';
 import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
+
+import {AmpStory} from '#bento/components/amp-story/amp-story';
 
 // TODO(ccordry): add tests for analytics events.
 describes.realWin('StoryAdPageManager', {amp: true}, (env) => {

@@ -2,7 +2,7 @@ import {hasOwn, map} from '#core/types/object';
 
 import {InsertionState} from './story-ad-page-manager';
 
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {StateProperty} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {number} */
 const INTERVAL = 7;
@@ -15,7 +15,7 @@ const INTERVAL = 7;
 export class CountPagesAlgorithm {
   /** @override */
   constructor(storeService, pageManager) {
-    /** @private {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private {!../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
 
     /** @private {!StoryAdPageManager} */

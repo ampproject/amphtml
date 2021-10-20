@@ -1,7 +1,7 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractivePoll} from '../amp-story-interactive-poll';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryRequestService} from '#bento/components/amp-story/amp-story-request-service';
+import {AmpStoryStoreService} from '#bento/components/amp-story/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {

@@ -4,10 +4,11 @@ import {createElementWithAttributes} from '#core/dom';
 import {afterRenderPromise} from '#testing/helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+
 import {
   Action,
   AmpStoryStoreService,
-} from '../../../amp-story/1.0/amp-story-store-service';
+} from '#bento/components/amp-story/amp-story-store-service';
 
 describes.realWin(
   'amp-story-panning-media',

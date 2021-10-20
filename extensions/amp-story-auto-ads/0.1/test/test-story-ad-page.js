@@ -8,15 +8,16 @@ import {macroTask} from '#testing/helpers';
 import {Gestures} from '../../../../src/gesture';
 import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
-import {
-  Action,
-  UIType,
-  getStoreService,
-} from '../../../amp-story/1.0/amp-story-store-service';
 import {StoryAdAnalytics} from '../story-ad-analytics';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
+
+import {
+  Action,
+  UIType,
+  getStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
 
 const NOOP = () => {};
 

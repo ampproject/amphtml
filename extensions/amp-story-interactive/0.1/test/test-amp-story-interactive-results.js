@@ -1,7 +1,7 @@
 import {
   Action,
   AmpStoryStoreService,
-} from '../../../amp-story/1.0/amp-story-store-service';
+} from '#bento/components/amp-story/amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractiveResults,

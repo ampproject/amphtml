@@ -12,7 +12,8 @@ import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {getStoreService} from '../../amp-story/1.0/amp-story-store-service';
+
+import {getStoreService} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';
@@ -31,11 +32,11 @@ export const NEXT_PAGE_NO_AD_ATTR = 'next-page-no-ad';
  */
 export class StoryAdPageManager {
   /**
-   * @param {!../../amp-story/1.0/amp-story.AmpStory} ampStory
+   * @param {!../../.ampStory./bento/components/amp-story/amp-story.AmpStory} ampStory
    * @param {!JsonObject} config
    */
   constructor(ampStory, config) {
-    /** @private {!../../amp-story/1.0/amp-story.AmpStory} */
+    /** @private {!../../.ampStory./bento/components/amp-story/amp-story.AmpStory} */
     this.ampStory_ = ampStory;
 
     /** @private {!JsonObject} */
@@ -56,7 +57,7 @@ export class StoryAdPageManager {
     /** @private {Object<string, StoryAdPage>} */
     this.pages_ = {};
 
-    /** @private {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} **/
+    /** @private {!../../.ampStory./bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} **/
     this.storeService_ = getStoreService(this.ampdoc_.win);
 
     /** @private {number} */
@@ -226,7 +227,7 @@ export class StoryAdPageManager {
   /**
    * Users may put an 'next-page-no-ad' attribute on their pages to prevent ads
    * from showing as the next page.
-   * @param {?../../amp-story/1.0/amp-story-page.AmpStoryPage} page
+   * @param {?../../../bento/components/amp-story/amp-story-page.AmpStoryPage} page
    * @return {boolean}
    * @private
    */

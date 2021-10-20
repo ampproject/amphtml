@@ -76,7 +76,7 @@ export function addStoryAutoAdsConfig(parent, customConfig) {
  * Adds story pages to the story object as well as appending them to the DOM.
  * Also fires built signal on created elements.
  * @param {!Document} doc
- * @param {!../../amp-story/1.0/amp-story.AmpStory} storyImpl
+ * @param {!../../../bento/components/amp-story/amp-story.AmpStory} storyImpl
  * @param {number=} numPages
  * @return {Promise}
  */

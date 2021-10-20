@@ -3,18 +3,18 @@ import {
   AmpStoryInteractive,
   InteractiveType,
 } from '../amp-story-interactive-abstract';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
+import {AmpStoryRequestService} from '#bento/components/amp-story/amp-story-request-service';
 import {
   AmpStoryStoreService,
   StateProperty,
-} from '../../../amp-story/1.0/amp-story-store-service';
+} from '#bento/components/amp-story/amp-story-store-service';
 import {
   AmpStoryVariableService,
   AnalyticsVariable,
-} from '../../../amp-story/1.0/variable-service';
+} from '#bento/components/amp-story/variable-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
+import {StoryAnalyticsService} from '#bento/components/amp-story/story-analytics';
 import {
   addConfigToInteractive,
   getMockIncompleteData,

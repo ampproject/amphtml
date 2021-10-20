@@ -10,7 +10,8 @@ import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attributi
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertHttpsUrl} from '../../../src/url';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+
+import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
 
 /**
  * @typedef {{

@@ -9,7 +9,7 @@
 import {LocalizedStringId} from '#service/localization/strings';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
+import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
 import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
 import {addAttributesToElement} from '#core/dom';
 

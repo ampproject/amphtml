@@ -42,10 +42,11 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
+
 import {
   StateProperty,
   UIType,
-} from '../../amp-story/1.0/amp-story-store-service';
+} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -72,7 +73,7 @@ export class StoryAdPage {
    * @param {number} index
    * @param {!./story-ad-localization.StoryAdLocalization} localization
    * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
-   * @param {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
+   * @param {!../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} storeService
    */
   constructor(ampdoc, config, index, localization, buttonFitter, storeService) {
     /** @private @const {!JsonObject} */
@@ -129,7 +130,7 @@ export class StoryAdPage {
     /** @private {boolean} */
     this.viewed_ = false;
 
-    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {!../../../bento/components/amp-story/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
 
     /** @private {boolean} */
