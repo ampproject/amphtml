@@ -137,6 +137,9 @@ function getSrcs(entryModuleFilenames, options) {
           .split(path.win32.sep)
           .join(path.posix.sep)
       );
+    } else {
+      // Ensure that entrypoint itself is listed.
+      srcs.push(filename);
     }
   });
   if (options.extraGlobs) {

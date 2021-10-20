@@ -1,6 +1,7 @@
 'use strict';
 
 const compiler = require('@ampproject/google-closure-compiler');
+const path = require('path');
 const vinylFs = require('vinyl-fs');
 const {cyan, red, yellow} = require('kleur/colors');
 const {getBabelOutputDir} = require('./pre-closure-babel');
@@ -77,8 +78,11 @@ function initializeClosure(flags, options) {
  */
 function runClosure(outputFilename, options, flags, srcFiles) {
   return new Promise((resolve, reject) => {
+    // We use a different babel configuration for bento-* files, so its
+    // transforms are in a subdirectory.
+    const base = path.join(getBabelOutputDir(), options.bento ? 'bento' : '');
     vinylFs
-      .src(srcFiles, {base: getBabelOutputDir()})
+      .src(srcFiles, {base})
       .pipe(initializeClosure(flags, options))
       .on('error', (err) => {
         const reason = handleClosureCompilerError(err, outputFilename, options);
