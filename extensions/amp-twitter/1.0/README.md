@@ -32,7 +32,6 @@ import '@ampproject/bento-twitter';
 
 ```html
 <head>
-  <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style data-bento-boilerplate>
     bento-twitter {
@@ -41,16 +40,9 @@ import '@ampproject/bento-twitter';
       position: relative;
     }
   </style>
-  <!-- TODO(wg-bento): Once available, change src to bento-twitter.js -->
-  <script async src="https://cdn.ampproject.org/v0/amp-twitter-1.0.js"></script>
-  <style>
-    bento-twitter {
-      width: 375px;
-      height: 472px;
-    }
-  </style>
+  <script async src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"></script>
 </head>
-<bento-twitter id="my-tweet" data-tweetid="885634330868850689">
+<bento-twitter id="my-tweet" data-tweetid="885634330868850689" style="height: 472px; width: 375px;">
 </bento-twitter>
 <div class="buttons" style="margin-top: 8px;">
   <button id="change-tweet">

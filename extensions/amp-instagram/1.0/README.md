@@ -44,7 +44,8 @@ import '@ampproject/bento-instagram';
 <bento-instagram
   id="my-instagram"
   data-shortcode="CKXYAzuj7TE"
-  data-captioned>
+  data-captioned
+  style="width: 400px; height: 800px">>
 </bento-instagram>
 <button id="change-shortcode">Change shortcode</button>
 </div>
