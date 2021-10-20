@@ -717,7 +717,7 @@ async function buildBentoExtensionJs(dir, name, options) {
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
-    wrapper: 'none',
+    wrapper: 'bento',
     filename: await getBentoFilename(dir, bentoName, options),
     // Include extension directory since our entrypoint may be elsewhere.
     extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
