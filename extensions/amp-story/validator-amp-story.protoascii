@@ -914,6 +914,9 @@ tags: {
   mandatory_ancestor: "AMP-STORY-PAGE"
   mandatory_last_child: true
   attrs: {
+    name: "cta-text"
+  }  
+  attrs: {
     name: "cta-accent-color"
   }
   attrs: {
