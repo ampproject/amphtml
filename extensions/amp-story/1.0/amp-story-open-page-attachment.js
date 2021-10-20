@@ -129,6 +129,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   // Append text & aria-label.
   const openLabelAttr =
     anchorChild?.textContent ||
+    // For legacy support of amp-story-page-attachment with a src and cta-text attribute.
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
