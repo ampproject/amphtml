@@ -40,9 +40,7 @@ function findLocalizedString(
   languageCodes.some((languageCode) => {
     const localizedStringBundle = localizedStringBundles[languageCode];
     if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
-      localizedString =
-        localizedStringBundle[localizedStringId].string ||
-        localizedStringBundle[localizedStringId].fallback;
+      localizedString = localizedStringBundle[localizedStringId];
       return !!localizedString;
     }
 
