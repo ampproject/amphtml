@@ -173,7 +173,6 @@ async function compileAllJs(options) {
     log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
   }
   const startTime = Date.now();
-
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
     compileBentoRuntime(options),
