@@ -28,3 +28,7 @@ declare module '#core/dom/layout' {
     replacedContent?: boolean
   ) => void;
 }
+
+declare module '#core/static-layout' {
+  export const applyStaticLayout: (node: Node) => void;
+}
