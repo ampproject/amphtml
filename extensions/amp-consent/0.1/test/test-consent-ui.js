@@ -16,7 +16,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
 import {user} from '#utils/log';
-import {whenCalled} from '#testing/test-helper';
+import {whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'consent-ui',

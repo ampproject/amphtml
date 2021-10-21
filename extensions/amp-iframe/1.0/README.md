@@ -47,8 +47,7 @@ import '@ampproject/bento-iframe';
 <bento-iframe
   id="my-iframe"
   src="https://en.wikipedia.org/wiki/Bento"
-  width="800"
-  height="600">
+  style="width: 800px; height: 600px">
 </bento-iframe>
 
 <button id="change-source">

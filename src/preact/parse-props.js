@@ -66,6 +66,9 @@ const SIZE_DEFINED_STYLE = {
   'height': '100%',
 };
 
+/** @const {string} */
+const FILL_CONTENT_CLASS = 'i-amphtml-fill-content';
+
 /**
  * This is an internal property that marks light DOM nodes that were rendered
  * by AMP/Preact bridge and thus must be ignored by the mutation observer to
@@ -131,7 +134,6 @@ export function collectProps(
   mediaQueryProps
 ) {
   const {
-    'className': className,
     'layoutSizeDefined': layoutSizeDefined,
     'lightDomTag': lightDomTag,
     'props': propDefs,
@@ -150,18 +152,13 @@ export function collectProps(
     props['as'] = lightDomTag;
   }
 
-  // Class.
-  if (className) {
-    props['className'] = className;
-  }
-
   // Common styles.
   if (layoutSizeDefined) {
     if (Ctor['usesShadowDom']) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
-      props['className'] =
-        `i-amphtml-fill-content ${className || ''}`.trim() || null;
+      // `class` is preferred to `className` for Preact
+      props['class'] = FILL_CONTENT_CLASS;
     }
   }
 
