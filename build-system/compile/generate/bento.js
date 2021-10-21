@@ -10,7 +10,7 @@ const bentoRuntimePackages = require('./metadata/bento-runtime-packages');
 const dedent = require('dedent');
 
 const getPackageImportId = (pkg, name) =>
-  `${pkg}_${name}`.replace(/[^a-z0-9]/g, '_');
+  `${pkg}_${name}`.replace(/[^a-z0-9]/gi, '_');
 
 /**
  * @param {Object<string, string[]>} packages
