@@ -369,7 +369,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStoryPlayer_();
 
     this.uiState_ = this.getUIType_();
-    console.log('getUIType_:' + this.uiState_);
     this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
     if (this.isLandscapeSupported_()) {
       this.win.document.documentElement.setAttribute(
@@ -1590,7 +1589,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   onResize() {
     this.uiState_ = this.getUIType_();
-    console.log('getUIType_:' + this.uiState_);
     this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
 
     const isLandscape = this.isLandscape_();
@@ -1606,15 +1604,14 @@ export class AmpStory extends AMP.BaseElement {
    * @param {boolean} isLandscapeSupported Whether the story supports landscape
    * @private
    */
-  setOrientationAttribute_(isLandscape, isLandscapeSupported) {
+   setOrientationAttribute_(isLandscape, isLandscapeSupported) {
     // TODO(#20832) base this check on the size of the amp-story-page, once it
     // is stored as a store state.
     this.mutateElement(() => {
-      const isMobile = this.uiState_ === UIType.MOBILE;
-      const shouldDisplayLandscape = isLandscape && (isLandscapeSupported || isMobile);
-      const orientation = shouldDisplayLandscape ? 'landscape' : 'portrait';
-      console.log('orientation: ' + orientation);
-      this.element.setAttribute(Attributes.ORIENTATION, orientation);
+      this.element.setAttribute(
+        Attributes.ORIENTATION,
+        isLandscapeSupported && isLandscape ? 'landscape' : 'portrait'
+      );
     });
   }
 
@@ -1729,9 +1726,6 @@ export class AmpStory extends AMP.BaseElement {
       this.uiState_ === UIType.MOBILE &&
       this.androidSoftKeyboardIsProbablyOpen_()
     ) {
-      console.log(
-        'Returning MOBILE because Android soft keyboard is probably open'
-      );
       // The opening of the Android soft keyboard triggers a viewport resize
       // that can cause the story's dimensions to appear to be those of a
       // desktop. Here, we assume that the soft keyboard is open if the latest
@@ -1753,7 +1747,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     // Desktop one panel UI (default).
-    console.log('Returning DESKTOP_ONE_PANEL by default');
     return UIType.DESKTOP_ONE_PANEL;
   }
 
@@ -1806,7 +1799,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isLandscapeSupported_() {
-    return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE);
+    return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE) || this.androidSoftKeyboardIsProbablyOpen_();
   }
 
   /**
