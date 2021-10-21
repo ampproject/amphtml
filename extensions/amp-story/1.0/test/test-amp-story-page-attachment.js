@@ -8,7 +8,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let outlink;
 
   beforeEach(() => {
-    const win = env.win;
+    const {win} = env;
 
     // Set up the story.
     const storyEl = win.document.createElement('amp-story');
@@ -47,7 +47,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   it('should build amp-story-page-outlink with target="_top" even when the publisher has specified a different value', async () => {
     const anchorEl = outlinkEl.querySelector('amp-story-page-outlink a');
     anchorEl.setAttribute('target', '_blank');
-    
+
     outlink.buildCallback();
     await outlink.layoutCallback();
 
