@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as events from '../../../src/event-helper';
+import * as events from '#utils/event-helper';
 import {isJsonLdScriptTag} from '#core/dom';
 import {toArray} from '#core/types/array';
 import {tryParseJson} from '#core/types/object/json';

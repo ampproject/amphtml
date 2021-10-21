@@ -4,6 +4,7 @@
 import {AttachmentTheme} from './amp-story-page-attachment';
 import {LocalizedStringId} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {dev} from '#utils/log';
 import {getLocalizationService} from './amp-story-localization-service';
 import {
   getRGBFromCssColorValue,
@@ -11,7 +12,7 @@ import {
   maybeMakeProxyUrl,
 } from './utils';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * @enum {string}
@@ -221,23 +222,29 @@ const renderInlineUi = (pageEl, attachmentEl) => {
  * @param {!Element} openAttachmentEl
  */
 export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
-  const accentColor = attachmentEl.getAttribute('cta-accent-color');
+  if (!attachmentEl.hasAttribute('cta-accent-color')) {
+    dev().warn(
+      'AMP-STORY-PAGE-OUTLINK',
+      'No cta-accent-color attribute found.'
+    );
+  }
+
+  const accentColor =
+    attachmentEl.getAttribute('cta-accent-color') || '#000000';
 
   // Calculating contrast color (black or white) needed for outlink CTA UI.
   let contrastColor = null;
-  if (accentColor) {
-    setImportantStyles(attachmentEl, {
-      'background-color': attachmentEl.getAttribute('cta-accent-color'),
-    });
+  setImportantStyles(attachmentEl, {
+    'background-color': accentColor,
+  });
 
-    const win = toWin(attachmentEl.ownerDocument.defaultView);
-    const styles = computedStyle(win, attachmentEl);
-    const rgb = getRGBFromCssColorValue(styles['background-color']);
-    contrastColor = getTextColorForRGB(rgb);
-    setImportantStyles(attachmentEl, {
-      'background-color': '',
-    });
-  }
+  const win = getWin(attachmentEl);
+  const styles = computedStyle(win, attachmentEl);
+  const rgb = getRGBFromCssColorValue(styles['background-color']);
+  contrastColor = getTextColorForRGB(rgb);
+  setImportantStyles(attachmentEl, {
+    'background-color': '',
+  });
   if (
     attachmentEl.getAttribute('cta-accent-element') ===
     CtaAccentElement.BACKGROUND

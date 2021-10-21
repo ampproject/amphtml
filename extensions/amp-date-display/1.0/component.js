@@ -5,7 +5,8 @@ import {useMemo} from '#preact';
 import {Wrapper, useRenderer} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
+
 import {getTimeZoneName} from '../format';
 
 /** @const {string} */
@@ -73,10 +74,10 @@ let VariablesV2Def;
 let EnhancedVariablesV2Def;
 
 /**
- * @param {!DateDisplayDef.Props} props
+ * @param {!BentoDateDisplayDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function DateDisplay({
+export function BentoDateDisplay({
   datetime,
   displayIn = DEFAULT_DISPLAY_IN,
   locale = DEFAULT_LOCALE,

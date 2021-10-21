@@ -12,18 +12,20 @@ import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
+import {createCustomEvent, listenOnce} from '#utils/event-helper';
+
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
 import {urls} from '../config';
-import {createCustomEvent, listenOnce} from '../event-helper';
 import {getMode} from '../mode';
 import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
+  parseUrlDeprecated,
   parseUrlWithA,
   removeFragment,
   removeSearch,
@@ -176,7 +178,7 @@ const LOG_TYPE = {
  * NOTE: If udpated here, update in amp-story.js
  * @private @const {number}
  */
-const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+const PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -251,14 +253,6 @@ export class AmpStoryPlayer {
 
     /** @private {?Element} */
     this.nextButton_ = null;
-
-    /**
-     * Shows or hides the desktop panels player experiment.
-     * Variable is set on window for unit testing new features.
-     * @private {?boolean}
-     */
-    this.isDesktopPanelExperimentOn_ =
-      this.win_.DESKTOP_PANEL_STORY_PLAYER_EXP_ON;
 
     return this.element_;
   }
@@ -408,9 +402,7 @@ export class AmpStoryPlayer {
     this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
-    if (this.isDesktopPanelExperimentOn_) {
-      this.initializeDesktopStoryControlUI_();
-    }
+    this.initializeDesktopStoryControlUI_();
     this.signalReady_();
     this.element_.isBuilt_ = true;
   }
@@ -732,36 +724,36 @@ export class AmpStoryPlayer {
     new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
       this.visibleDeferred_.resolve()
     );
-    if (this.isDesktopPanelExperimentOn_) {
-      if (this.win_.ResizeObserver) {
-        new this.win_.ResizeObserver((e) => {
-          const {height, width} = e[0].contentRect;
-          this.onPlayerResize_(height, width);
-        }).observe(this.element_);
-      } else {
-        // Set size once as fallback for browsers not supporting ResizeObserver.
-        const {height, width} = this.element_./*OK*/ getBoundingClientRect();
+
+    if (this.win_.ResizeObserver) {
+      new this.win_.ResizeObserver((e) => {
+        const {height, width} = e[0].contentRect;
         this.onPlayerResize_(height, width);
-      }
+      }).observe(this.element_);
+    } else {
+      // Set size once as fallback for browsers not supporting ResizeObserver.
+      const {height, width} = this.element_./*OK*/ getBoundingClientRect();
+      this.onPlayerResize_(height, width);
     }
+
     this.render_();
 
     this.element_.isLaidOut_ = true;
   }
 
   /**
-   * Builds desktop "previous" and "next" story UI.
+   * Builds panel mode "previous" and "next" story UI.
    * @private
    */
   initializeDesktopStoryControlUI_() {
     this.prevButton_ = this.doc_.createElement('button');
-    this.prevButton_.classList.add('i-amphtml-story-player-desktop-panel-prev');
+    this.prevButton_.classList.add('i-amphtml-story-player-panel-prev');
     this.prevButton_.addEventListener('click', () => this.previous_());
     this.prevButton_.setAttribute('aria-label', 'previous story');
     this.rootEl_.appendChild(this.prevButton_);
 
     this.nextButton_ = this.doc_.createElement('button');
-    this.nextButton_.classList.add('i-amphtml-story-player-desktop-panel-next');
+    this.nextButton_.classList.add('i-amphtml-story-player-panel-next');
     this.nextButton_.addEventListener('click', () => this.next_());
     this.nextButton_.setAttribute('aria-label', 'next story');
     this.rootEl_.appendChild(this.nextButton_);
@@ -770,7 +762,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Toggles disabled attribute on desktop "previous" and "next" buttons.
+   * Toggles disabled attribute on panel mode "previous" and "next" buttons.
    * @private
    */
   checkButtonsDisabled_() {
@@ -792,26 +784,22 @@ export class AmpStoryPlayer {
    * @private
    */
   onPlayerResize_(height, width) {
-    const isDesktopOnePanel =
-      width / height > DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD;
+    const isPanel = width / height > PANEL_ASPECT_RATIO_THRESHOLD;
 
-    this.rootEl_.classList.toggle(
-      'i-amphtml-story-player-desktop-panel',
-      isDesktopOnePanel
-    );
+    this.rootEl_.classList.toggle('i-amphtml-story-player-panel', isPanel);
 
-    if (isDesktopOnePanel) {
+    if (isPanel) {
       setStyles(this.rootEl_, {
         '--i-amphtml-story-player-height': `${height}px`,
       });
 
       this.rootEl_.classList.toggle(
-        'i-amphtml-story-player-desktop-panel-medium',
+        'i-amphtml-story-player-panel-medium',
         height < 756
       );
 
       this.rootEl_.classList.toggle(
-        'i-amphtml-story-player-desktop-panel-small',
+        'i-amphtml-story-player-panel-small',
         height < 538
       );
     }
@@ -950,12 +938,11 @@ export class AmpStoryPlayer {
       'remaining': remaining,
     };
 
-    if (this.isDesktopPanelExperimentOn_) {
-      this.checkButtonsDisabled_();
-      this.getUiState_().then((uiTypeNumber) =>
-        this.onUiStateUpdate_(uiTypeNumber)
-      );
-    }
+    this.checkButtonsDisabled_();
+    this.getUiState_().then((uiTypeNumber) =>
+      this.onUiStateUpdate_(uiTypeNumber)
+    );
+
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
   }
@@ -1331,12 +1318,18 @@ export class AmpStoryPlayer {
   maybeGetCacheUrl_(url) {
     const ampCache = this.element_.getAttribute('amp-cache');
 
-    if (
-      !ampCache ||
-      isProxyOrigin(url) ||
-      !SUPPORTED_CACHES.includes(ampCache)
-    ) {
+    if (!ampCache || !SUPPORTED_CACHES.includes(ampCache)) {
       return Promise.resolve(url);
+    }
+
+    if (isProxyOrigin(url)) {
+      // Ensures serving type is 'viewer' (/v/) when publishers provide their
+      // own cached URL.
+      const location = parseUrlDeprecated(url);
+      if (location.pathname.startsWith('/c/')) {
+        location.pathname = '/v/' + location.pathname.substr(3);
+      }
+      return Promise.resolve(location.toString());
     }
 
     return ampToolboxCacheUrl
@@ -1548,10 +1541,8 @@ export class AmpStoryPlayer {
         this.onMutedStateUpdate_(/** @type {string} */ (data.value));
         break;
       case STORY_MESSAGE_STATE_TYPE.UI_STATE:
-        if (this.isDesktopPanelExperimentOn_) {
-          // Handles UI state updates on window resize.
-          this.onUiStateUpdate_(/** @type {number} */ (data.value));
-        }
+        // Handles UI state updates on window resize.
+        this.onUiStateUpdate_(/** @type {number} */ (data.value));
         break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));

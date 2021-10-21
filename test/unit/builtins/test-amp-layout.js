@@ -1,4 +1,5 @@
-import {AmpLayout, buildDom} from '#builtins/amp-layout/amp-layout';
+import {AmpLayout} from '#builtins/amp-layout/amp-layout';
+import {buildDom} from '#builtins/amp-layout/build-dom';
 
 import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';

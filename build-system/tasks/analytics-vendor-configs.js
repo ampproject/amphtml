@@ -1,8 +1,8 @@
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
 const debounce = require('../common/debounce');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const jsonminify = require('jsonminify');
 const {basename, dirname, extname, join} = require('path');
 const {endBuildStep} = require('./helpers');
@@ -37,7 +37,7 @@ async function analyticsVendorConfigs(opt_options) {
 
   const startTime = Date.now();
 
-  const srcFiles = await globby(srcPath);
+  const srcFiles = await fastGlob(srcPath);
   await fs.ensureDir(destPath);
   for (const srcFile of srcFiles) {
     let destFile = join(destPath, basename(srcFile));
@@ -63,7 +63,7 @@ async function analyticsVendorConfigs(opt_options) {
     }
     await fs.writeFile(destFile, contents, 'utf-8');
   }
-  if ((await globby(srcPath)).length > 0) {
+  if ((await fastGlob(srcPath)).length > 0) {
     endBuildStep(
       'Compiled all analytics vendor configs into',
       destPath,

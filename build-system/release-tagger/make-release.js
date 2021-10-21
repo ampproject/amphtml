@@ -6,14 +6,16 @@
 const dedent = require('dedent');
 const {
   createRelease,
+  createTag,
   getPullRequestsBetweenCommits,
-  getRelease,
+  getRef,
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
 
 const prereleaseConfig = {
-  'beta': true,
+  'beta-opt-in': true,
+  'beta-percent': true,
   'stable': false,
   'lts': false,
 };
@@ -160,45 +162,55 @@ function _createBody(head, base, prs) {
          ([major, {packages, unchanged}]) => dedent`\
          <h2>npm packages @ ${getSemver(major, head)}</h2>
          ${Object.entries(packages)
+           .sort()
            .map(
              ([extension, prs]) =>
                `<b>${extension}</b>\n<ul>${[...prs].join('\n')}</ul>`
            )
            .join('\n')}
    
-         <b>Packages not changed:</b> <i>${[...unchanged].join(', ')}</i>`
+         <b>Packages not changed:</b> <i>${[...unchanged]
+           .sort()
+           .join(', ')}</i>`
        )
        .join('\n')}
  
      <h2>Changes by component</h2>
-     ${components.join('')}\
+     ${components.sort().join('')}\
    `;
 
+  const patched = head.slice(0, -3) + '000';
   const cherrypickHeader = head.endsWith('0')
     ? ''
     : dedent`\
     <h2>🌸 Cherry-picked release 🌸</h2>
-    <a href="https://github.com/ampproject/amphtml/releases/tag/${base}">\
-    ${base}</a> was patched and published as <b>${head}</b>. Refer to the \
+    <a href="https://github.com/ampproject/amphtml/releases/tag/${patched}">\
+    ${patched}</a> was patched and published as <b>${head}</b>. Refer to the \
     <a href="https://amp-release-calendar.appspot.com">release calendar</a> \
     for additional channel information.\n\n`;
   return cherrypickHeader + template;
 }
 
 /**
- * Main function
+ * Make release
  * @param {string} head
  * @param {string} base
  * @param {string} channel
+ * @param {string} sha
  * @return {Promise<Object>}
  */
-async function makeRelease(head, base, channel) {
-  const {'target_commitish': headCommit} = await getRelease(head);
-  const {'target_commitish': baseCommit} = await getRelease(base);
-  const prs = await getPullRequestsBetweenCommits(headCommit, baseCommit);
+async function makeRelease(head, base, channel, sha) {
+  let headRef;
+  try {
+    headRef = (await getRef(head)).object;
+  } catch (_) {
+    headRef = (await createTag(head, sha)).object;
+  }
+  const {object: baseRef} = await getRef(base);
+  const prs = await getPullRequestsBetweenCommits(headRef.sha, baseRef.sha);
   const body = _createBody(head, base, prs);
   const prerelease = prereleaseConfig[channel];
-  return await createRelease(head, headCommit, body, prerelease);
+  return await createRelease(head, headRef.sha, body, prerelease);
 }
 
 module.exports = {makeRelease};

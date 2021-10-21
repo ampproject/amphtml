@@ -10,9 +10,10 @@ import * as mode from '#core/mode';
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {BaseElement} from '../../base-element';
-import {listen} from '../../event-helper';
-import {dev} from '../../log';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -29,6 +30,7 @@ export const ATTRIBUTES_TO_PROPAGATE = [
   'crossorigin',
   'referrerpolicy',
   'title',
+  'importance',
   'sizes',
   'srcset',
   'src',

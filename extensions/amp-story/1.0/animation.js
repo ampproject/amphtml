@@ -17,7 +17,7 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getChildJsonConfig} from '#core/dom';
 import {map, omit} from '#core/types/object';
@@ -400,7 +400,11 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      this.runner_.resume();
+      try {
+        this.runner_.resume();
+      } catch (e) {
+        // This fails when the story animations are not initialized and resume is called. Context on #35987.
+      }
     }
   }
 

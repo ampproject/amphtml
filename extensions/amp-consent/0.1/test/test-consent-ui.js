@@ -15,8 +15,8 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {user} from '../../../../src/log';
-import {whenCalled} from '#testing/test-helper';
+import {user} from '#utils/log';
+import {whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'consent-ui',
@@ -31,6 +31,7 @@ describes.realWin(
     let ampdoc;
     let consentUI;
     let mockInstance;
+    let mockViewport;
     let parent;
     let ownersStubs;
 
@@ -46,18 +47,17 @@ describes.realWin(
       postPrompt.setAttribute('id', 'testPost');
       parent.appendChild(postPrompt);
       doc.body.appendChild(parent);
+      mockViewport = {
+        addToFixedLayer: env.sandbox.spy(),
+        removeFromFixedLayer: () => {},
+      };
       mockInstance = {
         getAmpDoc: () => {
           return ampdoc;
         },
         element: parent,
         win,
-        getViewport: () => {
-          return {
-            addToFixedLayer: () => {},
-            removeFromFixedLayer: () => {},
-          };
-        },
+        getViewport: () => mockViewport,
         getVsync: () => {
           return {
             mutate: (callback) => {
@@ -106,6 +106,12 @@ describes.realWin(
       const consentUI = new ConsentUI(mockInstance, config);
       const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
       consentUI.show(false);
+      expect(
+        mockViewport.addToFixedLayer.withArgs(
+          mockInstance.element,
+          /* forceTransfer */ true
+        )
+      ).to.have.been.calledOnce;
       consentUI.iframeReady_.resolve();
       return whenCalled(showIframeSpy).then(() => Promise.resolve(consentUI));
     };

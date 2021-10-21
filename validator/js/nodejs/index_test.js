@@ -52,8 +52,8 @@ it('accepts the minimum valid AMP file', function(done) {
   // Note: This will use the validator that was built with build.py.
   const mini =
       fs.readFileSync(
-          '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8')
-        .trim();
+            '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8')
+          .trim();
   ampValidator.getInstance(/*validatorJs*/ '../../dist/validator_minified.js')
       .then(function(instance) {
         const validationResult = instance.validateString(mini);
@@ -71,9 +71,9 @@ it('accepts the minimum valid AMP4ADS file', function(done) {
   // Note: This will use the validator that was built with build.py.
   const mini =
       fs.readFileSync(
-          '../../testdata/amp4ads_feature_tests/min_valid_amp4ads.html',
-          'utf-8')
-        .trim();
+            '../../testdata/amp4ads_feature_tests/min_valid_amp4ads.html',
+            'utf-8')
+          .trim();
   ampValidator.getInstance(/*validatorJs*/ '../../dist/validator_minified.js')
       .then(function(instance) {
         const validationResult = instance.validateString(mini, 'AMP4ADS');
@@ -101,14 +101,14 @@ it('rejects a specific file that is known to have errors', function(done) {
   // Note: This will use the validator that was built with build.py.
   const severalErrorsHtml =
       fs.readFileSync(
-          '../../testdata/feature_tests/several_errors.html', 'utf-8')
-        .trim();
+            '../../testdata/feature_tests/several_errors.html', 'utf-8')
+          .trim();
   const severalErrorsOut =
       fs.readFileSync(
-          '../../testdata/feature_tests/several_errors.out', 'utf-8')
-        .split('\n')
-        .filter(isErrorLine)
-        .join('\n');
+            '../../testdata/feature_tests/several_errors.out', 'utf-8')
+          .split('\n')
+          .filter(isErrorLine)
+          .join('\n');
 
   ampValidator.getInstance(/*validatorJs*/ '../../dist/validator_minified.js')
       .then(function(instance) {
@@ -155,8 +155,8 @@ it('handles syntax errors in validator file', function(done) {
 it('also works with newInstance', function() {
   const mini =
       fs.readFileSync(
-          '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8')
-        .trim();
+            '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8')
+          .trim();
   const validatorJsContents =
       fs.readFileSync('../../dist/validator_minified.js', 'utf-8');
   const resultForMini =
@@ -166,8 +166,8 @@ it('also works with newInstance', function() {
 
   const severalErrorsHtml =
       fs.readFileSync(
-          '../../testdata/feature_tests/several_errors.html', 'utf-8')
-         .trim();
+            '../../testdata/feature_tests/several_errors.html', 'utf-8')
+          .trim();
   const resultForSeveralErrors = ampValidator.newInstance(validatorJsContents)
       .validateString(severalErrorsHtml);
 
@@ -177,11 +177,12 @@ it('also works with newInstance', function() {
 it('emits text if --format=text is specified on command line', function(done) {
   const severalErrorsOut =
       fs.readFileSync(
-          '../../testdata/feature_tests/several_errors.out', 'utf-8')
-        .split('\n')
-        .filter(isErrorLine)
-        .splice(1)  // trim 1st line
-        .join('\n');
+            '../../testdata/feature_tests/several_errors.out', 'utf-8')
+          .split('\n')
+          .filter(isErrorLine)
+          .splice(1)  // trim 1st line
+          .join('\n')
+          .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories
   execFile(
       process.execPath,
       [
@@ -241,7 +242,8 @@ it('supports AMP4ADS with --html_format command line option', function(done) {
           .split('\n')
           .filter(isErrorLine)
           .splice(1)  // trim 1st line
-          .join('\n');
+          .join('\n')
+          .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories
   execFile(
       process.execPath,
       [

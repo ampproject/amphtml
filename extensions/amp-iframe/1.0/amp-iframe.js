@@ -1,6 +1,6 @@
 import {BaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {measureIntersection} from '#core/dom/layout/intersection';
 
@@ -26,8 +26,9 @@ class AmpIframe extends BaseElement {
    * Callback for onload event of iframe. Checks if the component has a placeholder
    * element and hides it if it does. Also checks the position of the iframe on the
    * document.
+   * @override
    */
-  handleOnLoad_() {
+  handleOnLoad() {
     if (this.getPlaceholder()) {
       this.togglePlaceholder(false);
       return;
@@ -81,9 +82,6 @@ class AmpIframe extends BaseElement {
   /** @override */
   init() {
     return dict({
-      'onLoad': () => {
-        this.handleOnLoad_();
-      },
       'requestResize': (height, width) => {
         return this.updateSize_(height, width);
       },

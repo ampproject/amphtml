@@ -1,4 +1,3 @@
-import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
 import {StoryAnimationPresetDef} from './animation-types';
 import {
   calculateTargetScalingFactor,
@@ -8,12 +7,10 @@ import {
   whooshIn,
 } from './animation-presets-utils';
 import {px} from '#core/dom/style';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';
-/** @const {string} */
-const FILL_TEMPLATE_LAYOUT = 'fill';
 /** @const {number} */
 const SCALE_HIGH_DEFAULT = 3;
 /** @const {number} */
@@ -69,15 +66,6 @@ export function setStyleForPreset(el, presetName) {
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
-    if (
-      parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      )
-    ) {
-      parent.classList.remove(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      );
-    }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
 }

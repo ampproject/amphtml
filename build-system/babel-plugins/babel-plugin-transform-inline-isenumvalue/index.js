@@ -49,7 +49,7 @@ module.exports = function (babel) {
       const {imported} = importDeclaration.node.specifiers.find(
         ({local}) => local.name === path.node.name
       );
-      traverse(parseSync(code), {
+      traverse(parseSync(code, {caller: {name: 'is-enum-value'}}), {
         Program(path) {
           path.stop(); // prevent a full walk
 

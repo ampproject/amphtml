@@ -3,12 +3,13 @@ import {isIframed} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {dict} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
-import {dev, user, userAssert} from '../log';
 import {getMode} from '../mode';
 import {openWindowDialog} from '../open-window-dialog';
 import {registerServiceBuilderForDoc} from '../service-helpers';
@@ -444,7 +445,7 @@ export class Navigation {
     }
 
     /** @const {!Window} */
-    const win = toWin(element.ownerDocument.defaultView);
+    const win = getWin(element);
     const url = element.href;
     const {protocol} = location;
 

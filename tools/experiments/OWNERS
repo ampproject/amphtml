@@ -11,7 +11,10 @@
     },
     {
       pattern: 'experiments-config.js',
-      owners: [{name: 'ampproject/working-groups'}],
+      owners: [
+        {name: 'ampproject/working-groups'},
+        {name: 'alanorozco', requestReviews: false},
+      ],
     },
   ],
 }

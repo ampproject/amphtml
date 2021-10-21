@@ -1,9 +1,9 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const semver = require('semver');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {gitDiffFileMain} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
@@ -35,9 +35,9 @@ function check(file) {
  * @return {!Promise}
  */
 async function checkExactVersions() {
-  const packageJsonFiles = await globby([
+  const packageJsonFiles = await fastGlob([
     '**/package.json',
-    '!**/node_modules',
+    '!**/node_modules/**',
   ]);
   packageJsonFiles.forEach((file) => {
     if (check(file)) {

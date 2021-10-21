@@ -1,8 +1,9 @@
 import {Services} from '#service';
 import {vsyncForTesting} from '#service/vsync-impl';
 
+import {user} from '#utils/log';
+
 import {urls} from '../../../../src/config';
-import {user} from '../../../../src/log';
 import {AmpGeo} from '../amp-geo';
 import {GEO_IN_GROUP} from '../amp-geo-in-group';
 

@@ -27,6 +27,6 @@ feature_tests/deprecation_warnings_and_errors.html:19:0 The tag 'disallowed-tag'
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/deprecation_warnings_and_errors.html:21:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
+feature_tests/deprecation_warnings_and_errors.html:21:6 The tag 'style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 >>       ^~~~~~~~~
-feature_tests/deprecation_warnings_and_errors.html:21:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites)
+feature_tests/deprecation_warnings_and_errors.html:21:6 The tag 'noscript > style[amp-boilerplate]' is missing or incorrect, but required by 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)

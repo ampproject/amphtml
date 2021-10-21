@@ -1,2 +1,2 @@
-export {LightboxGalleryProvider} from './provider';
-export {WithLightbox} from './consumer';
+export {BentoLightboxGalleryProvider} from './provider';
+export {WithBentoLightboxGallery} from './consumer';

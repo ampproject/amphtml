@@ -1,9 +1,9 @@
 import {AmpEvents} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 
-import {TextMask} from './text-mask';
+import {listen} from '#utils/event-helper';
 
-import {listen} from '../../../src/event-helper';
+import {TextMask} from './text-mask';
 
 const SERVICE = 'inputmask';
 const TAG = `amp-${SERVICE}`;

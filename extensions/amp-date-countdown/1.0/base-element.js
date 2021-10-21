@@ -2,12 +2,12 @@ import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attribu
 
 import {PreactBaseElement} from '#preact/base-element';
 
-import {DateCountdown} from './component';
+import {BentoDateCountdown} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = DateCountdown;
+BaseElement['Component'] = BentoDateCountdown;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

@@ -1,13 +1,13 @@
 'use strict';
 
 const babel = require('@babel/core');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const tempy = require('tempy');
 const {BABEL_SRC_GLOBS} = require('./sources');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 
@@ -47,7 +47,11 @@ function getBabelOutputDir() {
  * @return {!Array<string>}
  */
 function getFilesToTransform() {
-  return globby.sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/']);
+  return fastGlob.sync([
+    ...BABEL_SRC_GLOBS,
+    '!node_modules/**',
+    '!third_party/**',
+  ]);
 }
 
 /**
@@ -77,7 +81,7 @@ async function preClosureBabel(file, outputFilename, options) {
   }
   const transformedFile = path.join(outputDir, file);
   if (!filesToTransform.includes(file)) {
-    if (!(await fs.exists(transformedFile))) {
+    if (!(await fs.pathExists(transformedFile))) {
       await fs.copy(file, transformedFile);
     }
     return transformedFile;
@@ -92,7 +96,7 @@ async function preClosureBabel(file, outputFilename, options) {
     const {contents, hash} = await batchedRead(file, optionsHash);
     const cachedPromise = transformCache.get(hash);
     if (cachedPromise) {
-      if (!(await fs.exists(transformedFile))) {
+      if (!(await fs.pathExists(transformedFile))) {
         await fs.outputFile(transformedFile, await cachedPromise);
       }
     } else {

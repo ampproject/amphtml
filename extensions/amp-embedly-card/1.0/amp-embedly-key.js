@@ -4,7 +4,7 @@ import {isExperimentOn} from '#experiments';
 
 import {PreactBaseElement} from '#preact/base-element';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 export const TAG = 'amp-embedly-key';

@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var InstagramDef = {};
+var BentoInstagramDef = {};
 
 /**
  * @typedef {{
@@ -11,12 +11,13 @@ var InstagramDef = {};
  *   requestResize: (function(number):*|undefined),
  *   loading: (string|undefined),
  *   onReadyState: (function(string, *=)|undefined),
+ *   onLoad: (function():undefined|undefined),
  * }}
  */
-InstagramDef.Props;
+BentoInstagramDef.Props;
 
 /** @constructor */
-InstagramDef.Api = function () {};
+BentoInstagramDef.Api = function () {};
 
 /** @type {string} */
-InstagramDef.Api.prototype.readyState;
+BentoInstagramDef.Api.prototype.readyState;

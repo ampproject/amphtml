@@ -2,10 +2,11 @@ import {isArray} from '#core/types';
 
 import {Services} from '#service';
 
+import {devAssert} from '#utils/log';
+
 import {OwnersInterface} from './owners-interface';
 import {Resource} from './resource';
 
-import {devAssert} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /**

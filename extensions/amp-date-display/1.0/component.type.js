@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var DateDisplayDef = {};
+var BentoDateDisplayDef = {};
 
 /**
  * @typedef {{
@@ -12,4 +12,4 @@ var DateDisplayDef = {};
  *   render: (?RendererFunctionType|undefined),
  * }}
  */
-DateDisplayDef.Props;
+BentoDateDisplayDef.Props;

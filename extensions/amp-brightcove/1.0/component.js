@@ -5,6 +5,7 @@ import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {dispatchCustomEvent} from '#core/dom';
 import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
+import {useValueRef} from '#preact/component';
 
 /** @const {string} */
 const DEFAULT = 'default';
@@ -25,7 +26,7 @@ const methods = {
  * @param {{current: ?VideoWrapperDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function BrightcoveWithRef(props, ref) {
+function BentoBrightcoveWithRef(props, ref) {
   const {
     account,
     autoplay,
@@ -37,10 +38,12 @@ export function BrightcoveWithRef(props, ref) {
     videoId,
     onPlayingState,
     urlParams,
+    onLoad,
     ...rest
   } = props;
 
   const playerStateRef = useRef({});
+  const onLoadRef = useValueRef(onLoad);
   const [muted, setMuted] = useState(mutedProp);
   const src = useMemo(
     () =>
@@ -62,6 +65,7 @@ export function BrightcoveWithRef(props, ref) {
       switch (eventType) {
         case 'ready':
           dispatchCustomEvent(currentTarget, 'canplay');
+          onLoadRef.current?.();
           break;
         case 'playing':
           onPlayingState?.(true);
@@ -96,7 +100,7 @@ export function BrightcoveWithRef(props, ref) {
         dispatchCustomEvent(currentTarget, mutedOrUnmutedEvent(isMuted));
       }
     },
-    [muted, onPlayingState]
+    [muted, onPlayingState, onLoadRef]
   );
 
   // Check for valid props
@@ -118,9 +122,6 @@ export function BrightcoveWithRef(props, ref) {
     />
   );
 }
-const Brightcove = forwardRef(BrightcoveWithRef);
-Brightcove.displayName = 'Brightcove'; // Make findable for tests.
-export {Brightcove};
 
 /**
  * @param {string} method
@@ -160,3 +161,7 @@ function checkProps({account}) {
   }
   return true;
 }
+
+const BentoBrightcove = forwardRef(BentoBrightcoveWithRef);
+BentoBrightcove.displayName = 'BentoBrightcove'; // Make findable for tests.
+export {BentoBrightcove};

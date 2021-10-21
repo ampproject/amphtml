@@ -12,14 +12,15 @@ import {
   childElementsByTag,
   matches,
 } from '#core/dom/query';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
+import {descendsFromStory} from '#utils/story';
+import {dev, devAssert, user} from '#utils/log';
 import {
   addAttributesToElement,
   dispatchCustomEvent,
   insertAfterOrAtStart,
   removeElement,
 } from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {fetchCachedSources} from './video-cache';
 import {
   fullscreenEnter,
@@ -31,7 +32,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isExperimentOn} from '#experiments';
-import {listen, listenOncePromise} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '#utils/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
@@ -606,6 +607,7 @@ export class AmpVideo extends AMP.BaseElement {
     tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+    this.setUpCaptions_();
 
     if (this.video_.changedSources) {
       this.video_.changedSources();
@@ -746,6 +748,29 @@ export class AmpVideo extends AMP.BaseElement {
     listenOncePromise(this.video_, 'loadedmetadata').then(() =>
       this.onVideoLoaded_()
     );
+    this.setUpCaptions_();
+  }
+
+  /**
+   * Connects to amp-story-captions component.
+   * @private
+   */
+  setUpCaptions_() {
+    const captionsId = this.element.getAttribute('captions-id');
+    if (!captionsId) {
+      return;
+    }
+    const captionsElement = this.win.document.querySelector(
+      `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
+    );
+    if (!captionsElement) {
+      return;
+    }
+    captionsElement.getImpl().then((impl) => {
+      if (impl.setVideoElement) {
+        impl.setVideoElement(this.video_);
+      }
+    });
   }
 
   /** @private */
@@ -811,8 +836,11 @@ export class AmpVideo extends AMP.BaseElement {
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
-    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    if (!src) {
+      return;
+    }
+    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     setInitialDisplay(poster, 'block');
     setStyles(poster, {
       'background-image': `url(${src})`,
