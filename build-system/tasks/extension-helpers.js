@@ -697,7 +697,7 @@ function buildBinaries(extDir, binaries, options) {
       ...options,
       toName: maybeToNpmEsmName(`${name}.max.js`),
       minifiedName: maybeToNpmEsmName(`${name}.js`),
-      latestName: '',
+      aliasName: '',
       outputFormat: esm ? 'esm' : 'cjs',
       externalDependencies: external,
       remapDependencies: remap,
@@ -717,7 +717,7 @@ async function buildBentoExtensionJs(dir, name, options) {
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
-    wrapper: 'none',
+    wrapper: 'bento',
     filename: await getBentoFilename(dir, bentoName, options),
     // Include extension directory since our entrypoint may be elsewhere.
     extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
@@ -811,7 +811,7 @@ async function buildExtensionJs(dir, name, options) {
     ...options,
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
-    latestName: isLatest ? `${name}-latest.js` : '',
+    aliasName: isLatest ? `${name}-latest.js` : '',
     wrapper: resolvedWrapper,
   });
 
