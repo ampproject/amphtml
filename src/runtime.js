@@ -28,11 +28,11 @@ import {
 
 import {BaseElement} from './base-element';
 import {startupChunk} from './chunk';
-import {config} from './config';
 import {reportErrorForWin} from './error-reporting';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
 import {hasRenderDelayingServices} from './render-delaying-services';
+import {config} from './runtime-config';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
