@@ -5,6 +5,7 @@ const {
   compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
+  writeGeneratedBentoRuntime,
 } = require('./helpers');
 const {
   createCtrlcHandler,
@@ -25,7 +26,11 @@ const argv = require('minimist')(process.argv.slice(2));
  * @return {Promise}
  */
 async function runPreBuildSteps(options) {
-  return Promise.all([compileCss(options), bootstrapThirdPartyFrames(options)]);
+  return Promise.all([
+    compileCss(options),
+    bootstrapThirdPartyFrames(options),
+    writeGeneratedBentoRuntime(),
+  ]);
 }
 
 /**
