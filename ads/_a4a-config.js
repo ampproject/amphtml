@@ -28,6 +28,7 @@ export function getA4ARegistry() {
       'doubleclick': () => true,
       'fake': () => true,
       'nws': () => true,
+      'smartadserver': () => true,
       'valueimpression': () => true,
       // TODO: Add new ad network implementation "is enabled" functions here.
       // Note: if you add a function here that requires a new "import", above,
