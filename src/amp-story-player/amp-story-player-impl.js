@@ -1327,9 +1327,9 @@ export class AmpStoryPlayer {
       // own cached URL.
       const location = parseUrlDeprecated(url);
       if (location.pathname.startsWith('/c/')) {
-        url = location.hostname + '/v/' + location.pathname.substr(3);
+        location.pathname = '/v/' + location.pathname.substr(3);
       }
-      return Promise.resolve(url);
+      return Promise.resolve(location.toString());
     }
 
     return ampToolboxCacheUrl
