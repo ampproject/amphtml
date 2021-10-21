@@ -17,12 +17,15 @@ export const _default = () => {
   const cards = boolean('show cards', true) ? undefined : 'hidden';
   const conversation = boolean('show conversation', false) ? undefined : 'none';
   return (
-    <BentoTwitter
-      cards={cards}
-      conversation={conversation}
-      tweetid={tweetId}
-      style={{width: '300px', height: '200px'}}
-    />
+    <>
+      <div style="height:2000px;">Scroll Down to load the tweet</div>
+      <BentoTwitter
+        cards={cards}
+        conversation={conversation}
+        tweetid={tweetId}
+        style={{width: '300px', height: '200px'}}
+      />
+    </>
   );
 };
 
