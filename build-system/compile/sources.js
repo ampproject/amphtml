@@ -59,7 +59,6 @@ const COMMON_GLOBS = [
  * NOTE: Keep the globs here in sync with the `CLOSURE_SRC_GLOBS`.
  */
 const BABEL_SRC_GLOBS = [
-  'build/bento.js',
   'src/**/*.js',
   'builtins/**/*.js',
   'build/**/*.js',
@@ -72,7 +71,6 @@ const BABEL_SRC_GLOBS = [
  * NOTE: Keep the globs here in sync with the `BABEL_SRC_GLOBS`.
  */
 const CLOSURE_SRC_GLOBS = [
-  'build/bento.js',
   '3p/3p.js',
   // Ads config files.
   'ads/_*.js',
