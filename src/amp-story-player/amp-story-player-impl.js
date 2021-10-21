@@ -25,6 +25,7 @@ import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
+  parseUrlDeprecated,
   parseUrlWithA,
   removeFragment,
   removeSearch,
@@ -1324,7 +1325,11 @@ export class AmpStoryPlayer {
     if (isProxyOrigin(url)) {
       // Ensures serving type is 'viewer' (/v/) when publishers provide their
       // own cached URL.
-      return Promise.resolve(url.replace('/c/', '/v/'));
+      const location = parseUrlDeprecated(url);
+      if (location.pathname.startsWith('/c/')) {
+        url = location.hostname + '/v/' + location.pathname.substr(3);
+      }
+      return Promise.resolve(url);
     }
 
     return ampToolboxCacheUrl
