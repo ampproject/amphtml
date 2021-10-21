@@ -782,7 +782,7 @@ async function generateBentoEntryPointSource(name, toExport, options) {
   return dedent(`
     import {BaseElement} from '../base-element';
     
-    ${toExport ? 'export default' : ''} function defineElement() {
+    function defineElement() {
       const css = __css__;
       if (css) {
         const style = document.createElement('style');
@@ -795,7 +795,7 @@ async function generateBentoEntryPointSource(name, toExport, options) {
       );
     }
 
-    ${toExport ? '' : 'defineElement();'}
+    ${toExport ? 'export {defineElement};' : 'defineElement();'}
   `)
     .replace('__css__', JSON.stringify(css))
     .replace('__name__', JSON.stringify(name));
