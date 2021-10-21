@@ -105,7 +105,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
-    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad-v3')) {
+    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad-v4')) {
       return null;
     }
 
@@ -120,7 +120,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     const adType = (ad.getAttribute('type') || '').toLowerCase();
     if (adType == 'doubleclick' || adType == 'adsense') {
-      addExperimentIdToElement(enableConversion ? '31062661' : '31062660', ad);
+      addExperimentIdToElement(enableConversion ? '31063204' : '31063203', ad);
     }
 
     if (!enableConversion) {
