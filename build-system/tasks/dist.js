@@ -12,6 +12,7 @@ const {
   maybeToEsmName,
   printConfigHelp,
   printNobuildHelp,
+  writeGeneratedBentoRuntime,
 } = require('./helpers');
 const {
   cleanupBuildDir,
@@ -97,6 +98,7 @@ async function runPreDistSteps(options) {
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
+  await writeGeneratedBentoRuntime();
   displayLifecycleDebugging();
 }
 
