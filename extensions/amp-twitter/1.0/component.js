@@ -88,43 +88,37 @@ function BentoTwitterWithRef(
     ]
   );
 
-  // eslint-disable-next-line prefer-const
-  let observerCb;
-  const ioCallback = useCallback(
-    ({isIntersecting}) => {
+  const observerCb = useIntersectionObserver(({isIntersecting}) => {
+    if (isIntersecting) {
       setinView(true);
-      if (!isIntersecting) {
-        setRender(true);
-        // unobserve element once it's rendered
-        observerCb(null);
-      }
-    },
-    [observerCb]
-  );
 
-  observerCb = useIntersectionObserver(ioCallback);
-  // Need to create custom callback ref because ProxyIframeEmbed uses an imperative handle with an property for the node.
-  const observerCbRef = (proxyIframeEmbedHandle) => {
-    const {node: iframeNode} = proxyIframeEmbedHandle;
-    // Observe grandparent div instead of iframe because iframe keeps changing height
-    observerCb(iframeNode?.parentNode.parentNode);
+      // unobserve element once it's rendered
+      observerCb(null);
+    }
+  });
+
+  const observerCbRef = (containerNode) => {
+    observerCb(containerNode);
   };
 
-  const proxyIframeEmbedRef = useMergeRefs([ref, observerCbRef]);
+  const containerRef = useMergeRefs([ref, observerCbRef]);
 
   return (
-    <ProxyIframeEmbed
-      allowfullscreen
-      ref={proxyIframeEmbedRef}
-      title={title}
-      {...rest}
-      // non-overridable props
-      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
-      messageHandler={messageHandler}
-      options={options}
-      type={TYPE}
-      style={height ? {...style, height} : style}
-    />
+    <div ref={containerRef}>
+      {inView && (
+        <ProxyIframeEmbed
+          allowfullscreen
+          title={title}
+          {...rest}
+          // non-overridable props
+          matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
+          messageHandler={messageHandler}
+          options={options}
+          type={TYPE}
+          style={height ? {...style, height} : style}
+        />
+      )}
+    </div>
   );
 }
 
