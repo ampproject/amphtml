@@ -44,7 +44,7 @@ export class ScrollBar extends ScrollComponent {
           'scrolling': 'no',
           'frameborder': '0',
           'allowtransparency': 'true',
-          'title': 'Scroll',
+          'title': 'Twitter Blue bar',
           'width': '100%',
           'height': '100%',
           'sandbox':
