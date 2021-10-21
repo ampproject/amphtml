@@ -26,7 +26,7 @@ exports.jsBundles = {
       toName: 'bento.max.js',
       minifiedName: 'bento.js',
       // For backwards-compat:
-      latestName: 'custom-elements-polyfill.js',
+      aliasName: 'custom-elements-polyfill.js',
     },
   },
   'alp.max.js': {
