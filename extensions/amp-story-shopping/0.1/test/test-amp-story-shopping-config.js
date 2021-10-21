@@ -2,7 +2,7 @@ import {createElementWithAttributes} from '#core/dom';
 import '../amp-story-shopping';
 
 describes.realWin(
-  'amp-story-shopping-v0.1',
+  'amp-story-shopping-config-v0.1',
   {
     amp: {
       runtimeOn: true,
@@ -18,13 +18,13 @@ describes.realWin(
       win = env.win;
     });
 
-    async function createAmpStoryShopping() {
+    async function createAmpStoryShoppingTag() {
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
       element = createElementWithAttributes(
         win.document,
-        'amp-story-shopping',
-        {'layout': 'container'}
+        'amp-story-shopping-config',
+        {'layout': 'responsive', 'width': '100px', 'height': '100px'}
       );
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
@@ -32,8 +32,8 @@ describes.realWin(
       shopping = await element.getImpl();
     }
 
-    it('should build shopping component', async () => {
-      await createAmpStoryShopping();
+    it('should build shopping config component', async () => {
+      await createAmpStoryShoppingTag();
       expect(() => shopping.layoutCallback()).to.not.throw();
     });
   }

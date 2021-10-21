@@ -15,16 +15,16 @@
   <body>
     <amp-story
         standalone
-        title="New Story"
-        publisher="AMP Story codelab"
+        title="New Story Shopping Component"
+        publisher="AMP Story Shopping"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
-      <amp-story-page id="cover">
-          
+      <amp-story-page id="example">
+        <amp-story-shopping-config height="10" width="10" layout="responsive"></amp-story-shopping-config>
         <amp-story-grid-layer template="vertical">
-            <amp-story-shopping></amp-story-shopping>
-          </amp-story-grid-layer>
-
+        <amp-story-shopping-tag height="10" width="10" layout="responsive"></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment height="10" width="10" layout="responsive"></amp-story-shopping-attachment>
       </amp-story-page>
     </amp-story>
   </body>
