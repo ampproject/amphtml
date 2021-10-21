@@ -1,7 +1,7 @@
 import {getStyle} from '#core/dom/style';
 import {WindowInterface} from '#core/window/interface';
 
-import {poll} from './iframe';
+import {poll} from '#testing/iframe';
 
 import {
   getService,
@@ -9,7 +9,7 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
-} from '../src/service-helpers';
+} from '../../src/service-helpers';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.

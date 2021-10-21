@@ -209,7 +209,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     this.unregisterEventHandlers_();
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.pauseHelper_.updatePlaying(false);
 
     return true;

@@ -11,7 +11,7 @@ import {
   getMockOutOfBoundsData,
   getMockScrambledData,
 } from './helpers';
-import {measureMutateElementStub} from '#testing/test-helper';
+import {measureMutateElementStub} from '#testing/helpers/service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

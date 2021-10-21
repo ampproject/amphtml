@@ -6,6 +6,8 @@ import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
+import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
+import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
 import {Services} from '#service';
 
@@ -96,6 +98,11 @@ export class Performance {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {string} */
+    this.eventid_ = base64UrlEncodeFromBytes(
+      getCryptoRandomBytesArray(win, 16)
+    );
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -523,26 +530,30 @@ export class Performance {
     }
   }
 
+  /** @private */
+  recordGoogleFontExp_() {
+    if (!this.googleFontExpRecorded_) {
+      this.googleFontExpRecorded_ = true;
+      const {win} = this;
+      const googleFontExp = parseInt(
+        computedStyle(win, win.document.body).getPropertyValue(
+          '--google-font-exp'
+        ),
+        10
+      );
+      if (googleFontExp >= 0) {
+        this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
+      }
+    }
+  }
+
   /**
    * Tick the metrics whose values change over time.
    * @private
    */
   tickCumulativeMetrics_() {
     if (this.supportsLayoutShift_) {
-      if (!this.googleFontExpRecorded_) {
-        this.googleFontExpRecorded_ = true;
-        const {win} = this;
-        const googleFontExp = parseInt(
-          computedStyle(win, win.document.body).getPropertyValue(
-            '--google-font-exp'
-          ),
-          10
-        );
-        if (googleFontExp >= 0) {
-          this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
-        }
-      }
-
+      this.recordGoogleFontExp_();
       this.tickCumulativeLayoutShiftScore_();
     }
     if (this.supportsLargestContentfulPaint_) {
@@ -606,6 +617,7 @@ export class Performance {
       sum += entry.value;
     }
     entries.length = 0;
+    this.recordGoogleFontExp_();
     if (old == null || sum > old) {
       // We'll record the largest windowed CLS.
       this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
@@ -835,6 +847,7 @@ export class Performance {
         dict({
           'ampexp': this.ampexp_,
           'canonicalUrl': this.documentInfo_.canonicalUrl,
+          'eventid': this.eventid_,
         }),
         /* cancelUnsent */ true
       );

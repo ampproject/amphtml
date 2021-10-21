@@ -34,7 +34,7 @@ import '@ampproject/bento-fit-text';
 
 ```html
 <head>
-  <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
+  <script async src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <script async custom-element="bento-fit-text" src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"></script>
   <style data-bento-boilerplate>

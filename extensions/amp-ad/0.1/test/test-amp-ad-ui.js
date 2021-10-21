@@ -326,9 +326,9 @@ describes.realWin(
           .not.null;
       });
 
-      it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
+      it('top sticky ads shall cause scroll trigger', () => {
         uiHandler.stickyAdPosition_ = 'top';
-        uiHandler.onResizeSuccess();
+        uiHandler.maybeInitStickyAd();
         expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
       });
 

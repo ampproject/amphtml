@@ -1,3 +1,5 @@
+import {TreeProto, NodeProto} from '@ampproject/bento-compiler';
+
 /**
  * AMP Components must implement this "buildDom" function in order to be server-rendered.
  *
@@ -8,33 +10,20 @@
  *
  * The return value is set to *, so that we may optionally return any DOM nodes
  * created during a client-side render. These nodes are often needed for ivars.
- *
- * @typedef {function(!Element):*}
  */
-export let BuildDomDef;
-
-/**
- * See @ampproject/bento-compiler for the definition.
- * @typedef {*}
- */
-export let TreeProtoDef;
+export type BuildDom = (Element) => void;
 
 /**
  * Contains component versioning data via a map from tagName --> version.
- *
- * @typedef {Object<string, string>}}
  */
-export let VersionsDef;
+export type Versions = Array<{component: string; version: string}>;
 
-/**
- * @typedef {{
- *   document: TreeProtoDef,
- *   versions: VersionsDef
- * }}
- */
-export let CompilerRequest;
+export type CompilerRequest = {
+  document?: TreeProto;
+  nodes?: NodeProto[];
+  versions: Versions;
+};
 
-/**
- * @typedef {{ document: TreeProtoDef }}
- */
-export let CompilerResponse;
+export type CompilerResponse = {document: TreeProto} | {nodes: NodeProto[]};
+
+export type BuilderMap = {[tagName: string]: BuildDom};

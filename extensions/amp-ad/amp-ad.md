@@ -171,6 +171,8 @@ Use to denote that this is a sticky ad unit and specify the position of this uni
 -   top
 -   bottom
 -   bottom-right
+-   left
+-   right
 
 ### `data-foo-bar`
 
@@ -298,6 +300,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Affiliate-B](../../ads/vendors/affiliateb.md)
 -   [AJA](../../ads/vendors/aja.md)
 -   [AMoAd](../../ads/vendors/amoad.md)
+-   [Andbeyond](../../ads/vendors/andbeyond.md)
 -   [Aniview](../../ads/vendors/aniview.md)
 -   [AnyClip](../../ads/vendors/anyclip.md)
 -   [AppNexus](../../ads/vendors/appnexus.md)
@@ -436,6 +439,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [rnetplus](../../ads/vendors/rnetplus.md)
 -   [Rubicon Project](../../ads/vendors/rubicon.md)
 -   [RUNative](../../ads/vendors/runative.md)
+-   [Sabavision](../../ads/vendors/sabavision.md)
 -   [SAS CI 360 Match](../../ads/vendors/sas.md)
 -   [Seeding Alliance](../../ads/vendors/seedingalliance.md)
 -   [Sekindo](../../ads/vendors/sekindo.md)

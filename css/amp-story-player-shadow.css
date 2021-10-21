@@ -102,7 +102,8 @@
 
   /* Override if iframe height is less than 538px. */
  .i-amphtml-story-player-panel.i-amphtml-story-player-panel-small  {
-    --i-amphtml-story-player-panel-ratio: 3 / 4;
+    /** If changing this, also change amp-story-desktop-one-panel.css **/
+    --i-amphtml-story-player-panel-ratio: 36 / 53;
   }
 
   .i-amphtml-story-player-panel-prev,

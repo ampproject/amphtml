@@ -1,5 +1,5 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
@@ -35,7 +35,7 @@ class AmpAccordion extends BaseElement {
   /** @override */
   triggerEvent(section, eventName, detail) {
     const event = createCustomEvent(
-      toWin(section.ownerDocument.defaultView),
+      getWin(section),
       `accordionSection.${eventName}`,
       detail
     );

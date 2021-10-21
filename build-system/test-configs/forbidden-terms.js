@@ -11,10 +11,6 @@ const privateServiceFactory =
 const shouldNeverBeUsed =
   'Usage of this API is not allowed - only for internal purposes.';
 
-const backwardCompat =
-  'This method must not be called. It is only retained ' +
-  'for backward compatibility during rollout.';
-
 const realiasGetMode =
   'Do not re-alias getMode or its return so it can be ' +
   'DCE\'d. Use explicitly like "getMode().localDev" instead.';
@@ -316,7 +312,7 @@ const forbiddenTermsGlobal = {
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
       'src/utils/display-observer.js',
-      'testing/test-helper.js',
+      'testing/helpers/service.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -588,9 +584,6 @@ const forbiddenTermsGlobal = {
     message: 'Use src/open-window-dialog',
     allowlist: ['src/open-window-dialog.js'],
   },
-  '\\.getWin\\(': {
-    message: backwardCompat,
-  },
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
@@ -769,7 +762,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
       'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
       'extensions/amp-youtube/1.0/storybook/Basic.js',
-      'src/builtins/storybook/amp-layout-with-aspect-ratio-css.amp.js',
       'src/builtins/storybook/amp-layout.amp.js',
       'src/preact/storybook/Context.js',
       'src/preact/storybook/Wrappers.js',

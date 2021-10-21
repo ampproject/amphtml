@@ -7,7 +7,7 @@ import {
   isShadowCssSupported,
 } from '#core/dom/web-components';
 import {toArray} from '#core/types/array';
-import {toWin} from '#core/window';
+import {getWin, toWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -38,7 +38,7 @@ let shadowDomStreamingSupported;
  * @return {!ShadowRoot}
  */
 export function createShadowRoot(hostElement) {
-  const win = toWin(hostElement.ownerDocument.defaultView);
+  const win = getWin(hostElement);
 
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {

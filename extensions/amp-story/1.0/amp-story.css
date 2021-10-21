@@ -82,8 +82,7 @@ amp-story {
   touch-action: manipulation !important;
 }
 
-html.i-amphtml-story-standalone,
-html.i-amphtml-story-standalone body {
+html:root, html:root body {
   font-size: calc(2.5 * var(--story-page-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
@@ -121,7 +120,7 @@ h6 {
   font-size: 0.67rem;
 }
 
-html.i-amphtml-story-standalone #i-amphtml-wrapper body {
+html:root #i-amphtml-wrapper body {
   /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
       1px bigger than the viewport. */
   border-top: none !important;
@@ -410,6 +409,23 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   height: var(--i-amphtml-story-layer-height, 100%);
   font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
   margin-left: calc((var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) * 0.5); /* Set margin to 1/2 of page-width - layer-width to center layer */
+
+  --i-amphtml-aspect-ratio-float: calc(var(--aspect-ratio)) !important; /* Avoid fractions, which don't work with compilers that remove parenthesis */
+  --i-amphtml-story-page-width: calc(100 * var(--story-page-vw, 1vw)) !important;
+  --i-amphtml-story-page-height: calc(100 * var(--story-page-vh, 1vh)) !important;
+  --i-amphtml-story-unscaled-width: min(var(--i-amphtml-story-page-width), calc(var(--i-amphtml-story-page-height) * var(--i-amphtml-aspect-ratio-float))) !important;
+  --i-amphtml-story-unscaled-height: min(var(--i-amphtml-story-page-height), calc(var(--i-amphtml-story-page-width) / var(--i-amphtml-aspect-ratio-float))) !important;
+  --i-amphtml-story-layer-width: calc(var(--i-amphtml-story-unscaled-width) * var(--scaling-factor, 1)) !important;
+  --i-amphtml-story-layer-height: calc(var(--i-amphtml-story-unscaled-height) * var(--scaling-factor, 1)) !important;
+}
+
+[preset="2021-foreground"] {
+  --aspect-ratio: 69/116 !important;
+}
+
+[preset="2021-background"] {
+  --aspect-ratio: 69/116 !important;
+  --scaling-factor: 1.142 !important;
 }
 
 /**
