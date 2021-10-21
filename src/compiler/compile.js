@@ -10,7 +10,7 @@ import {getBuilders} from './builders';
  */
 export function compile(request) {
   const {document, nodes, versions} = request ?? {};
-  if (!versions || (!request.document && !request.nodes)) {
+  if (!versions || !(document || nodes)) {
     throw new Error('Must provide versions and either document or nodes');
   }
 
