@@ -14,8 +14,9 @@ const dedent = require('dedent');
 const {addLabels, removeLabels} = require('./label-pull-requests');
 const {createOrUpdateTracker} = require('./update-issue-tracker');
 const {cyan, magenta} = require('kleur/colors');
+const {getRelease} = require('./utils');
 const {log} = require('../common/logging');
-const {makeRelease, maybeGetRelease} = require('./make-release');
+const {makeRelease} = require('./make-release');
 const {publishRelease, rollbackRelease} = require('./update-release');
 
 const {action, base, channel, head, sha, time} = argv;
@@ -40,7 +41,7 @@ async function _promote() {
     return;
   }
 
-  const release = await maybeGetRelease(head);
+  const release = await getRelease(head);
   if (!release) {
     const {'html_url': url} = await makeRelease(head, base, channel, sha);
     log('Created release', magenta(head), 'at', cyan(url));
