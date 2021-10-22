@@ -9,16 +9,11 @@ import {getBuilders} from './builders';
  * @return {import('./types').CompilerResponse}
  */
 export function compile(request) {
-  if (!request || (!request.document && !request.nodes)) {
-    throw new Error('Must provide either document or nodes');
+  const {document, nodes, versions} = request ?? {};
+  if (!versions || !(document || nodes)) {
+    throw new Error('Must provide versions and either document or nodes');
   }
 
-  // TODO(samouri): remove the defaults.
-  const versions = request.versions ?? [
-    {component: 'amp-layout', version: 'v0'},
-  ];
-
-  const {document, nodes} = request;
   if (document) {
     return {
       document: compiler.renderAstDocument(document, getBuilders(versions)),
