@@ -1,21 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const minimist = require('minimist');
-const {cyan, green} = require('../common/colors');
+const {cyan, green} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {requireNewServerModule} = require('./typescript-compile');
 const {URL} = require('url');
@@ -40,8 +24,8 @@ function setServeMode(modeOptions) {
     modeOptions = minimist(process.argv.slice(2), {string: ['rtv']});
   }
 
-  if (modeOptions.compiled) {
-    serveMode = 'compiled';
+  if (modeOptions.minified) {
+    serveMode = 'minified';
   } else if (modeOptions.esm) {
     serveMode = 'esm';
   } else if (modeOptions.cdn) {
@@ -61,7 +45,7 @@ function setServeMode(modeOptions) {
  */
 function logServeMode() {
   const serveMode = getServeMode();
-  if (serveMode == 'compiled') {
+  if (serveMode == 'minified') {
     log(green('Serving'), cyan('minified'), green('JS'));
   } else if (serveMode == 'esm') {
     log(green('Serving'), cyan('ESM'), green('JS'));
@@ -151,7 +135,7 @@ function replaceUrls(mode, html, hostName = '') {
   // If you need to add URL mapping logic, please don't do it in this function.
   // Instead, do so in the `cdn.ts` module required by `replaceCdnJsUrls()`
 
-  const useMaxNames = mode !== 'compiled';
+  const useMaxNames = mode !== 'minified';
   if (!useMaxNames) {
     // TODO(alanorozco): This should be handled in new-server as well.
     html = html.replace(

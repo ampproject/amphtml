@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 #ifndef HTMLPARSER__NODE_H_
 #define HTMLPARSER__NODE_H_
 
@@ -71,6 +55,7 @@ class Node {
   void AddAttribute(const Attribute& attr);
   // Sorts the attributes of this node.
   void SortAttributes(bool remove_duplicates = false);
+  void DropDuplicateAttributes();
 
   // Updates child nodes line and column numbers relative to the given node.
   // This does not change order or parent/child relationship of this or child
@@ -89,9 +74,6 @@ class Node {
   // Returns nullopt if ParseOptions.store_node_offsets is not set.
   std::optional<LineCol> LineColInHtmlSrc() const {
     return line_col_in_html_src_;
-  }
-  std::optional<Offsets> OffsetsInHtmlSrc() const {
-    return offsets_in_html_src_;
   }
   int NumTerms() const {
     return num_terms_;
@@ -160,8 +142,6 @@ class Node {
   std::string name_space_;
   // Position at which this node appears in HTML source.
   std::optional<LineCol> line_col_in_html_src_;
-  // Start/End offsets in original html src.
-  std::optional<LineCol> offsets_in_html_src_;
   // Records the number of terms for text contents.
   // Populated and meaningful only if node is of type TEXT_NODE.
   int num_terms_ = -1;

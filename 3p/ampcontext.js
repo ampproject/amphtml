@@ -1,27 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {MessageType} from '#core/3p-frame-messaging';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
-import {IframeMessagingClient} from './iframe-messaging-client';
-import {MessageType} from '../src/3p-frame-messaging';
-import {dev, devAssert} from '../src/log';
-import {dict, map} from '#core/types/object';
 import {isObject} from '#core/types';
-import {parseUrlDeprecated} from '../src/url';
+import {dict, map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
+
+import {dev, devAssert} from '#utils/log';
+
+import {IframeMessagingClient} from './iframe-messaging-client';
+
+import {parseUrlDeprecated} from '../src/url';
 
 export class AbstractAmpContext {
   /**
@@ -95,6 +83,9 @@ export class AbstractAmpContext {
 
     /** @type {?string} */
     this.pageViewId = null;
+
+    /** @type {?string} */
+    this.pageViewId64 = null;
 
     /** @type {?string} */
     this.referrer = null;
@@ -364,6 +355,7 @@ export class AbstractAmpContext {
     this.location = parseUrlDeprecated(context.location.href);
     this.mode = context.mode;
     this.pageViewId = context.pageViewId;
+    this.pageViewId64 = context.pageViewId64;
     this.referrer = context.referrer;
     this.sentinel = context.sentinel;
     this.sourceUrl = context.sourceUrl;

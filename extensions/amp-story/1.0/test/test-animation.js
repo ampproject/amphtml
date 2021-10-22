@@ -1,18 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AnimationManager,
@@ -464,8 +449,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
-    // TODO(wg-stories, #34695): This test is flaky during CI.
-    it.skip('creates internal runners when applying first frame (preset)', async () => {
+    it('creates internal runners when applying first frame (preset)', async () => {
       const page = html`
         <div>
           <div animate-in="fly-in-left"></div>
@@ -475,7 +459,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       `;
 
       const animationManager = new AnimationManager(page, ampdoc);
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
 
       querySelectorAllAnimateIn(page).forEach((target) => {
         const preset = presets[target.getAttribute('animate-in')];
@@ -483,7 +467,7 @@ describes.realWin('amp-story animations', {}, (env) => {
           createAnimationRunner.withArgs(
             page,
             env.sandbox.match({source: target, preset, spec: {target}}),
-            webAnimationBuilderPromise,
+            env.sandbox.match.any,
             env.sandbox.match.any,
             env.sandbox.match.any
           )
@@ -491,8 +475,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       });
     });
 
-    // TODO(wg-stories, #34695): This test is flaky during CI.
-    it.skip('creates internal runners when applying first frame (amp-story-animation)', async () => {
+    it('creates internal runners when applying first frame (amp-story-animation)', async () => {
       const spec1 = {keyframes: [{opacity: 1}]};
       const spec2 = {keyframes: [{transform: 'translate(10px, 10px)'}]};
 
@@ -512,13 +495,13 @@ describes.realWin('amp-story animations', {}, (env) => {
       spec2source.firstElementChild.textContent = JSON.stringify(spec2);
 
       const animationManager = new AnimationManager(page, ampdoc);
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
 
       expect(
         createAnimationRunner.withArgs(
           page,
           env.sandbox.match({source: spec1source, spec: spec1}),
-          webAnimationBuilderPromise,
+          env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
         )
@@ -528,7 +511,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         createAnimationRunner.withArgs(
           page,
           env.sandbox.match({source: spec2source, spec: spec2}),
-          webAnimationBuilderPromise,
+          env.sandbox.match.any,
           env.sandbox.match.any,
           env.sandbox.match.any
         )
@@ -544,7 +527,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         `,
         ampdoc
       );
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
       expect(createAnimationRunner).to.not.have.been.called;
     });
 
@@ -591,7 +574,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       });
 
       const animationManager = new AnimationManager(page, ampdoc);
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
 
       targetsWithOptions.forEach(({expectedOptions, target}) => {
         expect(
@@ -622,7 +605,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         </div>
       `;
       const animationManager = new AnimationManager(page, ampdoc);
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
       expect(runner.applyFirstFrame).to.have.callCount(
         querySelectorAllAnimateIn(page).length
       );
@@ -639,7 +622,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       env.win.document.body.appendChild(page);
       const animationManager = new AnimationManager(page, ampdoc);
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
 
       expect(
         createAnimationRunner.withArgs(
@@ -668,7 +651,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       env.win.document.body.appendChild(page);
       const animationManager = new AnimationManager(page, ampdoc);
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
 
       expect(
         createAnimationRunner.withArgs(
@@ -721,7 +704,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       env.win.document.body.appendChild(page);
 
       const animationManager = new AnimationManager(page, ampdoc);
-      await animationManager.applyFirstFrame();
+      await animationManager.applyFirstFrameOrFinish();
 
       expect(
         createAnimationRunner.withArgs(
@@ -803,7 +786,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
         runner[runnerMethod] = env.sandbox.spy();
         const animationManager = new AnimationManager(page, ampdoc);
-        await animationManager.applyFirstFrame();
+        await animationManager.applyFirstFrameOrFinish();
         animationManager[managerMethod]();
         expect(runner[runnerMethod]).to.have.callCount(
           querySelectorAllAnimateIn(page).length

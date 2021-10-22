@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -26,7 +10,8 @@ const {
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
+const {execOrThrow} = require('../common/exec');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
@@ -54,6 +39,16 @@ const getExtensionSrcPaths = () =>
     .sort();
 
 /**
+ * Object of targets to check with TypeScript.
+ *
+ * @type {Object<string, string>}
+ */
+const TSC_TYPECHECK_TARGETS = {
+  'compiler': 'src/compiler',
+  'carousel': 'extensions/amp-carousel/0.1',
+};
+
+/**
  * The main configuration location to add/edit targets for type checking.
  * Properties besides `entryPoints` are passed on to `closureCompile` as
  * options. * Values may be objects or functions, as some require initialization
@@ -68,7 +63,7 @@ const getExtensionSrcPaths = () =>
  *
  * @type {Object<string, Array<string>|Object|function():Object>}
  */
-const TYPE_CHECK_TARGETS = {
+const CLOSURE_TYPE_CHECK_TARGETS = {
   // Below are targets containing individual directories which are fully passing
   // type-checking. Do not remove or disable anything on this list.
   // Goal: Remove 'QUIET' from all of them.
@@ -115,7 +110,7 @@ const TYPE_CHECK_TARGETS = {
   // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
-    extraGlobs: ['{src,extensions}/**/*.js'],
+    extraGlobs: ['{src,extensions}/**/*.js', ...getLowBarExclusions()],
     onError(msg) {
       const lowBarErrors = [
         'JSC_BAD_JSDOC_ANNOTATION',
@@ -148,12 +143,12 @@ const TYPE_CHECK_TARGETS = {
       'ads/inabox/inabox-host.js',
       'src/web-worker/web-worker.js',
     ],
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   },
   'extensions': () => ({
     entryPoints: getExtensionSrcPaths(),
-    extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
+    extraGlobs: ['src/inabox/*.js', '!node_modules/preact/**'],
     warningLevel: 'QUIET',
   }),
   'integration': {
@@ -186,12 +181,47 @@ function externGlobsFromSrcGlobs(srcGlobs) {
 }
 
 /**
- * Performs closure type-checking on the target provided.
- * @param {string} targetName key in TYPE_CHECK_TARGETS
- * @return {!Promise<void>}
+ * Typecheck the given target using either tsc or closure.
+ *
+ * @param {string} targetName
+ * @return {Promise<void>}
  */
 async function typeCheck(targetName) {
-  let target = TYPE_CHECK_TARGETS[targetName];
+  return TSC_TYPECHECK_TARGETS[targetName]
+    ? tscTypeCheck(targetName)
+    : closureTypeCheck(targetName);
+}
+
+/**
+ * Performs tsc type-checking on the target provided.
+ * @param {string} targetName key in TSC_TYPECHECK_TARGETS
+ * @return {!Promise<void>}
+ */
+async function tscTypeCheck(targetName) {
+  execOrThrow(
+    `npx -p typescript tsc --project ${TSC_TYPECHECK_TARGETS[targetName]}/tsconfig.json`,
+    `Type checking ${targetName} failed`
+  );
+  log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
+}
+
+/**
+ * Returns the exclusion glob for telling closure to ignore all paths
+ * being checked via TS.
+ *
+ * @return {string[]}
+ */
+function getLowBarExclusions() {
+  return Object.values(TSC_TYPECHECK_TARGETS).map((dir) => `!${dir}`);
+}
+
+/**
+ * Performs closure type-checking on the target provided.
+ * @param {string} targetName key in CLOSURE_TYPE_CHECK_TARGETS
+ * @return {!Promise<void>}
+ */
+async function closureTypeCheck(targetName) {
+  let target = CLOSURE_TYPE_CHECK_TARGETS[targetName];
   // Allow targets to be dynamically evaluated
   if (typeof target == 'function') {
     target = target();
@@ -217,7 +247,7 @@ async function typeCheck(targetName) {
 
   // If srcGlobs and externGlobs are defined, determine the externs/extraGlobs
   if (srcGlobs.length || externGlobs.length) {
-    opts.externs = externGlobs.flatMap(globby.sync);
+    opts.externs = externGlobs.flatMap(fastGlob.sync);
 
     // Included globs should explicitly exclude any externs
     const excludedExterns = externGlobs.map((glob) => `!${glob}`);
@@ -281,7 +311,7 @@ async function checkTypes() {
   // Use the list of targets if provided, otherwise check all targets
   const targets = argv.targets
     ? argv.targets.split(/,/)
-    : Object.keys(TYPE_CHECK_TARGETS);
+    : Object.keys({...TSC_TYPECHECK_TARGETS, ...CLOSURE_TYPE_CHECK_TARGETS});
 
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();

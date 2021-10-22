@@ -6,22 +6,6 @@ teaser:
   text: Embeds an iframe containing a video player.
 ---
 
-<!--
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-video-iframe
 
 ## When should I use this?
@@ -426,7 +410,7 @@ prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
 #### <a name="getConsentData"></a> `getConsentData(callback)`
 
 The iframe document can request user consent data when the host document uses
-[`amp-consent`](hhttps://amp.dev/documentation/components/amp-consent/).
+[`amp-consent`](https://amp.dev/documentation/components/amp-consent/).
 
 Note: If you only require to block the iframe from loading when consent is not given, it's preferable to [set the `data-block-on-consent` attribute](https://amp.dev/documentation/components/amp-consent/#basic-blocking-behaviors) instead of calling `getConsentData()`
 

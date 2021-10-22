@@ -1,32 +1,19 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '#preact';
-import {Option, Selector} from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {closestAncestorElementBySelector} from '#core/dom/query';
 import {
   createElementWithAttributes,
   toggleAttribute,
   tryFocus,
 } from '#core/dom';
-import {devAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+
+import {devAssert} from '#utils/log';
+
+import {BentoSelector, BentoSelectorOption} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -110,7 +97,7 @@ function getOptions(element, mu) {
         option,
         disabled,
         index,
-        onFocus: () => tryFocus(child),
+        focus: () => tryFocus(child),
         role: child.getAttribute('role') || 'option',
         shimDomElement: child,
         // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
@@ -125,7 +112,7 @@ function getOptions(element, mu) {
       if (selected) {
         value.push(option);
       }
-      const optionChild = <Option {...props} />;
+      const optionChild = <BentoSelectorOption {...props} />;
       options.push(option);
       children.push(optionChild);
     });
@@ -133,7 +120,7 @@ function getOptions(element, mu) {
 }
 
 /**
- * @param {!SelectorDef.OptionProps} props
+ * @param {!BentoSelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
 export function OptionShim({
@@ -187,7 +174,7 @@ export function OptionShim({
 }
 
 /**
- * @param {!SelectorDef.Props} props
+ * @param {!BentoSelectorDef.Props} props
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
@@ -264,7 +251,7 @@ function SelectorShim({
 }
 
 /** @override */
-BaseElement['Component'] = Selector;
+BaseElement['Component'] = BentoSelector;
 
 /** @override */
 BaseElement['detached'] = true;

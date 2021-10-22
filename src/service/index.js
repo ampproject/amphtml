@@ -1,19 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {
+  getElementServiceForDoc,
+  getElementServiceIfAvailable,
+  getElementServiceIfAvailableForDoc,
+  getElementServiceIfAvailableForDocInEmbedScope,
+} from '../element-service';
 import {
   getAmpdoc,
   getExistingServiceOrNull,
@@ -23,12 +13,6 @@ import {
   getServiceInEmbedWin,
   getServicePromiseForDoc,
 } from '../service-helpers';
-import {
-  getElementServiceForDoc,
-  getElementServiceIfAvailable,
-  getElementServiceIfAvailableForDoc,
-  getElementServiceIfAvailableForDocInEmbedScope,
-} from '../element-service';
 
 /** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
 export let SubscriptionService;
@@ -808,26 +792,6 @@ export class Services {
    */
   static xhrFor(window) {
     return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
-  }
-
-  /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
-   */
-  static assistjsFrameServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService} */ (
-      getServiceForDoc(elementOrAmpDoc, 'assistjs-frame-service')
-    );
-  }
-
-  /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
-   */
-  static assistjsConfigServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-google-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (
-      getServiceForDoc(elementOrAmpDoc, 'assistjs-config-service')
-    );
   }
 
   /**

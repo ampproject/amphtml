@@ -1,32 +1,21 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDataParamsFromAttributes} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+import {getWin} from '#core/window';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '#core/types/object';
-import {getDataParamsFromAttributes} from '#core/dom';
 import {getSocialConfig} from './social-share-config';
-import {isExperimentOn} from '#experiments';
-import {parseQueryString} from '#core/types/string/url';
-import {toWin} from '#core/window';
-import {toggle} from '#core/dom/style';
-import {userAssert} from '../../../src/log';
+
+import {CSS} from '../../../build/amp-social-share-1.0.css';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
@@ -44,9 +33,7 @@ const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
  */
 const getTypeConfigOrUndefined = (element) => {
   const viewer = Services.viewerForDoc(element);
-  const platform = Services.platformFor(
-    toWin(element.ownerDocument.defaultView)
-  );
+  const platform = Services.platformFor(getWin(element));
   const type = userAssert(
     element.getAttribute('type'),
     'The type attribute is required. %s',

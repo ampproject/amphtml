@@ -1,27 +1,16 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {assertHttpsUrl} from '../../../src/url';
-import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
-import {dev, user} from '../../../src/log';
 import {dict, map} from '#core/types/object';
+
+import {getExperimentBranch} from '#experiments';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
+
+import {dev, user} from '#utils/log';
+
+import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
+import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
 import {openWindowDialog} from '../../../src/open-window-dialog';
+import {assertHttpsUrl} from '../../../src/url';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /**
  * @typedef {{
@@ -52,6 +41,14 @@ export const A4AVarNames = {
   CTA_TYPE: 'cta-type',
   CTA_URL: 'cta-url',
 };
+
+/** @type {Array<string>} */
+const PageOutlinkLayerVarNames = [
+  'cta-accent-color',
+  'cta-accent-element',
+  'cta-image',
+  'theme',
+];
 
 /** @enum {string} */
 const DataAttrs = {
@@ -198,6 +195,72 @@ export function handleAttributionClick(win, href) {
 }
 
 /**
+ * Creates a page-outlink element, returns an anchor tag containing relevant data if successful.
+ * @param {!Document} doc
+ * @param {!StoryAdUIMetadata} uiMetadata
+ * @param {!Element} container
+ * @return {?Element}
+ */
+function createPageOutlink_(doc, uiMetadata, container) {
+  const pageOutlink = doc.createElement('amp-story-page-outlink');
+  pageOutlink.setAttribute('layout', 'nodisplay');
+
+  const pageAnchorTag = createElementWithAttributes(
+    doc,
+    'a',
+    dict({
+      'class': 'i-amphtml-story-ad-link',
+      'target': '_top',
+      'href': uiMetadata[A4AVarNames.CTA_URL],
+    })
+  );
+  pageAnchorTag.textContent = uiMetadata[A4AVarNames.CTA_TYPE];
+
+  pageOutlink.appendChild(pageAnchorTag);
+
+  for (const pageOutlinkLayerVarName of PageOutlinkLayerVarNames) {
+    if (uiMetadata[pageOutlinkLayerVarName]) {
+      pageOutlink.setAttribute(
+        pageOutlinkLayerVarName,
+        uiMetadata[pageOutlinkLayerVarName]
+      );
+    }
+  }
+
+  pageOutlink.className = 'i-amphtml-story-page-outlink-container';
+
+  container.appendChild(pageOutlink);
+  return pageAnchorTag;
+}
+
+/**
+ * Creates a CTA layer, returns an anchor tag containing relevant data if successful.
+ * @param {!Element} a
+ * @param {!Document} doc
+ * @param {!Element} container
+ * @return {?Element}
+ */
+function createCtaLayer_(a, doc, container) {
+  const ctaLayer = doc.createElement('amp-story-cta-layer');
+  ctaLayer.className = 'i-amphtml-cta-container';
+
+  const linkRoot = createElementWithAttributes(
+    doc,
+    'div',
+    dict({
+      'class': 'i-amphtml-story-ad-link-root',
+      'role': 'button',
+    })
+  );
+
+  createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
+
+  ctaLayer.appendChild(linkRoot);
+  container.appendChild(ctaLayer);
+  return a;
+}
+
+/**
  * @param {!Document} doc
  * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
  * @param {!Element} container
@@ -208,6 +271,8 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
   const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
   const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
 
+  // TODO(#36035): we should be using this element in createPageOutlink_
+  // instead of creating it and dropping.
   const a = createElementWithAttributes(
     doc,
     'a',
@@ -238,22 +303,15 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    const ctaLayer = doc.createElement('amp-story-cta-layer');
-    ctaLayer.className = 'i-amphtml-cta-container';
-
-    const linkRoot = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-story-ad-link-root',
-        'role': 'button',
-      })
+    const autoAdvanceExpBranch = getExperimentBranch(
+      doc.defaultView,
+      StoryAdPageOutlink.ID
     );
 
-    createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
-
-    ctaLayer.appendChild(linkRoot);
-    container.appendChild(ctaLayer);
-    return a;
+    if (autoAdvanceExpBranch === StoryAdPageOutlink.EXPERIMENT) {
+      return createPageOutlink_(doc, uiMetadata, container);
+    } else {
+      return createCtaLayer_(a, doc, container);
+    }
   });
 }

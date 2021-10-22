@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests for the amp-gist tag. See the inline comments.
 |  -->
@@ -47,7 +32,7 @@ FAIL
 |    <!-- Invalid: missing data-gistid attribute. -->
 |    <amp-gist
 >>   ^~~~~~~~~
-amp-gist/0.1/test/validator-amp-gist.html:47:2 The mandatory attribute 'data-gistid' is missing in tag 'amp-gist'. (see https://amp.dev/documentation/components/amp-gist/)
+amp-gist/0.1/test/validator-amp-gist.html:32:2 The mandatory attribute 'data-gistid' is missing in tag 'amp-gist'. (see https://amp.dev/documentation/components/amp-gist/)
 |      layout="fixed-height"
 |      height="241">
 |    </amp-gist>
@@ -55,7 +40,7 @@ amp-gist/0.1/test/validator-amp-gist.html:47:2 The mandatory attribute 'data-gis
 |    <!-- Invalid: illegal layout. -->
 |    <amp-gist
 >>   ^~~~~~~~~
-amp-gist/0.1/test/validator-amp-gist.html:53:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-gist'. (see https://amp.dev/documentation/components/amp-gist/)
+amp-gist/0.1/test/validator-amp-gist.html:38:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-gist'. (see https://amp.dev/documentation/components/amp-gist/)
 |      layout="responsive"
 |      height="241"
 |      data-gistid="b9bb35bc68df68259af94430f012425f">

@@ -1,35 +1,31 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-video-docking-0.1.css';
+import {isRTL, removeElement} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {applyFillContent} from '#core/dom/layout';
+import {layoutRectEquals, rectIntersection} from '#core/dom/layout/rect';
+import {scopedQuerySelector} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyles,
+  toggle,
+} from '#core/dom/style';
+import {getInternalVideoElementFor} from '#core/dom/video';
+import {once} from '#core/types/function';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {applyBreakpointClassname} from './breakpoints';
 import {Controls} from './controls';
 import {DirectionX, DirectionY, FLOAT_TOLERANCE, RectDef} from './def';
-import {HtmlLiteralTagDef} from './html';
-import {
-  PlayingStates,
-  VideoAttributes,
-  VideoEvents,
-  VideoInterface,
-  VideoOrBaseElementDef,
-  isDockable,
-} from '../../../src/video-interface';
-import {Services} from '#service';
 import {VideoDockingEvents, pointerCoords} from './events';
-import {applyBreakpointClassname} from './breakpoints';
-import {applyFillContent} from '#core/dom/layout';
+import {HtmlLiteralTagDef} from './html';
 import {
   calculateLeftJustifiedX,
   calculateRightJustifiedX,
@@ -39,25 +35,18 @@ import {
   letterboxRect,
   topCornerRect,
 } from './math';
-import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {createViewportRect} from './viewport-rect';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getInternalVideoElementFor} from '#core/dom/video';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
+
+import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isRTL, removeElement} from '#core/dom';
-import {layoutRectEquals, rectIntersection} from '#core/dom/layout/rect';
-import {once} from '#core/types/function';
 import {
-  px,
-  resetStyles,
-  setImportantStyles,
-  setStyles,
-  toggle,
-} from '#core/dom/style';
-import {scopedQuerySelector} from '#core/dom/query';
+  PlayingStates,
+  VideoAttributes,
+  VideoEvents,
+  VideoInterface,
+  VideoOrBaseElementDef,
+  isDockable,
+} from '../../../src/video-interface';
 
 const TAG = 'amp-video-docking';
 
@@ -125,6 +114,7 @@ export const DockTargetType = {
  *   video: !VideoOrBaseElementDef,
  *   target: !DockTargetDef,
  *   step: number,
+ *   viewportRect: !RectDef,
  * }}
  */
 let DockedDef;
@@ -432,6 +422,15 @@ export class VideoDocking {
 
   /** @private */
   onViewportResize_() {
+    if (
+      this.viewportRect_.width === this.currentlyDocked_?.viewportRect.width
+    ) {
+      // Ignore resize events that occur when only the height changes.
+      // This works around issues where the browser may hide the location bar,
+      // or a virtual keyboard; causing a height-only resize that would
+      // otherwise undock the video.
+      return;
+    }
     this.observed_.forEach((video) => this.updateOnResize_(video));
   }
 
@@ -1151,7 +1150,8 @@ export class VideoDocking {
    */
   setCurrentlyDocked_(video, target, step) {
     const previouslyDocked = this.currentlyDocked_;
-    this.currentlyDocked_ = {video, target, step};
+    const viewportRect = {...this.viewportRect_};
+    this.currentlyDocked_ = {video, target, step, viewportRect};
     if (
       previouslyDocked &&
       previouslyDocked.video == video &&

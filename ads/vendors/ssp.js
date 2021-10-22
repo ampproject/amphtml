@@ -117,7 +117,7 @@ export function forceElementReflow(element) {
  */
 export function ssp(global, data) {
   // validate AMP input data- attributes
-  validateData(data, ['position'], ['site']);
+  validateData(data, ['position'], ['site', 'said']);
 
   let position = {id: -1};
 
@@ -169,6 +169,7 @@ export function ssp(global, data) {
 
         sssp.config({
           site: data.site || global.context.canonicalUrl,
+          said: data.said || null,
         });
 
         // propagate relevant data across all ad units

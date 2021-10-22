@@ -1,26 +1,10 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Implements element layout. See https://goo.gl/9avXuT for
  * details.
  */
 
-import {isFiniteNumber} from '#core/types';
 import {userAssert} from '#core/assert';
+import {isFiniteNumber} from '#core/types';
 
 /**
  * @enum {string}
@@ -61,7 +45,7 @@ export let LengthDef;
  *   height: string
  * }}
  */
-let DimensionsDef;
+export let DimensionsDef;
 
 /**
  * Elements that the progress can be shown for. This set has to be externalized
@@ -215,7 +199,7 @@ export function getLengthUnits(length) {
 
 /**
  * Returns the numeric value of a CSS length value.
- * @param {!LengthDef|string|null|undefined} length
+ * @param {!LengthDef|string|null|undefined|number} length
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {

@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const VIEWPORT = {
   HEIGHT: 768,
   WIDTH: 1024,
@@ -67,7 +51,8 @@ describes.endtoend(
         'childElementCount'
       );
 
-      await expect(count).to.eql(0);
+      // 2 accounts for previous and next buttons in panel player.
+      await expect(count).to.eql(2);
     });
 
     it('when player is not visible in first viewport and on first user scroll, iframe loads first story in prerender', async () => {
@@ -129,7 +114,8 @@ describes.endtoend(
       await expect(storyEl).to.exist;
     });
 
-    it('when player becomes visible in viewport and first story finishes loading, second story starts preloading', async () => {
+    it('when player becomes visible in viewport and first story finishes loading, second story starts preloading', async function () {
+      this.timeout(10000);
       const doc = await controller.getDocumentElement();
       const playerRect = await controller.getElementRect(player);
 

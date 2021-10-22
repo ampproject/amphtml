@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Cookies from '../../../../src/cookies';
 import {
   LinkerManager,
@@ -28,7 +12,7 @@ import {
 } from '../linker-reader';
 import {installSessionServiceForTesting} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
-import {mockWindowInterface} from '#testing/test-helper';
+import {mockWindowInterface} from '#testing/helpers/service';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, (env) => {
@@ -356,6 +340,30 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         expect(localDomainUrl).to.not.contain('testLinker1=');
         expect(localDomainUrl).to.not.contain('testLinker2=');
       });
+    });
+
+    it('should only allow same domain matching when opt in', async () => {
+      const config = {
+        linkers: {
+          enabled: true,
+          testLinker: {
+            ids: {
+              id: '222',
+            },
+            sameDomainEnabled: true,
+            destinationDomains: ['testdomain.com'],
+          },
+        },
+      };
+
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      await lm.init();
+      windowInterface.getHostname.returns('testdomain.com');
+      // When the window host name matches the target,
+      // the linker should not be applied.
+      const localDomainUrl = clickAnchor('https://testdomain.com/path');
+      expect(localDomainUrl).to.not.contain('testLinker1=');
+      expect(localDomainUrl).to.not.contain('testLinker2=');
     });
 
     it('should respect default destinationDomains config', () => {

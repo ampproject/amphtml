@@ -1,33 +1,18 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {playIgnoringError} from '#core/dom/video';
 import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {
   LayoutPriority,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {MessageType} from '../../../src/3p-frame-messaging';
+import {MessageType} from '#core/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
-import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {createCustomEvent, getData, listen} from '#utils/event-helper';
+import {user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
@@ -38,7 +23,6 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '#experiments';
-import {moveLayoutRect} from '#core/dom/layout/rect';
 import {parseJson} from '#core/types/object/json';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {removeElement} from '#core/dom';
@@ -78,7 +62,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.placeholder_ = null;
 
     /** @private {boolean} */
-    this.isClickToPlay_ = false;
+    this.hasPlaceholder_ = false;
 
     /** @private {boolean} */
     this.isAdLike_ = false;
@@ -88,12 +72,6 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isDisallowedAsAd_ = false;
-
-    /**
-     * The (relative) layout box of the ad iframe to the amp-ad tag.
-     * @private {?../../../src/layout-rect.LayoutRectDef}
-     */
-    this.iframeLayoutBox_ = null;
 
     /** @private  {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -296,7 +274,7 @@ export class AmpIframe extends AMP.BaseElement {
     );
 
     this.placeholder_ = this.getPlaceholder();
-    this.isClickToPlay_ = !!this.placeholder_;
+    this.hasPlaceholder_ = !!this.placeholder_;
 
     this.isResizable_ = this.element.hasAttribute('resizable');
     if (this.isResizable_) {
@@ -314,10 +292,6 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    // We remeasured this tag, lets also remeasure the iframe. Should be
-    // free now and it might have changed.
-    this.measureIframeLayoutBox_();
-
     const {element} = this;
 
     this.isAdLike_ = isAdLike(element);
@@ -335,37 +309,6 @@ export class AmpIframe extends AMP.BaseElement {
     return looksLikeTrackingIframe(this.element);
   }
 
-  /**
-   * Measure the layout box of the iframe if we rendered it already.
-   * @private
-   */
-  measureIframeLayoutBox_() {
-    if (this.iframe_) {
-      const iframeBox = this.getViewport().getLayoutRect(this.iframe_);
-      const box = this.getLayoutBox();
-      // Cache the iframe's relative position to the amp-iframe. This is
-      // necessary for fixed-position containers which "move" with the
-      // viewport.
-      this.iframeLayoutBox_ = moveLayoutRect(iframeBox, -box.left, -box.top);
-    }
-  }
-
-  /** @override */
-  getIntersectionElementLayoutBox() {
-    if (!this.iframe_) {
-      return super.getIntersectionElementLayoutBox();
-    }
-    const box = this.getLayoutBox();
-    if (!this.iframeLayoutBox_) {
-      this.measureIframeLayoutBox_();
-    }
-
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
-      devAssert(this.iframeLayoutBox_)
-    );
-    return moveLayoutRect(iframe, box.left, box.top);
-  }
-
   /** @override */
   layoutCallback() {
     userAssert(
@@ -374,7 +317,7 @@ export class AmpIframe extends AMP.BaseElement {
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.'
     );
 
-    if (!this.isClickToPlay_) {
+    if (!this.hasPlaceholder_) {
       this.assertPosition_();
     }
 
@@ -415,7 +358,7 @@ export class AmpIframe extends AMP.BaseElement {
     applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;
 
-    if (this.isClickToPlay_) {
+    if (this.hasPlaceholder_) {
       setStyle(iframe, 'zIndex', -1);
     }
 
@@ -477,7 +420,7 @@ export class AmpIframe extends AMP.BaseElement {
       return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
     });
 
-    if (this.isClickToPlay_) {
+    if (this.hasPlaceholder_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
@@ -851,7 +794,7 @@ export class AmpIframe extends AMP.BaseElement {
       return false;
     }
     const audio = this.win.document.createElement('audio');
-    audio.play();
+    playIgnoringError(audio);
     if (audio.paused) {
       return false;
     }

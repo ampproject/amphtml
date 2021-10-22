@@ -1,18 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import * as Preact from '#preact';
 import {
   Alignment,
@@ -27,12 +12,12 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '#preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '#preact/context';
-import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {isRTL} from '#core/dom';
-import {mod} from '#core/math';
-import {toWin} from '#core/window';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {getWin} from '#core/window';
 import {
+  cloneElement,
   useCallback,
   useContext,
   useEffect,
@@ -43,6 +28,7 @@ import {
   useState,
 } from '#preact';
 import {useStyles} from './component.jss';
+import {mod} from '#core/math';
 
 /**
  * @enum {string}
@@ -75,12 +61,14 @@ const Direction = {
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
+const generateCarouselKey = sequentialIdGenerator();
+
 /**
  * @param {!BaseCarouselDef.Props} props
  * @param {{current: ?BaseCarouselDef.CarouselApi}} ref
  * @return {PreactDef.Renderable}
  */
-function BaseCarouselWithRef(
+function BentoBaseCarouselWithRef(
   {
     advanceCount = 1,
     arrowPrevAs,
@@ -128,6 +116,7 @@ function BaseCarouselWithRef(
     : setGlobalCurrentSlide;
   const currentSlideRef = useRef(currentSlide);
   const axis = orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y;
+  const [id] = useState(generateCarouselKey);
 
   useLayoutEffect(() => {
     // noop if !_thumbnails || !carouselContext.
@@ -170,7 +159,7 @@ function BaseCarouselWithRef(
     if (!shouldAutoAdvance || !containRef.current) {
       return;
     }
-    const win = toWin(containRef.current.ownerDocument.defaultView);
+    const win = getWin(containRef.current);
     const interval = win.setInterval(() => {
       const autoAdvanced = autoAdvance();
       if (!autoAdvanced) {
@@ -185,7 +174,9 @@ function BaseCarouselWithRef(
       if (length <= 0 || isNaN(index)) {
         return;
       }
-      index = Math.min(Math.max(index, 0), length - 1);
+      index = loop
+        ? mod(index, length)
+        : Math.min(Math.max(index, 0), length - 1);
       setCurrentSlide(index);
       if (currentSlideRef.current !== index) {
         currentSlideRef.current = index;
@@ -194,7 +185,7 @@ function BaseCarouselWithRef(
         }
       }
     },
-    [length, setCurrentSlide, onSlideChange]
+    [length, loop, setCurrentSlide, onSlideChange]
   );
 
   useImperativeHandle(
@@ -320,12 +311,7 @@ function BaseCarouselWithRef(
       }}
       tabIndex="0"
       wrapperClassName={classes.carousel}
-      contentAs={lightbox ? WithLightbox : 'div'}
       contentRef={contentRef}
-      contentProps={{
-        enableActivation: false,
-        render: () => children,
-      }}
       {...rest}
     >
       {!hideControls && (
@@ -342,7 +328,7 @@ function BaseCarouselWithRef(
         advanceCount={advanceCount}
         alignment={snapAlign}
         axis={axis}
-        lightbox={lightbox}
+        lightboxGroup={lightbox && 'carousel' + id}
         loop={loop}
         mixedLength={mixedLength}
         onClick={onClick}
@@ -354,36 +340,19 @@ function BaseCarouselWithRef(
         visibleCount={mixedLength ? 1 : visibleCount}
         _thumbnails={_thumbnails}
       >
-        {/*
-          TODO(#30283): TBD: this is an interesting concept. We could decide
-          to render only N slides at a time and for others just output an empty
-          placeholder. When a slide's slot is unrendered, the slide
-          automatically gets unslotted and gets CanRender=false w/o any extra
-          state management code.
-
-          Note: We naively display all slides for mixedLength as multiple
-          can be visible within the carousel viewport - eventually these can also
-          be optimized to only display the minimum necessary for the current
-          and next viewport.
-        */}
-        {childrenArray.map((child, index) =>
-          Math.min(
-            // Distance from currentSlide.
-            Math.abs(index - currentSlide),
-            // Account for wraparound when looping.
-            loop ? mod(length + currentSlide - index, length) : length
-          ) < Math.ceil(visibleCount * 3) || mixedLength ? (
+        {childrenArray.map((child, index) => {
+          const {alt, 'aria-label': ariaLabel} = child.props;
+          return (
             <WithAmpContext
+              caption={alt || ariaLabel}
               key={index}
               renderable={index == currentSlide}
               playable={index == currentSlide}
             >
-              {child}
+              {cloneElement(child, {...child.props, thumbnailSrc: undefined})}
             </WithAmpContext>
-          ) : (
-            <></>
-          )
-        )}
+          );
+        })}
       </Scroller>
       {!hideControls && (
         <Arrow
@@ -399,6 +368,6 @@ function BaseCarouselWithRef(
   );
 }
 
-const BaseCarousel = forwardRef(BaseCarouselWithRef);
-BaseCarousel.displayName = 'BaseCarousel'; // Make findable for tests.
-export {BaseCarousel};
+const BentoBaseCarousel = forwardRef(BentoBaseCarouselWithRef);
+BentoBaseCarousel.displayName = 'BentoBaseCarousel'; // Make findable for tests.
+export {BentoBaseCarousel};

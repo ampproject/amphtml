@@ -1,25 +1,12 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * Creates npm package files for a given component and AMP version.
  */
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const fastGlob = require('fast-glob');
+const path = require('path');
+const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
@@ -39,20 +26,25 @@ async function shouldSkip() {
 }
 
 /**
+ * Returns relative paths to all the extension's CSS file
+ *
+ * @return {Promise<string[]>}
+ */
+async function getStylesheets() {
+  const extDir = `extensions/${extension}/${extensionVersion}/dist`
+    .split('/')
+    .join(path.sep);
+  const files = await fastGlob(path.join(extDir, '**', '*.css'));
+  return files.map((file) => path.relative(extDir, file));
+}
+
+/**
  * Write package.json
  * @return {Promise<void>}
  */
 async function writePackageJson() {
-  const extensionVersionArr = extensionVersion.split('.', 2);
-  const major = extensionVersionArr[0];
-  const minor = ampVersion.slice(0, 10);
-  const patch = Number(ampVersion.slice(-3)); // npm trims leading zeroes in patch number, so mimic this in package.json
-  const version = `${major}.${minor}.${patch}`;
-  if (
-    !valid(version) ||
-    ampVersion.length != 13 ||
-    extensionVersionArr[1] !== '0'
-  ) {
+  const version = getSemver(extensionVersion, ampVersion);
+  if (!valid(version) || ampVersion.length != 13) {
     log(
       'Invalid semver version',
       version,
@@ -65,6 +57,22 @@ async function writePackageJson() {
     return;
   }
 
+  const exports = {
+    '.': './preact',
+    './preact': {
+      import: './dist/component-preact.module.js',
+      require: './dist/component-preact.js',
+    },
+    './react': {
+      import: './dist/component-react.module.js',
+      require: './dist/component-react.js',
+    },
+  };
+
+  for (const stylesheet of await getStylesheets()) {
+    exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
+  }
+
   const json = {
     name: `@ampproject/${extension}`,
     version,
@@ -73,17 +81,7 @@ async function writePackageJson() {
     license: 'Apache-2.0',
     main: './dist/component-preact.js',
     module: './dist/component-preact.module.js',
-    exports: {
-      '.': './preact',
-      './preact': {
-        import: './dist/component-preact.module.js',
-        require: './dist/component-preact.js',
-      },
-      './react': {
-        import: './dist/component-react.module.js',
-        require: './dist/component-react.js',
-      },
-    },
+    exports,
     files: ['dist/*', 'react.js'],
     repository: {
       type: 'git',

@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 #ifndef HTMLPARSER__STRINGS_H_
 #define HTMLPARSER__STRINGS_H_
 
@@ -307,12 +291,8 @@ class Strings {
   // Returns 0, if the character at current position is not a whitespace.
   static int IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position = 0);
 
-  // Counts number of words delimited by characters. If no delimiters are
-  // specified defaults to whitspace chars that is ascii space, \n, \r etc.
-  // Note: entity names such as &nbsp;, &amp;, &copy; are not delimiters,
-  // callers must convert these (unescape) to their unicode values.
-  static int CountTerms(std::string_view s,
-                             std::string_view delimiters = kWhitespace);
+  // Counts number of terms in a text separated by whitespace and punctuations.
+  static int CountTerms(std::string_view s);
 
  private:
   // No instance of this class.

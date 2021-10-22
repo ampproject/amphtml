@@ -1,28 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
-import {Layout, getLayoutClass} from '#core/dom/layout';
-import {Services} from '#service';
-import {computedStyle, toggle} from '#core/dom/style';
-import {dev, user, userAssert} from '../log';
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
-import {isFiniteNumber} from '#core/types';
-import {toWin} from '#core/window';
 import {tryFocus} from '#core/dom';
+import {Layout, getLayoutClass} from '#core/dom/layout';
+import {computedStyle, toggle} from '#core/dom/style';
+import {isFiniteNumber} from '#core/types';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element} element
@@ -108,6 +95,11 @@ export class StandardActions {
     actionService.addGlobalMethodHandler(
       'toggleClass',
       this.handleToggleClass_.bind(this)
+    );
+
+    actionService.addGlobalMethodHandler(
+      'toggleChecked',
+      this.handleToggleChecked_.bind(this)
     );
   }
 
@@ -328,7 +320,7 @@ export class StandardActions {
   handleShow_(invocation) {
     const {node} = invocation;
     const target = dev().assertElement(node);
-    const ownerWindow = toWin(target.ownerDocument.defaultView);
+    const ownerWindow = getWin(target);
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
@@ -431,16 +423,36 @@ export class StandardActions {
 
     return null;
   }
-}
 
-/**
- * @param {!Node} node
- * @return {!Window}
- */
-function getWin(node) {
-  return toWin(
-    (node.ownerDocument || /** @type {!Document} */ (node)).defaultView
-  );
+  /**
+   * Handles "toggleChecked" action.
+   * @param {!./action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private Visible to tests only.
+   */
+  handleToggleChecked_(invocation) {
+    const target = dev().assertElement(invocation.node);
+    const {args} = invocation;
+
+    this.mutator_.mutateElement(target, () => {
+      if (args['force'] !== undefined) {
+        // must be boolean, won't do type conversion
+        const shouldForce = user().assertBoolean(
+          args['force'],
+          "Optional argument 'force' must be a boolean."
+        );
+        target.checked = shouldForce;
+      } else {
+        if (target.checked === true) {
+          target.checked = false;
+        } else {
+          target.checked = true;
+        }
+      }
+    });
+
+    return null;
+  }
 }
 
 /**

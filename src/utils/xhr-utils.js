@@ -1,23 +1,15 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssert, userAssert} from '#core/assert';
+import {fromIterator, isArray} from '#core/types/array';
+import {dict, isObject, map} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
-import {devAssert, userAssert} from '#core/assert';
-import {dict, isObject, map} from '#core/types/object';
-import {fromIterator, isArray} from '#core/types/array';
+
+import {user} from '#utils/log';
+
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {getMode} from '../mode';
 import {
   getCorsUrl,
   getWinOrigin,
@@ -25,11 +17,6 @@ import {
   parseUrlDeprecated,
   serializeQueryString,
 } from '../url';
-import {getMode} from '../mode';
-import {user} from '../log';
-
-import {isExperimentOn} from '#experiments';
-import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -70,7 +57,8 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  * `ArrayBuffer` and `Blob` are already supported by the structured clone
  * algorithm. Other serialization-needing types such as `URLSearchParams`
  * (which is not supported in IE and Safari) and `FederatedCredentials` are
- * not used in AMP runtime.
+ * not used in AMP runtime. `init.body` can also be a string
+ * (application/x-www-form-urlencoded) but that doesn't require serialization.
  *
  * @param {string} input The URL of the XHR to convert to structured
  *     cloneable.

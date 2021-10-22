@@ -1,39 +1,25 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {buildOpenAttachmentElementLinkIcon} from './amp-story-open-page-attachment';
+import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
+import {getHistoryState} from '#core/window/history';
 import {getLocalizationService} from './amp-story-localization-service';
-import {getState} from '#core/window/history';
+import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {
+  allowlistFormActions,
+  getResponseAttributeElements,
+  setupResponseAttributeElements,
+} from './amp-story-form';
 import {removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
 
 import {triggerClickFromLightDom} from './utils';
-
-/** @const {string} */
-const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 
 /**
  * Distance to swipe before opening attachment.
@@ -45,19 +31,11 @@ const OPEN_THRESHOLD_PX = 150;
  * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
  * @const {number}
  */
-const DRAG_CAP_PX = 48;
-
-/**
- * Max pixels to transform the remote attachment URL preview. Equivilent to the height of preview element.
- * Used for the amp-story-outlink-page-attachment-v2 experiment.
- * @const {number}
- */
-const DRAG_CAP_PX_V2 = 56;
+const DRAG_CAP_PX = 56;
 
 /**
  * Duration of post-tap URL preview progress bar animation minus 100ms.
  * The minus 100ms roughly accounts for the small system delay in opening a link.
- * Used for the amp-story-outlink-page-attachment-v2 experiment.
  * @const {number}
  */
 const POST_TAP_ANIMATION_DURATION = 500;
@@ -103,16 +81,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   buildCallback() {
     super.buildCallback();
 
-    const theme = this.element.getAttribute('theme')?.toLowerCase();
-    if (theme && AttachmentTheme.DARK === theme) {
-      if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-        this.headerEl_.setAttribute('theme', theme);
-        this.element.setAttribute('theme', theme);
-      } else {
-        this.headerEl_.classList.add(DARK_THEME_CLASS);
-        this.element.classList.add(DARK_THEME_CLASS);
-      }
-    }
+    this.maybeSetDarkThemeForElement_(this.headerEl);
+    this.maybeSetDarkThemeForElement_(this.element);
 
     // Outlinks can be an amp-story-page-outlink or the legacy version,
     // an amp-story-page-attachment with an href.
@@ -123,13 +93,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     if (this.type_ === AttachmentType.INLINE) {
       this.buildInline_();
-    }
-
-    if (
-      this.type_ === AttachmentType.OUTLINK &&
-      !isPageAttachmentUiV2ExperimentOn(this.win)
-    ) {
-      this.buildRemote_();
     }
 
     this.win.addEventListener('pageshow', (event) => {
@@ -150,12 +113,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   layoutCallback() {
     super.layoutCallback();
-    // Outlink attachment v2 renders an image and must be built in layoutCallback.
-    if (
-      this.type_ === AttachmentType.OUTLINK &&
-      isPageAttachmentUiV2ExperimentOn(this.win)
-    ) {
-      this.buildRemoteV2_();
+    // Outlink renders an image and must be built in layoutCallback.
+    if (this.type_ === AttachmentType.OUTLINK) {
+      this.buildOutlink_();
     }
   }
 
@@ -170,9 +130,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           </button>`;
     const localizationService = getLocalizationService(devAssert(this.element));
 
-    const titleEl = htmlFor(this.element)`
-    <span class="i-amphtml-story-page-attachment-title"></span>`;
-
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
@@ -180,20 +137,48 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       closeButtonEl.setAttribute('aria-label', localizedCloseString);
     }
 
-    if (this.element.hasAttribute('data-title')) {
-      titleEl.textContent = this.element.getAttribute('data-title');
+    const titleAndCloseWrapperEl = this.headerEl.appendChild(
+      htmlFor(this.element)`
+            <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
+    );
+    titleAndCloseWrapperEl.appendChild(closeButtonEl);
+
+    const titleText =
+      this.element.getAttribute('title') ||
+      this.element.getAttribute('data-title');
+    if (titleText) {
+      const titleEl = htmlFor(this.element)`
+        <span class="i-amphtml-story-page-attachment-title"></span>`;
+      titleEl.textContent = titleText;
+      titleAndCloseWrapperEl.appendChild(titleEl);
     }
 
-    if (isPageAttachmentUiV2ExperimentOn(this.win)) {
-      const titleAndCloseWrapperEl = this.headerEl_.appendChild(
-        htmlFor(this.element)`
-            <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
-      );
-      titleAndCloseWrapperEl.appendChild(closeButtonEl);
-      titleAndCloseWrapperEl.appendChild(titleEl);
-    } else {
-      this.headerEl_.appendChild(closeButtonEl);
-      this.headerEl_.appendChild(titleEl);
+    const forms = this.element.querySelectorAll('form');
+    if (forms.length > 0) {
+      allowlistFormActions(this.win);
+      forms.forEach((form) => {
+        setupResponseAttributeElements(this.win, form);
+        // Scroll each response attribute element into view, when displayed.
+        getResponseAttributeElements(form).forEach((el) => {
+          new this.win.ResizeObserver((e) => {
+            if (
+              this.state === DrawerState.OPEN &&
+              e[0].contentRect.height > 0
+            ) {
+              el./*OK*/ scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+              });
+            }
+          }).observe(el);
+        });
+      });
+
+      // Page attachments that contain forms must display the page's publisher
+      // domain above the attachment's contents. This enables users to gauge
+      // the trustworthiness of publishers before sending data to them.
+      this.headerEl.append(this.createDomainLabelElement_());
+      this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
     }
 
     const templateEl = this.element.querySelector(
@@ -201,60 +186,23 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     while (this.element.firstChild && this.element.firstChild !== templateEl) {
-      this.contentEl_.appendChild(this.element.firstChild);
+      this.contentEl.appendChild(this.element.firstChild);
     }
 
     // Ensures the content of the attachment won't be rendered/loaded until we
     // actually need it.
-    toggle(dev().assertElement(this.containerEl_), true);
+    toggle(dev().assertElement(this.containerEl), true);
   }
 
   /**
-   * Builds remote page attachment's drawer UI.
-   * Can be removed when amp-story-page-attachment-ui-v2 is laumched.
+   * Builds outlink CTA drawer UI.
    * @private
    */
-  buildRemote_() {
+  buildOutlink_() {
     this.setDragCap_(DRAG_CAP_PX);
     this.setOpenThreshold_(OPEN_THRESHOLD_PX);
 
-    this.headerEl_.classList.add(
-      'i-amphtml-story-draggable-drawer-header-attachment-remote'
-    );
-    this.element.classList.add('i-amphtml-story-page-attachment-remote');
-    // Use an anchor element to make this a real link in vertical rendering.
-    const link = htmlFor(this.element)`
-    <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-      <span class="i-amphtml-story-page-attachment-remote-title"></span>
-      <span class="i-amphtml-story-page-attachment-remote-icon"></span>
-    </a>`;
-    // URL will be validated and resolved based on the canonical URL if relative
-    // when navigating.
-    link.setAttribute('href', this.element.getAttribute('href'));
-    this.contentEl_.appendChild(link);
-
-    this.contentEl_.querySelector(
-      '.i-amphtml-story-page-attachment-remote-title'
-    ).textContent =
-      this.element.getAttribute('data-title') ||
-      Services.urlForDoc(this.element).getSourceOrigin(
-        this.element.getAttribute('href') ||
-          // Used if amp-story-page-attachment-ui-v2 is off and
-          // this.elmement is an amp-story-page-outlink.
-          this.element.querySelector('a').getAttribute('href')
-      );
-  }
-
-  /**
-   * Builds remote V2 page attachment's drawer UI.
-   * Used for the amp-story-page-attachment-ui-v2 experiment.
-   * @private
-   */
-  buildRemoteV2_() {
-    this.setDragCap_(DRAG_CAP_PX_V2);
-    this.setOpenThreshold_(OPEN_THRESHOLD_PX);
-
-    this.headerEl_.classList.add(
+    this.headerEl.classList.add(
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
     );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
@@ -265,16 +213,28 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
       </a>`;
 
+    const isPageOutlink = this.element.tagName === 'AMP-STORY-PAGE-OUTLINK';
+    if (isPageOutlink) {
+      // The target must be '_top' for page outlinks, which will result in the
+      // link opening in the current tab. Opening links in a new tab requires a
+      // trusted event, and Safari does not consider swiping up to be trusted.
+      this.element.querySelector('a').setAttribute('target', '_top');
+    }
+
     // For backwards compatibility if element is amp-story-page-outlink.
-    const hrefAttr =
-      this.element.tagName === 'AMP-STORY-PAGE-OUTLINK'
-        ? this.element.querySelector('a').getAttribute('href')
-        : this.element.getAttribute('href');
+    const hrefAttr = isPageOutlink
+      ? this.element.querySelector('a').getAttribute('href')
+      : this.element.getAttribute('href');
 
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.
     link.setAttribute('href', hrefAttr);
     const {openStringEl, urlStringEl} = htmlRefs(link);
+
+    // Navigation is handled programmatically. Disable clicks on the placeholder
+    // anchor to prevent from users triggering double navigations, which has
+    // side effects in native contexts opening webviews/CCTs.
+    link.addEventListener('click', (event) => event.preventDefault());
 
     // Set image.
     const openImgAttr = this.element.getAttribute('cta-image');
@@ -287,7 +247,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       link.prepend(ctaImgEl);
     } else if (!openImgAttr) {
       // Attach link icon SVG by default.
-      const linkImage = buildOpenAttachmentElementLinkIcon(link);
+      const linkImage = buildOutlinkLinkIconElement(link);
       link.prepend(linkImage);
     }
 
@@ -301,7 +261,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
     urlStringEl.textContent = hrefAttr;
 
-    this.contentEl_.appendChild(link);
+    this.contentEl.appendChild(link);
   }
 
   /**
@@ -310,7 +270,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   initializeListeners_() {
     super.initializeListeners_();
 
-    const closeButtonEl = this.headerEl_.querySelector(
+    const closeButtonEl = this.headerEl.querySelector(
       '.i-amphtml-story-page-attachment-close-button'
     );
     if (closeButtonEl) {
@@ -322,7 +282,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     // Always open links in a new tab.
-    this.contentEl_.addEventListener(
+    this.contentEl.addEventListener(
       'click',
       (event) => {
         const {target} = event;
@@ -350,7 +310,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     if (this.type_ === AttachmentType.OUTLINK) {
       const ampdoc = this.getAmpDoc();
       ampdoc.onVisibilityChanged(() => {
-        if (ampdoc.isVisible() && this.state_ === DrawerState.OPEN) {
+        if (ampdoc.isVisible() && this.state === DrawerState.OPEN) {
           this.closeInternal_(false /** shouldAnimate */);
         }
       });
@@ -361,27 +321,30 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   open(shouldAnimate = true) {
-    if (this.state_ === DrawerState.OPEN) {
+    if (this.state === DrawerState.OPEN) {
       return;
     }
 
     super.open(shouldAnimate);
 
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+
+    this.toggleBackgroundOverlay_(true);
 
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
     if (this.type_ !== AttachmentType.OUTLINK) {
       const currentHistoryState = /** @type {!Object} */ (
-        getState(this.win.history)
+        getHistoryState(this.win.history)
       );
       const historyState = {
         ...currentHistoryState,
-        [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
+        [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService.get(
           StateProperty.CURRENT_PAGE_ID
         ),
       };
+
       this.historyService_.push(() => this.closeInternal_(), historyState);
     }
 
@@ -391,14 +354,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     if (this.type_ === AttachmentType.OUTLINK) {
-      if (
-        isPageAttachmentUiV2ExperimentOn(this.win) ||
-        this.element.parentElement.querySelector('amp-story-page-outlink')
-      ) {
-        this.openRemoteV2_();
-      } else {
-        this.openRemote_();
-      }
+      this.openRemote_();
     }
   }
 
@@ -407,7 +363,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * and redirects to the specified URL.
    * @private
    */
-  openRemoteV2_() {
+  openRemote_() {
     // If the element is an amp-story-page-outlink the click target is its anchor element child.
     // This is for SEO and analytics optimisation.
     // Otherwise the element is the legacy version, amp-story-page-attachment with an href,
@@ -429,7 +385,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     };
 
     const isMobileUI =
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+      this.storeService.get(StateProperty.UI_STATE) === UIType.MOBILE;
     if (!isMobileUI) {
       programaticallyClickOnTarget();
     } else {
@@ -441,37 +397,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
-   * Triggers a remote attachment opening animation, and redirects to the
-   * specified URL.
-   * @private
-   */
-  openRemote_() {
-    const animationEl = this.win.document.createElement('div');
-    animationEl.classList.add('i-amphtml-story-page-attachment-expand');
-    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-
-    this.mutateElement(() => {
-      storyEl.appendChild(animationEl);
-    }).then(() => {
-      // Give some time for the 120ms CSS animation to run (cf
-      // amp-story-page-attachment.css). The navigation itself will take some
-      // time, depending on the target and network conditions.
-      this.win.setTimeout(() => {
-        const clickTarget = this.element.parentElement
-          .querySelector('.i-amphtml-story-page-open-attachment-host')
-          .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
-        triggerClickFromLightDom(clickTarget, this.element);
-      });
-    }, 50);
-  }
-
-  /**
    * Ensures the history state we added when opening the drawer is popped,
    * and closes the drawer either directly, or through the onPop callback.
    * @override
    */
   close_() {
-    switch (this.state_) {
+    switch (this.state) {
       // If the drawer was open, pop the history entry that was added, which
       // will close the drawer through the onPop callback.
       case DrawerState.OPEN:
@@ -490,14 +421,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   closeInternal_(shouldAnimate = true) {
-    if (this.state_ === DrawerState.CLOSED) {
+    if (this.state === DrawerState.CLOSED) {
       return;
     }
 
     super.closeInternal_(shouldAnimate);
 
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    this.toggleBackgroundOverlay_(false);
+
+    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
+    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const animationEl = storyEl.querySelector(
@@ -518,5 +451,58 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
     );
+  }
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleBackgroundOverlay_(isActive) {
+    const activePageEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    this.mutateElement(() => {
+      activePageEl.classList.toggle(
+        'i-amphtml-story-page-attachment-active',
+        isActive
+      );
+    });
+  }
+
+  /**
+   * Updates the given element with the appropriate class or attribute, if the
+   * page attachment's theme is 'dark'.
+   * @param {!Element} element The element upon which to set the dark theme.
+   * @private
+   */
+  maybeSetDarkThemeForElement_(element) {
+    const theme = this.element.getAttribute('theme')?.toLowerCase();
+    if (theme && AttachmentTheme.DARK === theme) {
+      element.setAttribute('theme', theme);
+    }
+  }
+
+  /**
+   * Create the domain label element to be displayed at the top of the page
+   * attachment.
+   * @return {!Element} element The domain label element.
+   * @private
+   */
+  createDomainLabelElement_() {
+    const domainLabelEl = this.win.document.createElement('div');
+    domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
+    domainLabelEl.textContent = this.getPublisherOrigin_();
+    return domainLabelEl;
+  }
+
+  /**
+   * Returns the publisher origin URL string (e.g., "stories.example.com").
+   * @return {string} The domain of the publisher.
+   * @private
+   */
+  getPublisherOrigin_() {
+    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    return publisherOrigin.replace(/https?:\/\//, '');
   }
 }

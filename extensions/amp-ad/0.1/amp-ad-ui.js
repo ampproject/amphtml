@@ -1,28 +1,14 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Services} from '#service';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '#core/types/object';
+import {user, userAssert} from '#utils/log';
 
 import {getAdContainer} from '../../../src/ad-helper';
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 import {setStyle, setStyles} from '#core/dom/style';
+
+const TAG = 'amp-ad-ui';
 
 const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
 const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
@@ -37,6 +23,8 @@ const TOP_STICKY_AD_TRIGGER_THRESHOLD = 200;
 const StickyAdPositions = {
   TOP: 'top',
   BOTTOM: 'bottom',
+  LEFT: 'left',
+  RIGHT: 'right',
   BOTTOM_RIGHT: 'bottom-right',
 };
 
@@ -66,15 +54,22 @@ export class AmpAdUIHandler {
     if (this.element_.hasAttribute(STICKY_AD_PROP)) {
       // TODO(powerivq@) Kargo is currently running an experiment using empty sticky attribute, so
       // we default the position to bottom right. Remove this default afterwards.
-      userAssert(
-        this.element_.getAttribute(STICKY_AD_PROP),
-        'amp-ad sticky is deprecating empty attribute value, please use <amp-ad sticky="bottom" instead'
-      );
+      if (!this.element_.getAttribute(STICKY_AD_PROP)) {
+        user().error(
+          TAG,
+          'amp-ad sticky is deprecating empty attribute value, please use <amp-ad sticky="bottom" instead'
+        );
+      }
 
       this.stickyAdPosition_ =
         this.element_.getAttribute(STICKY_AD_PROP) ||
         StickyAdPositions.BOTTOM_RIGHT;
       this.element_.setAttribute(STICKY_AD_PROP, this.stickyAdPosition_);
+
+      if (!Object.values(StickyAdPositions).includes(this.stickyAdPosition_)) {
+        user().error(TAG, `Invalid sticky ad type: ${this.stickyAdPosition_}`);
+        this.stickyAdPosition_ = null;
+      }
     }
 
     /**
@@ -214,6 +209,18 @@ export class AmpAdUIHandler {
   }
 
   /**
+   * Verify that the limits for sticky ads are not exceeded
+   */
+  validateStickyAd() {
+    userAssert(
+      this.doc_.querySelectorAll(
+        'amp-sticky-ad.i-amphtml-built, amp-ad[sticky].i-amphtml-built'
+      ).length <= 1,
+      'At most one sticky ad can be loaded per page'
+    );
+  }
+
+  /**
    * @return {boolean}
    */
   isStickyAd() {
@@ -228,22 +235,37 @@ export class AmpAdUIHandler {
       setStyle(this.element_, 'visibility', 'visible');
 
       if (this.stickyAdPosition_ == StickyAdPositions.TOP) {
+        const doc = this.element_.getAmpDoc();
+
         // Let the top sticky ad be below the viewer top.
-        const paddingTop = Services.viewportForDoc(
-          this.element_.getAmpDoc()
-        ).getPaddingTop();
+        const paddingTop = Services.viewportForDoc(doc).getPaddingTop();
         setStyle(this.element_, 'top', `${paddingTop}px`);
+
+        this.topStickyAdScrollListener_ = Services.viewportForDoc(doc).onScroll(
+          () => {
+            const scrollPos = doc.win./*OK*/ scrollY;
+            if (scrollPos > TOP_STICKY_AD_TRIGGER_THRESHOLD) {
+              this.topStickyAdCloserAcitve_ = true;
+            }
+
+            // When the scroll position is close to the top, we close the
+            // top sticky ad in order not to have the ads overlap the
+            // content.
+            if (
+              this.topStickyAdCloserAcitve_ &&
+              scrollPos < TOP_STICKY_AD_CLOSE_THRESHOLD
+            ) {
+              this.closeStickyAd_();
+            }
+          }
+        );
+        this.unlisteners_.push(this.topStickyAdScrollListener_);
       }
 
-      if (this.stickyAdPosition_ == StickyAdPositions.BOTTOM) {
-        const paddingBar = this.doc_.createElement('amp-ad-sticky-padding');
-        this.element_.insertBefore(
-          paddingBar,
-          devAssert(
-            this.element_.firstChild,
-            'amp-ad should have been expanded.'
-          )
-        );
+      this.adjustPadding();
+      if (!this.closeButtonRendered_) {
+        this.addCloseButton_();
+        this.closeButtonRendered_ = true;
       }
     }
   }
@@ -267,35 +289,17 @@ export class AmpAdUIHandler {
   }
 
   /**
-   * When a sticky ad is shown, the close button should be rendered at the same time.
+   * Adjust the padding-bottom when resized to prevent overlaying on top of content
    */
-  onResizeSuccess() {
-    if (this.isStickyAd() && !this.closeButtonRendered_) {
-      this.addCloseButton_();
-      this.closeButtonRendered_ = true;
-    }
-
-    if (this.isStickyAd() && !this.topStickyAdScrollListener_) {
-      const doc = this.element_.getAmpDoc();
-      this.topStickyAdScrollListener_ = Services.viewportForDoc(doc).onScroll(
-        () => {
-          const scrollPos = doc.win./*OK*/ scrollY;
-          if (scrollPos > TOP_STICKY_AD_TRIGGER_THRESHOLD) {
-            this.topStickyAdCloserAcitve_ = true;
-          }
-
-          // When the scroll position is close to the top, we close the
-          // top sticky ad in order not to have the ads overlap the
-          // content.
-          if (
-            this.topStickyAdCloserAcitve_ &&
-            scrollPos < TOP_STICKY_AD_CLOSE_THRESHOLD
-          ) {
-            this.closeStickyAd_();
-          }
-        }
+  adjustPadding() {
+    if (
+      this.stickyAdPosition_ == StickyAdPositions.BOTTOM ||
+      this.stickyAdPosition_ == StickyAdPositions.BOTTOM_RIGHT
+    ) {
+      const borderBottom = this.element_./*OK*/ offsetHeight;
+      Services.viewportForDoc(this.element_.getAmpDoc()).updatePaddingBottom(
+        borderBottom
       );
-      this.unlisteners_.push(this.topStickyAdScrollListener_);
     }
   }
 

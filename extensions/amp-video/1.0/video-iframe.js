@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {Deferred} from '#core/data-structures/promise';
 import {VideoWrapper} from './component';
@@ -46,6 +30,21 @@ function usePropRef(prop) {
 }
 
 /**
+ * Posts message to frame when ready promise resolves
+ * @param {HTMLIFrameElement} iframe
+ * @param {Promise<void>} ready
+ * @param {function():string} makeMessageCb
+ */
+function postWhenReady(iframe, ready, makeMessageCb) {
+  if (!iframe || !iframe.contentWindow) {
+    return;
+  }
+  ready.then(() => {
+    iframe.contentWindow./*OK*/ postMessage(makeMessageCb(), '*');
+  });
+}
+
+/**
  * @param {!VideoIframeDef.Props} props
  * @param {{current: ?T}} ref
  * @return {PreactDef.Renderable}
@@ -63,6 +62,7 @@ function VideoIframeInternalWithRef(
     onMessage,
     playerStateRef,
     makeMethodMessage: makeMethodMessageProp,
+    makeFullscreenMessage: makeFullscreenMessageProp,
     onIframeLoad,
     ...rest
   },
@@ -77,15 +77,20 @@ function VideoIframeInternalWithRef(
   const makeMethodMessageRef = useRef(makeMethodMessageProp);
   const postMethodMessage = useCallback(
     (method) => {
-      if (!iframeRef.current || !iframeRef.current.contentWindow) {
-        return;
-      }
-      const makeMethodMessage = makeMethodMessageRef.current;
-      readyDeferred.promise.then(() => {
-        const message = makeMethodMessage(method);
-        iframeRef.current.contentWindow./*OK*/ postMessage(message, '*');
-      });
+      postWhenReady(iframeRef?.current, readyDeferred.promise, () =>
+        makeMethodMessageRef.current(method)
+      );
     },
+    [readyDeferred.promise]
+  );
+  const makeFullscreenMessageRef = useRef(makeFullscreenMessageProp);
+  const postFullscreenMessage = useCallback(
+    () =>
+      postWhenReady(
+        iframeRef?.current,
+        readyDeferred.promise,
+        makeFullscreenMessageRef.current
+      ),
     [readyDeferred.promise]
   );
 
@@ -97,6 +102,15 @@ function VideoIframeInternalWithRef(
       },
       get duration() {
         return playerStateRef?.current?.['duration'] ?? NaN;
+      },
+      requestFullscreen: () => {
+        if (makeFullscreenMessageRef.current) {
+          postFullscreenMessage();
+        } else {
+          return readyDeferred.promise.then(() => {
+            iframeRef.current.requestFullscreen();
+          });
+        }
       },
       play: () => postMethodMessage('play'),
       pause: () => {
@@ -110,7 +124,13 @@ function VideoIframeInternalWithRef(
         }
       },
     }),
-    [playerStateRef, postMethodMessage, unloadOnPause]
+    [
+      playerStateRef,
+      postMethodMessage,
+      postFullscreenMessage,
+      readyDeferred.promise,
+      unloadOnPause,
+    ]
   );
 
   // Keep `onMessage` in a ref to prevent re-listening on every render.

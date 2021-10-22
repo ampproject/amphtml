@@ -1,32 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '../../../src/animation';
+import {Animation} from '#utils/animation';
 import {BaseCarousel} from './base-carousel';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
-import {listen} from '../../../src/event-helper';
-import {numeric} from '../../../src/transition';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {listen} from '#utils/event-helper';
+import {numeric} from '#core/dom/transition';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
 
 /** @const {string} */
@@ -51,6 +32,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -116,8 +100,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallbackTemp(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback(isIntersecting)
     );
 
     this.doLayout_(this.pos_);
@@ -128,13 +113,14 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     return super.unlayoutCallback();
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     this.updateInViewport_(this.pos_, this.pos_);
   }
 
@@ -241,7 +227,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {
@@ -318,7 +304,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /**
    * @param {number} pos
-   * @param {function(!Element)} callback
+   * @param {function(!Element):void} callback
    * @private
    */
   withinWindow_(pos, callback) {
