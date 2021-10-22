@@ -76,6 +76,8 @@ import {Services} from '#service';
 import {Navigation} from '#service/navigation';
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
 
+import {dev, devAssert, user} from '#utils/log';
+
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -91,7 +93,6 @@ import {
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dev, devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   AmpA4A,
@@ -692,8 +693,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
     // If slotWidth is -1, that means its width must be determined by its
     // parent container, and so should have the same value as parentWidth.
-    msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-    psz = `${parentWidth}x-1`;
+
+    // For amp-sticky-ad, it returns 0, so we follow them for amp-ad sticky ads here.
+    if (this.uiHandler.isStickyAd()) {
+      msz = '0x-1';
+      psz = '0x-1';
+    } else {
+      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+      psz = `${parentWidth}x-1`;
+    }
     fws = fwSignal ? fwSignal : '0';
     return {
       'iu': this.element.getAttribute('data-slot'),
@@ -721,6 +729,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
+      'ppid': (this.jsonTargeting && this.jsonTargeting['ppid']) || null,
       ...googleBlockParameters(this),
     };
   }
@@ -955,6 +964,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           ).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
+        }
+        if (rtcResponse.response['ppid']) {
+          this.jsonTargeting['ppid'] = rtcResponse.response['ppid'];
         }
       }
     });

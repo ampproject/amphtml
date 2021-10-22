@@ -1,15 +1,16 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-accordion-1.0.css';
-import {createCustomEvent} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
@@ -34,7 +35,7 @@ class AmpAccordion extends BaseElement {
   /** @override */
   triggerEvent(section, eventName, detail) {
     const event = createCustomEvent(
-      toWin(section.ownerDocument.defaultView),
+      getWin(section),
       `accordionSection.${eventName}`,
       detail
     );

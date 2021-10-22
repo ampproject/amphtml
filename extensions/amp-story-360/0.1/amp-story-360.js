@@ -12,11 +12,12 @@ import {htmlFor} from '#core/dom/static-template';
 import {Services} from '#service';
 import {LocalizedStringId} from '#service/localization/strings';
 
+import {listenOncePromise} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {listenOncePromise} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
 import {
   Action,
   StateProperty,
@@ -390,7 +391,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.localizationService_ = localizationService;
         }
       ),
-    ]).then(() => Promise.resolve());
+    ]);
   }
 
   /**

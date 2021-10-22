@@ -1,5 +1,5 @@
 import {LOCAL_STORAGE_KEY, getHistoryState, setHistoryState} from '../history';
-import {loadPromise} from '../../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {removeElement} from '#core/dom';
 
 describes.realWin('amp-story history', {}, (env) => {

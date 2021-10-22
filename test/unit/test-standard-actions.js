@@ -11,9 +11,9 @@ import {
   getAutofocusElementForShowAction,
 } from '#service/standard-actions-impl';
 
-import {macroTask} from '#testing/helpers';
+import {user} from '#utils/log';
 
-import {user} from '../../src/log';
+import {macroTask} from '#testing/helpers';
 
 describes.sandboxed('StandardActions', {}, (env) => {
   let standardActions;

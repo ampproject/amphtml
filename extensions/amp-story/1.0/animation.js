@@ -17,7 +17,7 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getChildJsonConfig} from '#core/dom';
 import {map, omit} from '#core/types/object';

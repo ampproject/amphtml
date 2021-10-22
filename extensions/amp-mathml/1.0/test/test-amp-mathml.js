@@ -5,8 +5,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
 
+import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
-import {waitFor} from '#testing/test-helper';
 
 import {QUADRATIC_FORMULA} from './utils';
 

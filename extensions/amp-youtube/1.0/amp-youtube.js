@@ -1,9 +1,10 @@
 import {isExperimentOn} from '#experiments';
 
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-youtube-1.0.css';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-youtube';

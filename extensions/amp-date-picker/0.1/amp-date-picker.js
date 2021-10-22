@@ -17,6 +17,9 @@ import {dashToCamelCase} from '#core/types/string';
 
 import {Services} from '#service';
 
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {createDateRangePicker} from './date-range-picker';
 import {DatesList} from './dates-list';
@@ -25,8 +28,6 @@ import {createSingleDatePicker} from './single-date-picker';
 
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {requireExternal} from '../../../src/module';
 
 /**

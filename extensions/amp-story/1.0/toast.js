@@ -1,6 +1,6 @@
 import {Services} from '#service';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /** @private @const {string} */
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';
@@ -27,7 +27,7 @@ export class Toast {
    * @param {!Node|string} childNodeOrText
    */
   static show(storyEl, childNodeOrText) {
-    const win = toWin(storyEl.ownerDocument.defaultView);
+    const win = getWin(storyEl);
 
     const toast = createElementWithAttributes(
       win.document,

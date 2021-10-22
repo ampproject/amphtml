@@ -35,7 +35,7 @@ export const KEYBOARD_SELECT_MODE = {
 };
 
 /**
- * @param {!SelectorDef.Props} props
+ * @param {!BentoSelectorDef.Props} props
  * @param {{current: ?SelectorDef.SelectorApi}} ref
  * @return {PreactDef.Renderable}
  */
@@ -257,15 +257,15 @@ function SelectorWithRef(
   );
 }
 
-const Selector = forwardRef(SelectorWithRef);
-Selector.displayName = 'Selector'; // Make findable for tests.
-export {Selector};
+const BentoSelector = forwardRef(SelectorWithRef);
+BentoSelector.displayName = 'BentoSelector'; // Make findable for tests.
+export {BentoSelector};
 
 /**
  * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
-export function Option({
+export function BentoSelectorOption({
   as: Comp = 'div',
   'class': className = '',
   disabled = false,

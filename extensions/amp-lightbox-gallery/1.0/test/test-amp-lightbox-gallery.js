@@ -8,10 +8,11 @@ import {toggleExperiment} from '#experiments';
 import {Services} from '#service/';
 import {ActionInvocation} from '#service/action-impl';
 
-import {poll} from '#testing/iframe';
-import {waitFor, whenCalled} from '#testing/test-helper';
+import * as analytics from '#utils/analytics';
 
-import * as analytics from '../../../../src/analytics';
+import {waitFor, whenCalled} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
+
 import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';

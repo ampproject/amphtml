@@ -12,18 +12,20 @@ import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
+import {createCustomEvent, listenOnce} from '#utils/event-helper';
+
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
 import {urls} from '../config';
-import {createCustomEvent, listenOnce} from '../event-helper';
 import {getMode} from '../mode';
 import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
+  parseUrlDeprecated,
   parseUrlWithA,
   removeFragment,
   removeSearch,
@@ -1316,12 +1318,18 @@ export class AmpStoryPlayer {
   maybeGetCacheUrl_(url) {
     const ampCache = this.element_.getAttribute('amp-cache');
 
-    if (
-      !ampCache ||
-      isProxyOrigin(url) ||
-      !SUPPORTED_CACHES.includes(ampCache)
-    ) {
+    if (!ampCache || !SUPPORTED_CACHES.includes(ampCache)) {
       return Promise.resolve(url);
+    }
+
+    if (isProxyOrigin(url)) {
+      // Ensures serving type is 'viewer' (/v/) when publishers provide their
+      // own cached URL.
+      const location = parseUrlDeprecated(url);
+      if (location.pathname.startsWith('/c/')) {
+        location.pathname = '/v/' + location.pathname.substr(3);
+      }
+      return Promise.resolve(location.toString());
     }
 
     return ampToolboxCacheUrl

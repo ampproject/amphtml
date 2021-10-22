@@ -2,9 +2,10 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
 
 const TYPE = 'reddit';
 

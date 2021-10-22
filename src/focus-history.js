@@ -3,7 +3,7 @@ import {isElement} from '#core/types';
 
 import {Services} from '#service';
 
-import {dev} from './log';
+import {dev} from '#utils/log';
 
 /**
  * FocusHistory keeps track of recent focused elements. This history can be

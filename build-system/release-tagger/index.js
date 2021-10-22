@@ -9,15 +9,17 @@
  * 5. time (in UTC, Y-%m-%d %H:%M:%S)
  */
 
-const [action, head, base, channel, time] = process.argv.slice(2);
-
+const argv = require('minimist')(process.argv.slice(2));
 const dedent = require('dedent');
 const {addLabels, removeLabels} = require('./label-pull-requests');
 const {createOrUpdateTracker} = require('./update-issue-tracker');
 const {cyan, magenta} = require('kleur/colors');
+const {getRelease} = require('./utils');
 const {log} = require('../common/logging');
 const {makeRelease} = require('./make-release');
 const {publishRelease, rollbackRelease} = require('./update-release');
+
+const {action, base, channel, head, sha, time} = argv;
 
 /**
  * Promote actions
@@ -30,7 +32,8 @@ async function _promote() {
     head: ${magenta(head)}
     base: ${magenta(base)}
     channel: ${magenta(channel)}
-    time: ${magenta(time)}`)
+    time: ${magenta(time)}
+    sha: ${magenta(sha)}`)
   );
 
   const supportedChannels = ['beta-opt-in', 'beta-percent', 'stable', 'lts'];
@@ -38,14 +41,17 @@ async function _promote() {
     return;
   }
 
-  if (channel == 'stable') {
-    await publishRelease(head);
-    log('Published release', magenta(head));
+  const release = await getRelease(head);
+  if (!release) {
+    const {'html_url': url} = await makeRelease(head, base, channel, sha);
+    log('Created release', magenta(head), 'at', cyan(url));
+  } else {
+    log('Found release', magenta(head), 'at', cyan(release.url));
   }
 
-  if (channel == 'beta-opt-in') {
-    await makeRelease(head, base, channel);
-    log('Created release', magenta(head));
+  if (['stable', 'lts'].includes(channel)) {
+    const {'html_url': url} = await publishRelease(head);
+    log('Published release', magenta(head), 'at', cyan(url));
   }
 
   if (['beta-percent', 'stable', 'lts'].includes(channel)) {
