@@ -10,7 +10,7 @@ tags: {  # amp-story-shopping
 }
 tags: {  # <amp-story-shopping>
   html_format: AMP
-  tag_name: "STORY-SHOPPING"
+  tag_name: "AMP-STORY-SHOPPING"
   requires_extension: "amp-story-shopping"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
