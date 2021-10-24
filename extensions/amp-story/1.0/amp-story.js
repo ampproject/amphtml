@@ -1604,7 +1604,7 @@ export class AmpStory extends AMP.BaseElement {
    * @param {boolean} isLandscapeSupported Whether the story supports landscape
    * @private
    */
-   setOrientationAttribute_(isLandscape, isLandscapeSupported) {
+  setOrientationAttribute_(isLandscape, isLandscapeSupported) {
     // TODO(#20832) base this check on the size of the amp-story-page, once it
     // is stored as a store state.
     this.mutateElement(() => {
@@ -1648,6 +1648,7 @@ export class AmpStory extends AMP.BaseElement {
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
+          this.element.setAttribute('mobile', '');
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
@@ -1662,6 +1663,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
         this.vsync_.mutate(() => {
+          this.element.removeAttribute('mobile');
           this.element.removeAttribute('desktop');
           this.element.classList.add('i-amphtml-story-desktop-one-panel');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
@@ -1669,6 +1671,7 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.vsync_.mutate(() => {
+          this.element.removeAttribute('mobile');
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
@@ -1688,6 +1691,7 @@ export class AmpStory extends AMP.BaseElement {
             'i-amphtml-story-vertical'
           );
           setImportantStyles(this.win.document.body, {height: 'auto'});
+          this.element.removeAttribute('mobile');
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           for (let i = 0; i < pageAttachments.length; i++) {
@@ -1799,7 +1803,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isLandscapeSupported_() {
-    return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE) || this.androidSoftKeyboardIsProbablyOpen_();
+    return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE);
   }
 
   /**
