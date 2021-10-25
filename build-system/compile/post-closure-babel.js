@@ -3,12 +3,12 @@ const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const fs = require('fs-extra');
 const path = require('path');
-// const Remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
 
-// /** @type {Remapping.default} */
-// const remapping = /** @type {*} */ (Remapping);
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
 
 /**
  * Minify passed string.
@@ -61,25 +61,22 @@ async function postClosureBabel(file) {
   }
 
   debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
-  const {
-    compressed,
-    // terserMap
-  } = await terserMinify(code);
-  await fs.outputFile(file, compressed);
+  const {compressed, terserMap} = await terserMinify(code);
+  // await fs.outputFile(file, compressed);
 
-  // const closureMap = await fs.readJson(`${file}.map`, 'utf8');
-  // const sourceMap = remapping(
-  //   [terserMap, babelMap, closureMap],
-  //   () => null,
-  //   !argv.full_sourcemaps
-  // );
-  // debug(
-  //   CompilationLifecycles['complete'],
-  //   file,
-  //   compressed?.toString(),
-  //   sourceMap
-  // );
-  // await fs.writeJson(`${file}.map`, sourceMap);
+  const closureMap = await fs.readJson(`${file}.map`, 'utf8');
+  const sourceMap = remapping(
+    [terserMap, babelMap, closureMap],
+    () => null,
+    !argv.full_sourcemaps
+  );
+  debug(
+    CompilationLifecycles['complete'],
+    file,
+    compressed?.toString(),
+    sourceMap
+  );
+  await fs.writeJson(`${file}.map`, sourceMap);
 }
 
 module.exports = {
