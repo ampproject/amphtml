@@ -6,7 +6,7 @@ import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
 
-import {isAnimationNone} from '#testing/test-helper';
+import {isAnimationNone} from '#testing/helpers/service';
 
 import * as rds from '../../src/render-delaying-services';
 import {createShadowRoot} from '../../src/shadow-embed';

@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "AMP_CONFIG for canary/prod configurations",
+  "type": "object",
+  "required": [
+    "allow-doc-opt-in",
+    "allow-url-opt-in",
+    "canary"
+  ],
+  "properties": {
+    "allow-doc-opt-in": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[\\w-]+$"
+      }
+    },
+    "allow-url-opt-in": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[\\w-]+$"
+      }
+    },
+    "canary": {
+      "type": "number",
+      "enum": [
+        0,
+        1
+      ]
+    }
+  },
+  "patternProperties": {
+    "^(?!allow-doc-opt-in|allow-url-opt-in|canary)[\\w-]+$": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

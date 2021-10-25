@@ -4,9 +4,9 @@ import '#3p/polyfills';
 import {register} from '#3p/3p';
 import {draw3p, init} from '#3p/integration-lib';
 
-import {verizonmedia} from '#ads/vendors/verizonmedia';
+import {andbeyond} from '#ads/vendors/andbeyond';
 
 init(window);
-register('verizonmedia', verizonmedia);
+register('andbeyond', andbeyond);
 
 window.draw3p = draw3p;

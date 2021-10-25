@@ -8,8 +8,7 @@ import {
   parseLayout,
   parseLength,
 } from '#core/dom/layout';
-
-import {applyStaticLayout} from '../../../../../src/static-layout';
+import {applyStaticLayout} from '#core/static-layout';
 
 describes.sandboxed('DOM - layout', {}, () => {
   let div;
@@ -231,17 +230,6 @@ describes.sandboxed('DOM - layout', {}, () => {
     expect(div).to.have.class('i-amphtml-layout-nodisplay');
     expect(div).to.not.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(0);
-  });
-
-  it('layout=nodisplay with SSR', () => {
-    div.setAttribute('layout', 'nodisplay');
-    div.style.display = 'none';
-    applyStaticLayout(div);
-    expect(div.style.display).to.equal('');
-
-    document.body.appendChild(div);
-    expect(div).to.have.display('none');
-    document.body.removeChild(div);
   });
 
   it('layout=fixed', () => {
