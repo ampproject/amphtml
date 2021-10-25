@@ -502,7 +502,7 @@ async function buildExtension(
   }
 
   if (options.bento) {
-    // await buildBentoExtensionJs(extDir, name, options);
+    await buildBentoExtensionJs(extDir, name, options);
   }
   await buildExtensionJs(extDir, name, {...options, bento: false});
 }
@@ -707,27 +707,27 @@ function buildBinaries(extDir, binaries, options) {
   return Promise.all(promises);
 }
 
-// /**
-//  * @param {string} dir
-//  * @param {string} name
-//  * @param {!Object} options
-//  * @return {!Promise}
-//  */
-// async function buildBentoExtensionJs(dir, name, options) {
-//   const bentoName = getBentoName(name);
-//   return buildExtensionJs(dir, bentoName, {
-//     ...options,
-//     wrapper: 'bento',
-//     filename: await getBentoBuildFilename(
-//       dir,
-//       bentoName,
-//       'standalone',
-//       options
-//     ),
-//     // Include extension directory since our entrypoint may be elsewhere.
-//     extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
-//   });
-// }
+/**
+ * @param {string} dir
+ * @param {string} name
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+async function buildBentoExtensionJs(dir, name, options) {
+  const bentoName = getBentoName(name);
+  return buildExtensionJs(dir, bentoName, {
+    ...options,
+    wrapper: 'bento',
+    filename: await getBentoBuildFilename(
+      dir,
+      bentoName,
+      'standalone',
+      options
+    ),
+    // Include extension directory since our entrypoint may be elsewhere.
+    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
+  });
+}
 
 /**
  * Bento extensions may specify their own bento-*.js file to specify custom
@@ -835,13 +835,21 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, isLatest, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
-  await compileJs(`${dir}/`, filename, './dist/v0', {
+  console./*OK*/ log(`${dir}/`, filename, './dist/v0', {
     ...options,
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
     aliasName: isLatest ? `${name}-latest.js` : '',
     wrapper: resolvedWrapper,
   });
+
+  // await compileJs(`${dir}/`, filename, './dist/v0', {
+  //   ...options,
+  //   toName: `${name}-${version}.max.js`,
+  //   minifiedName: `${name}-${version}.js`,
+  //   aliasName: isLatest ? `${name}-latest.js` : '',
+  //   wrapper: resolvedWrapper,
+  // });
 
   // If an incremental watch build fails, simply return.
   if (options.errored) {
