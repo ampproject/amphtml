@@ -150,6 +150,7 @@ const prettifyGlobs = [
   '**/OWNERS',
   '**/*.md',
   '**/*.yml',
+  '**/*.css',
 ];
 
 /**
