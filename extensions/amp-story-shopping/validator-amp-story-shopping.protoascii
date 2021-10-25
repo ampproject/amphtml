@@ -29,7 +29,6 @@ tags: {  # <amp-story-shopping-config>
     supported_layouts: NODISPLAY
   }
 }
-
 tags: {  # <amp-story-shopping-attachment>
   html_format: AMP
   tag_name: "AMP-STORY-SHOPPING-ATTACHMENT"
