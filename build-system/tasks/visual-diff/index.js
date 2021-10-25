@@ -789,7 +789,10 @@ async function performVisualTests(browserFetcher) {
       // Load and parse the config. Use JSON5 due to JSON comments in file.
       const visualTestsConfig = JSON5.parse(
         fs.readFileSync(
-          path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
+          path.resolve(
+            __dirname,
+            '../../../test/visual-diff/visual-tests.jsonc'
+          ),
           'utf8'
         )
       );
