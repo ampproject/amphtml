@@ -50,17 +50,18 @@ describes.realWin(
       );
     });
 
-    it('renders with optional attrs correctly', async () => {
+    it.only('renders with optional attrs correctly', async () => {
       const element = html`
         <amp-dailymotion
           data-videoid="x3rdtfy"
           width="500"
           height="281"
           data-mute="true"
-          data-endscreen-enable="true"
-          data-sharing-enable="true"
+          data-endscreen-enable="false"
+          data-sharing-enable="false"
           data-ui-highlight="444444"
-          data-info="true"
+          data-ui-logo="false"
+          data-info="false"
         ></amp-dailymotion>
       `;
       env.win.document.body.appendChild(element);
@@ -74,13 +75,15 @@ describes.realWin(
       // Mute Attr
       expect(iframe.src).to.contain('mute=1');
       // Enscreen Enable attr
-      expect(iframe.src).to.contain('endscreen-enable=true');
+      expect(iframe.src).to.contain('endscreen-enable=false');
       // Sharing Enable attr
-      expect(iframe.src).to.contain('sharing-enable=true');
+      expect(iframe.src).to.contain('sharing-enable=false');
       // UI Highlight attr
       expect(iframe.src).to.contain('ui-highlight=444444');
+      // UI Logo attr
+      expect(iframe.src).to.contain('ui-logo=false');
       // info attr
-      expect(iframe.src).to.contain('info=true');
+      expect(iframe.src).to.contain('info=false');
     });
   }
 );
