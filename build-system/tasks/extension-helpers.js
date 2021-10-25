@@ -863,7 +863,7 @@ async function buildExtensionJs(dir, name, options) {
       fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
       fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
     } catch (_) {
-      console.log(_);
+      console./*OK*/ log(_);
     }
   }
 
@@ -872,7 +872,7 @@ async function buildExtensionJs(dir, name, options) {
       await copyWorkerDomResources(version);
       await buildSandboxedProxyIframe(options.minify);
     } catch (_) {
-      console.log(_);
+      console./*OK*/ log(_);
     }
   }
 }
