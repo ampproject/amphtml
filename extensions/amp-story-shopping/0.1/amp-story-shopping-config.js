@@ -27,6 +27,6 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return layout == Layout.NODISPLAY;
   }
 }
