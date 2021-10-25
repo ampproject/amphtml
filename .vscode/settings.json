@@ -49,6 +49,10 @@
     {
       "fileMatch": ["build-system/tasks/bundle-size/filesize.json"],
       "url": "./build-system/json-schemas/filesize.json"
+    },
+    {
+      "fileMatch": ["test/visual-diff/visual-tests.jsonc"],
+      "url": "./build-system/json-schemas/visual-tests.json"
     }
   ]
 }
