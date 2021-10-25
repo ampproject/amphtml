@@ -707,27 +707,27 @@ function buildBinaries(extDir, binaries, options) {
   return Promise.all(promises);
 }
 
-/**
- * @param {string} dir
- * @param {string} name
- * @param {!Object} options
- * @return {!Promise}
- */
-async function buildBentoExtensionJs(dir, name, options) {
-  const bentoName = getBentoName(name);
-  return buildExtensionJs(dir, bentoName, {
-    ...options,
-    wrapper: 'bento',
-    filename: await getBentoBuildFilename(
-      dir,
-      bentoName,
-      'standalone',
-      options
-    ),
-    // Include extension directory since our entrypoint may be elsewhere.
-    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
-  });
-}
+// /**
+//  * @param {string} dir
+//  * @param {string} name
+//  * @param {!Object} options
+//  * @return {!Promise}
+//  */
+// async function buildBentoExtensionJs(dir, name, options) {
+//   const bentoName = getBentoName(name);
+//   return buildExtensionJs(dir, bentoName, {
+//     ...options,
+//     wrapper: 'bento',
+//     filename: await getBentoBuildFilename(
+//       dir,
+//       bentoName,
+//       'standalone',
+//       options
+//     ),
+//     // Include extension directory since our entrypoint may be elsewhere.
+//     extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
+//   });
+// }
 
 /**
  * Bento extensions may specify their own bento-*.js file to specify custom
