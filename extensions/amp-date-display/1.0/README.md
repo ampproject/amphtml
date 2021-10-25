@@ -40,7 +40,7 @@ The example below contains an `bento-date-display` with three sections. The
 
 ```html
 <head>
-  <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
+  <script async src="https://cdn.ampproject.org/bento.js"></script>
   <script async src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css">
 </head>
