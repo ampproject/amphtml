@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {
   EmbeddedComponentState,
@@ -21,10 +5,10 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -191,10 +175,6 @@ export class AmpStoryHint {
       }
     );
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isOpen) => {
-      this.onBookendStateUpdate_(isOpen);
-    });
-
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_COMPONENT_STATE,
       /** @param {./amp-story-store-service.InteractiveComponentDef} component */ (
@@ -320,17 +300,6 @@ export class AmpStoryHint {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (!isVisible) {
-      this.hideAllNavigationHint();
-    }
-  }
-
-  /**
-   * Reacts to bookend state updates.
-   * @param {boolean} isOpen
-   * @private
-   */
-  onBookendStateUpdate_(isOpen) {
-    if (isOpen) {
       this.hideAllNavigationHint();
     }
   }

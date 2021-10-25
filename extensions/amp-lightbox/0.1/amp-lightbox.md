@@ -8,22 +8,6 @@ teaser:
   text: Displays elements in a full-viewport “lightbox” modal.
 ---
 
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-lightbox
 
 ## Usage
@@ -104,9 +88,9 @@ iframe.
 <amp-img alt="lightbox ad in friendly iframe"
     layout="fixed"
     width="360" height="480"
-    src="https://github.com/ampproject/amphtml/raw/main/spec/img/lightbox-ad-fie.gif" >
+    src="https://github.com/ampproject/amphtml/raw/main/docs/spec/img/lightbox-ad-fie.gif" >
 <noscript>
-<img alt="lightbox ad in friendly iframe" src="../../spec/img/lightbox-ad-fie.gif" />
+<img alt="lightbox ad in friendly iframe" src="../../docs/spec/img/lightbox-ad-fie.gif" />
 </noscript>
 </amp-img>
 
@@ -115,9 +99,9 @@ iframe.
 <amp-img alt="lightbox ad in 3p iframe"
     layout="fixed"
     width="360" height="480"
-    src="https://github.com/ampproject/amphtml/raw/main/spec/img/lightbox-ad-3p.gif" >
+    src="https://github.com/ampproject/amphtml/raw/main/docs/spec/img/lightbox-ad-3p.gif" >
 <noscript>
-<img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />
+<img alt="lightbox ad in 3p iframe" src="../../docs/spec/img/lightbox-ad-3p.gif" />
 </noscript>
 </amp-img>
 

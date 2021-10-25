@@ -1,23 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {BindExpression} from '../bind-expression';
 import {BindMacro} from '../bind-macro';
 
-describe('BindExpression', () => {
+describes.sandboxed('BindExpression', {}, () => {
   const argumentTypeError = 'Unexpected argument type';
   const unsupportedFunctionError = 'not a supported function';
   const expressionSizeExceededError = 'exceeds max';
@@ -347,27 +331,18 @@ describe('BindExpression', () => {
     it('custom Array#sort()', () => {
       expect(evaluate('[11, 1, 2].sort()')).to.deep.equal([1, 11, 2]);
       expect(evaluate('[11, 1, 2].sort((x, y) => x - y)')).to.deep.equal([
-        1,
-        2,
-        11,
+        1, 2, 11,
       ]);
 
       const a = [11, 1, 2];
       expect(evaluate('a.sort()', {a})).to.deep.equal([1, 11, 2]);
       expect(evaluate('a.sort((x, y) => x - y)', {a})).to.deep.equal([
-        1,
-        2,
-        11,
+        1, 2, 11,
       ]);
 
       // Sort should be out-of-place i.e. does not sort the caller.
       expect(evaluate('a.sort().concat(a)', {a})).to.deep.equal([
-        1,
-        11,
-        2,
-        11,
-        1,
-        2,
+        1, 11, 2, 11, 1, 2,
       ]);
     });
 
@@ -385,10 +360,7 @@ describe('BindExpression', () => {
 
       // Splice should be out-of-place i.e. does not splice the caller.
       expect(evaluate('a.splice(1).concat(a)', {a})).to.deep.equal([
-        1,
-        1,
-        2,
-        3,
+        1, 1, 2, 3,
       ]);
     });
 

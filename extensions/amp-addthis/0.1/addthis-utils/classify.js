@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
 import {getDetailsForMeta} from './meta';
 import {rot13Array} from './rot13';
@@ -25,7 +10,8 @@ const REFERRER_BITS = {
   ON_DOMAIN: 0x2,
   OFF_DOMAIN: 0x4,
 };
-const RE_SEARCH_TERMS = /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
+const RE_SEARCH_TERMS =
+  /^(?:q|search|bs|wd|p|kw|keyword|query|qry|querytext|text|searchcriteria|searchstring|searchtext|sp_q)=(.*)/i;
 const RE_SEARCH_REFERRER = /ws\/results\/(web|images|video|news)/;
 const RE_SEARCH_GOOGLE = /google.*\/(search|url|aclk|m\?)/;
 const RE_SEARCH_AOL = /aol.*\/aol/;
@@ -201,7 +187,7 @@ export const classifyPage = (pageInfo, metaElements) => {
     classifyString(pageInfo.title) | classifyString(pageInfo.hostname, true);
 
   metaElements.forEach((metaElement) => {
-    const {name, content} = getDetailsForMeta(metaElement);
+    const {content, name} = getDetailsForMeta(metaElement);
 
     if (name === 'description' || name === 'keywords') {
       bitmask |= classifyString(content);
@@ -269,7 +255,7 @@ export const isProductPage = (doc, metaElements) => {
 
   // see if 'og:type' meta tag === 'product'
   const ogTags = metaElements.reduce((tags, metaElement) => {
-    const {name, content} = getDetailsForMeta(metaElement);
+    const {content, name} = getDetailsForMeta(metaElement);
 
     if (name.startsWith('og:')) {
       const ogProperty = name.split(':').pop();

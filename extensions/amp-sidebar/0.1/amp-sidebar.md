@@ -2,28 +2,10 @@
 $category@: layout
 formats:
   - websites
-  - stories
   - email
-  - stories
 teaser:
   text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
 ---
-
-<!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-sidebar
 
@@ -51,7 +33,7 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 _Example:_
 
-In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
+In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../../docs/spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
 
 ```html
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
@@ -68,7 +50,7 @@ In the following example, we use `amp-sidebar` to contain navigation items. Howe
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
+To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../../docs/spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
@@ -260,55 +242,6 @@ See [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md) for the full
 When using `<amp-sidebar>`, keep in mind that your users will often view your page on mobile in an AMP viewer, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
 
 For this reason, we recommend that affordances to open the sidebar are not placed in a fixed, full-width header.
-
-[filter formats="stories"]
-
-### Sidebar for Stories
-
-Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
-
-#### Behavior
-
--   The `<amp-sidebar>` must be a direct child of `<amp-story>`.
--   The sidebar defaults to the "end" side, meaning right for left-right languages and left for right-to-left languages.
--   The `<amp-sidebar>` has default background color of white and is overridable in CSS.
--   Default width of `<amp-sidebar>` is `75%` of the viewport up to `360px`, on and `25%` up to `600px` for desktop experiences. Width can be overriden using the CSS `width` property, but has to be contained within these intervals.
--   A 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
-
-There are certain restrictions on what attributes and features are allowed in order to provide a consistent UI experience across the story platform. The following are allowed attributes and features of an `amp-sidebar` within an `amp-story`.
-
-#### Allowed Attributes
-
--   [layout](#layout)
--   [data-close-button-aria-label](#data)
--   [common attributes](#common)
-
-_Example: Basic Sidebar in a Story_
-
-The following example shows a simple `amp-sidebar` within an `amp-story`.
-
-```html
-...
-<body>
-    <amp-story standalone>
-      <amp-sidebar id="sidebar1" layout="nodisplay">
-        <ul>
-          <li><a href="https://www.ampproject.org"> External Link </a></li>
-          <li>Nav item 2</li>
-          <li>Nav item 3</li>
-        </ul>
-      </amp-sidebar>
-      <amp-story-page id="cover">
-        <amp-story-grid-layer template="fill">
-          <h1>Hello World</h1>
-          <p>This is the cover page of this story.</p>
-        </amp-story-grid-layer>
-      </amp-story-page>
-      ...
-  </body>
-```
-
-[/filter]<!-- formats="stories" -->
 
 ## Attributes
 

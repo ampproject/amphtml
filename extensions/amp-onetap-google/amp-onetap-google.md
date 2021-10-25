@@ -6,22 +6,6 @@ teaser:
   text: Displays Google One Tap.
 ---
 
-<!---
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-onetap-google
 
 ## Overview
@@ -44,7 +28,7 @@ After a successful sign-in, [`amp-access`](https://go.amp.dev/c/amp-access) and/
 <table>
   <tr>
     <td width="40%"><strong>data-src (required)</strong></td>
-    <td>The URL of the intermediate iframe. You can use <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md">URL substitution variables</a> to pass values like <code>ACCESS_READER_ID</code>.</td>
+    <td>The URL of the intermediate iframe. You can use <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md">URL substitution variables</a> to pass values like <code>ACCESS_READER_ID</code>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>

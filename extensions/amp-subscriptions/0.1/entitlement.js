@@ -1,19 +1,4 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {dict} from '../../../src/core/types/object';
+import {dict} from '#core/types/object';
 
 /** @enum {string} */
 export const GrantReason = {
@@ -22,6 +7,20 @@ export const GrantReason = {
   'FREE': 'UNLOCKED',
   'LAA': 'LAA',
 };
+
+/**
+ * The constructor arg for an {@link Entitlement}
+ *
+ * @typedef {{
+ *   source: string,
+ *   raw: string,
+ *   service: string,
+ *   granted: boolean,
+ *   grantReason: ?GrantReason,
+ *   dataObject: ?JsonObject,
+ *   decryptedDocumentKey: ?string
+ * }} EntitlementConstructorInputDef
+ */
 
 /**
  * The single entitlement object.
@@ -41,24 +40,17 @@ export class Entitlement {
   }
 
   /**
-   * @param {Object} input
-   * @param {string} [input.source]
-   * @param {string} [input.raw]
-   * @param {string} [input.service]
-   * @param {boolean} [input.granted]
-   * @param {?GrantReason} [input.grantReason]
-   * @param {?JsonObject} [input.dataObject]
-   * @param {?string} [input.decryptedDocumentKey]
+   * @param {!EntitlementConstructorInputDef} input
    */
   constructor(input) {
     const {
-      source,
-      raw = '',
-      service,
-      granted = false,
-      grantReason = '',
       dataObject,
       decryptedDocumentKey,
+      grantReason = '',
+      granted = false,
+      raw = '',
+      service,
+      source,
     } = input;
     /** @const {string} */
     this.raw = raw;

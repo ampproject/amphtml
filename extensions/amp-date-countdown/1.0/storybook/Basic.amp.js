@@ -1,27 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {boolean, date, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-date-countdown-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [
       {name: 'amp-date-countdown', version: '1.0'},
@@ -29,93 +12,92 @@ export default {
     ],
     experiments: ['bento'],
   },
+  argTypes: {
+    dateAttribute: {
+      name: 'date attribute',
+      control: {type: 'radio'},
+      defaultValue: 'end-date',
+      options: ['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds'],
+    },
+    'end-date': {
+      name: 'end date',
+      defaultValue: new Date(Date.now() + 10000),
+      control: {type: 'date'},
+    },
+    locale: {
+      name: 'locale',
+      control: {type: 'select'},
+      defaultValue: 'en',
+      options: [
+        'de',
+        'en',
+        'es',
+        'fr',
+        'id',
+        'it',
+        'ja',
+        'ko',
+        'nl',
+        'pt',
+        'ru',
+        'th',
+        'tr',
+        'vi',
+        'zh-cn',
+        'zh-tw',
+      ],
+    },
+    'when-ended': {
+      name: 'when-ended',
+      defaultValue: 'stop',
+      control: {type: 'inline-radio'},
+      options: ['stop', 'continue'],
+    },
+    'biggest-unit': {
+      name: 'biggest-unit',
+      control: {type: 'inline-radio'},
+      defaultValue: null,
+      options: [null, 'DAYS', 'HOURS', 'MINUTES', 'SECONDS'],
+    },
+  },
+  args: {
+    'timeleft-ms': 20000,
+    'timestamp-ms': Date.now() + 30000,
+    'timestamp-seconds': Math.floor(Date.now() / 1000) + 40,
+    'offset-seconds': 0,
+    'count-up': false,
+  },
 };
 
-const DATE_ATTRIBUTE_CONFIGURATIONS = [
-  'end-date',
-  'timeleft-ms',
-  'timestamp-ms',
-  'timestamp-seconds',
-];
-
-const LOCALE_CONFIGURATIONS = [
-  'google',
-  'de',
-  'en',
-  'es',
-  'fr',
-  'id',
-  'it',
-  'ja',
-  'ko',
-  'nl',
-  'pt',
-  'ru',
-  'th',
-  'tr',
-  'vi',
-  'zh-cn',
-  'zh-tw',
-];
-
-const WHEN_ENDED_CONFIGURATIONS = ['stop', 'continue'];
-
-const BIGGEST_UNIT_CONFIGURATIONS = [
-  null,
-  'DAYS',
-  'HOURS',
-  'MINUTES',
-  'SECONDS',
-];
-
-export const Default = () => {
-  const dateAttribute = select(
-    'Select a "Date Attribute"',
-    DATE_ATTRIBUTE_CONFIGURATIONS,
-    DATE_ATTRIBUTE_CONFIGURATIONS[0]
-  );
-  const endDate = date('end-date', new Date(Date.now() + 10000));
-  const timeleftMs = text('timeleft-ms', 20000);
-  const timestampMs = text('timestamp-ms', Date.now() + 30000);
-  const timestampSeconds = text(
-    'timestamp-seconds',
-    Math.floor(Date.now() / 1000) + 40
-  );
-
-  const offsetSeconds = text('offset-seconds', 0);
-  const locale = select(
-    'locale',
-    LOCALE_CONFIGURATIONS,
-    LOCALE_CONFIGURATIONS[0]
-  );
-  const whenEnded = select(
-    'whenEnded',
-    WHEN_ENDED_CONFIGURATIONS,
-    WHEN_ENDED_CONFIGURATIONS[0]
-  );
-  const biggestUnit = select(
-    'biggestUnit',
-    BIGGEST_UNIT_CONFIGURATIONS,
-    BIGGEST_UNIT_CONFIGURATIONS[0]
-  );
-  const countUp = boolean('count-up', false);
-
+const AmpDateCountdownUsingArgs = ({children, dateAttribute, ...args}) => {
   return (
     <amp-date-countdown
-      end-date={dateAttribute === 'end-date' ? new Date(endDate) : undefined}
-      timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : undefined}
-      timestamp-ms={dateAttribute === 'timestamp-ms' ? timestampMs : undefined}
-      timestamp-seconds={
-        dateAttribute === 'timestamp-seconds' ? timestampSeconds : undefined
+      {...args}
+      end-date={
+        dateAttribute === 'end-date'
+          ? new Date(args['end-date']).toISOString()
+          : undefined
       }
-      offset-seconds={offsetSeconds}
-      locale={locale}
-      when-ended={whenEnded}
-      biggest-unit={biggestUnit}
-      count-up={countUp}
-      layout="fixed-height"
-      height="100"
+      timeleft-ms={
+        dateAttribute === 'timeleft-ms' ? args['timeleft-ms'] : undefined
+      }
+      timestamp-ms={
+        dateAttribute === 'timestamp-ms' ? args['timestamp-ms'] : undefined
+      }
+      timestamp-seconds={
+        dateAttribute === 'timestamp-seconds'
+          ? args['timestamp-seconds']
+          : undefined
+      }
     >
+      {children}
+    </amp-date-countdown>
+  );
+};
+
+export const Default = (args) => {
+  return (
+    <AmpDateCountdownUsingArgs height="100" {...args}>
       <template type="amp-mustache">
         <div>
           <span>{'{{days}} {{dd}} {{d}}'}</span>
@@ -127,98 +109,15 @@ export const Default = () => {
           <span>{'{{seconds}} {{ss}} {{s}}'}</span>
         </div>
       </template>
-    </amp-date-countdown>
+    </AmpDateCountdownUsingArgs>
   );
 };
 
-Default.storyName = 'default';
-
-export const DefaultRenderer = () => {
-  const dateAttribute = select(
-    'Select a "Date Attribute"',
-    DATE_ATTRIBUTE_CONFIGURATIONS,
-    DATE_ATTRIBUTE_CONFIGURATIONS[0]
-  );
-  const endDate = date('end-date', new Date(Date.now() + 10000));
-  const timeleftMs = text('timeleft-ms', 20000);
-  const timestampMs = text('timestamp-ms', Date.now() + 30000);
-  const timestampSeconds = text(
-    'timestamp-seconds',
-    Math.floor(Date.now() / 1000) + 40
-  );
-
-  const offsetSeconds = text('offset-seconds', 0);
-  const locale = select(
-    'locale',
-    LOCALE_CONFIGURATIONS,
-    LOCALE_CONFIGURATIONS[0]
-  );
-  const whenEnded = select(
-    'whenEnded',
-    WHEN_ENDED_CONFIGURATIONS,
-    WHEN_ENDED_CONFIGURATIONS[0]
-  );
-  const biggestUnit = select(
-    'biggestUnit',
-    BIGGEST_UNIT_CONFIGURATIONS,
-    BIGGEST_UNIT_CONFIGURATIONS[0]
-  );
-  const countUp = boolean('count-up', false);
-
-  return (
-    <amp-date-countdown
-      end-date={dateAttribute === 'end-date' ? new Date(endDate) : undefined}
-      timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : undefined}
-      timestamp-ms={dateAttribute === 'timestamp-ms' ? timestampMs : undefined}
-      timestamp-seconds={
-        dateAttribute === 'timestamp-seconds' ? timestampSeconds : undefined
-      }
-      offset-seconds={offsetSeconds}
-      locale={locale}
-      when-ended={whenEnded}
-      biggest-unit={biggestUnit}
-      count-up={countUp}
-      layout="fixed-height"
-      height="100"
-    ></amp-date-countdown>
-  );
+export const DefaultRenderer = (args) => {
+  return <AmpDateCountdownUsingArgs height="100" {...args} />;
 };
 
-DefaultRenderer.storyName = 'default renderer';
-
-export const ExternalTemplate = () => {
-  const template = select('template', ['template1', 'template2'], 'template1');
-  const dateAttribute = select(
-    'Select a "Date Attribute"',
-    DATE_ATTRIBUTE_CONFIGURATIONS,
-    DATE_ATTRIBUTE_CONFIGURATIONS[0]
-  );
-  const endDate = date('end-date', new Date(Date.now() + 10000));
-  const timeleftMs = text('timeleft-ms', 20000);
-  const timestampMs = text('timestamp-ms', Date.now() + 30000);
-  const timestampSeconds = text(
-    'timestamp-seconds',
-    Math.floor(Date.now() / 1000) + 40
-  );
-
-  const offsetSeconds = text('offset-seconds', 0);
-  const locale = select(
-    'locale',
-    LOCALE_CONFIGURATIONS,
-    LOCALE_CONFIGURATIONS[0]
-  );
-  const whenEnded = select(
-    'whenEnded',
-    WHEN_ENDED_CONFIGURATIONS,
-    WHEN_ENDED_CONFIGURATIONS[0]
-  );
-  const biggestUnit = select(
-    'biggestUnit',
-    BIGGEST_UNIT_CONFIGURATIONS,
-    BIGGEST_UNIT_CONFIGURATIONS[0]
-  );
-  const countUp = boolean('count-up', false);
-
+export const ExternalTemplate = (args) => {
   return (
     <div>
       <template type="amp-mustache" id="template1">
@@ -233,26 +132,16 @@ export const ExternalTemplate = () => {
             ` {{minutes}} {{ss}} {{seconds}}`}
         </div>
       </template>
-      <amp-date-countdown
-        end-date={dateAttribute === 'end-date' ? new Date(endDate) : undefined}
-        timeleft-ms={dateAttribute === 'timeleft-ms' ? timeleftMs : undefined}
-        timestamp-ms={
-          dateAttribute === 'timestamp-ms' ? timestampMs : undefined
-        }
-        timestamp-seconds={
-          dateAttribute === 'timestamp-seconds' ? timestampSeconds : undefined
-        }
-        offset-seconds={offsetSeconds}
-        locale={locale}
-        when-ended={whenEnded}
-        biggest-unit={biggestUnit}
-        count-up={countUp}
-        template={template}
-        layout="fixed-height"
-        height="100"
-      ></amp-date-countdown>
+      <AmpDateCountdownUsingArgs height="100" {...args} />
     </div>
   );
 };
 
-ExternalTemplate.storyName = 'external template';
+ExternalTemplate.argTypes = {
+  template: {
+    name: 'template',
+    control: {type: 'inline-radio'},
+    defaultValue: 'template1',
+    options: ['template1', 'template2'],
+  },
+};

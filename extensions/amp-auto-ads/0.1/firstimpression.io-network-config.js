@@ -1,23 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {Services} from '../../../src/services';
-import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
-import {dict} from '../../../src/core/types/object';
-import {parseQueryString} from '../../../src/url';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -28,6 +14,7 @@ export class FirstImpressionIoConfig {
    */
   constructor(autoAmpAdsElement) {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
+    this.pvid64 = 0;
   }
 
   /**
@@ -49,7 +36,13 @@ export class FirstImpressionIoConfig {
   getConfigUrl() {
     let previewId = 0;
 
-    const {host, pathname, hash, search} = window.location;
+    Services.documentInfoForDoc(this.autoAmpAdsElement_).pageViewId64.then(
+      (pageViewId64Value) => {
+        this.pvid64 = pageViewId64Value;
+      }
+    );
+
+    const {hash, host, pathname, search} = window.location;
     const hashParams = Object.assign(
       parseQueryString(hash),
       parseQueryString(search)
@@ -86,10 +79,10 @@ export class FirstImpressionIoConfig {
     if (targeting) {
       queryParams['targeting'] = targeting;
     }
-    if (fiReveal) {
+    if (fiReveal !== undefined) {
       queryParams['fi_reveal'] = fiReveal;
     }
-    if (fiDemand) {
+    if (fiDemand !== undefined) {
       queryParams['fi_demand'] = fiDemand;
     }
     if (fiGeo) {
@@ -113,6 +106,7 @@ export class FirstImpressionIoConfig {
   getAttributes() {
     const attributes = dict({
       'type': 'firstimpression',
+      'data-pvid64': this.pvid64,
     });
     return attributes;
   }

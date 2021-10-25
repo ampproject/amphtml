@@ -8,22 +8,6 @@ teaser:
   text: A stacked list of headers that collapse or expand content sections with user interaction.
 ---
 
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-accordion
 
 Provides a way for viewers to glance at the content outline and jump to any section. This is helpful for mobile devices where even a couple of sentences into a section requires scrolling.
@@ -44,7 +28,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/main/spec/amp-html-format.md).
+    can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 -   An `amp-accordion` with a defined `id` preserves the collapsed or expanded
     state of each section while the user remains on your domain.
@@ -60,7 +44,7 @@ on mobile devices.
     `amp-accordion`. It must be a heading element such as `<h1>-<h6>` or
     `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content. It
-    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/main/spec/email/amp-email-html.md).
+    can be any tag allowed in [AMP for Email](https://github.com/ampproject/amphtml/blob/main/docs/spec/email/amp-email-html.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
 
 [/filter]

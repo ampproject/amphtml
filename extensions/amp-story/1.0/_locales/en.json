@@ -59,17 +59,9 @@
     "string": "WhatsApp",
     "description": "Button label for the share target that shares a link via WhatsApp."
   },
-  "18": {
-    "string": "Expand both the height and width of your window to view this experience",
-    "description": "Text for a warning screen that informs the user that stories are only supported in larger browser windows."
-  },
   "19": {
     "string": "You must enable the amp-story experiment to view this content.",
     "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
-  },
-  "20": {
-    "string": "The page is best viewed in portrait mode",
-    "description": "Text for a warning screen that informs the user that stories are only supported in portrait orientation."
   },
   "21": {
     "string": "We're sorry, it looks like your browser doesn't support this experience",
@@ -95,18 +87,6 @@
     "string": "Continue Anyway",
     "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
-  "28": {
-    "string": "Change data privacy settings",
-    "description": "Label for a button that allows the user to change their choice to consent to providing their cookie access."
-  },
-  "29": {
-    "string": "Privacy settings",
-    "description": "Title for a section that allows the user to configure their privacy settings"
-  },
-  "30": {
-    "string": "More to read",
-    "description": "Label to be placed as a title on top of related articles at the end of a story."
-  },
   "31": {
     "string": "Sound off",
     "description": "Text that informs users that the sound is off after they click the mute button"
@@ -130,14 +110,6 @@
   "36": {
     "string": "Expand Tweet",
     "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
-  "37": {
-    "string": "Expand the height of your window to view this experience",
-    "description": "Text for a warning screen that informs the user that stories are only supported in taller browser windows."
-  },
-  "38": {
-    "string": "Expand the width of your window to view this experience",
-    "description": "Text for a warning screen that informs the user that stories are only supported in wider browser windows."
   },
   "62": {
     "string": "Share starting from this page",
@@ -267,14 +239,6 @@
     "string": "Previous page",
     "description": "Label for a button that returns the user to the previous page of the story."
   },
-  "94": {
-    "string": "Close bookend",
-    "description": "Label for a button that closes a dialog containing related articles and sharing options and returns the user to the article."
-  },
-  "95": {
-    "string": "Show bookend",
-    "description": "Label for a button that displays a dialog with related articles and sharing options."
-  },
   "96": {
     "string": "Move device to explore",
     "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
@@ -282,5 +246,13 @@
   "97": {
     "string": "Opening",
     "description": "Text displayed to users on tap of outlink button."
+  },
+  "98": {
+    "string": "Form not submitted, try again",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+  },
+  "99": {
+    "string": "Form successfully submitted",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   }
 }

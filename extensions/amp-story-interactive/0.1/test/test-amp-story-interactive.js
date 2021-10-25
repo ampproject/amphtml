@@ -1,19 +1,4 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractive,
   InteractiveType,
@@ -27,66 +12,21 @@ import {
   AmpStoryVariableService,
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
+import {LocalizationService} from '#service/localization';
+import {Services} from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
-import {dict} from '../../../../src/core/types/object';
+import {
+  addConfigToInteractive,
+  getMockIncompleteData,
+  getMockInteractiveData,
+  getMockOutOfBoundsData,
+  getMockScrambledData,
+} from './helpers';
+import {dict} from '#core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
-import {htmlFor} from '../../../../src/static-template';
-import {measureMutateElementStub} from '../../../../testing/test-helper';
-import {registerServiceBuilder} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
-
-/**
- * Returns mock interactive data.
- *
- * @return {Object}
- */
-export const getMockInteractiveData = () => {
-  return {
-    options: [
-      {
-        index: 0,
-        count: 3,
-        selected: true,
-      },
-      {
-        index: 1,
-        count: 3,
-        selected: false,
-      },
-      {
-        index: 2,
-        count: 3,
-        selected: false,
-      },
-      {
-        index: 3,
-        count: 1,
-        selected: false,
-      },
-    ],
-  };
-};
-
-export const addConfigToInteractive = (
-  interactive,
-  options = 4,
-  correct = undefined,
-  attributes = ['text', 'results-category', 'image']
-) => {
-  for (let i = 0; i < options; i++) {
-    attributes.forEach((attr) => {
-      interactive.element.setAttribute(
-        `option-${i + 1}-${attr}`,
-        `${attr} ${i + 1}`
-      );
-    });
-  }
-  if (correct) {
-    interactive.element.setAttribute(`option-${correct}-correct`, 'correct');
-  }
-};
+import {htmlFor} from '#core/dom/static-template';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {toggleExperiment} from '#experiments/';
 
 class InteractiveTest extends AmpStoryInteractive {
   constructor(element) {
@@ -155,6 +95,7 @@ describes.realWin(
         'amp-story-interactive'
       );
       ampStoryInteractiveEl.id = 'TEST_interactiveId';
+      ampStoryInteractiveEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryInteractiveEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 
@@ -195,7 +136,10 @@ describes.realWin(
         .callsFake((fn) => fn());
       env.sandbox
         .stub(ampStoryInteractive, 'measureMutateElement')
-        .callsFake(measureMutateElementStub);
+        .callsFake((fn1, fn2) => {
+          fn1();
+          fn2();
+        });
     });
 
     it('should parse the attributes properly into an options list', async () => {
@@ -279,12 +223,112 @@ describes.realWin(
       );
     });
 
+    it('should select the correct option if the backend responds with scrambled data', async () => {
+      const NUM_OPTIONS = 4;
+      const scrambledData = getMockScrambledData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(scrambledData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      const selectedIndex = scrambledData.options.filter(
+        (option) => option.selected
+      )[0].index;
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === selectedIndex) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
+    });
+
+    it('should select the correct option if the backend responds with incomplete data', async () => {
+      const NUM_OPTIONS = 4;
+      const incompleteData = getMockIncompleteData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(incompleteData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      const selectedIndex = incompleteData.options.filter(
+        (option) => option.selected
+      )[0].index;
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === selectedIndex) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
+    });
+
+    it('should select the correct option if the backend responds with out of bounds data', async () => {
+      const NUM_OPTIONS = 4;
+      const outOfBoundsData = getMockOutOfBoundsData();
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(outOfBoundsData);
+      addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      await ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
+      );
+      expect(ampStoryInteractive.optionsData_.length).to.equal(NUM_OPTIONS);
+      const selectedIndex = outOfBoundsData.options.filter(
+        (option) => option.selected
+      )[0].index;
+      for (let i = 0; i < NUM_OPTIONS; i++) {
+        if (i === selectedIndex) {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        } else {
+          expect(ampStoryInteractive.getOptionElements()[i]).to.not.have.class(
+            'i-amphtml-story-interactive-option-selected'
+          );
+        }
+      }
+    });
+
     it('should throw error if percentages are not correctly passed', () => {
       addConfigToInteractive(ampStoryInteractive);
       const responseData = dict({'wrongKey': []});
       allowConsoleError(() => {
         expect(() =>
-          ampStoryInteractive.handleSuccessfulDataRetrieval_(responseData)
+          ampStoryInteractive.onDataRetrieved_(responseData)
         ).to.throw();
       });
     });
@@ -292,36 +336,32 @@ describes.realWin(
     it('should preprocess percentages properly', () => {
       const responseData1 = getMockInteractiveData()['options'];
 
-      const percentages1 = ampStoryInteractive.preprocessPercentages_(
-        responseData1
-      );
+      const percentages1 =
+        ampStoryInteractive.preprocessPercentages_(responseData1);
 
       expect(percentages1).to.deep.equal([30, 30, 30, 10]);
     });
 
     it('should preprocess percentages preserving ties', () => {
       const responseData2 = generateResponseDataFor([3, 3, 3]);
-      const percentages2 = ampStoryInteractive.preprocessPercentages_(
-        responseData2
-      );
+      const percentages2 =
+        ampStoryInteractive.preprocessPercentages_(responseData2);
 
       expect(percentages2).to.deep.equal([33, 33, 33]);
     });
 
     it('should preprocess percentages preserving order', () => {
       const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
-      const percentages3 = ampStoryInteractive.preprocessPercentages_(
-        responseData3
-      );
+      const percentages3 =
+        ampStoryInteractive.preprocessPercentages_(responseData3);
 
       expect(percentages3).to.deep.equal([26, 26, 24, 24]);
     });
 
     it('should preprocess percentages handling rounding edge cases', () => {
       const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryInteractive.preprocessPercentages_(
-        responseData4
-      );
+      const percentages4 =
+        ampStoryInteractive.preprocessPercentages_(responseData4);
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });
@@ -346,66 +386,135 @@ describes.realWin(
       });
     });
 
-    it('should set the url of the disclaimer to the backend url', async () => {
-      toggleExperiment(win, 'amp-story-interactive-disclaimer', true);
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
+    describe('disclaimer dialog', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-story-interactive-disclaimer', true);
+      });
 
-      addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.element.setAttribute(
-        'endpoint',
-        'https://notabackend.com'
-      );
-      await ampStoryInteractive.buildCallback();
-      await ampStoryInteractive.layoutCallback();
+      it('should create the dialog when the disclaimer icon is clicked', async () => {
+        env.sandbox
+          .stub(requestService, 'executeRequest')
+          .resolves(getMockInteractiveData());
+        addConfigToInteractive(ampStoryInteractive);
+        ampStoryInteractive.element.setAttribute(
+          'endpoint',
+          'https://notabackend.com'
+        );
+        await ampStoryInteractive.buildCallback();
+        await ampStoryInteractive.layoutCallback();
 
-      expect(
-        ampStoryInteractive.element.querySelector(
-          '.i-amphtml-story-interactive-disclaimer-url'
-        ).textContent
-      ).to.be.equal('notabackend.com');
-    });
+        await ampStoryInteractive
+          .getRootElement()
+          .querySelector('.i-amphtml-story-interactive-disclaimer-icon')
+          .click();
 
-    it('should remove learn more link when backend is not on list', async () => {
-      toggleExperiment(win, 'amp-story-interactive-disclaimer', true);
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
+        expect(
+          storyEl.querySelector(
+            '.i-amphtml-story-interactive-disclaimer-dialog'
+          )
+        ).to.not.be.null;
+      });
 
-      addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.element.setAttribute(
-        'endpoint',
-        'https://notabackend.com'
-      );
+      it('should destroy the dialog when the close button is clicked', async () => {
+        env.sandbox
+          .stub(requestService, 'executeRequest')
+          .resolves(getMockInteractiveData());
+        addConfigToInteractive(ampStoryInteractive);
+        ampStoryInteractive.element.setAttribute(
+          'endpoint',
+          'https://notabackend.com'
+        );
+        await ampStoryInteractive.buildCallback();
+        await ampStoryInteractive.layoutCallback();
 
-      await ampStoryInteractive.buildCallback();
-      await ampStoryInteractive.layoutCallback();
-      expect(
-        ampStoryInteractive.element.querySelector(
-          '.i-amphtml-story-interactive-disclaimer-link'
-        )
-      ).to.be.null;
-    });
+        await ampStoryInteractive
+          .getRootElement()
+          .querySelector('.i-amphtml-story-interactive-disclaimer-icon')
+          .click();
 
-    it('should properly find backend from url in list of backends', async () => {
-      expect(
-        getBackendSpecs('notabackend.com/api/v1', {
-          'wrongbackend.com': {learnMoreUrl: 'url0', 'entity': 'WrongBackend'},
-          'notabackend.com': {learnMoreUrl: 'url1', 'entity': 'NotABackend'},
-        })
-      ).to.be.deep.equals([
-        'notabackend.com',
-        {learnMoreUrl: 'url1', entity: 'NotABackend'},
-      ]);
-    });
+        expect(
+          storyEl.querySelector(
+            '.i-amphtml-story-interactive-disclaimer-dialog'
+          )
+        ).to.not.be.null;
+      });
 
-    it('should not find backend from url in list of backends that does not include url passed', async () => {
-      expect(
-        getBackendSpecs('notabackend.com/api/v1', {
-          'wrongbackend.com': {learnMoreUrl: 'url0', 'entity': 'WrongBackend'},
-        })
-      ).to.be.undefined;
+      it('should set the url of the disclaimer to the backend url', async () => {
+        env.sandbox
+          .stub(requestService, 'executeRequest')
+          .resolves(getMockInteractiveData());
+
+        addConfigToInteractive(ampStoryInteractive);
+        ampStoryInteractive.element.setAttribute(
+          'endpoint',
+          'https://notabackend.com'
+        );
+        await ampStoryInteractive.buildCallback();
+        await ampStoryInteractive.layoutCallback();
+
+        await ampStoryInteractive
+          .getRootElement()
+          .querySelector('.i-amphtml-story-interactive-disclaimer-icon')
+          .click();
+
+        expect(
+          storyEl.querySelector(
+            '.i-amphtml-story-interactive-disclaimer-dialog .i-amphtml-story-interactive-disclaimer-url'
+          ).textContent
+        ).to.be.equal('notabackend.com');
+      });
+
+      it('should remove learn more link when backend is not on list', async () => {
+        env.sandbox
+          .stub(requestService, 'executeRequest')
+          .resolves(getMockInteractiveData());
+
+        addConfigToInteractive(ampStoryInteractive);
+        ampStoryInteractive.element.setAttribute(
+          'endpoint',
+          'https://notabackend.com'
+        );
+
+        await ampStoryInteractive.buildCallback();
+        await ampStoryInteractive.layoutCallback();
+
+        await ampStoryInteractive
+          .getRootElement()
+          .querySelector('.i-amphtml-story-interactive-disclaimer-icon')
+          .click();
+
+        expect(
+          storyEl.querySelector(
+            '.i-amphtml-story-interactive-disclaimer-dialog .i-amphtml-story-interactive-disclaimer-link'
+          )
+        ).to.be.null;
+      });
+
+      it('should properly find backend from url in list of backends', async () => {
+        expect(
+          getBackendSpecs('notabackend.com/api/v1', {
+            'wrongbackend.com': {
+              learnMoreUrl: 'url0',
+              'entity': 'WrongBackend',
+            },
+            'notabackend.com': {learnMoreUrl: 'url1', 'entity': 'NotABackend'},
+          })
+        ).to.be.deep.equals([
+          'notabackend.com',
+          {learnMoreUrl: 'url1', entity: 'NotABackend'},
+        ]);
+      });
+
+      it('should not find backend from url in list of backends that does not include url passed', async () => {
+        expect(
+          getBackendSpecs('notabackend.com/api/v1', {
+            'wrongbackend.com': {
+              learnMoreUrl: 'url0',
+              'entity': 'WrongBackend',
+            },
+          })
+        ).to.be.undefined;
+      });
     });
   }
 );

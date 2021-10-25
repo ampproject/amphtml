@@ -1,23 +1,7 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as sanitizer from '../../../../src/sanitizer';
-import * as service from '../../../../src/service';
+import * as service from '../../../../src/service-helpers';
 import {AmpMustache} from '../amp-mustache';
-import mustache from '../../../../third_party/mustache/mustache';
+import mustache from '#third_party/mustache/mustache';
 
 describes.repeated(
   'amp-mustache 0.1',
@@ -27,11 +11,11 @@ describes.repeated(
     },
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
-  (name, variant) => {
+  (name, variant, env) => {
     let viewerCanRenderTemplates = false;
 
     beforeEach(() => {
-      const getServiceForDocStub = window.sandbox.stub(
+      const getServiceForDocStub = env.sandbox.stub(
         service,
         'getServiceForDoc'
       );
@@ -595,14 +579,14 @@ describes.repeated(
       });
 
       it('should not call mustache parsing', () => {
-        window.sandbox.spy(mustache, 'parse');
+        env.sandbox.spy(mustache, 'parse');
         template.compileCallback();
         expect(mustache.parse).to.have.not.been.called;
       });
 
       it('should not mustache render but still sanitize html', () => {
-        window.sandbox.spy(sanitizer, 'sanitizeHtml');
-        window.sandbox.spy(mustache, 'render');
+        env.sandbox.spy(sanitizer, 'sanitizeHtml');
+        env.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
         expect(sanitizer.sanitizeHtml).to.have.been.called;

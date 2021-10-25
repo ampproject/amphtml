@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
@@ -27,9 +12,22 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
 exports.jsBundles = {
   'polyfills.js': {
     srcDir: './src/',
-    srcFilename: 'polyfills.js',
+    srcFilename: 'polyfills/index.js',
     destDir: './build/',
     minifiedDestDir: './build/',
+  },
+  'bento.js': {
+    srcDir: './src/',
+    srcFilename: 'bento.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      includePolyfills: false,
+      toName: 'bento.max.js',
+      minifiedName: 'bento.js',
+      // For backwards-compat:
+      aliasName: 'custom-elements-polyfill.js',
+    },
   },
   'alp.max.js': {
     srcDir: './ads/alp/',
@@ -40,17 +38,6 @@ exports.jsBundles = {
       toName: 'alp.max.js',
       includePolyfills: true,
       minifiedName: 'alp.js',
-    },
-  },
-  'examiner.max.js': {
-    srcDir: './src/examiner/',
-    srcFilename: 'examiner.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      toName: 'examiner.max.js',
-      includePolyfills: true,
-      minifiedName: 'examiner.js',
     },
   },
   'ww.max.js': {

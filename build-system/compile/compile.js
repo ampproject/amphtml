@@ -1,28 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {green, cyan} = require('kleur/colors');
+const {cyan, green} = require('kleur/colors');
+const {getAmpConfigForFile} = require('../tasks/prepend-global');
 const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel} = require('./pre-closure-babel');
@@ -50,6 +36,9 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  typeCheckOnly?: boolean,
  *  skipUnknownDepsCheck?: boolean,
  *  warningLevel?: boolean,
+ *  noAddDeps?: boolean,
+ *  continueOnError?: boolean,
+ *  errored?: boolean,
  * }}
  */
 let OptionsDef;
@@ -76,6 +65,9 @@ async function closureCompile(
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
+    /**
+     * Kicks off the first closure invocation.
+     */
     function start() {
       inProgress++;
       compile(
@@ -94,6 +86,9 @@ async function closureCompile(
       );
     }
 
+    /**
+     * Keeps track of the invocation count.
+     */
     function next() {
       if (!queue.length) {
         return;
@@ -107,6 +102,9 @@ async function closureCompile(
   });
 }
 
+/**
+ * Cleans up the placeholder directories for fake build modules.
+ */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
@@ -120,13 +118,11 @@ function cleanupBuildDir() {
  * Generates a list of source files based on various factors.
  * TODO(wg-infra, wg-performance): Clean up unnecessary files.
  *
- * @param {string[]|string} entryModuleFilenames
- * @param {string} outputDir
- * @param {string} outputFilename
+ * @param {string[]} entryModuleFilenames
  * @param {!OptionsDef} options
  * @return {!Array<string>}
  */
-function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
+function getSrcs(entryModuleFilenames, options) {
   const unneededFiles = [
     'build/fake-module/third_party/babel/custom-babel-helpers.js',
   ];
@@ -154,13 +150,13 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
   // this works fine.
   if (options.includePolyfills) {
     srcs.push(
-      '!build/fake-module/src/polyfills.js',
+      '!build/fake-module/src/polyfills/index.js',
       '!build/fake-module/src/polyfills/**/*.js',
       '!build/fake-polyfills/**/*.js'
     );
   } else {
-    srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js');
-    unneededFiles.push('build/fake-module/src/polyfills.js');
+    srcs.push('!src/polyfills/index.js', '!build/fake-polyfills/**/*.js');
+    unneededFiles.push('build/fake-module/src/polyfills/index.js');
   }
   // Negative globstars must come at the end.
   srcs.push(
@@ -188,12 +184,11 @@ function getSrcs(entryModuleFilenames, outputDir, outputFilename, options) {
  * Generates the set of options with which to invoke Closure compiler.
  * TODO(wg-infra,wg-performance): Clean up unnecessary options.
  *
- * @param {string} outputDir
  * @param {string} outputFilename
  * @param {!OptionsDef} options
- * @return {!Object}
+ * @return {!Promise<!Object>}
  */
-function generateCompilerOptions(outputDir, outputFilename, options) {
+async function generateCompilerOptions(outputFilename, options) {
   // Determine externs
   let externs = options.externs || [];
   if (!options.noAddDeps) {
@@ -201,8 +196,8 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
       'third_party/web-animations-externs/web_animations.js',
       'third_party/react-externs/externs.js',
       'third_party/moment/moment.extern.js',
-      ...globby.sync('src/core{,/**}/*.extern.js'),
-      ...globby.sync('build-system/externs/*.extern.js'),
+      ...fastGlob.sync('src/core{,/**}/*.extern.js'),
+      ...fastGlob.sync('build-system/externs/*.extern.js'),
       ...externs,
     ];
   }
@@ -211,7 +206,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
-    'third_party/closure-responding-channel',
     'third_party/d3/',
     'third_party/inputmask/',
     'third_party/mustache/',
@@ -219,7 +213,6 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     'third_party/resize-observer-polyfill/',
     'third_party/set-dom/',
     'third_party/subscriptions-project/',
-    'third_party/vega/',
     'third_party/webcomponentsjs/',
     'node_modules/',
     'build/patched-module/',
@@ -228,10 +221,11 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
+  const ampConfig = await getAmpConfigForFile(outputFilename, options);
   let wrapper = options.wrapper
     ? options.wrapper.replace('<%= contents %>', '%output%')
     : `(function(){%output%})();`;
-  wrapper = `${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
+  wrapper = `${ampConfig}${wrapper}\n\n//# sourceMappingURL=${outputFilename}.map`;
 
   /**
    * TODO(#28387) write a type for this.
@@ -248,7 +242,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     language_out: argv.esm || argv.sxg ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
     // We do not use the polyfills provided by closure compiler.
     // If you need a polyfill. Manually include them in the
-    // respective top level polyfills.js files.
+    // respective top level polyfills/*.js files.
     rewrite_polyfills: false,
     externs,
     js_module_root: [
@@ -280,7 +274,7 @@ function generateCompilerOptions(outputDir, outputFilename, options) {
     // Some optimizations get turned off when pseudo_names is on.
     // This causes some errors caused by the babel transformations
     // that we apply like unreachable code because we turn a conditional
-    // falsey. (ex. is IS_FORTESTING transformation which causes some conditionals
+    // falsey. (ex. is IS_PROD transformation which causes some conditionals
     // to be unreachable/suspicious code since the whole expression is
     // falsey)
     compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');
@@ -408,16 +402,15 @@ async function compile(
   }
   const destFile = `${outputDir}/${outputFilename}`;
   const sourcemapFile = `${destFile}.map`;
-  const compilerOptions = generateCompilerOptions(
-    outputDir,
+  const compilerOptions = await generateCompilerOptions(
     outputFilename,
     options
   );
   const srcs = options.noAddDeps
     ? entryModuleFilenames.concat(options.extraGlobs || [])
-    : getSrcs(entryModuleFilenames, outputDir, outputFilename, options);
+    : getSrcs(entryModuleFilenames, options);
   const transformedSrcFiles = await Promise.all(
-    globby
+    fastGlob
       .sync(srcs)
       .map((src) => preClosureBabel(src, outputFilename, options))
   );
@@ -445,6 +438,9 @@ async function compile(
   }
 }
 
+/**
+ * Indicates the current closure concurrency and how to override it.
+ */
 function printClosureConcurrency() {
   log(
     green('Using up to'),

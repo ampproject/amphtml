@@ -1,20 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {mod} from '../../../src/utils/math';
+import {mod} from '#core/math';
 
 /**
  * @enum {number}
@@ -55,14 +39,8 @@ let BaseCarouselDimensionDef;
  * @return {!BaseCarouselDimensionDef} The dimension for the Element along the given Axis.
  */
 export function getDimension(axis, el) {
-  const {
-    top,
-    bottom,
-    height,
-    left,
-    right,
-    width,
-  } = el./*OK*/ getBoundingClientRect();
+  const {bottom, height, left, right, top, width} =
+    el./*OK*/ getBoundingClientRect();
 
   return {
     start: Math.round(axis == Axis.X ? left : top),
@@ -77,7 +55,7 @@ export function getDimension(axis, el) {
  * @return {number} The center point.
  */
 export function getCenter(axis, el) {
-  const {start, end} = getDimension(axis, el);
+  const {end, start} = getDimension(axis, el);
   return (start + end) / 2;
 }
 
@@ -111,7 +89,7 @@ export function getPosition(axis, alignment, el) {
  * @return {boolean} If the element overlaps the position along the given axis.
  */
 export function overlaps(axis, el, position) {
-  const {start, end} = getDimension(axis, el);
+  const {end, start} = getDimension(axis, el);
   // Ignore the end point, since that is shared with the adjacent Element.
   return start <= position && position < end;
 }

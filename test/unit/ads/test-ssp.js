@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as _3p from '#3p/3p';
 
-import * as _3p from '../../../3p/3p';
-import {createIframePromise} from '../../../testing/iframe';
 import {
   handlePosition,
   handlePositionResponsive,
@@ -23,9 +7,11 @@ import {
   runWhenFetchingSettled,
   sizeAgainstWindow,
   ssp,
-} from '../../../ads/vendors/ssp';
+} from '#ads/vendors/ssp';
 
-describes.fakeWin('amp-ad-ssp', {}, () => {
+import {createIframePromise} from '#testing/iframe';
+
+describes.fakeWin('amp-ad-ssp', {}, (env) => {
   let sandbox;
   let win;
   let commonData;
@@ -35,11 +21,12 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
    * Set up our test environment.
    */
   beforeEach(() => {
-    sandbox = window.sandbox;
+    sandbox = env.sandbox;
 
     commonData = {
       width: '200',
       height: '200',
+      said: 'said1234',
       position:
         '{ "id": "id-1", "width": "200", "height": "200", "zoneId": "1234" }',
     };
@@ -88,11 +75,12 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
       {
         width: '200',
         height: '200',
+        said: 'said1234',
         position:
           '{ "id": "id-1", "width": "200", "height": "200", "zoneId": "1234" }',
       },
       ['position'],
-      ['site']
+      ['site', 'said']
     );
   });
 
@@ -170,7 +158,10 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
     ssp(win, commonData);
 
     expect(sssp.config).to.have.been.calledOnce;
-    expect(sssp.config).to.have.been.calledWith({site: 'https://test.com'});
+    expect(sssp.config).to.have.been.calledWith({
+      site: 'https://test.com',
+      said: 'said1234',
+    });
   });
 
   it('should call context.noContentAvailable() when position is invalid', () => {
@@ -252,7 +243,14 @@ describes.fakeWin('amp-ad-ssp', {}, () => {
 
     expect(sssp.getAds).to.have.been.calledOnce;
     expect(sssp.getAds).to.have.been.calledWith(
-      [{id: 'id-1', width: '200', height: '200', zoneId: '1234'}],
+      [
+        {
+          id: 'id-1',
+          width: '200',
+          height: '200',
+          zoneId: '1234',
+        },
+      ],
       {AMPcallback: sandbox.match.func}
     );
   });

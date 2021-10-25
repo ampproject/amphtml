@@ -6,5 +6,9 @@
     {
       owners: [{name: 'choumx'}],
     },
+    {
+      pattern: 'validator-*.protoascii',
+      owners: [{name: 'ampproject/wg-amp4email', notify: true}],
+    },
   ],
 }

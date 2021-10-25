@@ -1,32 +1,16 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import * as CID from '#service/cid-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
-import * as CID from '../../src/service/cid-impl';
+import {createIframePromise} from '#testing/iframe';
 
-import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('document-info', () => {
+  .run('document-info', {}, (env) => {
     beforeEach(() => {
-      window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
+      env.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     function getWin(links, metas) {
@@ -55,7 +39,7 @@ describe
         }
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
-        window.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        env.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
         win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(win.document);
         return iframe.win;

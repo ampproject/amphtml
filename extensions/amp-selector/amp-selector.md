@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-selector
 
 ## Usage
@@ -211,7 +195,7 @@ Fully valid AMP pages use the AMP layout system to infer sizing of elements to c
 
 ### Clearing selections
 
-To clear all selections when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
+To clear all selections when an element is tapped or clicked, set the [`on`](../../docs/spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
 
 Example:
 
@@ -249,7 +233,7 @@ The `keyboard-select-mode` attribute dictates the keyboard navigation behavior f
 </ul>
 
 This attribute can be configured to use different
-options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### Attributes on `<amp-selector>` options
 
@@ -266,7 +250,7 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 Events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="select: my-tab.show"`
 
-Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+Read more about [AMP Actions and Events](../../docs/spec/amp-actions-and-events.md).
 
 ### select
 

@@ -1,53 +1,42 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
-import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '../../../src/services';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/core/constants/visibility-state';
-import {
-  childElementByAttr,
-  childElementsByTag,
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
+} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {
+  childElementByAttr,
+  childElementsByTag,
   scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
-import {findIndex, toArray} from '../../../src/core/types/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {installStylesForDoc} from '../../../src/style-installer';
+} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {setStyles, toggle} from '#core/dom/style';
+import {findIndex, toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
+import {validatePage, validateUrl} from './utils';
+import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+
+import {CSS} from '../../../build/amp-next-page-1.0.css';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {setStyles, toggle} from '../../../src/style';
-
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
-import {validatePage, validateUrl} from './utils';
-import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+import {MultidocManager} from '../../../src/multidoc-manager';
+import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
@@ -495,7 +484,7 @@ export class NextPageService {
    * @return {!HostPage}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {location, title} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||
@@ -503,17 +492,19 @@ export class NextPageService {
       parseFavicon(this.doc_) ||
       '';
 
-    return /** @type {!HostPage} */ (new HostPage(
-      this,
-      {
-        url,
-        title: title || '',
-        image,
-      },
-      PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_
-    ));
+    return /** @type {!HostPage} */ (
+      new HostPage(
+        this,
+        {
+          url,
+          title: title || '',
+          image,
+        },
+        PageState.INSERTED /** initState */,
+        VisibilityState.VISIBLE /** initVisibility */,
+        this.doc_
+      )
+    );
   }
 
   /**
@@ -613,6 +604,28 @@ export class NextPageService {
           cap: this.getCapabilities_(),
         }
       );
+
+      // Reuse message deliverer from existing viewer.
+      // Even though we have multiple instances of the Viewer service, we only
+      // have a single messaging channel.
+      const messageDeliverer = this.viewer_.maybeGetMessageDeliverer();
+      if (messageDeliverer) {
+        amp.onMessage((eventType, data, awaitResponse) => {
+          // Some messages should be suppressed when coming from the inserted
+          // document. These are related to the viewport, so we allow the host
+          // document to handle these events instead.
+          // Otherwise, we would confuse the viewer and observe issues like the
+          // header appearing unexpectedly.
+          if (
+            eventType === 'documentHeight' ||
+            eventType === 'scroll' ||
+            eventType === 'viewport'
+          ) {
+            return;
+          }
+          messageDeliverer(eventType, data, awaitResponse);
+        });
+      }
 
       const ampdoc = devAssert(amp.ampdoc);
       installStylesForDoc(ampdoc, CSS, null, false, TAG);
@@ -882,10 +895,12 @@ export class NextPageService {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    const pages = /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
-      parsed,
-      `${TAG} Page list expected an array, found: ${typeof parsed}`
-    ));
+    const pages = /** @type {!Array<!./page.PageMeta>} */ (
+      user().assertArray(
+        parsed,
+        `${TAG} Page list expected an array, found: ${typeof parsed}`
+      )
+    );
 
     removeElement(scriptElement);
     return pages;
@@ -903,8 +918,9 @@ export class NextPageService {
     }
 
     if (this.remoteFetchingPromise_) {
-      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-        .remoteFetchingPromise_);
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+        this.remoteFetchingPromise_
+      );
     }
 
     this.remoteFetchingPromise_ = batchFetchJsonFor(
@@ -928,8 +944,9 @@ export class NextPageService {
         return [];
       });
 
-    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-      .remoteFetchingPromise_);
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+      this.remoteFetchingPromise_
+    );
   }
 
   /**

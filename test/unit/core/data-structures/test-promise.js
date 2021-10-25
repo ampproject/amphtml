@@ -1,36 +1,12 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred, LastAddedResolver} from '#core/data-structures/promise';
 
-import * as PromiseUtils from '../../../../src/core/data-structures/promise';
-
-describes.sandboxed('PromiseUtils', {}, () => {
-  function getPromiseObject() {
-    let resolve, reject;
-    const promise = new Promise((resolve_, reject_) => {
-      resolve = resolve_;
-      reject = reject_;
-    });
-
-    return {promise, resolve, reject};
-  }
+describes.sandboxed('data structures - PromiseUtils', {}, () => {
+  const getPromiseObject = () => new Deferred();
 
   describe('LastAddedResolver', () => {
     it('should resolve when its only promise resolves', () => {
       const one = getPromiseObject();
-      const resolver = new PromiseUtils.LastAddedResolver();
+      const resolver = new LastAddedResolver();
       resolver.add(one.promise);
 
       setTimeout(() => one.resolve('one'), 0);
@@ -43,7 +19,7 @@ describes.sandboxed('PromiseUtils', {}, () => {
     it('should resolve when its last promise added resolves', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();
-      const firstResolver = new PromiseUtils.LastAddedResolver();
+      const firstResolver = new LastAddedResolver();
       firstResolver.add(one.promise);
       firstResolver.add(two.promise);
 
@@ -53,7 +29,7 @@ describes.sandboxed('PromiseUtils', {}, () => {
       const three = getPromiseObject();
       const four = getPromiseObject();
       const five = getPromiseObject();
-      const secondResolver = new PromiseUtils.LastAddedResolver();
+      const secondResolver = new LastAddedResolver();
       secondResolver.add(three.promise);
       secondResolver.add(four.promise);
       secondResolver.add(five.promise);
@@ -75,10 +51,7 @@ describes.sandboxed('PromiseUtils', {}, () => {
     it('should support adding initial promises in the constructor', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();
-      const resolver = new PromiseUtils.LastAddedResolver([
-        one.promise,
-        two.promise,
-      ]);
+      const resolver = new LastAddedResolver([one.promise, two.promise]);
 
       setTimeout(() => one.resolve('one'), 0);
       setTimeout(() => two.resolve('two'), 10);
@@ -91,7 +64,7 @@ describes.sandboxed('PromiseUtils', {}, () => {
     it('should reject only when the last promise rejects', () => {
       const one = getPromiseObject();
       const two = getPromiseObject();
-      const firstResolver = new PromiseUtils.LastAddedResolver();
+      const firstResolver = new LastAddedResolver();
       firstResolver.add(one.promise);
       firstResolver.add(two.promise);
 
@@ -102,7 +75,7 @@ describes.sandboxed('PromiseUtils', {}, () => {
       const four = getPromiseObject();
       const five = getPromiseObject();
       const six = getPromiseObject();
-      const secondResolver = new PromiseUtils.LastAddedResolver();
+      const secondResolver = new LastAddedResolver();
       secondResolver.add(four.promise);
       secondResolver.add(five.promise);
       secondResolver.add(six.promise);

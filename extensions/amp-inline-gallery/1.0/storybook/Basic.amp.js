@@ -1,73 +1,56 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
+import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-inline-gallery-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [
       {name: 'amp-inline-gallery', version: '1.0'},
       {name: 'amp-base-carousel', version: '1.0'},
     ],
-
     experiments: ['bento'],
+  },
+  argTypes: {
+    orientation: {
+      control: {type: 'select'},
+      options: ['horizontal', 'vertical'],
+    },
+  },
+  args: {
+    topIndicatorInset: false,
+    bottomIndicatorInset: true,
+    orientation: 'vertical',
+    'auto-advance': false,
+    'auto-advance-count': 1,
+    'auto-advance-interval': 1000,
+    'auto-advance-loops': 3,
+    thumbnailsLoop: false,
+    thumbnailsAspectRatio: '',
   },
 };
 
-export const Default = () => {
-  const topInset = boolean('top indicator inset?', false);
-  const bottomInset = boolean('bottom indicator inset?', true);
-  const autoAdvance = boolean('auto advance', false);
-  const autoAdvanceCount = text('auto advance count', 1);
-  const autoAdvanceInterval = text('auto advance interval', 1000);
-  const autoAdvanceLoops = text('auto advance loops', 3);
-  const loop = boolean('loop thumbnails', false);
-  const aspectRatio = text('thumbnails aspect ratio', undefined);
-  const orientation = select(
-    'orientation',
-    ['horizontal', 'vertical'],
-    'vertical'
-  );
+export const Default = ({
+  bottomIndicatorInset,
+  thumbnailsAspectRatio,
+  thumbnailsLoop,
+  topIndicatorInset,
+  ...args
+}) => {
   return (
     <amp-inline-gallery style={{maxWidth: '360px'}} layout="container">
       <amp-inline-gallery-pagination
-        layout={topInset ? 'nodisplay' : 'fixed-height'}
-        height={topInset ? undefined : '24'}
-        inset={topInset}
+        layout={topIndicatorInset ? 'nodisplay' : 'fixed-height'}
+        height={topIndicatorInset ? undefined : '24'}
+        inset={topIndicatorInset}
       />
       <amp-inline-gallery-thumbnails
-        aspectRatio={aspectRatio}
-        loop={loop}
+        aspectRatio={thumbnailsAspectRatio}
+        loop={thumbnailsLoop}
         layout="fixed-height"
         height="50"
       />
-      <amp-base-carousel
-        auto-advance={autoAdvance}
-        auto-advance-count={autoAdvanceCount}
-        auto-advance-interval={autoAdvanceInterval}
-        auto-advance-loops={autoAdvanceLoops}
-        orientation={orientation}
-        width="360"
-        height="240"
-      >
+      <amp-base-carousel {...args} width="360" height="240">
         <amp-img
           width="360"
           height="240"
@@ -106,9 +89,9 @@ export const Default = () => {
         ></amp-img>
       </amp-base-carousel>
       <amp-inline-gallery-pagination
-        layout={bottomInset ? 'nodisplay' : 'fixed-height'}
-        height={bottomInset ? undefined : '24'}
-        inset={bottomInset}
+        layout={bottomIndicatorInset ? 'nodisplay' : 'fixed-height'}
+        height={bottomIndicatorInset ? undefined : '24'}
+        inset={bottomIndicatorInset}
       />
     </amp-inline-gallery>
   );

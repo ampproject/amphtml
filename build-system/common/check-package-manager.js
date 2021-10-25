@@ -1,19 +1,5 @@
 #!/usr/bin/env node
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 'use strict';
 
 /**
@@ -30,7 +16,7 @@ const https = require('https');
 const {getStdout} = require('./process');
 
 const setupInstructionsUrl =
-  'https://github.com/ampproject/amphtml/blob/main/contributing/getting-started-quick.md#one-time-setup';
+  'https://github.com/ampproject/amphtml/blob/main/docs/getting-started-quick.md#one-time-setup';
 const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
 
 const warningDelaySecs = 10;
@@ -63,7 +49,7 @@ ${yellow('For detailed instructions, see')} ${cyan(setupInstructionsUrl)}`;
 /**
  * Formats the text to appear red
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function red(text) {
@@ -72,7 +58,7 @@ function red(text) {
 /**
  * Formats the text to appear cyan
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function cyan(text) {
@@ -81,7 +67,7 @@ function cyan(text) {
 /**
  * Formats the text to appear green
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function green(text) {
@@ -90,7 +76,7 @@ function green(text) {
 /**
  * Formats the text to appear yellow
  *
- * @param {string} text
+ * @param {*} text
  * @return {string}
  */
 function yellow(text) {
@@ -103,7 +89,7 @@ function yellow(text) {
  * package manager being used is determined.
  **/
 function ensureNpm() {
-  if (!process.env.npm_execpath.includes('npm')) {
+  if (!process.env.npm_execpath?.includes('npm')) {
     console.log(npmInfoMessage);
     process.exit(1);
   }
@@ -112,7 +98,7 @@ function ensureNpm() {
 /**
  * Check the node version and print a warning if it is not the latest LTS.
  *
- * @return {Promise}
+ * @return {Promise<void>}
  **/
 function checkNodeVersion() {
   const nodeVersion = getStdout('node --version').trim();
@@ -276,6 +262,14 @@ async function main() {
       yellow('\nWARNING: Detected problems with'),
       cyan(Array.from(updatesNeeded).join(', '))
     );
+    if (process.env.CI) {
+      console.log(
+        yellow('Skipping delay prompt for'),
+        cyan('CI'),
+        yellow('environment.')
+      );
+      return;
+    }
     console.log(
       yellow('⤷ Continuing install in'),
       cyan(warningDelaySecs),

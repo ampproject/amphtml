@@ -11,5 +11,13 @@
         },
       ],
     },
+    {
+      pattern: 'client-side-experiments-config.json',
+      owners: [{name: 'danielrozenberg'}, {name: 'jridgewell'}],
+    },
+    {
+      pattern: '*-config.json',
+      owners: [{name: 'alanorozco', requestReviews: false}],
+    },
   ],
 }

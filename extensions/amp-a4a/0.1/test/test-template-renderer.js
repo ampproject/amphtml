@@ -1,29 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-mustache/0.2/amp-mustache';
+import {utf8Encode} from '#core/types/string/bytes';
+
+import {data} from './testdata/valid_css_at_rules_amp.reserialized';
+
+import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
+import {ValidatorResult} from '../amp-ad-type-defs';
+import {TemplateRenderer} from '../template-renderer';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
 } from '../template-validator';
-import {TemplateRenderer} from '../template-renderer';
-import {ValidatorResult} from '../amp-ad-type-defs';
-import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
   amp: {},
@@ -129,9 +115,8 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
               '"https://buy.com/buy-1">Click for ad!</a>' +
               '\n    <amp-analytics class="i-amphtml-element i-amphtml' +
               '-notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml' +
-              '-layout-size-defined amp-unresolved i-amphtml-' +
-              'unresolved" i-amphtml-layout="fixed" style="width: 1px;' +
-              ' height: 1px;"></amp-analytics></div>'
+              '-layout-size-defined" i-amphtml-layout="fixed" style="width: ' +
+              '1px; height: 1px;"></amp-analytics></div>'
           );
         });
     });

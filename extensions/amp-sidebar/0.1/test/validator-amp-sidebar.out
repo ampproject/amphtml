@@ -1,25 +1,10 @@
 FAIL
 |  <!--
-|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests support for the amp-sidebar tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -70,7 +55,7 @@ FAIL
 |    <amp-sidebar layout="nodisplay">
 |      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 >>     ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:70:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
+amp-sidebar/0.1/test/validator-amp-sidebar.html:55:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
 |        <ul>
 |          <li>Nav item 1</li>
 |        </ul>
@@ -85,7 +70,7 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:70:4 Tag 'nav' must have 1 child
 |    <amp-sidebar layout="nodisplay">
 |      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 >>     ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:83:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
+amp-sidebar/0.1/test/validator-amp-sidebar.html:68:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
 |        <ol>
 |          <li>Nav item 1</li>
 |        </ol>
@@ -100,7 +85,7 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:83:4 Tag 'nav' must have 1 child
 |      <amp-sidebar layout="nodisplay">
 |        <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 >>       ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:96:6 Tag 'nav' must have 1 child tags - saw 2 child tags.
+amp-sidebar/0.1/test/validator-amp-sidebar.html:81:6 Tag 'nav' must have 1 child tags - saw 2 child tags.
 |          <ul>
 |            <li>Nav item 1</li>
 |          </ul>
@@ -114,6 +99,6 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:96:6 Tag 'nav' must have 1 child
 |    <!-- Invalid: incorrect side value -->
 |    <amp-sidebar side="center" layout="nodisplay"></amp-sidebar>
 >>   ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:108:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-sidebar/)
+amp-sidebar/0.1/test/validator-amp-sidebar.html:93:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-sidebar/)
 |  </body>
 |  </html>

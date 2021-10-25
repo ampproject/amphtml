@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 // Renderer renders the parse tree rooted at node to the given buffer.
 //
 // Rendering is done on a 'best effort' basis: calling Parse on the output of
@@ -58,6 +42,14 @@ enum class RenderError {
 
 class Renderer {
  public:
+  // This renderer though fully functional, is primarily used to render webkit
+  // test cases. This Render uses recursion which may not be very efficient for
+  // production rendering. Some things you may need to consider:
+  // A) Increase the stack size.
+  // B) Control document complexity by --htmlparser_max_nodes_depth_count flag.
+  // C) Write your own renderer.
+  //
+  // TODO(amaltas): Replace recursion with iteration based dom tree traversal.
   static RenderError Render(Node* node, std::stringbuf* output_buffer);
 };
 

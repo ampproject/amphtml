@@ -1,21 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals} from '#core/constants/common-signals';
+import {tryResolve} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isArray} from '#core/types';
+
+import {Services} from '#service';
 
 import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
-import {CommonSignals} from '../../../../src/core/constants/common-signals';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -32,12 +24,6 @@ import {
   runCandidates,
   scan,
 } from '../amp-auto-lightbox';
-import {Services} from '../../../../src/services';
-import {Signals} from '../../../../src/core/data-structures/signals';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
-import {isArray} from '../../../../src/core/types';
-import {tryResolve} from '../../../../src/core/data-structures/promise';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -133,36 +119,82 @@ describes.realWin(
         `Criteria.meetsTreeShapeCriteria(html\`${outerHtml}\`)`;
 
       function itAcceptsOrRejects(scenarios) {
-        scenarios.forEach(({rejects, accepts, mutate, wrapWith}) => {
+        scenarios.forEach(({accepts, mutate, rejects, wrapWith}) => {
           const maybeWrap = (root) =>
             wrapWith ? wrap(root, wrapWith()) : root;
           const maybeMutate = (root) => mutate && mutate(root);
 
           it(`${accepts ? 'accepts' : 'rejects'} ${accepts || rejects}`, () => {
             [
-              html` <amp-img src="asada.png" layout="flex-item"></amp-img> `,
-              html`
-                <div>
-                  <amp-img src="adobada.png" layout="flex-item"></amp-img>
-                </div>
-              `,
-              html`
-                <div>
+              {
+                markup: html`
+                  <amp-img src="asada.png" layout="flex-item"></amp-img>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`
                   <div>
-                    <amp-img src="carnitas.png" layout="flex-item"></amp-img>
+                    <amp-img src="asada.png" layout="flex-item">
+                      <img src="adada.png" />
+                    </amp-img>
                   </div>
-                </div>
-              `,
+                `,
+                tagName: 'AMP-IMG',
+                candidate: 'amp-img',
+              },
+              {
+                markup: html`
+                  <div>
+                    <amp-img src="adobada.png" layout="flex-item"></amp-img>
+                  </div>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <div>
+                      <amp-img src="carnitas.png" layout="flex-item"></amp-img>
+                    </div>
+                  </div>
+                `,
+                tagName: 'AMP-IMG',
+              },
+              {
+                markup: html`<img src="asada.png" layout="flex-item" /> `,
+                tagName: 'IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <img src="adobada.png" layout="flex-item" />
+                  </div>
+                `,
+                tagName: 'IMG',
+              },
+              {
+                markup: html`
+                  <div>
+                    <div>
+                      <img src="carnitas.png" layout="flex-item" />
+                    </div>
+                  </div>
+                `,
+                tagName: 'IMG',
+              },
             ].forEach((unwrapped) => {
-              maybeMutate(unwrapped);
+              maybeMutate(unwrapped.markup);
 
-              const scenario = maybeWrap(unwrapped);
-              const candidate = firstElementLeaf(scenario);
+              const scenario = maybeWrap(unwrapped.markup);
+              const candidate = unwrapped.candidate
+                ? scenario.querySelector(unwrapped.candidate)
+                : firstElementLeaf(scenario);
 
               env.win.document.body.appendChild(scenario);
 
               expect(candidate).to.be.ok;
-              expect(candidate.tagName).to.equal('AMP-IMG');
+              expect(candidate.tagName).to.equal(unwrapped.tagName);
 
               expect(
                 Criteria.meetsTreeShapeCriteria(candidate),
@@ -259,7 +291,7 @@ describes.realWin(
 
     describe('meetsSizingCriteria', () => {
       const areaDeltaPerc = RENDER_AREA_RATIO * 100;
-      const {vw, vh} = {vw: 1000, vh: 600};
+      const {vh, vw} = {vw: 1000, vh: 600};
 
       const expectMeetsSizingCriteria = (
         renderWidth,

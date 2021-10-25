@@ -1,29 +1,18 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
 import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {computedStyle, setImportantStyles} from '../../../src/style';
+import {LocalizedStringId} from '#service/localization/strings';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {dev} from '#utils/log';
 import {getLocalizationService} from './amp-story-localization-service';
-import {getRGBFromCssColorValue, getTextColorForRGB} from './utils';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {isPageAttachmentUiV2ExperimentOn} from './amp-story-page-attachment-ui-v2';
+import {
+  getRGBFromCssColorValue,
+  getTextColorForRGB,
+  maybeMakeProxyUrl,
+} from './utils';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {getWin} from '#core/window';
 
 /**
  * @enum {string}
@@ -34,58 +23,39 @@ const CtaAccentElement = {
 };
 
 /**
+ * For amp-story-page-attachment elements.
  * @param {!Element} element
  * @return {!Element}
  */
-export const buildOpenDefaultAttachmentElement = (element) =>
+export const buildInlineElement = (element) =>
   htmlFor(element)`
-    <a class="
-        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button" target="_top">
-      <span class="i-amphtml-story-page-open-attachment-icon">
-        <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
-        <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
-      </span>
-      <span class="i-amphtml-story-page-open-attachment-label"></span>
-    </a>`;
-
-/**
- * @param {!Element} element
- * @return {!Element}
- */
-export const buildOpenInlineAttachmentElement = (element) =>
-  htmlFor(element)`
-    <a class="
-        i-amphtml-story-page-open-attachment i-amphtml-story-system-reset i-amphtml-amp-story-page-attachment-ui-v2"
-        role="button">
-      <div class="i-amphtml-story-inline-page-attachment-chip">
-        <div class="i-amphtml-story-inline-page-attachment-img"></div>
+    <a class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset" role="button">
+      <div class="i-amphtml-story-inline-page-attachment-chip" ref="chipEl">
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
     </a>`;
 
 /**
+ * UI template for amp-story-page-outlink elements and
+ * the legacy amp-story-page-attachment with href.
  * @param {!Element} element
  * @return {!Element}
  */
-const buildOpenOutlinkAttachmentElement = (element) =>
+const buildOutlinkElement = (element) =>
   htmlFor(element)`
-     <a class="i-amphtml-story-page-open-attachment i-amphtml-amp-story-page-attachment-ui-v2"
-         role="button" target="_top">
-       <span class="i-amphtml-story-outlink-page-attachment-arrow">
-         <span class="i-amphtml-story-outlink-page-open-attachment-bar-left"></span>
-         <span class="i-amphtml-story-outlink-page-open-attachment-bar-right"></span>
-       </span>
-       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
-        <div class="i-amphtml-story-outlink-page-attachment-label" ref="ctaLabelEl"></div>
-       </div>
-     </a>`;
+    <a class="i-amphtml-story-page-open-attachment" role="button" target="_top">
+      <svg class="i-amphtml-story-outlink-page-attachment-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8" width="20px" height="8px"><path d="M18,7.7c-0.2,0-0.5-0.1-0.7-0.2l-7.3-4l-7.3,4C2,7.9,1.1,7.7,0.7,6.9c-0.4-0.7-0.1-1.6,0.6-2l8-4.4c0.5-0.2,1-0.2,1.5,0l8,4.4c0.7,0.4,1,1.3,0.6,2C19,7.4,18.5,7.7,18,7.7z"></path></svg>
+      <div class="i-amphtml-story-outlink-page-attachment-outlink-chip" ref="chipEl">
+        <span class="i-amphtml-story-page-attachment-label" ref="ctaLabelEl"></span>
+      </div>
+    </a>`;
 
 /**
+ * Link icon used in amp-story-page-outlink UI and drawer.
  * @param {!Element} element
  * @return {!Element}
  */
-export const buildOpenAttachmentElementLinkIcon = (element) =>
+export const buildOutlinkLinkIconElement = (element) =>
   htmlFor(element)`
   <svg class="i-amphtml-story-page-open-attachment-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path fill-opacity=".1" d="M12 0c6.6 0 12 5.4 12 12s-5.4 12-12 12S0 18.6 0 12 5.4 0 12 0z"></path>
@@ -94,96 +64,58 @@ export const buildOpenAttachmentElementLinkIcon = (element) =>
 
 /**
  * Determines which open attachment UI to render.
- * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
-  const attachmentHref = attachmentEl.getAttribute('href');
-  if (isPageAttachmentUiV2ExperimentOn(win) && attachmentHref) {
-    return renderOutlinkPageAttachmentUI(
-      win,
-      pageEl,
-      attachmentEl,
-      attachmentHref
-    );
-  } else if (isPageAttachmentUiV2ExperimentOn(win) && openImgAttr) {
-    return renderPageAttachmentUiWithImages(win, pageEl, attachmentEl);
+export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
+  // Outlinks can be an amp-story-page-outlink or the legacy version,
+  // an amp-story-page-attachment with an href.
+  const isOutlink =
+    attachmentEl.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
+    attachmentEl.getAttribute('href');
+  if (isOutlink) {
+    return renderOutlinkUI(pageEl, attachmentEl);
+  } else {
+    return renderInlineUi(pageEl, attachmentEl);
   }
-  return renderDefaultPageAttachmentUI(win, pageEl, attachmentEl);
-};
-
-/**
- * Renders default page attachment UI.
- * @param {!Window} win
- * @param {!Element} pageEl
- * @param {!Element} attachmentEl
- * @return {!Element}
- */
-const renderDefaultPageAttachmentUI = (win, pageEl, attachmentEl) => {
-  const openAttachmentEl = buildOpenDefaultAttachmentElement(pageEl);
-  if (isPageAttachmentUiV2ExperimentOn(win)) {
-    openAttachmentEl.classList.add(
-      '.i-amphtml-amp-story-page-attachment-ui-v2'
-    );
-    // Setting theme
-    const theme = attachmentEl.getAttribute('theme');
-    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-      openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
-    }
-  }
-  // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
-  const attachmentHref = attachmentEl.getAttribute('href');
-  if (attachmentHref) {
-    openAttachmentEl.setAttribute('href', attachmentHref);
-  }
-
-  const textEl = openAttachmentEl.querySelector(
-    '.i-amphtml-story-page-open-attachment-label'
-  );
-
-  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
-  const openLabel =
-    (openLabelAttr && openLabelAttr.trim()) ||
-    getLocalizationService(pageEl).getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-    );
-
-  textEl.textContent = openLabel;
-
-  if (isPageAttachmentUiV2ExperimentOn(win)) {
-    openAttachmentEl.classList.add('i-amphtml-amp-story-page-attachment-ui-v2');
-  }
-  return openAttachmentEl;
 };
 
 /**
  * Renders inline page attachment UI.
- * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
- * @param {!Element} attachmentHref
  * @return {!Element}
  */
-const renderOutlinkPageAttachmentUI = (
-  win,
-  pageEl,
-  attachmentEl,
-  attachmentHref
-) => {
-  const openAttachmentEl = buildOpenOutlinkAttachmentElement(pageEl);
+const renderOutlinkUI = (pageEl, attachmentEl) => {
+  const openAttachmentEl = buildOutlinkElement(pageEl);
+
+  // amp-story-page-outlink requires an anchor element child for SEO and analytics optimisations.
+  // amp-story-page-attachment uses this same codepath and allows an href attribute.
+  // This is hidden with css. Clicks are simulated from it when a remote attachment is clicked.
+  const anchorChild = pageEl
+    .querySelector('amp-story-page-outlink')
+    ?.querySelector('a');
 
   // Copy href to the element so it can be previewed on hover and long press.
+  const attachmentHref =
+    anchorChild?.getAttribute('href') || attachmentEl.getAttribute('href');
   if (attachmentHref) {
     openAttachmentEl.setAttribute('href', attachmentHref);
   }
 
-  // Getting elements
+  // Copy title to the element if it exists.
+  const attachmentTitle =
+    anchorChild?.getAttribute('title') ||
+    attachmentEl.getAttribute('data-title');
+  if (attachmentTitle) {
+    openAttachmentEl.setAttribute('title', attachmentTitle);
+  }
+
+  // Get elements.
   const {chipEl, ctaLabelEl} = htmlRefs(openAttachmentEl);
 
-  // Setting theme
+  // Set theme.
   let themeAttribute = attachmentEl.getAttribute('theme');
   if (themeAttribute) {
     themeAttribute = themeAttribute.toLowerCase();
@@ -191,11 +123,14 @@ const renderOutlinkPageAttachmentUI = (
   openAttachmentEl.setAttribute('theme', themeAttribute);
 
   if (themeAttribute === AttachmentTheme.CUSTOM) {
-    setCustomThemeStyles(win, attachmentEl, openAttachmentEl);
+    setCustomThemeStyles(attachmentEl, openAttachmentEl);
   }
 
-  // Appending text & aria-label.
-  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  // Append text & aria-label.
+  const openLabelAttr =
+    anchorChild?.textContent ||
+    attachmentEl.getAttribute('cta-text') ||
+    attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
     ? openLabelAttr.trim()
     : getLocalizationService(pageEl).getLocalizedString(
@@ -207,15 +142,15 @@ const renderOutlinkPageAttachmentUI = (
   // Set image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
   if (openImgAttr && openImgAttr !== 'none') {
-    const ctaImgEl = win.document.createElement('div');
-    ctaImgEl.classList.add('i-amphtml-story-outlink-page-attachment-img');
+    const ctaImgEl = htmlFor(chipEl)`
+      <div class="i-amphtml-story-outlink-page-attachment-img"></div>`;
     setImportantStyles(ctaImgEl, {
       'background-image': 'url(' + openImgAttr + ')',
     });
     chipEl.prepend(ctaImgEl);
   } else if (!openImgAttr) {
     // Attach link icon SVG by default.
-    const linkImage = buildOpenAttachmentElementLinkIcon(attachmentEl);
+    const linkImage = buildOutlinkLinkIconElement(attachmentEl);
     chipEl.prepend(linkImage);
   }
 
@@ -224,22 +159,23 @@ const renderOutlinkPageAttachmentUI = (
 
 /**
  * Renders inline page attachment UI.
- * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
-  const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
+const renderInlineUi = (pageEl, attachmentEl) => {
+  const openAttachmentEl = buildInlineElement(pageEl);
 
-  // Setting theme
+  // Set theme.
   const theme = attachmentEl.getAttribute('theme');
   if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
     openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
   }
 
-  // Appending text & aria-label.
-  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  // Append text & aria-label if defined.
+  const openLabelAttr =
+    attachmentEl.getAttribute('cta-text') ||
+    attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(pageEl).getLocalizedString(
@@ -248,32 +184,33 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   if (openLabel !== 'none') {
-    const textEl = win.document.createElement('span');
-    textEl.classList.add('i-amphtml-story-inline-page-attachment-label');
+    const textEl = htmlFor(openAttachmentEl)`
+      <span class="i-amphtml-story-page-attachment-label"></span>`;
     textEl.textContent = openLabel;
     openAttachmentEl.appendChild(textEl);
   }
 
-  // Adding images.
-  const openImgAttr = attachmentEl.getAttribute('cta-image');
-
-  const ctaImgEl = openAttachmentEl.querySelector(
-    '.i-amphtml-story-inline-page-attachment-img'
-  );
-
-  setImportantStyles(ctaImgEl, {
-    'background-image': 'url(' + openImgAttr + ')',
-  });
+  // Add images if they are defined.
+  const {chipEl} = htmlRefs(openAttachmentEl);
+  const makeImgElWithBG = (openImgAttr) => {
+    const ctaImgEl = htmlFor(chipEl)`
+      <div class="i-amphtml-story-inline-page-attachment-img"></div>`;
+    setImportantStyles(ctaImgEl, {
+      'background-image': 'url(' + openImgAttr + ')',
+    });
+    return ctaImgEl;
+  };
 
   const openImgAttr2 = attachmentEl.getAttribute('cta-image-2');
-
   if (openImgAttr2) {
-    const ctaImgEl2 = win.document.createElement('div');
-    ctaImgEl2.classList.add('i-amphtml-story-inline-page-attachment-img');
-    setImportantStyles(ctaImgEl2, {
-      'background-image': 'url(' + openImgAttr2 + ')',
-    });
-    ctaImgEl.parentNode.insertBefore(ctaImgEl2, ctaImgEl.nextSibling);
+    const src = maybeMakeProxyUrl(openImgAttr2, pageEl.getAmpDoc());
+    chipEl.prepend(makeImgElWithBG(src));
+  }
+
+  const openImgAttr = attachmentEl.getAttribute('cta-image');
+  if (openImgAttr) {
+    const src = maybeMakeProxyUrl(openImgAttr, pageEl.getAmpDoc());
+    chipEl.prepend(makeImgElWithBG(src));
   }
 
   return openAttachmentEl;
@@ -281,26 +218,33 @@ const renderPageAttachmentUiWithImages = (win, pageEl, attachmentEl) => {
 
 /**
  * Sets custom theme attributes.
- * @param {!Window} win
  * @param {!Element} attachmentEl
  * @param {!Element} openAttachmentEl
  */
-export const setCustomThemeStyles = (win, attachmentEl, openAttachmentEl) => {
-  const accentColor = attachmentEl.getAttribute('cta-accent-color');
+export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
+  if (!attachmentEl.hasAttribute('cta-accent-color')) {
+    dev().warn(
+      'AMP-STORY-PAGE-OUTLINK',
+      'No cta-accent-color attribute found.'
+    );
+  }
+
+  const accentColor =
+    attachmentEl.getAttribute('cta-accent-color') || '#000000';
 
   // Calculating contrast color (black or white) needed for outlink CTA UI.
   let contrastColor = null;
-  if (accentColor) {
-    setImportantStyles(attachmentEl, {
-      'background-color': attachmentEl.getAttribute('cta-accent-color'),
-    });
-    const styles = computedStyle(win, attachmentEl);
-    const rgb = getRGBFromCssColorValue(styles['background-color']);
-    contrastColor = getTextColorForRGB(rgb);
-    setImportantStyles(attachmentEl, {
-      'background-color': '',
-    });
-  }
+  setImportantStyles(attachmentEl, {
+    'background-color': accentColor,
+  });
+
+  const win = getWin(attachmentEl);
+  const styles = computedStyle(win, attachmentEl);
+  const rgb = getRGBFromCssColorValue(styles['background-color']);
+  contrastColor = getTextColorForRGB(rgb);
+  setImportantStyles(attachmentEl, {
+    'background-color': '',
+  });
   if (
     attachmentEl.getAttribute('cta-accent-element') ===
     CtaAccentElement.BACKGROUND

@@ -49,7 +49,7 @@ The requirements for an RTC endpoint to be used with Google Ad Manager are the s
 The RTC Response to a GET must meet the following requirements:
 
 -   Status Code = 200
--   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/main/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
+-   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
 -   Body of response is a JSON object of targeting information such as:
     -   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
     -   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using Google Ad Manager, refer to Google Ad Manager docs).
@@ -60,7 +60,8 @@ The body of the response must meet the following specification:
   <tr>
    <td><code>{"<strong>targeting</strong>": {"key1": "value1",
              "key2": "value2"},
-<strong>categoryExclusions</strong>: ['cat1', 'cat2', 'cat3']} </code>
+"<strong>categoryExclusions</strong>": ["cat1", "cat2", "cat3"],
+"<strong>ppid</strong>": "userId"} </code>
    </td>
   </tr>
   <tr>
@@ -75,6 +76,9 @@ The body of the response must meet the following specification:
 -   "categoryExclusions"
     -   Optional parameter
     -   Value is an array of categories to use for category exclusions in DFP
+-   "ppid"
+    -   Optional parameter
+    -   Value is a string to use for targeting
 
 The RTC responses will be merged with whatever JSON targeting is specified on the amp-ad element.
 
@@ -237,6 +241,12 @@ This resulting object will then be sent on the **scp** parameter of the ad reque
 ```http
 https://securepubads.g.doubleclick.net/gampad/ads?.....&scp=excl_cat%3Dabc,health,sports,food,fun…...
 ```
+
+### Merging ppid
+
+It's highly recommended the PPID is retrieved from only one provider.
+Regardless, if multiple RTC responses contain ppid values, then the one
+requested from the last URL in the list will be chosen.
 
 ### Merging RTC Responses from Vendors and Custom URLs
 

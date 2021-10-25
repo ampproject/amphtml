@@ -1,39 +1,26 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   ActionTrust,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
-} from '../core/constants/action-constants';
-import {Keys} from '../core/constants/key-codes';
-import {Services} from '../services';
-import {debounce, throttle} from '../core/types/function';
-import {dev, devAssert, user, userAssert} from '../log';
-import {dict, hasOwn, map} from '../core/types/object';
-import {getDetail} from '../event-helper';
-import {getMode} from '../mode';
-import {getValueForExpr} from '../json';
-import {isAmp4Email} from '../format';
-import {isArray, toArray} from '../core/types/array';
-import {isEnabled} from '../dom';
-import {isFiniteNumber, toWin} from '../types';
-import {registerServiceBuilderForDoc} from '../service';
+} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import {isAmp4Email} from '#core/document/format';
+import {isEnabled} from '#core/dom';
+import {isFiniteNumber} from '#core/types';
+import {isArray, toArray} from '#core/types/array';
+import {debounce, throttle} from '#core/types/function';
+import {dict, getValueForExpr, hasOwn, map} from '#core/types/object';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {getDetail} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {reportError} from '../error-reporting';
+import {getMode} from '../mode';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -64,6 +51,7 @@ const DEFAULT_EMAIL_ALLOWLIST = [
   {tagOrTarget: '*', method: 'hide'},
   {tagOrTarget: '*', method: 'show'},
   {tagOrTarget: '*', method: 'toggleClass'},
+  {tagOrTarget: '*', method: 'toggleChecked'},
   {tagOrTarget: '*', method: 'toggleVisibility'},
 ];
 
@@ -480,7 +468,7 @@ export class ActionService {
     const queuedInvocations = target[ACTION_QUEUE_];
     if (isArray(queuedInvocations)) {
       // Invoke and clear all queued invocations now handler is installed.
-      Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
+      Services.timerFor(getWin(target)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         queuedInvocations.forEach((invocation) => {
           try {
@@ -628,7 +616,7 @@ export class ActionService {
     /** @type {?Promise} */
     let currentPromise = null;
     action.actionInfos.forEach((actionInfo) => {
-      const {target, args, method, str} = actionInfo;
+      const {args, method, str, target} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);

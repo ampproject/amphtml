@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @externs */
 
 // HACK. Define application types used in default AMP externs
@@ -317,7 +301,22 @@ window.adpushup.initAmp = function (
   height,
   siteid,
   slotpath,
-  totalampslots
+  totalampslots,
+  jsontargeting,
+  extras
+) {};
+
+// andbeyond.js
+window.andbeyond = {};
+window.andbeyond.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots,
+  jsontargeting,
+  extras
 ) {};
 
 // adreactor.js
@@ -369,6 +368,10 @@ data.onNoAds;
 
 // amoad.js
 data.sid;
+
+// amplified.js
+data.amplified_id;
+data.amplified_params;
 
 // appnexus.js
 data.tagid;
@@ -626,6 +629,12 @@ data.site;
 data.zone;
 data.callback;
 
+// seedtag.js
+data.adunitId;
+data.placement;
+data.publisherId;
+data.forceCreative;
+
 // sharethrough.js
 data.pkey;
 
@@ -683,9 +692,6 @@ data.extraParams;
 data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
-
-// verizonmedia.js
-window.jacData;
 
 // webediads.js
 var wads;

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <!-- prettier-ignore -->
+  <head>
+    <meta charset="utf-8">
+    <title>amp-render example</title>
+    <link rel="canonical" href="/examples/amp-render.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-render {
+        color: red;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  </head>
+  <body>
+    <!-- Valid: amp-render with only src attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="amp-state:source"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with only [src] attribute -->
+    <amp-render width="10" height="10" [src]="srcUrl"> </amp-render>
+
+    <!-- Valid: amp-render with relative URL as src attribute -->
+    <amp-render width="10" height="10" src="/path/to/data.json"> </amp-render>
+
+    <!-- Valid: amp-render with both src and [src] attributes -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      [src]="foo.bar"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with binding="refresh" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="refresh"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with binding="no" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="no"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with binding="never" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="never"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with binding="always" attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="always"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with credentials="include" -->
+    <amp-render
+      width="10"
+      height="10"
+      src="amp-script:scriptFn.dataFn"
+      credentials="include"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with credentials="omit" -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      credentials="omit"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with xssi-prefix attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      xssi-prefix="({["
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with key attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      key="name"
+    >
+    </amp-render>
+
+    <!-- Valid: container layout -->
+    <amp-render
+      layout="container"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+    >
+    </amp-render>
+
+    <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
+    <amp-render width="10" height="10"> </amp-render>
+
+    <!-- Invalid: invalid binding attribute -->
+    <amp-render
+      width="10"
+      height="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      binding="foobar"
+    >
+    </amp-render>
+
+    <!-- Valid: amp-render with template attribute -->
+    <amp-render width=10 height=10
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      template="found">
+    </amp-render>
+    <template id="found" type="amp-mustache"></template>
+
+    <!-- Invalid: missing template with specified id -->
+    <amp-render width=10 height=10
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+      template="missing">
+    </amp-render>
+
+  </body>
+</html>

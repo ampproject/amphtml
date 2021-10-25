@@ -4,7 +4,7 @@ A Gulp plugin for validating [AMPHTML files](https://ampproject.org) using the o
 
 ## Installation
 
-Install package with NPM and add it to your development dependencies:
+Install package with npm and add it to your development dependencies:
 
 ```sh
 npm install --save-dev gulp-amphtml-validator

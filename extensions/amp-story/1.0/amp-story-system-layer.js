@@ -1,18 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
@@ -26,24 +11,26 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from '../../../src/localized-strings';
+import {LocalizedStringId} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '../../../src/services';
-import {closest, matches, scopedQuerySelector} from '../../../src/dom';
+import {Services} from '#service';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/core/types/object';
-import {escapeCssSelectorIdent} from '../../../src/core/dom/css';
+import {dev} from '#utils/log';
+import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
+
 import {renderAsElement} from './simple-template';
-import {setImportantStyles} from '../../../src/style';
-import {toArray} from '../../../src/core/types/array';
+
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -85,16 +72,10 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
-const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
-
-/** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
-
-/** @private @const {string} */
-const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
@@ -282,13 +263,6 @@ const TEMPLATE = {
         {
           tag: 'button',
           attrs: dict({
-            'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
             'class':
               CLOSE_CLASS +
               ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
@@ -340,10 +314,8 @@ const VIEWER_CONTROL_DEFAULTS = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close button
  *   - share button
  *   - domain info button
- *   - sidebar
  *   - story updated label (for live stories)
  *   - close (for players)
  *   - skip (for players)
@@ -423,9 +395,8 @@ export class SystemLayer {
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
-    this.systemLayerEl_.querySelector(
-      '.i-amphtml-story-share-control'
-    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
+    this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
+      Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
@@ -462,7 +433,7 @@ export class SystemLayer {
       ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
       : null;
 
-    if (shouldShowStoryUrlInfo(this.viewer_)) {
+    if (shouldShowStoryUrlInfo(this.viewer_, this.storeService_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -539,8 +510,6 @@ export class SystemLayer {
         this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
-      } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
-        this.onSidebarClick_();
       } else if (
         matches(
           target,
@@ -558,10 +527,6 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
-    });
-
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
@@ -661,14 +626,6 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.HAS_SIDEBAR_STATE,
-      (hasSidebar) => {
-        this.onHasSidebarStateUpdate_(hasSidebar);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
@@ -712,32 +669,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Reacts to the bookend state updates and updates the UI accordingly.
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.getShadowRoot().classList.toggle(
-      'i-amphtml-story-bookend-active',
-      isActive
-    );
-  }
-
-  /**
-   * Checks if the story has a sidebar in order to display the icon representing
-   * the opening of the sidebar.
-   * @param {boolean} hasSidebar
-   * @private
-   */
-  onHasSidebarStateUpdate_(hasSidebar) {
-    if (hasSidebar) {
-      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '');
-    } else {
-      this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
-    }
   }
 
   /**
@@ -903,17 +834,16 @@ export class SystemLayer {
       const shadowRoot = this.getShadowRoot();
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
-      shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
-        case UIType.DESKTOP_PANELS:
-          shadowRoot.setAttribute('desktop', '');
-          shadowRoot.classList.add('i-amphtml-story-desktop-panels');
-          break;
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+          break;
+        case UIType.DESKTOP_ONE_PANEL:
+          shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
           break;
       }
     });
@@ -1042,14 +972,6 @@ export class SystemLayer {
   onInfoClick_() {
     const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
     this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
-  }
-
-  /**
-   * Handles click events on the sidebar button and toggles the sidebar.
-   * @private
-   */
-  onSidebarClick_() {
-    this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
   }
 
   /**

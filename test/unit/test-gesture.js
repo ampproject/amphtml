@@ -1,22 +1,6 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 
-describe('Gestures', () => {
+describes.sandboxed('Gestures', {}, (env) => {
   class TestRecognizer extends GestureRecognizer {
     constructor(manager) {
       super('test', manager);
@@ -38,7 +22,7 @@ describe('Gestures', () => {
   let onGesture;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     eventListeners = {};
     element = {
@@ -53,13 +37,13 @@ describe('Gestures', () => {
       },
     };
 
-    onGesture = window.sandbox.spy();
+    onGesture = env.sandbox.spy();
 
     gestures = Gestures.get(element);
     gestures.onGesture(TestRecognizer, onGesture);
     expect(gestures.recognizers_.length).to.equal(1);
     recognizer = gestures.recognizers_[0];
-    recognizerMock = window.sandbox.mock(recognizer);
+    recognizerMock = env.sandbox.mock(recognizer);
   });
 
   afterEach(() => {
@@ -73,7 +57,7 @@ describe('Gestures', () => {
   }
 
   it('onPointerDown should be called', () => {
-    const handler = window.sandbox.spy();
+    const handler = env.sandbox.spy();
     gestures.onPointerDown(handler);
     sendEvent({type: 'touchstart'});
     expect(handler).to.be.calledOnce;
@@ -257,7 +241,7 @@ describe('Gestures', () => {
 
   it('should allow youngest to start', () => {
     gestures.onGesture(Test2Recognizer, () => {});
-    const recognizer2Mock = window.sandbox.mock(gestures.recognizers_[1]);
+    const recognizer2Mock = env.sandbox.mock(gestures.recognizers_[1]);
 
     gestures.ready_[0] = 10;
     gestures.ready_[1] = 9;
@@ -272,8 +256,8 @@ describe('Gestures', () => {
   it('should allow event to propagate when nothing happening', () => {
     const event = {
       type: 'touchend',
-      preventDefault: window.sandbox.spy(),
-      stopPropagation: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.have.not.been.called;
@@ -284,8 +268,8 @@ describe('Gestures', () => {
     gestures.eventing_ = recognizer;
     const event = {
       type: 'touchend',
-      preventDefault: window.sandbox.spy(),
-      stopPropagation: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -300,8 +284,8 @@ describe('Gestures', () => {
 
     const event = {
       type: 'touchend',
-      preventDefault: window.sandbox.spy(),
-      stopPropagation: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -313,8 +297,8 @@ describe('Gestures', () => {
     gestures.ready_[0] = 1;
     const event = {
       type: 'touchend',
-      preventDefault: window.sandbox.spy(),
-      stopPropagation: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -325,8 +309,8 @@ describe('Gestures', () => {
     gestures.pending_[0] = 1;
     let event = {
       type: 'touchend',
-      preventDefault: window.sandbox.spy(),
-      stopPropagation: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.be.calledOnce;
@@ -335,8 +319,8 @@ describe('Gestures', () => {
     clock.tick(10);
     event = {
       type: 'touchend',
-      preventDefault: window.sandbox.spy(),
-      stopPropagation: window.sandbox.spy(),
+      preventDefault: env.sandbox.spy(),
+      stopPropagation: env.sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault).to.have.not.been.called;
@@ -356,7 +340,7 @@ describe('Gestures', () => {
   it('should remove listeners and shared cache instance on cleanup', () => {
     const eventNames = ['touchstart', 'touchend', 'touchmove', 'touchcancel'];
     const prop = '__AMP_Gestures';
-    const removeSpy = window.sandbox.spy(element, 'removeEventListener');
+    const removeSpy = env.sandbox.spy(element, 'removeEventListener');
 
     expect(element[prop]).to.exist;
 
@@ -378,7 +362,7 @@ describe('Gestures', () => {
     let onGesture;
 
     beforeEach(() => {
-      clock = window.sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
 
       eventListeners = {};
       element = {
@@ -390,13 +374,13 @@ describe('Gestures', () => {
         },
       };
 
-      onGesture = window.sandbox.spy();
+      onGesture = env.sandbox.spy();
 
       gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
       gestures.onGesture(TestRecognizer, onGesture);
       expect(gestures.recognizers_.length).to.equal(1);
       recognizer = gestures.recognizers_[0];
-      recognizerMock = window.sandbox.mock(recognizer);
+      recognizerMock = env.sandbox.mock(recognizer);
     });
 
     afterEach(() => {
@@ -407,8 +391,8 @@ describe('Gestures', () => {
       gestures.eventing_ = recognizer;
       const event = {
         type: 'touchend',
-        preventDefault: window.sandbox.spy(),
-        stopPropagation: window.sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -423,8 +407,8 @@ describe('Gestures', () => {
 
       const event = {
         type: 'touchend',
-        preventDefault: window.sandbox.spy(),
-        stopPropagation: window.sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -436,8 +420,8 @@ describe('Gestures', () => {
       gestures.ready_[0] = 1;
       const event = {
         type: 'touchend',
-        preventDefault: window.sandbox.spy(),
-        stopPropagation: window.sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -448,8 +432,8 @@ describe('Gestures', () => {
       gestures.pending_[0] = 1;
       let event = {
         type: 'touchend',
-        preventDefault: window.sandbox.spy(),
-        stopPropagation: window.sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -458,8 +442,8 @@ describe('Gestures', () => {
       clock.tick(10);
       event = {
         type: 'touchend',
-        preventDefault: window.sandbox.spy(),
-        stopPropagation: window.sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.preventDefault).to.have.not.been.called;
@@ -486,7 +470,7 @@ describe('Gestures', () => {
         },
       };
 
-      onGesture = window.sandbox.spy();
+      onGesture = env.sandbox.spy();
 
       gestures = Gestures.get(
         element,
@@ -496,7 +480,7 @@ describe('Gestures', () => {
       gestures.onGesture(TestRecognizer, onGesture);
       expect(gestures.recognizers_.length).to.equal(1);
       recognizer = gestures.recognizers_[0];
-      recognizerMock = window.sandbox.mock(recognizer);
+      recognizerMock = env.sandbox.mock(recognizer);
     });
 
     afterEach(() => {
@@ -506,7 +490,7 @@ describe('Gestures', () => {
     it('should stop event from propagating', () => {
       const event = {
         type: 'touchend',
-        stopPropagation: window.sandbox.spy(),
+        stopPropagation: env.sandbox.spy(),
       };
       eventListeners[event.type](event);
       expect(event.stopPropagation).to.have.be.calledOnce;

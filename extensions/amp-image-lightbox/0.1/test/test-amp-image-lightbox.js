@@ -1,29 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-image-lightbox';
-import * as dom from '../../../../src/dom';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionService} from '../../../../src/service/action-impl';
-import {ActionTrust} from '../../../../src/core/constants/action-constants';
+
+import {ActionTrust} from '#core/constants/action-constants';
+import {Keys} from '#core/constants/key-codes';
+import * as dom from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {parseSrcset} from '#core/dom/srcset';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
 import {ImageViewer} from '../amp-image-lightbox';
-import {Keys} from '../../../../src/core/constants/key-codes';
-import {Services} from '../../../../src/services';
-import {WindowInterface} from '../../../../src/window-interface';
-import {parseSrcset} from '../../../../src/srcset';
 
 describes.realWin(
   'amp-image-lightbox component',
@@ -65,19 +53,13 @@ describes.realWin(
       const impl = await lightbox.getImpl(false);
 
       const noop = () => {};
-      impl.getViewport = () => {
-        return {
-          onChanged: noop,
-          enterLightboxMode: noop,
-        };
-      };
-      impl.getHistory_ = () => {
-        return {
-          push: () => {
-            return Promise.resolve();
-          },
-        };
-      };
+      impl.getViewport = () => ({
+        onChanged: noop,
+        enterLightboxMode: noop,
+      });
+      impl.getHistory_ = () => ({
+        push: () => Promise.resolve(),
+      });
       impl.enter_ = noop;
 
       const ampImage = doc.createElement('amp-img');
@@ -87,23 +69,69 @@ describes.realWin(
       const container = lightbox.querySelector(
         '.i-amphtml-image-lightbox-container'
       );
-      expect(container).to.not.equal(null);
+      expect(container).to.not.be.null;
 
       const caption = container.querySelector(
         '.i-amphtml-image-lightbox-caption'
       );
-      expect(caption).to.not.equal(null);
+      expect(caption).to.not.be.null;
       expect(caption).to.have.class('amp-image-lightbox-caption');
 
       const viewer = container.querySelector(
         '.i-amphtml-image-lightbox-viewer'
       );
-      expect(viewer).to.not.equal(null);
+      expect(viewer).to.not.be.null;
 
       const image = viewer.querySelector(
         '.i-amphtml-image-lightbox-viewer-image'
       );
-      expect(image).to.not.equal(null);
+      expect(image).to.not.be.null;
+
+      // Very important. Image must have transform-origin=50% 50%.
+      const win = image.ownerDocument.defaultView;
+      expect(win.getComputedStyle(image)['transform-origin']).to.equal(
+        '50% 50%'
+      );
+    });
+
+    it('should render correctly with an img element', async () => {
+      const lightbox = await getImageLightbox();
+      const impl = await lightbox.getImpl(false);
+
+      const noop = () => {};
+      impl.getViewport = () => ({
+        onChanged: noop,
+        enterLightboxMode: noop,
+      });
+      impl.getHistory_ = () => ({
+        push: () => Promise.resolve(),
+      });
+      impl.enter_ = noop;
+
+      const img = doc.createElement('img');
+      img.setAttribute('src', 'data:');
+      impl.open_({caller: img});
+
+      const container = lightbox.querySelector(
+        '.i-amphtml-image-lightbox-container'
+      );
+      expect(container).to.not.be.null;
+
+      const caption = container.querySelector(
+        '.i-amphtml-image-lightbox-caption'
+      );
+      expect(caption).to.not.be.null;
+      expect(caption).to.have.class('amp-image-lightbox-caption');
+
+      const viewer = container.querySelector(
+        '.i-amphtml-image-lightbox-viewer'
+      );
+      expect(viewer).to.not.be.null;
+
+      const image = viewer.querySelector(
+        '.i-amphtml-image-lightbox-viewer-image'
+      );
+      expect(image).to.not.be.null;
 
       // Very important. Image must have transform-origin=50% 50%.
       const win = image.ownerDocument.defaultView;
@@ -263,7 +291,7 @@ describes.realWin(
       env.win.document.body.appendChild(element);
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias');
-      await dom.whenUpgradedToCustomElement(element);
+      await whenUpgradedToCustomElement(element);
 
       const impl = await element.getImpl();
       env.sandbox.stub(impl, 'open_');
@@ -309,6 +337,7 @@ describes.realWin(
     let loadPromiseStub;
 
     const sourceElement = {
+      tagName: 'amp-img',
       offsetWidth: 101,
       offsetHeight: 201,
       getAttribute: (name) => {

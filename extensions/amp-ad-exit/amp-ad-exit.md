@@ -11,22 +11,6 @@ teaser:
 
 Provides configurable ad exit behavior for AMPHTML ads.
 
-<!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 ## Usage
 
 Use the `amp-ad-exit` component to expose an “exit” action to other elements
@@ -260,7 +244,7 @@ You can override this behavior with a `"transport"` object on the config, such a
 
 Variable substitution applies to navigation URLs and click-tracking URLs. URL
 variable substitution works like standard
-[AMP variable substitution](https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md)
+[AMP variable substitution](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md)
 with custom variables and a limited set of platform variables.
 
 #### Platform variables
@@ -272,7 +256,7 @@ with custom variables and a limited set of platform variables.
   </tr>
   <tr>
     <td><code>RANDOM</code></td>
-    <td>A <a href="https://github.com/ampproject/amphtml/blob/main/spec/amp-var-substitutions.md#random">random</a> float.</td>
+    <td>A <a href="https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-var-substitutions.md#random">random</a> float.</td>
   </tr>
   <tr>
     <td><code>CLICK_X</code></td>

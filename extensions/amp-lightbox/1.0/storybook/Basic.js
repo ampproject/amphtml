@@ -1,27 +1,11 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {Lightbox} from '../component';
+import * as Preact from '#preact';
+import {BentoLightbox} from '../component';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
-import {useRef} from '../../../../src/preact';
+import {useRef} from '#preact';
 
 export default {
   title: 'Lightbox',
-  component: Lightbox,
+  component: BentoLightbox,
   decorators: [withKnobs],
 };
 
@@ -29,11 +13,11 @@ export default {
  * @param {!Object} props
  * @return {*}
  */
-function LightboxWithActions({children, ...rest}) {
+function BentoLightboxWithActions({children, ...rest}) {
   const ref = useRef();
   return (
     <section>
-      <Lightbox
+      <BentoLightbox
         closeButtonAs={(props) => (
           <button {...props} aria-label="My custom close button">
             close
@@ -43,7 +27,7 @@ function LightboxWithActions({children, ...rest}) {
         {...rest}
       >
         {children}
-      </Lightbox>
+      </BentoLightbox>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.open()}>open</button>
       </div>
@@ -176,7 +160,7 @@ export const _default = () => {
   const color = text('font color', '');
   return (
     <div>
-      <LightboxWithActions
+      <BentoLightboxWithActions
         id="lightbox"
         animation={animation}
         style={{backgroundColor, color}}
@@ -185,7 +169,7 @@ export const _default = () => {
           Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
           aeque inermis reprehendunt.
         </p>
-      </LightboxWithActions>
+      </BentoLightboxWithActions>
     </div>
   );
 };
@@ -202,7 +186,7 @@ export const scrollable = () => {
   const lotsOfText = boolean('lots of text?', true);
   return (
     <div>
-      <LightboxWithActions
+      <BentoLightboxWithActions
         id="lightbox"
         animation={animation}
         style={{backgroundColor, color}}
@@ -337,7 +321,7 @@ export const scrollable = () => {
             </p>
           </>
         )}
-      </LightboxWithActions>
+      </BentoLightboxWithActions>
     </div>
   );
 };

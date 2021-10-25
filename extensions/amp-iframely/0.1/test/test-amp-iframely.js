@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-iframely';
 
 describes.realWin(
@@ -141,18 +125,16 @@ describes.realWin(
 
     it('renders image placeholder', () => {
       return renderIframely(paramsID).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
-        expect(image.tagName).to.equal('AMP-IMG');
-        expect(image.className).to.match(
-          /i-amphtml-element i-amphtml-notbuilt amp-notbuilt i-amphtml-layout-fill i-amphtml-layout-size-defined/
-        );
+        expect(image).to.have.class('i-amphtml-fill-content');
+        expect(image.getAttribute('loading')).to.equal('lazy');
       });
     });
 
     it('renders image placeholder with proper URL for ID version', () => {
       return renderIframely(paramsID).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://cdn.iframe.ly/${TestID}/thumbnail?amp=1`
@@ -162,7 +144,7 @@ describes.realWin(
 
     it('renders image placeholder with proper URL for Key-URL version', () => {
       return renderIframely(paramsKU).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://cdn.iframe.ly/api/thumbnail?url=${encodeURIComponent(
@@ -183,7 +165,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://${properDomain}/${TestID}/thumbnail?amp=1`
@@ -203,7 +185,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
           `https://${domain}/${TestID}/thumbnail?amp=1`
@@ -220,7 +202,7 @@ describes.realWin(
         'layout': 'fill',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -235,7 +217,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -251,7 +233,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -265,7 +247,7 @@ describes.realWin(
         'layout': 'fixed',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -280,7 +262,7 @@ describes.realWin(
         'layout': 'fixed',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -296,7 +278,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -311,7 +293,7 @@ describes.realWin(
         'layout': 'fixed',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.not.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -325,7 +307,7 @@ describes.realWin(
         'resizable': '',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -340,7 +322,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
@@ -372,7 +354,7 @@ describes.realWin(
         'layout': 'responsive',
       };
       return renderIframely(data).then((iframely) => {
-        const image = iframely.querySelector('amp-img');
+        const image = iframely.querySelector('img');
         const iframe = iframely.querySelector('iframe');
         expect(image).to.not.be.null;
         expect(iframe).to.not.be.null;

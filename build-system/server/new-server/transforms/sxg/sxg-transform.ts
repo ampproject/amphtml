@@ -1,22 +1,8 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 import posthtml from 'posthtml';
 import {URL} from 'url';
-import {isJsonScript, isValidScript} from '../utilities/script';
+import {isJsonScript, isValidScript} from '../utilities/cdn-tag';
 import {OptionSet} from '../utilities/option-set';
 
 function sxgTransform(node: posthtml.Node, options: OptionSet = {}): posthtml.Node {
@@ -31,7 +17,7 @@ function sxgTransform(node: posthtml.Node, options: OptionSet = {}): posthtml.No
     return node;
   }
 
-  if (options.compiled) {
+  if (options.minified) {
     const src = node.attrs.src;
     node.attrs.src = src.replace('.js', '.sxg.js');
   } else {

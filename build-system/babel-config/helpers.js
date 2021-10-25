@@ -1,23 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const experimentsConstantBackup = require('../global-configs/experiments-const.json');
+const {BUILD_CONSTANTS} = require('../compile/build-constants');
 
 /**
  * Get experiment constant to define from command line arguments, if any
@@ -46,24 +32,20 @@ function getExperimentConstant() {
 function getReplacePlugin() {
   /**
    * @param {string} identifierName the identifier name to replace
-   * @param {boolean} value the value to replace with
+   * @param {boolean|string} value the value to replace with
    * @return {!Object} replacement options used by minify-replace plugin
    */
   function createReplacement(identifierName, value) {
-    return {
-      identifierName,
-      replacement: {type: 'booleanLiteral', value: !!value},
-    };
+    const replacement =
+      typeof value === 'boolean'
+        ? {type: 'booleanLiteral', value}
+        : {type: 'stringLiteral', value};
+    return {identifierName, replacement};
   }
 
-  // We build on the idea that SxG is an upgrade to the ESM build.
-  // Therefore, all conditions set by ESM will also hold for SxG.
-  // However, we will also need to introduce a separate IS_SxG flag
-  // for conditions only true for SxG.
-  const replacements = [
-    createReplacement('IS_ESM', argv.esm || argv.sxg),
-    createReplacement('IS_SXG', argv.sxg),
-  ];
+  const replacements = Object.entries(BUILD_CONSTANTS).map(([ident, val]) =>
+    createReplacement(ident, val)
+  );
 
   const experimentConstant = getExperimentConstant();
   if (experimentConstant) {
@@ -119,10 +101,6 @@ function getReplaceGlobalsPlugin() {
               return;
             }
             const possibleNames = ['globalThis', 'self'];
-            // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis#browser_compatibility
-            if (argv.ie) {
-              possibleNames.shift();
-            }
             const name = possibleNames.find((name) => !scope.getBinding(name));
             if (!name) {
               throw path.buildCodeFrameError(

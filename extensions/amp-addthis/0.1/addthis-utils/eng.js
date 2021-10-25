@@ -1,23 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {API_SERVER} from '../constants';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 
 import {addParamsToUrl} from '../../../../src/url';
-import {dict} from '../../../../src/core/types/object';
+import {dict} from '#core/types/object';
 import {getSessionId} from './session';
 import {pixelDrop} from './pixel';
 
@@ -27,14 +12,10 @@ import {pixelDrop} from './pixel';
  * @return {{al: (string|undefined), amp: number, dc: number, dp: string, dt: string, fp: string, ict: string, ivh: number, pct: number, pfm: number, ph: number, pub: string, sh: number, sid: string}}
  */
 const getEngData = (params) => {
-  const {monitors, loc, ampDoc, pubId} = params;
-  const {
-    dwellMonitor,
-    scrollMonitor,
-    clickMonitor,
-    activeToolsMonitor,
-  } = monitors;
-  const {host, pathname, hash} = loc;
+  const {ampDoc, loc, monitors, pubId} = params;
+  const {activeToolsMonitor, clickMonitor, dwellMonitor, scrollMonitor} =
+    monitors;
+  const {hash, host, pathname} = loc;
   const viewport = Services.viewportForDoc(ampDoc);
 
   return {
