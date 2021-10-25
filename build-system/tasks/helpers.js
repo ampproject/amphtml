@@ -332,7 +332,8 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   options.errored = false;
-  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
+  console.log(entryPoint, destDir, minifiedName, options, timeInfo);
+  // await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
   // If an incremental watch build fails, simply return.
   if (options.watch && options.errored) {
     return;
