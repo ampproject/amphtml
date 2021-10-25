@@ -149,6 +149,22 @@ test('add cherrypick tasks', async (t) => {
       '',
       '{"query":"query {' +
         'search(query:\\"repo:ampproject/amphtml ' +
+        'in:title Release 2109080123002\\", type: ISSUE, first: 1) ' +
+        '{ nodes { ... on Issue { number title body }}}}"}'
+    )
+    .reply(200, {data: {search: {}}})
+    .post(
+      '',
+      '{"query":"query {' +
+        'search(query:\\"repo:ampproject/amphtml ' +
+        'in:title Release 2109080123001\\", type: ISSUE, first: 1) ' +
+        '{ nodes { ... on Issue { number title body }}}}"}'
+    )
+    .reply(200, {data: {search: {}}})
+    .post(
+      '',
+      '{"query":"query {' +
+        'search(query:\\"repo:ampproject/amphtml ' +
         'in:title Release 2109080123000\\", type: ISSUE, first: 1) ' +
         '{ nodes { ... on Issue { number title body }}}}"}'
     )
@@ -181,10 +197,10 @@ test('add cherrypick tasks', async (t) => {
   const rest = nock('https://api.github.com')
     // https://docs.github.com/en/rest/reference/issues#update-an-issue
     .patch('/repos/ampproject/amphtml/issues/1', {
-      title: '🚄 Release 2109080123001',
+      title: '🚄 Release 2109080123002',
       body:
-        '### AMP Version\n\n[2109080123001]' +
-        '(https://github.com/ampproject/amphtml/releases/tag/2109080123001)\n\n' +
+        '### AMP Version\n\n[2109080123002]' +
+        '(https://github.com/ampproject/amphtml/releases/tag/2109080123002)\n\n' +
         '### Promotions\n\n' +
         '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
         '2109080123000 promoted to Experimental and Beta (opt-in) channels (optintime)\n' +
@@ -192,18 +208,18 @@ test('add cherrypick tasks', async (t) => {
         '2109080123000 promoted to Experimental and Beta (1% traffic) channels (percenttime)\n' +
         '- [x] <!-- amp-version=2109080123000 channel=stable -->' +
         '2109080123000 promoted to Stable channel (stabletime)\n' +
-        '🌸 2109080123000 was cherry-picked to create 2109080123001\n' +
-        '- [x] <!-- amp-version=2109080123001 channel=stable -->' +
-        '2109080123001 promoted to Stable channel (9/15/2021, 5:34:56 AM PT)\n' +
-        '- [ ] <!-- amp-version=2109080123001 channel=lts -->' +
-        '2109080123001 promoted to LTS channel <!-- promote-time -->\n\n' +
+        '🌸 2109080123000 was cherry-picked to create 2109080123002\n' +
+        '- [x] <!-- amp-version=2109080123002 channel=stable -->' +
+        '2109080123002 promoted to Stable channel (9/15/2021, 5:34:56 AM PT)\n' +
+        '- [ ] <!-- amp-version=2109080123002 channel=lts -->' +
+        '2109080123002 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
       state: 'open',
     })
     .reply(200);
 
   await createOrUpdateTracker(
-    '2109080123001',
+    '2109080123002',
     '2109080123000',
     'stable',
     '2021-09-15 12:34:56'

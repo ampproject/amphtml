@@ -58,7 +58,11 @@ async function writePackageJson() {
   }
 
   const exports = {
-    '.': './preact',
+    '.': './web-component',
+    './web-component': {
+      import: './dist/web-component.module.js',
+      require: './dist/web-component.js',
+    },
     './preact': {
       import: './dist/component-preact.module.js',
       require: './dist/component-preact.js',
@@ -79,8 +83,8 @@ async function writePackageJson() {
     description: `AMP HTML ${extension} Component`,
     author: 'The AMP HTML Authors',
     license: 'Apache-2.0',
-    main: './dist/component-preact.js',
-    module: './dist/component-preact.module.js',
+    main: './dist/web-component.js',
+    module: './dist/web-component.module.js',
     exports,
     files: ['dist/*', 'react.js'],
     repository: {
