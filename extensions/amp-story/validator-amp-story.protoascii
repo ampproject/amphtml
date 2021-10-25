@@ -110,8 +110,6 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
     child_tag_name_oneof: "AMP-STORY-SOCIAL-SHARE"
-    child_tag_name_oneof: "AMP-STORY-SHOPPING-CONFIG"
-    child_tag_name_oneof: "AMP-STORY-SHOPPING-TAG"
   }
 }
 tags: {  # <amp-story-page>
@@ -139,6 +137,8 @@ tags: {  # <amp-story-page>
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
     child_tag_name_oneof: "AMP-STORY-PAGE-OUTLINK"
+    child_tag_name_oneof: "AMP-STORY-SHOPPING-CONFIG"
+    child_tag_name_oneof: "AMP-STORY-SHOPPING-ATTACHMENT"
     mandatory_min_num_child_tags: 1
   }
 }
