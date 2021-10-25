@@ -521,8 +521,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
 /**
  * Name cache to help terser perform cross-binary property mangling.
- *
- * TODO: ensure this is actually necessary.
  */
 const nameCache = {};
 
@@ -556,7 +554,9 @@ async function minify(code, map) {
     module: !!argv.esm,
     nameCache,
   };
-  // TS complains if defined inline, since it sees type `string` but needs type ("strict" | boolean).
+  // Remove the local variable name cache which should not be reused between binaries.
+  // See https://github.com/ampproject/amphtml/issues/36476
+  /** @type {any}*/ (nameCache).vars = {};
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};
