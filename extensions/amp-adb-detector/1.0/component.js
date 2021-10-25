@@ -28,13 +28,17 @@ const DisplayAs = forwardRef(DisplayAsWithRef);
  * @param {{current: ?BentoAdbDetectorDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function BentoAdbDetectorWithRef({ampAd, onB, onBlock, ...rest}, ref) {
+export function BentoAdbDetectorWithRef(
+  {ampAd, divBlocked, onB, onBlock, ...rest},
+  ref
+) {
   /** States */
   const [isBlockerDetected, setIsBlockerDetected] = useState(false);
   const [detectionStatusString, setdetectionStatusString] = useState(
     'Checking for Ad Blocker'
   );
   const adRef = useRef(null);
+  const divRef = useRef(null);
   const myRef = useRef(ref);
 
   /** Style Classes */
@@ -43,21 +47,46 @@ export function BentoAdbDetectorWithRef({ampAd, onB, onBlock, ...rest}, ref) {
   const xf = useCallback(() => {
     console.error(adRef.current);
     console.error(myRef.current);
-    myRef.current./*OK*/ offsetParent.children[0].togglePlaceholder(false);
-    myRef.current./*OK*/ offsetParent.children[0].toggleLoading(false, true);
-    myRef.current./*OK*/ offsetParent.children[0].classList.remove(
-      'i-amphtml-notbuilt'
+    // // // // // // // // myRef.current./*OK*/ offsetParent.children[0].togglePlaceholder(false);
+    // // // // // // // // myRef.current./*OK*/ offsetParent.children[0].toggleLoading(false, true);
+    // // // // // // // // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    // // // // // // // //   'i-amphtml-notbuilt'
+    // // // // // // // // );
+    // // // // // // // // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    // // // // // // // //   'amp-notbuilt'
+    // // // // // // // // );
+    // // // // // // // // // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    // // // // // // // // //   'amp-unresolved'
+    // // // // // // // // // );
+    // // // // // // // // // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    // // // // // // // // //   'i-amphtml-unresolved'
+    // // // // // // // // // );
+    // // // // // // // // myRef.current./*OK*/ offsetParent.children[0].classList.add(
+    // // // // // // // //   'amp-notsupported'
+    // // // // // // // // );
+    myRef.current./*OK*/ offsetParent.removeChild(
+      myRef.current./*OK*/ offsetParent.children[0]
     );
-    myRef.current./*OK*/ offsetParent.children[0].classList.remove(
-      'amp-notbuilt'
-    );
-    myRef.current./*OK*/ offsetParent.children[0].classList.add(
-      'amp-notsupported'
-    );
+    // myRef.current./*OK*/ offsetParent.children[0].togglePlaceholder(false);
+    // myRef.current./*OK*/ offsetParent.children[0].toggleLoading(false, true);
+    // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    //   'i-amphtml-notbuilt'
+    // );
+    // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    //   'amp-notbuilt'
+    // );
+    // // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    // //   'amp-unresolved'
+    // // );
+    // // myRef.current./*OK*/ offsetParent.children[0].classList.remove(
+    // //   'i-amphtml-unresolved'
+    // // );
+    // // myRef.current./*OK*/ offsetParent.children[0].classList.add(
+    // //   'amp-notsupported'
+    // // );
 
-    myRef.current./*OK*/ offsetParent.children[0].toggleFallback(true);
+    // myRef.current./*OK*/ offsetParent.children[0].toggleFallback(false);
 
-    debugger;
     // this.togglePlaceholder(true);
     //     const forceLoadingIndicator =
     //       this.element.hasAttribute('reset-on-refresh');
@@ -87,6 +116,7 @@ export function BentoAdbDetectorWithRef({ampAd, onB, onBlock, ...rest}, ref) {
         setdetectionStatusString('This is a fallback ad');
         //onBlock();
         xf();
+        setIsBlockerDetected(true);
         //eval(onB);
       }
     );
@@ -94,7 +124,8 @@ export function BentoAdbDetectorWithRef({ampAd, onB, onBlock, ...rest}, ref) {
 
   return (
     <ContainWrapper layout size paint {...rest} ref={myRef}>
-      <DisplayAs as={ampAd} ref={adRef} />
+      {!isBlockerDetected && <DisplayAs as={ampAd} ref={adRef} />}
+      {isBlockerDetected && <DisplayAs as={divBlocked} ref={divRef} />}
       {/* <ContainWrapper layout size paint {...rest}>
         <div
           class={objStr({

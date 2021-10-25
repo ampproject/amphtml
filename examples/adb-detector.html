@@ -162,17 +162,17 @@
     <script
       async
       custom-element="amp-ad"
-      src="/dist/v0/amp-ad-0.1.max.js"
+      src="dist/v0/amp-ad-0.1.max.js"
     ></script>
     <!-- <script
       async
       custom-element="amp-sticky-ad"
-      src="/dist/v0/amp-sticky-ad-0.1.max.js"
+      src="dist/v0/amp-sticky-ad-0.1.max.js"
     ></script> -->
     <script
       async
       custom-element="amp-adb-detector"
-      src="/dist/v0/amp-adb-detector-1.0.max.js"
+      src="dist/v0/amp-adb-detector-1.0.max.js"
     ></script>
     <style amp-boilerplate>
       body {
@@ -242,7 +242,11 @@
         }
       </style>
     </noscript>
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <!-- <script async src="https://cdn.ampproject.org/v0.js"></script> -->
+    <script async src="dist/amp.js"></script>
+    <script>
+      AMP.toggleExperiment('bento', true);
+    </script>
   </head>
 
   <body>
@@ -250,60 +254,6 @@
       <div class="brand-logo">PublisherLogo</div>
     </header>
     <main role="main">
-      <!-- Sticky Left Ad -->
-      <amp-adb-detector>
-        <amp-ad
-          sticky="left"
-          width="120"
-          height="600"
-          top="50"
-          left="25"
-          type="doubleclick"
-          data-slot="/21730346048/test-skyscraper"
-        >
-          <div placeholder></div>
-          <div fallback style="background-color: #f9b">
-            <h1>AdBlocker Detected</h1>
-            <p>Please allow ad on this site.</p>
-            <p><a>Learn more</a> how to disable AdBlocker.</p>
-          </div>
-        </amp-ad>
-      </amp-adb-detector>
-
-      <!-- Sticky Right Ad -->
-      <amp-adb-detector>
-        <amp-ad
-          sticky="right"
-          width="120"
-          height="600"
-          top="50"
-          right="25"
-          type="doubleclick"
-          data-slot="/21730346048/test-skyscraper"
-        >
-          <div placeholder></div>
-          <div fallback style="background-color: #f9b">
-            <h1>AdBlocker Detected</h1>
-            <p>Please allow ad on this site.</p>
-            <p><a>Learn more</a> how to disable AdBlocker.</p>
-          </div>
-        </amp-ad>
-      </amp-adb-detector>
-
-      <!-- Sticky Bottom Ad -->
-      <amp-sticky-ad layout="nodisplay">
-        <amp-ad
-          width="320"
-          height="50"
-          type="adstir"
-          data-app-id="MEDIA-343ded3e"
-          data-ad-spot="1"
-        >
-          <div placeholder></div>
-          <div fallback></div>
-        </amp-ad>
-      </amp-sticky-ad>
-
       <article>
         <div class="content-container">
           <header>
@@ -355,6 +305,73 @@
               varius condimentum. Maecenas sollicitudin felis aliquam tortor
               vulputate, ac posuere velit semper.
             </p>
+            <amp-adb-detector layout="fixed" width="300" height="250">
+              <amp-ad
+                width="300"
+                height="250"
+                type="doubleclick"
+                data-slot="/21730346048/test-skyscraper"
+              >
+                <div placeholder></div>
+                <div fallback>
+                  <p>Error while loadin g Ad.</p>
+                </div>
+              </amp-ad>
+              <div
+                slot="blocked"
+                style="background-color: #b9b; height: 100%; margin: 10px"
+              >
+                <h2>Ad Blocker Detected</h2>
+                <p>Please allow ads to run on this page.</p>
+              </div>
+            </amp-adb-detector>
+            <amp-adb-detector layout="fixed" width="300" height="250">
+              <amp-ad
+                width="300"
+                height="220"
+                type="doubleclick"
+                data-slot="/21730346048/test-skyscraper"
+              >
+                <div placeholder></div>
+                <div fallback style="margin: 10px">
+                  Error while loading Ad.
+                  <p>
+                    I have intentionally set wrong size-code for this ad, so
+                    that
+                    <b
+                      ><i><u>fallback</u></i></b
+                    >
+                    can be shown.
+                  </p>
+                </div>
+              </amp-ad>
+              <div
+                slot="blocked"
+                style="background-color: #4ab; height: 100%; margin: 10px"
+              >
+                <h2>Ad Blocker Detected</h2>
+                <p>Please allow ads to run on this page.</p>
+              </div>
+            </amp-adb-detector>
+            <amp-adb-detector layout="fixed" width="300" height="250">
+              <amp-ad
+                width="300"
+                height="250"
+                type="doubleclick"
+                data-slot="/21730346048/test-skyscraper"
+              >
+                <div placeholder></div>
+                <div fallback>Error while loading Ad.</div>
+              </amp-ad>
+              <div
+                slot="blocked"
+                style="background-color: #99f; height: 100%; margin: 10px"
+              >
+                <h2>Ad Blocker Detected</h2>
+                <p>Please allow ads to run on this page.</p>
+              </div>
+            </amp-adb-detector>
+
             <p>
               Fusce pretium tempor justo, vitae consequat dolor maximus eget.
               Aliquam iaculis tincidunt quam sed maximus. Suspendisse faucibus

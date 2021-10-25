@@ -17,6 +17,12 @@ BaseElement['props'] = {
     as: true,
     clone: true,
   },
+  divBlocked: {
+    selector: 'div[status="blocked"]',
+    single: true,
+    as: true,
+    clone: true,
+  },
 };
 
 /** @override */

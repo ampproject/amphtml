@@ -16,19 +16,22 @@ export default {
 export const _default = () => {
   return (
     <>
-      <BentoAdbDetector>
-        <amp-ad
-          width="120"
-          height="600"
-          type="doubleclick"
-          data-slot="/21730346048/test-skyscraper"
-          id="ampad1"
-        >
-          <div fallback>
-            This is a fallback -- do similar as image-slider for img tag slot
-          </div>
-        </amp-ad>
-      </BentoAdbDetector>
+      <BentoAdbDetector
+        style={{width: 120, height: 600}}
+        ampAd={(props) => (
+          <amp-ad
+            width="120"
+            height="600"
+            type="doubleclick"
+            data-slot="/21730346048/test-skyscraper"
+            {...props}
+          >
+            <div fallback>
+              This is a fallback -- do similar as image-slider for img tag slot
+            </div>
+          </amp-ad>
+        )}
+      ></BentoAdbDetector>
     </>
   );
 };

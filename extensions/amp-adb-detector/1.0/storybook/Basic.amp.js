@@ -31,10 +31,13 @@ export const _default = (args) => {
           id="ampad1"
         >
           <div fallback>
-            <h2>Ad Blocker Detected</h2>
-            <p>Please allow ads to run on this page.</p>
+            <p>Error while loading Ad</p>
           </div>
         </amp-ad>
+        <div status="blocked">
+          <h2>Ad Blocker Detected</h2>
+          <p>Please allow ads to run on this page.</p>
+        </div>
       </amp-adb-detector>
     </>
   );
