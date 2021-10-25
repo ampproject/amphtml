@@ -1,0 +1,311 @@
+[
+  {
+    "name": "amp-accordion",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-base-carousel",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-brightcove",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-date-countdown",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "bento": true,
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-date-display",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "bento": true,
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-embedly-card",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-facebook",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-fit-text",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-inline-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "cssBinaries": [
+        "amp-inline-gallery-pagination"
+      ],
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-instagram",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-jwplayer",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "bento": true,
+      "npm": true
+    }
+  },
+  {
+    "name": "amp-lightbox",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-lightbox-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-mathml",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "bento": true,
+      "npm": true
+    }
+  },
+  {
+    "name": "amp-render",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-selector",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-sidebar",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-social-share",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-soundcloud",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-sticky-ad",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": true,
+      "cssBinaries": [
+        "amp-story-consent",
+        "amp-story-draggable-drawer-header",
+        "amp-story-form",
+        "amp-story-hint",
+        "amp-story-info-dialog",
+        "amp-story-open-page-attachment",
+        "amp-story-share",
+        "amp-story-share-menu",
+        "amp-story-system-layer",
+        "amp-story-tooltip",
+        "amp-story-unsupported-browser-layer"
+      ]
+    }
+  },
+  {
+    "name": "amp-stream-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-timeago",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-twitter",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-video",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-video-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-vimeo",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-wordpress-embed",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
+    "name": "amp-youtube",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  }
+]
