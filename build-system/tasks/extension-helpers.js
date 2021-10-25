@@ -835,21 +835,13 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, isLatest, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
-  console./*OK*/ log(`${dir}/`, filename, './dist/v0', {
+  await compileJs(`${dir}/`, filename, './dist/v0', {
     ...options,
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
     aliasName: isLatest ? `${name}-latest.js` : '',
     wrapper: resolvedWrapper,
   });
-
-  // await compileJs(`${dir}/`, filename, './dist/v0', {
-  //   ...options,
-  //   toName: `${name}-${version}.max.js`,
-  //   minifiedName: `${name}-${version}.js`,
-  //   aliasName: isLatest ? `${name}-latest.js` : '',
-  //   wrapper: resolvedWrapper,
-  // });
 
   // If an incremental watch build fails, simply return.
   if (options.errored) {
