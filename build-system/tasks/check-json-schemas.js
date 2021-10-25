@@ -9,7 +9,7 @@ const {default: Ajv} = require('ajv');
 const {log} = require('../common/logging');
 
 /**
- * Fetches the content of a JSON/JSON5 file.
+ * Fetches the content of a JSON/JSONC/JSON5 file.
  *
  * @param {string} file repo root relative.
  * @return {any}
