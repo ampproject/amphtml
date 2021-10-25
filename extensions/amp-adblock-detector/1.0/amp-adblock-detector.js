@@ -4,8 +4,6 @@ import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
-import {CSS} from '../../../build/amp-adblock-detector-1.0.css';
-
 /** @const {string} */
 const TAG = 'amp-adblock-detector';
 
@@ -22,5 +20,5 @@ class AmpAdblockDetector extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpAdblockDetector, CSS);
+  AMP.registerElement(TAG, AmpAdblockDetector);
 });

@@ -5,9 +5,6 @@ import {BentoAdblockDetector} from '../component';
 export default {
   title: 'AdblockDetector',
   component: BentoAdblockDetector,
-  parameters: {
-    extensions: [{name: 'amp-ad', version: '0.1'}],
-  },
 };
 
 export const _default = (args) => {
