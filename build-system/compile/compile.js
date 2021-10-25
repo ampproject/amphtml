@@ -432,12 +432,12 @@ async function compile(
     return; // Watch build. Bail on compilation errors.
   }
   if (!options.typeCheckOnly) {
-    if (!argv.pseudo_names && !options.skipUnknownDepsCheck) {
-      await checkForUnknownDeps(destFile);
-    }
-    await postClosureBabel(destFile);
-    await sanitize(destFile);
-    await writeSourcemaps(sourcemapFile, options);
+    // if (!argv.pseudo_names && !options.skipUnknownDepsCheck) {
+    //   await checkForUnknownDeps(destFile);
+    // }
+    // await postClosureBabel(destFile);
+    // await sanitize(destFile);
+    // await writeSourcemaps(sourcemapFile, options);
   }
 }
 
