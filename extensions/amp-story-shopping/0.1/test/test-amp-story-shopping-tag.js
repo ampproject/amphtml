@@ -12,7 +12,7 @@ describes.realWin(
   (env) => {
     let win;
     let element;
-    let shopping;
+    let shoppingTag;
 
     beforeEach(() => {
       win = env.win;
@@ -24,18 +24,18 @@ describes.realWin(
       element = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
-        {'layout': 'fixed-height', 'width': '100px', 'height': '100px'}
+        {'layout': 'fixed-height', 'width': 'auto', 'height': '50px'}
       );
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
 
-      shopping = await element.getImpl();
+      shoppingTag = await element.getImpl();
     }
 
     it('should build shopping tag component', async () => {
       await createAmpStoryShoppingTag();
-      expect(shopping.isLayoutSupported('fixed-height')).to.be.true;
-      expect(() => shopping.layoutCallback()).to.not.throw();
+      expect(shoppingTag.isLayoutSupported('fixed-height')).to.be.true;
+      expect(() => shoppingTag.layoutCallback()).to.not.throw();
     });
   }
 );

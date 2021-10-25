@@ -12,7 +12,7 @@ describes.realWin(
   (env) => {
     let win;
     let element;
-    let shopping;
+    let shoppingConfig;
 
     beforeEach(() => {
       win = env.win;
@@ -24,18 +24,18 @@ describes.realWin(
       element = createElementWithAttributes(
         win.document,
         'amp-story-shopping-config',
-        {'layout': 'nodisplay', 'width': '100px', 'height': '100px'}
+        {'layout': 'nodisplay'}
       );
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
 
-      shopping = await element.getImpl();
+      shoppingConfig = await element.getImpl();
     }
 
     it('should build shopping config component', async () => {
       await createAmpStoryShoppingTag();
-      expect(shopping.isLayoutSupported('nodisplay')).to.be.true;
-      expect(() => shopping.layoutCallback()).to.not.throw();
+      expect(shoppingConfig.isLayoutSupported('nodisplay')).to.be.true;
+      expect(() => shoppingConfig.layoutCallback()).to.not.throw();
     });
   }
 );
