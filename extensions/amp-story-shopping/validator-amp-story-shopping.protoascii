@@ -18,3 +18,8 @@ tags: {  # <amp-story-shopping>
     supported_layouts: RESPONSIVE
   }
 }
+descendant_tag_list: {
+   tag: "AMP-STORY-SHOPPING-ATTACHEMENT,
+   tag: "AMP-STORY-SHOPPING-CONFIG",
+   tag: "AMP-STORY-SHOPPING-TAG"
+}
