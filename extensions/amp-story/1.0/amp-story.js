@@ -1648,7 +1648,10 @@ export class AmpStory extends AMP.BaseElement {
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
-          this.win.document.documentElement.setAttribute('mobile-story', '');
+          this.win.document.documentElement.setAttribute(
+            'i-amphtml-story-mobile',
+            ''
+          );
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
@@ -1663,7 +1666,9 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
         this.vsync_.mutate(() => {
-          this.win.document.documentElement.removeAttribute('mobile-story');
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.removeAttribute('desktop');
           this.element.classList.add('i-amphtml-story-desktop-one-panel');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
@@ -1671,7 +1676,9 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.vsync_.mutate(() => {
-          this.win.document.documentElement.removeAttribute('mobile-story');
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
@@ -1691,7 +1698,9 @@ export class AmpStory extends AMP.BaseElement {
             'i-amphtml-story-vertical'
           );
           setImportantStyles(this.win.document.body, {height: 'auto'});
-          this.win.document.documentElement.removeAttribute('mobile-story');
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           for (let i = 0; i < pageAttachments.length; i++) {
