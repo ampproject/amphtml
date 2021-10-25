@@ -339,13 +339,13 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     return;
   }
 
-  const destPath = path.join(destDir, minifiedName);
+  // const destPath = path.join(destDir, minifiedName);
   // combineWithCompiledFile(srcFilename, destPath, options);
   if (options.aliasName) {
-    fs.copySync(
-      destPath,
-      path.join(destDir, maybeToEsmName(options.aliasName))
-    );
+    // fs.copySync(
+    //   destPath,
+    //   path.join(destDir, maybeToEsmName(options.aliasName))
+    // );
   }
 
   let name = minifiedName;
