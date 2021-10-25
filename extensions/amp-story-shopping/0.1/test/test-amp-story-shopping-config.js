@@ -34,8 +34,8 @@ describes.realWin(
 
     it('should build shopping config component', async () => {
       await createAmpStoryShoppingTag();
+      expect(() => shopping.isLayoutSupported('nodisplay')).to.be.true;
       expect(() => shopping.layoutCallback()).to.not.throw();
-      expect(shopping.isLayoutSupported('nodisplay')).to.be.true;
     });
   }
 );
