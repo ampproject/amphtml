@@ -40,7 +40,7 @@ PASS
 |        <amp-story-page id="example">
 |          <amp-story-shopping-config height="10" width="10" layout="responsive"></amp-story-shopping-config>
 |          <amp-story-grid-layer template="vertical">
-|            <amp-story-shopping-tag height="50" width="10" layout="fixed-height"></amp-story-shopping-tag>
+|            <amp-story-shopping-tag height="50" width="auto" layout="fixed-height"></amp-story-shopping-tag>
 |          </amp-story-grid-layer>
 |          <amp-story-shopping-attachment layout="nodisplay"></amp-story-shopping-attachment>
 |        </amp-story-page>
