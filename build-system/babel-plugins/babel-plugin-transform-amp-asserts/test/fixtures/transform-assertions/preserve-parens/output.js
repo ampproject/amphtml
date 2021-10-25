@@ -6,8 +6,6 @@
 function hello() {
   return (
     /** @type {!Element} */
-
-    /** @type {x} */
     (dev())
   );
 }

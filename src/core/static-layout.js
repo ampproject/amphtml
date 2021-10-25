@@ -18,7 +18,7 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
  * `hasNaturalDimensions` checks for membership in this set.
  * `getNaturalDimensions` determines the dimensions for an element in the
  *    set and caches it.
- * @type {!Object<string, ?DimensionsDef>}
+ * @type {!Object<string, ?./dom/layout/index.DimensionsDef>}
  * @private  Visible for testing only!
  */
 export const naturalDimensions_ = {
@@ -46,7 +46,7 @@ export function hasNaturalDimensions(tagName) {
  * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
  * @param {!Element} element
- * @return {DimensionsDef}
+ * @return {./dom/layout/index.DimensionsDef}
  */
 export function getNaturalDimensions(element) {
   const tagName = element.tagName.toUpperCase();
@@ -54,9 +54,13 @@ export function getNaturalDimensions(element) {
   if (!naturalDimensions_[tagName]) {
     const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
-    const temp = doc.createElement(naturalTagName);
+    const temp = /** @type {!HTMLElement} */ (
+      doc.createElement(naturalTagName)
+    );
+
     // For audio, should no-op elsewhere.
-    temp.controls = true;
+    /** @type {HTMLAudioElement} */ (temp).controls = true;
+
     setStyles(temp, {
       position: 'absolute',
       visibility: 'hidden',
@@ -68,7 +72,9 @@ export function getNaturalDimensions(element) {
     };
     doc.body.removeChild(temp);
   }
-  return /** @type {DimensionsDef} */ (naturalDimensions_[tagName]);
+  return /** @type {./dom/layout/index.DimensionsDef} */ (
+    naturalDimensions_[tagName]
+  );
 }
 
 /**
@@ -84,7 +90,7 @@ export function getNaturalDimensions(element) {
  * any changes made to it must be made in coordination with caches that
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
- * @param {!Element} element
+ * @param {!AmpElement} element
  * @return {!Layout}
  */
 export function applyStaticLayout(element) {
@@ -107,9 +113,6 @@ export function applyStaticLayout(element) {
       element.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
     } else if (layout == Layout.NODISPLAY) {
       toggle(element, false);
-      // TODO(jridgewell): Temporary hack while SSR still adds an inline
-      // `display: none`
-      element['style']['display'] = '';
     }
     return layout;
   }
@@ -128,9 +131,6 @@ export function applyStaticLayout(element) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
     toggle(element, false);
-    // TODO(jridgewell): Temporary hack while SSR still adds an inline
-    // `display: none`
-    element['style']['display'] = '';
   } else if (layout == Layout.FIXED) {
     setStyles(element, {
       width: devAssertString(width),
@@ -199,19 +199,22 @@ export function applyStaticLayout(element) {
  */
 export function getEffectiveLayout(element) {
   // Return the pre-existing value if layout has already been applied.
-  const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
-  if (completedLayoutAttr) {
-    return parseLayout(completedLayoutAttr);
+  const completedLayout = parseLayout(element.getAttribute('layout'));
+  if (completedLayout) {
+    return completedLayout;
   }
 
   return getEffectiveLayoutInternal(element).layout;
 }
 
 /**
- * @typedef {
- *   {layout: !Layout, height: number, width: number} | {layout: !Layout}
- * } InternalEffectiveLayout
+ * @typedef {{
+ *  layout: !Layout,
+ *  height: (string|number|null),
+ *  width: (string|number|null)
+ * }}
  */
+let InternalEffectiveLayoutDef;
 
 /**
  * Gets the effective layout for an element.
@@ -220,7 +223,7 @@ export function getEffectiveLayout(element) {
  * Else calculate layout based on element attributes and return the width/height.
  *
  * @param {!Element} element
- * @return {InternalEffectiveLayout}
+ * @return {InternalEffectiveLayoutDef}
  */
 function getEffectiveLayoutInternal(element) {
   // Parse layout from the element.

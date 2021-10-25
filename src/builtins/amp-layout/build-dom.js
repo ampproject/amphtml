@@ -1,7 +1,6 @@
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {realChildNodes} from '#core/dom/query';
-
-import {getEffectiveLayout} from '../../static-layout';
+import {getEffectiveLayout} from '#core/static-layout';
 
 /**
  * @see amphtml/compiler/types.js for full description
