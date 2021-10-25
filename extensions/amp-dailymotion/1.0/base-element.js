@@ -10,13 +10,8 @@ BaseElement['Component'] = BentoDailymotion;
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
   'videoId': {attr: 'data-videoid'},
-  'mute': {attr: 'data-mute'},
-  'endscreenEnable': {attr: 'data-endscreen-enable'},
-  'sharingEnable': {attr: 'data-sharing-enable'},
   'start': {attr: 'data-start'},
   'uiHighlight': {attr: 'data-ui-highlight'},
-  'uiLogo': {attr: 'data-ui-logo'},
-  'info': {attr: 'data-info'},
   'implicitParams': {attrPrefix: 'data-param-'},
 };
 

@@ -50,7 +50,7 @@ describes.realWin(
       );
     });
 
-    it.only('renders with optional attrs correctly', async () => {
+    it('renders with optional attrs correctly', async () => {
       const element = html`
         <amp-dailymotion
           data-videoid="x3rdtfy"
