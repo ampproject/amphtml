@@ -2,7 +2,7 @@ import {createElementWithAttributes} from '#core/dom';
 import '../amp-story-shopping';
 
 describes.realWin(
-  'amp-story-shopping-tagv0.1',
+  'amp-story-shopping-tag-v0.1',
   {
     amp: {
       runtimeOn: true,
