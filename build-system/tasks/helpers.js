@@ -13,7 +13,7 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {closureCompile} = require('../compile/compile');
+// const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('kleur/colors');
 const {generateBentoRuntime} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
