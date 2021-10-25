@@ -502,7 +502,7 @@ async function buildExtension(
   }
 
   if (options.bento) {
-    await buildBentoExtensionJs(extDir, name, options);
+    // await buildBentoExtensionJs(extDir, name, options);
   }
   await buildExtensionJs(extDir, name, {...options, bento: false});
 }
