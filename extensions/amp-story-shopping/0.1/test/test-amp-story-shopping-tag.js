@@ -24,7 +24,7 @@ describes.realWin(
       element = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
-        {'layout': 'responsive', 'width': '100px', 'height': '100px'}
+        {'layout': 'fixed-height', 'width': '100px', 'height': '100px'}
       );
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);

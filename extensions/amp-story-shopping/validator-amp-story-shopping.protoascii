@@ -36,6 +36,6 @@ tags: {  # <amp-story-shopping-attachment>
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
   amp_layout: {
-    supported_layouts: RESPONSIVE
+    supported_layouts: NODISPLAY
   }
 }
