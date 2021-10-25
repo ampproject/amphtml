@@ -435,7 +435,7 @@ async function compile(
     if (!argv.pseudo_names && !options.skipUnknownDepsCheck) {
       await checkForUnknownDeps(destFile);
     }
-    // await postClosureBabel(destFile);
+    await postClosureBabel(destFile);
     await sanitize(destFile);
     await writeSourcemaps(sourcemapFile, options);
   }
