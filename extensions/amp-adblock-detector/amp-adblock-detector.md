@@ -15,7 +15,7 @@ teaser:
   * Remove this comment!
 -->
 
-# amp-adb-detector
+# amp-adblock-detector
 
 <!--
   If the component is relevant for more than one format and operates differently between these
@@ -30,12 +30,12 @@ One to three paragraphs explaining the component usage. List important functiona
 
 Below is an example for websites.
 
-[example preview="inline" playground="true" imports="amp-adb-detector"]
+[example preview="inline" playground="true" imports="amp-adblock-detector"]
 
 ```html
-<amp-adb-detector required-attribute>
+<amp-adblock-detector required-attribute>
   I am a hello world inline executable code sample for websites!
-</amp-adb-detector>
+</amp-adblock-detector>
 ```
 
 [/example][/filter]
@@ -49,12 +49,12 @@ Below is an example for websites.
 
 Below is an example for ads.
 
-[example preview=“inline” playground=“true” imports="amp-adb-detector"]
+[example preview=“inline” playground=“true” imports="amp-adblock-detector"]
 
 ```html
-<amp-adb-detector required-attribute>
+<amp-adblock-detector required-attribute>
   I am a hello world inline executable code sample for ads!
-</amp-adb-detector>
+</amp-adblock-detector>
 ```
 
 [/example][/filter]
@@ -67,7 +67,7 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 #### Example
 
-The example below demonstrates `amp-adb-detector` component in standalone use.
+The example below demonstrates `amp-adblock-detector` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
@@ -75,13 +75,13 @@ The example below demonstrates `amp-adb-detector` component in standalone use.
 <head>
 ...
 <script async src="https://cdn.ampproject.org/v0.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-adb-detector-1.0.css">
-<script async custom-element="amp-adb-detector" src="https://cdn.ampproject.org/v0/amp-adb-detector-1.0.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-adblock-detector-1.0.css">
+<script async custom-element="amp-adblock-detector" src="https://cdn.ampproject.org/v0/amp-adblock-detector-1.0.js"></script>
 ...
 </head>
-<amp-adb-detector>
+<amp-adblock-detector>
   ...
-</amp-adb-detector>
+</amp-adblock-detector>
 <button id="element-id">
   Event Trigger
 </button>
@@ -96,14 +96,14 @@ The example below demonstrates `amp-adb-detector` component in standalone use.
 
 Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
-The `amp-adb-detector` component API is accessible by including the following script tag in your document:
+The `amp-adblock-detector` component API is accessible by including the following script tag in your document:
 
 ```
-await customElements.whenDefined('amp-adb-detector-component');
-const api = await AdbDetector.getApi();
+await customElements.whenDefined('amp-adblock-detector-component');
+const api = await AdblockDetector.getApi();
 ```
 
-The `amp-adb-detector` API allows you to register and respond to the following events:
+The `amp-adblock-detector` API allows you to register and respond to the following events:
 
 **event 1**
 Explanation of event, proper syntax/arguments.
@@ -131,14 +131,14 @@ example
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-adb-detector-1.0.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-adblock-detector-1.0.css">
 ```
 
 Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
 
 **Container type**
 
-The `amp-adb-detector` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
+The `amp-adblock-detector` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
 
 ```css
 example
@@ -146,7 +146,7 @@ example
 
 **style/layout guidelines 2 (optional)**
 
-Information on how to layout and style `amp-adb-detector`.
+Information on how to layout and style `amp-adblock-detector`.
 
 ```
 example
@@ -157,9 +157,9 @@ example
 What to do if they want behavior. How to work around it.
 
 ```html
-<amp-adb-detector required-attribute>
+<amp-adblock-detector required-attribute>
   Code sample of behavior or behavior workaround.
-</amp-adb-detector>
+</amp-adblock-detector>
 ```
 
 ### Behavior restrictions
@@ -172,24 +172,24 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
--   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-adb-detector`.
--   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-adb-detector`.
+-   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-adblock-detector`.
+-   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-adblock-detector`.
 
 ### `optional-attribute-name` (optional)
 
-Here, I write what `optional-attribute-name` will do to `amp-adb-detector`.
+Here, I write what `optional-attribute-name` will do to `amp-adblock-detector`.
 
 ## Actions (optional)
 
 ### `action-name`
 
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-adb-detector` needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-adblock-detector` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
 ### `event-name`
 
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-adb-detector` needs to be identified with an `id` to work.
+Description of event. Use cases of event-name. Include all the nuances, such as: `amp-adblock-detector` needs to be identified with an `id` to work.
 
 #### Valid AMP
 
@@ -200,18 +200,18 @@ Syntax and argument details for use in fully valid AMP pages.
 ```html
 <head>
   <script
-    custom-element="amp-adb-detector"
+    custom-element="amp-adblock-detector"
     async
-    src="https://cdn.ampproject.org/v0/amp-adb-detector-latest.js"
+    src="https://cdn.ampproject.org/v0/amp-adblock-detector-latest.js"
   ></script>
 </head>
 <body>
-  <amp-adb-detector
+  <amp-adblock-detector
     required-attribute
     on="event-name: my-button.show"
   >
     Hello World!
-  </amp-adb-detector>
+  </amp-adblock-detector>
   <button id="my-button" hidden>
     Here I am!
   </button>
@@ -242,7 +242,7 @@ Explain analytics.
 
 ## Accessibility (optional)
 
-Accessibility information related to `amp-adb-detector`.
+Accessibility information related to `amp-adblock-detector`.
 
 ## Version notes (optional)
 
@@ -250,4 +250,4 @@ Information on version differences and migration notes.
 
 ## Validation
 
-See [amp-adb-detector rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-adb-detector/validator-amp-adb-detector.protoascii) in the AMP validator specification.
+See [amp-adblock-detector rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-adblock-detector/validator-amp-adblock-detector.protoascii) in the AMP validator specification.

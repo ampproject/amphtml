@@ -1,27 +1,25 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoAdbDetector} from './component';
-import {CSS as COMPONENT_CSS} from './component.jss';
+import {BentoAdblockDetector} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoAdbDetector;
+BaseElement['Component'] = BentoAdblockDetector;
 
 /** @override */
 BaseElement['props'] = {
-  'onB': {attr: 'onBlock'},
   ampAd: {
+    as: true,
+    clone: true,
     selector: 'amp-ad',
     single: true,
+  },
+  fallbackDiv: {
     as: true,
     clone: true,
-  },
-  divBlocked: {
     selector: 'div[status="blocked"]',
     single: true,
-    as: true,
-    clone: true,
   },
 };
 
@@ -30,6 +28,3 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
-
-/** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
