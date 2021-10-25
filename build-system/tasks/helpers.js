@@ -13,7 +13,7 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-// const {closureCompile} = require('../compile/compile');
+const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('kleur/colors');
 const {generateBentoRuntime} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
@@ -332,20 +332,19 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const minifiedName = maybeToEsmName(options.minifiedName);
 
   options.errored = false;
-  console.log(entryPoint, destDir, minifiedName, options, timeInfo);
-  // await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
+  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
   // If an incremental watch build fails, simply return.
   if (options.watch && options.errored) {
     return;
   }
 
-  // const destPath = path.join(destDir, minifiedName);
-  // combineWithCompiledFile(srcFilename, destPath, options);
+  const destPath = path.join(destDir, minifiedName);
+  combineWithCompiledFile(srcFilename, destPath, options);
   if (options.aliasName) {
-    // fs.copySync(
-    //   destPath,
-    //   path.join(destDir, maybeToEsmName(options.aliasName))
-    // );
+    fs.copySync(
+      destPath,
+      path.join(destDir, maybeToEsmName(options.aliasName))
+    );
   }
 
   let name = minifiedName;
