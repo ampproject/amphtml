@@ -50,6 +50,7 @@ defaultTask.description =
   'Start the dev server, lazily build JS when requested, and watch for changes';
 defaultTask.flags = {
   minified: 'Compile and serve minified binaries',
+  esm: 'Compile and serve minified ESM binaries',
   pseudo_names:
     'Compile with readable names (useful while profiling / debugging production code)',
   pretty_print:
