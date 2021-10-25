@@ -23,7 +23,6 @@ tags: {  # <amp-story-shopping-config>
   html_format: AMP
   tag_name: "AMP-STORY-SHOPPING-CONFIG"
   requires_extension: "amp-story-shopping"
-  mandatory_ancestor: "AMP-STORY-PAGE"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
   amp_layout: {
@@ -34,7 +33,6 @@ tags: {  # <amp-story-shopping-attachment>
   html_format: AMP
   tag_name: "AMP-STORY-SHOPPING-ATTACHMENT"
   requires_extension: "amp-story-shopping"
-  mandatory_ancestor: "AMP-STORY-PAGE"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
   amp_layout: {
