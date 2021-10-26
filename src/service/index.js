@@ -24,7 +24,7 @@ export let SubscriptionService;
  * @param {!Window} window
  * @return {!./service/ampdoc-impl.AmpDocService}
  */
-function ampdocServiceFor(window) {
+function ampdocServiceForInternal(window) {
   return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
     getService(window, 'ampdoc')
   );
@@ -35,7 +35,7 @@ function ampdocServiceFor(window) {
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
-function ampdoc(nodeOrAmpDoc) {
+function ampdocInternal(nodeOrAmpDoc) {
   return getAmpdoc(nodeOrAmpDoc);
 }
 
@@ -43,7 +43,7 @@ function ampdoc(nodeOrAmpDoc) {
  * @param {!Window} window
  * @return {!./service/extensions-impl.Extensions}
  */
-function extensionsFor(window) {
+function extensionsForInternal(window) {
   return /** @type {!./service/extensions-impl.Extensions} */ (
     getService(window, 'extensions')
   );
@@ -51,8 +51,12 @@ function extensionsFor(window) {
 
 /**
  * Services used to be a class full of static methods.
- * We modified this to an object because minifiers have better support for it.
- * Note: `Services` may not self-references or else it will deopt.
+ * This was changed to an object in #36486 because terser has better minification
+ * support for regular objects than static methods.
+ *
+ * In order to prevent deoptimizations, we must ensure:
+ * - Services does not self-references.
+ * - Services does not use method definition shorthand.
  */
 export const Services = {
   /**
@@ -139,8 +143,8 @@ export const Services = {
     );
   },
 
-  ampdoc: (nodeOrAmpdoc) => ampdoc(nodeOrAmpdoc),
-  ampdocServiceFor: (win) => ampdocServiceFor(win),
+  ampdoc: (nodeOrAmpdoc) => ampdocInternal(nodeOrAmpdoc),
+  ampdocServiceFor: (win) => ampdocServiceForInternal(win),
 
   /**
    * @param {!Element|!ShadowRoot} element
@@ -151,7 +155,7 @@ export const Services = {
     if (loadAnalytics) {
       // Get Extensions service and force load analytics extension.
       const ampdoc = getAmpdoc(element);
-      extensionsFor(ampdoc.win)./*OK*/ installExtensionForDoc(
+      extensionsForInternal(ampdoc.win)./*OK*/ installExtensionForDoc(
         ampdoc,
         'amp-analytics'
       );
@@ -277,7 +281,7 @@ export const Services = {
     ).get();
   },
 
-  extensionsFor: (win) => extensionsFor(win),
+  extensionsFor: (win) => extensionsForInternal(win),
 
   /**
    * Returns a service to register callbacks we wish to execute when an
@@ -621,8 +625,8 @@ export const Services = {
    * TODO(dmanek): Add tests for this method.
    */
   storageForTopLevelDoc: (elementOrAmpDoc) => {
-    const thisAmpdoc = ampdoc(elementOrAmpDoc);
-    const ampdocService = ampdocServiceFor(thisAmpdoc.win);
+    const thisAmpdoc = ampdocInternal(elementOrAmpDoc);
+    const ampdocService = ampdocServiceForInternal(thisAmpdoc.win);
     const topAmpdoc = ampdocService.isSingleDoc()
       ? ampdocService.getSingleDoc()
       : null;
