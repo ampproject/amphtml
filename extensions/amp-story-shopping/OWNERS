@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'jshamble'}, {name: 'processprocess'}],
+      owners: [{name: 'jshamble'}, {name: 'processprocess'}, {name: 'gmajoulet', notify: true }],
     },
   ],
 }
