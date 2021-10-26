@@ -18,29 +18,7 @@ const jobName = 'bundle-size-module-build.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie(
-    `amp dist --noconfig --esm` +
-      ` --extensions=${[
-        'amp-accordion',
-        'amp-mustache',
-        'amp-script',
-        'amp-subscriptions',
-        'amp-subscriptions-google',
-        //
-        'amp-access',
-        'amp-analytics',
-        'amp-animation',
-        // 'amp-bind',
-        'amp-form',
-        'amp-image-lightbox',
-        'amp-image-slider',
-        'amp-list',
-        'amp-pan-zoom',
-        'amp-render',
-        'amp-story',
-        'amp-story-player',
-      ].join(',')}`
-  );
+  timedExecOrDie(`amp dist --noconfig --esm`);
   storeModuleBuildToWorkspace();
 }
 
