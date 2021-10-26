@@ -1,11 +1,13 @@
 /** @type {x} */
-
+(
 /** @type {!Element} */
-(dev());
+(dev()));
 
 function hello() {
   return (
+    /** @type {x} */
+    (
     /** @type {!Element} */
-    (dev())
+    (dev()))
   );
 }

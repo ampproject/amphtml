@@ -84,13 +84,49 @@ module.exports = function (babel) {
     }
 
     if (type) {
+      const preExistingComment =
+        path.parentPath?.leadingComment ?? path.parentPath?.innerComment;
+      if (preExistingComment) {
+        path.parentPath?.replaceWith(
+          t.parenthesizedExpression(path.parentPath)
+        );
+      }
+
       path.replaceWith(t.parenthesizedExpression(arg));
       // If it starts with a capital, make the type non-nullable.
       if (/^[A-Z]/.test(type)) {
         type = '!' + type;
       }
-      // Add a cast annotation to fix type.
+
       path.addComment('leading', `* @type {${type}} `);
+
+      // In case there were preexisting comments around the path,
+      // then wrap in an extra layer of parens for the double cast.
+      const preExistingComments =
+        path.parentPath.node.leadingComments ||
+        path.parentPath.node.innerComments;
+      if (
+        preExistingComments &&
+        preExistingComments.some((c) => c.value.includes('type'))
+      ) {
+        if (
+          t.isExpressionStatement(path.parentPath) &&
+          !t.isReturnStatement(path.parentPath)
+        ) {
+          path.parentPath.node.expression = t.parenthesizedExpression(
+            path.parentPath.node.expression
+          );
+        } else if (t.isReturnStatement(path.parentPath)) {
+          path.parentPath.node.argument = t.parenthesizedExpression(
+            path.parentPath.node.argument
+          );
+          path.parentPath.node.argument.leadingComments = preExistingComments;
+        } else {
+          path.parentPath.replaceWith(
+            t.parenthesizedExpression(path.parentPath.node)
+          );
+        }
+      }
     } else if (!assertion) {
       path.remove();
     }
