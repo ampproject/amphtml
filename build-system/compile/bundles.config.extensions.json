@@ -490,7 +490,7 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-image-slider",
+    "name": "amp-image-lightbox",
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
