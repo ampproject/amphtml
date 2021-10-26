@@ -465,9 +465,19 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-iframely",
+    "name": "amp-iframe",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
   },
   {
     "name": "amp-ima-video",
