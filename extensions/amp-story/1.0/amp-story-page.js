@@ -572,9 +572,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         });
       });
       this.maybeStartAnimations_();
-      this.hasAudio_().then((hasAudio) =>
-        this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, hasAudio)
-      );
+      this.checkPageHasAudio_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -1454,14 +1452,17 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    * @return {!Promise<boolean>}
    */
-  hasAudio_() {
-    if (
+  checkPageHasAudio_() {
+    const hasAudioElements =
       this.element.hasAttribute('background-audio') ||
-      this.element.querySelector('amp-audio')
-    ) {
-      return Promise.resolve(true);
-    }
-    return this.hasVideoWithAudio_();
+      this.element.querySelector('amp-audio');
+    const hasAudioPromise = hasAudioElements
+      ? Promise.resolve(true)
+      : this.hasVideoWithAudio_();
+
+    hasAudioPromise.then((hasAudio) =>
+      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, hasAudio)
+    );
   }
 
   /**
