@@ -8,7 +8,7 @@
         {name: 'jshamble'},
         {name: 'processprocess'},
         {name: 'gmajoulet', notify: true},
-        ],
+      ],
     },
   ],
 }
