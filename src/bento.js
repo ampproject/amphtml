@@ -3,10 +3,6 @@
  * Entry point for `bento.js`
  */
 
-import {install as installCustomElements} from './polyfills/custom-elements';
-
-installCustomElements(self);
-
 const BENTO = self.BENTO || [];
 
 BENTO.push = (fn) => {

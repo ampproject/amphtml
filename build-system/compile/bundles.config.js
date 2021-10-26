@@ -25,8 +25,17 @@ exports.jsBundles = {
       includePolyfills: false,
       toName: 'bento.max.js',
       minifiedName: 'bento.js',
-      // For backwards-compat:
-      aliasName: 'custom-elements-polyfill.js',
+    },
+  },
+  'custom-elements-polyfill.js': {
+    srcDir: './src/',
+    srcFilename: 'custom-elements-polyfill.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      includePolyfills: false,
+      toName: 'custom-elements-polyfill.max.js',
+      minifiedName: 'custom-elements-polyfill.js',
     },
   },
   'alp.max.js': {
