@@ -52,11 +52,6 @@
     }
   },
   {
-    "name": "amp-action-macro",
-    "version": "0.1",
-    "latestVersion": "0.1"
-  },
-  {
     "name": "amp-ad",
     "version": "0.1",
     "latestVersion": "0.1",
