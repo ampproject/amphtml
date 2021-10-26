@@ -51,23 +51,22 @@ async function postClosureBabel(file) {
     return;
   }
 
-  // debug(CompilationLifecycles['closured-pre-babel'], file);
-  // /** @type {?babel.TransformOptions} */
-  // const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
-  // const {code, map: babelMap} =
-  //   (await babel.transformFileAsync(file, babelOptions ?? undefined)) || {};
-  // if (!code || !babelMap) {
-  //   throw new Error(`Error transforming contents of ${file}`);
-  // }
-  //
-  // debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
-  const code = fs.readFileSync(file, 'utf8');
+  debug(CompilationLifecycles['closured-pre-babel'], file);
+  /** @type {?babel.TransformOptions} */
+  const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
+  const {code, map: babelMap} =
+    (await babel.transformFileAsync(file, babelOptions ?? undefined)) || {};
+  if (!code || !babelMap) {
+    throw new Error(`Error transforming contents of ${file}`);
+  }
+
+  debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
   const {compressed, terserMap} = await terserMinify(code);
   await fs.outputFile(file, compressed);
 
   const closureMap = await fs.readJson(`${file}.map`, 'utf8');
   const sourceMap = remapping(
-    [terserMap, closureMap],
+    [terserMap, babelMap, closureMap],
     () => null,
     !argv.full_sourcemaps
   );
