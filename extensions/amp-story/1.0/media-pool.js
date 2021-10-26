@@ -883,12 +883,8 @@ export class MediaPool {
       if (parent) {
         let volume = parent.getAttribute('volume');
         if (volume) {
-          domMediaEl.volume = volume;
+          domMediaEl.volume = Number.parseFloat(volume);
         }
-      }
-
-      if (parent.getAttribute('noaudio')) {
-        domMediaEl.volume = 0;
       }
     }
 
