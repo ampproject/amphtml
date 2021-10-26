@@ -195,21 +195,6 @@ export class AmpAdXOriginIframeHandler {
       )
     );
 
-    if (this.uiHandler_.isStickyAd()) {
-      setStyle(iframe, 'pointer-events', 'none');
-      this.unlisteners_.push(
-        listenFor(
-          this.iframe,
-          'signal-interactive',
-          () => {
-            setStyle(iframe, 'pointer-events', 'auto');
-          },
-          true,
-          true
-        )
-      );
-    }
-
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
         this.sendEmbedInfo_(this.inViewport_);
@@ -472,7 +457,7 @@ export class AmpAdXOriginIframeHandler {
             } else {
               this.lastRejectedResizeTime_ = 0;
             }
-            this.uiHandler_.onResizeSuccess();
+            this.uiHandler_.adjustPadding();
             this.sendEmbedSizeResponse_(
               info.success,
               id,

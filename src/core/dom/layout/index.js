@@ -45,7 +45,7 @@ export let LengthDef;
  *   height: string
  * }}
  */
-let DimensionsDef;
+export let DimensionsDef;
 
 /**
  * Elements that the progress can be shown for. This set has to be externalized
@@ -199,7 +199,7 @@ export function getLengthUnits(length) {
 
 /**
  * Returns the numeric value of a CSS length value.
- * @param {!LengthDef|string|null|undefined} length
+ * @param {!LengthDef|string|null|undefined|number} length
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {

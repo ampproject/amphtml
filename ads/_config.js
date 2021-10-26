@@ -174,6 +174,15 @@ const adConfig = jsonConfiguration({
 
   'adservsolutions': {},
 
+  'adskeeper': {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.adskeeper.com',
+      'https://servicer.adskeeper.com',
+      'https://s-img.adskeeper.com',
+    ],
+  },
+
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
   },
@@ -297,6 +306,12 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://srv.clickfuse.com',
     renderStartImplemented: true,
   },
+
+  'andbeyond': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.andbeyond.media',
+  },
+
   'aniview': {
     renderStartImplemented: true,
   },
@@ -1080,6 +1095,13 @@ const adConfig = jsonConfiguration({
 
   'seedingalliance': {},
 
+  'seedtag': {
+    prefetch: 'https://config.seedtag.com/omid/bridge/bridge.js',
+    preconnect: ['https://s.seedtag.com'],
+    consentHandlingOverride: true,
+    renderStartImplemented: true,
+  },
+
   'sekindo': {
     renderStartImplemented: true,
   },
@@ -1290,12 +1312,6 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
-    renderStartImplemented: true,
-  },
-
-  'verizonmedia': {
-    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
-    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 

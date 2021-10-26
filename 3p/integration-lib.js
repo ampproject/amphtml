@@ -26,6 +26,7 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
   '1wo': true,
   '24smi': true,
+  adskeeper: true,
   adsloom: true,
   adstyle: true,
   bringhub: true,

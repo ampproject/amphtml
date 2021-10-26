@@ -171,6 +171,8 @@ Use to denote that this is a sticky ad unit and specify the position of this uni
 -   top
 -   bottom
 -   bottom-right
+-   left
+-   right
 
 ### `data-foo-bar`
 
@@ -298,6 +300,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Affiliate-B](../../ads/vendors/affiliateb.md)
 -   [AJA](../../ads/vendors/aja.md)
 -   [AMoAd](../../ads/vendors/amoad.md)
+-   [Andbeyond](../../ads/vendors/andbeyond.md)
 -   [Aniview](../../ads/vendors/aniview.md)
 -   [AnyClip](../../ads/vendors/anyclip.md)
 -   [AppNexus](../../ads/vendors/appnexus.md)
@@ -498,6 +501,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 
 -   [1wo](../../ads/vendors/1wo.md)
 -   [24smi](../../ads/vendors/24smi.md)
+-   [AdsKeeper](../../ads/vendors/adskeeper.md)
 -   [AdsLoom](../../ads/vendors/adsloom.md)
 -   [Bringhub](../../ads/vendors/bringhub.md)
 -   [Dable](../../ads/vendors/dable.md)

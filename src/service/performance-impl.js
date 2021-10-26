@@ -530,26 +530,30 @@ export class Performance {
     }
   }
 
+  /** @private */
+  recordGoogleFontExp_() {
+    if (!this.googleFontExpRecorded_) {
+      this.googleFontExpRecorded_ = true;
+      const {win} = this;
+      const googleFontExp = parseInt(
+        computedStyle(win, win.document.body).getPropertyValue(
+          '--google-font-exp'
+        ),
+        10
+      );
+      if (googleFontExp >= 0) {
+        this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
+      }
+    }
+  }
+
   /**
    * Tick the metrics whose values change over time.
    * @private
    */
   tickCumulativeMetrics_() {
     if (this.supportsLayoutShift_) {
-      if (!this.googleFontExpRecorded_) {
-        this.googleFontExpRecorded_ = true;
-        const {win} = this;
-        const googleFontExp = parseInt(
-          computedStyle(win, win.document.body).getPropertyValue(
-            '--google-font-exp'
-          ),
-          10
-        );
-        if (googleFontExp >= 0) {
-          this.addEnabledExperiment(`google-font-exp=${googleFontExp}`);
-        }
-      }
-
+      this.recordGoogleFontExp_();
       this.tickCumulativeLayoutShiftScore_();
     }
     if (this.supportsLargestContentfulPaint_) {
@@ -613,6 +617,7 @@ export class Performance {
       sum += entry.value;
     }
     entries.length = 0;
+    this.recordGoogleFontExp_();
     if (old == null || sum > old) {
       // We'll record the largest windowed CLS.
       this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT);

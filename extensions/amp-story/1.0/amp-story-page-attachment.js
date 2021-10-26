@@ -213,11 +213,18 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
       </a>`;
 
+    const isPageOutlink = this.element.tagName === 'AMP-STORY-PAGE-OUTLINK';
+    if (isPageOutlink) {
+      // The target must be '_top' for page outlinks, which will result in the
+      // link opening in the current tab. Opening links in a new tab requires a
+      // trusted event, and Safari does not consider swiping up to be trusted.
+      this.element.querySelector('a').setAttribute('target', '_top');
+    }
+
     // For backwards compatibility if element is amp-story-page-outlink.
-    const hrefAttr =
-      this.element.tagName === 'AMP-STORY-PAGE-OUTLINK'
-        ? this.element.querySelector('a').getAttribute('href')
-        : this.element.getAttribute('href');
+    const hrefAttr = isPageOutlink
+      ? this.element.querySelector('a').getAttribute('href')
+      : this.element.getAttribute('href');
 
     // URL will be validated and resolved based on the canonical URL if relative
     // when navigating.

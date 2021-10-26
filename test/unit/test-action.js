@@ -17,7 +17,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 
 import {createCustomEvent} from '#utils/event-helper';
 
-import {whenCalled} from '#testing/test-helper';
+import {whenCalled} from '#testing/helpers/service';
 
 /**
  * @return {!ActionService}

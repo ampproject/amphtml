@@ -62,6 +62,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 
         /** */
         connectedCallback() {
+          this.classList.add('i-amphtml-built');
           this.implementation.mountCallback();
           this.implementation.buildCallback();
         }
