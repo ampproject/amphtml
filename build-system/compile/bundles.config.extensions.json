@@ -232,9 +232,12 @@
     }
   },
   {
-    "name": "amp-cache-url",
+    "name": "amp-byside-content",
     "version": "0.1",
-    "latestVersion": "0.1"
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-call-tracking",
