@@ -514,32 +514,9 @@
     }
   },
   {
-    "name": "amp-inline-gallery",
+    "name": "amp-imgur",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "cssBinaries": [
-        "amp-inline-gallery",
-        "amp-inline-gallery-captions",
-        "amp-inline-gallery-pagination",
-        "amp-inline-gallery-slide",
-        "amp-inline-gallery-thumbnails"
-      ]
-    }
-  },
-  {
-    "name": "amp-inline-gallery",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "cssBinaries": [
-        "amp-inline-gallery-pagination"
-      ],
-      "npm": true,
-      "bento": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-inputmask",
