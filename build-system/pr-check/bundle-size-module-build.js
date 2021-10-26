@@ -18,7 +18,13 @@ const jobName = 'bundle-size-module-build.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp dist --noconfig --esm --extensions=amp-mustache');
+  timedExecOrDie(
+    `amp dist --noconfig --esm --extensions=${[
+      'amp-accordion',
+      'amp-mustache',
+      'amp-script',
+    ].join(',')}`
+  );
   storeModuleBuildToWorkspace();
 }
 
