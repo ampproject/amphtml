@@ -33,7 +33,8 @@ async function buildVendorConfigs(options) {
   const bundles = generateBundles();
 
   await Promise.all(
-    Object.values(bundles).map((bundle) =>
+    // only for testing: bundles.slice(0, 1).
+    Object.values(bundles.slice(0, 1)).map((bundle) =>
       esbuildCompile(
         bundle.srcDir,
         bundle.srcFilename,
