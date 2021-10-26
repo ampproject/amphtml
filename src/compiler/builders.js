@@ -14,8 +14,7 @@ const versionedBuilderMap = {
 };
 
 /**
- * Wraps a buildDom function with functionality that
- * every component needs.
+ * Wraps a buildDom function with functionality that every component needs.
  *
  * @param {import('./types').BuildDom} buildDom
  * @return {import('./types').BuildDom}
