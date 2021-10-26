@@ -3,7 +3,6 @@ import {AmpStoryShoppingConfig} from './amp-story-shopping-config';
 import {AmpStoryShoppingTag} from './amp-story-shopping-tag';
 
 import {CSS as shoppingAttachmentCSS} from '../../../build/amp-story-shopping-attachment-0.1.css';
-import {CSS as shoppingConfigCSS} from '../../../build/amp-story-shopping-config-0.1.css';
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 
 AMP.extension('amp-story-shopping', '0.1', (AMP) => {
@@ -12,11 +11,7 @@ AMP.extension('amp-story-shopping', '0.1', (AMP) => {
     AmpStoryShoppingAttachment,
     shoppingAttachmentCSS
   );
-  AMP.registerElement(
-    'amp-story-shopping-config',
-    AmpStoryShoppingConfig,
-    shoppingConfigCSS
-  );
+  AMP.registerElement('amp-story-shopping-config', AmpStoryShoppingConfig);
   AMP.registerElement(
     'amp-story-shopping-tag',
     AmpStoryShoppingTag,
