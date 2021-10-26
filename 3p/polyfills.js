@@ -8,13 +8,11 @@ import * as mode from '#core/mode';
 import {install as installMathSign} from '#polyfills/math-sign';
 import {install as installObjectAssign} from '#polyfills/object-assign';
 import {install as installObjectValues} from '#polyfills/object-values';
-import {install as installPromise} from '#polyfills/promise';
 import {install as installStringStartsWith} from '#polyfills/string-starts-with';
 
 if (!mode.isEsm()) {
   installMathSign(self);
   installObjectAssign(self);
   installObjectValues(self);
-  installPromise(self);
   installStringStartsWith(self);
 }
