@@ -65,7 +65,10 @@ import {renderPageDescription} from './semantic-render';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
-import {upgradeBackgroundAudio} from './audio';
+import {
+  upgradeBackgroundAudio,
+  waitForElementsWithUnresolvedAudio,
+} from './audio';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -1469,7 +1472,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return this.waitForMediaLayout_().then(() =>
+    return waitForElementsWithUnresolvedAudio(this.element).then(() =>
       Array.prototype.some.call(
         ampVideoEls,
         (video) => !video.hasAttribute('noaudio')

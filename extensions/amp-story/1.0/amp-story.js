@@ -89,7 +89,10 @@ import {
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {upgradeBackgroundAudio} from './audio';
+import {
+  upgradeBackgroundAudio,
+  waitForElementsWithUnresolvedAudio,
+} from './audio';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -2243,7 +2246,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const containsMediaElementWithAudio = storyHasBackgroundAudio
       ? Promise.resolve(true)
-      : this.resolveElementsWithAudio_().then(() => {
+      : waitForElementsWithUnresolvedAudio(this.element).then(() => {
           return !!this.element.querySelector(
             'amp-audio, amp-video:not([noaudio]), [background-audio]'
           );
@@ -2255,18 +2258,6 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
       storyHasBackgroundAudio
-    );
-  }
-
-  /**
-   * Resolves elements that determine their audio at runtime.
-   * @return {!Promise}
-   */
-  resolveElementsWithAudio_() {
-    return Promise.all(
-      Array.from(
-        this.element.querySelectorAll('amp-video[cache]:not([noaudio])')
-      ).map((el) => el.getImpl())
     );
   }
 
