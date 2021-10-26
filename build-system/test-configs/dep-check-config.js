@@ -85,7 +85,6 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/messaging.js->src/utils/event-helper.js',
       '3p/bodymovinanimation.js->src/utils/event-helper.js',
       '3p/iframe-messaging-client.js->src/utils/event-helper.js',
@@ -206,6 +205,9 @@ exports.rules = [
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/responsive-attributes.js',
       'extensions/amp-stream-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
       'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
+
+      // <amp-dailymotion> versions share this message API definition.
+      'extensions/amp-dailymotion/**->extensions/amp-dailymotion/dailymotion-api.js',
 
       // Autolightboxing dependencies
       'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
@@ -423,7 +425,6 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/amp.js->src/polyfills/index.js',
       'src/polyfills/index.js->src/polyfills/abort-controller.js',
@@ -433,7 +434,6 @@ exports.rules = [
       'src/polyfills/index.js->src/polyfills/math-sign.js',
       'src/polyfills/index.js->src/polyfills/object-assign.js',
       'src/polyfills/index.js->src/polyfills/object-values.js',
-      'src/polyfills/index.js->src/polyfills/promise.js',
       'src/polyfills/index.js->src/polyfills/array-includes.js',
       'src/polyfills/index.js->src/polyfills/string-starts-with.js',
       'src/polyfills/index.js->src/polyfills/custom-elements.js',

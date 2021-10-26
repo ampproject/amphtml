@@ -629,6 +629,12 @@ data.site;
 data.zone;
 data.callback;
 
+// seedtag.js
+data.adunitId;
+data.placement;
+data.publisherId;
+data.forceCreative;
+
 // sharethrough.js
 data.pkey;
 
@@ -686,9 +692,6 @@ data.extraParams;
 data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
-
-// verizonmedia.js
-window.jacData;
 
 // webediads.js
 var wads;
