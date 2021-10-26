@@ -18,6 +18,11 @@
     }
   },
   {
+    "name": "amp-animation-polyfill",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-story",
     "version": "1.0",
     "latestVersion": "1.0",
