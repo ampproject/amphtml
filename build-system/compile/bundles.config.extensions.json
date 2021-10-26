@@ -26,6 +26,14 @@
     "latestVersion": "0.2"
   },
   {
+    "name": "amp-render",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "bento": true
+    }
+  },
+  {
     "name": "amp-story",
     "version": "1.0",
     "latestVersion": "1.0",
