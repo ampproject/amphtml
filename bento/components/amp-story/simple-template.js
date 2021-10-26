@@ -1,9 +1,12 @@
-import {LocalizedStringId} from '#service/localization/strings'; // eslint-disable-line no-unused-vars
 import {createElementWithAttributes} from '#core/dom';
-import {devAssert} from '#utils/log';
-import {getLocalizationService} from './amp-story-localization-service';
-import {hasOwn} from '#core/types/object';
 import {isArray} from '#core/types';
+import {hasOwn} from '#core/types/object';
+
+import {LocalizedStringId} from '#service/localization/strings'; // eslint-disable-line no-unused-vars
+
+import {devAssert} from '#utils/log';
+
+import {getLocalizationService} from './amp-story-localization-service';
 
 /**
  * @typedef {{

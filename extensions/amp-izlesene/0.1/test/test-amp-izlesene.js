@@ -1,4 +1,4 @@
-import '../amp-izlesene';
+import '#extensions/amp-izlesene/0.1/amp-izlesene';
 
 describes.realWin(
   'amp-izlesene',

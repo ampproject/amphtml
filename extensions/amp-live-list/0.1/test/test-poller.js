@@ -1,6 +1,6 @@
-import {Services} from '#service';
+import {Poller} from '#extensions/amp-live-list/0.1/poller';
 
-import {Poller} from '../poller';
+import {Services} from '#service';
 
 describes.sandboxed('Poller', {}, (env) => {
   let clock;

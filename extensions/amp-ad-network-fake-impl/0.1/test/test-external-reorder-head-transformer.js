@@ -1,4 +1,4 @@
-import {ExternalReorderHeadTransformer} from '../external-reorder-head-transformer';
+import {ExternalReorderHeadTransformer} from '#extensions/amp-ad-network-fake-impl/0.1/external-reorder-head-transformer';
 
 const title = `<title>Hello, world.</title>`;
 const styleBoilerplate = `<style amp4ads-boilerplate>body{visibility:hidden}</style>`;

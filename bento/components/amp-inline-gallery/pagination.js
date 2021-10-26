@@ -1,7 +1,9 @@
+import {CarouselContext} from '#bento/components/amp-base-carousel/carousel-context';
+
 import * as Preact from '#preact';
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {Wrapper} from '#preact/component';
 import {useContext} from '#preact';
+import {Wrapper} from '#preact/component';
+
 import {useStyles} from './pagination.jss';
 
 /**

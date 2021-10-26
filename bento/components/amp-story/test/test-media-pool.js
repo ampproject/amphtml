@@ -1,6 +1,8 @@
-import {MediaPool, MediaType} from '../media-pool';
-import {Services} from '#service';
+import {MediaPool, MediaType} from '#bento/components/amp-story/media-pool';
+
 import {findIndex} from '#core/types/array';
+
+import {Services} from '#service';
 
 const NOOP = () => {};
 

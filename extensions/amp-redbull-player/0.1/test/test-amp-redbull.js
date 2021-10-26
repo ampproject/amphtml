@@ -1,4 +1,4 @@
-import '../amp-redbull-player';
+import '#extensions/amp-redbull-player/0.1/amp-redbull-player';
 
 describes.realWin(
   'amp-redbull-player',

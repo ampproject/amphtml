@@ -1,4 +1,4 @@
-import '../amp-jwplayer';
+import '#bento/components/amp-jwplayer/amp-jwplayer';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
@@ -10,7 +10,7 @@ import * as consent from '../../../../src/consent';
 /**
  * @param {Document} doc
  * @param {JsonObject} attrs
- * @returns {Element}
+ * @return {Element}
  */
 async function mountComp(doc, attrs) {
   const el = createElementWithAttributes(doc, 'amp-jwplayer', {

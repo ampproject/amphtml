@@ -1,4 +1,4 @@
-import {evaluateAccessExpr} from '../../amp-access/0.1/access-expr';
+import {evaluateAccessExpr} from '#extensions/amp-access/0.1/access-expr';
 
 /**
  * @param {string} expr

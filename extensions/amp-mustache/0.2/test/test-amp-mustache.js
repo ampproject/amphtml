@@ -1,5 +1,5 @@
 import * as service from '../../../../src/service-helpers';
-import {AmpMustache} from '../amp-mustache';
+import {AmpMustache} from '#extensions/amp-mustache/0.2/amp-mustache';
 import {Purifier} from '#purifier';
 import mustache from '#third_party/mustache/mustache';
 

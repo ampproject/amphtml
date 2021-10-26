@@ -5,14 +5,14 @@ import {
   getNameArgsForTesting,
   installVariableServiceForTesting,
   variableServiceForDoc,
-} from '../variables';
+} from '#extensions/amp-analytics/0.1/variables';
 import {Services} from '#service';
 import {forceExperimentBranch} from '#experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
-} from '../linker-reader';
-import {installSessionServiceForTesting} from '../session-manager';
+} from '#extensions/amp-analytics/0.1/linker-reader';
+import {installSessionServiceForTesting} from '#extensions/amp-analytics/0.1/session-manager';
 
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let fakeElement;

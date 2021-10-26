@@ -1,4 +1,4 @@
-import {AmpInstagram} from '../amp-instagram';
+import {AmpInstagram} from '#extensions/amp-instagram/0.1/amp-instagram';
 
 describes.realWin(
   'amp-instagram',

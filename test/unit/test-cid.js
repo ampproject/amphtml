@@ -1,5 +1,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
+import {installCryptoPolyfill} from '#extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {
@@ -18,7 +20,6 @@ import {installViewerServiceForDoc} from '#service/viewer-impl';
 import {macroTask} from '#testing/helpers';
 import {stubServiceForDoc} from '#testing/helpers/service';
 
-import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {getCookie, setCookie} from '../../src/cookies';
 import * as cookie from '../../src/cookies';
 import {

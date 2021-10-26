@@ -1,4 +1,4 @@
-import {API_SERVER} from '../constants';
+import {API_SERVER} from '#extensions/amp-addthis/0.1/constants';
 import {callPixelEndpoint} from './pixel';
 
 import {classifyPage, classifyReferrer, getKeywordsString} from './classify';

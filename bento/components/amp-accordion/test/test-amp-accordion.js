@@ -1,4 +1,4 @@
-import '../amp-accordion';
+import '#bento/components/amp-accordion/amp-accordion';
 import {ActionTrust} from '#core/constants/action-constants';
 import {subscribe, unsubscribe} from '#core/context';
 import {htmlFor} from '#core/dom/static-template';

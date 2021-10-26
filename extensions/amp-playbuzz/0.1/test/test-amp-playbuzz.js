@@ -1,4 +1,4 @@
-import '../amp-playbuzz';
+import '#extensions/amp-playbuzz/0.1/amp-playbuzz';
 
 describes.realWin(
   'amp-playbuzz',

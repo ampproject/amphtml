@@ -1,4 +1,4 @@
-import '../amp-powr-player';
+import '#extensions/amp-powr-player/0.1/amp-powr-player';
 import {listenOncePromise} from '#utils/event-helper';
 
 import {parseUrlDeprecated} from '../../../../src/url';

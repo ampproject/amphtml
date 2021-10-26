@@ -1,26 +1,30 @@
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+import {Keys} from '#core/constants/key-codes';
+import {closest} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {dev, devAssert} from '#utils/log';
+
+import {getLocalizationService} from './amp-story-localization-service';
+import {ShareWidget} from './amp-story-share';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {Keys} from '#core/constants/key-codes';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
-import {ShareWidget} from './amp-story-share';
-import {closest} from '#core/dom/query';
+import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyles} from '#core/dom/style';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';

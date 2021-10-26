@@ -1,4 +1,7 @@
-import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
+import {
+  LoginDoneDialog,
+  buildLangSelector,
+} from '#extensions/amp-access/0.1/amp-login-done-dialog';
 
 describes.sandboxed('LoginDoneDialog', {}, (env) => {
   let clock;

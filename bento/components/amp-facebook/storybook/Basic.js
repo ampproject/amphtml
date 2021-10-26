@@ -1,5 +1,6 @@
+import {BentoFacebook} from '#bento/components/amp-facebook/component';
+
 import * as Preact from '#preact';
-import {BentoFacebook} from '../component';
 
 export default {
   title: 'Facebook',

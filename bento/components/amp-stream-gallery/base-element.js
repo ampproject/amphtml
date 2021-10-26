@@ -1,8 +1,11 @@
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
-import {CSS as GALLERY_CSS} from './component.jss';
-import {PreactBaseElement} from '#preact/base-element';
-import {BentoStreamGallery} from './component';
+import {CSS as CAROUSEL_CSS} from '#bento/components/amp-base-carousel/component.jss';
+
 import {dict} from '#core/types/object';
+
+import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoStreamGallery} from './component';
+import {CSS as GALLERY_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */

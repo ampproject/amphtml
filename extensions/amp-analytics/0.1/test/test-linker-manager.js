@@ -3,15 +3,15 @@ import {
   LinkerManager,
   areFriendlyDomains,
   isWildCardMatch,
-} from '../linker-manager';
+} from '#extensions/amp-analytics/0.1/linker-manager';
 import {Priority} from '#service/navigation';
 import {Services} from '#service';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
-} from '../linker-reader';
-import {installSessionServiceForTesting} from '../session-manager';
-import {installVariableServiceForTesting} from '../variables';
+} from '#extensions/amp-analytics/0.1/linker-reader';
+import {installSessionServiceForTesting} from '#extensions/amp-analytics/0.1/session-manager';
+import {installVariableServiceForTesting} from '#extensions/amp-analytics/0.1/variables';
 import {mockWindowInterface} from '#testing/helpers/service';
 
 // TODO(ccordry): Refactor all these tests with async/await.

@@ -1,10 +1,11 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
+import {AccessServerJwtAdapter} from '#extensions/amp-access/0.1/amp-access-server-jwt';
+
 import {isUserErrorMessage} from '#utils/log';
 
 import * as DocumentFetcher from '../../../../src/document-fetcher';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
-import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 
 describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
   let win;

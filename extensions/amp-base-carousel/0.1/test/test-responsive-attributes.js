@@ -1,4 +1,4 @@
-import {ResponsiveAttributes} from '../responsive-attributes';
+import {ResponsiveAttributes} from '#extensions/amp-base-carousel/0.1/responsive-attributes';
 
 describes.sandboxed('ResponsiveAttributes', {}, (env) => {
   let matchMediaStub;

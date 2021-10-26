@@ -1,5 +1,5 @@
-import {AccessController} from '../iframe-api/access-controller';
-import {AmpAccessIframeApi} from '../iframe-api/iframe-api';
+import {AccessController} from '#extensions/amp-access/0.1/iframe-api/access-controller';
+import {AmpAccessIframeApi} from '#extensions/amp-access/0.1/iframe-api/iframe-api';
 
 describes.fakeWin(
   'AmpAccessIframeApi',

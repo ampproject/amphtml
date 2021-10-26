@@ -1,12 +1,15 @@
-import '../amp-next-page';
+import '#bento/components/amp-next-page/amp-next-page';
+import {HostPage, PageState} from '#bento/components/amp-next-page/page';
+import {
+  ScrollDirection,
+  ViewportRelativePos,
+} from '#bento/components/amp-next-page/visibility-observer';
+
 import {VisibilityState} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {Services} from '#service';
-
-import {HostPage, PageState} from '../page';
-import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>

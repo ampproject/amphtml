@@ -1,29 +1,19 @@
-import '../../../amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
 import {MANUAL_EXPERIMENT_ID} from '#ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '#ads/google/a4a/utils';
 
-import {Deferred} from '#core/data-structures/promise';
-import {createElementWithAttributes} from '#core/dom';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
-
-import {Xhr} from '#service/xhr-impl';
-
-import {devAssert} from '#utils/log';
-
-import {BaseElement} from '../../../../src/base-element';
 import {
   AmpA4A,
   EXPERIMENT_FEATURE_HEADER_NAME,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
-} from '../../../amp-a4a/0.1/amp-a4a';
-import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
+} from '#extensions/amp-a4a/0.1/amp-a4a';
+import {SignatureVerifier} from '#extensions/amp-a4a/0.1/signature-verifier';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
   resetSraStateForTesting,
-} from '../amp-ad-network-doubleclick-impl';
+} from '#extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
 import {
   TFCD,
   combineInventoryUnits,
@@ -41,7 +31,18 @@ import {
   getTfcd,
   isAdTest,
   sraBlockCallbackHandler,
-} from '../sra-utils';
+} from '#extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils';
+
+import {Deferred} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+
+import {Xhr} from '#service/xhr-impl';
+
+import {devAssert} from '#utils/log';
+
+import {BaseElement} from '../../../../src/base-element';
 
 const config = {amp: true, allowExternalResources: true};
 

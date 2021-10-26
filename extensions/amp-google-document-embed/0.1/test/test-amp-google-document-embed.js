@@ -1,4 +1,4 @@
-import '../amp-google-document-embed';
+import '#extensions/amp-google-document-embed/0.1/amp-google-document-embed';
 
 describes.realWin(
   'amp-google-document-embed',

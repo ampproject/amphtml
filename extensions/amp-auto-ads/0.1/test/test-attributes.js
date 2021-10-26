@@ -1,4 +1,7 @@
-import {Attributes, getAttributesFromConfigObj} from '../attributes';
+import {
+  Attributes,
+  getAttributesFromConfigObj,
+} from '#extensions/amp-auto-ads/0.1/attributes';
 
 describes.sandboxed('attributes', {}, () => {
   it('should ignore attributes field if an array', () => {

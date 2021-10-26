@@ -1,3 +1,5 @@
+import {LinkRewriterManager} from '#extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+
 import {CommonSignals} from '#core/constants/common-signals';
 import {dict} from '#core/types/object';
 
@@ -10,7 +12,6 @@ import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
-import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 
 const TAG = 'amp-smartlinks';
 

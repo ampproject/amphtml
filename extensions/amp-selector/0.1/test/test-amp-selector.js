@@ -1,3 +1,5 @@
+import {AmpSelector} from '#extensions/amp-selector/0.1/amp-selector';
+
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Keys} from '#core/constants/key-codes';
@@ -6,8 +8,6 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';
-
-import {AmpSelector} from '../amp-selector';
 
 describes.realWin(
   'amp-selector',

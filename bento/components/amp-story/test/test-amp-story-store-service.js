@@ -2,8 +2,11 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../amp-story-store-service';
-import {EmbedMode, EmbedModeParam} from '../embed-mode';
+} from '#bento/components/amp-story/amp-story-store-service';
+import {
+  EmbedMode,
+  EmbedModeParam,
+} from '#bento/components/amp-story/embed-mode';
 
 describes.fakeWin('amp-story-store-service', {}, (env) => {
   let storeService;

@@ -1,4 +1,4 @@
-import '../amp-truncate-text';
+import '#extensions/amp-truncate-text/0.1/amp-truncate-text';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 

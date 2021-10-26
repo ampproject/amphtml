@@ -1,11 +1,14 @@
+import {
+  DIRTINESS_INDICATOR_CLASS,
+  FormDirtiness,
+} from '#extensions/amp-form/0.1/form-dirtiness';
+
 import {AmpEvents} from '#core/constants/amp-events';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 
 import {Services} from '#service';
 
 import {createCustomEvent, getDetail} from '#utils/event-helper';
-
-import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
 
 function getForm(doc) {
   const form = doc.createElement('form');

@@ -1,3 +1,16 @@
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalyticsEvents,
+} from '#extensions/amp-subscriptions/0.1/analytics';
+import {SubscriptionsScoreFactor} from '#extensions/amp-subscriptions/0.1/constants';
+import {DocImpl} from '#extensions/amp-subscriptions/0.1/doc-impl';
+import {
+  Entitlement,
+  GrantReason,
+} from '#extensions/amp-subscriptions/0.1/entitlement';
+import {UrlBuilder} from '#extensions/amp-subscriptions/0.1/url-builder';
+
 import {getValueForExpr} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 import {WindowInterface} from '#core/window/interface';
@@ -23,18 +36,6 @@ import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {
-  Action,
-  ActionStatus,
-  SubscriptionAnalyticsEvents,
-} from '../../amp-subscriptions/0.1/analytics';
-import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
-import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
-import {
-  Entitlement,
-  GrantReason,
-} from '../../amp-subscriptions/0.1/entitlement';
-import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_KEY = 'subscribe.google.com';

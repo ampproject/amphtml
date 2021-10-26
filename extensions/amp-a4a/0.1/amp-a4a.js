@@ -1,5 +1,12 @@
 import {signingServerURLs} from '#ads/_a4a-config';
 
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from '#extensions/amp-ad/0.1/concurrent-load';
+import {GEO_IN_GROUP} from '#extensions/amp-geo/0.1/amp-geo-in-group';
+
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
@@ -64,12 +71,6 @@ import {
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
-import {
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-  is3pThrottled,
-} from '../../amp-ad/0.1/concurrent-load';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [

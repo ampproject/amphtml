@@ -1,4 +1,4 @@
-import '../amp-vimeo';
+import '#extensions/amp-vimeo/0.1/amp-vimeo';
 import * as VideoUtils from '#core/dom/video';
 
 describes.realWin(

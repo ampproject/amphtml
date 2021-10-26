@@ -1,6 +1,10 @@
+import {
+  Action,
+  getStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {StoryAnalyticsService} from '#bento/components/amp-story/story-analytics';
+
 import * as analytics from '#utils/analytics';
-import {Action, getStoreService} from '../amp-story-store-service';
-import {StoryAnalyticsService} from '../story-analytics';
 
 describes.realWin('amp-story-analytics', {amp: true}, (env) => {
   let el;

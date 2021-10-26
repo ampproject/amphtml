@@ -1,4 +1,4 @@
-import {StandaloneService} from '../amp-standalone';
+import {StandaloneService} from '#extensions/amp-standalone/0.1/amp-standalone';
 
 describes.sandboxed('amp-standalone', {}, (env) => {
   let fakeAmpdoc;

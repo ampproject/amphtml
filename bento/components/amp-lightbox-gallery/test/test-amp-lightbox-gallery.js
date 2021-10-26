@@ -1,4 +1,6 @@
-import '../amp-lightbox-gallery';
+import '#bento/components/amp-lightbox-gallery/amp-lightbox-gallery';
+import {installLightboxGallery} from '#bento/components/amp-lightbox-gallery/amp-lightbox-gallery';
+
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
@@ -12,8 +14,6 @@ import * as analytics from '#utils/analytics';
 
 import {waitFor, whenCalled} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
-
-import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';
 

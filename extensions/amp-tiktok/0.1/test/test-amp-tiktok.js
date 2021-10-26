@@ -1,4 +1,4 @@
-import '../amp-tiktok';
+import '#extensions/amp-tiktok/0.1/amp-tiktok';
 import * as dom from '#core/dom';
 import {Services} from '#service';
 import {computedStyle} from '#core/dom/style';

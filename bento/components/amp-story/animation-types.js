@@ -5,7 +5,7 @@ import {
   WebAnimationSelectorDef,
   WebAnimationTimingDef,
   WebKeyframesDef,
-} from '../../amp-animation/0.1/web-animation-types';
+} from '#extensions/amp-animation/0.1/web-animation-types';
 
 export {
   WebAnimationBuilderOptionsDef,

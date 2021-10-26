@@ -3,10 +3,10 @@ import {
   ActionStatus,
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
-} from '../analytics';
-import {Actions} from '../actions';
-import {UrlBuilder} from '../url-builder';
-import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
+} from '#extensions/amp-subscriptions/0.1/analytics';
+import {Actions} from '#extensions/amp-subscriptions/0.1/actions';
+import {UrlBuilder} from '#extensions/amp-subscriptions/0.1/url-builder';
+import {WebLoginDialog} from '#extensions/amp-access/0.1/login-dialog';
 
 const LOCAL = 'local';
 const LOCAL_OPTS = {serviceId: LOCAL};

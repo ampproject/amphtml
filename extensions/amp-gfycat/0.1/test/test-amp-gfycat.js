@@ -1,4 +1,4 @@
-import '../amp-gfycat';
+import '#extensions/amp-gfycat/0.1/amp-gfycat';
 import {listenOncePromise} from '#utils/event-helper';
 
 import {VideoEvents} from '../../../../src/video-interface';

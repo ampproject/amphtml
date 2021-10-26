@@ -1,4 +1,4 @@
-import '../amp-springboard-player';
+import '#extensions/amp-springboard-player/0.1/amp-springboard-player';
 
 describes.realWin(
   'amp-springboard-player',

@@ -1,10 +1,13 @@
-import {Action, getStoreService} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
-import {LocalizedStringId} from '#service/localization/strings';
-import {createShadowRootWithStyle} from './utils';
-import {dict} from '#core/types/object';
 import {removeElement} from '#core/dom';
+import {dict} from '#core/types/object';
+
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {Action, getStoreService} from './amp-story-store-service';
 import {renderAsElement} from './simple-template';
+import {createShadowRootWithStyle} from './utils';
+
+import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 
 /** @const {string} Class for the continue anyway button */
 const CONTINUE_ANYWAY_BUTTON_CLASS = 'i-amphtml-continue-button';

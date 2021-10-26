@@ -1,13 +1,3 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {tryResolve} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isArray} from '#core/types';
-
-import {Services} from '#service';
-
-import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -23,7 +13,18 @@ import {
   meetsSizingCriteria,
   runCandidates,
   scan,
-} from '../amp-auto-lightbox';
+} from '#extensions/amp-auto-lightbox/0.1/amp-auto-lightbox';
+
+import {CommonSignals} from '#core/constants/common-signals';
+import {tryResolve} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {createElementWithAttributes} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isArray} from '#core/types';
+
+import {Services} from '#service';
+
+import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
 
 const TAG = 'amp-auto-lightbox';
 

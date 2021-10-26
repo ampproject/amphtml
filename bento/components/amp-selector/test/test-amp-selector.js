@@ -1,4 +1,4 @@
-import '../amp-selector';
+import '#bento/components/amp-selector/amp-selector';
 import {ActionTrust} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
 

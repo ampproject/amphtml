@@ -1,6 +1,7 @@
 import '#third_party/react-dates/bundle';
+import {DatesList} from '#extensions/amp-date-picker/0.1/dates-list';
+
 import {requireExternal} from '../../../../src/module';
-import {DatesList} from '../dates-list';
 
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');

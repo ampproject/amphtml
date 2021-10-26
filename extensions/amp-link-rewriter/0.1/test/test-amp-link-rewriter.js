@@ -1,6 +1,6 @@
-import {LinkRewriter} from '../link-rewriter';
-import {getConfigOpts} from '../config-options';
-import {getScopeElements} from '../scope';
+import {LinkRewriter} from '#extensions/amp-link-rewriter/0.1/link-rewriter';
+import {getConfigOpts} from '#extensions/amp-link-rewriter/0.1/config-options';
+import {getScopeElements} from '#extensions/amp-link-rewriter/0.1/scope';
 import helpersMaker from './test-helpers';
 
 describes.fakeWin(

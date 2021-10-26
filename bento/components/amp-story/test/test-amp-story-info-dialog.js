@@ -1,15 +1,17 @@
 import {
-  Action,
-  AmpStoryStoreService,
-  StateProperty,
-} from '../amp-story-store-service';
-import {
   DIALOG_VISIBLE_CLASS,
   InfoDialog,
   MOREINFO_VISIBLE_CLASS,
-} from '../amp-story-info-dialog';
-import {LocalizationService} from '#service/localization';
+} from '#bento/components/amp-story/amp-story-info-dialog';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '#bento/components/amp-story/amp-story-store-service';
+
 import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {

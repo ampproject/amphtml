@@ -1,5 +1,6 @@
+import localesObjs from '#bento/components/amp-story/_locales';
+
 import {LocalizedStringId} from '#service/localization/strings';
-import localesObjs from '../_locales';
 
 describes.fakeWin('amp-story-localization-strings', {amp: true}, () => {
   describe('localized strings', () => {

@@ -1,4 +1,4 @@
-import {LaterpayVendor} from '../laterpay-impl';
+import {LaterpayVendor} from '#extensions/amp-access-laterpay/0.2/laterpay-impl';
 
 const TAG = 'amp-access-laterpay';
 

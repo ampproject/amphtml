@@ -1,4 +1,4 @@
-import {JwtHelper, pemToBytes} from '../jwt';
+import {JwtHelper, pemToBytes} from '#extensions/amp-access/0.1/jwt';
 
 describes.sandboxed('JwtHelper', {}, (env) => {
   // Generated from https://jwt.io/#debugger

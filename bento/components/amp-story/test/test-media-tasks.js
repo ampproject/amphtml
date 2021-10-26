@@ -8,8 +8,9 @@ import {
   SwapOutOfDomTask,
   UnmuteTask,
   UpdateSourcesTask,
-} from '../media-tasks';
-import {Sources} from '../sources';
+} from '#bento/components/amp-story/media-tasks';
+import {Sources} from '#bento/components/amp-story/sources';
+
 import {toArray} from '#core/types/array';
 
 describes.realWin('media-tasks', {}, (env) => {

@@ -1,3 +1,5 @@
+import {AmpNextPage} from '#extensions/amp-next-page/0.1/amp-next-page';
+
 import {VisibilityState} from '#core/constants/visibility-state';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyle} from '#core/dom/style';
@@ -10,7 +12,6 @@ import {macroTask} from '#testing/helpers';
 
 import * as DocFetcher from '../../../../src/document-fetcher';
 import {getServicePromiseForDoc} from '../../../../src/service-helpers';
-import {AmpNextPage} from '../amp-next-page';
 
 const EXAMPLE_PAGE = `
     <header>Header</header>

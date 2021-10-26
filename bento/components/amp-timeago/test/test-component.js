@@ -1,10 +1,10 @@
 import {mount} from 'enzyme';
 
+import {BentoTimeago} from '#bento/components/amp-timeago/component';
+
 import * as Preact from '#preact';
 
 import {waitFor} from '#testing/helpers/service';
-
-import {BentoTimeago} from '../component';
 
 describes.realWin('BentoTimeago 1.0 preact component', {}, (env) => {
   function getTime(wrapper) {

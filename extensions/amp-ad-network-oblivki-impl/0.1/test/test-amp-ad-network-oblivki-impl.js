@@ -1,13 +1,13 @@
-import {createElementWithAttributes} from '#core/dom';
-
+import {AmpAdNetworkOblivkiImpl} from '#extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl';
+import {oblivkiIsA4AEnabled} from '#extensions/amp-ad-network-oblivki-impl/0.1/oblivki-a4a-config';
 import {
   AmpAdUIHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-ui';
+} from '#extensions/amp-ad/0.1/amp-ad-ui';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {AmpAdNetworkOblivkiImpl} from '../amp-ad-network-oblivki-impl';
-import {oblivkiIsA4AEnabled} from '../oblivki-a4a-config';
+} from '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+
+import {createElementWithAttributes} from '#core/dom';
 
 describes.realWin('oblivki-a4a-config', {amp: false}, (env) => {
   let win, doc;

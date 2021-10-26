@@ -1,13 +1,16 @@
-import {macroTask} from '#testing/helpers';
-
-import {CountPagesAlgorithm} from '../algorithm-count-pages';
-import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
-
 import {AmpStory} from '#bento/components/amp-story/amp-story';
 import {
   Action,
   getStoreService,
 } from '#bento/components/amp-story/amp-story-store-service';
+
+import {CountPagesAlgorithm} from '#extensions/amp-story-auto-ads/0.1/algorithm-count-pages';
+import {
+  InsertionState,
+  StoryAdPageManager,
+} from '#extensions/amp-story-auto-ads/0.1/story-ad-page-manager';
+
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
   let storeService;

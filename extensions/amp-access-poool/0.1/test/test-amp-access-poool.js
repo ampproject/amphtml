@@ -1,4 +1,4 @@
-import {PooolVendor} from '../poool-impl';
+import {PooolVendor} from '#extensions/amp-access-poool/0.1/poool-impl';
 
 describes.fakeWin(
   'PooolVendor',

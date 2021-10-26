@@ -1,4 +1,4 @@
-import '../amp-youtube';
+import '#bento/components/amp-youtube/amp-youtube';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';

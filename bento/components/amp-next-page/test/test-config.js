@@ -1,5 +1,5 @@
-import {Page} from '../page';
-import {validatePage} from '../utils';
+import {Page} from '#bento/components/amp-next-page/page';
+import {validatePage} from '#bento/components/amp-next-page/utils';
 
 describes.sandboxed('amp-next-page config', {}, () => {
   const documentUrl = 'https://example.com/parent';

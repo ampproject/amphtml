@@ -1,13 +1,14 @@
 import {done} from 'fetch-mock';
 
-import {getSourceUrl} from '../../../../../src/url';
-import {AmpViewerIntegration} from '../../amp-viewer-integration';
+import {AmpViewerIntegration} from '#extensions/amp-viewer-integration/0.1/amp-viewer-integration';
 import {
   Messaging,
   WindowPortEmulator,
   parseMessage,
-} from '../../messaging/messaging';
-import {ViewerForTesting} from '../../viewer-for-testing';
+} from '#extensions/amp-viewer-integration/0.1/messaging/messaging';
+import {ViewerForTesting} from '#extensions/amp-viewer-integration/0.1/viewer-for-testing';
+
+import {getSourceUrl} from '../../../../../src/url';
 
 describes.sandboxed('amp-viewer-integration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';

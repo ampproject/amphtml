@@ -1,12 +1,18 @@
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryGridLayer} from '../amp-story-grid-layer';
-import {AmpStoryPage} from '../amp-story-page';
-import {MediaType} from '../media-pool';
-import {Services} from '#service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryGridLayer} from '#bento/components/amp-story/amp-story-grid-layer';
+import {AmpStoryPage} from '#bento/components/amp-story/amp-story-page';
+import {
+  Action,
+  AmpStoryStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {MediaType} from '#bento/components/amp-story/media-pool';
+
 import {setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+
 import {CSS} from '../../../../build/amp-story-1.0.css';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   let win;

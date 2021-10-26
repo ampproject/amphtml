@@ -4,9 +4,12 @@ import {
   PURPOSE_CONSENT_STATE,
   constructConsentInfo,
   constructMetadata,
-} from '../consent-info';
+} from '#extensions/amp-consent/0.1/consent-info';
 import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
-import {ConsentUI, consentUiClasses} from '../consent-ui';
+import {
+  ConsentUI,
+  consentUiClasses,
+} from '#extensions/amp-consent/0.1/consent-ui';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {elementByTag} from '#core/dom/query';

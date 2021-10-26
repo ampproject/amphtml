@@ -1,8 +1,8 @@
 import {date, select, withKnobs} from '@storybook/addon-knobs';
 
-import * as Preact from '#preact';
+import {BentoDateDisplay} from '#bento/components/amp-date-display/component';
 
-import {BentoDateDisplay} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'DateDisplay',

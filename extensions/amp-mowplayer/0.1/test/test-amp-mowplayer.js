@@ -1,4 +1,4 @@
-import '../amp-mowplayer';
+import '#extensions/amp-mowplayer/0.1/amp-mowplayer';
 import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';

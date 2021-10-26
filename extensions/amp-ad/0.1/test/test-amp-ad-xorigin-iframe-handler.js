@@ -1,5 +1,5 @@
-import {AmpAdUIHandler} from '../amp-ad-ui';
-import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
+import {AmpAdUIHandler} from '#extensions/amp-ad/0.1/amp-ad-ui';
+import {AmpAdXOriginIframeHandler} from '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';

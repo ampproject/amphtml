@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {BentoStreamGallery} from '../component';
 import {mount} from 'enzyme';
+
+import {BentoStreamGallery} from '#bento/components/amp-stream-gallery/component';
+
+import * as Preact from '#preact';
 
 describes.sandboxed('StreamGallery preact component', {}, () => {
   it('should render BentoBaseCarousel', () => {

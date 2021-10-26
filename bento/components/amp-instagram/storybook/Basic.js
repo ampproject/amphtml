@@ -1,12 +1,12 @@
-import * as Preact from '#preact';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../../../amp-accordion/1.0/component';
-import {BentoInstagram} from '../component';
+} from '#bento/components/amp-accordion/component';
+import {BentoInstagram} from '#bento/components/amp-instagram/component';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'Instagram',

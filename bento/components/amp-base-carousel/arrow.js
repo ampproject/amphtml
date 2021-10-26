@@ -1,7 +1,9 @@
+import objstr from 'obj-str';
+
 import * as Preact from '#preact';
 import {useCallback} from '#preact';
+
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 /**
  * @param {!BentoBaseCarouselDef.ArrowProps} props

@@ -2,8 +2,8 @@ import {
   Action,
   StateProperty,
   getStoreService,
-} from '../amp-story-store-service';
-import {AmpStoryViewerMessagingHandler} from '../amp-story-viewer-messaging-handler';
+} from '#bento/components/amp-story/amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from '#bento/components/amp-story/amp-story-viewer-messaging-handler';
 
 describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
   let fakeViewerService;

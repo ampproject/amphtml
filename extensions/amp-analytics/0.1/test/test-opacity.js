@@ -1,4 +1,4 @@
-import {getMinOpacity} from '../opacity';
+import {getMinOpacity} from '#extensions/amp-analytics/0.1/opacity';
 
 describes.realWin('getMinOpacity', {amp: true}, (env) => {
   let win;

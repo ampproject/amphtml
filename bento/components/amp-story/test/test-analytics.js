@@ -1,5 +1,9 @@
-import {Action, getStoreService} from '../amp-story-store-service';
-import {getAnalyticsService} from '../story-analytics';
+import {
+  Action,
+  getStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {getAnalyticsService} from '#bento/components/amp-story/story-analytics';
+
 import {installDocService} from '#service/ampdoc-impl';
 
 describes.fakeWin('amp-story analytics', {}, (env) => {

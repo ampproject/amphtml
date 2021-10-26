@@ -1,10 +1,10 @@
 import * as cookie from '../../../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {CookieWriter} from '../cookie-writer';
+import {CookieWriter} from '#extensions/amp-analytics/0.1/cookie-writer';
 import {dict} from '#core/types/object';
-import {installLinkerReaderService} from '../linker-reader';
-import {installSessionServiceForTesting} from '../session-manager';
-import {installVariableServiceForTesting} from '../variables';
+import {installLinkerReaderService} from '#extensions/amp-analytics/0.1/linker-reader';
+import {installSessionServiceForTesting} from '#extensions/amp-analytics/0.1/session-manager';
+import {installVariableServiceForTesting} from '#extensions/amp-analytics/0.1/variables';
 import {stubService} from '#testing/helpers/service';
 
 const TAG = '[amp-analytics/cookie-writer]';

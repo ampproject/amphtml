@@ -1,4 +1,4 @@
-import '../amp-recaptcha-input';
+import '#extensions/amp-recaptcha-input/0.1/amp-recaptcha-input';
 import {createElementWithAttributes} from '#core/dom';
 
 describes.realWin(

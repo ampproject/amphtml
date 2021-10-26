@@ -1,6 +1,6 @@
-import {Services} from '#service';
+import {getAdNetworkConfig} from '#extensions/amp-auto-ads/0.1/ad-network-config';
 
-import {getAdNetworkConfig} from '../ad-network-config';
+import {Services} from '#service';
 
 describes.realWin(
   'denakop-network-config',

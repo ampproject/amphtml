@@ -1,4 +1,4 @@
-import '../amp-reach-player';
+import '#extensions/amp-reach-player/0.1/amp-reach-player';
 
 describes.realWin(
   'amp-reach-player',

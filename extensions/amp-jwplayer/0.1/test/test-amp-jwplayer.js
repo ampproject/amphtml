@@ -1,4 +1,4 @@
-import '../amp-jwplayer';
+import '#extensions/amp-jwplayer/0.1/amp-jwplayer';
 import * as fullscreen from '#core/dom/fullscreen';
 import {htmlFor} from '#core/dom/static-template';
 

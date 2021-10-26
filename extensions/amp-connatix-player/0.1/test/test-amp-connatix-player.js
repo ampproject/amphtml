@@ -1,4 +1,4 @@
-import '../amp-connatix-player';
+import '#extensions/amp-connatix-player/0.1/amp-connatix-player';
 
 describes.realWin(
   'amp-connatix-player',

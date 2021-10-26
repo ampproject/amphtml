@@ -1,5 +1,5 @@
-import {AmpViewerIntegration} from '../../amp-viewer-integration';
-import {WebviewViewerForTesting} from '../../webview-viewer-for-testing';
+import {AmpViewerIntegration} from '#extensions/amp-viewer-integration/0.1/amp-viewer-integration';
+import {WebviewViewerForTesting} from '#extensions/amp-viewer-integration/0.1/webview-viewer-for-testing';
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';

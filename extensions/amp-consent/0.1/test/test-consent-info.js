@@ -10,7 +10,7 @@ import {
   getStoredConsentInfo,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
-} from '../consent-info';
+} from '#extensions/amp-consent/0.1/consent-info';
 import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {dict} from '#core/types/object';
 

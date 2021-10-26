@@ -1,7 +1,7 @@
-import helpersFactory from './helpers';
+import {WAYPOINT_BASE_URL} from '#extensions/amp-skimlinks/0.1/constants';
+import {getAmpSkimlinksOptions} from '#extensions/amp-skimlinks/0.1/skim-options';
 
-import {WAYPOINT_BASE_URL} from '../constants';
-import {getAmpSkimlinksOptions} from '../skim-options';
+import helpersFactory from './helpers';
 
 describes.fakeWin(
   'Skim Options',

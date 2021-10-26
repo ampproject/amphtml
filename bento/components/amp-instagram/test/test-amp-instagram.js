@@ -1,4 +1,4 @@
-import '../amp-instagram';
+import '#bento/components/amp-instagram/amp-instagram';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';

@@ -3,8 +3,8 @@ import {
   AmpStoryStoreService,
 } from '#bento/components/amp-story/amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractiveResultsDetailed} from '../amp-story-interactive-results-detailed';
-import {InteractiveType} from '../amp-story-interactive-abstract';
+import {AmpStoryInteractiveResultsDetailed} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-results-detailed';
+import {InteractiveType} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';

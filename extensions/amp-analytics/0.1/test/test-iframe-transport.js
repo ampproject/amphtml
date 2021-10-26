@@ -1,7 +1,7 @@
 import {
   IframeTransport,
   getIframeTransportScriptUrlForTesting,
-} from '../iframe-transport';
+} from '#extensions/amp-analytics/0.1/iframe-transport';
 import {addParamsToUrl} from '../../../../src/url';
 import {expectPostMessage} from '#testing/iframe';
 import {urls} from '../../../../src/config';

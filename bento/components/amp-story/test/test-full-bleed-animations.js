@@ -2,15 +2,17 @@
  * @fileoverview Tests full-bleed animations like panning and zooming.
  */
 
-import {AmpStory} from '../amp-story';
-import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import {AmpStory} from '#bento/components/amp-story/amp-story';
+import {AmpStoryStoreService} from '#bento/components/amp-story/amp-story-store-service';
+import {presets} from '#bento/components/amp-story/animation-presets';
 import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
-} from '../animation-presets-utils';
-import {presets} from '../animation-presets';
+} from '#bento/components/amp-story/animation-presets-utils';
+
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

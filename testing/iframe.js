@@ -1,3 +1,6 @@
+import {BindEvents} from '#extensions/amp-bind/0.1/bind-events';
+import {FormEvents} from '#extensions/amp-form/0.1/form-events';
+
 import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
 import {AmpEvents} from '#core/constants/amp-events';
 
@@ -17,8 +20,6 @@ import {FakeLocation} from './fake-dom';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
-import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
 
 let iframeCount = 0;

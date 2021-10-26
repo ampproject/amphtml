@@ -1,5 +1,5 @@
-import {addParamsToUrl} from '../../src/url';
-import {VideoEvents} from '../../src/video-interface';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 /**
  * Maps events coming from the Brightcove frame to events to be dispatched from the

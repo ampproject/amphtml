@@ -1,4 +1,4 @@
-import '../amp-soundcloud';
+import '#extensions/amp-soundcloud/0.1/amp-soundcloud';
 
 describes.realWin(
   'amp-soundcloud',

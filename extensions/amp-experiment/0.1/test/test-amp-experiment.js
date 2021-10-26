@@ -1,9 +1,9 @@
+import {AmpExperiment} from '#extensions/amp-experiment/0.1/amp-experiment';
+import * as variant from '#extensions/amp-experiment/0.1/variant';
+
 import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
-
-import {AmpExperiment} from '../amp-experiment';
-import * as variant from '../variant';
 
 describes.realWin(
   'amp-experiment',

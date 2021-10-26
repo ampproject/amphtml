@@ -1,7 +1,8 @@
+import {assertConfig} from '#extensions/amp-next-page/0.1/config';
+
 import {Services} from '#service';
 
 import {parseUrlDeprecated} from '../../../../src/url';
-import {assertConfig} from '../config';
 
 describes.sandboxed('amp-next-page assertConfig', {}, (env) => {
   const documentUrl = 'https://example.com/parent';

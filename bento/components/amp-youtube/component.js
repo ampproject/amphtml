@@ -1,3 +1,5 @@
+import {VideoIframe} from '#bento/components/amp-video/video-iframe';
+
 import {dispatchCustomEvent} from '#core/dom';
 import {dict} from '#core/types/object';
 
@@ -8,7 +10,6 @@ import {forwardRef} from '#preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status

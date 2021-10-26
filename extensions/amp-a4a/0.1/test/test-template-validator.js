@@ -1,14 +1,17 @@
-import {utf8Encode} from '#core/types/string/bytes';
-
-import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-
-import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
+import {getAmpAdTemplateHelper} from '#extensions/amp-a4a/0.1/amp-ad-template-helper';
+import {
+  AdResponseType,
+  ValidatorResult,
+} from '#extensions/amp-a4a/0.1/amp-ad-type-defs';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
-} from '../template-validator';
+} from '#extensions/amp-a4a/0.1/template-validator';
+
+import {utf8Encode} from '#core/types/string/bytes';
+
+import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 
 const realWinConfig = {
   amp: {},

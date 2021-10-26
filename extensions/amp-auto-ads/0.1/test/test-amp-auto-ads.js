@@ -1,5 +1,5 @@
-import '../../../amp-ad/0.1/amp-ad';
-import '../amp-auto-ads';
+import '#extensions/amp-ad/0.1/amp-ad';
+import '#extensions/amp-auto-ads/0.1/amp-auto-ads';
 import {getA4ARegistry} from '#ads/_a4a-config';
 
 import {waitForChild} from '#core/dom';

@@ -1,4 +1,4 @@
-import '../amp-nested-menu';
+import '#extensions/amp-nested-menu/0.1/amp-nested-menu';
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {Keys} from '#core/constants/key-codes';

@@ -1,4 +1,4 @@
-import '../amp-ooyala-player';
+import '#extensions/amp-ooyala-player/0.1/amp-ooyala-player';
 import * as fullscreen from '#core/dom/fullscreen';
 
 describes.realWin(

@@ -1,4 +1,4 @@
-import '../amp-twitter';
+import '#extensions/amp-twitter/0.1/amp-twitter';
 import {cleanupTweetId_, twitter} from '#3p/twitter';
 
 describes.realWin(

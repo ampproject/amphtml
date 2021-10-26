@@ -1,5 +1,6 @@
+import {Messaging} from '#extensions/amp-viewer-integration/0.1/messaging/messaging';
+
 import {getWinOrigin, serializeQueryString} from '../../../../../src/url';
-import {Messaging} from '../../messaging/messaging';
 
 describes.sandboxed('AmpViewerMessagingIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';

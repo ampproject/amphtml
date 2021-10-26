@@ -1,4 +1,4 @@
-import '../amp-yotpo';
+import '#extensions/amp-yotpo/0.1/amp-yotpo';
 import {yotpo} from '#3p/yotpo';
 
 describes.realWin(

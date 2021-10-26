@@ -1,6 +1,6 @@
-import {RelativePositions, layoutRectLtwh} from '#core/dom/layout/rect';
+import {AmpVisibilityObserver} from '#extensions/amp-position-observer/0.1/amp-position-observer';
 
-import {AmpVisibilityObserver} from '../amp-position-observer';
+import {RelativePositions, layoutRectLtwh} from '#core/dom/layout/rect';
 
 /**
  * Functional tests that create:

@@ -6,12 +6,12 @@ import {isExperimentOn} from '#experiments';
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
+import {BUBBLE_MESSAGE_EVENTS} from './amp-video-iframe-api';
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {postMessageWhenAvailable} from '../../../src/iframe-video';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @const {string} */
 const TAG = 'amp-video-iframe';

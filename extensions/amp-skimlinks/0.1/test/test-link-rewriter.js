@@ -1,17 +1,18 @@
+import {
+  ORIGINAL_URL_ATTRIBUTE,
+  PRIORITY_META_TAG_NAME,
+  EVENTS as linkRewriterEvents,
+} from '#extensions/amp-skimlinks/0.1/link-rewriter/constants';
+import {LinkReplacementCache} from '#extensions/amp-skimlinks/0.1/link-rewriter/link-replacement-cache';
+import {LinkRewriter} from '#extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter';
+import {LinkRewriterManager} from '#extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+import {TwoStepsResponse} from '#extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response';
+
 import {AmpEvents} from '#core/constants/amp-events';
 
 import {createCustomEvent} from '#utils/event-helper';
 
 import * as chunkModule from '../../../../src/chunk';
-import {
-  ORIGINAL_URL_ATTRIBUTE,
-  PRIORITY_META_TAG_NAME,
-  EVENTS as linkRewriterEvents,
-} from '../link-rewriter/constants';
-import {LinkReplacementCache} from '../link-rewriter/link-replacement-cache';
-import {LinkRewriter} from '../link-rewriter/link-rewriter';
-import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
-import {TwoStepsResponse} from '../link-rewriter/two-steps-response';
 
 const CLICK_EVENT = {
   type: 'click',

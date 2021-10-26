@@ -1,5 +1,5 @@
-import '../../../amp-ad/0.1/amp-ad';
-import '../amp-sticky-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
+import '#bento/components/amp-sticky-ad/amp-sticky-ad';
 import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';

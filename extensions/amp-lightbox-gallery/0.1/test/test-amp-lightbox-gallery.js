@@ -1,4 +1,4 @@
-import {installLightboxGallery} from '../amp-lightbox-gallery';
+import {installLightboxGallery} from '#extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';
 

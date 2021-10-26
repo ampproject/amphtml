@@ -1,4 +1,4 @@
-import '../amp-youtube';
+import '#extensions/amp-youtube/0.1/amp-youtube';
 import {Services} from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';

@@ -1,9 +1,9 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {dev} from '#utils/log';
+import {AccessIframeAdapter} from '#extensions/amp-access/0.1/amp-access-iframe';
+import {Messenger} from '#extensions/amp-access/0.1/iframe-api/messenger';
 
-import {AccessIframeAdapter} from '../amp-access-iframe';
-import {Messenger} from '../iframe-api/messenger';
+import {dev} from '#utils/log';
 
 describes.fakeWin(
   'AccessIframeAdapter',

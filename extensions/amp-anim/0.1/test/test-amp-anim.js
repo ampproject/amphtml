@@ -1,4 +1,4 @@
-import {AmpAnim, SRC_PLACEHOLDER} from '../amp-anim';
+import {AmpAnim, SRC_PLACEHOLDER} from '#extensions/amp-anim/0.1/amp-anim';
 
 const EXAMPLE_SRCSET = `https://media.giphy.com/media/yFQ0ywscgobJK/giphy.gif 1282w,
 https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif 1923w`;

@@ -1,11 +1,14 @@
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {devAssert} from '#utils/log';
+
+import {getLocalizationService} from './amp-story-localization-service';
 import {Action, getStoreService} from './amp-story-store-service';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '#service/localization/strings';
-import {devAssert} from '#utils/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 
 /**
  * @enum {string}

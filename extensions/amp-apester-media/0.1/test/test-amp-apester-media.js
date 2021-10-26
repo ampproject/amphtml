@@ -1,4 +1,4 @@
-import '../amp-apester-media';
+import '#extensions/amp-apester-media/0.1/amp-apester-media';
 import {Services} from '#service';
 
 describes.realWin(

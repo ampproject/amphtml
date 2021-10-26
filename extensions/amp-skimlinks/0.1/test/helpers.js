@@ -1,10 +1,11 @@
+import {AmpSkimlinks} from '#extensions/amp-skimlinks/0.1/amp-skimlinks';
+import {Tracking} from '#extensions/amp-skimlinks/0.1/tracking';
+
 import {Services} from '#service';
 
 import {DEFAULT_SKIM_OPTIONS} from './constants';
 
 import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
-import {AmpSkimlinks} from '../amp-skimlinks';
-import {Tracking} from '../tracking';
 
 const helpersFactory = (env) => {
   const {win} = env;

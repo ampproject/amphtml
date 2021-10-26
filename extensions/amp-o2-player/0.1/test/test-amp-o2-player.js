@@ -1,4 +1,4 @@
-import '../amp-o2-player';
+import '#extensions/amp-o2-player/0.1/amp-o2-player';
 import {MessageType} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 

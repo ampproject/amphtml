@@ -1,7 +1,7 @@
-import '../../../amp-mustache/0.2/amp-mustache';
-import {Xhr} from '#service/xhr-impl';
+import '#extensions/amp-mustache/0.2/amp-mustache';
+import {AmpAdTemplateHelper} from '#extensions/amp-a4a/0.1/amp-ad-template-helper';
 
-import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
+import {Xhr} from '#service/xhr-impl';
 
 describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   const cdnUrl =

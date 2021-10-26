@@ -2,7 +2,10 @@ import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoEvents} from '../../../src/video-interface';
-import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
+import {
+  BRIGHTCOVE_EVENTS,
+  getBrightcoveIframeSrc,
+} from '#bento/components/amp-brightcove/brightcove-api';
 import {
   createFrameFor,
   isJsonOrObj,

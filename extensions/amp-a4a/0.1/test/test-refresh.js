@@ -1,12 +1,12 @@
-import {Services} from '#service';
-
 import {
   DATA_ATTR_NAME,
   DATA_MANAGER_ID_NAME,
   METATAG_NAME,
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
-} from '../refresh-manager';
+} from '#extensions/amp-a4a/0.1/refresh-manager';
+
+import {Services} from '#service';
 
 describes.sandboxed('refresh', {}, (env) => {
   let mockA4a;

@@ -1,9 +1,9 @@
 import {withAmp} from '@ampproject/storybook-addon';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 
-import * as Preact from '#preact';
+import {VideoElementWithActions} from '#bento/components/amp-video/storybook/_helpers';
 
-import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-youtube-1_0',

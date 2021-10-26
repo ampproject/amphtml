@@ -1,7 +1,7 @@
-import {getResourceTiming} from '../resource-timing';
-import {installLinkerReaderService} from '../linker-reader';
-import {installSessionServiceForTesting} from '../session-manager';
-import {installVariableServiceForTesting} from '../variables';
+import {getResourceTiming} from '#extensions/amp-analytics/0.1/resource-timing';
+import {installLinkerReaderService} from '#extensions/amp-analytics/0.1/linker-reader';
+import {installSessionServiceForTesting} from '#extensions/amp-analytics/0.1/session-manager';
+import {installVariableServiceForTesting} from '#extensions/amp-analytics/0.1/variables';
 
 /**
  * Returns a new, pre-filled resourceTimingSpec.

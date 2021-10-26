@@ -1,19 +1,22 @@
 import * as utilsStory from '#utils/story';
-import {Entitlement, GrantReason} from '../entitlement';
-import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
-import {LocalSubscriptionRemotePlatform} from '../local-subscription-platform-remote';
+import {
+  Entitlement,
+  GrantReason,
+} from '#extensions/amp-subscriptions/0.1/entitlement';
+import {LocalSubscriptionIframePlatform} from '#extensions/amp-subscriptions/0.1/local-subscription-platform-iframe';
+import {LocalSubscriptionRemotePlatform} from '#extensions/amp-subscriptions/0.1/local-subscription-platform-remote';
 import {
   PageConfig,
   PageConfigResolver,
 } from '#third_party/subscriptions-project/config';
-import {PlatformStore} from '../platform-store';
-import {ServiceAdapter} from '../service-adapter';
+import {PlatformStore} from '#extensions/amp-subscriptions/0.1/platform-store';
+import {ServiceAdapter} from '#extensions/amp-subscriptions/0.1/service-adapter';
 import {Services} from '#service';
-import {SubscriptionAnalyticsEvents} from '../analytics';
-import {SubscriptionPlatform} from '../subscription-platform';
-import {SubscriptionService} from '../amp-subscriptions';
-import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
-import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
+import {SubscriptionAnalyticsEvents} from '#extensions/amp-subscriptions/0.1/analytics';
+import {SubscriptionPlatform} from '#extensions/amp-subscriptions/0.1/subscription-platform';
+import {SubscriptionService} from '#extensions/amp-subscriptions/0.1/amp-subscriptions';
+import {ViewerSubscriptionPlatform} from '#extensions/amp-subscriptions/0.1/viewer-subscription-platform';
+import {localSubscriptionPlatformFactory} from '#extensions/amp-subscriptions/0.1/local-subscription-platform';
 
 describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   let win;

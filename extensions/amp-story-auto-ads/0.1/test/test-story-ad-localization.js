@@ -1,4 +1,7 @@
-import {CtaTypes, StoryAdLocalization} from '../story-ad-localization';
+import {
+  CtaTypes,
+  StoryAdLocalization,
+} from '#extensions/amp-story-auto-ads/0.1/story-ad-localization';
 
 describes.realWin('amp-story-auto-ads:localization', {amp: true}, (env) => {
   describe('story ad localization', () => {

@@ -1,4 +1,4 @@
-import {AmpCacheUrlService} from '../amp-cache-url';
+import {AmpCacheUrlService} from '#extensions/amp-cache-url/0.1/amp-cache-url';
 
 describes.fakeWin(
   'amp-cache-url',

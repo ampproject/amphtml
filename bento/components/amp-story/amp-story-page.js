@@ -8,64 +8,68 @@
  * </amp-story-page>
  * </code>
  */
+import {AmpEvents} from '#core/constants/amp-events';
+import {CommonSignals} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
+import {addAttributesToElement, iterateCursor} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {Layout} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
+import {toArray} from '#core/types/array';
+import {debounce} from '#core/types/function';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {
   AFFILIATE_LINK_SELECTOR,
   AmpStoryAffiliateLink,
 } from './amp-story-affiliate-link';
-import {
-  Action,
-  StateProperty,
-  UIType,
-  getStoreService,
-} from './amp-story-store-service';
-import {AdvancementConfig} from './page-advancement';
-import {AmpEvents} from '#core/constants/amp-events';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
   EXPANDABLE_COMPONENTS,
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
-import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Deferred} from '#core/data-structures/promise';
-import {EventType, dispatch} from './events';
-import {Layout} from '#core/dom/layout';
-import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '#service/localization/strings';
-import {MediaPool} from './media-pool';
-import {Services} from '#service';
-import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
-import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
-import {addAttributesToElement, iterateCursor} from '#core/dom';
-import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
-import {debounce} from '#core/types/function';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {getAmpdoc} from '../../../src/service-helpers';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
+import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
+import {
+  Action,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
+import {AnimationManager, hasAnimations} from './animation';
+import {upgradeBackgroundAudio} from './audio';
+import {EventType, dispatch} from './events';
+import {LoadingSpinner} from './loading-spinner';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
+import {MediaPool} from './media-pool';
+import {AdvancementConfig} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
-import {listen, listenOnce} from '#utils/event-helper';
-import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {toggle} from '#core/dom/style';
-import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 
-import {toArray} from '#core/types/array';
-import {upgradeBackgroundAudio} from './audio';
+import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
+import {getAmpdoc} from '../../../src/service-helpers';
+import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.

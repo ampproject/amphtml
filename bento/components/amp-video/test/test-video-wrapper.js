@@ -1,10 +1,13 @@
+import {mount} from 'enzyme';
+
+import {VideoWrapper} from '#bento/components/amp-video/component';
+
+import {omit} from '#core/types/object';
+
 import * as Preact from '#preact';
-import {VideoWrapper} from '../component';
-import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {forwardRef} from '#preact/compat';
-import {mount} from 'enzyme';
-import {omit} from '#core/types/object';
+import {WithAmpContext} from '#preact/context';
 
 import {useStyles as useAutoplayStyles} from '../autoplay.jss';
 

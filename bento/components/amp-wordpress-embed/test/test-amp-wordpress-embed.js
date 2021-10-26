@@ -1,4 +1,4 @@
-import '../amp-wordpress-embed';
+import '#bento/components/amp-wordpress-embed/amp-wordpress-embed';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';

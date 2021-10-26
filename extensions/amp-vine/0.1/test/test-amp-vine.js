@@ -1,4 +1,4 @@
-import '../amp-vine';
+import '#extensions/amp-vine/0.1/amp-vine';
 
 describes.realWin(
   'amp-vine',

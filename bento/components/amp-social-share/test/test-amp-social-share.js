@@ -1,4 +1,4 @@
-import '../amp-social-share';
+import '#bento/components/amp-social-share/amp-social-share';
 import {waitForChildPromise} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';

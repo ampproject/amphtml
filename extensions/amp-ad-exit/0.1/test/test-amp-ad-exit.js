@@ -1,12 +1,16 @@
+import {
+  AmpAdExit,
+  getAttributionReportingStatus,
+} from '#extensions/amp-ad-exit/0.1/amp-ad-exit';
+import {FilterType} from '#extensions/amp-ad-exit/0.1/filters/filter';
+import {IFRAME_TRANSPORTS} from '#extensions/amp-analytics/0.1/iframe-transport-vendors';
+
 import {toggleExperiment} from '#experiments';
 
 import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 
 import {setParentWindow} from '../../../../src/service-helpers';
-import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
-import {AmpAdExit, getAttributionReportingStatus} from '../amp-ad-exit';
-import {FilterType} from '../filters/filter';
 
 const TEST_3P_VENDOR = '3p-vendor';
 

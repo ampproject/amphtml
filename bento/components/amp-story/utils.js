@@ -1,20 +1,23 @@
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {setStyle, toggle} from '#core/dom/style';
+
 import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
 import {StateProperty} from './amp-story-store-service';
+
+import {getMode} from '../../../src/mode';
+import {createShadowRoot} from '../../../src/shadow-embed';
 import {
   assertHttpsUrl,
   getSourceOrigin,
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {dev, user, userAssert} from '#utils/log';
-import {getMode} from '../../../src/mode';
-
-import {setStyle, toggle} from '#core/dom/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

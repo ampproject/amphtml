@@ -1,4 +1,4 @@
-import {crc32} from '../crc32';
+import {crc32} from '#extensions/amp-consent/0.1/crc32';
 
 const testVectors = [
   {

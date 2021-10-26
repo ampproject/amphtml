@@ -1,10 +1,13 @@
-import {Action, getStoreService} from './amp-story-store-service';
 import {CommonSignals} from '#core/constants/common-signals';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 import {lastChildElement} from '#core/dom/query';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {userAssert} from '#utils/log';
+
+import {Action, getStoreService} from './amp-story-store-service';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to

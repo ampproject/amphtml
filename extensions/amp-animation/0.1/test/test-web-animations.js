@@ -1,3 +1,7 @@
+import {NativeWebAnimationRunner} from '#extensions/amp-animation/0.1/runners/native-web-animation-runner';
+import {WebAnimationPlayState} from '#extensions/amp-animation/0.1/web-animation-types';
+import {Builder} from '#extensions/amp-animation/0.1/web-animations';
+
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
@@ -7,10 +11,6 @@ import {Services} from '#service';
 import {user} from '#utils/log';
 
 import {poll} from '#testing/iframe';
-
-import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
-import {WebAnimationPlayState} from '../web-animation-types';
-import {Builder} from '../web-animations';
 
 describes.realWin('MeasureScanner', {amp: 1}, (env) => {
   let win, doc;

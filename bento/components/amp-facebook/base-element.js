@@ -1,6 +1,8 @@
-import {BentoFacebook} from './component';
-import {PreactBaseElement} from '#preact/base-element';
 import {dashToUnderline} from '#core/types/string';
+
+import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoFacebook} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 

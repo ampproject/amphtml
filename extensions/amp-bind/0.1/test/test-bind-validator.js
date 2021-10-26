@@ -1,4 +1,4 @@
-import {BindValidator} from '../bind-validator';
+import {BindValidator} from '#extensions/amp-bind/0.1/bind-validator';
 
 describes.sandboxed('BindValidator (allowUrlProperties=true)', {}, () => {
   let val;

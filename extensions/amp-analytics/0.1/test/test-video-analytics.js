@@ -1,5 +1,9 @@
-import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {AnalyticsEvent, AnalyticsEventType, VideoEventTracker} from '../events';
+import {AmpdocAnalyticsRoot} from '#extensions/amp-analytics/0.1/analytics-root';
+import {
+  AnalyticsEvent,
+  AnalyticsEventType,
+  VideoEventTracker,
+} from '#extensions/amp-analytics/0.1/events';
 import {dispatchCustomEvent} from 'src/core/dom/index';
 import {macroTask} from '#testing/helpers';
 

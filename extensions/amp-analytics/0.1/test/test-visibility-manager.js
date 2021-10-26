@@ -4,7 +4,7 @@ import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
   provideVisibilityManager,
-} from '../visibility-manager';
+} from '#extensions/amp-analytics/0.1/visibility-manager';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {layoutRectLtwh, rectIntersection} from '#core/dom/layout/rect';
 import {setParentWindow} from '../../../../src/service-helpers';

@@ -1,4 +1,7 @@
 import '#service/real-time-config/real-time-config-impl';
+import {AmpA4A} from '#extensions/amp-a4a/0.1/amp-a4a';
+import {RefreshManager} from '#extensions/amp-a4a/0.1/refresh-manager';
+
 import {Deferred} from '#core/data-structures/promise';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
@@ -15,8 +18,6 @@ import {dev} from '#utils/log';
 import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-valueimpression-impl';

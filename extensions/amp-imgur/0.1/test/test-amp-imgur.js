@@ -1,4 +1,4 @@
-import '../amp-imgur';
+import '#extensions/amp-imgur/0.1/amp-imgur';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
 
 import {user} from '#utils/log';

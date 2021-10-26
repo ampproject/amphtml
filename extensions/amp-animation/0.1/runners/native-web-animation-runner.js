@@ -1,11 +1,3 @@
-import {Observable} from '#core/data-structures/observable';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-
-import {devAssert} from '#utils/log';
-
-import {AnimationRunner} from './animation-runner';
-import {getTotalDuration} from './utils';
-
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -17,7 +9,15 @@ import {
   WebKeyframesDef,
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
-} from '../web-animation-types';
+} from '#extensions/amp-animation/0.1/web-animation-types';
+
+import {Observable} from '#core/data-structures/observable';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+
+import {devAssert} from '#utils/log';
+
+import {AnimationRunner} from './animation-runner';
+import {getTotalDuration} from './utils';
 
 /**
  */

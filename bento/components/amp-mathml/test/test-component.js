@@ -1,10 +1,10 @@
 import {mount} from 'enzyme';
 
+import {BentoMathml} from '#bento/components/amp-mathml/component';
+
 import * as Preact from '#preact';
 
 import {QUADRATIC_FORMULA} from './utils';
-
-import {BentoMathml} from '../component';
 
 describes.sandboxed('BentoMathml preact component v1.0', {}, (env) => {
   it('should render', async () => {

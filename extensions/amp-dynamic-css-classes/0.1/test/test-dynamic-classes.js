@@ -1,4 +1,4 @@
-import {referrers_} from '../amp-dynamic-css-classes';
+import {referrers_} from '#extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes';
 
 describes.sandboxed('amp-dynamic-css-classes', {}, () => {
   describe('referrers_', () => {

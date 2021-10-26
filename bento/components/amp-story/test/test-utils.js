@@ -1,10 +1,10 @@
-import {StateProperty} from '../amp-story-store-service';
+import {StateProperty} from '#bento/components/amp-story/amp-story-store-service';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
   shouldShowStoryUrlInfo,
   timeStrToMillis,
-} from '../utils';
+} from '#bento/components/amp-story/utils';
 
 describes.fakeWin('amp-story utils', {}, (env) => {
   describe('timeStrToMillis', () => {

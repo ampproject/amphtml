@@ -1,3 +1,5 @@
+import {VideoIframe} from '#bento/components/amp-video/video-iframe';
+
 import {dispatchCustomEvent} from '#core/dom';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
@@ -9,7 +11,6 @@ import {forwardRef} from '#preact/compat';
 import {JwplayerToDom, makeJwplayerIframeSrc} from './jwplayer-api';
 
 import {isJsonOrObj, objOrParseJson} from '../../../src/iframe-video';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
 const JWPLAYER_ORIGIN = /https:\/\/content\.jwplatform\.com/;
 

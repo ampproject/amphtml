@@ -1,4 +1,4 @@
-import '../amp-dynamic-css-classes';
+import '#extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes';
 import {Services} from '#service';
 import {vsyncForTesting} from '#service/vsync-impl';
 

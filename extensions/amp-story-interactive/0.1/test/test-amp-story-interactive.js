@@ -2,7 +2,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractive,
   InteractiveType,
-} from '../amp-story-interactive-abstract';
+} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-abstract';
 import {AmpStoryRequestService} from '#bento/components/amp-story/amp-story-request-service';
 import {
   AmpStoryStoreService,
@@ -23,7 +23,7 @@ import {
   getMockScrambledData,
 } from './helpers';
 import {dict} from '#core/types/object';
-import {getBackendSpecs} from '../interactive-disclaimer';
+import {getBackendSpecs} from '#extensions/amp-story-interactive/0.1/interactive-disclaimer';
 import {htmlFor} from '#core/dom/static-template';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments/';

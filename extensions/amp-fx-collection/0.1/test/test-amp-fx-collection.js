@@ -1,6 +1,6 @@
-import {createElementWithAttributes} from '#core/dom';
+import {AmpFxCollection} from '#extensions/amp-fx-collection/0.1/amp-fx-collection';
 
-import {AmpFxCollection} from '../amp-fx-collection';
+import {createElementWithAttributes} from '#core/dom';
 
 describes.fakeWin(
   'amp-fx-collection',

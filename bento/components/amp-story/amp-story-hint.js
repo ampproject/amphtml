@@ -1,15 +1,18 @@
-import {CSS} from '../../../build/amp-story-hint-1.0.css';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
 import {
   EmbeddedComponentState,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
-import {createShadowRootWithStyle} from './utils';
-import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
+import {createShadowRootWithStyle} from './utils';
+
+import {CSS} from '../../../build/amp-story-hint-1.0.css';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {

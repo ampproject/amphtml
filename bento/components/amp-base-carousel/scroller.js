@@ -1,17 +1,11 @@
-import * as Preact from '#preact';
-import {
-  Alignment,
-  Axis,
-  findOverlappingIndex,
-  getPercentageOffsetFromAlignment,
-  scrollContainerToElement,
-} from './dimensions';
-import {WithBentoLightboxGallery} from '../../amp-lightbox-gallery/1.0/component';
-import {debounce} from '#core/types/function';
-import {forwardRef} from '#preact/compat';
-import {mod} from '#core/math';
+import {WithBentoLightboxGallery} from '#bento/components/amp-lightbox-gallery/component';
+
 import {setStyle} from '#core/dom/style';
+import {mod} from '#core/math';
+import {debounce} from '#core/types/function';
 import {getWin} from '#core/window';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -19,7 +13,16 @@ import {
   useMemo,
   useRef,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
+
 import {useStyles} from './component.jss';
+import {
+  Alignment,
+  Axis,
+  findOverlappingIndex,
+  getPercentageOffsetFromAlignment,
+  scrollContainerToElement,
+} from './dimensions';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last

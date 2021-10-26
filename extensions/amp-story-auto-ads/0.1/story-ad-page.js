@@ -1,3 +1,10 @@
+import {
+  StateProperty,
+  UIType,
+} from '#bento/components/amp-story/amp-story-store-service';
+
+import {assertConfig} from '#extensions/amp-ad-exit/0.1/config';
+
 import {CommonSignals} from '#core/constants/common-signals';
 import {
   createElementWithAttributes,
@@ -41,12 +48,6 @@ import {getFrameDoc, localizeCtaText} from './utils';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {assertConfig} from '../../amp-ad-exit/0.1/config';
-
-import {
-  StateProperty,
-  UIType,
-} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';

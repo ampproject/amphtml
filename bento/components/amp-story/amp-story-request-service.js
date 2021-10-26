@@ -1,9 +1,12 @@
-import {Services} from '#service';
 import {getChildJsonConfig} from '#core/dom';
-import {isProtocolValid} from '../../../src/url';
 import {once} from '#core/types/function';
-import {registerServiceBuilder} from '../../../src/service-helpers';
+
+import {Services} from '#service';
+
 import {user, userAssert} from '#utils/log';
+
+import {registerServiceBuilder} from '../../../src/service-helpers';
+import {isProtocolValid} from '../../../src/url';
 
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';

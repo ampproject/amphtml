@@ -1,8 +1,10 @@
+import {dict} from '#core/types/object';
+
+import {PreactBaseElement} from '#preact/base-element';
+
+import {CarouselContextProp} from './carousel-props';
 import {BentoBaseCarousel} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {CarouselContextProp} from './carousel-props';
-import {PreactBaseElement} from '#preact/base-element';
-import {dict} from '#core/types/object';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */

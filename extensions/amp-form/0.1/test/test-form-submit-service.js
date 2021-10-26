@@ -1,4 +1,4 @@
-import {FormSubmitService} from '../form-submit-service';
+import {FormSubmitService} from '#extensions/amp-form/0.1/form-submit-service';
 
 describes.sandboxed('form-submit-service', {}, (env) => {
   let submitService;

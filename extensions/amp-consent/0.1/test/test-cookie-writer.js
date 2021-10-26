@@ -1,6 +1,6 @@
 import * as cookie from '../../../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {CookieWriter} from '../cookie-writer';
+import {CookieWriter} from '#extensions/amp-consent/0.1/cookie-writer';
 import {dict} from '#core/types/object';
 
 const TAG = '[amp-consent/cookie-writer]';

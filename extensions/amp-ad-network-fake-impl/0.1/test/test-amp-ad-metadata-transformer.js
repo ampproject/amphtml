@@ -1,4 +1,4 @@
-import {AmpAdMetadataTransformer} from '../amp-ad-metadata-transformer';
+import {AmpAdMetadataTransformer} from '#extensions/amp-ad-network-fake-impl/0.1/amp-ad-metadata-transformer';
 
 const ampRuntimeScript = `<script async src=https://cdn.ampproject.org/amp4ads-v0.js></script>`;
 const metaCharset = `<meta charset=utf-8></meta>`;

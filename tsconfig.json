@@ -9,6 +9,7 @@
       "#ads/*": ["./ads/*"],
       "#bento/*": ["./bento/*"],
       "#build/*": ["./build/*"],
+      "#extensions": ["./extensions"],
 
       "#builtins/*": ["./src/builtins/*"],
       "#compiler": ["./src/compiler"],

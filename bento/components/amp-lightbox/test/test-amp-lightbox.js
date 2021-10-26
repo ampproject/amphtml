@@ -1,11 +1,14 @@
-import '../amp-lightbox';
-import {ActionInvocation} from '#service/action-impl';
+import '#bento/components/amp-lightbox/amp-lightbox';
 import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
-import {poll} from '#testing/iframe';
+
 import {toggleExperiment} from '#experiments';
-import {whenCalled} from '#testing/helpers/service';
+
 import {Services} from '#service/';
+import {ActionInvocation} from '#service/action-impl';
+
+import {whenCalled} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
 
 describes.realWin(
   'amp-lightbox:1.0',

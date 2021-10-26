@@ -1,8 +1,8 @@
-import {DEFAULT_ACTION} from '#core/constants/action-constants';
+import {AmpAnimation} from '#extensions/amp-animation/0.1/amp-animation';
+import {NativeWebAnimationRunner} from '#extensions/amp-animation/0.1/runners/native-web-animation-runner';
+import {WebAnimationPlayState} from '#extensions/amp-animation/0.1/web-animation-types';
 
-import {AmpAnimation} from '../amp-animation';
-import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
-import {WebAnimationPlayState} from '../web-animation-types';
+import {DEFAULT_ACTION} from '#core/constants/action-constants';
 
 describes.sandboxed('AmpAnimation', {}, (env) => {
   let ioCallbacks;

@@ -1,4 +1,4 @@
-import {COOKIELESS_API_SERVER} from '../constants';
+import {COOKIELESS_API_SERVER} from '#extensions/amp-addthis/0.1/constants';
 import {Services} from '#service';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
 import {createElementWithAttributes} from '#core/dom';

@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
+import {BentoSocialShare} from '#bento/components/amp-social-share/component';
 
-import {BentoSocialShare} from '../component';
+import * as Preact from '#preact';
 
 const types = [
   'email',

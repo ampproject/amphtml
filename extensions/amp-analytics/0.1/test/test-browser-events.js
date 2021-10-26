@@ -1,9 +1,9 @@
-import {AmpdocAnalyticsRoot} from '../analytics-root';
+import {AmpdocAnalyticsRoot} from '#extensions/amp-analytics/0.1/analytics-root';
 import {
   AnalyticsEvent,
   AnalyticsEventType,
   BrowserEventTracker,
-} from '../events';
+} from '#extensions/amp-analytics/0.1/events';
 import {macroTask} from '#testing/helpers';
 import {toggleExperiment} from '#experiments';
 

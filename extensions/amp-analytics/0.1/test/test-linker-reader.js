@@ -1,7 +1,7 @@
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
-} from '../linker-reader';
+} from '#extensions/amp-analytics/0.1/linker-reader';
 import {mockWindowInterface} from '#testing/helpers/service';
 
 describes.sandboxed('LinkerReader', {}, (env) => {

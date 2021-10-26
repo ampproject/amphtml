@@ -1,14 +1,14 @@
+import {
+  AFFILIATE_STATUS,
+  AffiliateLinkResolver,
+} from '#extensions/amp-skimlinks/0.1/affiliate-link-resolver';
+import {DEFAULT_CONFIG} from '#extensions/amp-skimlinks/0.1/constants';
+import {Waypoint} from '#extensions/amp-skimlinks/0.1/waypoint';
+
 import {Services} from '#service';
 
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import helpersFactory from './helpers';
-
-import {
-  AFFILIATE_STATUS,
-  AffiliateLinkResolver,
-} from '../affiliate-link-resolver';
-import {DEFAULT_CONFIG} from '../constants';
-import {Waypoint} from '../waypoint';
 
 const DOMAIN_RESOLVER_API_URL = DEFAULT_CONFIG.beaconUrl;
 

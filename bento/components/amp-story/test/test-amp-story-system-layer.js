@@ -2,11 +2,13 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../amp-story-store-service';
-import {LocalizationService} from '#service/localization';
-import {ProgressBar} from '../progress-bar';
+} from '#bento/components/amp-story/amp-story-store-service';
+import {SystemLayer} from '#bento/components/amp-story/amp-story-system-layer';
+import {ProgressBar} from '#bento/components/amp-story/progress-bar';
+
 import {Services} from '#service';
-import {SystemLayer} from '../amp-story-system-layer';
+import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 const NOOP = () => {};

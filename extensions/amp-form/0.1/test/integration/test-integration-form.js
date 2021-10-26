@@ -1,3 +1,6 @@
+import {AmpForm, AmpFormService} from '#extensions/amp-form/0.1/amp-form';
+import {AmpMustache} from '#extensions/amp-mustache/0.1/amp-mustache';
+
 import {AmpEvents} from '#core/constants/amp-events';
 
 import {Services} from '#service';
@@ -9,8 +12,6 @@ import {listenOncePromise} from '#utils/event-helper';
 import {poll} from '#testing/iframe';
 
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
-import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
-import {AmpForm, AmpFormService} from '../../amp-form';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;

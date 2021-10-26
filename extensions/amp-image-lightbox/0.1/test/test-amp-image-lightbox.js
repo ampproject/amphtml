@@ -1,5 +1,7 @@
-import '../amp-image-lightbox';
+import '#extensions/amp-image-lightbox/0.1/amp-image-lightbox';
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {ImageViewer} from '#extensions/amp-image-lightbox/0.1/amp-image-lightbox';
 
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
@@ -10,8 +12,6 @@ import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';
-
-import {ImageViewer} from '../amp-image-lightbox';
 
 describes.realWin(
   'amp-image-lightbox component',

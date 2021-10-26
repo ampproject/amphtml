@@ -1,4 +1,7 @@
-import {DEFAULT_CONFIG, WAYPOINT_BASE_URL} from '../constants';
+import {
+  DEFAULT_CONFIG,
+  WAYPOINT_BASE_URL,
+} from '#extensions/amp-skimlinks/0.1/constants';
 
 export const pubcode = 'pubXcode';
 

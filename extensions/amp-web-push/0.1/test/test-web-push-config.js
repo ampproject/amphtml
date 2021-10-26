@@ -1,6 +1,6 @@
-import '../amp-web-push';
-import {WebPushConfigAttributes} from '../amp-web-push-config';
-import {CONFIG_TAG, TAG} from '../vars';
+import '#extensions/amp-web-push/0.1/amp-web-push';
+import {WebPushConfigAttributes} from '#extensions/amp-web-push/0.1/amp-web-push-config';
+import {CONFIG_TAG, TAG} from '#extensions/amp-web-push/0.1/vars';
 
 describes.realWin(
   'web-push-config',

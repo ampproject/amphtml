@@ -1,4 +1,4 @@
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
+import {CarouselEvents} from '#extensions/amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {createCustomEvent} from '#utils/event-helper';
 import {dict} from '#core/types/object';

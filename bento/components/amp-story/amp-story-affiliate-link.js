@@ -2,11 +2,14 @@
  * @fileoverview Affiliate link component that expands when clicked.
  */
 
+import {htmlFor} from '#core/dom/static-template';
+
 import {Services} from '#service';
+
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
+
 import {getAmpdoc} from '../../../src/service-helpers';
-import {htmlFor} from '#core/dom/static-template';
 
 /**
  * Links that are affiliate links.

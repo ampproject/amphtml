@@ -1,9 +1,13 @@
-import * as Preact from '#preact';
-import {BentoFacebook} from '../component';
-import {WithAmpContext} from '#preact/context';
-import {createRef} from '#preact';
 import {mount} from 'enzyme';
+
+import {BentoFacebook} from '#bento/components/amp-facebook/component';
+
 import {serializeMessage} from '#core/3p-frame-messaging';
+
+import * as Preact from '#preact';
+import {createRef} from '#preact';
+import {WithAmpContext} from '#preact/context';
+
 import {waitFor} from '#testing/helpers/service';
 
 describes.sandboxed('BentoFacebook preact component', {}, (env) => {

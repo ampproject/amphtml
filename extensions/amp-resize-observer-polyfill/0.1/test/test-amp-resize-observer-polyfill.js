@@ -1,9 +1,9 @@
+import {upgradeResizeObserverPolyfill} from '#extensions/amp-resize-observer-polyfill/0.1/amp-resize-observer-polyfill';
+
 import {
   ResizeObserverStub,
   installStub,
 } from '#polyfills/stubs/resize-observer-stub';
-
-import {upgradeResizeObserverPolyfill} from '../amp-resize-observer-polyfill';
 
 describes.realWin('amp-resize-observer-polyfill', {amp: false}, (env) => {
   let win;

@@ -1,4 +1,4 @@
-import '../amp-date-countdown';
+import '#extensions/amp-date-countdown/0.1/amp-date-countdown';
 //import {Services} from '../../../../src/service';
 
 describes.realWin(

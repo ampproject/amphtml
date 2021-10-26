@@ -1,4 +1,4 @@
-import '../amp-ima-video';
+import '#extensions/amp-ima-video/0.1/amp-ima-video';
 import {waitForChildPromise} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 

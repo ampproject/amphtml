@@ -1,4 +1,4 @@
-import '../amp-accordion';
+import '#extensions/amp-accordion/0.1/amp-accordion';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Keys} from '#core/constants/key-codes';
 import {createElementWithAttributes, tryFocus} from '#core/dom';

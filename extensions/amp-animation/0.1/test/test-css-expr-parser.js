@@ -1,5 +1,5 @@
-import {parseCss} from '../parsers/css-expr';
-import * as ast from '../parsers/css-expr-ast';
+import {parseCss} from '#extensions/amp-animation/0.1/parsers/css-expr';
+import * as ast from '#extensions/amp-animation/0.1/parsers/css-expr-ast';
 
 describes.sandboxed('CSS parse', {}, () => {
   /**

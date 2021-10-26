@@ -1,3 +1,5 @@
+import {FxType} from '#extensions/amp-fx-collection/0.1/fx-type';
+
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -7,8 +9,6 @@ import {
 import {Services} from '#service';
 
 import {dev, devAssert, userAssert} from '#utils/log';
-
-import {FxType} from '../fx-type';
 
 /**
  * These fully qualified names, my goodness.

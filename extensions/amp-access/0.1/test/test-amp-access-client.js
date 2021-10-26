@@ -1,7 +1,8 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
+import {AccessClientAdapter} from '#extensions/amp-access/0.1/amp-access-client';
+
 import * as mode from '../../../../src/mode';
-import {AccessClientAdapter} from '../amp-access-client';
 
 describes.realWin(
   'AccessClientAdapter',

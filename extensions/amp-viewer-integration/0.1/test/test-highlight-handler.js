@@ -1,11 +1,17 @@
+import {
+  HighlightHandler,
+  getHighlightParam,
+} from '#extensions/amp-viewer-integration/0.1/highlight-handler';
+import {
+  Messaging,
+  WindowPortEmulator,
+} from '#extensions/amp-viewer-integration/0.1/messaging/messaging';
+
 import {VisibilityState} from '#core/constants/visibility-state';
 import * as docready from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {Services} from '#service';
-
-import {HighlightHandler, getHighlightParam} from '../highlight-handler';
-import {Messaging, WindowPortEmulator} from '../messaging/messaging';
 
 describes.fakeWin(
   'getHighlightParam',

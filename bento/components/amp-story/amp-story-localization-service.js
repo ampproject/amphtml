@@ -1,5 +1,6 @@
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
 /**

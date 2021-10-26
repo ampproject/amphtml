@@ -1,5 +1,5 @@
 import {BaseElement} from '../../../../src/base-element';
-import {LegacyAdIntersectionObserverHost} from '../legacy-ad-intersection-observer-host';
+import {LegacyAdIntersectionObserverHost} from '#extensions/amp-ad/0.1/legacy-ad-intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
 import {deserializeMessage} from '#core/3p-frame-messaging';
 import {getIntersectionChangeEntry} from '#utils/intersection-observer-3p-host';

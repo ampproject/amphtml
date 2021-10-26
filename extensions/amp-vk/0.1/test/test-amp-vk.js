@@ -1,4 +1,4 @@
-import '../amp-vk';
+import '#extensions/amp-vk/0.1/amp-vk';
 import {Layout} from '#core/dom/layout';
 
 import {Resource} from '#service/resource';

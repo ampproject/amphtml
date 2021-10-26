@@ -1,4 +1,4 @@
-import '../amp-mega-menu';
+import '#extensions/amp-mega-menu/0.1/amp-mega-menu';
 import {Keys} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';

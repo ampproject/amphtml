@@ -1,3 +1,5 @@
+import {installActivityServiceForTesting} from '#extensions/amp-analytics/0.1/activity-impl';
+
 import {Observable} from '#core/data-structures/observable';
 
 import {Services} from '#service';
@@ -19,7 +21,6 @@ import {user} from '#utils/log';
 import {mockWindowInterface, stubServiceForDoc} from '#testing/helpers/service';
 import {createIframePromise} from '#testing/iframe';
 
-import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {setCookie} from '../../src/cookies';
 import * as trackPromise from '../../src/impression';
 import {registerServiceBuilder} from '../../src/service-helpers';

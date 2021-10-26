@@ -1,11 +1,11 @@
-import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-
 import {
   extensionsHasElement,
   getAmpAdMetadata,
   getExtensionsFromMetadata,
   mergeExtensionsMetadata,
-} from '../amp-ad-utils';
+} from '#extensions/amp-a4a/0.1/amp-ad-utils';
+
+import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describes.sandboxed('getAmpAdMetadata', {}, () => {
   it('should parse metadata successfully', () => {

@@ -1,4 +1,4 @@
-import '../amp-facebook';
+import '#extensions/amp-facebook/0.1/amp-facebook';
 import {expect} from 'chai';
 import {facebook} from '#3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service-helpers';

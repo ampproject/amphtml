@@ -1,14 +1,6 @@
-import {
-  Action,
-  StateProperty,
-  getStoreService,
-} from './amp-story-store-service';
 import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-story-consent-1.0.css';
+import {isJsonScriptTag} from '#core/dom';
 import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
-import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
   closest,
@@ -16,19 +8,30 @@ import {
   matches,
 } from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {isArray} from '#core/types';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
+import {renderAsElement} from './simple-template';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {isArray} from '#core/types';
-import {isJsonScriptTag} from '#core/dom';
 
-import {parseJson} from '#core/types/object/json';
-import {renderAsElement} from './simple-template';
+import {CSS} from '../../../build/amp-story-consent-1.0.css';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-story-consent';

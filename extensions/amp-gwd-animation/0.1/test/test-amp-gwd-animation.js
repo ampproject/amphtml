@@ -1,9 +1,8 @@
-import {Services} from '#service';
-
-import {createCustomEvent} from '#utils/event-helper';
-
-import {getServiceForDocOrNull} from '../../../../src/service-helpers';
-import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
+import {
+  GWD_PAGEDECK_ID,
+  TAG,
+  addAction,
+} from '#extensions/amp-gwd-animation/0.1/amp-gwd-animation';
 import {
   ANIMATIONS_DISABLED_CLASS,
   CURRENT_LABEL_ANIMATION_ATTR,
@@ -12,7 +11,13 @@ import {
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
   PlaybackCssClass,
-} from '../amp-gwd-animation-impl';
+} from '#extensions/amp-gwd-animation/0.1/amp-gwd-animation-impl';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+
+import {getServiceForDocOrNull} from '../../../../src/service-helpers';
 
 describes.sandboxed('AMP GWD Animation', {}, (env) => {
   /**

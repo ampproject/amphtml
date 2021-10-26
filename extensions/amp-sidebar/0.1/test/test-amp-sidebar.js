@@ -1,4 +1,4 @@
-import '../amp-sidebar';
+import '#extensions/amp-sidebar/0.1/amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';

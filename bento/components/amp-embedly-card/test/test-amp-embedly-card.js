@@ -1,4 +1,4 @@
-import '../amp-embedly-card';
+import '#bento/components/amp-embedly-card/amp-embedly-card';
 import {createElementWithAttributes} from '#core/dom';
 import {computedStyle} from '#core/dom/style';
 

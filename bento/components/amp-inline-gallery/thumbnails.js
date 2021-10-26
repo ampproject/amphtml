@@ -1,7 +1,9 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
+import {CarouselContext} from '#bento/components/amp-base-carousel/carousel-context';
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/component';
+
 import {px} from '#core/dom/style';
+
+import * as Preact from '#preact';
 import {
   useContext,
   useEffect,
@@ -9,6 +11,7 @@ import {
   useRef,
   useState,
 } from '#preact';
+
 import {useStyles} from './thumbnails.jss';
 
 /**

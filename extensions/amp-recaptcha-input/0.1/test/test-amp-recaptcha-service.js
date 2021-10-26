@@ -1,5 +1,5 @@
-import '../amp-recaptcha-input';
-import {AmpRecaptchaService} from '../amp-recaptcha-service';
+import '#extensions/amp-recaptcha-input/0.1/amp-recaptcha-input';
+import {AmpRecaptchaService} from '#extensions/amp-recaptcha-input/0.1/amp-recaptcha-service';
 
 /**
  * Tests for the iframe communicatiuon will be done in

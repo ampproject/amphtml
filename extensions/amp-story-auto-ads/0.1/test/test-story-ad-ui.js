@@ -1,7 +1,4 @@
-import {forceExperimentBranch} from '#experiments';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
-
-import {ButtonTextFitter} from '../story-ad-button-text-fitter';
+import {ButtonTextFitter} from '#extensions/amp-story-auto-ads/0.1/story-ad-button-text-fitter';
 import {
   A4AVarNames,
   createCta,
@@ -9,7 +6,10 @@ import {
   getStoryAdMetadataFromElement,
   maybeCreateAttribution,
   validateCtaMetadata,
-} from '../story-ad-ui';
+} from '#extensions/amp-story-auto-ads/0.1/story-ad-ui';
+
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 
 describes.realWin('story-ad-ui', {amp: true}, (env) => {
   let win;

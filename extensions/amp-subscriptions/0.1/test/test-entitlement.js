@@ -1,4 +1,7 @@
-import {Entitlement, GrantReason} from '../entitlement';
+import {
+  Entitlement,
+  GrantReason,
+} from '#extensions/amp-subscriptions/0.1/entitlement';
 
 describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';

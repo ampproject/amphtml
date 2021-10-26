@@ -1,4 +1,4 @@
-import {UrlBuilder} from '../url-builder';
+import {UrlBuilder} from '#extensions/amp-subscriptions/0.1/url-builder';
 
 describes.fakeWin('UrlBuilder', {amp: true}, (env) => {
   let ampdoc;

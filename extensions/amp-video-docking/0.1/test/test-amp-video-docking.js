@@ -1,11 +1,3 @@
-import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {createElementWithAttributes} from '#core/dom';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {htmlFor} from '#core/dom/static-template';
-
-import {Services} from '#service';
-
-import {PlayingStates} from '../../../../src/video-interface';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -18,8 +10,17 @@ import {
   REVERT_TO_INLINE_RATIO,
   VideoDocking,
   getPosterImageSrc,
-} from '../amp-video-docking';
-import {DirectionX, DirectionY} from '../def';
+} from '#extensions/amp-video-docking/0.1/amp-video-docking';
+import {DirectionX, DirectionY} from '#extensions/amp-video-docking/0.1/def';
+
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {PlayingStates} from '../../../../src/video-interface';
 
 const slotId = 'my-slot-element';
 

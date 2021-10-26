@@ -1,3 +1,13 @@
+import {isConnectedNode} from '#core/dom';
+import {matches} from '#core/dom/query';
+import {findIndex} from '#core/types/array';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,
@@ -11,15 +21,9 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
-import {Services} from '#service';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
-import {dev, devAssert} from '#utils/log';
-import {findIndex} from '#core/types/array';
-import {isConnectedNode} from '#core/dom';
-import {matches} from '#core/dom/query';
-import {getWin} from '#core/window';
+
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */

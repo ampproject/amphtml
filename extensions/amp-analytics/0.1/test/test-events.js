@@ -11,8 +11,8 @@ import {
   TimerEventTracker,
   VisibilityTracker,
   trackerTypeForTesting,
-} from '../events';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
+} from '#extensions/amp-analytics/0.1/events';
+import {AmpdocAnalyticsRoot} from '#extensions/amp-analytics/0.1/analytics-root';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {macroTask} from '#testing/helpers';

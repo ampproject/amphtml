@@ -1,7 +1,9 @@
-import {AmpStoryHint} from '../amp-story-hint';
-import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '#service/localization';
+import {AmpStoryHint} from '#bento/components/amp-story/amp-story-hint';
+import {AmpStoryStoreService} from '#bento/components/amp-story/amp-story-store-service';
+
 import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 const NOOP = () => {};

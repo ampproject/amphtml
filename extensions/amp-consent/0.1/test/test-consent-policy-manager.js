@@ -4,7 +4,7 @@ import {
   PURPOSE_CONSENT_STATE,
   constructConsentInfo,
   constructMetadata,
-} from '../consent-info';
+} from '#extensions/amp-consent/0.1/consent-info';
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
@@ -12,9 +12,9 @@ import {
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
-} from '../consent-policy-manager';
+} from '#extensions/amp-consent/0.1/consent-policy-manager';
 import {dict} from '#core/types/object';
-import {expandPolicyConfig} from '../consent-config';
+import {expandPolicyConfig} from '#extensions/amp-consent/0.1/consent-config';
 import {macroTask} from '#testing/helpers';
 
 import {

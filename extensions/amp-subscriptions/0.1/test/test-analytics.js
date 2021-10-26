@@ -3,7 +3,7 @@ import {
   ActionStatus,
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
-} from '../analytics';
+} from '#extensions/amp-subscriptions/0.1/analytics';
 import {user} from '#utils/log';
 
 //--> env.sandbox.stub(ServiceUrl, 'adsUrl', url => serverUrl + url);

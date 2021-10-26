@@ -1,4 +1,4 @@
-import '../amp-fx-flying-carpet';
+import '#extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet';
 import {Services} from '#service';
 import {Resource} from '#service/resource';
 

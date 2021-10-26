@@ -1,4 +1,4 @@
-import {AmpOrientationObserver} from '../amp-orientation-observer';
+import {AmpOrientationObserver} from '#extensions/amp-orientation-observer/0.1/amp-orientation-observer';
 
 describes.realWin(
   'Creates the relevant fx presets correctly',

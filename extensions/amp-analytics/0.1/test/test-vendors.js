@@ -1,7 +1,10 @@
-import {AmpAnalytics} from '../amp-analytics';
-import {AnalyticsConfig} from '../config';
-import {ExpansionOptions, variableServiceForDoc} from '../variables';
-import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
+import {AmpAnalytics} from '#extensions/amp-analytics/0.1/amp-analytics';
+import {AnalyticsConfig} from '#extensions/amp-analytics/0.1/config';
+import {
+  ExpansionOptions,
+  variableServiceForDoc,
+} from '#extensions/amp-analytics/0.1/variables';
+import {IFRAME_TRANSPORTS} from '#extensions/amp-analytics/0.1/iframe-transport-vendors';
 import {
   ImagePixelVerifier,
   mockWindowInterface,

@@ -1,4 +1,4 @@
-import {clearOurFragment} from '../../addthis-utils/fragment';
+import {clearOurFragment} from '#extensions/amp-addthis/0.1/addthis-utils/fragment';
 
 describes.sandboxed('fragment', {}, () => {
   it('clears AddThis fragments from an url', () => {

@@ -1,4 +1,4 @@
-import {FontLoader} from '../fontloader';
+import {FontLoader} from '#extensions/amp-font/0.1/fontloader';
 
 describes.repeated(
   '',

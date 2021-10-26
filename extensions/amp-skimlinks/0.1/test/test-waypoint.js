@@ -1,11 +1,12 @@
+import {XCUST_ATTRIBUTE_NAME} from '#extensions/amp-skimlinks/0.1/constants';
+import {Waypoint} from '#extensions/amp-skimlinks/0.1/waypoint';
+
 import {parseQueryString} from '#core/types/string/url';
 
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import helpersFactory from './helpers';
 
 import {parseUrlDeprecated} from '../../../../src/url';
-import {XCUST_ATTRIBUTE_NAME} from '../constants';
-import {Waypoint} from '../waypoint';
 
 describes.fakeWin(
   'Waypoint',

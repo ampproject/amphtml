@@ -1,8 +1,8 @@
+import {processHead} from '#extensions/amp-a4a/0.1/head-validation';
+
 import {rootNodeFor} from '#core/dom';
 
 import {Services} from '#service';
-
-import {processHead} from '../head-validation';
 
 describes.realWin('head validation', {amp: true}, (env) => {
   let adElement;

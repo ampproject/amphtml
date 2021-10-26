@@ -1,8 +1,8 @@
 import {dict} from '#core/types/object';
 
-import {postMessageWhenAvailable} from '../../src/iframe-video';
-import {addParamsToUrl} from '../../src/url';
-import {VideoEvents} from '../../src/video-interface';
+import {postMessageWhenAvailable} from '../../../src/iframe-video';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents} from '../../../src/video-interface';
 
 /**
  * @fileoverview

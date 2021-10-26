@@ -1,8 +1,11 @@
-import {BaseElement} from './base-element';
-import {isExperimentOn} from '#experiments';
-import {userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
 import {measureIntersection} from '#core/dom/layout/intersection';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-iframe';

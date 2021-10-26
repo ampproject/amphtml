@@ -1,12 +1,16 @@
 import '#bento/components/amp-base-carousel/amp-base-carousel';
 import '#bento/components/amp-inline-gallery/amp-inline-gallery';
-import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
 import {CarouselContextProp} from '#bento/components/amp-base-carousel/carousel-props';
+
+import {ActionTrust} from '#core/constants/action-constants';
+import {subscribe} from '#core/context';
 import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
-import {subscribe} from '#core/context';
+
 import {toggleExperiment} from '#experiments';
+
+import {ActionInvocation} from '#service/action-impl';
+
 import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(

@@ -1,3 +1,11 @@
+import {getLocalizationService} from '#bento/components/amp-story/amp-story-localization-service';
+import {
+  Action,
+  StateProperty,
+  UIType,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
+
 import {removeChildren} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
@@ -11,14 +19,6 @@ import {LocalizedStringId} from '#service/localization/strings';
 import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-education-0.1.css';
-
-import {getLocalizationService} from '#bento/components/amp-story/amp-story-localization-service';
-import {
-  Action,
-  StateProperty,
-  UIType,
-} from '#bento/components/amp-story/amp-story-store-service';
-import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
 
 /** @type {string} */
 const TAG = 'amp-story-education';

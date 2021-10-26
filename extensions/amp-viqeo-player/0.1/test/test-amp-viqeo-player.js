@@ -1,9 +1,10 @@
+import AmpViqeoPlayer from '#extensions/amp-viqeo-player/0.1/amp-viqeo-player';
+
 import {Services} from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 
 import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
-import AmpViqeoPlayer from '../amp-viqeo-player';
 
 describes.realWin(
   'amp-viqeo-player',

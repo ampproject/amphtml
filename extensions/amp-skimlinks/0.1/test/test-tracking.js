@@ -1,12 +1,13 @@
-import {pubcode} from './constants';
-import helpersFactory from './helpers';
-
-import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 import {
   DEFAULT_CONFIG,
   PLATFORM_NAME,
   XCUST_ATTRIBUTE_NAME,
-} from '../constants';
+} from '#extensions/amp-skimlinks/0.1/constants';
+
+import {pubcode} from './constants';
+import helpersFactory from './helpers';
+
+import {CustomEventReporterBuilder} from '../../../../src/extension-analytics';
 
 const {
   linksTrackingUrl: LINKS_IMPRESSIONS_TRACKING_URL,

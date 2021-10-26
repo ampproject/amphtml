@@ -1,11 +1,11 @@
-import '#bento/components/amp-sticky-ad';
-import '../amp-ad';
+import '#bento/components/amp-sticky-ad/amp-sticky-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
 import * as mode from '#core/mode';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {AmpAdUIHandler} from '../amp-ad-ui';
+import {AmpAd3PImpl} from '#extensions/amp-ad/0.1/amp-ad-3p-impl';
+import {AmpAdUIHandler} from '#extensions/amp-ad/0.1/amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';

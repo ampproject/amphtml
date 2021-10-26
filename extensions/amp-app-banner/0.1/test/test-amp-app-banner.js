@@ -1,11 +1,11 @@
-import {Services} from '#service';
-
 import {
   AbstractAppBanner,
   AmpAndroidAppBanner,
   AmpAppBanner,
   AmpIosAppBanner,
-} from '../amp-app-banner';
+} from '#extensions/amp-app-banner/0.1/amp-app-banner';
+
+import {Services} from '#service';
 
 describes.realWin(
   'amp-app-banner',

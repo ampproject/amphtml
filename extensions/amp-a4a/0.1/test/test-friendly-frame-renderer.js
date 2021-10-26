@@ -1,4 +1,4 @@
-import {FriendlyFrameRenderer} from '../friendly-frame-renderer';
+import {FriendlyFrameRenderer} from '#extensions/amp-a4a/0.1/friendly-frame-renderer';
 
 const realWinConfig = {
   amp: {},

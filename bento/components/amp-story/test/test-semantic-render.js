@@ -1,4 +1,4 @@
-import {extractTextContent} from '../semantic-render';
+import {extractTextContent} from '#bento/components/amp-story/semantic-render';
 
 describes.fakeWin('amp-story semantic-render', {}, () => {
   describe('text extraction WebVTT', () => {

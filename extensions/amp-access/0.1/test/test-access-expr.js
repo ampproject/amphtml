@@ -1,4 +1,4 @@
-import {AmpAccessEvaluator} from '../access-expr';
+import {AmpAccessEvaluator} from '#extensions/amp-access/0.1/access-expr';
 
 describes.sandboxed('evaluate', {}, () => {
   let evaluator;

@@ -1,14 +1,14 @@
-import '../amp-story-panning-media';
+import '#extensions/amp-story-panning-media/0.1/amp-story-panning-media';
+import {
+  Action,
+  AmpStoryStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {afterRenderPromise} from '#testing/helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-
-import {
-  Action,
-  AmpStoryStoreService,
-} from '#bento/components/amp-story/amp-story-store-service';
 
 describes.realWin(
   'amp-story-panning-media',

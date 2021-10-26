@@ -1,4 +1,4 @@
-import '../amp-brid-player';
+import '#extensions/amp-brid-player/0.1/amp-brid-player';
 import {Services} from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';

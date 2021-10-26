@@ -1,3 +1,5 @@
+import {GEO_IN_GROUP} from '#extensions/amp-geo/0.1/amp-geo-in-group';
+
 import {Deferred} from '#core/data-structures/promise';
 import {toggle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
@@ -17,7 +19,6 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';

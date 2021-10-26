@@ -1,4 +1,4 @@
-import {RE_ALPHA} from '../constants';
+import {RE_ALPHA} from '#extensions/amp-addthis/0.1/constants';
 
 const CHAR_Z_LOWER = 122;
 const CHAR_Z_UPPER = 90;

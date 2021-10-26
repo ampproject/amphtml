@@ -1,9 +1,9 @@
+import {AmpActionMacro} from '#extensions/amp-action-macro/0.1/amp-action-macro';
+
 import {ActionTrust} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 import {ActionInvocation} from '#service/action-impl';
-
-import {AmpActionMacro} from '../amp-action-macro';
 
 describes.realWin(
   'amp-action-macro',

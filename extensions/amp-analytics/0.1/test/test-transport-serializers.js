@@ -1,4 +1,4 @@
-import {TransportSerializers} from '../transport-serializer';
+import {TransportSerializers} from '#extensions/amp-analytics/0.1/transport-serializer';
 import {dict} from '#core/types/object';
 import {isArray} from '#core/types';
 

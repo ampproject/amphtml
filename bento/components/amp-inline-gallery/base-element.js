@@ -1,10 +1,13 @@
-import * as Preact from '#preact';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {BentoInlineGallery} from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {dict} from '#core/types/object';
+import {CarouselContextProp} from '#bento/components/amp-base-carousel/carousel-props';
+
 import {setProp} from '#core/context';
+import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {useContext, useLayoutEffect} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoInlineGallery} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */

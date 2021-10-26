@@ -1,4 +1,4 @@
-import '../amp-mathml';
+import '#bento/components/amp-mathml/amp-mathml';
 
 import {MessageType, serializeMessage} from '#core/3p-frame-messaging';
 import {createElementWithAttributes} from '#core/dom';

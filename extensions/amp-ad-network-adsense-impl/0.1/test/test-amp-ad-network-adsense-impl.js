@@ -2,7 +2,18 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
+import {AmpA4A} from '#extensions/amp-a4a/0.1/amp-a4a';
+import {
+  AmpAdNetworkAdsenseImpl,
+  resetSharedState,
+} from '#extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl';
+import {AD_SIZE_OPTIMIZATION_EXP} from '#extensions/amp-ad-network-adsense-impl/0.1/responsive-state';
+import {AmpAd} from '#extensions/amp-ad/0.1/amp-ad';
+import {
+  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
+} from '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
@@ -15,17 +26,6 @@ import {forceExperimentBranch, toggleExperiment} from '#experiments';
 import * as experiments from '#experiments';
 
 import {Services} from '#service';
-
-import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-import {
-  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {
-  AmpAdNetworkAdsenseImpl,
-  resetSharedState,
-} from '../amp-ad-network-adsense-impl';
-import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';

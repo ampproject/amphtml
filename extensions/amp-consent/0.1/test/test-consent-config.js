@@ -3,8 +3,8 @@ import {
   ConsentConfig,
   expandConsentEndpointUrl,
   expandPolicyConfig,
-} from '../consent-config';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+} from '#extensions/amp-consent/0.1/consent-config';
+import {GEO_IN_GROUP} from '#extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {macroTask} from '#testing/helpers';

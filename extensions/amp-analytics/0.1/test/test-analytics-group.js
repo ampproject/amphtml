@@ -1,4 +1,4 @@
-import {AmpdocAnalyticsRoot} from '../analytics-root';
+import {AmpdocAnalyticsRoot} from '#extensions/amp-analytics/0.1/analytics-root';
 import {
   AnalyticsEventType,
   ClickEventTracker,
@@ -8,8 +8,8 @@ import {
   SignalTracker,
   TimerEventTracker,
   VisibilityTracker,
-} from '../events';
-import {AnalyticsGroup} from '../analytics-group';
+} from '#extensions/amp-analytics/0.1/events';
+import {AnalyticsGroup} from '#extensions/amp-analytics/0.1/analytics-group';
 import {toggleExperiment} from '#experiments';
 
 describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {

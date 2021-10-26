@@ -1,4 +1,4 @@
-import '../amp-minute-media-player';
+import '#extensions/amp-minute-media-player/0.1/amp-minute-media-player';
 import * as fullscreen from '#core/dom/fullscreen';
 
 const WIDTH = '16';

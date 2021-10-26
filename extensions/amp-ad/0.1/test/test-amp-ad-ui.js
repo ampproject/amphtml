@@ -1,6 +1,6 @@
 import * as adHelper from '../../../../src/ad-helper';
 import * as domQuery from '#core/dom/query';
-import {AmpAdUIHandler} from '../amp-ad-ui';
+import {AmpAdUIHandler} from '#extensions/amp-ad/0.1/amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '#core/dom';
 import {macroTask} from '#testing/helpers';

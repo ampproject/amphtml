@@ -1,4 +1,4 @@
-import {applyBreakpointClassname} from '../breakpoints';
+import {applyBreakpointClassname} from '#extensions/amp-video-docking/0.1/breakpoints';
 
 describes.realWin('Synthetic Breakpoints', {amp: false}, (env) => {
   const huge = 'foo-huge';

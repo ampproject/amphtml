@@ -2,7 +2,7 @@
  * @fileoverview Some unit tests of the internal carousel implementation.
  */
 
-import {Carousel} from '../carousel';
+import {Carousel} from '#extensions/amp-base-carousel/0.1/carousel';
 import {dev} from '#utils/log';
 import {setInitialDisplay, setStyle, setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';

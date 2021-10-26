@@ -1,7 +1,15 @@
-import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
-import {ConfigManager} from '../config-manager';
+import {
+  ALT_TEXT,
+  CONFIGURATION_EVENT,
+  ICON_SIZE,
+  ORIGIN,
+} from '#extensions/amp-addthis/0.1/constants';
+import {ConfigManager} from '#extensions/amp-addthis/0.1/config-manager';
 
-import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
+import {
+  createCUID,
+  isDateInFuture,
+} from '#extensions/amp-addthis/0.1/addthis-utils/cuid';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {
@@ -9,12 +17,15 @@ import {
   isProductCode,
   isPubId,
   isWidgetId,
-} from '../addthis-utils/mode';
-import {getConfigManager} from '../amp-addthis';
-import {getDetailsForMeta, getMetaElements} from '../addthis-utils/meta';
-import {getKeywordsString} from '../addthis-utils/classify';
-import {getSessionId} from '../addthis-utils/session';
-import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
+} from '#extensions/amp-addthis/0.1/addthis-utils/mode';
+import {getConfigManager} from '#extensions/amp-addthis/0.1/amp-addthis';
+import {
+  getDetailsForMeta,
+  getMetaElements,
+} from '#extensions/amp-addthis/0.1/addthis-utils/meta';
+import {getKeywordsString} from '#extensions/amp-addthis/0.1/addthis-utils/classify';
+import {getSessionId} from '#extensions/amp-addthis/0.1/addthis-utils/session';
+import {getWidgetOverload} from '#extensions/amp-addthis/0.1/addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {toArray} from '#core/types/array';
 
 describes.realWin(

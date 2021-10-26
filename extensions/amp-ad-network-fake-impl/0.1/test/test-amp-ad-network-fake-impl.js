@@ -1,5 +1,5 @@
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
-import {AmpAdNetworkFakeImpl} from '../amp-ad-network-fake-impl';
+import {AmpAdNetworkFakeImpl} from '#extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl';
+import {AmpAd} from '#extensions/amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
 
 describes.realWin(
   'amp-ad-network-fake-impl',

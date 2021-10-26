@@ -1,4 +1,4 @@
-import '../amp-delight-player';
+import '#extensions/amp-delight-player/0.1/amp-delight-player';
 import {listenOncePromise} from '#utils/event-helper';
 
 import {VideoEvents} from '../../../../src/video-interface';

@@ -1,4 +1,4 @@
-import {TcfApiCommandManager} from '../tcf-api-command-manager';
+import {TcfApiCommandManager} from '#extensions/amp-consent/0.1/tcf-api-command-manager';
 import {macroTask} from '#testing/helpers';
 import {mockWindowInterface} from '#testing/helpers/service';
 import {user} from '#utils/log';

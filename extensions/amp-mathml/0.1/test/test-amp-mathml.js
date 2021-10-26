@@ -1,4 +1,4 @@
-import '../amp-mathml';
+import '#extensions/amp-mathml/0.1/amp-mathml';
 
 describes.realWin(
   'amp-mathml',

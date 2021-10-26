@@ -1,18 +1,21 @@
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
-import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '#service/localization/strings';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {getWin} from '#core/window';
+
+import {LocalizedStringId} from '#service/localization/strings';
+
 import {dev} from '#utils/log';
+
 import {getLocalizationService} from './amp-story-localization-service';
+import {AttachmentTheme} from './amp-story-page-attachment';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
   maybeMakeProxyUrl,
 } from './utils';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {getWin} from '#core/window';
 
 /**
  * @enum {string}

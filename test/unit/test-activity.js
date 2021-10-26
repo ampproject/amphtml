@@ -1,3 +1,5 @@
+import {installActivityServiceForTesting} from '#extensions/amp-analytics/0.1/activity-impl';
+
 import {Observable} from '#core/data-structures/observable';
 
 import {Services} from '#service';
@@ -8,8 +10,6 @@ import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
 import {installViewportServiceForDoc} from '#service/viewport/viewport-impl';
 import {installVsyncService} from '#service/vsync-impl';
-
-import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 
 describes.sandboxed('Activity getTotalEngagedTime', {}, (env) => {
   let clock;

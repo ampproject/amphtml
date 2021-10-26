@@ -1,4 +1,4 @@
-import {API_SERVER} from '../constants';
+import {API_SERVER} from '#extensions/amp-addthis/0.1/constants';
 import {Services} from '#service';
 
 import {addParamsToUrl} from '../../../../src/url';

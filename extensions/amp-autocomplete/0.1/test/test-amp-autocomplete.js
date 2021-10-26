@@ -1,5 +1,5 @@
-import '../amp-autocomplete';
-import {AmpAutocomplete} from '../amp-autocomplete';
+import '#extensions/amp-autocomplete/0.1/amp-autocomplete';
+import {AmpAutocomplete} from '#extensions/amp-autocomplete/0.1/amp-autocomplete';
 import {Keys} from '#core/constants/key-codes';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';

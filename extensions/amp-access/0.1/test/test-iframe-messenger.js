@@ -1,4 +1,4 @@
-import {Messenger} from '../iframe-api/messenger';
+import {Messenger} from '#extensions/amp-access/0.1/iframe-api/messenger';
 
 describes.fakeWin('Messenger', {}, (env) => {
   let win;

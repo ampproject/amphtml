@@ -1,8 +1,9 @@
 import '#third_party/react-dates/bundle';
 import * as fakeTimers from '@sinonjs/fake-timers';
 
+import {wrap as withMaximumNights} from '#extensions/amp-date-picker/0.1/wrappers/maximum-nights';
+
 import {requireExternal} from '../../../../src/module';
-import {wrap as withMaximumNights} from '../wrappers/maximum-nights';
 
 describes.sandboxed('amp-date-picker', {}, () => {
   const moment = requireExternal('moment');

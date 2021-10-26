@@ -1,15 +1,18 @@
-import {AmpAnalytics} from '../amp-analytics';
-import {AnalyticsConfig} from '../config';
-import {ClickEventTracker, VisibilityTracker} from '../events';
+import {AmpAnalytics} from '#extensions/amp-analytics/0.1/amp-analytics';
+import {AnalyticsConfig} from '#extensions/amp-analytics/0.1/config';
+import {
+  ClickEventTracker,
+  VisibilityTracker,
+} from '#extensions/amp-analytics/0.1/events';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '#testing/helpers/service';
 import {LayoutPriority} from '#core/dom/layout';
-import {LinkerManager} from '../linker-manager';
+import {LinkerManager} from '#extensions/amp-analytics/0.1/linker-manager';
 import {Services} from '#service';
-import {SessionManager} from '../session-manager';
-import {Transport} from '../transport';
+import {SessionManager} from '#extensions/amp-analytics/0.1/session-manager';
+import {Transport} from '#extensions/amp-analytics/0.1/transport';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {expect} from 'chai';
 import {
@@ -18,8 +21,8 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
 import {installCryptoService} from '#service/crypto-impl';
-import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
-import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {installUserNotificationManagerForTesting} from '#extensions/amp-user-notification/0.1/amp-user-notification';
+import {instrumentationServiceForDocForTesting} from '#extensions/amp-analytics/0.1/instrumentation';
 import {macroTask} from '#testing/helpers';
 
 describes.realWin(

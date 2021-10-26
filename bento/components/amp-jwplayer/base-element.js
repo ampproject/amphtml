@@ -1,3 +1,5 @@
+import {VideoBaseElement} from '#bento/components/amp-video/video-base-element';
+
 import {getDataParamsFromAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 
@@ -8,7 +10,6 @@ import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {
   /** @override */

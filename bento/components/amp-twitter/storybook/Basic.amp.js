@@ -1,6 +1,7 @@
-import * as Preact from '#preact';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-twitter-1_0',

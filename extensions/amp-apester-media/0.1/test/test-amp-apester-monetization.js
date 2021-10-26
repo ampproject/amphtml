@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {handleCompanionAds} from '../monetization';
+import {handleCompanionAds} from '#extensions/amp-apester-media/0.1/monetization';
 import {installDocService} from '#service/ampdoc-impl';
 import {
   registerServiceBuilderForDoc,

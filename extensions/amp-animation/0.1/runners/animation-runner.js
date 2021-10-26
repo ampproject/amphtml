@@ -1,6 +1,6 @@
 import {
   WebAnimationPlayState, // eslint-disable-line no-unused-vars
-} from '../web-animation-types';
+} from '#extensions/amp-animation/0.1/web-animation-types';
 
 /**
  */

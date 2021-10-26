@@ -1,4 +1,4 @@
-import '../amp-timeago';
+import '#bento/components/amp-timeago/amp-timeago';
 import {toggleExperiment} from '#experiments';
 
 import {waitFor} from '#testing/helpers/service';

@@ -1,7 +1,10 @@
-import {Entitlement, GrantReason} from '../entitlement';
+import {
+  Entitlement,
+  GrantReason,
+} from '#extensions/amp-subscriptions/0.1/entitlement';
 
-import {PlatformStore} from '../platform-store';
-import {SubscriptionPlatform} from '../subscription-platform';
+import {PlatformStore} from '#extensions/amp-subscriptions/0.1/platform-store';
+import {SubscriptionPlatform} from '#extensions/amp-subscriptions/0.1/subscription-platform';
 import {user} from '#utils/log';
 
 describes.realWin('Platform store', {}, (env) => {

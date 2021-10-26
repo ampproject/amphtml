@@ -1,6 +1,6 @@
-import {LocalizedStringId} from '#service/localization/strings';
+import localesObjs from '#extensions/amp-story-auto-ads/0.1/_locales';
 
-import localesObjs from '../_locales';
+import {LocalizedStringId} from '#service/localization/strings';
 
 describes.fakeWin('amp-story-ad-localization-strings', {amp: true}, () => {
   describe('localized strings', () => {

@@ -1,3 +1,16 @@
+import {Keys} from '#core/constants/key-codes';
+import {addAttributesToElement, tryFocus} from '#core/dom';
+import {closest, matches} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {getLocalizationService} from './amp-story-localization-service';
 import {
   Action,
   EmbeddedComponentState,
@@ -6,31 +19,21 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {EventType, dispatch} from './events';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
-import {EventType, dispatch} from './events';
-import {Keys} from '#core/constants/key-codes';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
-import {addAttributesToElement, tryFocus} from '#core/dom';
-import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
-import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
+import {getAmpdoc} from '../../../src/service-helpers';
+import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 /**
  * Action icons to be placed in tooltip.

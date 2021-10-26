@@ -1,10 +1,10 @@
+import {TwoStepsResponse} from '#extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response';
+import {AmpSmartlinks} from '#extensions/amp-smartlinks/0.1/amp-smartlinks';
+import {Linkmate} from '#extensions/amp-smartlinks/0.1/linkmate';
+
 import * as DocumentReady from '#core/document/ready';
 
 import {Services} from '#service';
-
-import {TwoStepsResponse} from '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
-import {AmpSmartlinks} from '../amp-smartlinks';
-import {Linkmate} from '../linkmate';
 
 const helpersFactory = (env) => {
   const {win} = env;

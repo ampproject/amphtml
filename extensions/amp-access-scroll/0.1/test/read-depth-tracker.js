@@ -1,5 +1,5 @@
-import {AccessSource} from '../../../amp-access/0.1/amp-access-source';
-import {ReadDepthTracker} from '../read-depth-tracker';
+import {ReadDepthTracker} from '#extensions/amp-access-scroll/0.1/read-depth-tracker';
+import {AccessSource} from '#extensions/amp-access/0.1/amp-access-source';
 
 describes.realWin(
   'ReadDepthTracker',

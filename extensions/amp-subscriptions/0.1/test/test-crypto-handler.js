@@ -1,4 +1,4 @@
-import {CryptoHandler} from '../crypto-handler';
+import {CryptoHandler} from '#extensions/amp-subscriptions/0.1/crypto-handler';
 import {decryptAesGcm} from '#third_party/subscriptions-project/aes_gcm';
 
 describes.realWin(

@@ -1,4 +1,4 @@
-import '../amp-3q-player';
+import '#extensions/amp-3q-player/0.1/amp-3q-player';
 import {createElementWithAttributes} from '#core/dom';
 import * as fullscreen from '#core/dom/fullscreen';
 

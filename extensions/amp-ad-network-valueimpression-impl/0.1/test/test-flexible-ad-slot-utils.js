@@ -1,8 +1,8 @@
+import {getFlexibleAdSlotData} from '#extensions/amp-ad-network-valueimpression-impl/0.1/flexible-ad-slot-utils';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
-
-import {getFlexibleAdSlotData} from '../flexible-ad-slot-utils';
 
 describes.realWin('#getFlexibleAdSlotData', {amp: true}, (env) => {
   let doc, win;

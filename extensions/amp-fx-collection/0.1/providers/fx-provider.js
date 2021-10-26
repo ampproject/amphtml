@@ -1,3 +1,14 @@
+import {FxType} from '#extensions/amp-fx-collection/0.1/fx-type'; // eslint-disable-line no-unused-vars
+import {
+  ScrollToggleDispatch,
+  ScrollTogglePosition, // eslint-disable-line no-unused-vars
+  assertValidScrollToggleElement,
+  getScrollToggleFloatInOffset,
+  getScrollTogglePosition,
+  installScrollToggleStyles,
+  scrollToggleFloatIn,
+} from '#extensions/amp-fx-collection/0.1/scroll-toggle';
+
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -25,16 +36,6 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
-import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
-import {
-  ScrollToggleDispatch,
-  ScrollTogglePosition, // eslint-disable-line no-unused-vars
-  assertValidScrollToggleElement,
-  getScrollToggleFloatInOffset,
-  getScrollTogglePosition,
-  installScrollToggleStyles,
-  scrollToggleFloatIn,
-} from '../scroll-toggle';
 
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc

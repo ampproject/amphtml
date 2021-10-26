@@ -1,4 +1,4 @@
-import {AccessOtherAdapter} from '../amp-access-other';
+import {AccessOtherAdapter} from '#extensions/amp-access/0.1/amp-access-other';
 
 describes.realWin('AccessOtherAdapter', {amp: true}, (env) => {
   let ampdoc;

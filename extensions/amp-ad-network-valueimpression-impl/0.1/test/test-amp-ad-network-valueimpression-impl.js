@@ -2,12 +2,12 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
+import {AmpAdNetworkValueimpressionImpl} from '#extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
-
-import {AmpAdNetworkValueimpressionImpl} from '../amp-ad-network-valueimpression-impl';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

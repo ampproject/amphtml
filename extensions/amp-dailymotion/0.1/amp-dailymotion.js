@@ -19,7 +19,7 @@ import {
   DailymotionEvents,
   getDailymotionIframeSrc,
   makeDailymotionMessage,
-} from '../dailymotion-api';
+} from '#bento/components/amp-dailymotion/dailymotion-api';
 import {getData, listen} from '#utils/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';

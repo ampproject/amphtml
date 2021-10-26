@@ -5,7 +5,7 @@ import {
   findSentences,
   markTextRangeList,
   textPosChar,
-} from '../findtext';
+} from '#extensions/amp-viewer-integration/0.1/findtext';
 
 describes.sandboxed('CircularBuffer', {}, () => {
   it('add and get', () => {

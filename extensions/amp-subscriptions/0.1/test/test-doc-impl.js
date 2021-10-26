@@ -1,4 +1,4 @@
-import {DocImpl} from '../doc-impl';
+import {DocImpl} from '#extensions/amp-subscriptions/0.1/doc-impl';
 
 describes.realWin('DocImpl', {amp: true}, (env) => {
   let ampdoc;

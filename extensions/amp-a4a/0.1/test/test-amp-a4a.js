@@ -1,11 +1,34 @@
-import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
 // The following namespaces are imported so that we can stub and spy on certain
 // methods in tests.
+import {
+  AmpA4A,
+  CREATIVE_SIZE_HEADER,
+  DEFAULT_SAFEFRAME_VERSION,
+  EXPERIMENT_FEATURE_HEADER_NAME,
+  INVALID_SPSA_RESPONSE,
+  RENDERING_TYPE_HEADER,
+  SAFEFRAME_VERSION_HEADER,
+  assignAdUrlToError,
+  protectFunctionWrapper,
+} from '#extensions/amp-a4a/0.1/amp-a4a';
+import * as secureFrame from '#extensions/amp-a4a/0.1/secure-frame';
+import {
+  AMP_SIGNATURE_HEADER,
+  VerificationStatus,
+} from '#extensions/amp-a4a/0.1/signature-verifier';
+import {AmpAdXOriginIframeHandler} from '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {
+  incrementLoadingAds,
+  is3pThrottled,
+} from '#extensions/amp-ad/0.1/concurrent-load';
+import {GEO_IN_GROUP} from '#extensions/amp-geo/0.1/amp-geo-in-group';
+
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
@@ -35,25 +58,6 @@ import {cancellation} from '../../../../src/error-reporting';
 import * as analyticsExtension from '../../../../src/extension-analytics';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import * as mode from '../../../../src/mode';
-import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {
-  incrementLoadingAds,
-  is3pThrottled,
-} from '../../../amp-ad/0.1/concurrent-load';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {
-  AmpA4A,
-  CREATIVE_SIZE_HEADER,
-  DEFAULT_SAFEFRAME_VERSION,
-  EXPERIMENT_FEATURE_HEADER_NAME,
-  INVALID_SPSA_RESPONSE,
-  RENDERING_TYPE_HEADER,
-  SAFEFRAME_VERSION_HEADER,
-  assignAdUrlToError,
-  protectFunctionWrapper,
-} from '../amp-a4a';
-import * as secureFrame from '../secure-frame';
-import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   let doc;

@@ -1,7 +1,10 @@
+import {
+  WebLoginDialog,
+  openLoginDialog,
+} from '#extensions/amp-access/0.1/login-dialog';
+
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
-
-import {WebLoginDialog, openLoginDialog} from '../login-dialog';
 
 const RETURN_URL_ESC = encodeURIComponent(
   'http://localhost:8000/extensions' +

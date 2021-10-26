@@ -1,4 +1,4 @@
-import '../amp-bind';
+import '#extensions/amp-bind/0.1/amp-bind';
 import {ActionTrust} from '#core/constants/action-constants';
 
 import {Services} from '#service';

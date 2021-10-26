@@ -1,4 +1,5 @@
-import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
+import {AmpStoryCtaLayer} from '#bento/components/amp-story/amp-story-cta-layer';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

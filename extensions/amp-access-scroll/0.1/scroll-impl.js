@@ -1,3 +1,5 @@
+import {AccessClientAdapter} from '#extensions/amp-access/0.1/amp-access-client';
+
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
@@ -14,7 +16,6 @@ import {buildUrl, connectHostname} from './scroll-url';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {addParamToUrl, isProxyOrigin} from '../../../src/url';
-import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 
 const TAG = 'amp-access-scroll-elt';
 /**

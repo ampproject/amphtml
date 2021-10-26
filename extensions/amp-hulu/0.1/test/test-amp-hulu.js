@@ -1,4 +1,4 @@
-import '../amp-hulu';
+import '#extensions/amp-hulu/0.1/amp-hulu';
 
 describes.realWin(
   'amp-hulu',

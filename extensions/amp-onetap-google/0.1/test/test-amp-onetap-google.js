@@ -1,4 +1,9 @@
-import '../amp-onetap-google';
+import '#extensions/amp-onetap-google/0.1/amp-onetap-google';
+import {
+  ACTIONS,
+  SENTINEL,
+} from '#extensions/amp-onetap-google/0.1/amp-onetap-google';
+
 import {createElementWithAttributes, waitForChild} from '#core/dom';
 
 import {Services} from '#service';
@@ -10,7 +15,6 @@ import {user} from '#utils/log';
 import {macroTask} from '#testing/helpers';
 
 import {BaseElement} from '../../../../src/base-element';
-import {ACTIONS, SENTINEL} from '../amp-onetap-google';
 
 const TAG = 'amp-onetap-google';
 

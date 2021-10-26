@@ -1,5 +1,5 @@
-import {ClickDelayFilter} from '../../filters/click-delay';
-import {FilterType} from '../../filters/filter';
+import {ClickDelayFilter} from '#extensions/amp-ad-exit/0.1/filters/click-delay';
+import {FilterType} from '#extensions/amp-ad-exit/0.1/filters/filter';
 
 describes.sandboxed('click-delay', {}, (env) => {
   const DEFAULT_CONFIG = {

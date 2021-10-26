@@ -1,4 +1,4 @@
-import '../amp-dailymotion';
+import '#extensions/amp-dailymotion/0.1/amp-dailymotion';
 
 describes.realWin(
   'amp-dailymotion',

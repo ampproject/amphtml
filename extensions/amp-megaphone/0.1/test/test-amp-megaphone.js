@@ -1,4 +1,4 @@
-import '../amp-megaphone';
+import '#extensions/amp-megaphone/0.1/amp-megaphone';
 
 describes.realWin(
   'amp-megaphone',

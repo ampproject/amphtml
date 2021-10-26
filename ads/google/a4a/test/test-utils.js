@@ -1,6 +1,6 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
-import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '#extensions/amp-ad/0.1/amp-ad-ui';
+import '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as IniLoad from '../../../../src/ini-load';
 import {
   AMP_EXPERIMENT_ATTRIBUTE,
@@ -25,8 +25,8 @@ import {
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
-import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
+import {GEO_IN_GROUP} from '#extensions/amp-geo/0.1/amp-geo-in-group';
+import {MockA4AImpl} from '#extensions/amp-a4a/0.1/test/utils';
 import {Services} from '#service';
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {createElementWithAttributes} from '#core/dom';

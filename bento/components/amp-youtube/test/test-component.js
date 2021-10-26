@@ -1,13 +1,12 @@
 import {mount} from 'enzyme';
 
+import {useStyles} from '#bento/components/amp-video/component.jss';
+import {BentoYoutube} from '#bento/components/amp-youtube/component';
+
 import {dispatchCustomEvent} from '#core/dom';
 
 import * as Preact from '#preact';
 import {createRef} from '#preact';
-
-import {useStyles} from 'extensions/amp-video/1.0/component.jss';
-
-import {BentoYoutube} from '../component';
 
 describes.realWin('YouTube preact component v1.0', {}, (env) => {
   let window, document;

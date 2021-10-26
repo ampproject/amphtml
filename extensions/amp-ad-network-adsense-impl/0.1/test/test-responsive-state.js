@@ -4,6 +4,12 @@ import {
   ADSENSE_RSPV_TAG,
 } from '#ads/google/utils';
 
+import {
+  AD_SIZE_OPTIMIZATION_EXP,
+  MAX_HEIGHT_EXP,
+  ResponsiveState,
+} from '#extensions/amp-ad-network-adsense-impl/0.1/responsive-state';
+
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {toWin} from '#core/window';
@@ -11,12 +17,6 @@ import {toWin} from '#core/window';
 import {forceExperimentBranch} from '#experiments';
 
 import {Services} from '#service';
-
-import {
-  AD_SIZE_OPTIMIZATION_EXP,
-  MAX_HEIGHT_EXP,
-  ResponsiveState,
-} from '../responsive-state';
 
 const AD_CLIENT_ID = 'ca-pub-123';
 

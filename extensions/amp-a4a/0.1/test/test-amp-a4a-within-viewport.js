@@ -2,14 +2,14 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
-import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '#extensions/amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {AmpA4A} from '#extensions/amp-a4a/0.1/amp-a4a';
+
 import {htmlFor} from '#core/dom/static-template';
 import {pushIfNotExist, removeItem} from '#core/types/array';
 
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
-
-import {AmpA4A} from '../amp-a4a';
 
 describes.realWin(
   'amp-a4a: whenWithinViewport',

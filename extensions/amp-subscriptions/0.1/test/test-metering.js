@@ -1,4 +1,4 @@
-import {Metering} from '../metering';
+import {Metering} from '#extensions/amp-subscriptions/0.1/metering';
 
 describes.fakeWin('Metering', {amp: true}, () => {
   /** @type {!Metering} */

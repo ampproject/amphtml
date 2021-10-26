@@ -2,9 +2,11 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
-import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import '#extensions/amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {getA4ARegistry, signingServerURLs} from '#ads/_a4a-config';
+
+import {AMP_SIGNATURE_HEADER} from '#extensions/amp-a4a/0.1/signature-verifier';
 
 import {installDocService} from '#service/ampdoc-impl';
 import {installCryptoService} from '#service/crypto-impl';
@@ -20,8 +22,6 @@ import {createIframePromise} from '#testing/iframe';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 import {MockA4AImpl, TEST_URL} from './utils';
-
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but

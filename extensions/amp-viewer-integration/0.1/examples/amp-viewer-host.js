@@ -1,4 +1,4 @@
-import {Messaging} from '../messaging/messaging';
+import {Messaging} from '#extensions/amp-viewer-integration/0.1/messaging/messaging';
 
 /**
  * @fileoverview This is an example of how the viewer host can be implemented

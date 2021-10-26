@@ -1,10 +1,15 @@
-import {BaseElement} from './base-element';
-import {createLoaderLogo} from '../0.1/facebook-loader';
-import {dashToUnderline} from '#core/types/string';
+import {createLoaderLogo} from '#extensions/amp-facebook/0.1/facebook-loader';
+
 import {dict} from '#core/types/object';
-import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
+import {dashToUnderline} from '#core/types/string';
+
 import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
+import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 
 /** @const {string} */
 const TAG = 'amp-facebook';

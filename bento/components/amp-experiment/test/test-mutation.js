@@ -1,9 +1,9 @@
-import {toggleExperiment} from '#experiments';
-
 import {
   assertAttributeMutationFormat,
   assertCharacterDataMutationFormat,
-} from '../mutation/mutation';
+} from '#bento/components/amp-experiment/mutation/mutation';
+
+import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'amp-experiment mutation',

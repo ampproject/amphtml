@@ -2,7 +2,7 @@ import {
   BinarySearchPreference,
   BinarySearchStop,
   binarySearch,
-} from '../binary-search';
+} from '#extensions/amp-truncate-text/0.1/binary-search';
 
 describes.sandboxed('binarySearch', {}, () => {
   const {NEXT, PREV} = BinarySearchPreference;

@@ -1,5 +1,5 @@
-import {BindExpression} from '../bind-expression';
-import {BindMacro} from '../bind-macro';
+import {BindExpression} from '#extensions/amp-bind/0.1/bind-expression';
+import {BindMacro} from '#extensions/amp-bind/0.1/bind-macro';
 
 describes.sandboxed('BindExpression', {}, () => {
   const argumentTypeError = 'Unexpected argument type';

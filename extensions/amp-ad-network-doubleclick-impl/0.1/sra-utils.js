@@ -1,14 +1,17 @@
 import {isInManualExperiment} from '#ads/google/a4a/traffic-experiments';
 import {getEnclosingContainerTypes} from '#ads/google/a4a/utils';
 
+import {
+  RENDERING_TYPE_HEADER,
+  XORIGIN_MODE,
+} from '#extensions/amp-a4a/0.1/amp-a4a';
+
 import {tryResolve} from '#core/data-structures/promise';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {isObject} from '#core/types';
 import {utf8Encode} from '#core/types/string/bytes';
 
 import {dev, devAssert} from '#utils/log';
-
-import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

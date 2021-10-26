@@ -1,6 +1,6 @@
-import {getStyle} from '#core/dom/style';
+import {LoaderService} from '#extensions/amp-loader/0.1/amp-loader';
 
-import {LoaderService} from '../amp-loader';
+import {getStyle} from '#core/dom/style';
 
 describes.fakeWin('amp-loader', {}, () => {
   let loaderService;

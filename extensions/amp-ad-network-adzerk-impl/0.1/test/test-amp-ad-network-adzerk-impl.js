@@ -2,17 +2,17 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
-import '../../../amp-mustache/0.1/amp-mustache';
+import '#extensions/amp-ad/0.1/amp-ad';
+import '#extensions/amp-mustache/0.1/amp-mustache';
+import {
+  AMP_TEMPLATED_CREATIVE_HEADER_NAME,
+  AmpAdNetworkAdzerkImpl,
+} from '#extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl';
+
 import {createElementWithAttributes} from '#core/dom';
 import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 import {Xhr} from '#service/xhr-impl';
-
-import {
-  AMP_TEMPLATED_CREATIVE_HEADER_NAME,
-  AmpAdNetworkAdzerkImpl,
-} from '../amp-ad-network-adzerk-impl';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
   let win, doc;

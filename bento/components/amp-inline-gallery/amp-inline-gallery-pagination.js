@@ -1,9 +1,13 @@
-import {CSS} from './pagination.jss';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {BentoInlineGalleryPagination} from './pagination';
-import {PreactBaseElement} from '#preact/base-element';
+import {CarouselContextProp} from '#bento/components/amp-base-carousel/carousel-props';
+
 import {isExperimentOn} from '#experiments';
+
+import {PreactBaseElement} from '#preact/base-element';
+
 import {userAssert} from '#utils/log';
+
+import {BentoInlineGalleryPagination} from './pagination';
+import {CSS} from './pagination.jss';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-pagination';

@@ -1,6 +1,6 @@
-import {BentoYoutube} from './component';
+import {VideoBaseElement} from '#bento/components/amp-video/video-base-element';
 
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {BentoYoutube} from './component';
 
 export class BaseElement extends VideoBaseElement {}
 

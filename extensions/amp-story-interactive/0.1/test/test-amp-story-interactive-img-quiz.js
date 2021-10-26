@@ -1,5 +1,5 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
+import {AmpStoryInteractiveImgQuiz} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz';
 import {AmpStoryRequestService} from '#bento/components/amp-story/amp-story-request-service';
 import {AmpStoryStoreService} from '#bento/components/amp-story/amp-story-store-service';
 import {LocalizationService} from '#service/localization';

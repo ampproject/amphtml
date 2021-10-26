@@ -1,5 +1,6 @@
+import {AmpStoryPageAttachment} from '#bento/components/amp-story/amp-story-page-attachment';
+
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachmentEl;

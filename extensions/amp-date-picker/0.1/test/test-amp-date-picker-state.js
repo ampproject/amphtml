@@ -1,10 +1,14 @@
 import '#third_party/react-dates/bundle';
 import * as fakeTimers from '@sinonjs/fake-timers';
 
+import {
+  AmpDatePicker,
+  DatePickerState,
+} from '#extensions/amp-date-picker/0.1/amp-date-picker';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {requireExternal} from '../../../../src/module';
-import {AmpDatePicker, DatePickerState} from '../amp-date-picker';
 
 describes.realWin(
   'amp-date-picker',

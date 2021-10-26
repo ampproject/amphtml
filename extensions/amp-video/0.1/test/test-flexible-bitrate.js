@@ -1,5 +1,5 @@
-import '../flexible-bitrate';
-import {BitrateManager} from '../flexible-bitrate';
+import '#extensions/amp-video/0.1/flexible-bitrate';
+import {BitrateManager} from '#extensions/amp-video/0.1/flexible-bitrate';
 import {childElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {toggleExperiment} from '#experiments';

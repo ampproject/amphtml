@@ -1,4 +1,4 @@
-import '../amp-embedly-card';
+import '#extensions/amp-embedly-card/0.1/amp-embedly-card';
 
 describes.realWin(
   'amp-embedly-card',

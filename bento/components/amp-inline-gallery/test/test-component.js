@@ -1,9 +1,11 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {mount} from 'enzyme';
-import {BentoInlineGallery} from '../component';
-import {BentoInlineGalleryPagination} from '../pagination';
-import {BentoInlineGalleryThumbnails} from '../thumbnails';
+
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/component';
+import {BentoInlineGallery} from '#bento/components/amp-inline-gallery/component';
+import {BentoInlineGalleryPagination} from '#bento/components/amp-inline-gallery/pagination';
+import {BentoInlineGalleryThumbnails} from '#bento/components/amp-inline-gallery/thumbnails';
+
+import * as Preact from '#preact';
 
 describes.sandboxed('InlineGallery preact component', {}, () => {
   describe('BentoInlineGalleryPagination component', () => {

@@ -1,16 +1,17 @@
+import {AmpAdNetworkBase} from '#extensions/amp-a4a/0.1/amp-ad-network-base';
+import {
+  AdResponseType,
+  ValidatorResult,
+} from '#extensions/amp-a4a/0.1/amp-ad-type-defs';
+import {NameFrameRenderer} from '#extensions/amp-a4a/0.1/name-frame-renderer';
+import {TemplateRenderer} from '#extensions/amp-a4a/0.1/template-renderer';
+import {TemplateValidator} from '#extensions/amp-a4a/0.1/template-validator';
+
 import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
 
 import {addParamToUrl} from '../../../src/url';
-import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
-import {
-  AdResponseType,
-  ValidatorResult,
-} from '../../amp-a4a/0.1/amp-ad-type-defs';
-import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
-import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
-import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
 
 // These have no side-effects, and so may be reused between all instances.
 const validator = new TemplateValidator();

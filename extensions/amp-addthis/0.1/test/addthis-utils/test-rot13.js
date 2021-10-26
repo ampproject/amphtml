@@ -1,4 +1,4 @@
-import {rot13Array} from '../../addthis-utils/rot13';
+import {rot13Array} from '#extensions/amp-addthis/0.1/addthis-utils/rot13';
 
 describes.sandboxed('rot13', {}, () => {
   it('should properly rotate alphabetical characters', () => {

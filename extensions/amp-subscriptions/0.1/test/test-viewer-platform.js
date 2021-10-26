@@ -1,11 +1,17 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
-import {Dialog} from '../dialog';
-import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
-import {Entitlement, GrantReason} from '../entitlement';
+import {
+  Action,
+  SubscriptionAnalytics,
+} from '#extensions/amp-subscriptions/0.1/analytics';
+import {Dialog} from '#extensions/amp-subscriptions/0.1/dialog';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from '#extensions/amp-subscriptions/0.1/constants';
+import {
+  Entitlement,
+  GrantReason,
+} from '#extensions/amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '#third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../service-adapter';
+import {ServiceAdapter} from '#extensions/amp-subscriptions/0.1/service-adapter';
 import {Services} from '#service';
-import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+import {ViewerSubscriptionPlatform} from '#extensions/amp-subscriptions/0.1/viewer-subscription-platform';
 import {dict} from '#core/types/object';
 import {getWinOrigin} from '../../../../src/url';
 

@@ -1,5 +1,3 @@
-import {Services} from '#service';
-
 import {
   AsYouGoValidator,
   DefaultValidator,
@@ -10,8 +8,10 @@ import {
   ShowFirstOnSubmitValidator,
   getFormValidator,
   setReportValiditySupportedForTesting,
-} from '../form-validators';
-import {ValidationBubble} from '../validation-bubble';
+} from '#extensions/amp-form/0.1/form-validators';
+import {ValidationBubble} from '#extensions/amp-form/0.1/validation-bubble';
+
+import {Services} from '#service';
 
 describes.realWin('form-validators', {amp: true}, (env) => {
   const emailTypeValidationMsg = 'Yo! That email does not look so.. email-y';

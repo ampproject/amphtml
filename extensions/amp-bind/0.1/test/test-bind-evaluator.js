@@ -1,5 +1,5 @@
-import {BindEvaluator} from '../bind-evaluator';
-import {BindExpression} from '../bind-expression';
+import {BindEvaluator} from '#extensions/amp-bind/0.1/bind-evaluator';
+import {BindExpression} from '#extensions/amp-bind/0.1/bind-expression';
 
 describes.sandboxed('BindEvaluator', {}, (env) => {
   let evaluator;

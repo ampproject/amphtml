@@ -1,3 +1,5 @@
+import {getStoreService} from '#bento/components/amp-story/amp-story-store-service';
+
 import {findIndex} from '#core/types/array';
 
 import {devAssert} from '#utils/log';
@@ -12,8 +14,6 @@ import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-
-import {getStoreService} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';

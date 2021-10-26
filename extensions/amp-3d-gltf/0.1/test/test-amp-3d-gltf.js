@@ -1,4 +1,4 @@
-import '../amp-3d-gltf';
+import '#extensions/amp-3d-gltf/0.1/amp-3d-gltf';
 import {createIframeWithMessageStub} from '#testing/iframe';
 
 describes.realWin(

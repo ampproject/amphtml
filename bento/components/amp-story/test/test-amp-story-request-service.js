@@ -1,7 +1,7 @@
 import {
   AmpStoryRequestService,
   CONFIG_SRC_ATTRIBUTE_NAME,
-} from '../amp-story-request-service';
+} from '#bento/components/amp-story/amp-story-request-service';
 
 describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
   let requestService;

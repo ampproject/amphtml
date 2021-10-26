@@ -1,4 +1,9 @@
-import '../amp-story-360';
+import '#extensions/amp-story-360/0.1/amp-story-360';
+import {
+  Action,
+  AmpStoryStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {LocalizationService} from '#service/localization';
@@ -7,11 +12,6 @@ import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
-
-import {
-  Action,
-  AmpStoryStoreService,
-} from '#bento/components/amp-story/amp-story-store-service';
 
 describes.realWin(
   'amp-story-360',

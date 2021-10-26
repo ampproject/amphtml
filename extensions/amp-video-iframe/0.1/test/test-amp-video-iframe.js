@@ -1,4 +1,4 @@
-import '../amp-video-iframe';
+import '#extensions/amp-video-iframe/0.1/amp-video-iframe';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 

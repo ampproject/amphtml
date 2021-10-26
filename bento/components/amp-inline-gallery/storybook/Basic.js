@@ -1,9 +1,11 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
-import {BentoInlineGallery} from '../component';
-import {BentoInlineGalleryPagination} from '../pagination';
-import {BentoInlineGalleryThumbnails} from '../thumbnails';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
+
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/component';
+import {BentoInlineGallery} from '#bento/components/amp-inline-gallery/component';
+import {BentoInlineGalleryPagination} from '#bento/components/amp-inline-gallery/pagination';
+import {BentoInlineGalleryThumbnails} from '#bento/components/amp-inline-gallery/thumbnails';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'InlineGallery',

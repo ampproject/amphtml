@@ -1,4 +1,16 @@
-import '../../../amp-mustache/0.1/amp-mustache';
+import '#extensions/amp-mustache/0.1/amp-mustache';
+import {
+  AmpForm,
+  AmpFormService,
+  checkUserValidityAfterInteraction_,
+} from '#extensions/amp-form/0.1/amp-form';
+import {DIRTINESS_INDICATOR_CLASS} from '#extensions/amp-form/0.1/form-dirtiness';
+import {
+  setCheckValiditySupportedForTesting,
+  setReportValiditySupportedForTesting,
+} from '#extensions/amp-form/0.1/form-validators';
+import {AmpSelector} from '#extensions/amp-selector/0.1/amp-selector';
+
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {
@@ -23,17 +35,6 @@ import {
   createFormDataWrapper,
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
-import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
-import {
-  AmpForm,
-  AmpFormService,
-  checkUserValidityAfterInteraction_,
-} from '../amp-form';
-import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
-import {
-  setCheckValiditySupportedForTesting,
-  setReportValiditySupportedForTesting,
-} from '../form-validators';
 
 describes.repeated(
   '',

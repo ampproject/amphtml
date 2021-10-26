@@ -1,5 +1,5 @@
-import {Messaging} from '../messaging/messaging';
-import {TouchHandler} from '../touch-handler';
+import {Messaging} from '#extensions/amp-viewer-integration/0.1/messaging/messaging';
+import {TouchHandler} from '#extensions/amp-viewer-integration/0.1/touch-handler';
 
 function getFakeTouchEvent(type) {
   return {

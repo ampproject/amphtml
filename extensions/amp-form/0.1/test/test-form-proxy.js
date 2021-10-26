@@ -1,10 +1,11 @@
-import {Services} from '#service';
-
-import {parseUrlDeprecated} from '../../../../src/url';
 import {
   installFormProxy,
   setDenylistedPropertiesForTesting,
-} from '../form-proxy';
+} from '#extensions/amp-form/0.1/form-proxy';
+
+import {Services} from '#service';
+
+import {parseUrlDeprecated} from '../../../../src/url';
 
 const PROPS = [
   'id',

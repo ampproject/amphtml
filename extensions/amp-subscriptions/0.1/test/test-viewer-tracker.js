@@ -1,5 +1,5 @@
 import {Observable} from '#core/data-structures/observable';
-import {ViewerTracker} from '../viewer-tracker';
+import {ViewerTracker} from '#extensions/amp-subscriptions/0.1/viewer-tracker';
 
 describes.realWin('ViewerTracker', {amp: true}, (env) => {
   let ampdoc;

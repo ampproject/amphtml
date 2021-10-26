@@ -1,5 +1,6 @@
+import {BentoIframe} from '#bento/components/amp-iframe/component';
+
 import * as Preact from '#preact';
-import {BentoIframe} from '../component';
 
 export default {
   title: 'Iframe',

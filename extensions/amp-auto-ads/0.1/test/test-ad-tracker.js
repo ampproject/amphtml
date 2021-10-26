@@ -1,13 +1,13 @@
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-
-import {Services} from '#service';
-
 import {
   AdTracker,
   getAdConstraintsFromConfigObj,
   getExistingAds,
-} from '../ad-tracker';
-import * as MeasurePageLayoutBox from '../measure-page-layout-box';
+} from '#extensions/amp-auto-ads/0.1/ad-tracker';
+import * as MeasurePageLayoutBox from '#extensions/amp-auto-ads/0.1/measure-page-layout-box';
+
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {Services} from '#service';
 
 describes.realWin('ad-tracker', {amp: true}, (env) => {
   let win, doc;

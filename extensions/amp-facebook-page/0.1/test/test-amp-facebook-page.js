@@ -1,4 +1,4 @@
-import '../amp-facebook-page';
+import '#extensions/amp-facebook-page/0.1/amp-facebook-page';
 import {createElementWithAttributes} from '#core/dom';
 import {facebook} from '#3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service-helpers';

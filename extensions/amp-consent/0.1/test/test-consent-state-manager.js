@@ -4,9 +4,12 @@ import {
   composeStoreValue,
   constructConsentInfo,
   constructMetadata,
-} from '../consent-info';
+} from '#extensions/amp-consent/0.1/consent-info';
 import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
-import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
+import {
+  ConsentInstance,
+  ConsentStateManager,
+} from '#extensions/amp-consent/0.1/consent-state-manager';
 import {Services} from '#service';
 import {dev} from '#utils/log';
 import {macroTask} from '#testing/helpers';

@@ -1,8 +1,10 @@
-import {LogLevel, dev} from '#utils/log';
-import {Services} from '#service';
-import {isArray} from '#core/types';
 import {removeChildren} from '#core/dom';
 import {toggle} from '#core/dom/style';
+import {isArray} from '#core/types';
+
+import {Services} from '#service';
+
+import {LogLevel, dev} from '#utils/log';
 
 /**
  * @param {!../../../src/service/vsync-impl.Vsync} vsync

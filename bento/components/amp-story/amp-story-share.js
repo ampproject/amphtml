@@ -1,17 +1,20 @@
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
-import {Toast} from './toast';
+import {isObject} from '#core/types';
+import {dict, map} from '#core/types/object';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '#core/window/clipboard';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {listen} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
-import {dict, map} from '#core/types/object';
+
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
-import {isObject} from '#core/types';
-import {listen} from '#utils/event-helper';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {Toast} from './toast';
 
 /**
  * Maps share provider type to visible name.

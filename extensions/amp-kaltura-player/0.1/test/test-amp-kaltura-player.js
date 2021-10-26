@@ -1,4 +1,4 @@
-import '../amp-kaltura-player';
+import '#extensions/amp-kaltura-player/0.1/amp-kaltura-player';
 
 describes.realWin(
   'amp-kaltura-player',

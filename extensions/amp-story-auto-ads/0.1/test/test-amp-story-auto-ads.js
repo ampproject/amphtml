@@ -1,3 +1,19 @@
+import {AmpStory} from '#bento/components/amp-story/amp-story';
+import {NavigationDirection} from '#bento/components/amp-story/amp-story-page';
+import {
+  Action,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+import * as storyEvents from '#bento/components/amp-story/events';
+
+import {
+  AmpStoryAutoAds,
+  Attributes,
+} from '#extensions/amp-story-auto-ads/0.1/amp-story-auto-ads';
+import {StoryAdPage} from '#extensions/amp-story-auto-ads/0.1/story-ad-page';
+
 import {CommonSignals} from '#core/constants/common-signals';
 
 import {forceExperimentBranch} from '#experiments';
@@ -14,18 +30,6 @@ import {
 } from './story-mock';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
-import {StoryAdPage} from '../story-ad-page';
-
-import {AmpStory} from '#bento/components/amp-story/amp-story';
-import {NavigationDirection} from '#bento/components/amp-story/amp-story-page';
-import {
-  Action,
-  StateProperty,
-  UIType,
-  getStoreService,
-} from '#bento/components/amp-story/amp-story-store-service';
-import * as storyEvents from '#bento/components/amp-story/events';
 
 const NOOP = () => {};
 

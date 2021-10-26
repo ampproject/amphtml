@@ -7,7 +7,7 @@ import {useResourcesNotify} from '#preact/utils';
 
 import {user} from '#utils/log';
 
-import {getTimeZoneName} from '../format';
+import {getTimeZoneName} from './format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';

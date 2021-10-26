@@ -1,14 +1,17 @@
-import * as Preact from '#preact';
-import {forwardRef} from '#preact/compat';
-import {useMemo} from '#preact';
+import {VideoIframe} from '#bento/components/amp-video/video-iframe';
+
 import {dispatchCustomEvent} from '#core/dom';
+import {parseQueryString} from '#core/types/string/url';
+
+import * as Preact from '#preact';
+import {useMemo} from '#preact';
+import {forwardRef} from '#preact/compat';
+
 import {
   DailymotionEvents,
   getDailymotionIframeSrc,
   makeDailymotionMessage,
-} from '../dailymotion-api';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {parseQueryString} from '#core/types/string/url';
+} from './dailymotion-api';
 
 /**
  * @param {string} method

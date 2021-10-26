@@ -1,11 +1,11 @@
-import * as Preact from '#preact';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../component';
+} from '#bento/components/amp-accordion/component';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'Accordion',

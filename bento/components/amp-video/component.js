@@ -1,22 +1,13 @@
-import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
-import {tryPlay} from '#core/dom/video';
-import {Deferred} from '#core/data-structures/promise';
+import objstr from 'obj-str';
+
 import {Loading} from '#core/constants/loading-instructions';
-import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {
-  MetadataDef,
-  parseFavicon,
-  parseOgImage,
-  parseSchemaImage,
-  setMediaSession,
-} from '../../../src/mediasession-helper';
 import {ReadyState} from '#core/constants/ready-state';
-import {dict} from '#core/types/object';
-import {forwardRef} from '#preact/compat';
+import {Deferred} from '#core/data-structures/promise';
+import {tryPlay} from '#core/dom/video';
 import {once} from '#core/types/function';
-import {useAmpContext, useLoading} from '#preact/context';
-import {useStyles as useAutoplayStyles} from './autoplay.jss';
+import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -26,9 +17,22 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+import {useAmpContext, useLoading} from '#preact/context';
 import {useResourcesNotify} from '#preact/utils';
+
+import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
+
+import {
+  MetadataDef,
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+  setMediaSession,
+} from '../../../src/mediasession-helper';
+import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player

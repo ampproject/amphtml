@@ -1,3 +1,5 @@
+import {AmpList} from '#extensions/amp-list/0.1/amp-list';
+
 import {Services} from '#service';
 import {AmpDocService} from '#service/ampdoc-impl';
 
@@ -6,8 +8,6 @@ import {
   measureMutateElementStub,
   mutateElementStub,
 } from '#testing/helpers/service';
-
-import {AmpList} from '../amp-list';
 
 describes.realWin(
   'amp-list layout container',

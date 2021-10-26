@@ -5,7 +5,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
-} from '../concurrent-load';
+} from '#extensions/amp-ad/0.1/concurrent-load';
 import {installTimerService} from '#service/timer-impl';
 import {macroTask} from '#testing/helpers';
 

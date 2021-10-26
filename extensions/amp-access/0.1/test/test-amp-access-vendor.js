@@ -1,5 +1,5 @@
-import {AccessVendor} from '../access-vendor';
-import {AccessVendorAdapter} from '../amp-access-vendor';
+import {AccessVendor} from '#extensions/amp-access/0.1/access-vendor';
+import {AccessVendorAdapter} from '#extensions/amp-access/0.1/amp-access-vendor';
 
 describes.realWin('AccessVendorAdapter', {amp: true}, (env) => {
   let ampdoc;

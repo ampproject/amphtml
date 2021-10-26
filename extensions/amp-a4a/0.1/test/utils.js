@@ -1,6 +1,6 @@
-import {dict} from '#core/types/object';
+import {AmpA4A} from '#extensions/amp-a4a/0.1/amp-a4a';
 
-import {AmpA4A} from '../amp-a4a';
+import {dict} from '#core/types/object';
 
 /** @type {string} @private */
 export const TEST_URL =

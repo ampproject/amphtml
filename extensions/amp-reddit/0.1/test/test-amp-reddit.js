@@ -1,4 +1,4 @@
-import '../amp-reddit';
+import '#extensions/amp-reddit/0.1/amp-reddit';
 import {reddit} from '#3p/reddit';
 
 describes.realWin(

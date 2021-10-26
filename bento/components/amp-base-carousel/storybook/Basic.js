@@ -1,5 +1,6 @@
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/component';
+
 import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../component';
 
 export default {
   title: 'BaseCarousel',

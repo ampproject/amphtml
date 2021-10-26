@@ -1,8 +1,12 @@
-import '../../../amp-ad/0.1/amp-ad';
-import {Services} from '#service';
+import '#extensions/amp-ad/0.1/amp-ad';
 
-import {AdTracker} from '../ad-tracker';
-import {PlacementState, getPlacementsFromConfigObj} from '../placement';
+import {AdTracker} from '#extensions/amp-auto-ads/0.1/ad-tracker';
+import {
+  PlacementState,
+  getPlacementsFromConfigObj,
+} from '#extensions/amp-auto-ads/0.1/placement';
+
+import {Services} from '#service';
 
 describes.realWin(
   'placement',

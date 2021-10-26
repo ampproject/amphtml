@@ -2,12 +2,15 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
+import {AmpAdNetworkDoubleclickImpl} from '#extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
+import {
+  SafeframeHostApi,
+  removeSafeframeListener,
+} from '#extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host';
+
 import {createElementWithAttributes} from '#core/dom';
 import {utf8Encode} from '#core/types/string/bytes';
-
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

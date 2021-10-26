@@ -40,6 +40,25 @@ import {
 import {getMultiSizeDimensions} from '#ads/google/utils';
 
 import {
+  AmpA4A,
+  ConsentTupleDef,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '#extensions/amp-a4a/0.1/amp-a4a';
+import {
+  RefreshManager, // eslint-disable-line no-unused-vars
+  getRefreshManager,
+} from '#extensions/amp-a4a/0.1/refresh-manager';
+import {AMP_SIGNATURE_HEADER} from '#extensions/amp-a4a/0.1/signature-verifier';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+  waitFor3pThrottle,
+} from '#extensions/amp-ad/0.1/concurrent-load';
+
+import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
@@ -94,24 +113,6 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {getMode} from '../../../src/mode';
-import {
-  AmpA4A,
-  ConsentTupleDef,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
-  RefreshManager, // eslint-disable-line no-unused-vars
-  getRefreshManager,
-} from '../../amp-a4a/0.1/refresh-manager';
-import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
-import {
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-  is3pThrottled,
-  waitFor3pThrottle,
-} from '../../amp-ad/0.1/concurrent-load';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';

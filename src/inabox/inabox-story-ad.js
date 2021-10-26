@@ -1,13 +1,14 @@
-import {CSS as inaboxCSS} from '../../build/amp-story-auto-ads-inabox-0.1.css';
-import {CSS as sharedCSS} from '../../build/amp-story-auto-ads-shared-0.1.css';
-import {ButtonTextFitter} from '../../extensions/amp-story-auto-ads/0.1/story-ad-button-text-fitter';
+import {ButtonTextFitter} from '#extensions/amp-story-auto-ads/0.1/story-ad-button-text-fitter';
 import {
   START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
   maybeCreateAttribution,
   validateCtaMetadata,
-} from '../../extensions/amp-story-auto-ads/0.1/story-ad-ui';
+} from '#extensions/amp-story-auto-ads/0.1/story-ad-ui';
+
+import {CSS as inaboxCSS} from '../../build/amp-story-auto-ads-inabox-0.1.css';
+import {CSS as sharedCSS} from '../../build/amp-story-auto-ads-shared-0.1.css';
 import {installStylesForDoc} from '../style-installer';
 
 /**

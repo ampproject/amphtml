@@ -1,6 +1,6 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {DomFingerprint} from '#core/dom/fingerprint';
-import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
+import {GEO_IN_GROUP} from '#extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {buildUrl} from './shared/url-builder';
 import {dev, devAssert, user} from '#utils/log';

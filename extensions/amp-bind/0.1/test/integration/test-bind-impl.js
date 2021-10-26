@@ -5,6 +5,9 @@
 
 import * as fakeTimers from '@sinonjs/fake-timers';
 
+import {BindEvents} from '#extensions/amp-bind/0.1/bind-events';
+import {Bind} from '#extensions/amp-bind/0.1/bind-impl';
+
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
@@ -15,8 +18,6 @@ import {Services} from '#service';
 import {dev, user} from '#utils/log';
 
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
-import {BindEvents} from '../../bind-events';
-import {Bind} from '../../bind-impl';
 
 /**
  * @param {!Object} env

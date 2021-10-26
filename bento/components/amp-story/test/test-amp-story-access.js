@@ -1,11 +1,16 @@
 import {
+  AmpStoryAccess,
+  Type,
+} from '#bento/components/amp-story/amp-story-access';
+import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../amp-story-store-service';
-import {AmpStoryAccess, Type} from '../amp-story-access';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+} from '#bento/components/amp-story/amp-story-store-service';
+
 import {afterRenderPromise} from '#testing/helpers';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-access', {amp: true}, (env) => {
   let win;

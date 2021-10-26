@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-story-captions';
+import '#extensions/amp-story-captions/0.1/amp-story-captions';
 import {createElementWithAttributes} from '#core/dom';
 
 const BLANK_VIDEO =

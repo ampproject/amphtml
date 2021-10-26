@@ -1,5 +1,7 @@
-import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
+
+import {dev} from '#utils/log';
+
 import {renderAsElement} from './simple-template';
 
 /** @const {string} */

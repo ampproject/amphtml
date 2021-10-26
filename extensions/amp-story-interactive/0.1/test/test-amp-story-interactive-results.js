@@ -8,8 +8,8 @@ import {
   decideStrategy,
   processResultsCategory,
   processResultsPercentage,
-} from '../amp-story-interactive-results';
-import {InteractiveType} from '../amp-story-interactive-abstract';
+} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-results';
+import {InteractiveType} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';

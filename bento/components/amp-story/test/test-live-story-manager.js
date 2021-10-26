@@ -1,11 +1,14 @@
-import {Action} from '../amp-story-store-service';
-import {AmpStory} from '../amp-story';
-import {AmpStoryPage} from '../amp-story-page';
+import {AmpStory} from '#bento/components/amp-story/amp-story';
+import {AmpStoryPage} from '#bento/components/amp-story/amp-story-page';
+import {Action} from '#bento/components/amp-story/amp-story-store-service';
+import {LiveStoryManager} from '#bento/components/amp-story/live-story-manager';
+
 import {CommonSignals} from '#core/constants/common-signals';
-import {LiveStoryManager} from '../live-story-manager';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
 import {addAttributesToElement} from '#core/dom';
+
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

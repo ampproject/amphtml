@@ -1,8 +1,11 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {forwardRef, toChildArray} from '#preact/compat';
+import objstr from 'obj-str';
+
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/component';
+
 import {setStyle} from '#core/dom/style';
 import {getWin} from '#core/window';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -10,8 +13,9 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {forwardRef, toChildArray} from '#preact/compat';
+
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;

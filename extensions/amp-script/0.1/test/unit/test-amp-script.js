@@ -1,5 +1,12 @@
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 
+import {
+  AmpScript,
+  AmpScriptService,
+  SanitizerImpl,
+  StorageLocation,
+} from '#extensions/amp-script/0.1/amp-script';
+
 import {Services} from '#service';
 
 import {user} from '#utils/log';
@@ -10,12 +17,6 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../../src/service-helpers';
-import {
-  AmpScript,
-  AmpScriptService,
-  SanitizerImpl,
-  StorageLocation,
-} from '../../amp-script';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let element;

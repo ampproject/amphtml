@@ -1,25 +1,28 @@
-import {Action, StateProperty, UIType} from './amp-story-store-service';
-import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
-import {HistoryState, setHistoryState} from './history';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
-import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
+import {removeElement} from '#core/dom';
 import {closest} from '#core/dom/query';
-import {dev, devAssert} from '#utils/log';
-import {getHistoryState} from '#core/window/history';
-import {getLocalizationService} from './amp-story-localization-service';
-import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {setImportantStyles, toggle} from '#core/dom/style';
+import {getHistoryState} from '#core/window/history';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {dev, devAssert} from '#utils/log';
+
+import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {
   allowlistFormActions,
   getResponseAttributeElements,
   setupResponseAttributeElements,
 } from './amp-story-form';
-import {removeElement} from '#core/dom';
-import {setImportantStyles, toggle} from '#core/dom/style';
-
+import {getLocalizationService} from './amp-story-localization-service';
+import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
+import {Action, StateProperty, UIType} from './amp-story-store-service';
+import {HistoryState, setHistoryState} from './history';
+import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {triggerClickFromLightDom} from './utils';
+
+import {getSourceOrigin} from '../../../src/url';
 
 /**
  * Distance to swipe before opening attachment.

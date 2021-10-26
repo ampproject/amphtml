@@ -1,8 +1,8 @@
+import {getAdNetworkConfig} from '#extensions/amp-auto-ads/0.1/ad-network-config';
+
 import {Layout} from '#core/dom/layout';
 
 import {Services} from '#service';
-
-import {getAdNetworkConfig} from '../ad-network-config';
 
 describes.realWin(
   'premiumads-network-config',

@@ -1,4 +1,7 @@
-import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
+import {
+  RE_NONALPHA,
+  RE_WHITESPACE,
+} from '#extensions/amp-addthis/0.1/constants';
 import {getDetailsForMeta} from './meta';
 import {rot13Array} from './rot13';
 

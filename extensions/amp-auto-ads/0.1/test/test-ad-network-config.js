@@ -1,4 +1,4 @@
-import {getAdNetworkConfig} from '../ad-network-config';
+import {getAdNetworkConfig} from '#extensions/amp-auto-ads/0.1/ad-network-config';
 
 describes.realWin(
   'ad-network-config',

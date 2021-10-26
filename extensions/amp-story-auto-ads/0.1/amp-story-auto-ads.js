@@ -1,3 +1,10 @@
+import {
+  StateProperty,
+  UIType,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {EventType, dispatch} from '#bento/components/amp-story/events';
+import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
+
 import {CommonSignals} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {svgFor} from '#core/dom/static-template';
@@ -36,13 +43,6 @@ import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-
-import {
-  StateProperty,
-  UIType,
-} from '#bento/components/amp-story/amp-story-store-service';
-import {EventType, dispatch} from '#bento/components/amp-story/events';
-import {createShadowRootWithStyle} from '#bento/components/amp-story/utils';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';

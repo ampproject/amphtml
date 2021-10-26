@@ -1,4 +1,4 @@
-import '../amp-iframely';
+import '#extensions/amp-iframely/0.1/amp-iframely';
 
 describes.realWin(
   'amp-iframely',

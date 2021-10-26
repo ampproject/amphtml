@@ -1,4 +1,4 @@
-import {AmpAdCustom} from '../amp-ad-custom';
+import {AmpAdCustom} from '#extensions/amp-ad/0.1/amp-ad-custom';
 import {LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';
 import {createElementWithAttributes, removeChildren} from '#core/dom';

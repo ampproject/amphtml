@@ -1,7 +1,7 @@
+import {AmpAudio} from '#extensions/amp-audio/0.1/amp-audio';
+
 import {htmlFor} from '#core/dom/static-template';
 import {naturalDimensions_} from '#core/static-layout';
-
-import {AmpAudio} from '../amp-audio';
 
 describes.realWin(
   'amp-audio',

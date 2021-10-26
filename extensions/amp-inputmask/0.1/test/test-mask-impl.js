@@ -1,4 +1,4 @@
-import {Mask} from '../mask-impl';
+import {Mask} from '#extensions/amp-inputmask/0.1/mask-impl';
 
 describes.sandboxed('amp-inputmask mask-impl', {}, (env) => {
   class FakeElement {}

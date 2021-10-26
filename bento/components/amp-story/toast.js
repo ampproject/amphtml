@@ -1,6 +1,7 @@
-import {Services} from '#service';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {getWin} from '#core/window';
+
+import {Services} from '#service';
 
 /** @private @const {string} */
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';

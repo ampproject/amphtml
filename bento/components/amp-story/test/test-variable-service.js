@@ -1,6 +1,12 @@
-import {Action, getStoreService} from '../amp-story-store-service';
-import {AdvancementMode} from '../story-analytics';
-import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {
+  Action,
+  getStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {AdvancementMode} from '#bento/components/amp-story/story-analytics';
+import {
+  AnalyticsVariable,
+  getVariableService,
+} from '#bento/components/amp-story/variable-service';
 
 describes.fakeWin('amp-story variable service', {}, (env) => {
   let variableService;

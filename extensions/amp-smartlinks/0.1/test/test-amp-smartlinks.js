@@ -1,10 +1,10 @@
+import {LinkRewriterManager} from '#extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+import {AmpSmartlinks} from '#extensions/amp-smartlinks/0.1/amp-smartlinks';
+import * as LinkmateOptions from '#extensions/amp-smartlinks/0.1/linkmate-options';
+
 import * as DocumentReady from '#core/document/ready';
 
 import {Services} from '#service';
-
-import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
-import {AmpSmartlinks} from '../amp-smartlinks';
-import * as LinkmateOptions from '../linkmate-options';
 
 const helpersFactory = (env) => {
   return {

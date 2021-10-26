@@ -1,4 +1,4 @@
-import '../amp-facebook-comments';
+import '#extensions/amp-facebook-comments/0.1/amp-facebook-comments';
 import {createElementWithAttributes} from '#core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {resetServiceForTesting} from '../../../../src/service-helpers';

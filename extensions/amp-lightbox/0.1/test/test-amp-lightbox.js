@@ -1,4 +1,4 @@
-import '../amp-lightbox';
+import '#extensions/amp-lightbox/0.1/amp-lightbox';
 import * as dom from '#core/dom';
 import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';

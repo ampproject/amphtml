@@ -1,9 +1,12 @@
+import {
+  AmpLiveList,
+  getNumberMaxOrDefault,
+} from '#extensions/amp-live-list/0.1/amp-live-list';
+import {LiveListManager} from '#extensions/amp-live-list/0.1/live-list-manager';
+
 import {AmpEvents} from '#core/constants/amp-events';
 
 import {AmpDocSingle} from '#service/ampdoc-impl';
-
-import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
-import {LiveListManager} from '../live-list-manager';
 
 describes.realWin(
   'amp-live-list',

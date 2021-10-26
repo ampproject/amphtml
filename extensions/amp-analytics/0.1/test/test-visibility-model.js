@@ -1,4 +1,4 @@
-import {VisibilityModel} from '../visibility-model';
+import {VisibilityModel} from '#extensions/amp-analytics/0.1/visibility-model';
 
 const NO_SPEC = {};
 const NO_CALC = () => 0;

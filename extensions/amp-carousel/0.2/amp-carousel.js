@@ -1,9 +1,9 @@
-import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
+import {ActionSource} from '#extensions/amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
-import {Carousel} from '../../amp-base-carousel/0.1/carousel';
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
-import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
+import {Carousel} from '#extensions/amp-base-carousel/0.1/carousel';
+import {CarouselEvents} from '#extensions/amp-base-carousel/0.1/carousel-events';
+import {ChildLayoutManager} from '#extensions/amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '#service';
 import {
   closestAncestorElementBySelector,

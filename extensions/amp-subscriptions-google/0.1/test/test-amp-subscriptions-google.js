@@ -1,3 +1,19 @@
+import {
+  AmpFetcher,
+  GoogleSubscriptionsPlatform,
+} from '#extensions/amp-subscriptions-google/0.1/amp-subscriptions-google';
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalytics,
+} from '#extensions/amp-subscriptions/0.1/analytics';
+import {SubscriptionsScoreFactor} from '#extensions/amp-subscriptions/0.1/constants';
+import {
+  Entitlement,
+  GrantReason,
+} from '#extensions/amp-subscriptions/0.1/entitlement';
+import {ServiceAdapter} from '#extensions/amp-subscriptions/0.1/service-adapter';
+
 import {WindowInterface} from '#core/window/interface';
 
 import {toggleExperiment} from '#experiments';
@@ -12,22 +28,6 @@ import {
   Entitlement as SwgEntitlement,
 } from '#third_party/subscriptions-project/swg';
 import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
-
-import {
-  Action,
-  ActionStatus,
-  SubscriptionAnalytics,
-} from '../../../amp-subscriptions/0.1/analytics';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
-import {
-  Entitlement,
-  GrantReason,
-} from '../../../amp-subscriptions/0.1/entitlement';
-import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
-import {
-  AmpFetcher,
-  GoogleSubscriptionsPlatform,
-} from '../amp-subscriptions-google';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';

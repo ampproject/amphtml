@@ -1,4 +1,4 @@
-import {ConsentLinkerReader} from '../linker-reader';
+import {ConsentLinkerReader} from '#extensions/amp-consent/0.1/linker-reader';
 import {mockWindowInterface} from '#testing/helpers/service';
 
 describes.realWin('LinkerReader', {amp: true}, (env) => {

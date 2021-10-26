@@ -1,4 +1,4 @@
-import {ACTION_TYPE, AmpConsent} from '../amp-consent';
+import {ACTION_TYPE, AmpConsent} from '#extensions/amp-consent/0.1/amp-consent';
 import {
   CONSENT_ITEM_STATE,
   METADATA_STORAGE_KEY,
@@ -7,10 +7,10 @@ import {
   constructConsentInfo,
   constructMetadata,
   getConsentStateValue,
-} from '../consent-info';
+} from '#extensions/amp-consent/0.1/consent-info';
 import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
-import {ConsentStateManager} from '../consent-state-manager';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {ConsentStateManager} from '#extensions/amp-consent/0.1/consent-state-manager';
+import {GEO_IN_GROUP} from '#extensions/amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';
 import {macroTask} from '#testing/helpers';

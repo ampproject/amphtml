@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
-import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
+
+import {VideoElementWithActions} from '#bento/components/amp-video/storybook/_helpers';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-brightcove-1_0',

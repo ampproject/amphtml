@@ -1,5 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
-import '../amp-riddle-quiz';
+import '#extensions/amp-riddle-quiz/0.1/amp-riddle-quiz';
 
 describes.realWin(
   'amp-riddle-quiz',

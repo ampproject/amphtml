@@ -1,5 +1,8 @@
 import {ActionTrust} from '#core/constants/action-constants';
-import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
+import {
+  AmpIframe,
+  setTrackingIframeTimeoutForTesting,
+} from '#extensions/amp-iframe/0.1/amp-iframe';
 import {CommonSignals} from '#core/constants/common-signals';
 import {LayoutPriority} from '#core/dom/layout';
 import {Services} from '#service';

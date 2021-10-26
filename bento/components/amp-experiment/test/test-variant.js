@@ -1,7 +1,7 @@
+import {allocateVariant} from '#bento/components/amp-experiment/variant';
+
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
-
-import {allocateVariant} from '../variant';
 
 describes.sandboxed('allocateVariant', {}, (env) => {
   let fakeHead;

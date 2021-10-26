@@ -1,4 +1,4 @@
-import '../amp-soundcloud';
+import '#bento/components/amp-soundcloud/amp-soundcloud';
 import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
@@ -34,7 +34,7 @@ describes.realWin(
      * @param {strng|undefined} playlistId
      * @param {boolean|undefined} visual
      * @param {string|undefined} secretToken
-     * @returns Soundcloud Widget URL
+     * @return Soundcloud Widget URL
      */
     const buildURL = (color, trackId, playlistId, visual, secretToken) => {
       // Build Base URL

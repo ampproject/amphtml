@@ -1,13 +1,19 @@
+import {ShareWidget} from '#bento/components/amp-story/amp-story-share';
+import {
+  ShareMenu,
+  VISIBLE_CLASS,
+} from '#bento/components/amp-story/amp-story-share-menu';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-} from '../amp-story-store-service';
+} from '#bento/components/amp-story/amp-story-store-service';
+
 import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
-import {ShareWidget} from '../amp-story-share';
 import {getStyle} from '#core/dom/style';
+
+import {Services} from '#service';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {

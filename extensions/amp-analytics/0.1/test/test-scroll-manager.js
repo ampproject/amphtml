@@ -1,5 +1,5 @@
-import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {ScrollManager} from '../scroll-manager';
+import {AmpdocAnalyticsRoot} from '#extensions/amp-analytics/0.1/analytics-root';
+import {ScrollManager} from '#extensions/amp-analytics/0.1/scroll-manager';
 
 describes.realWin('ScrollManager', {amp: 1}, (env) => {
   let win;

@@ -1,21 +1,25 @@
+import {isAmpElement} from '#core/dom/amp-element-helpers';
+import {Layout} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+
+import {Services} from '#service';
+import {LocalizedStringId} from '#service/localization/strings';
+
+import {listen} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import {getLocalizationService} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
-import {Services} from '#service';
-import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '#utils/log';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
-import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {listen} from '#utils/event-helper';
-import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+
+import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;

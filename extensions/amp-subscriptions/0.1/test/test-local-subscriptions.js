@@ -1,9 +1,15 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
-import {Dialog} from '../dialog';
-import {Entitlement, GrantReason} from '../entitlement';
+import {
+  Action,
+  SubscriptionAnalytics,
+} from '#extensions/amp-subscriptions/0.1/analytics';
+import {Dialog} from '#extensions/amp-subscriptions/0.1/dialog';
+import {
+  Entitlement,
+  GrantReason,
+} from '#extensions/amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '#third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../service-adapter';
-import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
+import {ServiceAdapter} from '#extensions/amp-subscriptions/0.1/service-adapter';
+import {localSubscriptionPlatformFactory} from '#extensions/amp-subscriptions/0.1/local-subscription-platform';
 
 describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
   let ampdoc;

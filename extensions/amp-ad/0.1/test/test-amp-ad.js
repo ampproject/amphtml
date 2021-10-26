@@ -1,5 +1,5 @@
-import {AmpAd} from '../amp-ad';
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {AmpAd} from '#extensions/amp-ad/0.1/amp-ad';
+import {AmpAd3PImpl} from '#extensions/amp-ad/0.1/amp-ad-3p-impl';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {getA4ARegistry} from '#ads/_a4a-config';

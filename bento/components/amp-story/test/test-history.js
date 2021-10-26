@@ -1,6 +1,12 @@
-import {LOCAL_STORAGE_KEY, getHistoryState, setHistoryState} from '../history';
-import {loadPromise} from '#utils/event-helper';
+import {
+  LOCAL_STORAGE_KEY,
+  getHistoryState,
+  setHistoryState,
+} from '#bento/components/amp-story/history';
+
 import {removeElement} from '#core/dom';
+
+import {loadPromise} from '#utils/event-helper';
 
 describes.realWin('amp-story history', {}, (env) => {
   let clock;

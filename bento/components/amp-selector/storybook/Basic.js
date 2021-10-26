@@ -1,9 +1,13 @@
 import {select, withKnobs} from '@storybook/addon-knobs';
 
+import {
+  BentoSelector,
+  BentoSelectorOption,
+} from '#bento/components/amp-selector/component';
+
 import * as Preact from '#preact';
 import {useState} from '#preact';
 
-import {BentoSelector, BentoSelectorOption} from '../component';
 export default {
   title: 'Selector',
   component: BentoSelector,

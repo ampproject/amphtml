@@ -1,8 +1,8 @@
-import {Action} from '../analytics';
-import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
-import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
-import {ServiceAdapter} from '../service-adapter';
+import {Action} from '#extensions/amp-subscriptions/0.1/analytics';
+import {Dialog} from '#extensions/amp-subscriptions/0.1/dialog';
+import {Entitlement} from '#extensions/amp-subscriptions/0.1/entitlement';
+import {LocalSubscriptionPlatformRenderer} from '#extensions/amp-subscriptions/0.1/local-subscription-platform-renderer';
+import {ServiceAdapter} from '#extensions/amp-subscriptions/0.1/service-adapter';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 

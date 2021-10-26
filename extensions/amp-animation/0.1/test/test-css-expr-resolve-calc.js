@@ -1,4 +1,4 @@
-import * as ast from '../parsers/css-expr-ast';
+import * as ast from '#extensions/amp-animation/0.1/parsers/css-expr-ast';
 
 describes.sandboxed('CSS resolve calc', {}, (env) => {
   const normalize = true;

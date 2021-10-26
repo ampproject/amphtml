@@ -1,4 +1,4 @@
-import '../amp-vimeo';
+import '#bento/components/amp-vimeo/amp-vimeo';
 import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';

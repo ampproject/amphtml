@@ -1,4 +1,4 @@
-import '../amp-beopinion';
+import '#extensions/amp-beopinion/0.1/amp-beopinion';
 import {beopinion} from '#3p/beopinion';
 
 describes.realWin(

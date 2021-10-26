@@ -1,15 +1,18 @@
+import {
+  AdResponseType,
+  ValidatorResult,
+} from '#extensions/amp-a4a/0.1/amp-ad-type-defs';
+import {
+  CryptographicValidator,
+  SIGNATURE_VERIFIER_PROPERTY_NAME,
+} from '#extensions/amp-a4a/0.1/cryptographic-validator';
+import {VerificationStatus} from '#extensions/amp-a4a/0.1/signature-verifier';
+
 import {utf8Encode} from '#core/types/string/bytes';
 
 import {user} from '#utils/log';
 
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-
-import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
-import {
-  CryptographicValidator,
-  SIGNATURE_VERIFIER_PROPERTY_NAME,
-} from '../cryptographic-validator';
-import {VerificationStatus} from '../signature-verifier';
 
 const realWinConfig = {
   amp: {},

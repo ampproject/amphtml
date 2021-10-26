@@ -1,12 +1,12 @@
 import {mount} from 'enzyme';
 
+import {BentoInstagram} from '#bento/components/amp-instagram/component';
+
 import * as Preact from '#preact';
 import {createRef} from '#preact';
 import {WithAmpContext} from '#preact/context';
 
 import {waitFor} from '#testing/helpers/service';
-
-import {BentoInstagram} from '../component';
 
 describes.sandboxed('BentoInstagram preact component v1.0', {}, (env) => {
   it('Normal render', () => {

@@ -1,9 +1,9 @@
-import '../../../amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
+import {AnchorAdStrategy} from '#extensions/amp-auto-ads/0.1/anchor-ad-strategy';
+
 import {waitForChild} from '#core/dom';
 
 import {Services} from '#service';
-
-import {AnchorAdStrategy} from '../anchor-ad-strategy';
 
 describes.realWin(
   'anchor-ad-strategy',

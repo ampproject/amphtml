@@ -1,4 +1,4 @@
-import '../amp-nexxtv-player';
+import '#extensions/amp-nexxtv-player/0.1/amp-nexxtv-player';
 import {createElementWithAttributes} from '#core/dom';
 
 import {listenOncePromise} from '#utils/event-helper';

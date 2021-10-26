@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-social-share';
+import '#extensions/amp-social-share/0.1/amp-social-share';
 import {Keys} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 

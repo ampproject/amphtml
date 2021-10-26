@@ -1,10 +1,10 @@
-import * as analyticsApi from '#utils/analytics';
-
 import {
   AnalyticsEvents,
   AnalyticsVars,
   StoryAdAnalytics,
-} from '../story-ad-analytics';
+} from '#extensions/amp-story-auto-ads/0.1/story-ad-analytics';
+
+import * as analyticsApi from '#utils/analytics';
 
 describes.realWin(
   'amp-story-auto-ads:story-ad-analytics',

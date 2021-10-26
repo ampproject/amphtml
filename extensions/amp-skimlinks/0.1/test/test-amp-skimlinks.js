@@ -1,13 +1,14 @@
+import {SKIMLINKS_REWRITER_ID} from '#extensions/amp-skimlinks/0.1/constants';
+import {EVENTS as linkRewriterEvents} from '#extensions/amp-skimlinks/0.1/link-rewriter/constants';
+import {LinkRewriterManager} from '#extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
+import * as SkimOptionsModule from '#extensions/amp-skimlinks/0.1/skim-options';
+
 import {Deferred} from '#core/data-structures/promise';
 import * as DocumentReady from '#core/document/ready';
 
 import helpersFactory from './helpers';
 
 import * as chunkModule from '../../../../src/chunk';
-import {SKIMLINKS_REWRITER_ID} from '../constants';
-import {EVENTS as linkRewriterEvents} from '../link-rewriter/constants';
-import {LinkRewriterManager} from '../link-rewriter/link-rewriter-manager';
-import * as SkimOptionsModule from '../skim-options';
 
 describes.fakeWin(
   'amp-skimlinks',

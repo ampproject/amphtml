@@ -1,7 +1,10 @@
-import * as Preact from '#preact';
-import {Render} from '../component';
-import {macroTask} from '#testing/helpers';
 import {mount} from 'enzyme';
+
+import {Render} from '#bento/components/amp-render/component';
+
+import * as Preact from '#preact';
+
+import {macroTask} from '#testing/helpers';
 
 describes.sandboxed('Render 1.0 preact component', {}, () => {
   it('should render', async () => {

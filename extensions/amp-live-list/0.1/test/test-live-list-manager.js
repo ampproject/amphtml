@@ -1,7 +1,7 @@
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
-} from '../live-list-manager';
+} from '#extensions/amp-live-list/0.1/live-list-manager';
 
 const XHR_BUFFER_SIZE = 2;
 

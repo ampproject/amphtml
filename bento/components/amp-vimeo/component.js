@@ -1,3 +1,5 @@
+import {VideoIframe} from '#bento/components/amp-video/video-iframe';
+
 import {dispatchCustomEvent} from '#core/dom';
 
 import * as Preact from '#preact';
@@ -6,17 +8,17 @@ import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
 
 import {
-  objOrParseJson,
-  postMessageWhenAvailable,
-} from '../../../src/iframe-video';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {
   VIMEO_EVENTS,
   getVimeoIframeSrc,
   getVimeoOriginRegExp,
   listenToVimeoEvents,
   makeVimeoMessage,
-} from '../vimeo-api';
+} from './vimeo-api';
+
+import {
+  objOrParseJson,
+  postMessageWhenAvailable,
+} from '../../../src/iframe-video';
 
 /**
  * @param {!HTMLIframeElement} iframe

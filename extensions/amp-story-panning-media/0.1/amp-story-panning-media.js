@@ -1,3 +1,8 @@
+import {
+  Action,
+  StateProperty,
+} from '#bento/components/amp-story/amp-story-store-service';
+
 import {CommonSignals} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {Layout} from '#core/dom/layout';
@@ -11,11 +16,6 @@ import {Services} from '#service';
 import {dev, user} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-
-import {
-  Action,
-  StateProperty,
-} from '#bento/components/amp-story/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';

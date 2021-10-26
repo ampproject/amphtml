@@ -1,10 +1,10 @@
 import {boolean, color, text, withKnobs} from '@storybook/addon-knobs';
 
+import {BentoSoundcloud} from '#bento/components/amp-soundcloud/component';
+
 import * as Preact from '#preact';
 
 import {rgba2hex} from './converter';
-
-import {BentoSoundcloud} from '../component';
 
 export default {
   title: 'Soundcloud',

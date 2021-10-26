@@ -1,3 +1,5 @@
+import {AmpInstallServiceWorker} from '#extensions/amp-install-serviceworker/0.1/amp-install-serviceworker';
+
 import {Services} from '#service';
 
 import {loadPromise} from '#utils/event-helper';
@@ -13,7 +15,6 @@ import {
   isSecureUrlDeprecated,
   parseUrlDeprecated,
 } from '../../../../src/url';
-import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 
 function stubUrlService(sandbox) {
   sandbox.stub(Services, 'urlForDoc').returns({

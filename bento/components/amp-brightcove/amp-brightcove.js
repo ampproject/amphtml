@@ -1,14 +1,19 @@
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-brightcove-1.0.css';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-brightcove-1.0.css';
-import {dict} from '#core/types/object';
-import {isExperimentOn} from '#experiments';
-import {userAssert} from '#utils/log';
-import {Services} from '#service';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';

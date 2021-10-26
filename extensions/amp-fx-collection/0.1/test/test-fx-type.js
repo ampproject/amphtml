@@ -5,7 +5,7 @@ import {
   isValidTypeCombination,
   sanitizeFxTypes,
   validFxTypes,
-} from '../fx-type';
+} from '#extensions/amp-fx-collection/0.1/fx-type';
 
 describes.fakeWin('amp-fx types', {amp: false}, (env) => {
   function expectNoFalseDefinitions(objOrDef, id) {

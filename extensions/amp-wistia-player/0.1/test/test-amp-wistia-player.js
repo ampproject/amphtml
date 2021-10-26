@@ -1,4 +1,4 @@
-import '../amp-wistia-player';
+import '#extensions/amp-wistia-player/0.1/amp-wistia-player';
 import * as fullscreen from '#core/dom/fullscreen';
 
 describes.realWin(

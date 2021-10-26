@@ -1,15 +1,16 @@
+import {
+  AmpFormTextarea,
+  getHasOverflow,
+  handleInitialOverflowElements,
+  maybeResizeTextarea,
+} from '#extensions/amp-form/0.1/amp-form-textarea';
+
 import {Services} from '#service';
 
 import * as eventHelper from '#utils/event-helper';
 
 import {CSS} from '../../../../build/amp-form-0.1.css';
 import {installStylesForDoc} from '../../../../src/style-installer';
-import {
-  AmpFormTextarea,
-  getHasOverflow,
-  handleInitialOverflowElements,
-  maybeResizeTextarea,
-} from '../amp-form-textarea';
 
 describes.realWin(
   'amp-form textarea[autoexpand]',

@@ -1,8 +1,8 @@
+import {A4AVariableSource} from '#extensions/amp-a4a/0.1/a4a-variable-source';
+
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
 import {createIframePromise} from '#testing/iframe';
-
-import {A4AVariableSource} from '../a4a-variable-source';
 
 describes.sandboxed('A4AVariableSource', {}, () => {
   let varSource;

@@ -1,7 +1,7 @@
-import {KeyCodes, Keys} from '#core/constants/key-codes';
+import {KeyboardHandler} from '#extensions/amp-viewer-integration/0.1/keyboard-handler';
+import {Messaging} from '#extensions/amp-viewer-integration/0.1/messaging/messaging';
 
-import {KeyboardHandler} from '../keyboard-handler';
-import {Messaging} from '../messaging/messaging';
+import {KeyCodes, Keys} from '#core/constants/key-codes';
 
 describes.realWin('KeyboardHandler', {}, (env) => {
   let messages;

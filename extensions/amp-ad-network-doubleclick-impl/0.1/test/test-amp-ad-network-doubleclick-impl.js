@@ -2,8 +2,28 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import '#extensions/amp-ad/0.1/amp-ad';
 import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
+
+import {
+  AmpA4A,
+  CREATIVE_SIZE_HEADER,
+  XORIGIN_MODE,
+  signatureVerifierFor,
+} from '#extensions/amp-a4a/0.1/amp-a4a';
+import {
+  AMP_SIGNATURE_HEADER,
+  VerificationStatus,
+} from '#extensions/amp-a4a/0.1/signature-verifier';
+import {
+  AmpAdNetworkDoubleclickImpl,
+  getNetworkId,
+  getPageviewStateTokensForAdRequest,
+  resetLocationQueryParametersForTesting,
+  resetTokensToInstancesMap,
+} from '#extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl';
+import {SafeframeHostApi} from '#extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host';
+import {AmpAd} from '#extensions/amp-ad/0.1/amp-ad';
 
 import {
   CONSENT_POLICY_STATE,
@@ -19,25 +39,6 @@ import {toggleExperiment} from '#experiments';
 import {Services} from '#service';
 
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {
-  AmpA4A,
-  CREATIVE_SIZE_HEADER,
-  XORIGIN_MODE,
-  signatureVerifierFor,
-} from '../../../amp-a4a/0.1/amp-a4a';
-import {
-  AMP_SIGNATURE_HEADER,
-  VerificationStatus,
-} from '../../../amp-a4a/0.1/signature-verifier';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-import {
-  AmpAdNetworkDoubleclickImpl,
-  getNetworkId,
-  getPageviewStateTokensForAdRequest,
-  resetLocationQueryParametersForTesting,
-  resetTokensToInstancesMap,
-} from '../amp-ad-network-doubleclick-impl';
-import {SafeframeHostApi} from '../safeframe-host';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

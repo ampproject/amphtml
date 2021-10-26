@@ -1,9 +1,9 @@
-import '../amp-call-tracking';
+import '#extensions/amp-call-tracking/0.1/amp-call-tracking';
+import {clearResponseCacheForTesting} from '#extensions/amp-call-tracking/0.1/amp-call-tracking';
+
 import {realChildElements} from '#core/dom/query';
 
 import {Services} from '#service';
-
-import {clearResponseCacheForTesting} from '../amp-call-tracking';
 
 describes.realWin(
   'amp-call-tracking',

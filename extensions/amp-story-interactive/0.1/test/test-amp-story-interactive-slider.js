@@ -1,4 +1,4 @@
-import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
+import {AmpStoryInteractiveSlider} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-slider';
 import {AmpStoryStoreService} from '#bento/components/amp-story/amp-story-store-service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
@@ -9,7 +9,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   MID_SELECTION_CLASS,
   POST_SELECTION_CLASS,
-} from '../amp-story-interactive-abstract';
+} from '#extensions/amp-story-interactive/0.1/amp-story-interactive-abstract';
 
 describes.realWin(
   'amp-story-interactive-slider',

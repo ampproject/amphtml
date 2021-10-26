@@ -1,8 +1,10 @@
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {includes} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.

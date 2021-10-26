@@ -3,6 +3,12 @@
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
+import {
+  Action,
+  StateProperty,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {timeStrToMillis} from '#bento/components/amp-story/utils';
+
 import {CommonSignals} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -18,9 +24,6 @@ import {dev, user, userAssert} from '#utils/log';
 import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-
-import {Action, StateProperty} from '#bento/components/amp-story';
-import {timeStrToMillis} from '#bento/components/amp-story/utils';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';

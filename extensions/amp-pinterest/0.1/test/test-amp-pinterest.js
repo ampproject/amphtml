@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-pinterest';
+import '#extensions/amp-pinterest/0.1/amp-pinterest';
 
 describes.realWin(
   'amp-pinterest',

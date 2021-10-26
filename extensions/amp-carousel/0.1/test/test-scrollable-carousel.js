@@ -1,4 +1,4 @@
-import '../amp-carousel';
+import '#extensions/amp-carousel/0.1/amp-carousel';
 import {ActionService} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Services} from '#service';

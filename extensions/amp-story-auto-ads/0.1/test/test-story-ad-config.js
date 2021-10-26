@@ -1,8 +1,8 @@
+import {StoryAdConfig} from '#extensions/amp-story-auto-ads/0.1/story-ad-config';
+
 import {Services} from '#service';
 
 import {createStoryAdElementAndConfig} from './story-mock';
-
-import {StoryAdConfig} from '../story-ad-config';
 
 describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
   let win;

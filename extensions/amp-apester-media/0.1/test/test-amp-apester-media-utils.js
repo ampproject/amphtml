@@ -4,7 +4,7 @@ import {
   extractElementTags,
   extractTags,
   extractTitle,
-} from '../utils';
+} from '#extensions/amp-apester-media/0.1/utils';
 
 describes.realWin('amp-apester-media-utils', {amp: true}, (env) => {
   let window, document;

@@ -1,9 +1,15 @@
-import {Action, getStoreService} from '../amp-story-store-service';
-import {ProgressBar} from '../progress-bar';
-import {Services} from '#service';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 import {expect} from 'chai';
+
+import {
+  Action,
+  getStoreService,
+} from '#bento/components/amp-story/amp-story-store-service';
+import {ProgressBar} from '#bento/components/amp-story/progress-bar';
+
 import {forceExperimentBranch} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
 
 describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
   let win;

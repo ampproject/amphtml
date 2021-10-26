@@ -4,10 +4,10 @@ import {
   SESSION_VALUES,
   SessionManager,
   installSessionServiceForTesting,
-} from '../session-manager';
+} from '#extensions/amp-analytics/0.1/session-manager';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {expect} from 'chai';
-import {installVariableServiceForTesting} from '../variables';
+import {installVariableServiceForTesting} from '#extensions/amp-analytics/0.1/variables';
 import {
   registerServiceBuilder,
   resetServiceForTesting,

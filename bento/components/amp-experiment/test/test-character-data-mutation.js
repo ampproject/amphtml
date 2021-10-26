@@ -1,6 +1,6 @@
-import {toggleExperiment} from '#experiments';
+import {CharacterDataMutation} from '#bento/components/amp-experiment/mutation/character-data-mutation';
 
-import {CharacterDataMutation} from '../mutation/character-data-mutation';
+import {toggleExperiment} from '#experiments';
 
 const TEST_VALUE = 'TEST_VALUE';
 

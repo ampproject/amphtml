@@ -1,10 +1,11 @@
+import {StateProperty} from '#bento/components/amp-story/amp-story-store-service';
 import {
   AdvancementConfig,
   ManualAdvancement,
   MediaBasedAdvancement,
   TimeBasedAdvancement,
-} from '../page-advancement';
-import {StateProperty} from '../amp-story-store-service';
+} from '#bento/components/amp-story/page-advancement';
+
 import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin('page-advancement', {amp: true}, (env) => {

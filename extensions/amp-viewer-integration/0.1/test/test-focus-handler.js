@@ -1,5 +1,5 @@
-import {FocusHandler} from '../focus-handler';
-import {Messaging} from '../messaging/messaging';
+import {FocusHandler} from '#extensions/amp-viewer-integration/0.1/focus-handler';
+import {Messaging} from '#extensions/amp-viewer-integration/0.1/messaging/messaging';
 
 const data = {
   bottom: 0,

@@ -1,3 +1,11 @@
+import {
+  VIMEO_EVENTS,
+  getVimeoIframeSrc,
+  getVimeoOriginRegExp,
+  listenToVimeoEvents,
+  makeVimeoMessage,
+} from '#bento/components/amp-vimeo/vimeo-api';
+
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {isAutoplaySupported} from '#core/dom/video';
@@ -20,13 +28,6 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {
-  VIMEO_EVENTS,
-  getVimeoIframeSrc,
-  getVimeoOriginRegExp,
-  listenToVimeoEvents,
-  makeVimeoMessage,
-} from '../vimeo-api';
 
 const TAG = 'amp-vimeo';
 

@@ -1,4 +1,8 @@
-import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
+import {
+  AnalyticsConfig,
+  expandConfigRequest,
+  mergeObjects,
+} from '#extensions/amp-analytics/0.1/config';
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {map} from '#core/types/object';

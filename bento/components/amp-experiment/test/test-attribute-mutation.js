@@ -1,8 +1,8 @@
-import {toggleExperiment} from '#experiments';
+import {AttributeMutationDefaultClass} from '#bento/components/amp-experiment/mutation/attribute-mutation-default-class';
+import {AttributeMutationDefaultStyle} from '#bento/components/amp-experiment/mutation/attribute-mutation-default-style';
+import {AttributeMutationDefaultUrl} from '#bento/components/amp-experiment/mutation/attribute-mutation-default-url';
 
-import {AttributeMutationDefaultClass} from '../mutation/attribute-mutation-default-class';
-import {AttributeMutationDefaultStyle} from '../mutation/attribute-mutation-default-style';
-import {AttributeMutationDefaultUrl} from '../mutation/attribute-mutation-default-url';
+import {toggleExperiment} from '#experiments';
 
 describes.realWin(
   'amp-experiment attribute-mutation-*',

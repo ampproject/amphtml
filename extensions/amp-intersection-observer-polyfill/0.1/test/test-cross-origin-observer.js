@@ -1,12 +1,13 @@
+import {
+  calculateIntersectionRect,
+  maybeSetupCrossOriginObserver,
+} from '#extensions/amp-intersection-observer-polyfill/0.1/cross-origin-observer';
+
 import {MessageType} from '#core/3p-frame-messaging';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {WindowInterface} from '#core/window/interface';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {
-  calculateIntersectionRect,
-  maybeSetupCrossOriginObserver,
-} from '../cross-origin-observer';
 
 describes.sandboxed('calculateIntersectionRect', {}, () => {
   it('when on screen', () => {

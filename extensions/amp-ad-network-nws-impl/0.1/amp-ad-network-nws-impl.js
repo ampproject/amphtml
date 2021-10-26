@@ -1,10 +1,11 @@
+import {AmpA4A} from '#extensions/amp-a4a/0.1/amp-a4a';
+
 import {removeElement} from '#core/dom';
 import {parseJson} from '#core/types/object/json';
 
 import {dev, devAssert} from '#utils/log';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 
 const URL = 'https://svr.nws.ai/a4a';
 

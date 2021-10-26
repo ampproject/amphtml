@@ -1,7 +1,7 @@
-import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
+import {AmpCacheUrlService} from '#extensions/amp-cache-url/0.1/amp-cache-url';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {fetchCachedSources} from '../video-cache';
+import {fetchCachedSources} from '#extensions/amp-video/0.1/video-cache';
 import {installPerformanceService} from '#service/performance-impl';
 import {xhrServiceForTesting} from '#service/xhr-impl';
 

@@ -1,14 +1,18 @@
 import '#bento/components/amp-base-carousel/amp-base-carousel';
 import '#bento/components/amp-stream-gallery/amp-stream-gallery';
-import {ActionInvocation} from '#service/action-impl';
+import {useStyles} from '#bento/components/amp-base-carousel/component.jss';
+
 import {ActionTrust} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
-import {poll} from '#testing/iframe';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+
 import {toggleExperiment} from '#experiments';
-import {useStyles} from '#bento/components/amp-base-carousel/component.jss';
+
+import {ActionInvocation} from '#service/action-impl';
+
 import {waitFor} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
 
 describes.realWin(
   'amp-stream-gallery',

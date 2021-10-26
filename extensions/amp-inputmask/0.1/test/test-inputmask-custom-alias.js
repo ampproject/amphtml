@@ -3,7 +3,7 @@ import {
   getMaskPrefix,
   getPrefixSubsets,
   removePrefix,
-} from '../inputmask-custom-alias';
+} from '#extensions/amp-inputmask/0.1/inputmask-custom-alias';
 
 describes.sandboxed('inputmask "custom" alias', {}, () => {
   describe('removePrefix', () => {

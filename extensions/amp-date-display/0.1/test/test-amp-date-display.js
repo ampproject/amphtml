@@ -1,4 +1,4 @@
-import '../amp-date-display';
+import '#extensions/amp-date-display/0.1/amp-date-display';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {expect} from 'chai';
 

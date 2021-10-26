@@ -1,10 +1,10 @@
+import {AmpExperiment} from '#bento/components/amp-experiment/amp-experiment';
+import * as applyExperiment from '#bento/components/amp-experiment/apply-experiment';
+import * as variant from '#bento/components/amp-experiment/variant';
+
 import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
-
-import {AmpExperiment} from '../amp-experiment';
-import * as applyExperiment from '../apply-experiment';
-import * as variant from '../variant';
 
 describes.realWin(
   'amp-experiment',

@@ -1,4 +1,4 @@
-import '../amp-timeago';
+import '#extensions/amp-timeago/0.1/amp-timeago';
 
 describes.realWin(
   'amp-timeago',

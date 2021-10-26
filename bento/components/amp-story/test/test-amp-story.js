@@ -1,28 +1,33 @@
-import * as consent from '../../../../src/consent';
-import * as utils from '../utils';
+import {AmpStory} from '#bento/components/amp-story/amp-story';
+import {AmpStoryConsent} from '#bento/components/amp-story/amp-story-consent';
+import {PageState} from '#bento/components/amp-story/amp-story-page';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
   UIType,
-} from '../amp-story-store-service';
-import {AdvancementMode} from '../story-analytics';
-import {AmpStory} from '../amp-story';
-import {AmpStoryConsent} from '../amp-story-consent';
+} from '#bento/components/amp-story/amp-story-store-service';
+import {MediaType} from '#bento/components/amp-story/media-pool';
+import {AdvancementMode} from '#bento/components/amp-story/story-analytics';
+import * as utils from '#bento/components/amp-story/utils';
+
 import {CommonSignals} from '#core/constants/common-signals';
 import {Keys} from '#core/constants/key-codes';
-import {LocalizationService} from '#service/localization';
-import {MediaType} from '../media-pool';
-import {PageState} from '../amp-story-page';
-import {Performance} from '#service/performance-impl';
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
 import {VisibilityState} from '#core/constants/visibility-state';
+import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {toggleExperiment} from '#experiments';
 import {setImportantStyles} from '#core/dom/style';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+import {Performance} from '#service/performance-impl';
+
 import {waitFor} from '#testing/helpers/service';
+
+import * as consent from '../../../../src/consent';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -49,6 +54,7 @@ describes.realWin(
     /**
      * @param {number} count
      * @param {Array<string>=} ids
+     * @param autoAdvance
      * @return {!Array<!Element>}
      */
     async function createStoryWithPages(count, ids = [], autoAdvance = false) {

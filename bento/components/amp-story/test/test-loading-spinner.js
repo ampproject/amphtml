@@ -1,4 +1,4 @@
-import {LoadingSpinner} from '../loading-spinner';
+import {LoadingSpinner} from '#bento/components/amp-story/loading-spinner';
 
 describes.realWin('loading-spinner', {}, (env) => {
   let win;

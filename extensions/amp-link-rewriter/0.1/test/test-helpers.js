@@ -1,4 +1,4 @@
-import {LinkRewriter} from '../link-rewriter';
+import {LinkRewriter} from '#extensions/amp-link-rewriter/0.1/link-rewriter';
 
 const helpersMaker = () => {
   return {

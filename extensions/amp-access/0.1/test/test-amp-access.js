@@ -1,3 +1,6 @@
+import {AccessService} from '#extensions/amp-access/0.1/amp-access';
+import {AccessClientAdapter} from '#extensions/amp-access/0.1/amp-access-client';
+
 import {AmpEvents} from '#core/constants/amp-events';
 import {Observable} from '#core/data-structures/observable';
 
@@ -7,9 +10,6 @@ import {Services} from '#service';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
-
-import {AccessService} from '../amp-access';
-import {AccessClientAdapter} from '../amp-access-client';
 
 describes.fakeWin(
   'AccessService',

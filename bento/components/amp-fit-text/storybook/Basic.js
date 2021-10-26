@@ -1,5 +1,6 @@
+import {BentoFitText} from '#bento/components/amp-fit-text/component';
+
 import * as Preact from '#preact';
-import {BentoFitText} from '../component';
 
 export default {
   title: 'FitText',

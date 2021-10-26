@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {Render} from '../component';
 import {withKnobs} from '@storybook/addon-knobs';
+
+import {Render} from '#bento/components/amp-render/component';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'Render',

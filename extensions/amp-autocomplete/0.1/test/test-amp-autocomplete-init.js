@@ -1,4 +1,4 @@
-import '../amp-autocomplete';
+import '#extensions/amp-autocomplete/0.1/amp-autocomplete';
 
 describes.realWin(
   'amp-autocomplete init',

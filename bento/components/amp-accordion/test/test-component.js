@@ -1,16 +1,16 @@
 import {mount} from 'enzyme';
 
-import * as Preact from '#preact';
-import {useAmpContext} from '#preact/context';
-
-import {waitFor} from '#testing/helpers/service';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../component';
+} from '#bento/components/amp-accordion/component';
+
+import * as Preact from '#preact';
+import {useAmpContext} from '#preact/context';
+
+import {waitFor} from '#testing/helpers/service';
 
 const ContextReader = (props) => {
   const {renderable} = useAmpContext();

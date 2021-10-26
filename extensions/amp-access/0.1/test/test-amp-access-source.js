@@ -1,16 +1,16 @@
+import {AccessClientAdapter} from '#extensions/amp-access/0.1/amp-access-client';
+import {AccessIframeAdapter} from '#extensions/amp-access/0.1/amp-access-iframe';
+import {AccessOtherAdapter} from '#extensions/amp-access/0.1/amp-access-other';
+import {AccessServerAdapter} from '#extensions/amp-access/0.1/amp-access-server';
+import {AccessServerJwtAdapter} from '#extensions/amp-access/0.1/amp-access-server-jwt';
+import {AccessSource} from '#extensions/amp-access/0.1/amp-access-source';
+import {AccessVendorAdapter} from '#extensions/amp-access/0.1/amp-access-vendor';
+
 import {toggleExperiment} from '#experiments';
 
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
-
-import {AccessClientAdapter} from '../amp-access-client';
-import {AccessIframeAdapter} from '../amp-access-iframe';
-import {AccessOtherAdapter} from '../amp-access-other';
-import {AccessServerAdapter} from '../amp-access-server';
-import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
-import {AccessSource} from '../amp-access-source';
-import {AccessVendorAdapter} from '../amp-access-vendor';
 
 describes.fakeWin(
   'AccessSource',

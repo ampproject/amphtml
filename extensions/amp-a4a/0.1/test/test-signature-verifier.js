@@ -1,11 +1,14 @@
 // TODO(@jridgewell, #11081): fix linter to allow fixing weird indentation
 
+import {
+  SignatureVerifier,
+  VerificationStatus,
+} from '#extensions/amp-a4a/0.1/signature-verifier';
+
 import {base64EncodeFromBytes} from '#core/types/string/base64';
 import {utf8Encode} from '#core/types/string/bytes';
 
 import {dev, user} from '#utils/log';
-
-import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};
 

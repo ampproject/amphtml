@@ -1,6 +1,6 @@
-import {BentoVideoIframe} from './component';
+import {VideoBaseElement} from '#bento/components/amp-video/video-base-element';
 
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {BentoVideoIframe} from './component';
 
 export class BaseElement extends VideoBaseElement {}
 

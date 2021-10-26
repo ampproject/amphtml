@@ -1,4 +1,4 @@
-import '../amp-brightcove';
+import '#extensions/amp-brightcove/0.1/amp-brightcove';
 import * as consent from '../../../../src/consent';
 import {BaseElement} from '../../../../src/base-element';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';

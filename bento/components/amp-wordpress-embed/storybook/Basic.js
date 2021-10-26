@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
+import {BentoWordPressEmbed} from '#bento/components/amp-wordpress-embed/component';
 
-import {BentoWordPressEmbed} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'WordPressEmbed',

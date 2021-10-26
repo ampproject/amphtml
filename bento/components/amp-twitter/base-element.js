@@ -1,4 +1,5 @@
 import {PreactBaseElement} from '#preact/base-element';
+
 import {BentoTwitter} from './component';
 
 export class BaseElement extends PreactBaseElement {}

@@ -1,4 +1,4 @@
-import '../amp-gist';
+import '#extensions/amp-gist/0.1/amp-gist';
 
 describes.realWin(
   'amp-gist',

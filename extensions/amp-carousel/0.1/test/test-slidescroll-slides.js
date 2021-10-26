@@ -1,5 +1,5 @@
-import {AmpSlideScroll} from '../slidescroll';
-import {CarouselControls} from '../carousel-controls';
+import {AmpSlideScroll} from '#extensions/amp-carousel/0.1/slidescroll';
+import {CarouselControls} from '#extensions/amp-carousel/0.1/carousel-controls';
 
 describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
   let win, doc;

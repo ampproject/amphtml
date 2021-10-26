@@ -1,17 +1,19 @@
+import {copyChildren, removeChildren} from '#core/dom';
+import {Layout} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setImportantStyles} from '#core/dom/style';
+import {isArray, isObject} from '#core/types';
+import {parseJson} from '#core/types/object/json';
+
+import {dev, user} from '#utils/log';
+
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {Layout} from '#core/dom/layout';
-import {closest} from '#core/dom/query';
-import {copyChildren, removeChildren} from '#core/dom';
-import {dev, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
-import {htmlFor} from '#core/dom/static-template';
-import {isArray, isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
-import {setImportantStyles} from '#core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-access';

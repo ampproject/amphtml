@@ -1,4 +1,4 @@
-import {RE_ALPHA} from '../../constants';
+import {RE_ALPHA} from '#extensions/amp-addthis/0.1/constants';
 
 const RE_NUMDASH = /[0-9\-].*/;
 

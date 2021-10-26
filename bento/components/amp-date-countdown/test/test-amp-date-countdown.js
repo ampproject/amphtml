@@ -1,5 +1,5 @@
-import '../../../amp-mustache/0.2/amp-mustache';
-import '../amp-date-countdown';
+import '#extensions/amp-mustache/0.2/amp-mustache';
+import '#bento/components/amp-date-countdown/amp-date-countdown';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {waitFor} from '#testing/helpers/service';

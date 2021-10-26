@@ -1,17 +1,20 @@
-import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AnimationManager,
   AnimationRunner,
   AnimationSequence,
-} from '../animation';
+} from '#bento/components/amp-story/animation';
+import {presets} from '#bento/components/amp-story/animation-presets';
+
+import {WebAnimationPlayState} from '#extensions/amp-animation/0.1/web-animation-types';
+
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {presets} from '../animation-presets';
 import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 
 const querySelectorAllAnimateIn = (element) =>
   toArray(scopedQuerySelectorAll(element, '[animate-in]'));

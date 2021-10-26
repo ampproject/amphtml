@@ -1,4 +1,4 @@
-import {WebviewViewerForTesting} from '../../viewer-initiated-handshake-viewer-for-testing';
+import {WebviewViewerForTesting} from '#extensions/amp-viewer-integration/0.1/viewer-initiated-handshake-viewer-for-testing';
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
