@@ -1,5 +1,10 @@
 [
   {
+    "name": "amp-3d-gltf",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-access",
     "version": "0.1",
     "latestVersion": "0.1",
