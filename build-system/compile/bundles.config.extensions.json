@@ -93,7 +93,7 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-ad-network-fake-impl",
+    "name": "amp-ad-network-doubleclick-impl",
     "version": "0.1",
     "latestVersion": "0.1"
   },
