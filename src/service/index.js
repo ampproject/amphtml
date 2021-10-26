@@ -18,8 +18,41 @@ import {
 export let SubscriptionService;
 
 /**
+ * Returns the global instance of the `AmpDocService` service that can be
+ * used to resolve an ampdoc for any node: either in the single-doc or
+ * shadow-doc environment.
+ * @param {!Window} window
+ * @return {!./service/ampdoc-impl.AmpDocService}
+ */
+function ampdocServiceFor(window) {
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+    getService(window, 'ampdoc')
+  );
+}
+
+/**
+ * Returns the AmpDoc for the specified context node.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
+ * @return {!./service/ampdoc-impl.AmpDoc}
+ */
+function ampdoc(nodeOrAmpDoc) {
+  return getAmpdoc(nodeOrAmpDoc);
+}
+
+/**
+ * @param {!Window} window
+ * @return {!./service/extensions-impl.Extensions}
+ */
+function extensionsFor(window) {
+  return /** @type {!./service/extensions-impl.Extensions} */ (
+    getService(window, 'extensions')
+  );
+}
+
+/**
  * Services used to be a class full of static methods.
  * We modified this to an object because minifiers have better support for it.
+ * Note: `Services` may not self-references or else it will deopt.
  */
 export const Services = {
   /**
@@ -106,27 +139,8 @@ export const Services = {
     );
   },
 
-  /**
-   * Returns the global instance of the `AmpDocService` service that can be
-   * used to resolve an ampdoc for any node: either in the single-doc or
-   * shadow-doc environment.
-   * @param {!Window} window
-   * @return {!./service/ampdoc-impl.AmpDocService}
-   */
-  ampdocServiceFor: (window) => {
-    return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
-      getService(window, 'ampdoc')
-    );
-  },
-
-  /**
-   * Returns the AmpDoc for the specified context node.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
-   * @return {!./service/ampdoc-impl.AmpDoc}
-   */
-  ampdoc: (nodeOrAmpDoc) => {
-    return getAmpdoc(nodeOrAmpDoc);
-  },
+  ampdoc: (nodeOrAmpdoc) => ampdoc(nodeOrAmpdoc),
+  ampdocServiceFor: (win) => ampdocServiceFor(win),
 
   /**
    * @param {!Element|!ShadowRoot} element
@@ -137,7 +151,7 @@ export const Services = {
     if (loadAnalytics) {
       // Get Extensions service and force load analytics extension.
       const ampdoc = getAmpdoc(element);
-      Services.extensionsFor(ampdoc.win)./*OK*/ installExtensionForDoc(
+      extensionsFor(ampdoc.win)./*OK*/ installExtensionForDoc(
         ampdoc,
         'amp-analytics'
       );
@@ -263,15 +277,7 @@ export const Services = {
     ).get();
   },
 
-  /**
-   * @param {!Window} window
-   * @return {!./service/extensions-impl.Extensions}
-   */
-  extensionsFor: (window) => {
-    return /** @type {!./service/extensions-impl.Extensions} */ (
-      getService(window, 'extensions')
-    );
-  },
+  extensionsFor: (win) => extensionsFor(win),
 
   /**
    * Returns a service to register callbacks we wish to execute when an
@@ -615,8 +621,8 @@ export const Services = {
    * TODO(dmanek): Add tests for this method.
    */
   storageForTopLevelDoc: (elementOrAmpDoc) => {
-    const thisAmpdoc = Services.ampdoc(elementOrAmpDoc);
-    const ampdocService = Services.ampdocServiceFor(thisAmpdoc.win);
+    const thisAmpdoc = ampdoc(elementOrAmpDoc);
+    const ampdocService = ampdocServiceFor(thisAmpdoc.win);
     const topAmpdoc = ampdocService.isSingleDoc()
       ? ampdocService.getSingleDoc()
       : null;
