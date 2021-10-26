@@ -218,11 +218,17 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-byside-content",
+    "name": "amp-brightcove",
     "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-brightcove",
+    "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "bento": true
     }
   },
   {
