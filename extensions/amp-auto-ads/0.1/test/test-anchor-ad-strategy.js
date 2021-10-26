@@ -39,12 +39,45 @@ describes.realWin(
       it('should insert sticky ad with inside custom analytics', () => {
         configObj['optInStatus'].push(2);
 
+        const defaultFetch = window.fetch.bind();
+
+        window.fetch = () => {
+          return {
+            then: (callback) => {
+              callback({
+                json: () => {},
+              });
+
+              return {
+                then: () => ({
+                  'requests': {
+                    'denakop': 'https://v3.denakop.com/api.gif?',
+                  },
+                  'triggers': {
+                    'initLoad': {
+                      'on': 'ini-load',
+                      'request': 'doubleclick',
+                      'selector': 'amp-ad',
+                      'selectionMethod': 'closest',
+                      'vars': {
+                        'ac': 'a',
+                      },
+                    },
+                  },
+                }),
+              };
+            },
+          };
+        };
+
         const anchorAdStrategy = new AnchorAdStrategy(
           env.ampdoc,
           attributes,
           configObj,
-          {'data-custom': 'true', 'config': 'api.domain.com/config.json'}
+          {'config': 'https://example.com/test.json'}
         );
+
+        window.fetch = defaultFetch;
 
         const strategyPromise = anchorAdStrategy.run().then((placed) => {
           expect(placed).to.equal(true);
@@ -61,7 +94,7 @@ describes.realWin(
               expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
               const ampAd = stickyAd.firstChild;
               const ampAnalytics = ampAd.firstChild;
-              expect(ampAnalytics.getAttribute('data-custom')).to.equal('true');
+              expect(ampAnalytics.getAttribute('sandbox')).to.equal('true');
               resolve();
             }
           );
