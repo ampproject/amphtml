@@ -136,12 +136,9 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-apester-media",
+    "name": "amp-animation-polyfill",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-app-banner",
