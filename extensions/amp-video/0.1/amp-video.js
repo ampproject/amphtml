@@ -210,7 +210,6 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    console.log('started video buildCallback', this.element.id);
     const {element} = this;
 
     this.configure_();
@@ -273,7 +272,7 @@ export class AmpVideo extends AMP.BaseElement {
         this.element,
         this.getAmpDoc(),
         this.getMaxBitrate_()
-      ).then(() => console.log('buildCallback done for', this.element.id));
+      );
     }
   }
 
