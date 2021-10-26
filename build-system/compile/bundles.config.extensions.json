@@ -284,12 +284,12 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-date-display",
+    "name": "amp-date-countdown",
     "version": "0.1",
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-date-display",
+    "name": "amp-date-countdown",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
