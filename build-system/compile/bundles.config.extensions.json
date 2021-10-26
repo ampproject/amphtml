@@ -167,12 +167,9 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-autocomplete",
+    "name": "amp-auto-lightbox",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-base-carousel",
