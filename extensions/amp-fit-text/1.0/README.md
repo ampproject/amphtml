@@ -30,8 +30,11 @@ import '@ampproject/bento-fit-text';
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <script async custom-element="bento-fit-text" src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"></script>
-  <style data-bento-boilerplate>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"
+  ></script>
+  <style>
     bento-fit-text {
       display: block;
       overflow: hidden;
@@ -40,10 +43,10 @@ import '@ampproject/bento-fit-text';
   </style>
 </head>
 <bento-fit-text id="my-fit-text">
-  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
-  inermis reprehendunt.
+  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis
+  reprehendunt.
 </bento-fit-text>
-<div class="buttons" style="margin-top: 8px;">
+<div class="buttons" style="margin-top: 8px">
   <button id="font-button">Change max-font-size</button>
   <button id="content-button">Change content</button>
 </div>
@@ -54,8 +57,10 @@ import '@ampproject/bento-fit-text';
     await customElements.whenDefined('bento-fit-text');
 
     // set up button actions
-    document.querySelector('#font-button').onclick = () => fitText.setAttribute('max-font-size', '40');
-    document.querySelector('#content-button').onclick = () => fitText.textContent = 'new content';
+    document.querySelector('#font-button').onclick = () =>
+      fitText.setAttribute('max-font-size', '40');
+    document.querySelector('#content-button').onclick = () =>
+      (fitText.textContent = 'new content');
   })();
 </script>
 ```
@@ -68,7 +73,7 @@ If the content of the `bento-fit-text` overflows the available space, even with 
 In the following example, we specified a `min-font-size` of `40`, and added more content inside the `bento-fit-text` element. This causes the content to exceed the size of its fixed block parent, so the text is truncated to fit the container.
 
 ```html
-<div style="width: 300px; height: 300px; background: #005AF0; color: #FFF;">
+<div style="width: 300px; height: 300px; background: #005af0; color: #fff">
   <bento-fit-text min-font-size="40">
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
     inermis reprehendunt. Lorem ipsum dolor sit amet, has nisl nihil convenire
@@ -82,13 +87,17 @@ In the following example, we specified a `min-font-size` of `40`, and added more
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-fit-text-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-fit-text-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-fit-text {
     display: block;
     overflow: hidden;
@@ -162,18 +171,18 @@ The `BentoFitText` component has a defined layout size type. To ensure the compo
 
 ```jsx
 <BentoFitText style={{width: 300, height: 100}}>
-  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
-  inermis reprehendunt.
-</BentoFitText>
+  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis
+  reprehendunt.
+</BentoFitText>;
 ```
 
 Or via `className`:
 
 ```jsx
 <BentoFitText className="custom-styles">
-  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
-  inermis reprehendunt.
-</BentoFitText>
+  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis
+  reprehendunt.
+</BentoFitText>;
 ```
 
 ```css

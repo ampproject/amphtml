@@ -26,8 +26,16 @@ import '@ampproject/bento-lightbox';
 
 ```html
 <head>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css">
-  <script async custom-element="bento-lightbox" src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css"
+  />
+  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
+  ></script>
 </head>
 <bento-lightbox id="my-lightbox">
   Lightboxed content
@@ -54,7 +62,7 @@ Bento enabled components in standalone use are highly interactive through their 
 The `bento-lightbox` component API is accessible by including the following script tag in your document:
 
 ```js
-await customElements.whenDefined('amp-lightbox');
+await customElements.whenDefined('bento-lightbox');
 const api = await lightbox.getApi();
 ```
 
@@ -85,7 +93,7 @@ The `amp-lightbox` API allows you to register and respond to the following event
 This event is triggered when the lightbox is opened.
 
 ```js
-lightbox.addEventListener('open', (e) => console.log(e))
+lightbox.addEventListener('open', (e) => console.log(e));
 ```
 
 **close**
@@ -93,7 +101,7 @@ lightbox.addEventListener('open', (e) => console.log(e))
 This event is triggered when the lightbox is closed.
 
 ```js
-lightbox.addEventListener('close', (e) => console.log(e))
+lightbox.addEventListener('close', (e) => console.log(e));
 ```
 
 #### Layout and style
@@ -101,13 +109,17 @@ lightbox.addEventListener('close', (e) => console.log(e))
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-lightbox {
     display: none !important;
   }
@@ -149,20 +161,20 @@ npm install @ampproject/bento-lightbox
 
 ```javascript
 import React from 'react';
-import { BentoLightbox } from '@ampproject/bento-lightbox/react';
+import {BentoLightbox} from '@ampproject/bento-lightbox/react';
 import '@ampproject/bento-lightbox/styles.css';
 function App() {
   return (
-      <BentoLightbox
-        id="lightbox"
-        closeButtonAs={(props) => (
-          <button {...props} aria-label="Close my fancy lightbox">
-            Close!
-          </button>
-        )}
-      >
-        <p>Hello World</p>
-      </BentoLightbox>
+    <BentoLightbox
+      id="lightbox"
+      closeButtonAs={(props) => (
+        <button {...props} aria-label="Close my fancy lightbox">
+          Close!
+        </button>
+      )}
+    >
+      <p>Hello World</p>
+    </BentoLightbox>
   );
 }
 ```
@@ -174,15 +186,13 @@ function App() {
 The `BentoLightbox` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoLightbox style={{width: '300px', height: '200px'}}>
-</BentoLightbox>
+<BentoLightbox style={{width: 300, height: 200}}></BentoLightbox>;
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoLightbox className='custom-styles'>
-</BentoLightbox>
+<BentoLightbox className="custom-styles"></BentoLightbox>;
 ```
 
 ```css

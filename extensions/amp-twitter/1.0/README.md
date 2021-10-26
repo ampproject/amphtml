@@ -28,7 +28,7 @@ import '@ampproject/bento-twitter';
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-twitter {
       display: block;
       overflow: hidden;
@@ -36,7 +36,10 @@ import '@ampproject/bento-twitter';
     }
   </style>
   <!-- TODO(wg-bento): Once available, change src to bento-twitter.js -->
-  <script async src="https://cdn.ampproject.org/v0/amp-twitter-1.0.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
+  ></script>
   <style>
     bento-twitter {
       width: 375px;
@@ -44,12 +47,9 @@ import '@ampproject/bento-twitter';
     }
   </style>
 </head>
-<bento-twitter id="my-tweet" data-tweetid="885634330868850689">
-</bento-twitter>
-<div class="buttons" style="margin-top: 8px;">
-  <button id="change-tweet">
-    Change tweet
-  </button>
+<bento-twitter id="my-tweet" data-tweetid="885634330868850689"> </bento-twitter>
+<div class="buttons" style="margin-top: 8px">
+  <button id="change-tweet">Change tweet</button>
 </div>
 
 <script>
@@ -59,8 +59,8 @@ import '@ampproject/bento-twitter';
 
     // set up button actions
     document.querySelector('#change-tweet').onclick = () => {
-      twitter.setAttribute('data-tweetid', '495719809695621121')
-    }
+      twitter.setAttribute('data-tweetid', '495719809695621121');
+    };
   })();
 </script>
 ```
@@ -70,13 +70,17 @@ import '@ampproject/bento-twitter';
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-twitter-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-twitter {
     display: block;
     overflow: hidden;
@@ -136,14 +140,11 @@ npm install @ampproject/bento-twitter
 
 ```javascript
 import React from 'react';
-import { BentoTwitter } from '@ampproject/bento-twitter/react';
+import {BentoTwitter} from '@ampproject/bento-twitter/react';
 import '@ampproject/bento-twitter/styles.css';
 
 function App() {
-  return (
-    <BentoTwitter tweetid="1356304203044499462">
-    </BentoTwitter>
-  );
+  return <BentoTwitter tweetid="1356304203044499462"></BentoTwitter>;
 }
 ```
 
@@ -154,15 +155,19 @@ function App() {
 The `BentoTwitter` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoTwitter style={{width: '300px', height: '100px'}}  tweetid="1356304203044499462">
-</BentoTwitter>
+<BentoTwitter
+  style={{width: 300, height: 100}}
+  tweetid="1356304203044499462"
+></BentoTwitter>;
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoTwitter className='custom-styles'  tweetid="1356304203044499462">
-</BentoTwitter>
+<BentoTwitter
+  className="custom-styles"
+  tweetid="1356304203044499462"
+></BentoTwitter>;
 ```
 
 ```css

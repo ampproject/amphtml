@@ -37,29 +37,48 @@ import '@ampproject/bento-base-carousel';
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-base-carousel {
       display: block;
       overflow: hidden;
       position: relative;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+  ></script>
   <style>
-    bento-base-carousel, bento-base-carousel > div {
+    bento-base-carousel,
+    bento-base-carousel > div {
       aspect-ratio: 4/1;
     }
     .red-gradient {
       background: brown;
-      background: linear-gradient(90deg, brown 50%, lightsalmon 90%, wheat 100%);
+      background: linear-gradient(
+        90deg,
+        brown 50%,
+        lightsalmon 90%,
+        wheat 100%
+      );
     }
     .blue-gradient {
       background: steelblue;
-      background: linear-gradient(90deg, steelblue 50%, plum 90%, lavender 100%);
+      background: linear-gradient(
+        90deg,
+        steelblue 50%,
+        plum 90%,
+        lavender 100%
+      );
     }
     .green-gradient {
       background: seagreen;
-      background: linear-gradient(90deg, seagreen 50%, mediumturquoise 90%, turquoise 100%);
+      background: linear-gradient(
+        90deg,
+        seagreen 50%,
+        mediumturquoise 90%,
+        turquoise 100%
+      );
     }
   </style>
 </head>
@@ -68,7 +87,7 @@ import '@ampproject/bento-base-carousel';
   <div class="blue-gradient"></div>
   <div class="green-gradient"></div>
 </bento-base-carousel>
-<div class="buttons" style="margin-top: 8px;">
+<div class="buttons" style="margin-top: 8px">
   <button id="prev-button">Go to previous slide</button>
   <button id="next-button">Go to next slide</button>
   <button id="go-to-button">Go to slide with green gradient</button>
@@ -137,7 +156,7 @@ This event is triggered when the index displayed by the carousel has changed.
 The new index is available via `event.data.index`.
 
 ```javascript
-carousel.addEventListener('slideChange', (e) => console.log(e.data.index))
+carousel.addEventListener('slideChange', (e) => console.log(e.data.index));
 ```
 
 #### Layout and style
@@ -145,13 +164,17 @@ carousel.addEventListener('slideChange', (e) => console.log(e.data.index))
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-base-carousel {
     display: block;
     overflow: hidden;
@@ -171,7 +194,7 @@ bento-base-carousel {
 }
 
 bento-base-carousel > * {
-  aspect-ratio: 4/1
+  aspect-ratio: 4/1;
 }
 ```
 
@@ -183,9 +206,7 @@ generally work without this, there may be a few bugs. You can let the carousel
 know that it should operate as `rtl` as follows:
 
 ```html
-<bento-base-carousel dir="rtl" …>
-  …
-</bento-base-carousel>
+<bento-base-carousel dir="rtl" …> … </bento-base-carousel>
 ```
 
 If the carousel is in a RTL context, and you want the carousel to operate as
@@ -458,7 +479,7 @@ This event is triggered when the index displayed by the carousel has changed.
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BentoBaseCarousel>
+</BentoBaseCarousel>;
 ```
 
 #### Layout and style
@@ -468,11 +489,11 @@ This event is triggered when the index displayed by the carousel has changed.
 The `BentoBaseCarousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoBaseCarousel style={{width: '300px', height: '100px'}}>
+<BentoBaseCarousel style={{width: 300, height: 100}}>
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BentoBaseCarousel>
+</BentoBaseCarousel>;
 ```
 
 Or via `className`:
@@ -482,7 +503,7 @@ Or via `className`:
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BentoBaseCarousel>
+</BentoBaseCarousel>;
 ```
 
 ```css
@@ -492,7 +513,7 @@ Or via `className`:
 }
 
 .custom-styles > * {
-  aspect-ratio: 4/1
+  aspect-ratio: 4/1;
 }
 ```
 
@@ -504,9 +525,7 @@ generally work without this, there may be a few bugs. You can let the carousel
 know that it should operate as `rtl` as follows:
 
 ```jsx
-<BentoBaseCarousel dir="rtl" …>
-  …
-</BentoBaseCarousel>
+<BentoBaseCarousel dir="rtl">…</BentoBaseCarousel>;
 ```
 
 If the carousel is in a RTL context, and you want the carousel to operate as
@@ -517,10 +536,10 @@ LTR, you can explicitly set the `dir="ltr"` on the carousel.
 Slides are automatically sized by the carousel when **not** specifying
 `mixedLengths`.
 
-```html
-<BentoBaseCarousel …>
+```jsx
+<BentoBaseCarousel>
   <img style={{height: '100%', width: '100%'}} src="…" />
-</BentoBaseCarousel>
+</BentoBaseCarousel>;
 ```
 
 The slides have implicit height when the carousel is laid out.
@@ -544,13 +563,9 @@ addition, when changing `visibleSlides`, you likely want to change
 ```jsx
 const count = window.matchMedia('(max-width: 600px)').matches ? 4 : 3;
 
-<BentoBaseCarousel
-  visibleCount={count}
-  advanceCount={count}
->
-  <img style={{height: '100%', width: '100%'}} src="…" />
-  …
-</BentoBaseCarousel>
+<BentoBaseCarousel visibleCount={count} advanceCount={count}>
+  <img style={{height: '100%', width: '100%'}} src="…" />…
+</BentoBaseCarousel>;
 ```
 
 #### Props
@@ -673,17 +688,18 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
 
 ```jsx
 function CustomPrevButton(props) {
-  return <button {...props} className="carousel-prev" />
+  return <button {...props} className="carousel-prev" />;
 }
 
 function CustomNextButton(props) {
-  return <button {...props} className="carousel-prev" />
+  return <button {...props} className="carousel-prev" />;
 }
 
 <BentoBaseCarousel
   arrowPrevAs={CustomPrevButton}
-  arrowNextAs={CustomNextButton}>
+  arrowNextAs={CustomNextButton}
+>
   <div>first slide</div>
   // …
-</BentoBaseCarousel>
+</BentoBaseCarousel>;
 ```
