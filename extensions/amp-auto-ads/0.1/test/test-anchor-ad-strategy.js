@@ -77,8 +77,6 @@ describes.realWin(
           {'config': 'https://example.com/test.json'}
         );
 
-        window.fetch = defaultFetch;
-
         const strategyPromise = anchorAdStrategy.run().then((placed) => {
           expect(placed).to.equal(true);
         });
@@ -92,9 +90,9 @@ describes.realWin(
             () => {
               const stickyAd = env.win.document.body.firstChild;
               expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-              const ampAd = stickyAd.firstChild;
-              const ampAnalytics = ampAd.firstChild;
-              expect(ampAnalytics.getAttribute('sandbox')).to.equal('true');
+
+              window.fetch = defaultFetch;
+
               resolve();
             }
           );
@@ -102,6 +100,7 @@ describes.realWin(
 
         return Promise.all([strategyPromise, expectPromise]);
       });
+
       it('should insert sticky ad if opted in', () => {
         configObj['optInStatus'].push(2);
 

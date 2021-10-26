@@ -1,13 +1,13 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {isArray} from '#core/types';
-import {deepMerge, dict, hasOwn} from '#core/types/object';
+import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
-import {devAssert, user} from '#utils/log';
+import {devAssert} from '#utils/log';
 
 /**
  * Method to create scoped analytics element for any element.
@@ -25,13 +25,6 @@ export function insertAnalyticsElement(
   disableImmediate = false
 ) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
-
-  if (!config) {
-    return user().error(
-      'AMP-ANALYTICS',
-      'No config object defined by arguments'
-    );
-  }
 
   const analyticsElem = createElementWithAttributes(
     doc,

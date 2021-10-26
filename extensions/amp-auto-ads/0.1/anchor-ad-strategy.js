@@ -3,9 +3,9 @@ import {dict, hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-
 import {user} from '#utils/log';
+
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';

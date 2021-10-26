@@ -224,9 +224,40 @@ describes.realWin(
     });
 
     it('should insert ads with custom analytics childrens node', () => {
+      const defaultFetch = window.fetch.bind();
+
+      window.fetch = () => {
+        return {
+          then: (callback) => {
+            callback({
+              json: () => {},
+            });
+
+            return {
+              then: () => ({
+                'requests': {
+                  'denakop': 'https://v3.denakop.com/api.gif?',
+                },
+                'triggers': {
+                  'initLoad': {
+                    'on': 'ini-load',
+                    'request': 'doubleclick',
+                    'selector': 'amp-ad',
+                    'selectionMethod': 'closest',
+                    'vars': {
+                      'ac': 'a',
+                    },
+                  },
+                },
+              }),
+            };
+          },
+        };
+      };
+
       return getAmpAutoAds(
         'doubleclick',
-        '{"data-custom": "true","config":"api.domain.com/config.json"}'
+        '{"config":"api.domain.com/config.json"}'
       ).then(() => {
         return new Promise((resolve) => {
           waitForChild(
@@ -237,24 +268,21 @@ describes.realWin(
             () => {
               expect(anchor1.childNodes).to.have.lengthOf(1);
               expect(
-                anchor1.childNodes[0]
-                  .querySelector('amp-analytics')
-                  .getAttribute('data-custom')
-              ).to.equal('true');
+                anchor1.childNodes[0].querySelector('amp-analytics')
+              ).to.not.equal('true');
 
               expect(anchor2.childNodes).to.have.lengthOf(1);
               expect(
-                anchor2.childNodes[0]
-                  .querySelector('amp-analytics')
-                  .getAttribute('data-custom')
-              ).to.equal('true');
+                anchor2.childNodes[0].querySelector('amp-analytics')
+              ).to.not.equal('true');
 
               expect(anchor4.childNodes).to.have.lengthOf(1);
               expect(
-                anchor2.childNodes[0]
-                  .querySelector('amp-analytics')
-                  .getAttribute('data-custom')
-              ).to.equal('true');
+                anchor2.childNodes[0].querySelector('amp-analytics')
+              ).to.not.equal('true');
+
+              window.fetch = defaultFetch;
+
               resolve();
             }
           );
