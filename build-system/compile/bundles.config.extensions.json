@@ -547,22 +547,9 @@
     }
   },
   {
-    "name": "amp-instagram",
+    "name": "amp-inputmask",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
-    "name": "amp-instagram",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-install-serviceworker",
