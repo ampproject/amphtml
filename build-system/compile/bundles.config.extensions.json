@@ -506,9 +506,12 @@
     }
   },
   {
-    "name": "amp-imgur",
+    "name": "amp-image-viewer",
     "version": "0.1",
-    "latestVersion": "0.1"
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-inline-gallery",
