@@ -357,6 +357,7 @@ async function buildExtensions(options) {
       options.compileOnlyCss ||
       extensionsToBuild.includes(extensions[extension].name)
     ) {
+      console./*OK*/ log('started', extension[extension].name);
       results.push(doBuildExtension(extensions, extension, options));
     }
   }
