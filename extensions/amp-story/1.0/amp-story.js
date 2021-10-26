@@ -2238,6 +2238,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateAudioIcon_() {
+    console.log('checking if story has audio');
     const containsMediaElementWithAudio = !!this.element.querySelector(
       'amp-audio, amp-video:not([noaudio]), [background-audio]'
     );

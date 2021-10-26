@@ -327,6 +327,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
+    console.log('buildCallback done for', this.element.id);
   }
 
   /** @private */
@@ -668,6 +669,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   waitForMediaLayout_() {
     const mediaSet = toArray(this.getMediaBySelector_(Selectors.ALL_AMP_MEDIA));
+    console.log('waiting for media layout', this.element.id, mediaSet.length);
 
     const mediaPromises = mediaSet.map((mediaEl) => {
       return new Promise((resolve) => {
@@ -684,6 +686,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
+              .then(() => console.log(`resolved`, mediaEl.id))
               .then(resolve, resolve);
             break;
           case 'amp-audio':
@@ -1449,13 +1452,18 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   checkPageHasAudio_() {
+    if (
+      this.element.hasAttribute('background-audio') ||
+      this.element.querySelector('amp-audio')
+    ) {
+      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      return;
+    }
     this.hasVideoWithAudio_().then((hasVideoWithAudio) => {
-      const pageHasAudio =
-        this.element.hasAttribute('background-audio') ||
-        this.element.querySelector('amp-audio') ||
-        hasVideoWithAudio;
-
-      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
+      this.storeService_.dispatch(
+        Action.TOGGLE_PAGE_HAS_AUDIO,
+        hasVideoWithAudio
+      );
     });
   }
 
