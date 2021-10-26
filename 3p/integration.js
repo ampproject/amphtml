@@ -383,7 +383,6 @@ register('caprofitx', caprofitx);
 register('cedato', cedato);
 register('chargeads', chargeads);
 register('colombia', colombia);
-register('colombiafeed', colombiafeed);
 register('conative', conative);
 register('connatix', connatix);
 register('contentad', contentad);
