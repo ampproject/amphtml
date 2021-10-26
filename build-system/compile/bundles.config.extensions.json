@@ -23,6 +23,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-autocomplete",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-story",
     "version": "1.0",
     "latestVersion": "1.0",
