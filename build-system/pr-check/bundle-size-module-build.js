@@ -20,7 +20,7 @@ const jobName = 'bundle-size-module-build.js';
 function pushBuildWorkflow() {
   timedExecOrDie(
     `amp dist --noconfig --esm` +
-      `--extensions=${[
+      ` --extensions=${[
         'amp-accordion',
         'amp-mustache',
         'amp-script',
