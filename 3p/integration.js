@@ -59,7 +59,6 @@ import {adpushup} from '#ads/vendors/adpushup';
 import {adreactor} from '#ads/vendors/adreactor';
 import {adsensor} from '#ads/vendors/adsensor';
 import {adservsolutions} from '#ads/vendors/adservsolutions';
-import {adskeeper} from '#ads/vendors/adskeeper';
 import {adsloom} from '#ads/vendors/adsloom';
 import {adsnative} from '#ads/vendors/adsnative';
 import {adspeed} from '#ads/vendors/adspeed';
