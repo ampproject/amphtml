@@ -23,6 +23,8 @@ function pushBuildWorkflow() {
       'amp-accordion',
       'amp-mustache',
       'amp-script',
+      'amp-subscriptions',
+      'amp-subscriptions-google',
     ].join(',')}`
   );
   storeModuleBuildToWorkspace();
