@@ -498,7 +498,7 @@
     }
   },
   {
-    "name": "amp-image-viewer",
+    "name": "amp-image-slider",
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
