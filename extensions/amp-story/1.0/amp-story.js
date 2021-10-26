@@ -167,13 +167,6 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
-/**
- * Elements that resolve if they have audio at runtime.
- * @const {string}
- */
-const RUNTIME_RESOLVED_AUDIO_ELEMENTS_SELECTOR =
-  'amp-video[cahce]:not([noaudio])';
-
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
