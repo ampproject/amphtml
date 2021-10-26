@@ -1,3 +1,5 @@
+/** @type {x} */
+
 /** @type {!Element} */
 (dev());
 

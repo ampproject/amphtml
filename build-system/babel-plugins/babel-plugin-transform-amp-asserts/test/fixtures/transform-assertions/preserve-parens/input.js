@@ -1,5 +1,6 @@
-(dev().assertElement(dev()));
+/** @type {x} */ (dev().assertElement(dev()));
 
 function hello() {
-  return (dev().assertElement(dev()));
+    return /** @type {x} */ (
+        dev().assertElement(dev()));
 }
