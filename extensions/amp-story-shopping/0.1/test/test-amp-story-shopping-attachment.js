@@ -14,11 +14,12 @@ describes.realWin(
     let element;
     let shoppingAttachment;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
+      await createAmpStoryShoppingAttachment();
     });
 
-    async function createAmpStoryShoppingTag() {
+    async function createAmpStoryShoppingAttachment() {
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
       element = createElementWithAttributes(
@@ -32,8 +33,7 @@ describes.realWin(
       shoppingAttachment = await element.getImpl();
     }
 
-    it('should build shopping attachment component', async () => {
-      await createAmpStoryShoppingTag();
+    it('should build shopping attachment component', () => {
       expect(() => shoppingAttachment.layoutCallback()).to.not.throw();
       expect(shoppingAttachment.isLayoutSupported('nodisplay')).to.be.true;
     });

@@ -5,7 +5,7 @@ tags: {  # amp-story-shopping
     name: "amp-story-shopping"
     version: "0.1"
     version: "latest"
-    requires_usage: NONE
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }

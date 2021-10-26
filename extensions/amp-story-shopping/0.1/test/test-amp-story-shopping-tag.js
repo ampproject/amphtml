@@ -14,8 +14,9 @@ describes.realWin(
     let element;
     let shoppingTag;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
+      await createAmpStoryShoppingTag();
     });
 
     async function createAmpStoryShoppingTag() {
@@ -32,8 +33,7 @@ describes.realWin(
       shoppingTag = await element.getImpl();
     }
 
-    it('should build shopping tag component', async () => {
-      await createAmpStoryShoppingTag();
+    it('should build shopping tag component', () => {
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
       expect(shoppingTag.isLayoutSupported('fixed-height')).to.be.true;
     });

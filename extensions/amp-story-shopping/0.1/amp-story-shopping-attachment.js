@@ -1,10 +1,12 @@
 import {Layout, applyFillContent} from '#core/dom/layout';
 
+import {AmpStoryPageAttachment} from 'extensions/amp-story/1.0/amp-story-page-attachment';
+
 import {CSS} from '../../../build/amp-story-shopping-attachment-0.1.css';
 
 const TAG = 'amp-story-shopping-attachment';
 
-export class AmpStoryShoppingAttachment extends AMP.BaseElement {
+export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
