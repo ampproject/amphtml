@@ -437,7 +437,7 @@ async function compile(
     }
     await postClosureBabel(destFile);
     // await sanitize(destFile);
-    await writeSourcemaps(sourcemapFile, options);
+    // await writeSourcemaps(sourcemapFile, options);
   }
 }
 
