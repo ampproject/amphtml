@@ -61,23 +61,23 @@ async function postClosureBabel(file) {
   // }
   //
   // debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
-  const code = fs.readFileSync(file);
+  const code = fs.readFileSync(file, 'utf8');
   const {compressed, terserMap} = await terserMinify(code);
   await fs.outputFile(file, compressed);
 
-  const closureMap = await fs.readJson(`${file}.map`, 'utf8');
-  const sourceMap = remapping(
-    [terserMap, babelMap, closureMap],
-    () => null,
-    !argv.full_sourcemaps
-  );
-  debug(
-    CompilationLifecycles['complete'],
-    file,
-    compressed?.toString(),
-    sourceMap
-  );
-  await fs.writeJson(`${file}.map`, sourceMap);
+  // const closureMap = await fs.readJson(`${file}.map`, 'utf8');
+  // const sourceMap = remapping(
+  //   [terserMap, babelMap, closureMap],
+  //   () => null,
+  //   !argv.full_sourcemaps
+  // );
+  // debug(
+  //   CompilationLifecycles['complete'],
+  //   file,
+  //   compressed?.toString(),
+  //   sourceMap
+  // );
+  // await fs.writeJson(`${file}.map`, sourceMap);
 }
 
 module.exports = {
