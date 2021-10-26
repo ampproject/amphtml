@@ -19,13 +19,15 @@ const jobName = 'bundle-size-module-build.js';
  */
 function pushBuildWorkflow() {
   timedExecOrDie(
-    `amp dist --noconfig --esm --extensions=${[
-      'amp-accordion',
-      'amp-mustache',
-      'amp-script',
-      'amp-subscriptions',
-      'amp-subscriptions-google',
-    ].join(',')}`
+    `amp dist --noconfig --esm`
+    // +
+    // `--extensions=${[
+    //   'amp-accordion',
+    //   'amp-mustache',
+    //   'amp-script',
+    //   'amp-subscriptions',
+    //   'amp-subscriptions-google',
+    // ].join(',')}`
   );
   storeModuleBuildToWorkspace();
 }
