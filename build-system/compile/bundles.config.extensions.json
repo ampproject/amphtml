@@ -261,12 +261,9 @@
     }
   },
   {
-    "name": "amp-consent",
+    "name": "amp-connatix-player",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-crypto-polyfill",
