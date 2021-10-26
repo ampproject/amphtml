@@ -1448,14 +1448,14 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any audio.
+   * Checks if the page has audio elements or video elements with audio.
    * @private
-   * @return {!Promise<boolean>}
    */
   checkPageHasAudio_() {
     const hasAudioElements =
       this.element.hasAttribute('background-audio') ||
       this.element.querySelector('amp-audio');
+
     const hasAudioPromise = hasAudioElements
       ? Promise.resolve(true)
       : this.hasVideoWithAudio_();
@@ -1466,8 +1466,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any videos with audio, waiting for video
-   * buildCallback to check if video cache updates audio for video.
+   * Checks if the page has any videos with audio.
    * @return {!Promise<boolean>}
    * @private
    */
