@@ -452,9 +452,12 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-hulu",
+    "name": "amp-gwd-animation",
     "version": "0.1",
-    "latestVersion": "0.1"
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-iframe",
