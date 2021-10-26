@@ -348,17 +348,18 @@ async function buildExtensions(options) {
   const startTime = Date.now();
   maybeInitializeExtensions(extensions, /* includeLatest */ false);
   const extensionsToBuild = getExtensionsToBuild();
-  const results = [];
+  let totalExtensionsBuilt = 0;
   for (const extension in extensions) {
     if (
       options.compileOnlyCss ||
       extensionsToBuild.includes(extensions[extension].name)
     ) {
-      results.push(doBuildExtension(extensions, extension, options));
+      await doBuildExtension(extensions, extension, options);
+      totalExtensionsBuilt++;
     }
   }
-  await Promise.all(results);
-  if (!options.compileOnlyCss && results.length > 0) {
+  // await Promise.all(results);
+  if (!options.compileOnlyCss && totalExtensionsBuilt > 0) {
     endBuildStep(
       options.minify ? 'Minified all' : 'Compiled all',
       'extensions',
@@ -961,11 +962,20 @@ async function copyWorkerDomResources(version) {
 }
 
 module.exports = {
+  buildBentoCss,
+  buildBinaries,
+  buildExtensionJs,
   buildExtensions,
+  buildNpmBinaries,
+  buildNpmCss,
+  declareExtension,
+  dedupe,
   doBuildExtension,
   extensions,
+  getExtensionsFromArg,
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
   setExtensionsToBuildFromDocuments,
+  INABOX_EXTENSION_SET,
 };
