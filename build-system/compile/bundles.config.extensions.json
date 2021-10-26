@@ -250,9 +250,15 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-connatix-player",
-    "version": "0.1",
-    "latestVersion": "0.1"
+    "name": "amp-carousel",
+    "version": [
+      "0.1",
+      "0.2"
+    ],
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
   },
   {
     "name": "amp-consent",
