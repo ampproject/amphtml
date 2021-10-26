@@ -1088,10 +1088,9 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
+      "hasCss": false,
       "cssBinaries": [
         "amp-story-shopping-attachment",
-        "amp-story-shopping-config",
         "amp-story-shopping-tag"
       ]
     }
