@@ -20,9 +20,19 @@ export class CarouselControls {
    *  ariaRole: 'button' | 'presentation',
    *  hasPrev: () => boolean,
    *  hasNext: () => boolean,
+   *  prevButton: !HTMLDivElement,
+   *  nextButton: !HTMLDivElement,
    * }} param0
    */
-  constructor({ariaRole, element, go, hasNext, hasPrev}) {
+  constructor({
+    ariaRole,
+    element,
+    go,
+    hasNext,
+    hasPrev,
+    nextButton,
+    prevButton,
+  }) {
     /** @private @type {!AmpElement} */
     this.element_ = element;
 
@@ -35,11 +45,11 @@ export class CarouselControls {
     /** @private @type {!Window} */
     this.win_ = getWin(element);
 
-    /** @private {?HTMLDivElement} */
-    this.prevButton_ = null;
+    /** @private {!HTMLDivElement} */
+    this.prevButton_ = prevButton;
 
-    /** @private {?HTMLDivElement} */
-    this.nextButton_ = null;
+    /** @private {!HTMLDivElement} */
+    this.nextButton_ = nextButton;
 
     /** @private {boolean} */
     this.showControls_ = false;
@@ -56,24 +66,23 @@ export class CarouselControls {
    * Meant to be called during carousel's buildCallback().
    */
   initialize() {
-    const input = Services.inputFor(this.win_);
-    const doc = /** @type {!Document} */ (this.element_.ownerDocument);
-
-    if (isAmp4Email(doc) || this.element_.hasAttribute('controls')) {
+    if (this.element_.hasAttribute('controls')) {
       this.showControls_ = true;
-    } else {
-      input.onMouseDetected((mouseDetected) => {
-        if (mouseDetected) {
-          this.showControls_ = true;
-          toggleAttribute(
-            this.element_,
-            _CONTROL_HIDE_ATTRIBUTE,
-            !this.showControls_
-          );
-          this.element_.classList.add(_HAS_CONTROL_CLASS);
-        }
-      }, true);
+      return;
     }
+
+    const input = Services.inputFor(this.win_);
+    input.onMouseDetected((mouseDetected) => {
+      if (mouseDetected) {
+        this.showControls_ = true;
+        toggleAttribute(
+          this.element_,
+          _CONTROL_HIDE_ATTRIBUTE,
+          !this.showControls_
+        );
+        this.element_.classList.add(_HAS_CONTROL_CLASS);
+      }
+    }, true);
   }
 
   /**
@@ -81,26 +90,17 @@ export class CarouselControls {
    * TODO(samouri): extract to build-dom.js file.
    */
   buildDom() {
-    const doc = this.element_.ownerDocument;
-    if (isAmp4Email(doc) || this.element_.hasAttribute('controls')) {
-      this.element_.classList.add(_HAS_CONTROL_CLASS);
-    }
-    this.buildButtons();
+    this.updateButtonTitles();
+    this.setupButtonInteraction(this.prevButton_, () => this.handlePrev());
+    this.setupButtonInteraction(this.nextButton_, () => this.handleNext());
     this.setControlsState();
   }
 
   /**
-   * Builds a carousel button for next/prev.
-   * @param {string} className
-   * @param {function():void} onInteraction
-   * @return {?HTMLDivElement}
+   * @param {!HTMLDivElement} button
+   * @param {*} onInteraction
    */
-  buildButton(className, onInteraction) {
-    const button = this.element_.ownerDocument.createElement('div');
-    button.tabIndex = 0;
-    button.classList.add('amp-carousel-button');
-    button.classList.add(className);
-    button.setAttribute('role', this.ariaRole_);
+  setupButtonInteraction(button, onInteraction) {
     button.onkeydown = (event) => {
       if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
         if (!event.defaultPrevented) {
@@ -110,24 +110,6 @@ export class CarouselControls {
       }
     };
     button.onclick = onInteraction;
-
-    return button;
-  }
-
-  /**
-   * Builds the next and previous buttons.
-   */
-  buildButtons() {
-    this.prevButton_ = this.buildButton('amp-carousel-button-prev', () => {
-      this.interactionPrev();
-    });
-    this.element_.appendChild(this.prevButton_);
-
-    this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
-      this.interactionNext();
-    });
-    this.updateButtonTitles();
-    this.element_.appendChild(this.nextButton_);
   }
 
   /**
@@ -197,19 +179,21 @@ export class CarouselControls {
   }
 
   /**
-   * Called on user interaction to proceed to the next item/position.
+   * Called on user interaction to proceed to the previous position.
    */
-  interactionNext() {
-    if (!this.nextButton_.classList.contains('amp-disabled')) {
-      this.go_(/* dir */ 1, /* animate */ true, /* autoplay */ false);
+  handlePrev() {
+    const isEnabled = !this.prevButton_.classList.contains('amp-disabled');
+    if (isEnabled) {
+      this.go_(/* dir */ -1, /* animate */ true, /* autoplay */ false);
     }
   }
 
   /**
-   * Called on user interaction to proceed to the previous item/position.
+   * Called on user interaction to proceed to the next position.
    */
-  interactionPrev() {
-    if (!this.prevButton_.classList.contains('amp-disabled')) {
+  handleNext() {
+    const isEnabled = !this.prevButton_.classList.contains('amp-disabled');
+    if (isEnabled) {
       this.go_(/* dir */ -1, /* animate */ true, /* autoplay */ false);
     }
   }
