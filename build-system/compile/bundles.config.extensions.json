@@ -29,12 +29,9 @@
     }
   },
   {
-    "name": "amp-access-scroll",
+    "name": "amp-access-poool",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-accordion",
