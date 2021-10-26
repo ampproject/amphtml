@@ -21,6 +21,7 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
   /** @override */
   buildCallback() {
     this.container_ = this.element.ownerDocument.createElement('div');
+    this.container_.setAttribute('layout', Layout.NODISPLAY);
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
     applyFillContent(this.container_, /* replacedContent */ true);
