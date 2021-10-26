@@ -180,9 +180,22 @@
     }
   },
   {
-    "name": "amp-beopinion",
+    "name": "amp-base-carousel",
     "version": "0.1",
-    "latestVersion": "0.1"
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-base-carousel",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
   },
   {
     "name": "amp-bind",
