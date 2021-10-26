@@ -327,7 +327,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
-    console.log('buildCallback done for', this.element.id);
   }
 
   /** @private */
@@ -570,7 +569,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         });
       });
       this.maybeStartAnimations_();
-      this.checkPageHasAudio_();
+      this.hasAudio_().then((hasAudio) =>
+        this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, hasAudio)
+      );
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -669,7 +670,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   waitForMediaLayout_() {
     const mediaSet = toArray(this.getMediaBySelector_(Selectors.ALL_AMP_MEDIA));
-    console.log('waiting for media layout', this.element.id, mediaSet.length);
 
     const mediaPromises = mediaSet.map((mediaEl) => {
       return new Promise((resolve) => {
@@ -686,7 +686,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
-              .then(() => console.log(`resolved`, mediaEl.id))
               .then(resolve, resolve);
             break;
           case 'amp-audio':
@@ -1450,21 +1449,16 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Checks if the page has any audio.
    * @private
+   * @return {!Promise<boolean>}
    */
-  checkPageHasAudio_() {
+  hasAudio_() {
     if (
       this.element.hasAttribute('background-audio') ||
       this.element.querySelector('amp-audio')
     ) {
-      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
-      return;
+      return Promise.resolve(true);
     }
-    this.hasVideoWithAudio_().then((hasVideoWithAudio) => {
-      this.storeService_.dispatch(
-        Action.TOGGLE_PAGE_HAS_AUDIO,
-        hasVideoWithAudio
-      );
-    });
+    return this.hasVideoWithAudio_();
   }
 
   /**

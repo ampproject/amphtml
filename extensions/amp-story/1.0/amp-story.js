@@ -167,6 +167,13 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
+/**
+ * Elements that resolve if they have audio at runtime.
+ * @const {string}
+ */
+const RUNTIME_RESOLVED_AUDIO_ELEMENTS_SELECTOR =
+  'amp-video[cahce]:not([noaudio])';
+
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -2238,20 +2245,35 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateAudioIcon_() {
-    console.log('checking if story has audio');
-    const containsMediaElementWithAudio = !!this.element.querySelector(
-      'amp-audio, amp-video:not([noaudio]), [background-audio]'
-    );
     const storyHasBackgroundAudio =
       this.element.hasAttribute('background-audio');
 
-    this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_AUDIO,
-      containsMediaElementWithAudio || storyHasBackgroundAudio
+    const containsMediaElementWithAudio = storyHasBackgroundAudio
+      ? Promise.resolve(true)
+      : this.resolveElementsWithAudio_().then(() => {
+          return !!this.element.querySelector(
+            'amp-audio, amp-video:not([noaudio]), [background-audio]'
+          );
+        });
+
+    containsMediaElementWithAudio.then((containsAudio) =>
+      this.storeService_.dispatch(Action.TOGGLE_STORY_HAS_AUDIO, containsAudio)
     );
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
       storyHasBackgroundAudio
+    );
+  }
+
+  /**
+   * Resolves elements that determine their audio at runtime.
+   * @return {!Promise}
+   */
+  resolveElementsWithAudio_() {
+    return Promise.all(
+      Array.from(
+        this.element.querySelectorAll('amp-video[cache]:not([noaudio])')
+      ).map((el) => el.getImpl())
     );
   }
 
