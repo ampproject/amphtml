@@ -16,5 +16,50 @@
       "npm": true,
       "bento": true
     }
+  },
+  {
+    "name": "amp-story",
+    "version": "1.0",
+    "latestVersion": "1.0",
+    "options": {
+      "hasCss": true,
+      "cssBinaries": [
+        "amp-story-consent",
+        "amp-story-draggable-drawer-header",
+        "amp-story-form",
+        "amp-story-hint",
+        "amp-story-info-dialog",
+        "amp-story-open-page-attachment",
+        "amp-story-share",
+        "amp-story-share-menu",
+        "amp-story-system-layer",
+        "amp-story-tooltip",
+        "amp-story-unsupported-browser-layer"
+      ]
+    }
+  },
+  {
+    "name": "amp-story-360",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story-auto-ads",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "cssBinaries": [
+        "amp-story-auto-ads-ad-badge",
+        "amp-story-auto-ads-attribution",
+        "amp-story-auto-ads-cta-button",
+        "amp-story-auto-ads-inabox",
+        "amp-story-auto-ads-progress-bar",
+        "amp-story-auto-ads-shared"
+      ]
+    }
   }
 ]
