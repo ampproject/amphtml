@@ -142,7 +142,7 @@ async function dist() {
   if (
     !argv.core_runtime_only &&
     !argv.bento_runtime_only &&
-    // !argv.extensions &&
+    !argv.extensions &&
     !argv.extensions_from &&
     !argv.noextensions
   ) {
