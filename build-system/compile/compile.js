@@ -436,8 +436,8 @@ async function compile(
       await checkForUnknownDeps(destFile);
     }
     await postClosureBabel(destFile);
-    // await sanitize(destFile);
-    // await writeSourcemaps(sourcemapFile, options);
+    await sanitize(destFile);
+    await writeSourcemaps(sourcemapFile, options);
   }
 }
 
