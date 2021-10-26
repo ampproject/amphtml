@@ -30,7 +30,7 @@ function pushBuildWorkflow() {
         'amp-access',
         'amp-analytics',
         'amp-animation',
-        'amp-bind',
+        // 'amp-bind',
         'amp-form',
         'amp-image-lightbox',
         'amp-image-slider',
