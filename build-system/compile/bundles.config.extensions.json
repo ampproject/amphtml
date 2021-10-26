@@ -373,7 +373,7 @@
     }
   },
   {
-    "name": "amp-facebook-like",
+    "name": "amp-facebook-comments",
     "version": "0.1",
     "latestVersion": "0.1"
   },
