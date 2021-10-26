@@ -5,12 +5,9 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-access",
+    "name": "amp-3q-player",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-access-laterpay",
