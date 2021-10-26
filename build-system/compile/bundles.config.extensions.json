@@ -447,12 +447,9 @@
     "latestVersion": "0.1"
   },
   {
-    "name": "amp-gwd-animation",
+    "name": "amp-google-document-embed",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-hulu",
