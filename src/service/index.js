@@ -383,6 +383,16 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/performance-impl.Performance}
+   */
+  static performanceForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/performance-impl.Performance}*/ (
+      getServiceForDoc(elementOrAmpDoc, 'performance')
+    );
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/platform-impl.Platform}
    */

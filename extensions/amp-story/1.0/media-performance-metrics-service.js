@@ -3,7 +3,10 @@ import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
-import {registerServiceBuilder} from '../../../src/service-helpers';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../../../src/service-helpers';
 import {toArray} from '#core/types/array';
 
 /**
@@ -87,10 +90,37 @@ export const getMediaPerformanceMetricsService = (win) => {
   let service = Services.mediaPerformanceMetricsService(win);
 
   if (!service) {
-    service = new MediaPerformanceMetricsService(win);
+    service = new MediaPerformanceMetricsService(Services.performanceFor(win));
     registerServiceBuilder(win, 'media-performance-metrics', function () {
       return service;
     });
+  }
+
+  return service;
+};
+
+/**
+ * Util function to retrieve the media performance metrics service for the
+ * given node or AMP document. Ensures we can retrieve the service
+ * synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!MediaPerformanceMetricsService}
+ */
+export const getMediaPerformanceMetricsServiceForDoc = (nodeOrDoc) => {
+  let service = Services.mediaPerformanceMetricsService(nodeOrDoc);
+
+  if (!service) {
+    service = new MediaPerformanceMetricsService(
+      Services.performanceForDoc(nodeOrDoc)
+    );
+    registerServiceBuilderForDoc(
+      nodeOrDoc,
+      'media-performance-metrics',
+      function () {
+        return service;
+      }
+    );
   }
 
   return service;
@@ -102,14 +132,14 @@ export const getMediaPerformanceMetricsService = (win) => {
  */
 export class MediaPerformanceMetricsService {
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/performance-impl.Performance} performance
    */
-  constructor(win) {
+  constructor(performance) {
     /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */
     this.mediaMap_ = new WeakMap();
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
-    this.performanceService_ = Services.performanceFor(win);
+    this.performanceService_ = performance;
   }
 
   /**

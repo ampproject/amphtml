@@ -93,11 +93,11 @@ function upgradeOrRegisterElementReady(win, name, toClass) {
  * @private
  */
 function tryUpgradeElement(element, toClass) {
-  // try {
+  try {
     element.upgrade(toClass);
-  // } catch (e) {
-    // reportError(e, element);
-  // }
+  } catch (e) {
+    reportError(e, element);
+  }
 }
 
 /**

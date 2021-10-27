@@ -17,7 +17,10 @@ import {
   installRuntimeServices,
 } from '#service/core-services';
 import {stubElementsForDoc} from '#service/custom-element-registry';
-import {installPerformanceService} from '#service/performance-impl';
+import {
+  installPerformanceService,
+  installPerformanceServiceForAmpDoc,
+} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
 
 import {installAutoLightboxExtension} from './auto-lightbox';
@@ -117,8 +120,10 @@ try {
 startupChunk(self.document, function initial() {
   /** @const {!./service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  console.log(ampdoc);
   installPlatformService(self);
   installPerformanceService(self);
+  installPerformanceServiceForAmpDoc(ampdoc);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
   if (mode.isEsm()) {
