@@ -1,7 +1,5 @@
 import {Layout, applyFillContent} from '#core/dom/layout';
 
-import {CSS} from '../../../build/amp-story-shopping-tag-0.1.css';
-
 const TAG = 'amp-story-shopping-tag';
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
