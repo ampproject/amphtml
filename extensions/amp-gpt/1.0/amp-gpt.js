@@ -1,7 +1,12 @@
-import {BaseElement} from './base-element';
 import {dict} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-gpt';
@@ -16,6 +21,7 @@ class AmpGpt extends BaseElement {
 
     return dict({
       // Extra props passed by wrapper AMP component
+      'actions_': Services.actionServiceForDoc(this.element),
       'exampleTagNameProp': this.element.tagName,
     });
   }
