@@ -30,6 +30,7 @@ export function BentoGpt({
 }) {
   /** References */
   const gptAdDivRef = useRef(null);
+  const gptAdSlotRef = useRef(null);
 
   /** Parsed Attributes */
   const parsedSize = useMemo(() => {
@@ -42,11 +43,11 @@ export function BentoGpt({
    * Initializes Targets on Component Load
    */
   const initializeTargets = useCallback(
-    (scope) => {
+    (adSlot) => {
       if (parsedTarget) {
         /** Loop through all parsed keys and set targeting key-value pair */
         for (const key in parsedTarget) {
-          scope.googletag.setTargeting(key, parsedTarget[key]);
+          adSlot.setTargeting(key, parsedTarget[key]);
         }
       }
     },
@@ -74,7 +75,7 @@ export function BentoGpt({
       /** Adds element to the execution queue */
       scope.googletag.cmd.push(function () {
         /** Define slot and related parameters */
-        scope.googletag
+        gptAdSlotRef.current = scope.googletag
           .defineSlot(adUnitPath, parsedSize, optDiv)
           .addService(scope.googletag.pubads());
 
@@ -89,13 +90,13 @@ export function BentoGpt({
         /** Enable Services */
         scope.googletag.enableServices();
 
-        initializeTargets(scope);
+        initializeTargets(gptAdSlotRef.current);
 
         /** Display GPT Ad */
         display(scope);
       });
     },
-    [adUnitPath, optDiv, parsedSize, initializeTargets, display]
+    [adUnitPath, display, gptAdSlotRef, initializeTargets, optDiv, parsedSize]
   );
 
   useEffect(() => {
