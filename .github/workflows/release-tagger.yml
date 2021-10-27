@@ -27,16 +27,17 @@ jobs:
     steps:
       - uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: lts/*
       - uses: actions/checkout@v2
       - run: bash ./.github/workflows/install_dependencies.sh
       - name: Run tagger
-        run: node ./build-system/release-tagger/index.js \
-          ${{ github.event.inputs.action }} \
-          ${{ github.event.inputs.head }} \
-          ${{ github.event.inputs.base }} \
-          ${{ github.event.inputs.channel }} \
-          ${{ github.event.inputs.time }} \
-          ${{ github.event.inputs.sha }}
+        run: |
+          node ./build-system/release-tagger/index.js \
+            ${{ github.event.inputs.action }} \
+            ${{ github.event.inputs.head }} \
+            ${{ github.event.inputs.base }} \
+            ${{ github.event.inputs.channel }} \
+            ${{ github.event.inputs.time }} \
+            ${{ github.event.inputs.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
