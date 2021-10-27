@@ -437,8 +437,8 @@ export class AmpScript extends AMP.BaseElement {
           return response.text();
         } else {
           // For cross-origin, verify hash of script itself (skip in
-          // development mode).
-          if (this.development_) {
+          // development and sandboxed mode).
+          if (this.development_ || this.sandboxed_) {
             return response.text();
           } else {
             return response.text().then((text) => {

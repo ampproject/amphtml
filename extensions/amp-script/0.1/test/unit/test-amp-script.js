@@ -130,6 +130,24 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(service.checkSha384).to.be.called;
   });
 
+  it('should skip the check for sha384(author_js) for cross-origin src in sandboxed mode', async () => {
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/')
+    element.setAttribute('src', 'https://bar.example/bar.js')
+    element.setAttribute('sandboxed', '')
+
+    script.buildCallback()
+
+    stubFetch(
+      'https://bar.example/bar.js',
+      { 'Content-Type': 'application/javascript; charset=UTF-8' },
+      'alert(1)'
+    )
+
+    service.checkSha384.withArgs('alert(1)').resolves()
+    await script.layoutCallback()
+    expect(service.checkSha384).not.to.be.called
+  });
+
   it('callFunction waits for initialization to complete before returning', async () => {
     element.setAttribute('script', 'local-script');
     script.workerDom_ = {callFunction: env.sandbox.spy()};
