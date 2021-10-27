@@ -25,7 +25,7 @@ import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
-import {CSS} from '../../../build/amp-next-page-1.0.css';
+import {CSS} from '../../../../build/amp-next-page-1.0.css';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,

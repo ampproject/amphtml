@@ -14,7 +14,7 @@ import {
 } from './amp-inline-gallery-thumbnails';
 import {BaseElement} from './base-element';
 
-import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
+import {CSS as PAGINATION_CSS} from '../../../../build/amp-inline-gallery-pagination-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-inline-gallery';

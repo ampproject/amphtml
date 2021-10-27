@@ -6,7 +6,7 @@ import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
-import {CSS} from '../../../build/amp-sidebar-1.0.css';
+import {CSS} from '../../../../build/amp-sidebar-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';

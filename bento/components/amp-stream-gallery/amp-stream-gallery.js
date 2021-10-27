@@ -10,7 +10,7 @@ import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
-import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
+import {CSS} from '../../../../build/amp-stream-gallery-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-stream-gallery';

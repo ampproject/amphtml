@@ -16,15 +16,16 @@ const {
   buildNpmCss,
   declareExtension,
   dedupe,
+  getBentoBuildFilename,
   getExtensionsFromArg,
 } = require('./extension-helpers');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {compileJison} = require('./compile-jison');
 const {doBuildJs, endBuildStep, watchDebounceDelay} = require('./helpers');
+const {existsSync, mkdirSync} = require('fs');
 const {getBentoName} = require('./bento-helpers');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
-const {mkdirSync} = require('fs');
 const {red} = require('kleur/colors');
 const {watch} = require('chokidar');
 
@@ -245,8 +246,12 @@ async function buildComponent(
   }
 
   if (hasCss) {
-    mkdirSync('build');
-    mkdirSync('build/css');
+    if (!existsSync('build')) {
+      mkdirSync('build');
+    }
+    if (!existsSync('build/css')) {
+      mkdirSync('build/css');
+    }
     await buildComponentCss(componentsDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -257,7 +262,7 @@ async function buildComponent(
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
-    await buildNpmBinaries(componentsDir, options);
+    await buildNpmBinaries(componentsDir, name, options);
     await buildNpmCss(componentsDir, options);
   }
   if (options.binaries) {
@@ -275,7 +280,12 @@ async function buildComponent(
   await buildExtensionJs(componentsDir, bentoName, {
     ...options,
     wrapper: 'none',
-    filename: await getBentoName(componentsDir, bentoName, options),
+    filename: await getBentoBuildFilename(
+      componentsDir,
+      bentoName,
+      'standalone',
+      options
+    ),
     // Include extension directory since our entrypoint may be elsewhere.
     extraGlobs: [...(options.extraGlobs || []), `${componentsDir}/**/*.js`],
   });

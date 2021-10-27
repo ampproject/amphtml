@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {NextPageService} from './service';
 
-import {CSS} from '../../../build/amp-next-page-1.0.css';
+import {CSS} from '../../../../build/amp-next-page-1.0.css';
 
 const TAG = 'amp-next-page';
 const SERVICE = 'next-page';

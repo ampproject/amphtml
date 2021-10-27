@@ -14,7 +14,7 @@ import {userAssert} from '#utils/log';
 import {BaseElement} from './base-element';
 import {getSocialConfig} from './social-share-config';
 
-import {CSS} from '../../../build/amp-social-share-1.0.css';
+import {CSS} from '../../../../build/amp-social-share-1.0.css';
 import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */

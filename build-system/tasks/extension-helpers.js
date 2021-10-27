@@ -972,6 +972,7 @@ module.exports = {
   dedupe,
   doBuildExtension,
   extensions,
+  getBentoBuildFilename,
   getExtensionsFromArg,
   getExtensionsToBuild,
   maybeInitializeExtensions,
