@@ -19,7 +19,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.setAttribute('layout', Layout.NODISPLAY);
+    this.container_.setAttribute('layout', Layout.FIXED_HEIGHT);
     this.container_.textContent = this.myText_;
     this.element.appendChild(this.container_);
     applyFillContent(this.container_, /* replacedContent */ true);
@@ -28,6 +28,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout.FIXED_HEIGHT;
   }
 }
