@@ -70,8 +70,8 @@
  * @template T
  */
 // const andReducer = (acc, value) => acc && value;
-const CanRender;
-const CanPlay;
-const LoadingProp;
+const CanRender = {};
+const CanPlay = {};
+const LoadingProp = {};
 
 export {CanRender, CanPlay, LoadingProp};
