@@ -151,6 +151,7 @@ const prettifyGlobs = [
   '**/*.md',
   '**/*.yml',
   '**/*.css',
+  '!third_party/**/*.css',
 ];
 
 /**
