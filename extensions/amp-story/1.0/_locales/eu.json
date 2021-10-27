@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Sakatu Aurrera"
-  },
-  "3": {
-    "string": "Sakatu Atzera"
-  },
-  "4": {
-    "string": "Ezin izan da kopiatu esteka arbelean :("
-  },
-  "5": {
-    "string": "Kopiatu da esteka."
-  },
-  "6": {
-    "string": "Posta elektronikoa"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Lortu esteka"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Gehiago"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Eduki hau ikusteko, amp-story esperimentua gaitu behar duzu."
-  },
-  "21": {
-    "string": "Zure arakatzaileak ez du onartzen eduki hau"
-  },
-  "22": {
-    "string": "Onartu"
-  },
-  "23": {
-    "string": "Baztertu"
-  },
-  "25": {
-    "string": "Ikusi jatorrizko domeinuan:"
-  },
-  "26": {
-    "string": "Informazio gehiago AMP emaitzei buruz"
-  },
-  "27": {
-    "string": "Jarraitu halere"
-  },
-  "31": {
-    "string": "Desaktibatu da audioa"
-  },
-  "32": {
-    "string": "Aktibatu da audioa"
-  },
-  "33": {
-    "string": "Orriak ez du audiorik"
-  },
-  "34": {
-    "string": "Erreproduzitu bideoa"
-  },
-  "35": {
-    "string": "Pasatu hatza gora"
-  },
-  "36": {
-    "string": "Zabaldu txioa"
-  },
-  "62": {
-    "string": "Partekatu orri honetatik aurrera"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Eguneratuta"
-  },
-  "65": {
-    "string": "Ezin izan da erreproduzitu bideoa"
-  },
-  "66": {
-    "string": "Desaktibatu istorioaren audioa"
-  },
-  "67": {
-    "string": "Aktibatu istorioaren audioa"
-  },
-  "68": {
-    "string": "Istorioari buruzko informazioa"
-  },
-  "69": {
-    "string": "Partekatu istorioa"
-  },
-  "70": {
-    "string": "Aktibatu/Desaktibatu istorioaren menua"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "1/2 aholkua"
-  },
-  "76": {
-    "string": "Sakatu hurrengo pantailara joateko"
-  },
-  "77": {
-    "string": "Aurrera"
-  },
-  "78": {
-    "string": "2/2 aholkua"
-  },
-  "79": {
-    "string": "Pasatu hatza hurrengo istoriora joateko"
-  },
-  "80": {
-    "string": "Ados"
-  },
-  "81": {
-    "string": "Aholkua"
-  },
-  "82": {
-    "string": "Aurreko orria"
-  },
-  "83": {
-    "string": "Aktibatu"
-  },
-  "84": {
-    "string": "PUNTUAZIOA:"
-  },
-  "85": {
-    "string": "Pausatu istorioa"
-  },
-  "86": {
-    "string": "Erreproduzitu istorioa"
-  },
-  "87": {
-    "string": "Itxi"
-  },
-  "88": {
-    "string": "Saltatu hurrengora"
-  },
-  "89": {
-    "string": "Hona bidaliko da zure erantzuna:"
-  },
-  "90": {
-    "string": "Hurrengo istorioa"
-  },
-  "91": {
-    "string": "Hurrengo orria"
-  },
-  "92": {
-    "string": "Erreproduzitu berriro"
-  },
-  "93": {
-    "string": "Aurreko orria"
-  },
-  "96": {
-    "string": "Arakatzeko, mugitu gailua"
-  },
-  "97": {
-    "string": "Irekitzen"
-  }
+  "2": "Sakatu Aurrera",
+  "3": "Sakatu Atzera",
+  "4": "Ezin izan da kopiatu esteka arbelean :(",
+  "5": "Kopiatu da esteka.",
+  "6": "Posta elektronikoa",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Lortu esteka",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Gehiago",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Eduki hau ikusteko, amp-story esperimentua gaitu behar duzu.",
+  "21": "Zure arakatzaileak ez du onartzen eduki hau",
+  "22": "Onartu",
+  "23": "Baztertu",
+  "25": "Ikusi jatorrizko domeinuan:",
+  "26": "Informazio gehiago AMP emaitzei buruz",
+  "27": "Jarraitu halere",
+  "31": "Desaktibatu da audioa",
+  "32": "Aktibatu da audioa",
+  "33": "Orriak ez du audiorik",
+  "34": "Erreproduzitu bideoa",
+  "35": "Pasatu hatza gora",
+  "36": "Zabaldu txioa",
+  "62": "Partekatu orri honetatik aurrera",
+  "63": "Line",
+  "64": "Eguneratuta",
+  "65": "Ezin izan da erreproduzitu bideoa",
+  "66": "Desaktibatu istorioaren audioa",
+  "67": "Aktibatu istorioaren audioa",
+  "68": "Istorioari buruzko informazioa",
+  "69": "Partekatu istorioa",
+  "70": "Aktibatu/Desaktibatu istorioaren menua",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "1/2 aholkua",
+  "76": "Sakatu hurrengo pantailara joateko",
+  "77": "Aurrera",
+  "78": "2/2 aholkua",
+  "79": "Pasatu hatza hurrengo istoriora joateko",
+  "80": "Ados",
+  "81": "Aholkua",
+  "82": "Aurreko orria",
+  "83": "Aktibatu",
+  "84": "PUNTUAZIOA:",
+  "85": "Pausatu istorioa",
+  "86": "Erreproduzitu istorioa",
+  "87": "Itxi",
+  "88": "Saltatu hurrengora",
+  "89": "Hona bidaliko da zure erantzuna:",
+  "90": "Hurrengo istorioa",
+  "91": "Hurrengo orria",
+  "92": "Erreproduzitu berriro",
+  "93": "Aurreko orria",
+  "96": "Arakatzeko, mugitu gailua",
+  "97": "Irekitzen"
 }

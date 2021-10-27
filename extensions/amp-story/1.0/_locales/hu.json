@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Koppintson a Tovább elemre"
-  },
-  "3": {
-    "string": "Koppintson a Vissza elemre"
-  },
-  "4": {
-    "string": "Nem sikerült a hivatkozást vágólapra másolni :("
-  },
-  "5": {
-    "string": "Hivatkozás vágólapra másolva!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Link mutatása"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Több"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "A tartalom megtekintéséhez engedélyeznie kell az amp-történet kísérletet."
-  },
-  "21": {
-    "string": "Sajnos úgy tűnik, a böngészője nem támogatja ezt a látványt"
-  },
-  "22": {
-    "string": "Elfogadás"
-  },
-  "23": {
-    "string": "Elutasítás"
-  },
-  "25": {
-    "string": "Megtekintés az eredeti tartományban:"
-  },
-  "26": {
-    "string": "További információ az AMP eredményekről"
-  },
-  "27": {
-    "string": "Folytatás mindenképp"
-  },
-  "31": {
-    "string": "Hang kikapcsolva"
-  },
-  "32": {
-    "string": "Hang bekapcsolva"
-  },
-  "33": {
-    "string": "Ezen az oldalon nincs hang"
-  },
-  "34": {
-    "string": "Videó lejátszása"
-  },
-  "35": {
-    "string": "Csúsztatás felfelé"
-  },
-  "36": {
-    "string": "Tweet kibontása"
-  },
-  "62": {
-    "string": "Megosztás ettől az oldaltól kezdve"
-  },
-  "63": {
-    "string": "Vonal"
-  },
-  "64": {
-    "string": "Frissítve"
-  },
-  "65": {
-    "string": "Nem sikerült lejátszani a videót"
-  },
-  "66": {
-    "string": "Történet némítása"
-  },
-  "67": {
-    "string": "Történet némításának feloldása"
-  },
-  "68": {
-    "string": "Történetinformáció"
-  },
-  "69": {
-    "string": "Történet megosztása"
-  },
-  "70": {
-    "string": "Történet menüváltó gomb"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "2/1. tipp"
-  },
-  "76": {
-    "string": "A következő képernyőre koppintással léphet"
-  },
-  "77": {
-    "string": "Tovább"
-  },
-  "78": {
-    "string": "2/2. tipp"
-  },
-  "79": {
-    "string": "A következő történetre csúsztatással léphet"
-  },
-  "80": {
-    "string": "Rendben"
-  },
-  "81": {
-    "string": "Tipp"
-  },
-  "82": {
-    "string": "Előző oldal"
-  },
-  "83": {
-    "string": "Aktiválás"
-  },
-  "84": {
-    "string": "PONTSZÁM:"
-  },
-  "85": {
-    "string": "Történet szüneteltetése"
-  },
-  "86": {
-    "string": "Történet lejátszása"
-  },
-  "87": {
-    "string": "Bezárás"
-  },
-  "88": {
-    "string": "Ugrás a következőre"
-  },
-  "89": {
-    "string": "A választ ide fogjuk küldeni"
-  },
-  "90": {
-    "string": "Következő történet"
-  },
-  "91": {
-    "string": "Következő oldal"
-  },
-  "92": {
-    "string": "Visszajátszás"
-  },
-  "93": {
-    "string": "Előző oldal"
-  },
-  "96": {
-    "string": "A felfedezéshez mozgassa az eszközt"
-  },
-  "97": {
-    "string": "Megnyitás"
-  }
+  "2": "Koppintson a Tovább elemre",
+  "3": "Koppintson a Vissza elemre",
+  "4": "Nem sikerült a hivatkozást vágólapra másolni :(",
+  "5": "Hivatkozás vágólapra másolva!",
+  "6": "E-mail",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Link mutatása",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Több",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "A tartalom megtekintéséhez engedélyeznie kell az amp-történet kísérletet.",
+  "21": "Sajnos úgy tűnik, a böngészője nem támogatja ezt a látványt",
+  "22": "Elfogadás",
+  "23": "Elutasítás",
+  "25": "Megtekintés az eredeti tartományban:",
+  "26": "További információ az AMP eredményekről",
+  "27": "Folytatás mindenképp",
+  "31": "Hang kikapcsolva",
+  "32": "Hang bekapcsolva",
+  "33": "Ezen az oldalon nincs hang",
+  "34": "Videó lejátszása",
+  "35": "Csúsztatás felfelé",
+  "36": "Tweet kibontása",
+  "62": "Megosztás ettől az oldaltól kezdve",
+  "63": "Vonal",
+  "64": "Frissítve",
+  "65": "Nem sikerült lejátszani a videót",
+  "66": "Történet némítása",
+  "67": "Történet némításának feloldása",
+  "68": "Történetinformáció",
+  "69": "Történet megosztása",
+  "70": "Történet menüváltó gomb",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "2/1. tipp",
+  "76": "A következő képernyőre koppintással léphet",
+  "77": "Tovább",
+  "78": "2/2. tipp",
+  "79": "A következő történetre csúsztatással léphet",
+  "80": "Rendben",
+  "81": "Tipp",
+  "82": "Előző oldal",
+  "83": "Aktiválás",
+  "84": "PONTSZÁM:",
+  "85": "Történet szüneteltetése",
+  "86": "Történet lejátszása",
+  "87": "Bezárás",
+  "88": "Ugrás a következőre",
+  "89": "A választ ide fogjuk küldeni",
+  "90": "Következő történet",
+  "91": "Következő oldal",
+  "92": "Visszajátszás",
+  "93": "Előző oldal",
+  "96": "A felfedezéshez mozgassa az eszközt",
+  "97": "Megnyitás"
 }

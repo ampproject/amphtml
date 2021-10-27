@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Sonraki'ye dokunun"
-  },
-  "3": {
-    "string": "Geri'ye dokunun"
-  },
-  "4": {
-    "string": "Bağlantı panoya kopyalanamadı :("
-  },
-  "5": {
-    "string": "Bağlantı kopyalandı!"
-  },
-  "6": {
-    "string": "E-posta"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Bağlantıyı Al"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Diğer"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Bu içeriği görüntülemek için amp-story deneyini etkinleştirmelisiniz."
-  },
-  "21": {
-    "string": "Üzgünüz, görünüşe göre tarayıcınız bu deneyimi desteklemiyor"
-  },
-  "22": {
-    "string": "Kabul et"
-  },
-  "23": {
-    "string": "Reddet"
-  },
-  "25": {
-    "string": "Orijinal alanda görüntüleyin:"
-  },
-  "26": {
-    "string": "AMP sonuçları hakkında daha fazla bilgi"
-  },
-  "27": {
-    "string": "Yine De Devam Et"
-  },
-  "31": {
-    "string": "Ses kapalı"
-  },
-  "32": {
-    "string": "Ses açık"
-  },
-  "33": {
-    "string": "Bu sayfada ses yok"
-  },
-  "34": {
-    "string": "Video oynat"
-  },
-  "35": {
-    "string": "Yukarı kaydır"
-  },
-  "36": {
-    "string": "Tweet'i genişlet"
-  },
-  "62": {
-    "string": "Bu sayfadan başlayarak paylaşın"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Güncellendi"
-  },
-  "65": {
-    "string": "Video oynatılamadı"
-  },
-  "66": {
-    "string": "Hikayeyi sessiz yap"
-  },
-  "67": {
-    "string": "Hikayenin sesini aç"
-  },
-  "68": {
-    "string": "Hikaye bilgileri"
-  },
-  "69": {
-    "string": "Hikayeyi paylaş"
-  },
-  "70": {
-    "string": "Hikaye menüsünü aç/kapat"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "İpucu 1/2"
-  },
-  "76": {
-    "string": "Sonraki ekrana gitmek için dokunun"
-  },
-  "77": {
-    "string": "Sonraki"
-  },
-  "78": {
-    "string": "İpucu 2/2"
-  },
-  "79": {
-    "string": "Sonraki hikayeye gitmek için kaydırın"
-  },
-  "80": {
-    "string": "Anladım"
-  },
-  "81": {
-    "string": "İpucu"
-  },
-  "82": {
-    "string": "Önceki sayfa"
-  },
-  "83": {
-    "string": "Etkinleştir"
-  },
-  "84": {
-    "string": "SKOR:"
-  },
-  "85": {
-    "string": "Hikayeyi duraklat"
-  },
-  "86": {
-    "string": "Hikayeyi oynat"
-  },
-  "87": {
-    "string": "Kapat"
-  },
-  "88": {
-    "string": "Sonrakine atla"
-  },
-  "89": {
-    "string": "Yanıtınız şuraya gönderilecek:"
-  },
-  "90": {
-    "string": "Sonraki hikaye"
-  },
-  "91": {
-    "string": "Sonraki sayfa"
-  },
-  "92": {
-    "string": "Tekrar oynat"
-  },
-  "93": {
-    "string": "Önceki sayfa"
-  },
-  "96": {
-    "string": "Keşfetmek için cihazı hareket ettirin"
-  },
-  "97": {
-    "string": "Açılıyor"
-  }
+  "2": "Sonraki'ye dokunun",
+  "3": "Geri'ye dokunun",
+  "4": "Bağlantı panoya kopyalanamadı :(",
+  "5": "Bağlantı kopyalandı!",
+  "6": "E-posta",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Bağlantıyı Al",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Diğer",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Bu içeriği görüntülemek için amp-story deneyini etkinleştirmelisiniz.",
+  "21": "Üzgünüz, görünüşe göre tarayıcınız bu deneyimi desteklemiyor",
+  "22": "Kabul et",
+  "23": "Reddet",
+  "25": "Orijinal alanda görüntüleyin:",
+  "26": "AMP sonuçları hakkında daha fazla bilgi",
+  "27": "Yine De Devam Et",
+  "31": "Ses kapalı",
+  "32": "Ses açık",
+  "33": "Bu sayfada ses yok",
+  "34": "Video oynat",
+  "35": "Yukarı kaydır",
+  "36": "Tweet'i genişlet",
+  "62": "Bu sayfadan başlayarak paylaşın",
+  "63": "Line",
+  "64": "Güncellendi",
+  "65": "Video oynatılamadı",
+  "66": "Hikayeyi sessiz yap",
+  "67": "Hikayenin sesini aç",
+  "68": "Hikaye bilgileri",
+  "69": "Hikayeyi paylaş",
+  "70": "Hikaye menüsünü aç/kapat",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "İpucu 1/2",
+  "76": "Sonraki ekrana gitmek için dokunun",
+  "77": "Sonraki",
+  "78": "İpucu 2/2",
+  "79": "Sonraki hikayeye gitmek için kaydırın",
+  "80": "Anladım",
+  "81": "İpucu",
+  "82": "Önceki sayfa",
+  "83": "Etkinleştir",
+  "84": "SKOR:",
+  "85": "Hikayeyi duraklat",
+  "86": "Hikayeyi oynat",
+  "87": "Kapat",
+  "88": "Sonrakine atla",
+  "89": "Yanıtınız şuraya gönderilecek:",
+  "90": "Sonraki hikaye",
+  "91": "Sonraki sayfa",
+  "92": "Tekrar oynat",
+  "93": "Önceki sayfa",
+  "96": "Keşfetmek için cihazı hareket ettirin",
+  "97": "Açılıyor"
 }

@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Klepnite na Ďalej"
-  },
-  "3": {
-    "string": "Klepnite na Späť"
-  },
-  "4": {
-    "string": "Nepodarilo sa skopírovať odkaz do schránky :("
-  },
-  "5": {
-    "string": "Odkaz bol skopírovaný!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Získať odkaz"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Viac"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Ak chcete zobraziť tento obsah, je potrebné povoliť experiment Príbeh AMP."
-  },
-  "21": {
-    "string": "Ľutujeme, zdá sa, že váš prehliadač toto prostredie nepodporuje"
-  },
-  "22": {
-    "string": "Prijať"
-  },
-  "23": {
-    "string": "Zamietnuť"
-  },
-  "25": {
-    "string": "Zobraziť na pôvodnej doméne:"
-  },
-  "26": {
-    "string": "Viac informácií o výsledkoch AMP"
-  },
-  "27": {
-    "string": "Pokračovať napriek tomu"
-  },
-  "31": {
-    "string": "Zvuk vypnutý"
-  },
-  "32": {
-    "string": "Zvuk zapnutý"
-  },
-  "33": {
-    "string": "Táto stránka nemá zvuk"
-  },
-  "34": {
-    "string": "Prehrať video"
-  },
-  "35": {
-    "string": "Potiahnite nahor"
-  },
-  "36": {
-    "string": "Rozbaliť tweet"
-  },
-  "62": {
-    "string": "Zdieľanie začína z tejto stránky"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Aktualizované"
-  },
-  "65": {
-    "string": "Video sa nepodarilo prehrať"
-  },
-  "66": {
-    "string": "Utlmiť príbeh"
-  },
-  "67": {
-    "string": "Obnoviť príbeh"
-  },
-  "68": {
-    "string": "Informácie o príbehu"
-  },
-  "69": {
-    "string": "Zdieľať príbeh"
-  },
-  "70": {
-    "string": "Prepnúť ponuku príbehu"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1 z 2"
-  },
-  "76": {
-    "string": "Klepnutím prejdete na ďalšiu obrazovku"
-  },
-  "77": {
-    "string": "Ďalej"
-  },
-  "78": {
-    "string": "Tip 2 z 2"
-  },
-  "79": {
-    "string": "Posunutím prejdete na ďalší príbeh"
-  },
-  "80": {
-    "string": "Mám to"
-  },
-  "81": {
-    "string": "Tip"
-  },
-  "82": {
-    "string": "Predchádzajúca strana"
-  },
-  "83": {
-    "string": "Aktivovať"
-  },
-  "84": {
-    "string": "SKÓRE:"
-  },
-  "85": {
-    "string": "Pozastaviť príbeh"
-  },
-  "86": {
-    "string": "Prehrať príbeh"
-  },
-  "87": {
-    "string": "Zavrieť"
-  },
-  "88": {
-    "string": "Preskočiť ďalej"
-  },
-  "89": {
-    "string": "Vaša odpoveď bude odoslaná na"
-  },
-  "90": {
-    "string": "Ďalší príbeh"
-  },
-  "91": {
-    "string": "Ďalšia strana"
-  },
-  "92": {
-    "string": "Prehrať znova"
-  },
-  "93": {
-    "string": "Predchádzajúca strana"
-  },
-  "96": {
-    "string": "Preskúmajte pohybom zariadenia"
-  },
-  "97": {
-    "string": "Otvára sa"
-  }
+  "2": "Klepnite na Ďalej",
+  "3": "Klepnite na Späť",
+  "4": "Nepodarilo sa skopírovať odkaz do schránky :(",
+  "5": "Odkaz bol skopírovaný!",
+  "6": "E-mail",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Získať odkaz",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Viac",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Ak chcete zobraziť tento obsah, je potrebné povoliť experiment Príbeh AMP.",
+  "21": "Ľutujeme, zdá sa, že váš prehliadač toto prostredie nepodporuje",
+  "22": "Prijať",
+  "23": "Zamietnuť",
+  "25": "Zobraziť na pôvodnej doméne:",
+  "26": "Viac informácií o výsledkoch AMP",
+  "27": "Pokračovať napriek tomu",
+  "31": "Zvuk vypnutý",
+  "32": "Zvuk zapnutý",
+  "33": "Táto stránka nemá zvuk",
+  "34": "Prehrať video",
+  "35": "Potiahnite nahor",
+  "36": "Rozbaliť tweet",
+  "62": "Zdieľanie začína z tejto stránky",
+  "63": "Line",
+  "64": "Aktualizované",
+  "65": "Video sa nepodarilo prehrať",
+  "66": "Utlmiť príbeh",
+  "67": "Obnoviť príbeh",
+  "68": "Informácie o príbehu",
+  "69": "Zdieľať príbeh",
+  "70": "Prepnúť ponuku príbehu",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Tip 1 z 2",
+  "76": "Klepnutím prejdete na ďalšiu obrazovku",
+  "77": "Ďalej",
+  "78": "Tip 2 z 2",
+  "79": "Posunutím prejdete na ďalší príbeh",
+  "80": "Mám to",
+  "81": "Tip",
+  "82": "Predchádzajúca strana",
+  "83": "Aktivovať",
+  "84": "SKÓRE:",
+  "85": "Pozastaviť príbeh",
+  "86": "Prehrať príbeh",
+  "87": "Zavrieť",
+  "88": "Preskočiť ďalej",
+  "89": "Vaša odpoveď bude odoslaná na",
+  "90": "Ďalší príbeh",
+  "91": "Ďalšia strana",
+  "92": "Prehrať znova",
+  "93": "Predchádzajúca strana",
+  "96": "Preskúmajte pohybom zariadenia",
+  "97": "Otvára sa"
 }

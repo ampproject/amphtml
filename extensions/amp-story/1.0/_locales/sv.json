@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Tryck på Nästa"
-  },
-  "3": {
-    "string": "Tryck på Tillbaka"
-  },
-  "4": {
-    "string": "Det gick inte att kopiera länken till Urklipp :("
-  },
-  "5": {
-    "string": "Länken kopierad!"
-  },
-  "6": {
-    "string": "E-post"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Få länk"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Fler"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Du måste aktivera amp-story-experimentet för att visa det här innehållet."
-  },
-  "21": {
-    "string": "Det verkar dessvärre som om din webbläsare inte stöder den här upplevelsen"
-  },
-  "22": {
-    "string": "Godkänn"
-  },
-  "23": {
-    "string": "Avvisa"
-  },
-  "25": {
-    "string": "Visa på originaldomänen:"
-  },
-  "26": {
-    "string": "Mer om AMP-resultat"
-  },
-  "27": {
-    "string": "Fortsätt ändå"
-  },
-  "31": {
-    "string": "Ljud av"
-  },
-  "32": {
-    "string": "Ljud på"
-  },
-  "33": {
-    "string": "Den här sidan saknar ljud"
-  },
-  "34": {
-    "string": "Spela video"
-  },
-  "35": {
-    "string": "Svep upp"
-  },
-  "36": {
-    "string": "Expandera tweet"
-  },
-  "62": {
-    "string": "Dela med start från den här sidan"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Uppdaterad"
-  },
-  "65": {
-    "string": "Videon kunde inte spelas"
-  },
-  "66": {
-    "string": "Stäng av ljudet på story"
-  },
-  "67": {
-    "string": "Slå på ljudet på storyn"
-  },
-  "68": {
-    "string": "Storyinformation"
-  },
-  "69": {
-    "string": "Dela story"
-  },
-  "70": {
-    "string": "Öppna/stäng storymeny"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tips 1 av 2"
-  },
-  "76": {
-    "string": "Tryck för att gå till nästa skärm"
-  },
-  "77": {
-    "string": "Nästa"
-  },
-  "78": {
-    "string": "Tips 2 av 2"
-  },
-  "79": {
-    "string": "Svep för att gå till nästa story"
-  },
-  "80": {
-    "string": "Jag förstår"
-  },
-  "81": {
-    "string": "Tips"
-  },
-  "82": {
-    "string": "Föregående sida"
-  },
-  "83": {
-    "string": "Aktivera"
-  },
-  "84": {
-    "string": "POÄNG:"
-  },
-  "85": {
-    "string": "Pausa story"
-  },
-  "86": {
-    "string": "Spela story"
-  },
-  "87": {
-    "string": "Stäng"
-  },
-  "88": {
-    "string": "Hoppa över nästa"
-  },
-  "89": {
-    "string": "Ditt svar skickas till"
-  },
-  "90": {
-    "string": "Nästa story"
-  },
-  "91": {
-    "string": "Nästa sida"
-  },
-  "92": {
-    "string": "Spela igen"
-  },
-  "93": {
-    "string": "Föregående sida"
-  },
-  "96": {
-    "string": "Flytta enheten för att utforska"
-  },
-  "97": {
-    "string": "Öppnar"
-  }
+  "2": "Tryck på Nästa",
+  "3": "Tryck på Tillbaka",
+  "4": "Det gick inte att kopiera länken till Urklipp :(",
+  "5": "Länken kopierad!",
+  "6": "E-post",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Få länk",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Fler",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Du måste aktivera amp-story-experimentet för att visa det här innehållet.",
+  "21": "Det verkar dessvärre som om din webbläsare inte stöder den här upplevelsen",
+  "22": "Godkänn",
+  "23": "Avvisa",
+  "25": "Visa på originaldomänen:",
+  "26": "Mer om AMP-resultat",
+  "27": "Fortsätt ändå",
+  "31": "Ljud av",
+  "32": "Ljud på",
+  "33": "Den här sidan saknar ljud",
+  "34": "Spela video",
+  "35": "Svep upp",
+  "36": "Expandera tweet",
+  "62": "Dela med start från den här sidan",
+  "63": "Line",
+  "64": "Uppdaterad",
+  "65": "Videon kunde inte spelas",
+  "66": "Stäng av ljudet på story",
+  "67": "Slå på ljudet på storyn",
+  "68": "Storyinformation",
+  "69": "Dela story",
+  "70": "Öppna/stäng storymeny",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Tips 1 av 2",
+  "76": "Tryck för att gå till nästa skärm",
+  "77": "Nästa",
+  "78": "Tips 2 av 2",
+  "79": "Svep för att gå till nästa story",
+  "80": "Jag förstår",
+  "81": "Tips",
+  "82": "Föregående sida",
+  "83": "Aktivera",
+  "84": "POÄNG:",
+  "85": "Pausa story",
+  "86": "Spela story",
+  "87": "Stäng",
+  "88": "Hoppa över nästa",
+  "89": "Ditt svar skickas till",
+  "90": "Nästa story",
+  "91": "Nästa sida",
+  "92": "Spela igen",
+  "93": "Föregående sida",
+  "96": "Flytta enheten för att utforska",
+  "97": "Öppnar"
 }

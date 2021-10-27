@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Preme Seguinte"
-  },
-  "3": {
-    "string": "Preme Atrás"
-  },
-  "4": {
-    "string": "Non se puido copiar a ligazón no portapapeis :("
-  },
-  "5": {
-    "string": "Ligazón copiada!"
-  },
-  "6": {
-    "string": "Correo electrónico"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Obter ligazón"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Máis"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Para ver este contido, debes activar o experimento amp-story."
-  },
-  "21": {
-    "string": "Sentímolo, pero semella que o teu navegador non é compatible con esta experiencia"
-  },
-  "22": {
-    "string": "Aceptar"
-  },
-  "23": {
-    "string": "Rexeitar"
-  },
-  "25": {
-    "string": "Ver no dominio orixinal:"
-  },
-  "26": {
-    "string": "Máis información sobre os resultados de AMP"
-  },
-  "27": {
-    "string": "Continuar de todas formas"
-  },
-  "31": {
-    "string": "Son desactivado"
-  },
-  "32": {
-    "string": "Son activado"
-  },
-  "33": {
-    "string": "Esta páxina non ten son"
-  },
-  "34": {
-    "string": "Reproducir vídeo"
-  },
-  "35": {
-    "string": "Deslizar cara enriba"
-  },
-  "36": {
-    "string": "Mostrar todo"
-  },
-  "62": {
-    "string": "Compartir a partir desta páxina"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Actualizado"
-  },
-  "65": {
-    "string": "Erro na reprodución do vídeo"
-  },
-  "66": {
-    "string": "Desactivar son"
-  },
-  "67": {
-    "string": "Activar son"
-  },
-  "68": {
-    "string": "Información da historia"
-  },
-  "69": {
-    "string": "Compartir historia"
-  },
-  "70": {
-    "string": "Mostrar o menú da historia"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Consello 1 de 2"
-  },
-  "76": {
-    "string": "Preme para ir á seguinte pantalla"
-  },
-  "77": {
-    "string": "Seguinte"
-  },
-  "78": {
-    "string": "Consello 2 de 2"
-  },
-  "79": {
-    "string": "Desliza para ir á seguinte historia"
-  },
-  "80": {
-    "string": "Entendido"
-  },
-  "81": {
-    "string": "Consello"
-  },
-  "82": {
-    "string": "Páxina anterior"
-  },
-  "83": {
-    "string": "Activar"
-  },
-  "84": {
-    "string": "PUNTUACIÓN:"
-  },
-  "85": {
-    "string": "Parar historia"
-  },
-  "86": {
-    "string": "Reproducir historia"
-  },
-  "87": {
-    "string": "Pechar"
-  },
-  "88": {
-    "string": "Saltar ó seguinte"
-  },
-  "89": {
-    "string": "A túa resposta enviarase a"
-  },
-  "90": {
-    "string": "Seguinte historia"
-  },
-  "91": {
-    "string": "Seguinte páxina"
-  },
-  "92": {
-    "string": "Repetir"
-  },
-  "93": {
-    "string": "Páxina anterior"
-  },
-  "96": {
-    "string": "Move o dispositivo para explorar"
-  },
-  "97": {
-    "string": "Abrindo"
-  }
+  "2": "Preme Seguinte",
+  "3": "Preme Atrás",
+  "4": "Non se puido copiar a ligazón no portapapeis :(",
+  "5": "Ligazón copiada!",
+  "6": "Correo electrónico",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Obter ligazón",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Máis",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Para ver este contido, debes activar o experimento amp-story.",
+  "21": "Sentímolo, pero semella que o teu navegador non é compatible con esta experiencia",
+  "22": "Aceptar",
+  "23": "Rexeitar",
+  "25": "Ver no dominio orixinal:",
+  "26": "Máis información sobre os resultados de AMP",
+  "27": "Continuar de todas formas",
+  "31": "Son desactivado",
+  "32": "Son activado",
+  "33": "Esta páxina non ten son",
+  "34": "Reproducir vídeo",
+  "35": "Deslizar cara enriba",
+  "36": "Mostrar todo",
+  "62": "Compartir a partir desta páxina",
+  "63": "Line",
+  "64": "Actualizado",
+  "65": "Erro na reprodución do vídeo",
+  "66": "Desactivar son",
+  "67": "Activar son",
+  "68": "Información da historia",
+  "69": "Compartir historia",
+  "70": "Mostrar o menú da historia",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Consello 1 de 2",
+  "76": "Preme para ir á seguinte pantalla",
+  "77": "Seguinte",
+  "78": "Consello 2 de 2",
+  "79": "Desliza para ir á seguinte historia",
+  "80": "Entendido",
+  "81": "Consello",
+  "82": "Páxina anterior",
+  "83": "Activar",
+  "84": "PUNTUACIÓN:",
+  "85": "Parar historia",
+  "86": "Reproducir historia",
+  "87": "Pechar",
+  "88": "Saltar ó seguinte",
+  "89": "A túa resposta enviarase a",
+  "90": "Seguinte historia",
+  "91": "Seguinte páxina",
+  "92": "Repetir",
+  "93": "Páxina anterior",
+  "96": "Move o dispositivo para explorar",
+  "97": "Abrindo"
 }

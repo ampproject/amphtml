@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Klepněte na Další"
-  },
-  "3": {
-    "string": "Klepněte na Zpět"
-  },
-  "4": {
-    "string": "Odkaz nelze zkopírovat do schránky :("
-  },
-  "5": {
-    "string": "Odkaz byl zkopírován!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Získat odkaz"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Více"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Pokud chcete zobrazit tento obsah, musíte povolit experiment s příběhem amp-story."
-  },
-  "21": {
-    "string": "Je nám líto, zdá se, že váš prohlížeč toto tento prvek nepodporuje"
-  },
-  "22": {
-    "string": "Přijmout"
-  },
-  "23": {
-    "string": "Odmítnout"
-  },
-  "25": {
-    "string": "Zobrazit na původní doméně:"
-  },
-  "26": {
-    "string": "Více o výsledcích AMP"
-  },
-  "27": {
-    "string": "Přesto pokračovat"
-  },
-  "31": {
-    "string": "Zvuk je vypnutý"
-  },
-  "32": {
-    "string": "Zvuk je zapnutý"
-  },
-  "33": {
-    "string": "Tato stránka je bez zvuku"
-  },
-  "34": {
-    "string": "Přehrát video"
-  },
-  "35": {
-    "string": "Potáhněte nahoru"
-  },
-  "36": {
-    "string": "Rozbalit tweet"
-  },
-  "62": {
-    "string": "Sdílet od této stránky"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Aktualizováno"
-  },
-  "65": {
-    "string": "Video nelze přehrát"
-  },
-  "66": {
-    "string": "Ztlumit zvuk příběhu"
-  },
-  "67": {
-    "string": "Zapnout zvuk příběhu"
-  },
-  "68": {
-    "string": "Informace o příběhu"
-  },
-  "69": {
-    "string": "Sdílet příběh"
-  },
-  "70": {
-    "string": "Přepnout nabídku příběhu"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1/2"
-  },
-  "76": {
-    "string": "Klepnutím přejdete na další obrazovku"
-  },
-  "77": {
-    "string": "Další"
-  },
-  "78": {
-    "string": "Tip 2/2"
-  },
-  "79": {
-    "string": "Potáhnutím přejdete na další příběh"
-  },
-  "80": {
-    "string": "Rozumím"
-  },
-  "81": {
-    "string": "Tip"
-  },
-  "82": {
-    "string": "Předchozí stránka"
-  },
-  "83": {
-    "string": "Aktivovat"
-  },
-  "84": {
-    "string": "SKÓRE:"
-  },
-  "85": {
-    "string": "Pozastavit příběh"
-  },
-  "86": {
-    "string": "Přehrát příběh"
-  },
-  "87": {
-    "string": "Zavřít"
-  },
-  "88": {
-    "string": "Přeskočit na další"
-  },
-  "89": {
-    "string": "Vaši odpověď obdrží"
-  },
-  "90": {
-    "string": "Další příběh"
-  },
-  "91": {
-    "string": "Další stránka"
-  },
-  "92": {
-    "string": "Přehrát znovu"
-  },
-  "93": {
-    "string": "Předchozí stránka"
-  },
-  "96": {
-    "string": "Pohněte zařízením a objevujte"
-  },
-  "97": {
-    "string": "Otevírání"
-  }
+  "2": "Klepněte na Další",
+  "3": "Klepněte na Zpět",
+  "4": "Odkaz nelze zkopírovat do schránky :(",
+  "5": "Odkaz byl zkopírován!",
+  "6": "E-mail",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Získat odkaz",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Více",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Pokud chcete zobrazit tento obsah, musíte povolit experiment s příběhem amp-story.",
+  "21": "Je nám líto, zdá se, že váš prohlížeč toto tento prvek nepodporuje",
+  "22": "Přijmout",
+  "23": "Odmítnout",
+  "25": "Zobrazit na původní doméně:",
+  "26": "Více o výsledcích AMP",
+  "27": "Přesto pokračovat",
+  "31": "Zvuk je vypnutý",
+  "32": "Zvuk je zapnutý",
+  "33": "Tato stránka je bez zvuku",
+  "34": "Přehrát video",
+  "35": "Potáhněte nahoru",
+  "36": "Rozbalit tweet",
+  "62": "Sdílet od této stránky",
+  "63": "Line",
+  "64": "Aktualizováno",
+  "65": "Video nelze přehrát",
+  "66": "Ztlumit zvuk příběhu",
+  "67": "Zapnout zvuk příběhu",
+  "68": "Informace o příběhu",
+  "69": "Sdílet příběh",
+  "70": "Přepnout nabídku příběhu",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Tip 1/2",
+  "76": "Klepnutím přejdete na další obrazovku",
+  "77": "Další",
+  "78": "Tip 2/2",
+  "79": "Potáhnutím přejdete na další příběh",
+  "80": "Rozumím",
+  "81": "Tip",
+  "82": "Předchozí stránka",
+  "83": "Aktivovat",
+  "84": "SKÓRE:",
+  "85": "Pozastavit příběh",
+  "86": "Přehrát příběh",
+  "87": "Zavřít",
+  "88": "Přeskočit na další",
+  "89": "Vaši odpověď obdrží",
+  "90": "Další příběh",
+  "91": "Další stránka",
+  "92": "Přehrát znovu",
+  "93": "Předchozí stránka",
+  "96": "Pohněte zařízením a objevujte",
+  "97": "Otevírání"
 }

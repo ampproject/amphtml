@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Tik op Volgende"
-  },
-  "3": {
-    "string": "Tik op Terug"
-  },
-  "4": {
-    "string": "Kan link niet kopiëren naar klembord :("
-  },
-  "5": {
-    "string": "Link gekopieerd"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Link ophalen"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "Sms"
-  },
-  "13": {
-    "string": "Meer"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Je moet het amp-story-experiment inschakelen om deze content te bekijken."
-  },
-  "21": {
-    "string": "Je browser ondersteunt deze ervaring niet"
-  },
-  "22": {
-    "string": "Accepteren"
-  },
-  "23": {
-    "string": "Weigeren"
-  },
-  "25": {
-    "string": "Bekijken op oorspronkelijk domein:"
-  },
-  "26": {
-    "string": "Meer over AMP-resultaten"
-  },
-  "27": {
-    "string": "Toch doorgaan"
-  },
-  "31": {
-    "string": "Geluid uit"
-  },
-  "32": {
-    "string": "Geluid aan"
-  },
-  "33": {
-    "string": "Deze pagina heeft geen geluid"
-  },
-  "34": {
-    "string": "Video afspelen"
-  },
-  "35": {
-    "string": "Omhoog vegen"
-  },
-  "36": {
-    "string": "Tweet uitvouwen"
-  },
-  "62": {
-    "string": "Delen vanaf deze pagina"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Bijgewerkt"
-  },
-  "65": {
-    "string": "Video kan niet worden afgespeeld"
-  },
-  "66": {
-    "string": "Verhaal dempen"
-  },
-  "67": {
-    "string": "Verhaal niet meer dempen"
-  },
-  "68": {
-    "string": "Verhaalinformatie"
-  },
-  "69": {
-    "string": "Verhaal delen"
-  },
-  "70": {
-    "string": "Verhaalmenu schakelen"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1 van 2"
-  },
-  "76": {
-    "string": "Tik om naar het volgende scherm te gaan"
-  },
-  "77": {
-    "string": "Volgende"
-  },
-  "78": {
-    "string": "Tip 2 van 2"
-  },
-  "79": {
-    "string": "Veeg om naar het volgende verhaal te gaan"
-  },
-  "80": {
-    "string": "Begrepen"
-  },
-  "81": {
-    "string": "Tip"
-  },
-  "82": {
-    "string": "Vorige pagina"
-  },
-  "83": {
-    "string": "Activeren"
-  },
-  "84": {
-    "string": "SCORE:"
-  },
-  "85": {
-    "string": "Verhaal pauzeren"
-  },
-  "86": {
-    "string": "Verhaal afspelen"
-  },
-  "87": {
-    "string": "Sluiten"
-  },
-  "88": {
-    "string": "Overslaan naar volgende"
-  },
-  "89": {
-    "string": "Je antwoord wordt verzonden naar"
-  },
-  "90": {
-    "string": "Volgende verhaal"
-  },
-  "91": {
-    "string": "Volgende pagina"
-  },
-  "92": {
-    "string": "Herhalen"
-  },
-  "93": {
-    "string": "Vorige pagina"
-  },
-  "96": {
-    "string": "Beweeg het apparaat om te verkennen"
-  },
-  "97": {
-    "string": "Wordt geopend"
-  }
+  "2": "Tik op Volgende",
+  "3": "Tik op Terug",
+  "4": "Kan link niet kopiëren naar klembord :(",
+  "5": "Link gekopieerd",
+  "6": "E-mail",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Link ophalen",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "Sms",
+  "13": "Meer",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Je moet het amp-story-experiment inschakelen om deze content te bekijken.",
+  "21": "Je browser ondersteunt deze ervaring niet",
+  "22": "Accepteren",
+  "23": "Weigeren",
+  "25": "Bekijken op oorspronkelijk domein:",
+  "26": "Meer over AMP-resultaten",
+  "27": "Toch doorgaan",
+  "31": "Geluid uit",
+  "32": "Geluid aan",
+  "33": "Deze pagina heeft geen geluid",
+  "34": "Video afspelen",
+  "35": "Omhoog vegen",
+  "36": "Tweet uitvouwen",
+  "62": "Delen vanaf deze pagina",
+  "63": "Line",
+  "64": "Bijgewerkt",
+  "65": "Video kan niet worden afgespeeld",
+  "66": "Verhaal dempen",
+  "67": "Verhaal niet meer dempen",
+  "68": "Verhaalinformatie",
+  "69": "Verhaal delen",
+  "70": "Verhaalmenu schakelen",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Tip 1 van 2",
+  "76": "Tik om naar het volgende scherm te gaan",
+  "77": "Volgende",
+  "78": "Tip 2 van 2",
+  "79": "Veeg om naar het volgende verhaal te gaan",
+  "80": "Begrepen",
+  "81": "Tip",
+  "82": "Vorige pagina",
+  "83": "Activeren",
+  "84": "SCORE:",
+  "85": "Verhaal pauzeren",
+  "86": "Verhaal afspelen",
+  "87": "Sluiten",
+  "88": "Overslaan naar volgende",
+  "89": "Je antwoord wordt verzonden naar",
+  "90": "Volgende verhaal",
+  "91": "Volgende pagina",
+  "92": "Herhalen",
+  "93": "Vorige pagina",
+  "96": "Beweeg het apparaat om te verkennen",
+  "97": "Wordt geopend"
 }

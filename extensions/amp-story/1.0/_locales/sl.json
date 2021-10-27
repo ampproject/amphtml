@@ -1,188 +1,64 @@
 {
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Več"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Če si želite ogledati to vsebino, morate omogočiti preizkus zgodb amp-story."
-  },
-  "2": {
-    "string": "Dotaknite se »Naprej«"
-  },
-  "21": {
-    "string": "Vaš brskalnik na žalost ne podpira te izkušnje"
-  },
-  "22": {
-    "string": "Sprejmi"
-  },
-  "23": {
-    "string": "Zavrni"
-  },
-  "25": {
-    "string": "Ogled v izvirni domeni:"
-  },
-  "26": {
-    "string": "Več o rezultatih AMP"
-  },
-  "27": {
-    "string": "Vseeno nadaljuj"
-  },
-  "3": {
-    "string": "Dotaknite se »Nazaj«"
-  },
-  "31": {
-    "string": "Zvok je izklopljen"
-  },
-  "32": {
-    "string": "Zvok je vklopljen"
-  },
-  "33": {
-    "string": "Na tej strani ni zvoka"
-  },
-  "34": {
-    "string": "Predvajaj video"
-  },
-  "35": {
-    "string": "Povleci navzgor"
-  },
-  "36": {
-    "string": "Razširi objavo"
-  },
-  "4": {
-    "string": "Povezave ni bilo mogoče kopirati v odložišče :("
-  },
-  "5": {
-    "string": "Povezava kopirana!"
-  },
-  "6": {
-    "string": "E-pošta"
-  },
-  "62": {
-    "string": "Začni deliti s to stranjo"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Posodobljeno"
-  },
-  "65": {
-    "string": "Videa ni bilo mogoče predvajati"
-  },
-  "66": {
-    "string": "Izklop zvoka"
-  },
-  "67": {
-    "string": "Vklop zvoka"
-  },
-  "68": {
-    "string": "Informacije o zgodbi"
-  },
-  "69": {
-    "string": "Deli zgodbo"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "70": {
-    "string": "Prikaži/skrij meni za zgodbo"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Namig 1 od 2"
-  },
-  "76": {
-    "string": "Dotaknite se za pomik na naslednji zaslon"
-  },
-  "77": {
-    "string": "Naprej"
-  },
-  "78": {
-    "string": "Namig 2 od 2"
-  },
-  "79": {
-    "string": "Povlecite za pomik na naslednjo zgodbo"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "80": {
-    "string": "Razumem"
-  },
-  "81": {
-    "string": "Namig"
-  },
-  "82": {
-    "string": "Prejšnja stran"
-  },
-  "83": {
-    "string": "Aktiviraj"
-  },
-  "84": {
-    "string": "REZULTAT:"
-  },
-  "85": {
-    "string": "Začasno ustavi zgodbo"
-  },
-  "86": {
-    "string": "Predvajaj zgodbo"
-  },
-  "87": {
-    "string": "Zapri"
-  },
-  "88": {
-    "string": "Preskoči na naslednji element"
-  },
-  "89": {
-    "string": "Vaš odgovor bo poslan na"
-  },
-  "9": {
-    "string": "Pridobi povezavo"
-  },
-  "90": {
-    "string": "Naslednja zgodba"
-  },
-  "91": {
-    "string": "Naslednja stran"
-  },
-  "92": {
-    "string": "Znova predvajaj"
-  },
-  "93": {
-    "string": "Prejšnja stran"
-  },
-  "96": {
-    "string": "Premaknite napravo za raziskovanje"
-  },
-  "97": {
-    "string": "Odpiranje"
-  }
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Več",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Če si želite ogledati to vsebino, morate omogočiti preizkus zgodb amp-story.",
+  "2": "Dotaknite se »Naprej«",
+  "21": "Vaš brskalnik na žalost ne podpira te izkušnje",
+  "22": "Sprejmi",
+  "23": "Zavrni",
+  "25": "Ogled v izvirni domeni:",
+  "26": "Več o rezultatih AMP",
+  "27": "Vseeno nadaljuj",
+  "3": "Dotaknite se »Nazaj«",
+  "31": "Zvok je izklopljen",
+  "32": "Zvok je vklopljen",
+  "33": "Na tej strani ni zvoka",
+  "34": "Predvajaj video",
+  "35": "Povleci navzgor",
+  "36": "Razširi objavo",
+  "4": "Povezave ni bilo mogoče kopirati v odložišče :(",
+  "5": "Povezava kopirana!",
+  "6": "E-pošta",
+  "62": "Začni deliti s to stranjo",
+  "63": "Line",
+  "64": "Posodobljeno",
+  "65": "Videa ni bilo mogoče predvajati",
+  "66": "Izklop zvoka",
+  "67": "Vklop zvoka",
+  "68": "Informacije o zgodbi",
+  "69": "Deli zgodbo",
+  "7": "Facebook",
+  "70": "Prikaži/skrij meni za zgodbo",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Namig 1 od 2",
+  "76": "Dotaknite se za pomik na naslednji zaslon",
+  "77": "Naprej",
+  "78": "Namig 2 od 2",
+  "79": "Povlecite za pomik na naslednjo zgodbo",
+  "8": "Google+",
+  "80": "Razumem",
+  "81": "Namig",
+  "82": "Prejšnja stran",
+  "83": "Aktiviraj",
+  "84": "REZULTAT:",
+  "85": "Začasno ustavi zgodbo",
+  "86": "Predvajaj zgodbo",
+  "87": "Zapri",
+  "88": "Preskoči na naslednji element",
+  "89": "Vaš odgovor bo poslan na",
+  "9": "Pridobi povezavo",
+  "90": "Naslednja zgodba",
+  "91": "Naslednja stran",
+  "92": "Znova predvajaj",
+  "93": "Prejšnja stran",
+  "96": "Premaknite napravo za raziskovanje",
+  "97": "Odpiranje"
 }

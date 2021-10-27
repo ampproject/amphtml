@@ -68,59 +68,34 @@ describes.fakeWin('localization', {amp: true}, (env) => {
       env.win.document.documentElement.setAttribute('lang', 'zh-CN');
       const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundle('zh-CN', {
-        '123': {
-          string: '买票',
-        },
+        '123': '买票',
       });
 
       expect(localizationService.getLocalizedString('123')).to.equal('买票');
     });
 
-    it('should utilize fallback if string is missing', () => {
-      const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          fallback: 'test fallback content',
-        },
-      });
+    expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+      'test string content'
+    );
+  });
 
-      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
-        'test fallback content'
-      );
-    });
+  it('should have language fallbacks', () => {
+    expect(getLanguageCodesFromString('de-hi-1')).to.deep.equal([
+      'de-hi-1',
+      'de-hi',
+      'de',
+      'default',
+    ]);
+  });
 
-    it('should not utilize fallback if string is present', () => {
-      const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'test string content',
-          fallback: 'test fallback content',
-        },
-      });
-
-      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
-        'test string content'
-      );
-    });
-
-    it('should have language fallbacks', () => {
-      expect(getLanguageCodesFromString('de-hi-1')).to.deep.equal([
-        'de-hi-1',
-        'de-hi',
-        'de',
-        'default',
-      ]);
-    });
-
-    it('should default to English', () => {
-      expect(getLanguageCodesFromString()).to.deep.equal(['en', 'default']);
-    });
+  it('should default to English', () => {
+    expect(getLanguageCodesFromString()).to.deep.equal(['en', 'default']);
   });
 
   describe('pseudolocales', () => {
     it('should transform strings', () => {
       const originalStringBundle = {
-        'test_string_id': {string: 'foo'},
+        'test_string_id': 'foo',
       };
       const pseudoLocaleBundle = createPseudoLocale(
         originalStringBundle,
@@ -132,11 +107,11 @@ describes.fakeWin('localization', {amp: true}, (env) => {
 
     it('should contain all string IDs from original locale', () => {
       const originalStringBundle = {
-        'msg_id_1': {string: 'msg1'},
-        'msg_id_2': {string: 'msg2'},
-        'msg_id_3': {string: 'msg3'},
-        'msg_id_4': {string: 'msg4'},
-        'msg_id_5': {string: 'msg5'},
+        'msg_id_1': 'msg1',
+        'msg_id_2': 'msg2',
+        'msg_id_3': 'msg3',
+        'msg_id_4': 'msg4',
+        'msg_id_5': 'msg5',
       };
       const pseudoLocaleBundle = createPseudoLocale(
         originalStringBundle,
@@ -149,7 +124,6 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     });
   });
 });
-
 describes.fakeWin('viewer localization', {amp: true}, (env) => {
   describe('viewer language override', () => {
     let win;
@@ -164,14 +138,10 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
     it('should take precedence over document language', () => {
       const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundle('fr', {
-        'test_string_id': {
-          string: 'oui',
-        },
+        'test_string_id': 'oui',
       });
       localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'yes',
-        },
+        'test_string_id': 'yes',
       });
 
       expect(localizationService.getLocalizedString('test_string_id')).to.equal(
@@ -182,14 +152,10 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
     it('should fall back if string is not found', () => {
       const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundle('fr', {
-        'incorrect_test_string_id': {
-          string: 'non',
-        },
+        'incorrect_test_string_id': 'non',
       });
       localizationService.registerLocalizedStringBundle('en', {
-        'correct_test_string_id': {
-          string: 'yes',
-        },
+        'correct_test_string_id': 'yes',
       });
 
       expect(
@@ -200,9 +166,7 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
     it('should fall back if language code is not registered', () => {
       const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'yes',
-        },
+        'test_string_id': 'yes',
       });
 
       expect(localizationService.getLocalizedString('test_string_id')).to.equal(

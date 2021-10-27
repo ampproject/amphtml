@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Tap Next"
-  },
-  "3": {
-    "string": "Tap Back"
-  },
-  "4": {
-    "string": "Could not copy link to clipboard :("
-  },
-  "5": {
-    "string": "Link copied!"
-  },
-  "6": {
-    "string": "Email"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Get Link"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "More"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "You must enable the AMP Story experiment to view this content."
-  },
-  "21": {
-    "string": "We're sorry, it looks like your browser doesn't support this experience"
-  },
-  "22": {
-    "string": "Accept"
-  },
-  "23": {
-    "string": "Decline"
-  },
-  "25": {
-    "string": "View on original domain:"
-  },
-  "26": {
-    "string": "More about AMP results"
-  },
-  "27": {
-    "string": "Continue Anyway"
-  },
-  "31": {
-    "string": "Sound off"
-  },
-  "32": {
-    "string": "Sound on"
-  },
-  "33": {
-    "string": "This page has no sound"
-  },
-  "34": {
-    "string": "Play video"
-  },
-  "35": {
-    "string": "Swipe up"
-  },
-  "36": {
-    "string": "Expand Tweet"
-  },
-  "62": {
-    "string": "Share starting from this page"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Updated"
-  },
-  "65": {
-    "string": "Video failed to play"
-  },
-  "66": {
-    "string": "Mute story"
-  },
-  "67": {
-    "string": "Unmute story"
-  },
-  "68": {
-    "string": "Story information"
-  },
-  "69": {
-    "string": "Share story"
-  },
-  "70": {
-    "string": "Toggle story menu"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1 of 2"
-  },
-  "76": {
-    "string": "Tap to go to the next screen"
-  },
-  "77": {
-    "string": "Next"
-  },
-  "78": {
-    "string": "Tip 2 of 2"
-  },
-  "79": {
-    "string": "Swipe to go to the next story"
-  },
-  "80": {
-    "string": "Got it"
-  },
-  "81": {
-    "string": "Tip"
-  },
-  "82": {
-    "string": "Previous page"
-  },
-  "83": {
-    "string": "Activate"
-  },
-  "84": {
-    "string": "SCORE:"
-  },
-  "85": {
-    "string": "Pause story"
-  },
-  "86": {
-    "string": "Play story"
-  },
-  "87": {
-    "string": "Close"
-  },
-  "88": {
-    "string": "Skip to next"
-  },
-  "89": {
-    "string": "Your response will be sent to"
-  },
-  "90": {
-    "string": "Next story"
-  },
-  "91": {
-    "string": "Next page"
-  },
-  "92": {
-    "string": "Replay"
-  },
-  "93": {
-    "string": "Previous page"
-  },
-  "96": {
-    "string": "Move device to explore"
-  },
-  "97": {
-    "string": "Opening"
-  }
+  "2": "Tap Next",
+  "3": "Tap Back",
+  "4": "Could not copy link to clipboard :(",
+  "5": "Link copied!",
+  "6": "Email",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Get Link",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "More",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "You must enable the AMP Story experiment to view this content.",
+  "21": "We're sorry, it looks like your browser doesn't support this experience",
+  "22": "Accept",
+  "23": "Decline",
+  "25": "View on original domain:",
+  "26": "More about AMP results",
+  "27": "Continue Anyway",
+  "31": "Sound off",
+  "32": "Sound on",
+  "33": "This page has no sound",
+  "34": "Play video",
+  "35": "Swipe up",
+  "36": "Expand Tweet",
+  "62": "Share starting from this page",
+  "63": "Line",
+  "64": "Updated",
+  "65": "Video failed to play",
+  "66": "Mute story",
+  "67": "Unmute story",
+  "68": "Story information",
+  "69": "Share story",
+  "70": "Toggle story menu",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Tip 1 of 2",
+  "76": "Tap to go to the next screen",
+  "77": "Next",
+  "78": "Tip 2 of 2",
+  "79": "Swipe to go to the next story",
+  "80": "Got it",
+  "81": "Tip",
+  "82": "Previous page",
+  "83": "Activate",
+  "84": "SCORE:",
+  "85": "Pause story",
+  "86": "Play story",
+  "87": "Close",
+  "88": "Skip to next",
+  "89": "Your response will be sent to",
+  "90": "Next story",
+  "91": "Next page",
+  "92": "Replay",
+  "93": "Previous page",
+  "96": "Move device to explore",
+  "97": "Opening"
 }

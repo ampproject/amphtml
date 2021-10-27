@@ -93,7 +93,6 @@ import {upgradeBackgroundAudio} from './audio';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -311,7 +310,7 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_ = getLocalizationService(this.element);
 
     this.localizationService_
-      .registerLocalizedStringBundle('default', LocalizedStringsDefault)
+      .registerLocalizedStringBundle('default', LocalizedStringsEn)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
       .registerLocalizedStringBundle('de', LocalizedStringsDe)
       .registerLocalizedStringBundle('en', LocalizedStringsEn)

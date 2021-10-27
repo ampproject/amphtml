@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Dodirnite Naprijed"
-  },
-  "3": {
-    "string": "Dodirnite Nazad"
-  },
-  "4": {
-    "string": "Kopiranje veze u međuspremnik nije uspjelo :("
-  },
-  "5": {
-    "string": "Veza je kopirana!"
-  },
-  "6": {
-    "string": "E-pošta"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Preuzmi vezu"
-  },
-  "10": {
-    "string": "Linkedin"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Više"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Morate omogućiti eksperiment amp-story za prikaz ovog sadržaja."
-  },
-  "21": {
-    "string": "Nažalost, vaš preglednik ne podržava ovo iskustvo"
-  },
-  "22": {
-    "string": "Prihvati"
-  },
-  "23": {
-    "string": "Odbij"
-  },
-  "25": {
-    "string": "Prikaz na originalnoj domeni:"
-  },
-  "26": {
-    "string": "Više o AMP rezultatima"
-  },
-  "27": {
-    "string": "Svejedno nastavi"
-  },
-  "31": {
-    "string": "Zvuk je isključen"
-  },
-  "32": {
-    "string": "Zvuk je uključen"
-  },
-  "33": {
-    "string": "Ova stranica nema zvuk"
-  },
-  "34": {
-    "string": "Reproduciraj videozapis"
-  },
-  "35": {
-    "string": "Pređite prstom nagore"
-  },
-  "36": {
-    "string": "Proširi tweet"
-  },
-  "62": {
-    "string": "Podijeli počevši od ove stranice"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Ažurirano"
-  },
-  "65": {
-    "string": "Reproduciranje videozapisa nije uspjelo"
-  },
-  "66": {
-    "string": "Isključi zvuk u priči"
-  },
-  "67": {
-    "string": "Uključi zvuk u priči"
-  },
-  "68": {
-    "string": "Informacija o priči"
-  },
-  "69": {
-    "string": "Podijeli priču"
-  },
-  "70": {
-    "string": "Uključi meni priče"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "1. savjet od 2"
-  },
-  "76": {
-    "string": "Dodirnite za prelazak na sljedeći ekran"
-  },
-  "77": {
-    "string": "Naprijed"
-  },
-  "78": {
-    "string": "2. savjet od 2"
-  },
-  "79": {
-    "string": "Pređite prstom za sljedeću priču"
-  },
-  "80": {
-    "string": "Razumijem"
-  },
-  "81": {
-    "string": "Savjet"
-  },
-  "82": {
-    "string": "Prethodna stranica"
-  },
-  "83": {
-    "string": "Aktiviraj"
-  },
-  "84": {
-    "string": "REZULTAT:"
-  },
-  "85": {
-    "string": "Pauziraj priču"
-  },
-  "86": {
-    "string": "Reproduciraj priču"
-  },
-  "87": {
-    "string": "Zatvori"
-  },
-  "88": {
-    "string": "Preskoči na sljedeće"
-  },
-  "89": {
-    "string": "Vaš odgovor će biti poslan na"
-  },
-  "90": {
-    "string": "Sljedeća priča"
-  },
-  "91": {
-    "string": "Sljedeća stranica"
-  },
-  "92": {
-    "string": "Ponovo reproduciraj"
-  },
-  "93": {
-    "string": "Prethodna stranica"
-  },
-  "96": {
-    "string": "Pomjerite uređaj i istražujte"
-  },
-  "97": {
-    "string": "Otvaranje"
-  }
+  "2": "Dodirnite Naprijed",
+  "3": "Dodirnite Nazad",
+  "4": "Kopiranje veze u međuspremnik nije uspjelo :(",
+  "5": "Veza je kopirana!",
+  "6": "E-pošta",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Preuzmi vezu",
+  "10": "Linkedin",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Više",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Morate omogućiti eksperiment amp-story za prikaz ovog sadržaja.",
+  "21": "Nažalost, vaš preglednik ne podržava ovo iskustvo",
+  "22": "Prihvati",
+  "23": "Odbij",
+  "25": "Prikaz na originalnoj domeni:",
+  "26": "Više o AMP rezultatima",
+  "27": "Svejedno nastavi",
+  "31": "Zvuk je isključen",
+  "32": "Zvuk je uključen",
+  "33": "Ova stranica nema zvuk",
+  "34": "Reproduciraj videozapis",
+  "35": "Pređite prstom nagore",
+  "36": "Proširi tweet",
+  "62": "Podijeli počevši od ove stranice",
+  "63": "Line",
+  "64": "Ažurirano",
+  "65": "Reproduciranje videozapisa nije uspjelo",
+  "66": "Isključi zvuk u priči",
+  "67": "Uključi zvuk u priči",
+  "68": "Informacija o priči",
+  "69": "Podijeli priču",
+  "70": "Uključi meni priče",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "1. savjet od 2",
+  "76": "Dodirnite za prelazak na sljedeći ekran",
+  "77": "Naprijed",
+  "78": "2. savjet od 2",
+  "79": "Pređite prstom za sljedeću priču",
+  "80": "Razumijem",
+  "81": "Savjet",
+  "82": "Prethodna stranica",
+  "83": "Aktiviraj",
+  "84": "REZULTAT:",
+  "85": "Pauziraj priču",
+  "86": "Reproduciraj priču",
+  "87": "Zatvori",
+  "88": "Preskoči na sljedeće",
+  "89": "Vaš odgovor će biti poslan na",
+  "90": "Sljedeća priča",
+  "91": "Sljedeća stranica",
+  "92": "Ponovo reproduciraj",
+  "93": "Prethodna stranica",
+  "96": "Pomjerite uređaj i istražujte",
+  "97": "Otvaranje"
 }

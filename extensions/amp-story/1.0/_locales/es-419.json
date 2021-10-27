@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Pulsa en Siguiente"
-  },
-  "3": {
-    "string": "Pulsa en Atrás"
-  },
-  "4": {
-    "string": "No se pudo copiar el enlace en el portapapeles :("
-  },
-  "5": {
-    "string": "¡Enlace copiado!"
-  },
-  "6": {
-    "string": "Correo electrónico"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Obtener enlace"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Más"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Para ver este contenido, debes habilitar el experimento en amp-story."
-  },
-  "21": {
-    "string": "Lo sentimos, parece que esta experiencia no está disponible para su navegador"
-  },
-  "22": {
-    "string": "Aceptar"
-  },
-  "23": {
-    "string": "Rechazar"
-  },
-  "25": {
-    "string": "Ver en el dominio original:"
-  },
-  "26": {
-    "string": "Más información sobre los resultados de AMP"
-  },
-  "27": {
-    "string": "Continuar de todas formas"
-  },
-  "31": {
-    "string": "Sonido desactivado"
-  },
-  "32": {
-    "string": "Sonido activado"
-  },
-  "33": {
-    "string": "Esta página no tiene sonido"
-  },
-  "34": {
-    "string": "Reproducir video"
-  },
-  "35": {
-    "string": "Deslizar el dedo hacia arriba"
-  },
-  "36": {
-    "string": "Mostrar tuit"
-  },
-  "62": {
-    "string": "Compartir a partir de esta página"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Actualizado"
-  },
-  "65": {
-    "string": "No se pudo reproducir el video"
-  },
-  "66": {
-    "string": "Silenciar historia"
-  },
-  "67": {
-    "string": "Dejar de silenciar la historia"
-  },
-  "68": {
-    "string": "Información de la historia"
-  },
-  "69": {
-    "string": "Compartir historia"
-  },
-  "70": {
-    "string": "Alternar el menú de la historia"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Consejo 1 de 2"
-  },
-  "76": {
-    "string": "Pulsa para ir a la siguiente pantalla"
-  },
-  "77": {
-    "string": "Siguiente"
-  },
-  "78": {
-    "string": "Consejo 2 de 2"
-  },
-  "79": {
-    "string": "Desliza para ir a la siguiente historia"
-  },
-  "80": {
-    "string": "Entendido"
-  },
-  "81": {
-    "string": "Consejo"
-  },
-  "82": {
-    "string": "Página anterior"
-  },
-  "83": {
-    "string": "Activar"
-  },
-  "84": {
-    "string": "PUNTUACIÓN:"
-  },
-  "85": {
-    "string": "Pausar la historia"
-  },
-  "86": {
-    "string": "Reproducir la historia"
-  },
-  "87": {
-    "string": "Cerrar"
-  },
-  "88": {
-    "string": "Saltar al siguiente"
-  },
-  "89": {
-    "string": "Tu respuesta se enviará a"
-  },
-  "90": {
-    "string": "Historia siguiente"
-  },
-  "91": {
-    "string": "Página siguiente"
-  },
-  "92": {
-    "string": "Repetir"
-  },
-  "93": {
-    "string": "Página anterior"
-  },
-  "96": {
-    "string": "Mueve el dispositivo para explorar"
-  },
-  "97": {
-    "string": "Abriendo..."
-  }
+  "2": "Pulsa en Siguiente",
+  "3": "Pulsa en Atrás",
+  "4": "No se pudo copiar el enlace en el portapapeles :(",
+  "5": "¡Enlace copiado!",
+  "6": "Correo electrónico",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Obtener enlace",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Más",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Para ver este contenido, debes habilitar el experimento en amp-story.",
+  "21": "Lo sentimos, parece que esta experiencia no está disponible para su navegador",
+  "22": "Aceptar",
+  "23": "Rechazar",
+  "25": "Ver en el dominio original:",
+  "26": "Más información sobre los resultados de AMP",
+  "27": "Continuar de todas formas",
+  "31": "Sonido desactivado",
+  "32": "Sonido activado",
+  "33": "Esta página no tiene sonido",
+  "34": "Reproducir video",
+  "35": "Deslizar el dedo hacia arriba",
+  "36": "Mostrar tuit",
+  "62": "Compartir a partir de esta página",
+  "63": "Line",
+  "64": "Actualizado",
+  "65": "No se pudo reproducir el video",
+  "66": "Silenciar historia",
+  "67": "Dejar de silenciar la historia",
+  "68": "Información de la historia",
+  "69": "Compartir historia",
+  "70": "Alternar el menú de la historia",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Consejo 1 de 2",
+  "76": "Pulsa para ir a la siguiente pantalla",
+  "77": "Siguiente",
+  "78": "Consejo 2 de 2",
+  "79": "Desliza para ir a la siguiente historia",
+  "80": "Entendido",
+  "81": "Consejo",
+  "82": "Página anterior",
+  "83": "Activar",
+  "84": "PUNTUACIÓN:",
+  "85": "Pausar la historia",
+  "86": "Reproducir la historia",
+  "87": "Cerrar",
+  "88": "Saltar al siguiente",
+  "89": "Tu respuesta se enviará a",
+  "90": "Historia siguiente",
+  "91": "Página siguiente",
+  "92": "Repetir",
+  "93": "Página anterior",
+  "96": "Mueve el dispositivo para explorar",
+  "97": "Abriendo..."
 }

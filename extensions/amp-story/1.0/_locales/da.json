@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Tryk på Næste"
-  },
-  "3": {
-    "string": "Tryk på Tilbage"
-  },
-  "4": {
-    "string": "Kunne ikke kopiere linket til udklipsholderen :("
-  },
-  "5": {
-    "string": "Link kopieret!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Hent link"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Mere"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Du skal aktivere amp-story-eksperimentet for at se dette indhold."
-  },
-  "21": {
-    "string": "Vi beklager, men det ser ud til, at din browser ikke understøtter denne oplevelse"
-  },
-  "22": {
-    "string": "Accepter"
-  },
-  "23": {
-    "string": "Afvis"
-  },
-  "25": {
-    "string": "Vis på det originale domæne:"
-  },
-  "26": {
-    "string": "Mere om AMP-resultater"
-  },
-  "27": {
-    "string": "Fortsæt alligevel"
-  },
-  "31": {
-    "string": "Lyd fra"
-  },
-  "32": {
-    "string": "Lyd til"
-  },
-  "33": {
-    "string": "Denne side har ingen lyd"
-  },
-  "34": {
-    "string": "Afspil video"
-  },
-  "35": {
-    "string": "Stryg op"
-  },
-  "36": {
-    "string": "Udvid tweet"
-  },
-  "62": {
-    "string": "Begynd at dele startende fra denne side"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Opdateret"
-  },
-  "65": {
-    "string": "Afspilning af video mislykkedes"
-  },
-  "66": {
-    "string": "Slå lyd fra historie fra"
-  },
-  "67": {
-    "string": "Slå lyd i historie til"
-  },
-  "68": {
-    "string": "Oplysninger om historie"
-  },
-  "69": {
-    "string": "Del historie"
-  },
-  "70": {
-    "string": "Slå historiemenu til"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1 af 2"
-  },
-  "76": {
-    "string": "Tryk for at gå til næste skærmbillede"
-  },
-  "77": {
-    "string": "Næste"
-  },
-  "78": {
-    "string": "Tip 2 af 2"
-  },
-  "79": {
-    "string": "Stryg for at gå til den næste historie"
-  },
-  "80": {
-    "string": "Forstået"
-  },
-  "81": {
-    "string": "Tip"
-  },
-  "82": {
-    "string": "Forrige side"
-  },
-  "83": {
-    "string": "Aktiver"
-  },
-  "84": {
-    "string": "SCORE:"
-  },
-  "85": {
-    "string": "Sæt historie på pause"
-  },
-  "86": {
-    "string": "Afspil historie"
-  },
-  "87": {
-    "string": "Luk"
-  },
-  "88": {
-    "string": "Spring til næste"
-  },
-  "89": {
-    "string": "Dit svar vil blive sendt til"
-  },
-  "90": {
-    "string": "Næste historie"
-  },
-  "91": {
-    "string": "Næste side"
-  },
-  "92": {
-    "string": "Afspil igen"
-  },
-  "93": {
-    "string": "Forrige side"
-  },
-  "96": {
-    "string": "Flyt enhed for at udforske"
-  },
-  "97": {
-    "string": "Åbner"
-  }
+  "2": "Tryk på Næste",
+  "3": "Tryk på Tilbage",
+  "4": "Kunne ikke kopiere linket til udklipsholderen :(",
+  "5": "Link kopieret!",
+  "6": "E-mail",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Hent link",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Mere",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Du skal aktivere amp-story-eksperimentet for at se dette indhold.",
+  "21": "Vi beklager, men det ser ud til, at din browser ikke understøtter denne oplevelse",
+  "22": "Accepter",
+  "23": "Afvis",
+  "25": "Vis på det originale domæne:",
+  "26": "Mere om AMP-resultater",
+  "27": "Fortsæt alligevel",
+  "31": "Lyd fra",
+  "32": "Lyd til",
+  "33": "Denne side har ingen lyd",
+  "34": "Afspil video",
+  "35": "Stryg op",
+  "36": "Udvid tweet",
+  "62": "Begynd at dele startende fra denne side",
+  "63": "Line",
+  "64": "Opdateret",
+  "65": "Afspilning af video mislykkedes",
+  "66": "Slå lyd fra historie fra",
+  "67": "Slå lyd i historie til",
+  "68": "Oplysninger om historie",
+  "69": "Del historie",
+  "70": "Slå historiemenu til",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Tip 1 af 2",
+  "76": "Tryk for at gå til næste skærmbillede",
+  "77": "Næste",
+  "78": "Tip 2 af 2",
+  "79": "Stryg for at gå til den næste historie",
+  "80": "Forstået",
+  "81": "Tip",
+  "82": "Forrige side",
+  "83": "Aktiver",
+  "84": "SCORE:",
+  "85": "Sæt historie på pause",
+  "86": "Afspil historie",
+  "87": "Luk",
+  "88": "Spring til næste",
+  "89": "Dit svar vil blive sendt til",
+  "90": "Næste historie",
+  "91": "Næste side",
+  "92": "Afspil igen",
+  "93": "Forrige side",
+  "96": "Flyt enhed for at udforske",
+  "97": "Åbner"
 }

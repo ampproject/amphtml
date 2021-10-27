@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Atingeți Înainte"
-  },
-  "3": {
-    "string": "Atingeți Înapoi"
-  },
-  "4": {
-    "string": "Nu s-a putut copia linkul în clipboard :("
-  },
-  "5": {
-    "string": "Link copiat!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Obțineți linkul"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Mai mult"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Trebuie să activați experimentul amp-story pentru a vizualiza acest conținut."
-  },
-  "21": {
-    "string": "Ne pare rău, se pare că browserul dvs. nu acceptă această experiență"
-  },
-  "22": {
-    "string": "Acceptați"
-  },
-  "23": {
-    "string": "Refuzați"
-  },
-  "25": {
-    "string": "Vizualizați pe domeniul original:"
-  },
-  "26": {
-    "string": "Mai multe detalii despre rezultatele AMP"
-  },
-  "27": {
-    "string": "Continuați oricum"
-  },
-  "31": {
-    "string": "Fără sunet"
-  },
-  "32": {
-    "string": "Cu sunet"
-  },
-  "33": {
-    "string": "Această pagină nu are sunet"
-  },
-  "34": {
-    "string": "Redați videoclipul"
-  },
-  "35": {
-    "string": "Glisați în sus"
-  },
-  "36": {
-    "string": "Extindeți tweetul"
-  },
-  "62": {
-    "string": "Distribuiți începând cu această pagină"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Actualizat"
-  },
-  "65": {
-    "string": "Videoclipul nu a putut fi redat"
-  },
-  "66": {
-    "string": "Opriți sunetul relatării"
-  },
-  "67": {
-    "string": "Activați sunetul relatării"
-  },
-  "68": {
-    "string": "Informații despre relatare"
-  },
-  "69": {
-    "string": "Distribuiți relatarea"
-  },
-  "70": {
-    "string": "Alternați meniul relatării"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Sugestia 1 din 2"
-  },
-  "76": {
-    "string": "Atingeți pentru a accesa ecranul următor"
-  },
-  "77": {
-    "string": "Înainte"
-  },
-  "78": {
-    "string": "Sugestia 2 din 2"
-  },
-  "79": {
-    "string": "Glisați pentru a accesa relatarea următoare"
-  },
-  "80": {
-    "string": "Am înțeles"
-  },
-  "81": {
-    "string": "Sugestie"
-  },
-  "82": {
-    "string": "Pagina precedentă"
-  },
-  "83": {
-    "string": "Activați"
-  },
-  "84": {
-    "string": "PUNCTAJ:"
-  },
-  "85": {
-    "string": "Întrerupeți relatarea"
-  },
-  "86": {
-    "string": "Redați relatarea"
-  },
-  "87": {
-    "string": "Închideți"
-  },
-  "88": {
-    "string": "Salt la următorul"
-  },
-  "89": {
-    "string": "Răspunsul dvs. va fi trimis la"
-  },
-  "90": {
-    "string": "Următoarea relatare"
-  },
-  "91": {
-    "string": "Pagina următoare"
-  },
-  "92": {
-    "string": "Reluare"
-  },
-  "93": {
-    "string": "Pagina precedentă"
-  },
-  "96": {
-    "string": "Mutați dispozitivul pentru a explora"
-  },
-  "97": {
-    "string": "Se deschide"
-  }
+  "2": "Atingeți Înainte",
+  "3": "Atingeți Înapoi",
+  "4": "Nu s-a putut copia linkul în clipboard :(",
+  "5": "Link copiat!",
+  "6": "E-mail",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Obțineți linkul",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Mai mult",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Trebuie să activați experimentul amp-story pentru a vizualiza acest conținut.",
+  "21": "Ne pare rău, se pare că browserul dvs. nu acceptă această experiență",
+  "22": "Acceptați",
+  "23": "Refuzați",
+  "25": "Vizualizați pe domeniul original:",
+  "26": "Mai multe detalii despre rezultatele AMP",
+  "27": "Continuați oricum",
+  "31": "Fără sunet",
+  "32": "Cu sunet",
+  "33": "Această pagină nu are sunet",
+  "34": "Redați videoclipul",
+  "35": "Glisați în sus",
+  "36": "Extindeți tweetul",
+  "62": "Distribuiți începând cu această pagină",
+  "63": "Line",
+  "64": "Actualizat",
+  "65": "Videoclipul nu a putut fi redat",
+  "66": "Opriți sunetul relatării",
+  "67": "Activați sunetul relatării",
+  "68": "Informații despre relatare",
+  "69": "Distribuiți relatarea",
+  "70": "Alternați meniul relatării",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Sugestia 1 din 2",
+  "76": "Atingeți pentru a accesa ecranul următor",
+  "77": "Înainte",
+  "78": "Sugestia 2 din 2",
+  "79": "Glisați pentru a accesa relatarea următoare",
+  "80": "Am înțeles",
+  "81": "Sugestie",
+  "82": "Pagina precedentă",
+  "83": "Activați",
+  "84": "PUNCTAJ:",
+  "85": "Întrerupeți relatarea",
+  "86": "Redați relatarea",
+  "87": "Închideți",
+  "88": "Salt la următorul",
+  "89": "Răspunsul dvs. va fi trimis la",
+  "90": "Următoarea relatare",
+  "91": "Pagina următoare",
+  "92": "Reluare",
+  "93": "Pagina precedentă",
+  "96": "Mutați dispozitivul pentru a explora",
+  "97": "Se deschide"
 }

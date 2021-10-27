@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Toca Següent"
-  },
-  "3": {
-    "string": "Toca Enrere"
-  },
-  "4": {
-    "string": "No s'ha pogut copiar l'enllaç al porta-retalls :("
-  },
-  "5": {
-    "string": "S'ha copiat l'enllaç."
-  },
-  "6": {
-    "string": "Correu electrònic"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Obtén l'enllaç"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Més"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Has d'activar l'experiment d'AMP-story per veure aquest contingut."
-  },
-  "21": {
-    "string": "Sembla que el teu navegador no admet aquesta experiència"
-  },
-  "22": {
-    "string": "Accepta"
-  },
-  "23": {
-    "string": "Rebutja"
-  },
-  "25": {
-    "string": "Mostra al domini original:"
-  },
-  "26": {
-    "string": "Més informació sobre els resultats d'AMP"
-  },
-  "27": {
-    "string": "Continua de totes maneres"
-  },
-  "31": {
-    "string": "So desactivat"
-  },
-  "32": {
-    "string": "So activat"
-  },
-  "33": {
-    "string": "Aquesta pàgina no té so"
-  },
-  "34": {
-    "string": "Reprodueix el vídeo"
-  },
-  "35": {
-    "string": "Llisca cap amunt"
-  },
-  "36": {
-    "string": "Amplia el tuit"
-  },
-  "62": {
-    "string": "Comparteix a partir d'aquesta pàgina"
-  },
-  "63": {
-    "string": "Línia"
-  },
-  "64": {
-    "string": "S'ha actualitzat"
-  },
-  "65": {
-    "string": "No s'ha pogut reproduir el vídeo"
-  },
-  "66": {
-    "string": "Silencia la història"
-  },
-  "67": {
-    "string": "Deixa de silenciar la història"
-  },
-  "68": {
-    "string": "Informació de la història"
-  },
-  "69": {
-    "string": "Comparteix la història"
-  },
-  "70": {
-    "string": "Activa/Desactiva el menú de la història"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Consell 1 de 2"
-  },
-  "76": {
-    "string": "Toca per anar a la pantalla següent"
-  },
-  "77": {
-    "string": "Següent"
-  },
-  "78": {
-    "string": "Consell 2 de 2"
-  },
-  "79": {
-    "string": "Fes lliscar el dit per anar a la història següent"
-  },
-  "80": {
-    "string": "Entesos"
-  },
-  "81": {
-    "string": "Consell"
-  },
-  "82": {
-    "string": "Pàgina anterior"
-  },
-  "83": {
-    "string": "Activa"
-  },
-  "84": {
-    "string": "PUNTUACIÓ:"
-  },
-  "85": {
-    "string": "Posa en pausa la història"
-  },
-  "86": {
-    "string": "Reprodueix la història"
-  },
-  "87": {
-    "string": "Tanca"
-  },
-  "88": {
-    "string": "Salta al següent"
-  },
-  "89": {
-    "string": "La teva resposta s'enviarà a"
-  },
-  "90": {
-    "string": "Història següent"
-  },
-  "91": {
-    "string": "Pàgina següent"
-  },
-  "92": {
-    "string": "Torna a reproduir"
-  },
-  "93": {
-    "string": "Pàgina anterior"
-  },
-  "96": {
-    "string": "Mou el dispositiu per explorar"
-  },
-  "97": {
-    "string": "S'està obrint"
-  }
+  "2": "Toca Següent",
+  "3": "Toca Enrere",
+  "4": "No s'ha pogut copiar l'enllaç al porta-retalls :(",
+  "5": "S'ha copiat l'enllaç.",
+  "6": "Correu electrònic",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Obtén l'enllaç",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Més",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Has d'activar l'experiment d'AMP-story per veure aquest contingut.",
+  "21": "Sembla que el teu navegador no admet aquesta experiència",
+  "22": "Accepta",
+  "23": "Rebutja",
+  "25": "Mostra al domini original:",
+  "26": "Més informació sobre els resultats d'AMP",
+  "27": "Continua de totes maneres",
+  "31": "So desactivat",
+  "32": "So activat",
+  "33": "Aquesta pàgina no té so",
+  "34": "Reprodueix el vídeo",
+  "35": "Llisca cap amunt",
+  "36": "Amplia el tuit",
+  "62": "Comparteix a partir d'aquesta pàgina",
+  "63": "Línia",
+  "64": "S'ha actualitzat",
+  "65": "No s'ha pogut reproduir el vídeo",
+  "66": "Silencia la història",
+  "67": "Deixa de silenciar la història",
+  "68": "Informació de la història",
+  "69": "Comparteix la història",
+  "70": "Activa/Desactiva el menú de la història",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Consell 1 de 2",
+  "76": "Toca per anar a la pantalla següent",
+  "77": "Següent",
+  "78": "Consell 2 de 2",
+  "79": "Fes lliscar el dit per anar a la història següent",
+  "80": "Entesos",
+  "81": "Consell",
+  "82": "Pàgina anterior",
+  "83": "Activa",
+  "84": "PUNTUACIÓ:",
+  "85": "Posa en pausa la història",
+  "86": "Reprodueix la història",
+  "87": "Tanca",
+  "88": "Salta al següent",
+  "89": "La teva resposta s'enviarà a",
+  "90": "Història següent",
+  "91": "Pàgina següent",
+  "92": "Torna a reproduir",
+  "93": "Pàgina anterior",
+  "96": "Mou el dispositiu per explorar",
+  "97": "S'està obrint"
 }

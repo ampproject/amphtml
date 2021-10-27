@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Bofya Unaofuata"
-  },
-  "3": {
-    "string": "Bofya Nyuma"
-  },
-  "4": {
-    "string": "Haikuweza kunakili kiungo kwenye klipubodi :("
-  },
-  "5": {
-    "string": "Umenakili kiungo!"
-  },
-  "6": {
-    "string": "Barua pepe"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Pata Kiungo"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Zaidi"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Sharti uwezeshe jaribio la hadithi za amp ili uone maudhui haya."
-  },
-  "21": {
-    "string": "Samahani, inaonekana kivinjari chako hakiwezi kutumia huduma hii"
-  },
-  "22": {
-    "string": "Kubali"
-  },
-  "23": {
-    "string": "Kataa"
-  },
-  "25": {
-    "string": "Angalia kwenye kikoa asili:"
-  },
-  "26": {
-    "string": "Zaidi kuhusu matokeo ya AMP"
-  },
-  "27": {
-    "string": "Endelea Hata Hivyo"
-  },
-  "31": {
-    "string": "Sauti imezimwa"
-  },
-  "32": {
-    "string": "Sauti imewashwa"
-  },
-  "33": {
-    "string": "Ukurasa huu hauna sauti"
-  },
-  "34": {
-    "string": "Cheza video"
-  },
-  "35": {
-    "string": "Telezesha juu"
-  },
-  "36": {
-    "string": "Panua Tweet"
-  },
-  "62": {
-    "string": "Tuma kuanzia ukurasa huu"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Imesasishwa"
-  },
-  "65": {
-    "string": "Video haikucheza"
-  },
-  "66": {
-    "string": "Zima sauti ya hadithi"
-  },
-  "67": {
-    "string": "Washa sauti ya hadithi"
-  },
-  "68": {
-    "string": "Maelezo ya hadithi"
-  },
-  "69": {
-    "string": "Tuma hadithi"
-  },
-  "70": {
-    "string": "Weka menyu ya hadithi"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Kidokezo cha 1 kati ya 2"
-  },
-  "76": {
-    "string": "Bofya ili uende kwenye skrini inayofuata"
-  },
-  "77": {
-    "string": "Inayofuata"
-  },
-  "78": {
-    "string": "Kidokezo cha 2 kati ya 2"
-  },
-  "79": {
-    "string": "Telezesha ili uende kwenye hadithi inayofuata"
-  },
-  "80": {
-    "string": "Nimeelewa"
-  },
-  "81": {
-    "string": "Kidokezo"
-  },
-  "82": {
-    "string": "Ukurasa uliotangulia"
-  },
-  "83": {
-    "string": "Wezesha"
-  },
-  "84": {
-    "string": "ALAMA:"
-  },
-  "85": {
-    "string": "Sitisha hadithi"
-  },
-  "86": {
-    "string": "Cheza hadithi"
-  },
-  "87": {
-    "string": "Funga"
-  },
-  "88": {
-    "string": "Fungua inayofuata"
-  },
-  "89": {
-    "string": "Jibu lako litatumwa kwa"
-  },
-  "90": {
-    "string": "Hadithi inayofuata"
-  },
-  "91": {
-    "string": "Ukurasa unaofuata"
-  },
-  "92": {
-    "string": "Cheza tena"
-  },
-  "93": {
-    "string": "Ukurasa uliotangulia"
-  },
-  "96": {
-    "string": "Sogeza kifaa ili ugundue zaidi"
-  },
-  "97": {
-    "string": "Inafungua"
-  }
+  "2": "Bofya Unaofuata",
+  "3": "Bofya Nyuma",
+  "4": "Haikuweza kunakili kiungo kwenye klipubodi :(",
+  "5": "Umenakili kiungo!",
+  "6": "Barua pepe",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Pata Kiungo",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Zaidi",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Sharti uwezeshe jaribio la hadithi za amp ili uone maudhui haya.",
+  "21": "Samahani, inaonekana kivinjari chako hakiwezi kutumia huduma hii",
+  "22": "Kubali",
+  "23": "Kataa",
+  "25": "Angalia kwenye kikoa asili:",
+  "26": "Zaidi kuhusu matokeo ya AMP",
+  "27": "Endelea Hata Hivyo",
+  "31": "Sauti imezimwa",
+  "32": "Sauti imewashwa",
+  "33": "Ukurasa huu hauna sauti",
+  "34": "Cheza video",
+  "35": "Telezesha juu",
+  "36": "Panua Tweet",
+  "62": "Tuma kuanzia ukurasa huu",
+  "63": "Line",
+  "64": "Imesasishwa",
+  "65": "Video haikucheza",
+  "66": "Zima sauti ya hadithi",
+  "67": "Washa sauti ya hadithi",
+  "68": "Maelezo ya hadithi",
+  "69": "Tuma hadithi",
+  "70": "Weka menyu ya hadithi",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "Kidokezo cha 1 kati ya 2",
+  "76": "Bofya ili uende kwenye skrini inayofuata",
+  "77": "Inayofuata",
+  "78": "Kidokezo cha 2 kati ya 2",
+  "79": "Telezesha ili uende kwenye hadithi inayofuata",
+  "80": "Nimeelewa",
+  "81": "Kidokezo",
+  "82": "Ukurasa uliotangulia",
+  "83": "Wezesha",
+  "84": "ALAMA:",
+  "85": "Sitisha hadithi",
+  "86": "Cheza hadithi",
+  "87": "Funga",
+  "88": "Fungua inayofuata",
+  "89": "Jibu lako litatumwa kwa",
+  "90": "Hadithi inayofuata",
+  "91": "Ukurasa unaofuata",
+  "92": "Cheza tena",
+  "93": "Ukurasa uliotangulia",
+  "96": "Sogeza kifaa ili ugundue zaidi",
+  "97": "Inafungua"
 }

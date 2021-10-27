@@ -1,188 +1,64 @@
 {
-  "2": {
-    "string": "Palieskite „Kitas“"
-  },
-  "3": {
-    "string": "Palieskite „Atgal“"
-  },
-  "4": {
-    "string": "Nepavyko nukopijuoti nuorodos į iškarpinę :("
-  },
-  "5": {
-    "string": "Nuoroda nukopijuota!"
-  },
-  "6": {
-    "string": "El. paštas"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "8": {
-    "string": "Google+"
-  },
-  "9": {
-    "string": "Gauti nuorodą"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Daugiau"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Turite suaktyvinti „amp-story“ eksperimentą, kad galėtumėte peržiūrėti šį turinį."
-  },
-  "21": {
-    "string": "Apgailestaujame, bet atrodo, kad jūsų naršyklė šios istorijos nepalaiko"
-  },
-  "22": {
-    "string": "Priimti"
-  },
-  "23": {
-    "string": "Atmesti"
-  },
-  "25": {
-    "string": "Peržiūra pradiniame domene:"
-  },
-  "26": {
-    "string": "Daugiau apie AMP rezultatus"
-  },
-  "27": {
-    "string": "Vis tiek tęsti"
-  },
-  "31": {
-    "string": "Garsas išjungtas"
-  },
-  "32": {
-    "string": "Garsas įjungtas"
-  },
-  "33": {
-    "string": "Nėra šio puslapio garso"
-  },
-  "34": {
-    "string": "Leisti vaizdo įrašą"
-  },
-  "35": {
-    "string": "Perbraukti aukštyn"
-  },
-  "36": {
-    "string": "Išskleisti „Twitter“ įrašą"
-  },
-  "62": {
-    "string": "Bendrinti pradedant šiuo puslapiu"
-  },
-  "63": {
-    "string": "Line"
-  },
-  "64": {
-    "string": "Atnaujinta"
-  },
-  "65": {
-    "string": "Nepavyko paleisti vaizdo įrašo"
-  },
-  "66": {
-    "string": "Nutildyti istoriją"
-  },
-  "67": {
-    "string": "Išjungti istorijos nutildymą"
-  },
-  "68": {
-    "string": "Istorijos informacija"
-  },
-  "69": {
-    "string": "Bendrinti istoriją"
-  },
-  "70": {
-    "string": "Perjungti istorijos meniu"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "1 patarimas iš 2"
-  },
-  "76": {
-    "string": "Palieskite, kad pereitumėte į kitą ekraną"
-  },
-  "77": {
-    "string": "Kitas"
-  },
-  "78": {
-    "string": "2 patarimas iš 2"
-  },
-  "79": {
-    "string": "Perbraukite, kad pereitumėte prie kitos istorijos"
-  },
-  "80": {
-    "string": "Supratau"
-  },
-  "81": {
-    "string": "Patarimas"
-  },
-  "82": {
-    "string": "Ankstesnis puslapis"
-  },
-  "83": {
-    "string": "Aktyvinti"
-  },
-  "84": {
-    "string": "REZULTATAS:"
-  },
-  "85": {
-    "string": "Pristabdyti istoriją"
-  },
-  "86": {
-    "string": "Leisti istoriją"
-  },
-  "87": {
-    "string": "Uždaryti"
-  },
-  "88": {
-    "string": "Pereiti prie kito"
-  },
-  "89": {
-    "string": "Jūsų atsakymas bus siunčiamas"
-  },
-  "90": {
-    "string": "Kita istorija"
-  },
-  "91": {
-    "string": "Kitas puslapis"
-  },
-  "92": {
-    "string": "Kartoti"
-  },
-  "93": {
-    "string": "Ankstesnis puslapis"
-  },
-  "96": {
-    "string": "Pereiti prie įrenginio naršymo"
-  },
-  "97": {
-    "string": "Atidaromas"
-  }
+  "2": "Palieskite „Kitas“",
+  "3": "Palieskite „Atgal“",
+  "4": "Nepavyko nukopijuoti nuorodos į iškarpinę :(",
+  "5": "Nuoroda nukopijuota!",
+  "6": "El. paštas",
+  "7": "Facebook",
+  "8": "Google+",
+  "9": "Gauti nuorodą",
+  "10": "LinkedIn",
+  "11": "Pinterest",
+  "12": "SMS",
+  "13": "Daugiau",
+  "14": "Tumblr",
+  "15": "Twitter",
+  "16": "WhatsApp",
+  "19": "Turite suaktyvinti „amp-story“ eksperimentą, kad galėtumėte peržiūrėti šį turinį.",
+  "21": "Apgailestaujame, bet atrodo, kad jūsų naršyklė šios istorijos nepalaiko",
+  "22": "Priimti",
+  "23": "Atmesti",
+  "25": "Peržiūra pradiniame domene:",
+  "26": "Daugiau apie AMP rezultatus",
+  "27": "Vis tiek tęsti",
+  "31": "Garsas išjungtas",
+  "32": "Garsas įjungtas",
+  "33": "Nėra šio puslapio garso",
+  "34": "Leisti vaizdo įrašą",
+  "35": "Perbraukti aukštyn",
+  "36": "Išskleisti „Twitter“ įrašą",
+  "62": "Bendrinti pradedant šiuo puslapiu",
+  "63": "Line",
+  "64": "Atnaujinta",
+  "65": "Nepavyko paleisti vaizdo įrašo",
+  "66": "Nutildyti istoriją",
+  "67": "Išjungti istorijos nutildymą",
+  "68": "Istorijos informacija",
+  "69": "Bendrinti istoriją",
+  "70": "Perjungti istorijos meniu",
+  "71": "A",
+  "72": "B",
+  "73": "C",
+  "74": "D",
+  "75": "1 patarimas iš 2",
+  "76": "Palieskite, kad pereitumėte į kitą ekraną",
+  "77": "Kitas",
+  "78": "2 patarimas iš 2",
+  "79": "Perbraukite, kad pereitumėte prie kitos istorijos",
+  "80": "Supratau",
+  "81": "Patarimas",
+  "82": "Ankstesnis puslapis",
+  "83": "Aktyvinti",
+  "84": "REZULTATAS:",
+  "85": "Pristabdyti istoriją",
+  "86": "Leisti istoriją",
+  "87": "Uždaryti",
+  "88": "Pereiti prie kito",
+  "89": "Jūsų atsakymas bus siunčiamas",
+  "90": "Kita istorija",
+  "91": "Kitas puslapis",
+  "92": "Kartoti",
+  "93": "Ankstesnis puslapis",
+  "96": "Pereiti prie įrenginio naršymo",
+  "97": "Atidaromas"
 }
