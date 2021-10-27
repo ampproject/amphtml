@@ -308,7 +308,7 @@ This event is triggered when the index displayed by the carousel has changed.
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BentoStreamGallery>;
+</BentoStreamGallery>
 ```
 
 #### Layout and style
@@ -318,13 +318,13 @@ This event is triggered when the index displayed by the carousel has changed.
 The `BentoStreamGallery` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `width`). These can be applied inline:
 
 ```jsx
-<BentoStreamGallery style={{width: 300}}>...</BentoStreamGallery>;
+<BentoStreamGallery style={{width: 300}}>...</BentoStreamGallery>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoStreamGallery className="custom-styles">...</BentoStreamGallery>;
+<BentoStreamGallery className="custom-styles">...</BentoStreamGallery>
 ```
 
 ```css

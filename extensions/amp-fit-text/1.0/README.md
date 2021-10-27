@@ -173,7 +173,7 @@ The `BentoFitText` component has a defined layout size type. To ensure the compo
 <BentoFitText style={{width: 300, height: 100}}>
   Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis
   reprehendunt.
-</BentoFitText>;
+</BentoFitText>
 ```
 
 Or via `className`:
@@ -182,7 +182,7 @@ Or via `className`:
 <BentoFitText className="custom-styles">
   Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis
   reprehendunt.
-</BentoFitText>;
+</BentoFitText>
 ```
 
 ```css

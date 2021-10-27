@@ -137,7 +137,7 @@ The `BentoWordPressEmbed` component has a defined layout size type. To ensure th
 <BentoWordPressEmbed
   style={{width: '100%', height: '100px'}}
   url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
-></BentoWordPressEmbed>;
+></BentoWordPressEmbed>
 ```
 
 Or via `className`:
@@ -146,7 +146,7 @@ Or via `className`:
 <BentoWordPressEmbed
   className="custom-styles"
   url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
-></BentoWordPressEmbed>;
+></BentoWordPressEmbed>
 ```
 
 ```css

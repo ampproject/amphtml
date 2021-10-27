@@ -158,7 +158,7 @@ The `BentoTwitter` component has a defined layout size type. To ensure the compo
 <BentoTwitter
   style={{width: 300, height: 100}}
   tweetid="1356304203044499462"
-></BentoTwitter>;
+></BentoTwitter>
 ```
 
 Or via `className`:
@@ -167,7 +167,7 @@ Or via `className`:
 <BentoTwitter
   className="custom-styles"
   tweetid="1356304203044499462"
-></BentoTwitter>;
+></BentoTwitter>
 ```
 
 ```css

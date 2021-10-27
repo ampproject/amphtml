@@ -164,7 +164,7 @@ The `BentoSoundcloud` component has a defined layout size type. To ensure the co
   style={{width: 300, height: 100}}
   trackId="243169232"
   visual={true}
-></BentoSoundcloud>;
+></BentoSoundcloud>
 ```
 
 Or via `className`:
@@ -174,7 +174,7 @@ Or via `className`:
   className="custom-styles"
   trackId="243169232"
   visual={true}
-></BentoSoundcloud>;
+></BentoSoundcloud>
 ```
 
 ```css

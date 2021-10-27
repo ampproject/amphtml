@@ -190,7 +190,7 @@ To ensure the component renders how you want it to, be sure to apply a size to t
 ```jsx
 <BentoSelector style={{width: 100, height: 400}}>
   <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
-</BentoSelector>;
+</BentoSelector>
 ```
 
 Or via `className`:
@@ -198,7 +198,7 @@ Or via `className`:
 ```jsx
 <BentoSelector className="custom-styles">
   <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
-</BentoSelector>;
+</BentoSelector>
 ```
 
 ```css
@@ -304,5 +304,5 @@ The `onChange` prop gives you two key options:
   <BentoSelectorOption as="li" option="2">
     Option 2
   </BentoSelectorOption>
-</BentoSelector>;
+</BentoSelector>
 ```

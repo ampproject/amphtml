@@ -142,7 +142,7 @@ The `BentoInstagram` component has a defined layout size type. To ensure the com
 <BentoInstagram
   style={{width: 300, height: 200}}
   shortcode="CKXYAzuj7TE"
-></BentoInstagram>;
+></BentoInstagram>
 ```
 
 Or via `className`:
@@ -151,7 +151,7 @@ Or via `className`:
 <BentoInstagram
   className="custom-styles"
   shortcode="CKXYAzuj7TE"
-></BentoInstagram>;
+></BentoInstagram>
 ```
 
 ```css

@@ -361,7 +361,7 @@ The `BentoSocialShare` component has a defined layout size type. To ensure the c
   style={{width: 50, height: 50}}
   type="twitter"
   aria-label="Share on Twitter"
-></BentoSocialShare>;
+></BentoSocialShare>
 ```
 
 Or via `className`:
@@ -371,7 +371,7 @@ Or via `className`:
   className="custom-styles"
   type="twitter"
   aria-label="Share on Twitter"
-></BentoSocialShare>;
+></BentoSocialShare>
 ```
 
 ```css

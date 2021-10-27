@@ -186,13 +186,13 @@ function App() {
 The `BentoLightbox` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoLightbox style={{width: 300, height: 200}}></BentoLightbox>;
+<BentoLightbox style={{width: 300, height: 200}}></BentoLightbox>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoLightbox className="custom-styles"></BentoLightbox>;
+<BentoLightbox className="custom-styles"></BentoLightbox>
 ```
 
 ```css

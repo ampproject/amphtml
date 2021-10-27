@@ -479,7 +479,7 @@ This event is triggered when the index displayed by the carousel has changed.
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BentoBaseCarousel>;
+</BentoBaseCarousel>
 ```
 
 #### Layout and style
@@ -493,7 +493,7 @@ The `BentoBaseCarousel` component has a defined layout size type. To ensure the 
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BentoBaseCarousel>;
+</BentoBaseCarousel>
 ```
 
 Or via `className`:
@@ -503,7 +503,7 @@ Or via `className`:
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />
-</BentoBaseCarousel>;
+</BentoBaseCarousel>
 ```
 
 ```css
@@ -525,7 +525,7 @@ generally work without this, there may be a few bugs. You can let the carousel
 know that it should operate as `rtl` as follows:
 
 ```jsx
-<BentoBaseCarousel dir="rtl">…</BentoBaseCarousel>;
+<BentoBaseCarousel dir="rtl">…</BentoBaseCarousel>
 ```
 
 If the carousel is in a RTL context, and you want the carousel to operate as
@@ -539,7 +539,7 @@ Slides are automatically sized by the carousel when **not** specifying
 ```jsx
 <BentoBaseCarousel>
   <img style={{height: '100%', width: '100%'}} src="…" />
-</BentoBaseCarousel>;
+</BentoBaseCarousel>
 ```
 
 The slides have implicit height when the carousel is laid out.
@@ -565,7 +565,7 @@ const count = window.matchMedia('(max-width: 600px)').matches ? 4 : 3;
 
 <BentoBaseCarousel visibleCount={count} advanceCount={count}>
   <img style={{height: '100%', width: '100%'}} src="…" />…
-</BentoBaseCarousel>;
+</BentoBaseCarousel>
 ```
 
 #### Props
@@ -701,5 +701,5 @@ function CustomNextButton(props) {
 >
   <div>first slide</div>
   // …
-</BentoBaseCarousel>;
+</BentoBaseCarousel>
 ```

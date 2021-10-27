@@ -218,7 +218,7 @@ The `BentoEmbedlyCard` component has a defined layout size type. To ensure the c
 <BentoEmbedlyCard
   style={{width: 300, height: 100}}
   url="https://www.youtube.com/watch?v=LZcKdHinUhE"
-></BentoEmbedlyCard>;
+></BentoEmbedlyCard>
 ```
 
 Or via `className`:
@@ -227,7 +227,7 @@ Or via `className`:
 <BentoEmbedlyCard
   className="custom-styles"
   url="https://www.youtube.com/watch?v=LZcKdHinUhE"
-></BentoEmbedlyCard>;
+></BentoEmbedlyCard>
 ```
 
 ```css

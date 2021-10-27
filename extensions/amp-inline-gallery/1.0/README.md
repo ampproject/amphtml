@@ -154,13 +154,13 @@ function App() {
 The `BentoInlineGallery` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `width`). These can be applied inline:
 
 ```jsx
-<BentoInlineGallery style={{width: 300}}>...</BentoInlineGallery>;
+<BentoInlineGallery style={{width: 300}}>...</BentoInlineGallery>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoInlineGallery className="custom-styles">...</BentoInlineGallery>;
+<BentoInlineGallery className="custom-styles">...</BentoInlineGallery>
 ```
 
 ```css

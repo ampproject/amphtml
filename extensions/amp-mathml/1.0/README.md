@@ -200,13 +200,13 @@ function App() {
 The `BentoMathml` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoMathml style={{width: 300, height: 100}}>...</BentoMathml>;
+<BentoMathml style={{width: 300, height: 100}}>...</BentoMathml>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoMathml className="custom-styles">...</BentoMathml>;
+<BentoMathml className="custom-styles">...</BentoMathml>
 ```
 
 ```css

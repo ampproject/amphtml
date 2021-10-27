@@ -547,7 +547,7 @@ See below for example.
     </BentoAccordionHeader>
     <BentoAccordionContent>Content 3</BentoAccordionContent>
   </BentoAccordionSection>
-</BentoAccordion>;
+</BentoAccordion>
 ```
 
 #### Layout and style
@@ -557,13 +557,13 @@ See below for example.
 The `BentoAccordion` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoAccordion style={{width: 300, height: 100}}>...</BentoAccordion>;
+<BentoAccordion style={{width: 300, height: 100}}>...</BentoAccordion>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoAccordion className="custom-styles">...</BentoAccordion>;
+<BentoAccordion className="custom-styles">...</BentoAccordion>
 ```
 
 ```css

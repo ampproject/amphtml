@@ -278,7 +278,7 @@ In the following example, we display a `toolbar` if the window width is less tha
   </BentoSidebar>
 
   <div id="target-element"></div>
-</>;
+</>
 ```
 
 #### Interactivity and API usage
@@ -349,7 +349,7 @@ To ensure the component renders how you want it to, be sure to apply a size to t
     <li>Nav item 5</li>
     <li>Nav item 6</li>
   </ul>
-</BentoSidebar>;
+</BentoSidebar>
 ```
 
 Or via `className`:
@@ -364,7 +364,7 @@ Or via `className`:
     <li>Nav item 5</li>
     <li>Nav item 6</li>
   </ul>
-</BentoSidebar>;
+</BentoSidebar>
 ```
 
 ```css
