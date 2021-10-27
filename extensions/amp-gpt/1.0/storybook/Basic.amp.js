@@ -1,10 +1,11 @@
 import {withAmp} from '@ampproject/storybook-addon';
+import {boolean, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-gpt-1_0',
-  decorators: [withAmp],
+  decorators: [withKnobs, withAmp],
   parameters: {
     extensions: [{name: 'amp-gpt', version: '1.0'}],
     experiments: ['bento'],
@@ -30,7 +31,7 @@ export const targeting = (args) => {
   return (
     <amp-gpt
       ad-unit-path="/21730346048/test-skyscraper"
-      opt-div="div1"
+      opt-div="div2"
       height="600"
       width="120"
       {...args}
@@ -38,5 +39,27 @@ export const targeting = (args) => {
     >
       This text is inside.
     </amp-gpt>
+  );
+};
+
+export const disableInitialLoad = (args) => {
+  const disableInitialLoad = boolean('disable-initial-load', true);
+  return (
+    <>
+      <amp-gpt
+        ad-unit-path="/21730346048/test-skyscraper"
+        opt-div="div3"
+        height="600"
+        width="120"
+        disable-initial-load={disableInitialLoad}
+        {...args}
+        targeting={JSON.stringify(targeting)}
+      >
+        This text is inside.
+      </amp-gpt>
+      <button onclick="googletag.cmd.push(function() { googletag.pubads().refresh(); });">
+        Show/Refresh Ad
+      </button>
+    </>
   );
 };

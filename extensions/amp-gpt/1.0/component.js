@@ -21,6 +21,7 @@ function isString(x) {
  */
 export function BentoGpt({
   adUnitPath,
+  disableInitialLoad = false,
   height,
   optDiv,
   size,
@@ -34,7 +35,7 @@ export function BentoGpt({
 
   /** Parsed Attributes */
   const parsedSize = useMemo(() => {
-    return [width, height];
+    return [parseInt(width, 10), parseInt(height, 10)];
   }, [width, height]);
   //const parsedSize = isString(size) ? JSON.parse(size) : size;
   const parsedTarget = isString(targeting) ? JSON.parse(targeting) : targeting;
@@ -57,12 +58,9 @@ export function BentoGpt({
   /**
    * Display GPT Ad
    */
-  const display = useCallback(
-    (scope) => {
-      scope.googletag.display(gptAdDivRef.current);
-    },
-    [gptAdDivRef]
-  );
+  const display = useCallback((adSlot) => {
+    global.googletag.display(adSlot);
+  }, []);
 
   /**
    * Initializes Google GPT Script and Service
@@ -79,6 +77,11 @@ export function BentoGpt({
           .defineSlot(adUnitPath, parsedSize, optDiv)
           .addService(scope.googletag.pubads());
 
+        /** Disable Initial Load */
+        if (disableInitialLoad === true) {
+          scope.googletag.pubads().disableInitialLoad();
+        }
+
         /**
          * Note:  We can add multiple slots,
          *        but this is out of the scope of this component.
@@ -93,10 +96,18 @@ export function BentoGpt({
         initializeTargets(gptAdSlotRef.current);
 
         /** Display GPT Ad */
-        display(scope);
+        display(gptAdDivRef.current);
       });
     },
-    [adUnitPath, display, gptAdSlotRef, initializeTargets, optDiv, parsedSize]
+    [
+      adUnitPath,
+      disableInitialLoad,
+      display,
+      gptAdSlotRef,
+      initializeTargets,
+      optDiv,
+      parsedSize,
+    ]
   );
 
   useEffect(() => {

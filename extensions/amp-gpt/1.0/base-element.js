@@ -16,6 +16,7 @@ BaseElement['props'] = {
   targeting: {attr: 'targeting'},
   height: {attr: 'height', type: 'number'},
   width: {attr: 'width', type: 'number'},
+  disableInitialLoad: {attr: 'disable-initial-load', type: 'boolean'},
 };
 
 /** @override */
