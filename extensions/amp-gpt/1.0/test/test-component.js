@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {BentoGpt} from '../component';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
+import {BentoGpt} from '../component';
 
 describes.sandboxed('BentoGpt preact component v1.0', {}, (env) => {
   // DO NOT SUBMIT: This is example code only.

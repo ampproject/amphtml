@@ -5,7 +5,10 @@ var BentoGptDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   adUnitPath: (string),
+ *   optDiv: (string|undefined),
+ *   size: (!Array<!Array<number>>|undefined),
+ *   targeting: (!Array<!Array<string>>|undefined),
  * }}
  */
 BentoGptDef.Props;

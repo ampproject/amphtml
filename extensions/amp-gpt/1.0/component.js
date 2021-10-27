@@ -3,95 +3,14 @@ import {loadScript} from '#3p/3p';
 import {isArray} from '#core/types';
 
 import * as Preact from '#preact';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
+import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 /**
- * Parse a GPT-Style general size Array like `[[300, 250]]` or `"300x250,970x90"` into an array of sizes `["300x250"]` or '['300x250', '970x90']'
- * @param  {array[array|number]} sizeObj Input array or double array [300,250] or [[300,250], [728,90]]
- * @return {array[string]}  Array of strings like `["300x250"]` or `["300x250", "728x90"]`
+ *
+ * @param {*} x
+ * @return {boolean} TODO
  */
-const parseSizesInput = function (sizeObj) {
-  const parsedSizes = [];
-  const _typeof =
-    typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
-      ? function (obj) {
-          return typeof obj;
-        }
-      : function (obj) {
-          return obj &&
-            typeof Symbol === 'function' &&
-            obj.constructor === Symbol
-            ? 'symbol'
-            : typeof obj;
-        };
-
-  //if a string for now we can assume it is a single size, like "300x250"
-  if (
-    (typeof sizeObj === 'undefined' ? 'undefined' : _typeof(sizeObj)) ===
-    objectType_string
-  ) {
-    //multiple sizes will be comma-separated
-    const sizes = sizeObj.split(',');
-
-    //regular expression to match strigns like 300x250
-    //start of line, at least 1 number, an "x" , then at least 1 number, and the then end of the line
-    const sizeRegex = /^(\d)+x(\d)+$/i;
-    if (sizes) {
-      for (const curSizePos in sizes) {
-        if (hasOwn(sizes, curSizePos) && sizes[curSizePos].match(sizeRegex)) {
-          parsedSizes.push(sizes[curSizePos]);
-        }
-      }
-    }
-  } else if (
-    (typeof sizeObj === 'undefined' ? 'undefined' : _typeof(sizeObj)) ===
-    objectType_object
-  ) {
-    const sizeArrayLength = sizeObj.length;
-
-    //don't process empty array
-    if (sizeArrayLength > 0) {
-      //if we are a 2 item array of 2 numbers, we must be a SingleSize array
-      if (
-        sizeArrayLength === 2 &&
-        _typeof(sizeObj[0]) === objectType_number &&
-        _typeof(sizeObj[1]) === objectType_number
-      ) {
-        parsedSizes.push(parseGPTSingleSizeArray(sizeObj));
-      } else {
-        //otherwise, we must be a MultiSize array
-        for (let i = 0; i < sizeArrayLength; i++) {
-          parsedSizes.push(parseGPTSingleSizeArray(sizeObj[i]));
-        }
-      }
-    }
-  }
-
-  return parsedSizes;
-};
-
-//parse a GPT style sigle size array, (i.e [300,250])
-//into an AppNexus style string, (i.e. 300x250)
-const parseGPTSingleSizeArray = function (singleSize) {
-  //if we aren't exactly 2 items in this array, it is invalid
-  if (
-    isArray(singleSize) &&
-    singleSize.length === 2 &&
-    !isNaN(singleSize[0]) &&
-    !isNaN(singleSize[1])
-  ) {
-    return singleSize[0] + 'x' + singleSize[1];
-  }
-};
-
 function isString(x) {
   return Object.prototype.toString.call(x) === '[object String]';
 }
@@ -100,48 +19,100 @@ function isString(x) {
  * @param {!BentoGpt.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BentoGpt({adUnitPath, optDiv, size, ...rest}) {
-  const div1Ref = useRef(null);
-  //const div2Ref = useRef(null);
-  //const x = Date.now();
-  const tempSz = isString(size) ? JSON.parse(size) : size;
+export function BentoGpt({
+  adUnitPath,
+  height,
+  optDiv,
+  size,
+  targeting,
+  width,
+  ...rest
+}) {
+  /** References */
+  const gptAdDivRef = useRef(null);
 
-  //.defineSlot('/21730346048/test-skyscraper', [120, 600], 'div1')
+  /** Parsed Attributes */
+  const parsedSize = useMemo(() => {
+    return [width, height];
+  }, [width, height]);
+  //const parsedSize = isString(size) ? JSON.parse(size) : size;
+  const parsedTarget = isString(targeting) ? JSON.parse(targeting) : targeting;
+
+  /**
+   * Initializes Targets on Component Load
+   */
+  const initializeTargets = useCallback(
+    (scope) => {
+      if (parsedTarget) {
+        /** Loop through all parsed keys and set targeting key-value pair */
+        for (const key in parsedTarget) {
+          scope.googletag.setTargeting(key, parsedTarget[key]);
+        }
+      }
+    },
+    [parsedTarget]
+  );
+
+  /**
+   * Display GPT Ad
+   */
+  const display = useCallback(
+    (scope) => {
+      scope.googletag.display(gptAdDivRef.current);
+    },
+    [gptAdDivRef]
+  );
+
+  /**
+   * Initializes Google GPT Script and Service
+   */
   const initialiseGpt = useCallback(
-    (g) => {
-      g.googletag = g.googletag || {cmd: []};
-      g.googletag.cmd.push(function () {
-        g.googletag
-          .defineSlot(adUnitPath, tempSz, optDiv)
-          .addService(g.googletag.pubads());
-        // g.googletag
-        //   .defineSlot('/21730346048/test-skyscraper', [120, 600], 'div2')
-        //   .addService(g.googletag.pubads());
-        g.googletag.enableServices();
-        g.googletag.display(div1Ref.current);
-        //g.googletag.display(div2Ref.current);
+    (scope) => {
+      /** Retrieve Existing or Initializes New GPT Service */
+      scope.googletag = scope.googletag || {cmd: []};
+
+      /** Adds element to the execution queue */
+      scope.googletag.cmd.push(function () {
+        /** Define slot and related parameters */
+        scope.googletag
+          .defineSlot(adUnitPath, parsedSize, optDiv)
+          .addService(scope.googletag.pubads());
+
+        /**
+         * Note:  We can add multiple slots,
+         *        but this is out of the scope of this component.
+         */
+        // scope.googletag
+        //   .defineSlot('/21730346048/test-skyscraper', [120, 600], 'sample-div2')
+        //   .addService(scope.googletag.pubads());
+
+        /** Enable Services */
+        scope.googletag.enableServices();
+
+        initializeTargets(scope);
+
+        /** Display GPT Ad */
+        display(scope);
       });
     },
-    [adUnitPath, size, optDiv]
+    [adUnitPath, optDiv, parsedSize, initializeTargets, display]
   );
 
   useEffect(() => {
+    /** Load GPT Script async once component initialized */
     loadScript(
       global,
       'https://www.googletagservices.com/tag/js/gpt.js',
       () => {
+        /** Script loaded successfully, now Initialize GPT Library */
         initialiseGpt(global);
       }
     );
   }, [initialiseGpt]);
 
   return (
-    <ContainWrapper layout size paint {...rest}>
-      <div
-        id={optDiv}
-        ref={div1Ref}
-        style="width: 120px; height: 600px;; margin: 10px"
-      ></div>
+    <ContainWrapper layout height={height} width={width} paint {...rest}>
+      <div id={optDiv} ref={gptAdDivRef} style={{height, width}}></div>
     </ContainWrapper>
   );
 }

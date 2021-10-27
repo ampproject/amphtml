@@ -5,18 +5,16 @@ import {BentoGpt} from '../component';
 export default {
   title: 'Gpt',
   component: BentoGpt,
-  args: {
-    'exampleProperty': 'example string property argument',
-  },
 };
 
 export const _default = (args) => {
+  // const json = [{'author': 'Anurag'}];
   return (
     <BentoGpt
-      style={{width: 120, height: 600}}
       adUnitPath={'/21730346048/test-skyscraper'}
-      size={[120, 600]}
       optDiv={'div1'}
+      height="600"
+      width="120"
       {...args}
     >
       This text is inside.

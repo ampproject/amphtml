@@ -10,12 +10,12 @@ BaseElement['Component'] = BentoGpt;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
   adUnitPath: {attr: 'ad-unit-path', type: 'string'},
   optDiv: {attr: 'opt-div', type: 'string'},
   size: {attr: 'size'},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  targeting: {attr: 'targeting'},
+  height: {attr: 'height', type: 'number'},
+  width: {attr: 'width', type: 'number'},
 };
 
 /** @override */
