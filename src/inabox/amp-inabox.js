@@ -14,10 +14,7 @@ import {
 } from '#service/core-services';
 import {stubElementsForDoc} from '#service/custom-element-registry';
 import {Navigation} from '#service/navigation';
-import {
-  installPerformanceService,
-  installPerformanceServiceForAmpDoc,
-} from '#service/performance-impl';
+import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
 
 import {installAmpdocServicesForInabox} from './inabox-services';
@@ -67,7 +64,6 @@ startupChunk(self.document, function initial() {
   const ampdoc = ampdocService.getAmpDoc(self.document);
   installPlatformService(self);
   installPerformanceService(self);
-  installPerformanceServiceForAmpDoc(ampdoc);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
   perf.tick(TickLabel.INSTALL_STYLES);
