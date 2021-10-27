@@ -21,6 +21,17 @@ export const _default = (args) => {
         opt-div="div1"
         height="600"
         width="120"
+        style="margin:10px"
+        {...args}
+      >
+        This text is inside.
+      </amp-gpt>
+      <amp-gpt
+        ad-unit-path="/21730346048/test-skyscraper"
+        opt-div="div2"
+        height="250"
+        width="300"
+        style="margin:10px"
         {...args}
       >
         This text is inside.

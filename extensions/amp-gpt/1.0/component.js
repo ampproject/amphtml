@@ -48,11 +48,15 @@ export function BentoGpt({
        */
       if (globalScopeRef.current) {
         /** Register refresh when in View */
-        globalScopeRef.current?.googletag.pubads().refresh();
+        globalScopeRef.current?.googletag
+          .pubads()
+          .refresh([gptAdSlotRef.current]);
       } else {
         /** Register refresh when in View after 250ms */
         setTimeout(() => {
-          globalScopeRef.current.googletag.pubads().refresh();
+          globalScopeRef.current.googletag
+            .pubads()
+            .refresh([gptAdSlotRef.current]);
         }, 250);
       }
     },
@@ -107,9 +111,8 @@ export function BentoGpt({
           .addService(scope.googletag.pubads());
 
         /** Disable Initial Load */
-        if (disableInitialLoad === true) {
-          scope.googletag.pubads().disableInitialLoad();
-        }
+        scope.googletag.pubads().disableInitialLoad();
+
         /**
          * Note:  We can add multiple slots,
          *        but this is out of the scope of this component.
