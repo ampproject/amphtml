@@ -33,19 +33,25 @@ The example below contains an `bento-stream-gallery` with three sections. The
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-streamGallery-1.0.css">
-
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdn.ampproject.org/v0/bento-streamGallery-1.0.css"
+  />
 </head>
 <body>
   <bento-stream-gallery>
-    <img src="img1.png">
-    <img src="img2.png">
-    <img src="img3.png">
-    <img src="img4.png">
-    <img src="img5.png">
-    <img src="img6.png">
-    <img src="img7.png">
+    <img src="img1.png" />
+    <img src="img2.png" />
+    <img src="img3.png" />
+    <img src="img4.png" />
+    <img src="img5.png" />
+    <img src="img6.png" />
+    <img src="img7.png" />
   </bento-stream-gallery>
   <script>
     (async () => {
@@ -111,7 +117,7 @@ This event is triggered when the index displayed by the carousel has changed.
 The new index is available via `event.data.index`.
 
 ```js
-streamGallery.addEventListener('slideChange', (e) => console.log(e.data.index))
+streamGallery.addEventListener('slideChange', (e) => console.log(e.data.index));
 ```
 
 #### Layout and style
@@ -119,13 +125,17 @@ streamGallery.addEventListener('slideChange', (e) => console.log(e.data.index))
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-streamGallery-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-streamGallery-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-stream-gallery {
     display: block;
     overflow: hidden;
@@ -216,19 +226,19 @@ npm install @ampproject/bento-stream-gallery
 
 ```javascript
 import React from 'react';
-import { BentoStreamGallery } from '@ampproject/bento-stream-gallery/react';
+import {BentoStreamGallery} from '@ampproject/bento-stream-gallery/react';
 import '@ampproject/bento-stream-gallery/styles.css';
 
 function App() {
   return (
     <BentoStreamGallery>
-      <img src="img1.png">
-      <img src="img2.png">
-      <img src="img3.png">
-      <img src="img4.png">
-      <img src="img5.png">
-      <img src="img6.png">
-      <img src="img7.png">
+      <img src="img1.png" />
+      <img src="img2.png" />
+      <img src="img3.png" />
+      <img src="img4.png" />
+      <img src="img5.png" />
+      <img src="img6.png" />
+      <img src="img7.png" />
     </BentoStreamGallery>
   );
 }
@@ -245,13 +255,13 @@ const ref = createRef();
 function App() {
   return (
     <BentoStreamGallery ref={ref}>
-      <img src="img1.png">
-      <img src="img2.png">
-      <img src="img3.png">
-      <img src="img4.png">
-      <img src="img5.png">
-      <img src="img6.png">
-      <img src="img7.png">
+      <img src="img1.png" />
+      <img src="img2.png" />
+      <img src="img3.png" />
+      <img src="img4.png" />
+      <img src="img5.png" />
+      <img src="img6.png" />
+      <img src="img7.png" />
     </BentoStreamGallery>
   );
 }
@@ -308,17 +318,13 @@ This event is triggered when the index displayed by the carousel has changed.
 The `BentoStreamGallery` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `width`). These can be applied inline:
 
 ```jsx
-<BentoStreamGallery style={{width: '300px'}}>
-  ...
-</BentoStreamGallery>
+<BentoStreamGallery style={{width: 300}}>...</BentoStreamGallery>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoStreamGallery className='custom-styles'>
-  ...
-</BentoStreamGallery>
+<BentoStreamGallery className="custom-styles">...</BentoStreamGallery>
 ```
 
 ```css

@@ -28,7 +28,7 @@ npm install @ampproject/bento-date-countdown
 
 ```javascript
 import React from 'react';
-import { BentoDateCountdown } from '@ampproject/bento-date-countdown/react';
+import {BentoDateCountdown} from '@ampproject/bento-date-countdown/react';
 import '@ampproject/bento-date-countdown/styles.css';
 
 function App() {

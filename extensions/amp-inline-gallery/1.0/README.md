@@ -29,21 +29,29 @@ The example below contains a `bento-inline-gallery` consisting of three slides w
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.css">
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css"
+  />
 </head>
 <body>
-
   <bento-inline-gallery id="inline-gallery">
-    <bento-inline-gallery-thumbnails aspect-ratio="1.5" loop></bento-inline-gallery-thumbnails>
+    <bento-inline-gallery-thumbnails
+      aspect-ratio="1.5"
+      loop
+    ></bento-inline-gallery-thumbnails>
     <bento-base-carousel snap-align="center" visible-count="1.2" loop>
-      <img src="server.com/static/inline-examples/images/image1.jpg">
-      <img src="server.com/static/inline-examples/images/image2.jpg">
-      <img src="server.com/static/inline-examples/images/image3.jpg">
+      <img src="server.com/static/inline-examples/images/image1.jpg" />
+      <img src="server.com/static/inline-examples/images/image2.jpg" />
+      <img src="server.com/static/inline-examples/images/image3.jpg" />
     </bento-base-carousel>
     <bento-inline-gallery-pagination inset></bento-inline-gallery-pagination>
   </bento-inline-gallery>
-
 </body>
 ```
 
@@ -52,23 +60,27 @@ The example below contains a `bento-inline-gallery` consisting of three slides w
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
-  amp-inline-gallery,
-  amp-inline-gallery-pagination,
-  amp-inline-gallery-thumbnails {
+<style>
+  bento-inline-gallery,
+  bento-inline-gallery-pagination,
+  bento-inline-gallery-thumbnails {
     display: block;
   }
-  amp-inline-gallery {
+  bento-inline-gallery {
     contain: layout;
   }
-  amp-inline-gallery-pagination,
-  amp-inline-gallery-thumbnails {
+  bento-inline-gallery-pagination,
+  bento-inline-gallery-thumbnails {
     overflow: hidden;
     position: relative;
   }
@@ -117,21 +129,22 @@ npm install @ampproject/bento-inline-gallery
 
 ```javascript
 import React from 'react';
-import { BentoInlineGallery } from '@ampproject/bento-inline-gallery/react';
+import {BentoInlineGallery} from '@ampproject/bento-inline-gallery/react';
 import '@ampproject/bento-inline-gallery/styles.css';
 
 function App() {
   return (
     <BentoInlineGallery id="inline-gallery">
-      <BentoInlineGalleryThumbnails aspect-ratio="1.5" loop></BentoInlineGalleryThumbnails>
+      <BentoInlineGalleryThumbnails aspect-ratio="1.5" loop />
       <BentoBaseCarousel snap-align="center" visible-count="1.2" loop>
-        <img src="server.com/static/inline-examples/images/image1.jpg">
-        <img src="server.com/static/inline-examples/images/image2.jpg">
-        <img src="server.com/static/inline-examples/images/image3.jpg">
+        <img src="server.com/static/inline-examples/images/image1.jpg" />
+        <img src="server.com/static/inline-examples/images/image2.jpg" />
+        <img src="server.com/static/inline-examples/images/image3.jpg" />
       </BentoBaseCarousel>
-      <BentoInlineGallery-pagination inset></BentoInlineGallery-pagination>
+      <BentoInlineGallery-pagination inset />
     </BentoInlineGallery>
-  }
+  );
+}
 ```
 
 #### Layout and style
@@ -141,17 +154,13 @@ function App() {
 The `BentoInlineGallery` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `width`). These can be applied inline:
 
 ```jsx
-<BentoInlineGallery style={{width: '300px'}}>
-  ...
-</BentoInlineGallery>
+<BentoInlineGallery style={{width: 300}}>...</BentoInlineGallery>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoInlineGallery className='custom-styles'>
-  ...
-</BentoInlineGallery>
+<BentoInlineGallery className="custom-styles">...</BentoInlineGallery>
 ```
 
 ```css

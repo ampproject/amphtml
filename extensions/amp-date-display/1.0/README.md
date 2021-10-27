@@ -33,7 +33,7 @@ npm install @ampproject/bento-date-display
 
 ```javascript
 import React from 'react';
-import { BentoDateDisplay } from '@ampproject/bento-date-display/react';
+import {BentoDateDisplay} from '@ampproject/bento-date-display/react';
 import '@ampproject/bento-date-display/styles.css';
 
 function App() {
