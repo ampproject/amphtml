@@ -383,16 +383,6 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/performance-impl.Performance}
-   */
-  static performanceForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/performance-impl.Performance}*/ (
-      getServiceForDoc(elementOrAmpDoc, 'performance')
-    );
-  }
-
-  /**
    * @param {!Window} window
    * @return {!./service/platform-impl.Platform}
    */
@@ -530,17 +520,6 @@ export class Services {
     return (
       /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
       (getExistingServiceOrNull(win, 'media-performance-metrics'))
-    );
-  }
-
-  /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
-   */
-  static mediaPerformanceMetricsServiceForDoc(nodeOrDoc) {
-    return (
-      /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
-      (getServiceForDocOrNull(nodeOrDoc, 'media-performance-metrics'))
     );
   }
 
