@@ -14,8 +14,6 @@ The examples below demonstrate use of the `<bento-sidebar>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -26,11 +24,7 @@ npm install @ampproject/bento-sidebar
 import '@ampproject/bento-sidebar';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -72,8 +66,6 @@ import '@ampproject/bento-sidebar';
   </script>
 </body>
 ```
-
-[/example]
 
 #### Bento Toolbar
 
@@ -215,8 +207,6 @@ The examples below demonstrate use of the `<BentoSidebar>` as a functional compo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -243,8 +233,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Bento Toolbar
 
