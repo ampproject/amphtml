@@ -284,6 +284,15 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const elementHeight = this.element.getAttribute('height');
+    const extraHeight =
+      this.element.getAttribute('data-apester-extra-height') || 0;
+    const extraMargin = extraHeight > 0 ? 20 : 0;
+    setStyles(this.element, {
+      'height': px(
+        parseInt(elementHeight, 10) + parseInt(extraHeight, 10) + extraMargin
+      ),
+    });
     this.element.classList.add('amp-apester-container');
     const vsync = Services.vsyncFor(this.win);
     return this.queryMedia_()

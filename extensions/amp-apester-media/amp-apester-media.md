@@ -35,6 +35,19 @@ channel (string value).
 ></amp-apester-media>
 ```
 
+### `data-apester-extra-height`
+
+This attribute is required only for video ad campaign, and it represents the height for ad block.
+It resolve the issue with Cumulative Layout Shift (CLS).
+
+```html
+<amp-apester-media
+  height="390"
+  data-apester-extra-height="420"
+  data-apester-media-id="#"
+></amp-apester-media>
+```
+
 ## Accessibility
 
 `amp-apester-media` automatically adds the
