@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-twitter>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,11 +22,7 @@ npm install @ampproject/bento-twitter
 import '@ampproject/bento-twitter';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -70,8 +64,6 @@ import '@ampproject/bento-twitter';
   })();
 </script>
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -136,8 +128,6 @@ The examples below demonstrate use of the `<BentoTwitter>` as a functional compo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -156,8 +146,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 

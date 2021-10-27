@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-lightbox>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,11 +22,7 @@ npm install @ampproject/bento-lightbox
 import '@ampproject/bento-lightbox';
 ```
 
-[/example]
-
 #### Example: Import via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -52,8 +46,6 @@ import '@ampproject/bento-lightbox';
   })();
 </script>
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
@@ -149,8 +141,6 @@ The examples below demonstrates use of the `<BentoLightbox>` as a functional com
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -176,8 +166,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 

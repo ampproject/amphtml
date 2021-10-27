@@ -21,8 +21,6 @@ The examples below demonstrate use of the `<bento-base-carousel>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -33,11 +31,7 @@ npm install @ampproject/bento-base-carousel
 import '@ampproject/bento-base-carousel';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -96,8 +90,6 @@ import '@ampproject/bento-base-carousel';
   })();
 </script>
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
@@ -385,8 +377,6 @@ The examples below demonstrate use of the `<BentoBaseCarousel>` as a functional 
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -408,8 +398,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Interactivity and API usage
 

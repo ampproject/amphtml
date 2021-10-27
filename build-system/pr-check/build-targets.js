@@ -206,7 +206,8 @@ const targetMatchers = {
   [Targets.JSON_FILES]: (file) => {
     return (
       jsonFilesWithSchemas.includes(file) ||
-      file == 'build-system/tasks/check-json-schemas.js'
+      file == 'build-system/tasks/check-json-schemas.js' ||
+      file == '.vscode/settings.json'
     );
   },
   [Targets.LINT]: (file) => {
@@ -318,7 +319,7 @@ const targetMatchers = {
     return (
       file.startsWith('build-system/tasks/visual-diff/') ||
       file.startsWith('examples/visual-tests/') ||
-      file == 'test/visual-diff/visual-tests'
+      file == 'test/visual-diff/visual-tests.jsonc'
     );
   },
 };

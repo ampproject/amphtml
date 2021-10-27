@@ -80,6 +80,7 @@ class Static {
 
 }
 
+var bar_;
 foo.bar_AMP_PRIVATE_;
 foo[bar_];
 foo['bar_'];

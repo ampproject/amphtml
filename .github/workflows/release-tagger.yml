@@ -32,7 +32,6 @@ jobs:
       - run: bash ./.github/workflows/install_dependencies.sh
       - name: Run tagger
         run: |
-          npm ci
           node ./build-system/release-tagger/index.js \
             ${{ github.event.inputs.action }} \
             ${{ github.event.inputs.head }} \

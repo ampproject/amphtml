@@ -29,8 +29,6 @@ The examples below demonstrate use of the `<bento-accordion>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -41,14 +39,10 @@ npm install @ampproject/bento-accordion
 import '@ampproject/bento-accordion';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
 
 The example below contains an `bento-accordion` with three sections. The
 `expanded` attribute on the third section expands it on page load.
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -57,7 +51,7 @@ The example below contains an `bento-accordion` with three sections. The
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-accordion-1.0.css">
 </head>
 <body>
-  <bento-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
+  <bento-accordion id="my-accordion" disable-session-states>
     <section>
       <h2>Section 1</h2>
       <p>Content in section 1.</p>
@@ -85,8 +79,6 @@ The example below contains an `bento-accordion` with three sections. The
   </script>
 </body>
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
@@ -287,8 +279,6 @@ animation when the content is expanded and "roll up" animation when collapsed.
 
 This attribute can be configured to based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
-[example preview="top-frame" playground="true" imports="bento-accordion:1.0"]
-
 ```html
 <bento-accordion animate>
   <section>
@@ -306,13 +296,9 @@ This attribute can be configured to based on a [media query](./../../../docs/spe
 </bento-accordion>
 ```
 
-[/example]
-
 ##### expanded
 
 Apply the `expanded` attribute to a nested `<section>` to expand that section when the page loads.
-
-[example preview="top-frame" playground="true" imports="bento-accordion:1.0"]
 
 ```html
 <bento-accordion>
@@ -331,13 +317,9 @@ Apply the `expanded` attribute to a nested `<section>` to expand that section wh
 </bento-accordion>
 ```
 
-[/example]
-
 ##### expand-single-section
 
 Allow only one section to expand at a time by applying the `expand-single-section` attribute to the `<bento-accordion>` element. This means if a user taps on a collapsed `<section>`, it will expand and collapse other expanded `<section>`'s.
-
-[example preview="top-frame" playground="true" imports="bento-accordion:1.0"]
 
 ```html
 <bento-accordion expand-single-section>
@@ -351,16 +333,14 @@ Allow only one section to expand at a time by applying the `expand-single-sectio
   </section>
   <section>
     <h2>Section 3</h2>
-    <amp-img
-      src="{{server_for_email}}/static/inline-examples/images/squirrel.jpg"
+    <img
+      src="https://source.unsplash.com/random/320x256"
       width="320"
       height="256"
-    ></amp-img>
+    />
   </section>
 </bento-accordion>
 ```
-
-[/example]
 
 #### Styling
 
@@ -384,8 +364,6 @@ Keep the following points in mind when you style an amp-accordion:
 The examples below demonstrates use of the `<BentoAccordion>` as a functional component usable with the Preact or React libraries.
 
 #### Example: Import via npm
-
-[example preview="top-frame" playground="false"]
 
 Install via npm:
 
@@ -419,8 +397,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
