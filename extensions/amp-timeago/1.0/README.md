@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-timeago>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,11 +22,7 @@ npm install @ampproject/bento-timeago
 import '@ampproject/bento-timeago';
 ```
 
-[/example]
-
 #### Example: Import via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -151,8 +145,6 @@ The examples below demonstrates use of the `<BentoTimeago>` as a functional comp
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -175,8 +167,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 

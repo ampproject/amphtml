@@ -14,8 +14,6 @@ The examples below demonstrate use of the `<bento-lightbox-gallery>` web compone
 
 ### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -26,11 +24,7 @@ npm install @ampproject/bento-lightbox-gallery
 import '@ampproject/bento-lightbox-gallery';
 ```
 
-[/example]
-
 ### Example: Import via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -71,8 +65,6 @@ import '@ampproject/bento-lightbox-gallery';
     })();
   </script>
 ```
-
-[/example]
 
 ### Usage
 
@@ -162,8 +154,6 @@ The preact/react version of the bentolightboxgallery functions differently than 
 
 ### Example: Import Via npm
 
-[example preview="top-frame" playground="false"]
-
 ```sh
 npm install @ampproject/bento-lightbox-gallery
 ```
@@ -187,13 +177,9 @@ function App() {
 
 ```
 
-[/example]
-
 #### Example Using BentoBaseCarousel
 
 `<BentoLightboxGallery>` can be used with a `<BentoBaseCarousel>` child in order to lightbox all of the carousel's children. As you navigate throught the carousel items in the lightbox, the original carousel slides are synchronised so that when the lightbox is closed, the user ends up on the same slide as they were originally on.
-
-[example preview="top-frame" playground="false"]
 
 ```javascript
 import React from 'react';
@@ -216,8 +202,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 For further examples of how to use the BentoLightboxGallery please check the storybook example found in (Basic.js)[./storybook/Basic.js].
 
