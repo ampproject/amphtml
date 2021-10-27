@@ -18,20 +18,17 @@
     }
   },
   {
+    "name": "amp-bind",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-mustache",
     "version": [
       "0.1",
       "0.2"
     ],
     "latestVersion": "0.2"
-  },
-  {
-    "name": "amp-script",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
   },
   {
     "name": "amp-story",
