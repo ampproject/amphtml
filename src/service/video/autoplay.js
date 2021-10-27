@@ -1,7 +1,7 @@
 import {removeElement} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
-import {dev} from '../../log';
+import {dev} from '#utils/log';
 
 /**
  * @param {!Element} node

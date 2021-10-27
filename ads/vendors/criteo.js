@@ -1,4 +1,4 @@
-import {dev} from '../../src/log';
+import {dev} from '#utils/log';
 import {loadScript} from '#3p/3p';
 
 /* global Criteo: false */

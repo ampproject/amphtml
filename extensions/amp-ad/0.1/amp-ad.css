@@ -1,5 +1,3 @@
-
-
 /**
  * Force the layout box of the ad iframe to be exactly as big as the actual
  * iframe. The `amp-ad` tag itself can be freely styled.
@@ -90,17 +88,21 @@ amp-ad .amp-ad-close-button:before {
   bottom: 0;
 }
 
-amp-ad[sticky='bottom'] .amp-ad-close-button {
-  top: -28px;
-}
-
-amp-ad[sticky='bottom-right'] .amp-ad-close-button {
+amp-ad[sticky='bottom'] .amp-ad-close-button,
+amp-ad[sticky='bottom-right'] .amp-ad-close-button,
+amp-ad[sticky='left'] .amp-ad-close-button,
+amp-ad[sticky='right'] .amp-ad-close-button {
   top: -28px;
 }
 
 amp-ad[sticky='top'] .amp-ad-close-button {
   transform: rotate(270deg);
   bottom: -28px;
+}
+
+amp-ad[sticky='left'] .amp-ad-close-button {
+  transform: rotate(90deg);
+  left: 0;
 }
 
 [dir='rtl'] amp-ad .amp-ad-close-button {
@@ -114,18 +116,6 @@ amp-ad[sticky='top'] .amp-ad-close-button {
 [dir='rtl'] amp-ad .amp-ad-close-button:before {
   right: -20px;
   left: 0;
-}
-
-amp-ad-sticky-padding {
-  display: block;
-  width: 100% !important;
-  background: #fff;
-  height: 4px;
-  max-height: 5px !important;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  /** Must be above the dismiss button to cover bottom shadow */
-  z-index: 12;
 }
 
 amp-ad[sticky] {
@@ -151,10 +141,38 @@ amp-ad[sticky='bottom'] {
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #fff;
   bottom: 0;
-  padding-top: 5px;
+  padding-top: 4px;
 }
 
 amp-ad[sticky='bottom-right'] {
   bottom: 0;
   right: 0;
+}
+
+amp-ad[sticky='left'],
+amp-ad[sticky='right'] {
+  background: #fff;
+}
+
+amp-ad[sticky='left'] iframe,
+amp-ad[sticky='right'] iframe {
+  max-width: 120px !important;
+}
+
+amp-ad[sticky='left'] {
+  left: 0;
+}
+
+amp-ad[sticky='right'] {
+  right: 0;
+}
+
+/**
+  * Enforce no left/right sticky ads if not on a wide screen
+  */
+@media (max-width: 1024px) {
+  amp-ad[sticky='left'],
+  amp-ad[sticky='right'] {
+    display: none !important;
+  }
 }

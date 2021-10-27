@@ -10,6 +10,7 @@ import {
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
 } from '#experiments/story-ad-auto-advance';
+import {divertStoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
 import {
   StoryAdSegmentExp,
@@ -17,6 +18,8 @@ import {
 } from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
+
+import {dev, devAssert, userAssert} from '#utils/log';
 
 import {getPlacementAlgo} from './algorithm-utils';
 import {
@@ -32,7 +35,6 @@ import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
@@ -53,8 +55,8 @@ const MUSTACHE_TAG = 'amp-mustache';
 /** @enum {string} */
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
+  DESKTOP_FULLBLEED: 'desktop-fullbleed',
   DESKTOP_ONE_PANEL: 'desktop-one-panel',
-  DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
   PAUSED: 'paused',
 };
@@ -142,6 +144,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
+        divertStoryAdPageOutlink(this.win);
         divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
@@ -311,16 +314,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_ONE_PANEL, DESKTOP_PANELS} = Attributes;
-      this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
+      const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = Attributes;
+      this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
-      this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType.DESKTOP_PANELS) {
-        this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
-        this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
+      if (uiState === UIType.DESKTOP_FULLBLEED) {
+        this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
       if (uiState === UIType.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');

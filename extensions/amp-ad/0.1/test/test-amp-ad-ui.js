@@ -310,6 +310,13 @@ describes.realWin(
     });
 
     describe('sticky ads', () => {
+      it('should reject invalid sticky type', () => {
+        expectAsyncConsoleError(/Invalid sticky ad type: invalid/, 1);
+        adElement.setAttribute('sticky', 'invalid');
+        const uiHandler = new AmpAdUIHandler(adImpl);
+        expect(uiHandler.stickyAdPosition_).to.be.null;
+      });
+
       it('should render close buttons', () => {
         expect(uiHandler.unlisteners_).to.be.empty;
         uiHandler.stickyAdPosition_ = 'bottom';
@@ -319,9 +326,9 @@ describes.realWin(
           .not.null;
       });
 
-      it('onResizeSuccess top sticky ads shall cause padding top adjustment', () => {
+      it('top sticky ads shall cause scroll trigger', () => {
         uiHandler.stickyAdPosition_ = 'top';
-        uiHandler.onResizeSuccess();
+        uiHandler.maybeInitStickyAd();
         expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
       });
 

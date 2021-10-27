@@ -1,7 +1,7 @@
 import {devAssert, devAssertElement} from '#core/assert';
 import {computedStyle} from '#core/dom/style';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *

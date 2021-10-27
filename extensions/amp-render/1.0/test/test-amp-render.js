@@ -4,12 +4,12 @@ import '../../../amp-script/0.1/amp-script';
 import '../amp-render';
 import * as BatchedJsonModule from '../../../../src/batched-json';
 import * as Style from '#core/dom/style';
-import * as log from '../../../../src/log';
+import * as log from '#utils/log';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 describes.realWin(

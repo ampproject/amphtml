@@ -13,6 +13,8 @@ import {map} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {
   LIGHTBOX_THUMBNAIL_AD,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
@@ -23,7 +25,6 @@ import {
   AutoLightboxEvents,
   isActionableByTap,
 } from '../../../../src/auto-lightbox';
-import {dev, devAssert, userAssert} from '../../../../src/log';
 
 const LIGHTBOX_ELIGIBLE_TAGS = new Set(['AMP-IMG', 'IMG']);
 

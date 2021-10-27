@@ -1,7 +1,7 @@
 'use strict';
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -16,15 +16,17 @@ exports.jsBundles = {
     destDir: './build/',
     minifiedDestDir: './build/',
   },
-  'custom-elements-polyfill.js': {
-    srcDir: 'src/polyfills/',
-    srcFilename: 'custom-elements-entrypoint.js',
+  'bento.js': {
+    srcDir: './src/',
+    srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      toName: 'custom-elements-polyfill.max.js',
       includePolyfills: false,
-      minifiedName: 'custom-elements-polyfill.js',
+      toName: 'bento.max.js',
+      minifiedName: 'bento.js',
+      // For backwards-compat:
+      aliasName: 'custom-elements-polyfill.js',
     },
   },
   'alp.max.js': {
@@ -106,16 +108,6 @@ exports.jsBundles = {
       externs: [],
       include3pDirectories: true,
       includePolyfills: true,
-    },
-  },
-  'compiler.js': {
-    srcDir: './src/compiler/',
-    srcFilename: 'index.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      minifiedName: 'compiler.js',
-      extraGlobs: ['src/builtins/**/*.js', 'extensions/amp-fit-text/**/*.js'],
     },
   },
   'amp-viewer-host.max.js': {

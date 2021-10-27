@@ -7,7 +7,7 @@ import {
 
 import {Services} from '#service';
 
-import {devAssert} from '../../log';
+import {devAssert} from '#utils/log';
 
 /** @enum {number} */
 export const PositionObserverFidelity = {

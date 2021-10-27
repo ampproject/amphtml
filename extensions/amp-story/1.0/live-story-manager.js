@@ -4,7 +4,7 @@ import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 import {lastChildElement} from '#core/dom/query';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to

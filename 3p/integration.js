@@ -13,7 +13,7 @@ import './polyfills';
 import {draw3p, init} from './integration-lib';
 import {getMode} from '../src/mode';
 import {register} from './3p';
-import {user} from 'src/log';
+import {user} from '#utils/log';
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -270,7 +270,6 @@ import {unruly} from '#ads/vendors/unruly';
 import {uzou} from '#ads/vendors/uzou';
 import {valuecommerce} from '#ads/vendors/valuecommerce';
 import {vdoai} from '#ads/vendors/vdoai';
-import {verizonmedia} from '#ads/vendors/verizonmedia';
 import {videointelligence} from '#ads/vendors/videointelligence';
 import {videonow} from '#ads/vendors/videonow';
 import {viralize} from '#ads/vendors/viralize';
@@ -562,7 +561,6 @@ register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
 register('vdoai', vdoai);
-register('verizonmedia', verizonmedia);
 register('videointelligence', videointelligence);
 register('videonow', videonow);
 register('viqeoplayer', viqeoplayer);

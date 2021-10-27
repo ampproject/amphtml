@@ -1,10 +1,8 @@
-
-
 @import './amp-story-access.css';
 @import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-one-panel.css';
-@import './amp-story-desktop-panels.css';
 @import './amp-story-draggable-drawer.css';
+@import './amp-story-form.css';
 @import './amp-story-page-attachment.css';
 @import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
@@ -12,6 +10,21 @@
 @import './pagination-buttons.css';
 
 /** Common */
+:root {
+  --story-page-vw: 1vw !important;
+  --story-page-vh: 1vh !important;
+  --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh)) !important;
+  --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
+}
+
+body {
+  animation:none !important;
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -ms-animation: none !important;
+}
+
 amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
@@ -77,12 +90,7 @@ amp-story {
   touch-action: manipulation !important;
 }
 
-html.i-amphtml-story-standalone {
-  font-size: calc(2.5 * var(--story-page-vmax, 8px));
-}
-
-html.i-amphtml-story-standalone,
-html.i-amphtml-story-standalone body {
+html:root, html:root body {
   font-size: calc(2.5 * var(--story-page-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
@@ -120,7 +128,7 @@ h6 {
   font-size: 0.67rem;
 }
 
-html.i-amphtml-story-standalone #i-amphtml-wrapper body {
+html:root #i-amphtml-wrapper body {
   /** AMP runtime adds a 1px border on iOS iframes, causing the body to be
       1px bigger than the viewport. */
   border-top: none !important;
@@ -215,25 +223,6 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
-.i-amphtml-story-sidebar[open] {
-  animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-  animation-duration: 0.3s !important;
-  animation-name: i-amphtml-sidebar-slide-in-right;
-}
-
-[desktop] .i-amphtml-story-sidebar {
-  min-width: 25% !important;
-  max-width: 600px !important;
-}
-
-.i-amphtml-story-sidebar {
-  min-width: 75% !important;
-  max-width: 360px !important;
-  animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
-  animation-duration: 0.2s !important;
-  animation-name: i-amphtml-sidebar-slide-out-right;
-}
-
 /* Setting `translateY` distances as a trick so that the runtime schedules
  * layout for the next N pages. The default value (1000%) means that pages are
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
@@ -243,7 +232,7 @@ amp-story-page:not(:first-of-type):not([distance]):not([active]) {
   transform: translateY(1000vh) !important;
 }
 
-amp-story-page:not([active]) {
+amp-story-page[distance]:not([active]) {
   transform: translateY(1000vh) !important;
 }
 
@@ -252,14 +241,14 @@ amp-story-page:not([active]) {
  * update them in the ampdoc.css file.
  */
 amp-story-page[active],
-amp-story-page[distance="0"],
-amp-story-page[distance="1"] {
+amp-story-page[distance="0"][distance],
+amp-story-page[distance="1"][distance] {
   transform: translateY(0) !important;
 }
 
 amp-story.i-amphtml-experiment-story-load-inactive-outside-viewport:not([desktop])
   amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
-amp-story-page[distance="2"] {
+amp-story-page[distance="2"][distance] {
   transform: translateY(100vh) !important;
 }
 
@@ -270,34 +259,6 @@ amp-story-page [data-text-background-color] {
   text-indent: 0 !important;
   box-decoration-break: clone !important;
   -webkit-box-decoration-break: clone !important;
-}
-
-.i-amphtml-story-opacity-mask {
-  position: absolute !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  opacity: 1 !important;
-  display: block !important;
-  /* Prevent someone from making this a full-screen image */
-  background-image: none !important;
-  background-color: rgba(0, 0, 0, 0.75) !important;
-  visibility: visible;
-  z-index: 100003 !important;
-  transition: visibility 0.3s, opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
-
-.i-amphtml-story-opacity-mask[hidden] {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  display: block !important;
-  visibility: hidden;
-  transition: visibility 0.2s, opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-}
-
-.i-amphtml-sidebar-mask {
-  display: none !important;
 }
 
 /** Call to action layer, positioned at the bottom 20% of the screen. */
@@ -324,6 +285,13 @@ amp-story-grid-layer {
   z-index: 2 !important;
   /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
+}
+
+/* Make the story element fullpage. */
+:root:not(.i-amphtml-story-vertical) amp-story {
+  position: absolute !important;
+  top: 0;
+  left: 0;
 }
 
 amp-story-grid-layer[anchor*="left"] {
@@ -456,6 +424,23 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   height: var(--i-amphtml-story-layer-height, 100%);
   font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
   margin-left: calc((var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) * 0.5); /* Set margin to 1/2 of page-width - layer-width to center layer */
+
+  --i-amphtml-aspect-ratio-float: calc(var(--aspect-ratio)) !important; /* Avoid fractions, which don't work with compilers that remove parenthesis */
+  --i-amphtml-story-page-width: calc(100 * var(--story-page-vw, 1vw)) !important;
+  --i-amphtml-story-page-height: calc(100 * var(--story-page-vh, 1vh)) !important;
+  --i-amphtml-story-unscaled-width: min(var(--i-amphtml-story-page-width), calc(var(--i-amphtml-story-page-height) * var(--i-amphtml-aspect-ratio-float))) !important;
+  --i-amphtml-story-unscaled-height: min(var(--i-amphtml-story-page-height), calc(var(--i-amphtml-story-page-width) / var(--i-amphtml-aspect-ratio-float))) !important;
+  --i-amphtml-story-layer-width: calc(var(--i-amphtml-story-unscaled-width) * var(--scaling-factor, 1)) !important;
+  --i-amphtml-story-layer-height: calc(var(--i-amphtml-story-unscaled-height) * var(--scaling-factor, 1)) !important;
+}
+
+[preset="2021-foreground"] {
+  --aspect-ratio: 69/116 !important;
+}
+
+[preset="2021-background"] {
+  --aspect-ratio: 69/116 !important;
+  --scaling-factor: 1.142 !important;
 }
 
 /**
@@ -997,8 +982,4 @@ amp-story-interactive-results[chip-style="transparent"] {
 amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
   --i-amphtml-interactive-option-text-color: white !important;
   --interactive-prompt-text-color: white;
-}
-
-amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
-  --i-amphtml-interactive-animation-delay: 350ms !important;
 }

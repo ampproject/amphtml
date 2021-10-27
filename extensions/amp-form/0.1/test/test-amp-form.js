@@ -13,15 +13,16 @@ import {Services} from '#service';
 import {ActionService} from '#service/action-impl';
 import {cidServiceForDocForTesting} from '#service/cid-impl';
 
-import {whenCalled} from '#testing/test-helper';
+import {createCustomEvent} from '#utils/event-helper';
+import {user} from '#utils/log';
+import * as xhrUtils from '#utils/xhr-utils';
 
-import {createCustomEvent} from '../../../../src/event-helper';
+import {whenCalled} from '#testing/helpers/service';
+
 import {
   createFormDataWrapper,
   isFormDataWrapper,
 } from '../../../../src/form-data-wrapper';
-import {user} from '../../../../src/log';
-import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {AmpSelector} from '../../../amp-selector/0.1/amp-selector';
 import {
   AmpForm,

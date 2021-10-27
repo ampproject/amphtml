@@ -11,7 +11,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {debounce} from '#core/types/function';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {escapeCssSelectorNth} from '#core/dom/css-selectors';
 import {getExperimentBranch} from 'src/experiments';
 import {hasOwn, map} from '#core/types/object';
@@ -410,10 +410,6 @@ export class ProgressBar {
       case UIType.MOBILE:
         MAX_SEGMENTS = 20;
         ELLIPSE_WIDTH_PX = 2;
-        break;
-      case UIType.DESKTOP_PANELS:
-        MAX_SEGMENTS = 20;
-        ELLIPSE_WIDTH_PX = 3;
         break;
       default:
         MAX_SEGMENTS = 20;

@@ -12,7 +12,13 @@ on:
         description: 'base AMP version'
         required: true
       channel:
-        description: 'release channel (beta | stable | lts)'
+        description: 'release channel (beta-opt-in | beta-percent | stable | lts)'
+        required: true
+      time:
+        description: 'action time'
+        required: true
+      sha:
+        description: 'commit sha'
         required: true
 jobs:
   tagger:
@@ -23,13 +29,14 @@ jobs:
         with:
           node-version: lts/*
       - uses: actions/checkout@v2
+      - run: bash ./.github/workflows/install_dependencies.sh
       - name: Run tagger
-        run: |
-          npm ci
-          node ./build-system/release-tagger/index.js \
-            ${{ github.event.inputs.action }} \
-            ${{ github.event.inputs.head }} \
-            ${{ github.event.inputs.base }} \
-            ${{ github.event.inputs.channel }}
+        run: node ./build-system/release-tagger/index.js \
+          ${{ github.event.inputs.action }} \
+          ${{ github.event.inputs.head }} \
+          ${{ github.event.inputs.base }} \
+          ${{ github.event.inputs.channel }} \
+          ${{ github.event.inputs.time }} \
+          ${{ github.event.inputs.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

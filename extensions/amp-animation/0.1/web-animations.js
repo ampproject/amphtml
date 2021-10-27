@@ -14,6 +14,8 @@ import {dashToCamelCase} from '#core/types/string';
 
 import {isExperimentOn} from '#experiments';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {parseCss} from './parsers/css-expr';
 import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {extractKeyframes} from './parsers/keyframes-extractor';
@@ -36,7 +38,6 @@ import {
 } from './web-animation-types';
 
 import {isInFie} from '../../../src/iframe-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 

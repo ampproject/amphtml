@@ -1,5 +1,5 @@
 import {Signals} from '#core/data-structures/signals';
-import * as docready from '#core/document-ready';
+import * as docready from '#core/document/ready';
 import * as dom from '#core/dom';
 import {
   ShadowDomVersion,
@@ -15,7 +15,7 @@ import {
   AmpDocSingle,
 } from '#service/ampdoc-impl';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 import {
   getServiceForDoc,
