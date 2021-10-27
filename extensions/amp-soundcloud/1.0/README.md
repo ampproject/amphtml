@@ -1,6 +1,7 @@
 # Bento Soundcloud
 
 The Bento Soundcloud component allows you to embed a Soundcloud clip.
+
 ## Usage
 
 ### Web Component

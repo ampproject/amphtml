@@ -1,6 +1,7 @@
 # Bento Carousel
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
+
 ## Usage
 
 Each of the Bento Carousel component’s immediate children is considered an

@@ -1,6 +1,7 @@
 # Bento Inline Gallery
 
 The Bento Inline Gallery component uses a Bento Carousel component to display slides, with optional pagination dots and thumbnails. Both components must be properly installed for the environment (Web Component vs Preact).
+
 ## Usage
 
 ### Web Component

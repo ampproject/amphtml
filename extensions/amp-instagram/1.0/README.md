@@ -1,6 +1,7 @@
 # Bento Instagram
 
 The Bento Instagram component allows you embed an Instagram post.
+
 ## Usage
 
 ### Web Component
