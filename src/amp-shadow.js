@@ -9,6 +9,7 @@ import './polyfills';
 import * as mode from '#core/mode';
 
 import {installDocService} from '#service/ampdoc-impl';
+import {installPerformanceService} from './performance-impl';
 import {
   installBuiltinElements,
   installRuntimeServices,
@@ -28,6 +29,9 @@ installDocService(self, /* isSingleDoc */ false);
 
 // Core services.
 installRuntimeServices(self);
+
+// Performance service.
+installPerformanceService(self);
 
 // Impression tracking for PWA is not meaningful, but the dependent code
 // has to be unblocked.

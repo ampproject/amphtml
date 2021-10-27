@@ -122,7 +122,6 @@ startupChunk(self.document, function initial() {
   const ampdoc = ampdocService.getAmpDoc(self.document);
   installPlatformService(self);
   installPerformanceService(self);
-  installPerformanceServiceForAmpDoc(ampdoc);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
   if (mode.isEsm()) {
