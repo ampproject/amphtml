@@ -1,5 +1,5 @@
 import * as Preact from /*OK*/ 'preact';
-import * as compat from /*OK*/ 'preact/compat';
+// import * as compat from /*OK*/ 'preact/compat';
 
 /**
  * @param {function(T, {current: (R|null)}):PreactDef.Renderable} fn
@@ -7,7 +7,8 @@ import * as compat from /*OK*/ 'preact/compat';
  * @template T, R
  */
 export function forwardRef(fn) {
-  return compat.forwardRef(fn);
+  return fn;
+  // return compat.forwardRef(fn);
 }
 
 /**
