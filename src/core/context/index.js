@@ -1,8 +1,6 @@
-import {ContextNode} from './node';
-import {ContextPropDef} from './prop.type';
-
-export {contextProp} from './prop';
-export {subscribe, unsubscribe} from './subscriber';
+export function contextProp() {}
+export function subscribe() {}
+export function unsubscribe() {}
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not
@@ -14,9 +12,7 @@ export {subscribe, unsubscribe} from './subscriber';
  * @param {!Node} node The target node.
  * @param {!Node} slot The slot to which the target node is assigned.
  */
-export function assignSlot(node, slot) {
-  ContextNode.assignSlot(node, slot);
-}
+export function assignSlot(node, slot) {}
 
 /**
  * Unassigns the direct slot previously done by the `assignSlot` call.
@@ -25,9 +21,7 @@ export function assignSlot(node, slot) {
  * @param {!Node} node The target node.
  * @param {!Node} slot The slot from which the target node is assigned.
  */
-export function unassignSlot(node, slot) {
-  ContextNode.unassignSlot(node, slot);
-}
+export function unassignSlot(node, slot) {}
 
 /**
  * Sets (or unsets) the direct parent. If the parent is set, the node will no
@@ -36,16 +30,12 @@ export function unassignSlot(node, slot) {
  * @param {!Node} node
  * @param {?Node} parent
  */
-export function setParent(node, parent) {
-  ContextNode.get(node).setParent(parent);
-}
+export function setParent(node, parent) {}
 
 /**
  * @param {!Node} node
  */
-export function discover(node) {
-  ContextNode.get(node).discover();
-}
+export function discover(node) {}
 
 /**
  * Designates (or undesignates) the node as a root node. If the node is
@@ -54,18 +44,14 @@ export function discover(node) {
  * @param {!Node} node
  * @param {boolean} isRoot
  */
-export function setIsRoot(node, isRoot) {
-  ContextNode.get(node).setIsRoot(isRoot);
-}
+export function setIsRoot(node, isRoot) {}
 
 /**
  * Reruns discovery on the children of the specified node, if any.
  *
  * @param {!Node} node
  */
-export function rediscoverChildren(node) {
-  ContextNode.rediscoverChildren(node);
-}
+export function rediscoverChildren(node) {}
 
 /**
  * Sets the property's input value. This is analagous to a CSS specified
@@ -87,9 +73,7 @@ export function rediscoverChildren(node) {
  * @param {T} value
  * @template T
  */
-export function setProp(node, prop, setter, value) {
-  ContextNode.get(node).values.set(prop, setter, value);
-}
+export function setProp(node, prop, setter, value) {}
 
 /**
  * Unsets the input value for the specified property and setter.
@@ -100,9 +84,7 @@ export function setProp(node, prop, setter, value) {
  * @param {function(T)} setter
  * @template T
  */
-export function removeProp(node, prop, setter) {
-  ContextNode.get(node).values.remove(prop, setter);
-}
+export function removeProp(node, prop, setter) {}
 
 /**
  * @param {!Node} node
@@ -110,9 +92,7 @@ export function removeProp(node, prop, setter) {
  * @param {function(!Node):boolean} match
  * @param {number=} weight
  */
-export function addGroup(node, name, match, weight = 0) {
-  ContextNode.get(node).addGroup(name, match, weight);
-}
+export function addGroup(node, name, match, weight = 0) {}
 
 /**
  * @param {!Node} node
@@ -122,9 +102,7 @@ export function addGroup(node, name, match, weight = 0) {
  * @param {T} value
  * @template T
  */
-export function setGroupProp(node, groupName, prop, setter, value) {
-  ContextNode.get(node).group(groupName).values.set(prop, setter, value);
-}
+export function setGroupProp(node, groupName, prop, setter, value) {}
 
 /**
  * @param {!Node} node
@@ -133,6 +111,4 @@ export function setGroupProp(node, groupName, prop, setter, value) {
  * @param {function(T)} setter
  * @template T
  */
-export function removeGroupProp(node, groupName, prop, setter) {
-  ContextNode.get(node).group(groupName).values.remove(prop, setter);
-}
+export function removeGroupProp(node, groupName, prop, setter) {}

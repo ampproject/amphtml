@@ -1,9 +1,9 @@
-import {
-  Loading,
-  reducer as loadingReducer,
-} from '#core/constants/loading-instructions';
-import {contextProp} from '#core/context/prop';
-import {ContextPropDef} from '#core/context/prop.type';
+// import {
+//   Loading,
+//   reducer as loadingReducer,
+// } from '#core/constants/loading-instructions';
+// import {contextProp} from '#core/context/prop';
+// import {ContextPropDef} from '#core/context/prop.type';
 
 /**
  * Defines whether a DOM subtree can be currently seen by the user. A subtree
@@ -15,12 +15,12 @@ import {ContextPropDef} from '#core/context/prop.type';
  *
  * @const {!ContextPropDef<boolean>}
  */
-const CanRender = contextProp('CanRender', {
-  defaultValue: true,
-  recursive: (inputs) => inputs.reduce(andReducer),
-  compute: (contextNode, inputs, parentValue) =>
-    (parentValue && inputs.reduce(andReducer, true)) || false,
-});
+// const CanRender = contextProp('CanRender', {
+//   defaultValue: true,
+//   recursive: (inputs) => inputs.reduce(andReducer),
+//   compute: (contextNode, inputs, parentValue) =>
+//     (parentValue && inputs.reduce(andReducer, true)) || false,
+// });
 
 /**
  * Defines whether a DOM subtree can be currently played or animated. If a
@@ -32,13 +32,13 @@ const CanRender = contextProp('CanRender', {
  *
  * @const {!ContextPropDef<boolean, boolean>}
  */
-const CanPlay = contextProp('CanPlay', {
-  defaultValue: true,
-  recursive: (inputs) => inputs.reduce(andReducer),
-  deps: [CanRender],
-  compute: (contextNode, inputs, parentValue, canRender) =>
-    (canRender && parentValue && inputs.reduce(andReducer, true)) || false,
-});
+// const CanPlay = contextProp('CanPlay', {
+//   defaultValue: true,
+//   recursive: (inputs) => inputs.reduce(andReducer),
+//   deps: [CanRender],
+//   compute: (contextNode, inputs, parentValue, canRender) =>
+//     (canRender && parentValue && inputs.reduce(andReducer, true)) || false,
+// });
 
 /**
  * The default `Loading` instruction for a subtree. See `Loading` for the set
@@ -49,19 +49,19 @@ const CanPlay = contextProp('CanPlay', {
  *
  * @const {!ContextPropDef<!Loading, boolean>}
  */
-const LoadingProp = contextProp('Loading', {
-  defaultValue: Loading.AUTO,
-  recursive: true,
-  deps: [CanRender],
-  compute: (contextNode, inputs, parentValue, canRender) =>
-    loadingReducer(
-      canRender ? Loading.AUTO : Loading.LAZY,
-      loadingReducer(
-        parentValue || Loading.AUTO,
-        inputs.reduce(loadingReducer, Loading.AUTO)
-      )
-    ),
-});
+// const LoadingProp = contextProp('Loading', {
+//   defaultValue: Loading.AUTO,
+//   recursive: true,
+//   deps: [CanRender],
+//   compute: (contextNode, inputs, parentValue, canRender) =>
+//     loadingReducer(
+//       canRender ? Loading.AUTO : Loading.LAZY,
+//       loadingReducer(
+//         parentValue || Loading.AUTO,
+//         inputs.reduce(loadingReducer, Loading.AUTO)
+//       )
+//     ),
+// });
 
 /**
  * @param {T} acc
@@ -69,6 +69,9 @@ const LoadingProp = contextProp('Loading', {
  * @return {T}
  * @template T
  */
-const andReducer = (acc, value) => acc && value;
+// const andReducer = (acc, value) => acc && value;
+const CanRender;
+const CanPlay;
+const LoadingProp;
 
 export {CanRender, CanPlay, LoadingProp};
