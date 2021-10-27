@@ -540,7 +540,7 @@ export class Services {
   static mediaPerformanceMetricsServiceForDoc(nodeOrDoc) {
   return (
     /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
-    (getServiceForDoc(nodeOrDoc, 'media-performance-metrics'))
+    (getServiceForDocOrNull(nodeOrDoc, 'media-performance-metrics'))
   );
 }
 
