@@ -128,8 +128,12 @@ use its corresponding `id` as the value.
     const api = await accordion.getApi();
 
     // set up button actions
-    document.querySelector('#button1').onclick = () => api.toggle();
-    document.querySelector('#button2').onclick = () => api.toggle('section1');
+    document.querySelector('#button1').onclick = () => {
+      api.toggle();
+    };
+    document.querySelector('#button2').onclick = () => {
+      api.toggle('section1');
+    };
   })();
 </script>
 ```
@@ -149,8 +153,12 @@ expands all sections of the accordion. To specify a section, add the `section` a
     const api = await accordion.getApi();
 
     // set up button actions
-    document.querySelector('#button1').onclick = () => api.expand();
-    document.querySelector('#button2').onclick = () => api.expand('section1');
+    document.querySelector('#button1').onclick = () => {
+      api.expand();
+    };
+    document.querySelector('#button2').onclick = () => {
+      api.expand('section1');
+    };
   })();
 </script>
 ```
@@ -171,8 +179,12 @@ it collapses all sections of the accordion. To specify a section, add the
     const api = await accordion.getApi();
 
     // set up button actions
-    document.querySelector('#button1').onclick = () => api.collapse();
-    document.querySelector('#button2').onclick = () => api.collapse('section1');
+    document.querySelector('#button1').onclick = () => {
+      api.collapse();
+    };
+    document.querySelector('#button2').onclick = () => {
+      api.collapse('section1');
+    };
   })();
 </script>
 ```
@@ -215,8 +227,12 @@ See below for example.
     // when section 2 collapses, section 1 also collapses
     const section1 = document.querySelector('#section1');
     const section2 = document.querySelector('#section2');
-    section1.addEventListener('expand', () => api.expand('section2'));
-    section2.addEventListener('collapse', () => api.collapse('section1'));
+    section1.addEventListener('expand', () => {
+      api.expand('section2');
+    });
+    section2.addEventListener('collapse', () => {
+      api.collapse('section1');
+    });
   })();
 </script>
 ```
@@ -512,9 +528,9 @@ See below for example.
   <BentoAccordionSection
     id="section1"
     key={1}
-    onExpandStateChange={(expanded) =>
-      expanded ? alert('section1 expanded') : alert('section1 collapsed')
-    }
+    onExpandStateChange={(expanded) => {
+      alert(expanded ?  'section1 expanded' : 'section1 collapsed');
+    }}
   >
     <BentoAccordionHeader>
       <h1>Section 1</h1>
@@ -525,9 +541,9 @@ See below for example.
   <BentoAccordionSection
     id="section2"
     key={2}
-    onExpandStateChange={(expanded) =>
-      expanded ? alert('section2 expanded') : alert('section2 collapsed')
-    }
+    onExpandStateChange={(expanded) => {
+      alert(expanded ?  'section2 expanded' : 'section2 collapsed');
+    }}
   >
     <BentoAccordionHeader>
       <h1>Section 2</h1>
@@ -538,9 +554,9 @@ See below for example.
   <BentoAccordionSection
     id="section3"
     key={3}
-    onExpandStateChange={(expanded) =>
-      expanded ? alert('section3 expanded') : alert('section3 collapsed')
-    }
+    onExpandStateChange={(expanded) => {
+      alert(expanded ?  'section3 expanded' : 'section3 collapsed');
+    }}
   >
     <BentoAccordionHeader>
       <h1>Section 3</h1>
