@@ -19,7 +19,9 @@
 .i-amphtml-story-ad-progress-background[desktop-one-panel] {
   top: var(--i-amphtml-story-desktop-one-panel-responsive-margin) !important;
   /* Calculates position by factoring in page width. */
-  left: calc(50vw - var(--i-amphtml-story-desktop-one-panel-width) / 2 + 4px) !important;
+  left: calc(
+    50vw - var(--i-amphtml-story-desktop-one-panel-width) / 2 + 4px
+  ) !important;
   width: calc(var(--i-amphtml-story-desktop-one-panel-width) - 8px) !important;
 }
 

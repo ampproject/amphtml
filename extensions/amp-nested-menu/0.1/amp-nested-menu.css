@@ -1,5 +1,3 @@
-
-
 amp-nested-menu,
 amp-nested-menu [amp-nested-submenu] {
   position: absolute !important;
@@ -15,7 +13,8 @@ amp-nested-menu.i-amphtml-layout-size-defined {
   overflow: visible !important;
 }
 
-amp-nested-menu ul, amp-nested-menu ol {
+amp-nested-menu ul,
+amp-nested-menu ol {
   list-style-type: none;
   padding: 0;
 }
@@ -44,20 +43,20 @@ amp-nested-menu [amp-nested-submenu][child-open] {
   transition: transform 233ms, visibility 0s 233ms;
 }
 
-amp-nested-menu[side="left"] [amp-nested-submenu] {
+amp-nested-menu[side='left'] [amp-nested-submenu] {
   right: 100% !important;
 }
 
-amp-nested-menu[side="right"] [amp-nested-submenu] {
+amp-nested-menu[side='right'] [amp-nested-submenu] {
   left: 100% !important;
 }
 
-amp-nested-menu[side="left"][child-open],
-amp-nested-menu[side="left"] [amp-nested-submenu][child-open] {
+amp-nested-menu[side='left'][child-open],
+amp-nested-menu[side='left'] [amp-nested-submenu][child-open] {
   transform: translateX(100%) !important;
 }
 
-amp-nested-menu[side="right"][child-open],
-amp-nested-menu[side="right"] [amp-nested-submenu][child-open] {
+amp-nested-menu[side='right'][child-open],
+amp-nested-menu[side='right'] [amp-nested-submenu][child-open] {
   transform: translateX(-100%) !important;
 }

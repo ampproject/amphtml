@@ -30,7 +30,7 @@ amp-story-page amp-ad[type='adsense'] {
 
 /* TODO(ccordry) allow advertisers to opt-in to fullscreen ads. */
 .i-amphtml-story-desktop-fullbleed
-  amp-story-grid-layer[template="fill"]
+  amp-story-grid-layer[template='fill']
   > amp-ad {
   left: 50% !important;
   right: auto !important;

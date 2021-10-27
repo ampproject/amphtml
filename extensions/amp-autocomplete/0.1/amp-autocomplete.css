@@ -1,5 +1,3 @@
-
-
 /* NOTE: styles that affect sizing are in ampdoc.css to avoid FOUC */
 amp-autocomplete,
 amp-autocomplete > input,
@@ -16,30 +14,34 @@ amp-autocomplete > textarea {
 .i-amphtml-autocomplete-results {
   position: absolute;
   top: 100%;
-  width: calc(100% + 1rem); /* 100% + input padding-left + 2 * margin-left offset */
-  min-width: calc(2em + 2rem); /* 2 chars. + 2em results padding + 2 * .5em visual offset */
+  width: calc(
+    100% + 1rem
+  ); /* 100% + input padding-left + 2 * margin-left offset */
+  min-width: calc(
+    2em + 2rem
+  ); /* 2 chars. + 2em results padding + 2 * .5em visual offset */
   max-height: 40vh;
-  margin-top: .5rem; /* default-ui-space-small */
-  margin-left: -.5rem; /* default-ui-space-small */
+  margin-top: 0.5rem; /* default-ui-space-small */
+  margin-left: -0.5rem; /* default-ui-space-small */
   border-radius: 4px; /* default-ui-border-radius */
 
   overflow-y: auto;
   overflow-x: hidden;
 
   background-color: white; /* default-ui-background-color */
-  box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* default-ui-box-shadow */
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.5); /* default-ui-box-shadow */
   z-index: 10;
 }
 
 .i-amphtml-autocomplete-results-up {
   top: auto;
   bottom: 100%;
-  margin-bottom: .5rem; /* default-ui-space-small */
+  margin-bottom: 0.5rem; /* default-ui-space-small */
 }
 
 .i-amphtml-autocomplete-item {
   position: relative;
-  padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
+  padding: 0.5rem 1rem; /* default-ui-space-small default-ui-space-medium */
   cursor: pointer;
 }
 
@@ -52,13 +54,13 @@ amp-autocomplete > textarea {
 }
 
 .i-amphtml-autocomplete-item:hover:not([data-disabled]) {
-  background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
+  background-color: rgba(0, 0, 0, 0.15); /* default-ui-light-gray */
 }
 
 .i-amphtml-autocomplete-item-active:not([data-disabled]) {
-  background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
+  background-color: rgba(0, 0, 0, 0.15); /* default-ui-light-gray */
 }
 
 .i-amphtml-autocomplete-item[data-disabled] {
-  color: rgba(0,0,0,.33);
+  color: rgba(0, 0, 0, 0.33);
 }

@@ -1,10 +1,8 @@
-
-
- .i-amphtml-pan-zoom {
-   display: flex;
-   justify-content: center;
-   align-items: center;
- }
+.i-amphtml-pan-zoom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 .i-amphtml-pan-zoom-child {
   position: absolute;

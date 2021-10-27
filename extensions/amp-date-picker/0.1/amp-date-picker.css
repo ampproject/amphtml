@@ -1,9 +1,6 @@
-
-
 @import '../../../third_party/react-dates/_datepicker.css';
 
-
-amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
+amp-date-picker[mode='overlay'] .i-amphtml-date-picker-container {
   position: absolute;
   top: calc(100% + 10px);
   left: 10px;
@@ -41,7 +38,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
  * publishers who make static date pickers with `input[type="date"]`
  * can add a rule like this themselves.
  */
- amp-date-picker input::-webkit-calendar-picker-indicator {
+amp-date-picker input::-webkit-calendar-picker-indicator {
   display: none;
 }
 
@@ -50,7 +47,8 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 }
 
 .amp-date-picker-calendar-container {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 }
 
 .DateInput_input {
@@ -87,7 +85,7 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
 
 .DayPicker__withBorder {
   background-color: #fdfdfd;
-  border: 1px solid rgba(0,0,0,0.07);
+  border: 1px solid rgba(0, 0, 0, 0.07);
   box-shadow: none;
   overflow: hidden;
 }
@@ -96,8 +94,8 @@ amp-lightbox .DayPicker__withBorder {
   border: 0;
 }
 
-amp-date-picker[mode="overlay"] .DayPicker__withBorder {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.07);
+amp-date-picker[mode='overlay'] .DayPicker__withBorder {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.07);
   border: 0;
 }
 
@@ -129,7 +127,8 @@ amp-date-picker[mode="overlay"] .DayPicker__withBorder {
   background-color: #cacccd;
 }
 
-amp-date-picker:not([allow-blocked-ranges]) .CalendarDay__blocked_calendar.CalendarDay__hovered_span {
+amp-date-picker:not([allow-blocked-ranges])
+  .CalendarDay__blocked_calendar.CalendarDay__hovered_span {
   background-color: #ff8080;
   border: 1px solid #ff8080;
 }
@@ -137,7 +136,7 @@ amp-date-picker:not([allow-blocked-ranges]) .CalendarDay__blocked_calendar.Calen
 .CalendarDay__blocked_out_of_range,
 .CalendarDay__blocked_out_of_range:active,
 .CalendarDay__blocked_out_of_range:hover {
-  color: rgb(0, 0, 0, .1);
+  color: rgb(0, 0, 0, 0.1);
   border: 1px solid transparent;
   background: transparent;
 }
@@ -218,15 +217,33 @@ amp-date-picker:not([allow-blocked-ranges]) .CalendarDay__blocked_calendar.Calen
 /* Show a blue dot on highlighted days */
 .CalendarDay__highlighted_calendar,
 .CalendarDay__highlighted_calendar:hover {
-  background-image: radial-gradient(circle at 50% 82%, #0654ab 0px, #0654ab 2px, transparent 3px, transparent 100%);
+  background-image: radial-gradient(
+    circle at 50% 82%,
+    #0654ab 0px,
+    #0654ab 2px,
+    transparent 3px,
+    transparent 100%
+  );
 }
 
 .CalendarDay__selected.CalendarDay__highlighted_calendar {
-  background-image: radial-gradient(circle at 50% 82%, #fff 0px, #fff 2px, transparent 3px, transparent 100%);
+  background-image: radial-gradient(
+    circle at 50% 82%,
+    #fff 0px,
+    #fff 2px,
+    transparent 3px,
+    transparent 100%
+  );
 }
 
 .CalendarDay__blocked_out_of_range.CalendarDay__highlighted_calendar::after {
-  background-image: radial-gradient(circle at 50% 82%, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 2px, transparent 3px, transparent 100%);
+  background-image: radial-gradient(
+    circle at 50% 82%,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 2px,
+    transparent 3px,
+    transparent 100%
+  );
 }
 
 .i-amphtml-date-picker-info {

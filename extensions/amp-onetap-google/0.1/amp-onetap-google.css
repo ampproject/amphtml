@@ -1,14 +1,11 @@
-
-
- .i-amphtml-onetap-google-iframe {
+.i-amphtml-onetap-google-iframe {
   z-index: 2147483647;
   border: none;
   position: fixed;
 }
 
 /* 'card' as received in 'set_ui_mode' messages from iframe */
-.i-amphtml-onetap-google-ui-card
-{
+.i-amphtml-onetap-google-ui-card {
   width: 391px;
   right: 20px;
   top: 20px;

@@ -1,5 +1,3 @@
-
-
 /* 1em = 16px for interactive components, unless overriden by font-size */
 .i-amphtml-story-interactive-quiz-option-container {
   display: flex !important;
@@ -70,7 +68,7 @@
   min-width: 1.5em !important;
   border-radius: 50% !important;
   border: solid 0.125em !important;
-  padding: .31em !important;
+  padding: 0.31em !important;
   margin-right: 1em !important;
   color: var(--interactive-accent-color) !important;
   border-color: var(--i-amphtml-interactive-answer-choice-border) !important;
@@ -95,7 +93,8 @@
   flex-shrink: 0 !important;
 }
 
-.i-amphtml-story-interactive-quiz-option:not(.i-amphtml-story-interactive-option-selected) .i-amphtml-story-interactive-quiz-percentage-text {
+.i-amphtml-story-interactive-quiz-option:not(.i-amphtml-story-interactive-option-selected)
+  .i-amphtml-story-interactive-quiz-percentage-text {
   opacity: 0.5 !important;
 }
 
@@ -173,7 +172,7 @@
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-quiz-option:focus::before {
-    background: var(--i-amphtml-interactive-theme-shading) !important;
+  background: var(--i-amphtml-interactive-theme-shading) !important;
 }
 
 .i-amphtml-story-interactive-post-selection:not(.i-amphtml-story-interactive-has-data)
@@ -264,31 +263,40 @@
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option
-    .i-amphtml-story-interactive-quiz-answer-choice {
-  animation: i-amphtml-story-interactive-quiz-answer-choice-landing-animation var(--i-amphtml-interactive-animation-time) !important;
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
+  .i-amphtml-story-interactive-quiz-answer-choice {
+  animation: i-amphtml-story-interactive-quiz-answer-choice-landing-animation
+    var(--i-amphtml-interactive-animation-time) !important;
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el1
+  ) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(2)
-    .i-amphtml-story-interactive-quiz-answer-choice {
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
+  .i-amphtml-story-interactive-quiz-answer-choice {
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el2
+  ) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(3)
-    .i-amphtml-story-interactive-quiz-answer-choice {
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
+  .i-amphtml-story-interactive-quiz-answer-choice {
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el3
+  ) !important;
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(4)
-    .i-amphtml-story-interactive-quiz-answer-choice {
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
+  .i-amphtml-story-interactive-quiz-answer-choice {
+  animation-delay: var(
+    --i-amphtml-interactive-landing-animation-delay-offset-el4
+  ) !important;
 }
 
 @keyframes i-amphtml-story-interactive-quiz-answer-choice-landing-animation {
   33% {
-    transform: scale(.8);
+    transform: scale(0.8);
   }
 }

@@ -1,5 +1,3 @@
-
-
 amp-truncate-text {
   padding: 0 !important;
   border: none !important;
@@ -16,7 +14,8 @@ amp-truncate-text[i-amphtml-truncate-expanded] .i-amphtml-truncate-content {
   position: static !important;
 }
 
-amp-truncate-text:not([i-amphtml-truncate-expanded]) .i-amphtml-truncate-expanded-slot {
+amp-truncate-text:not([i-amphtml-truncate-expanded])
+  .i-amphtml-truncate-expanded-slot {
   display: none !important;
 }
 
@@ -28,12 +27,13 @@ amp-truncate-text:not([i-amphtml-truncate-expanded]) .i-amphtml-truncate-expande
   right: 0 !important;
 }
 
-.i-amphtml-truncate-content [slot="expanded"] {
+.i-amphtml-truncate-content [slot='expanded'] {
   margin: 0 !important;
   white-space: nowrap !important;
 }
 
-.i-amphtml-truncate-content:not([i-amphtml-truncate-overflow]) .i-amphtml-truncate-collapsed-slot {
+.i-amphtml-truncate-content:not([i-amphtml-truncate-overflow])
+  .i-amphtml-truncate-collapsed-slot {
   display: none !important;
 }
 

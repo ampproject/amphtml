@@ -1,5 +1,3 @@
-
-
 /**
  * @fileoverview CSS specifically for non-AMP4ADS formats.
  */
@@ -76,7 +74,6 @@ html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;
 }
 
-
 /**
  * iOS-Embed mode (iOS <= 8). The `body` itself is scrollable.
  */
@@ -150,7 +147,6 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   visibility: visible;
 }
 
-
 .i-amphtml-scroll-disabled {
   overflow-x: hidden !important;
   overflow-y: hidden !important;
@@ -204,7 +200,6 @@ body:not(.i-amphtml-subs-ready) [subscriptions-action],
   display: none !important;
 }
 
-
 /**
  * Hide the update reference point of amp-live-list by default. This is
  * reset by the `amp-live-list > .amp-active[update]` selector.
@@ -235,29 +230,29 @@ amp-list[resizable-children] > .i-amphtml-loading-container.amp-hidden {
 amp-list[load-more] [load-more-loading],
 amp-list[load-more] [load-more-failed],
 amp-list[load-more] [load-more-button],
-amp-list[load-more] [load-more-end]
-{
+amp-list[load-more] [load-more-end] {
   display: none;
 }
 
 /**
  * amp-list error messaging container should be hidden at first.
  */
- amp-list [fetch-error] {
+amp-list [fetch-error] {
   display: none;
 }
 
 /**
  * amp-list initial content should be displayed (similar to placeholder).
  */
-amp-list[diffable] div[role="list"] {
+amp-list[diffable] div[role='list'] {
   display: block;
 }
 
 /**
  * amp-story
  */
-amp-story[standalone], amp-story-page {
+amp-story[standalone],
+amp-story-page {
   /* Ensures amp-story and amp-story-page have a height and are prerendered. */
   min-height: 1px !important;
   display: block !important;
@@ -324,14 +319,15 @@ amp-autocomplete > textarea,
  * loaded. This cause the element to jump. This is a fix for that, which
  * doesn't push the preset's defaults into v0.js making it larger.
  */
-[amp-fx^="fly-in"] {
+[amp-fx^='fly-in'] {
   visibility: hidden;
 }
 
 /**
  * amp-script[nodom] is an element with no UI, similar to amp-analytics.
  */
-amp-script[nodom], amp-script[sandboxed] {
+amp-script[nodom],
+amp-script[sandboxed] {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;

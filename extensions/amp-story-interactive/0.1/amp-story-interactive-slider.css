@@ -1,5 +1,3 @@
-
-
 .i-amphtml-story-interactive-slider-container {
   --average: 0%;
   --fraction: 0;
@@ -24,7 +22,8 @@
 .i-amphtml-story-interactive-slider-bubble {
   position: absolute !important;
   --scale-var: calc(var(--fraction) + 1) !important;
-  transform: translateY(calc(var(--scale-var) * -70% - 40%)) scale(var(--scale-var)) !important;
+  transform: translateY(calc(var(--scale-var) * -70% - 40%))
+    scale(var(--scale-var)) !important;
   text-align: center !important;
   font-weight: 700 !important;
   height: 100% !important;
@@ -67,14 +66,16 @@
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25) !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble {
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-slider-bubble {
   z-index: 2 !important;
   transform: scale(0.9) !important;
   transition: transform var(--i-amphtml-interactive-animation-time)
     var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble::after {
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-slider-bubble::after {
   cursor: initial !important;
   border: 0.1em solid var(--i-amphtml-interactive-option-background-color) !important;
   border-bottom-right-radius: 50% !important;
@@ -95,12 +96,15 @@
     var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble-wrapper,
-.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-bubble-wrapper  {
-  transform: translate(var(--translate-x-center), -50%)  scale(1) !important;
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-slider-bubble-wrapper,
+.i-amphtml-story-interactive-mid-selection
+  .i-amphtml-story-interactive-slider-bubble-wrapper {
+  transform: translate(var(--translate-x-center), -50%) scale(1) !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-slider-bubble-wrapper {
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-slider-bubble-wrapper {
   z-index: 2 !important;
 }
 
@@ -117,11 +121,14 @@
   position: absolute;
 }
 
-.i-amphtml-story-interactive-active.i-amphtml-story-interactive-has-data .i-amphtml-story-interactive-slider-average-indicator {
+.i-amphtml-story-interactive-active.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-slider-average-indicator {
   transform: translate(-50%, -50%) scale(1) !important;
 }
 
-.i-amphtml-story-interactive-has-data .i-amphtml-story-interactive-slider-average-indicator span {
+.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-slider-average-indicator
+  span {
   --pulse-animation-duration: 3s;
   transform: scale(0);
   box-sizing: border-box;
@@ -134,11 +141,15 @@
   animation: pulse var(--pulse-animation-duration) linear infinite forwards !important;
 }
 
-.i-amphtml-story-interactive-has-data .i-amphtml-story-interactive-slider-average-indicator span:nth-child(1) {
+.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-slider-average-indicator
+  span:nth-child(1) {
   animation-delay: calc(var(--pulse-animation-duration) * -0.33) !important;
 }
 
-.i-amphtml-story-interactive-has-data .i-amphtml-story-interactive-slider-average-indicator span:nth-child(2) {
+.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-slider-average-indicator
+  span:nth-child(2) {
   animation-delay: calc(var(--pulse-animation-duration) * -0.66) !important;
 }
 
@@ -194,17 +205,20 @@
   border-color: transparent transparent transparent white !important;
 }
 
-.i-amphtml-story-interactive-active.i-amphtml-story-interactive-has-data .i-amphtml-story-interactive-slider-average-text {
+.i-amphtml-story-interactive-active.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-slider-average-text {
   left: var(--average) !important;
   animation: average-pop 3s 0.3s forwards;
 }
 
 @keyframes average-pop {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, 35%);
     opacity: 0;
   }
-  10%, 90% {
+  10%,
+  90% {
     opacity: 1;
     transform: translate(-50%, 0);
   }
@@ -238,7 +252,8 @@
   height: 1em !important;
 }
 
-.i-amphtml-story-interactive-slider-input-size::before, .i-amphtml-story-interactive-slider-input-size::after {
+.i-amphtml-story-interactive-slider-input-size::before,
+.i-amphtml-story-interactive-slider-input-size::after {
   content: '' !important;
   background: linear-gradient(
     var(--gradient-angle),
@@ -293,13 +308,15 @@
 }
 
 /* Vendor pseudo-selectors are invalid on unsuported browsers, so we need to keep rules separate to avoid invalidating rulesets. */
-.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
+.i-amphtml-story-interactive-mid-selection
+  .i-amphtml-story-interactive-slider-input::-webkit-slider-thumb {
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25),
     0em 0em 0em 0.07em var(--i-amphtml-interactive-option-background-color) !important;
   border-top-left-radius: 0% !important;
 }
 
-.i-amphtml-story-interactive-mid-selection .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
+.i-amphtml-story-interactive-mid-selection
+  .i-amphtml-story-interactive-slider-input::-moz-range-thumb {
   box-shadow: 0em 0em 0.5em rgba(0, 0, 0, 0.25),
     0em 0em 0em 0.07em var(--i-amphtml-interactive-option-background-color) !important;
   border-top-left-radius: 0% !important;

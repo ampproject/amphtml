@@ -27,15 +27,21 @@ amp-story[standalone][i-amphtml-vertical] {
 }
 
 /* Increase CSS specifity. */
-amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element {
+amp-story[i-amphtml-vertical].i-amphtml-element
+  amp-story-page.i-amphtml-element {
   transform: none !important;
 }
 
-[i-amphtml-vertical] .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
+[i-amphtml-vertical]
+  .i-amphtml-story-draggable-drawer-container[hidden]
+  .i-amphtml-story-draggable-drawer-content {
   opacity: 1 !important;
 }
 
-[i-amphtml-vertical] .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content > * {
+[i-amphtml-vertical]
+  .i-amphtml-story-draggable-drawer-container[hidden]
+  .i-amphtml-story-draggable-drawer-content
+  > * {
   display: block !important;
 }
 
@@ -66,7 +72,6 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   color: black !important;
   font-size: 1rem !important;
 }
-
 
 [i-amphtml-vertical] .i-amphtml-story-page-description > h2 {
   font-size: 1.5rem !important;

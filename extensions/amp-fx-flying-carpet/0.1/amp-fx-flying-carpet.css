@@ -1,5 +1,3 @@
-
-
 /* Non-overridable properties */
 amp-fx-flying-carpet {
   position: relative !important;
@@ -27,7 +25,9 @@ amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip {
 }
 
 /* Fixed position container that creates the scroll effect */
-amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip > .i-amphtml-fx-flying-carpet-container {
+amp-fx-flying-carpet
+  > .i-amphtml-fx-flying-carpet-clip
+  > .i-amphtml-fx-flying-carpet-container {
   position: fixed !important;
   top: 0 !important;
   width: 100%;

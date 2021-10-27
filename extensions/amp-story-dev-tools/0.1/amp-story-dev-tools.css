@@ -1,5 +1,3 @@
-
-
 @import './amp-story-dev-tools-tab-debug.css';
 @import './amp-story-dev-tools-tab-preview.css';
 
@@ -11,30 +9,45 @@ amp-story-dev-tools {
   font-family: 'Poppins', sans-serif !important;
   color: white !important;
   --i-amphtml-story-dev-tools-vertical-spacing: 30px !important;
-  --i-amphtml-story-dev-tools-accent: #79B3FF !important;
+  --i-amphtml-story-dev-tools-accent: #79b3ff !important;
   --i-amphtml-story-dev-tools-accent-light: #92c1ff !important;
-  --i-amphtml-story-dev-tools-accent-translucent: #79B3FF55 !important;
+  --i-amphtml-story-dev-tools-accent-translucent: #79b3ff55 !important;
 
-  --i-amphtml-story-dev-tools-error-color: #FF5252 !important;
+  --i-amphtml-story-dev-tools-error-color: #ff5252 !important;
   --i-amphtml-story-dev-tools-gray-1: #101010 !important;
-  --i-amphtml-story-dev-tools-gray-2: #2E3137 !important;
-  --i-amphtml-story-dev-tools-gray-3: #2E2E2E !important;
-  --i-amphtml-story-dev-tools-gray-4: #3D3D3D !important;
+  --i-amphtml-story-dev-tools-gray-2: #2e3137 !important;
+  --i-amphtml-story-dev-tools-gray-3: #2e2e2e !important;
+  --i-amphtml-story-dev-tools-gray-4: #3d3d3d !important;
   --i-amphtml-story-dev-tools-gray-5: #525358 !important;
-  --i-amphtml-story-dev-tools-gray-transparent-1: #111111CC !important;
-  --i-amphtml-story-dev-tools-white-transparent-1: #FFFFFF22 !important;
-  --i-amphtml-story-dev-tools-white-transparent-2: #FFFFFF35 !important;
-  --i-amphtml-story-dev-tools-white-transparent-3: #FFFFFF77 !important;
-  --i-amphtml-story-dev-tools-white-transparent-4: #FFFFFFCC !important;
+  --i-amphtml-story-dev-tools-gray-transparent-1: #111111cc !important;
+  --i-amphtml-story-dev-tools-white-transparent-1: #ffffff22 !important;
+  --i-amphtml-story-dev-tools-white-transparent-2: #ffffff35 !important;
+  --i-amphtml-story-dev-tools-white-transparent-3: #ffffff77 !important;
+  --i-amphtml-story-dev-tools-white-transparent-4: #ffffffcc !important;
   --i-amphtml-story-dev-tools-black-transparent-1: #00000077 !important;
 
-
-  --i-amphtml-story-dev-tools-material-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-  --i-amphtml-story-dev-tools-material-easing-accelerated: cubic-bezier(0.4, 0.0, 1, 1) !important;
-  --i-amphtml-story-dev-tools-material-easing-decelerated: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  --i-amphtml-story-dev-tools-material-easing-standard: cubic-bezier(
+    0.4,
+    0,
+    0.2,
+    1
+  ) !important;
+  --i-amphtml-story-dev-tools-material-easing-accelerated: cubic-bezier(
+    0.4,
+    0,
+    1,
+    1
+  ) !important;
+  --i-amphtml-story-dev-tools-material-easing-decelerated: cubic-bezier(
+    0,
+    0,
+    0.2,
+    1
+  ) !important;
 }
 
-amp-story-dev-tools, amp-story-dev-tools * {
+amp-story-dev-tools,
+amp-story-dev-tools * {
   box-sizing: border-box !important;
 }
 
@@ -91,7 +104,8 @@ amp-story-dev-tools, amp-story-dev-tools * {
   outline: none !important;
 }
 
-.i-amphtml-story-dev-tools-button:hover, .i-amphtml-story-dev-tools-button:focus  {
+.i-amphtml-story-dev-tools-button:hover,
+.i-amphtml-story-dev-tools-button:focus {
   background: var(--i-amphtml-story-dev-tools-accent-translucent) !important;
 }
 
@@ -120,7 +134,8 @@ amp-story-dev-tools, amp-story-dev-tools * {
   align-items: center !important;
 }
 
-.i-amphtml-story-dev-tools-tab-selector:not([active]):hover, .i-amphtml-story-dev-tools-tabs > button:not([active]):focus {
+.i-amphtml-story-dev-tools-tab-selector:not([active]):hover,
+.i-amphtml-story-dev-tools-tabs > button:not([active]):focus {
   opacity: 0.9 !important;
 }
 

@@ -1,7 +1,4 @@
-
-
-@import url("../../../third_party/subscriptions-project/swg-button.css");
-
+@import url('../../../third_party/subscriptions-project/swg-button.css');
 
 /**
  * Disabled Action when  realtime config has not loaded yet

@@ -1,5 +1,3 @@
-
-
 amp-story-panning-media {
   /* Child img gets 100% height. This centers the image. */
   display: flex !important;
@@ -20,7 +18,7 @@ amp-story-panning-media amp-img {
   backface-visibility: hidden !important;
 }
 
-amp-story-grid-layer[template="fill"] amp-story-panning-media amp-img img {
+amp-story-grid-layer[template='fill'] amp-story-panning-media amp-img img {
   /* override for layout=fill */
   position: relative !important;
   display: inline-block !important;

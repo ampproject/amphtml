@@ -1,5 +1,3 @@
-
-
 amp-sidebar {
   --story-page-vh: 1vh;
   position: fixed !important;
@@ -17,23 +15,23 @@ amp-sidebar {
   will-change: transform;
 }
 
-amp-sidebar[side="left"] {
+amp-sidebar[side='left'] {
   left: 0 !important;
   transform: translateX(-100%);
   animation-name: i-amphtml-sidebar-slide-out-left;
 }
 
-amp-sidebar[side="left"][open] {
+amp-sidebar[side='left'][open] {
   animation-name: i-amphtml-sidebar-slide-in-left;
 }
 
-amp-sidebar[side="right"] {
+amp-sidebar[side='right'] {
   right: 0 !important;
   transform: translateX(100%);
   animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
-amp-sidebar[side="right"][open] {
+amp-sidebar[side='right'][open] {
   animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
@@ -42,7 +40,8 @@ amp-sidebar[side][i-amphtml-sidebar-opened] {
   animation: none;
 }
 
-amp-sidebar[side], .i-amphtml-sidebar-mask {
+amp-sidebar[side],
+.i-amphtml-sidebar-mask {
   /*
    * Note: This uses animations (instead of transitions) to make sure the
    * animation always plays correctly. Previously, the display was toggled in a
@@ -52,11 +51,12 @@ amp-sidebar[side], .i-amphtml-sidebar-mask {
    */
   /* Use same transition as PWA App-Shell https://goo.gl/AGFioO */
   animation-duration: 233ms;
-  animation-timing-function: cubic-bezier(0,0,.21,1);
+  animation-timing-function: cubic-bezier(0, 0, 0.21, 1);
   animation-fill-mode: forwards;
 }
 
-.i-amphtml-toolbar > ul, .i-amphtml-toolbar > ol {
+.i-amphtml-toolbar > ul,
+.i-amphtml-toolbar > ol {
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;

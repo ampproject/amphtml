@@ -1,7 +1,5 @@
-
-
-@import "../../amp-base-carousel/0.1/carousel.css";
-@import "arrows.css";
+@import '../../amp-base-carousel/0.1/carousel.css';
+@import 'arrows.css';
 
 amp-stream-gallery .i-amphtml-carousel-content {
   display: flex;
@@ -13,7 +11,7 @@ amp-stream-gallery .i-amphtml-carousel-content {
   min-width: 1px;
 }
 
-[i-amphtml-stream-gallery-extra-space="around"] {
+[i-amphtml-stream-gallery-extra-space='around'] {
   justify-content: center;
 }
 

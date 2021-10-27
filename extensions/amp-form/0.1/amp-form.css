@@ -1,5 +1,3 @@
-
-
 form.amp-form-submitting [submitting],
 form.amp-form-submit-success [submit-success],
 form.amp-form-submit-error [submit-error] {
@@ -7,7 +5,7 @@ form.amp-form-submit-error [submit-error] {
 }
 
 textarea[autoexpand]:not(.i-amphtml-textarea-max) {
-  overflow: hidden!important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-textarea-clone {
@@ -15,13 +13,13 @@ textarea[autoexpand]:not(.i-amphtml-textarea-max) {
   position: absolute;
   top: -9999px;
   left: -9999px;
-  height: 0!important;
+  height: 0 !important;
 }
 
 .i-amphtml-validation-bubble {
   transform: translate(-50%, -100%);
   background-color: white;
-  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, .5);
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.5);
   max-width: 200px;
   position: absolute;
   display: block;

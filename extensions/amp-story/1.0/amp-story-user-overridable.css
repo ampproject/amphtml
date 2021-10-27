@@ -1,5 +1,3 @@
-
-
 amp-story {
   font-display: optional;
 }
@@ -13,25 +11,25 @@ amp-story-grid-layer * {
   margin: 0;
 }
 
-[template="fill"] amp-anim img,
-[template="fill"] amp-img img,
-[template="fill"] amp-video video,
+[template='fill'] amp-anim img,
+[template='fill'] amp-img img,
+[template='fill'] amp-video video,
 .i-amphtml-story-grid-template-with-full-bleed-animation amp-img img {
   object-fit: cover;
 }
 
-[template="vertical"] {
+[template='vertical'] {
   align-content: start;
   grid-gap: 16px;
   justify-content: stretch;
   justify-items: start;
 }
 
-[template="vertical"] > * {
+[template='vertical'] > * {
   width: 100%;
 }
 
-[template="horizontal"] {
+[template='horizontal'] {
   align-content: stretch;
   align-items: start;
   grid-gap: 16px;

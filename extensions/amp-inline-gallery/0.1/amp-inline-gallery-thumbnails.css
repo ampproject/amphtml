@@ -1,11 +1,9 @@
-
-
 amp-inline-gallery-thumbnails .i-amphtml-carousel-content {
   padding: 0;
   padding: 0 calc(var(--thumbnail-margin, 0) / 2);
 }
 
-.i-amphtml-inline-gallery-thumbnails-container  {
+.i-amphtml-inline-gallery-thumbnails-container {
   box-sizing: border-box;
   width: auto !important;
   height: 100%;

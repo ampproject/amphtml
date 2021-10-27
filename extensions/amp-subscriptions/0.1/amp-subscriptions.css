@@ -1,42 +1,36 @@
-
-
-
 /**
  * Loading indicator.
  * Hide when `i-amphtml-subs-loading` class is not set.
  */
-body:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
+body:not(.i-amphtml-subs-loading) [subscriptions-section='loading'] {
   display: none !important;
 }
-
 
 /**
  * Content section.
  * Hide when not known or denied.
  */
-body:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
+body:not(.i-amphtml-subs-grant-yes) [subscriptions-section='content'] {
   display: none !important;
 }
-
 
 /**
  * Content-not-granted section.
  * Hide when not known or granted.
  */
-body:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
+body:not(.i-amphtml-subs-grant-no)
+  [subscriptions-section='content-not-granted'] {
   display: none !important;
 }
-
 
 /**
  * Actions sections.
  * Hide when not known or delegated.
  */
-body.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
-body.i-amphtml-subs-delegated [subscriptions-section="actions"] {
+body.i-amphtml-subs-grant-unk [subscriptions-section='actions'],
+body.i-amphtml-subs-delegated [subscriptions-section='actions'] {
   display: none !important;
 }
-
 
 /**
  * Actions.
@@ -48,7 +42,7 @@ body.i-amphtml-subs-grant-unk [subscriptions-action] {
 }
 
 [subscriptions-actions]:not(.i-amphtml-subs-display),
-[subscriptions-section="actions"]:not(.i-amphtml-subs-display),
+[subscriptions-section='actions']:not(.i-amphtml-subs-display),
 [subscriptions-action]:not(.i-amphtml-subs-display) {
   display: none !important;
 }
@@ -61,13 +55,13 @@ amp-subscriptions-dialog {
   left: 0 !important;
   margin-left: 0 !important;
   width: 100% !important;
-  z-index: 2147483641 !important;  /* Paywall is behind iframes from swg.js */
+  z-index: 2147483641 !important; /* Paywall is behind iframes from swg.js */
   max-height: 90vh;
   box-sizing: border-box;
   opacity: 1;
   background-image: none;
   background-color: #fff;
-  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2);
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
   margin-bottom: 0;
   transition: transform 0.3s ease-in;
 }
@@ -83,7 +77,7 @@ amp-subscriptions-dialog {
   background-position: 9px center;
   background-color: #fff;
   background-repeat: no-repeat;
-  box-shadow: 0 -1px 1px 0 rgba(0,0,0, 0.2);
+  box-shadow: 0 -1px 1px 0 rgba(0, 0, 0, 0.2);
   border: none;
   border-radius: 12px 0 0 0;
   cursor: pointer;
@@ -103,7 +97,7 @@ body:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
 
 .i-amphtml-subs-progress:after {
   content: '';
-  background-color: #2196F3;
+  background-color: #2196f3;
   height: 2px;
   position: absolute;
   left: 0;

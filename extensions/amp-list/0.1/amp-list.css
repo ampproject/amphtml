@@ -1,5 +1,3 @@
-
-
 /**
  * Show the error messaging container on fetch error.
  */
@@ -28,16 +26,19 @@ amp-list[load-more] [load-more-loading].i-amphtml-default-ui,
 amp-list[load-more] [load-more-failed].i-amphtml-default-ui,
 amp-list[load-more] [load-more-button].i-amphtml-default-ui,
 .i-amphtml-list-load-more-button {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
   font-weight: bold;
   font-size: 14px;
   text-transform: uppercase;
-  letter-spacing: .1em;
-  color: rgb(51,51,51);
+  letter-spacing: 0.1em;
+  color: rgb(51, 51, 51);
   text-align: center;
 }
 
-amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-list-load-more-spinner {
+amp-list[load-more]
+  [load-more-loading].i-amphtml-default-ui
+  .i-amphtml-list-load-more-spinner {
   display: inline-block;
   width: 40px;
   height: 40px;
@@ -48,15 +49,21 @@ amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-list-loa
 }
 
 @keyframes amp-list-load-more-spinner {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .i-amphtml-list-load-more-button {
-  border: none; margin: 0; padding: 0; /* poor man's reset */
+  border: none;
+  margin: 0;
+  padding: 0; /* poor man's reset */
 
   display: inline-block;
-  background-color: rgba(51,51,51,.75);
+  background-color: rgba(51, 51, 51, 0.75);
   color: white;
   margin: 4px 0px;
   padding: 0px 32px;
@@ -66,7 +73,7 @@ amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-list-loa
   border-radius: 24px;
 }
 
-[load-more] div[role="list"] {
+[load-more] div[role='list'] {
   overflow-y: hidden;
 }
 
@@ -77,7 +84,7 @@ amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-list-loa
 }
 
 .i-amphtml-list-load-more-button:hover {
-  background-color: rgba(51,51,51,1);
+  background-color: rgba(51, 51, 51, 1);
 }
 
 .i-amphtml-list-load-more-button.i-amphtml-list-load-more-button-small {
@@ -92,11 +99,15 @@ amp-list[load-more] [load-more-loading].i-amphtml-default-ui .i-amphtml-list-loa
   line-height: 24px;
 }
 
-amp-list[load-more] [load-more-failed].i-amphtml-default-ui .i-amphtml-list-load-more-message {
+amp-list[load-more]
+  [load-more-failed].i-amphtml-default-ui
+  .i-amphtml-list-load-more-message {
   line-height: 24px;
 }
 
-amp-list[load-more] [load-more-failed].i-amphtml-default-ui .i-amphtml-list-load-more-icon {
+amp-list[load-more]
+  [load-more-failed].i-amphtml-default-ui
+  .i-amphtml-list-load-more-icon {
   height: 24px;
   width: 24px;
   display: inline-block;

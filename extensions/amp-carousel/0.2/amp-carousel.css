@@ -1,17 +1,15 @@
-
-
 @import '../../amp-base-carousel/0.1/carousel.css';
 
-amp-carousel .i-amphtml-carousel-scroll[horizontal="true"] {
+amp-carousel .i-amphtml-carousel-scroll[horizontal='true'] {
   padding-bottom: 0 !important;
 }
 
-amp-carousel:not([type="slides"]) .i-amphtml-carousel-scroll {
+amp-carousel:not([type='slides']) .i-amphtml-carousel-scroll {
   display: block !important;
   white-space: nowrap !important;
 }
 
-amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
+amp-carousel:not([type='slides']) .i-amphtml-carousel-content {
   position: static;
 }
 
@@ -21,7 +19,7 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
    * Puts a space between items, for browsers that do not support the
    * properties below.
    */
-   margin-left: 8px;
+  margin-left: 8px;
   /*
    * Makes sure padding between items is correct in RTL mode. The end padding
    * is to override the padding-left above in RTL mode.
@@ -31,7 +29,7 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
 }
 
 .amp-scrollable-carousel-slide.i-amphtml-layout-responsive {
-  width: 100%
+  width: 100%;
 }
 
 .amp-scrollable-carousel-slide:first-child {
@@ -63,7 +61,7 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
  * Rotate arrow slots for RTL. This applies to default / custom arrows. Ideally
  * this would use the `dir(rtl)` selector.
  */
-.amp-carousel-button[dir="rtl"] {
+.amp-carousel-button[dir='rtl'] {
   transform: scaleX(-1);
 }
 
@@ -75,7 +73,7 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   margin: 16px;
   border-style: none;
   border-radius: 2px;
-  background-color: rgba(0, 0, 0, .5);
+  background-color: rgba(0, 0, 0, 0.5);
   background-position: 50% 50%;
   background-repeat: no-repeat;
   z-index: 10;
@@ -116,7 +114,7 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   align-items: center !important;
 }
 
-.i-amphtml-carousel-slide-item > *{
+.i-amphtml-carousel-slide-item > * {
   width: 100%;
   height: 100%;
   overflow: hidden !important;

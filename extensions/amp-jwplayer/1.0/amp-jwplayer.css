@@ -3,7 +3,7 @@
  * - display:block element
  * - size-defined element
  */
- amp-jwplayer {
+amp-jwplayer {
   display: block;
   overflow: hidden;
   position: relative;

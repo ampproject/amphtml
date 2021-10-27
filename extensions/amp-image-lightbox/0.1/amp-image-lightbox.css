@@ -1,6 +1,3 @@
-
-
-
 /* Non-overridable properties */
 amp-image-lightbox {
   position: fixed !important;
@@ -24,7 +21,6 @@ amp-image-lightbox {
   color: #f2f2f2;
 }
 
-
 .i-amphtml-image-lightbox-container {
   position: absolute;
   z-index: 0;
@@ -38,7 +34,6 @@ amp-image-lightbox {
   transform: translate3d(0, 0, 0);
 }
 
-
 .i-amphtml-image-lightbox-trans {
   pointer-events: none !important;
   position: fixed;
@@ -48,7 +43,6 @@ amp-image-lightbox {
   bottom: 0;
   right: 0;
 }
-
 
 .i-amphtml-image-lightbox-caption {
   position: absolute !important;
@@ -70,7 +64,6 @@ amp-image-lightbox {
   padding: 8px;
 }
 
-
 .i-amphtml-image-lightbox-viewer {
   position: absolute;
   z-index: 1;
@@ -83,7 +76,6 @@ amp-image-lightbox {
   overflow: hidden;
   transform: translate3d(0, 0, 0);
 }
-
 
 .i-amphtml-image-lightbox-viewer-image {
   position: absolute;

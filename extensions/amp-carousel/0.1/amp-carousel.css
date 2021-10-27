@@ -39,7 +39,7 @@ amp-carousel {
   border-radius: 2px;
   opacity: 0;
   pointer-events: all;
-  background-color: rgba(0, 0, 0, .5);
+  background-color: rgba(0, 0, 0, 0.5);
   background-position: 50% 50%;
   background-repeat: no-repeat;
   transform: translateY(-50%);
@@ -75,7 +75,9 @@ amp-carousel.i-amphtml-carousel-has-controls .amp-carousel-button,
   animation: i-amphtml-carousel-hint 1s ease-in 3s 1 normal both;
 }
 
-.amp-mode-mouse .i-amphtml-carousel-button-start-hint .amp-carousel-button:not(.amp-disabled) {
+.amp-mode-mouse
+  .i-amphtml-carousel-button-start-hint
+  .amp-carousel-button:not(.amp-disabled) {
   animation: none;
 }
 

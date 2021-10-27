@@ -1,7 +1,5 @@
-
-
-@import "inset-arrows.css";
-@import "outset-arrows.css";
+@import 'inset-arrows.css';
+@import 'outset-arrows.css';
 
 .i-amphtml-stream-gallery-inset-arrows {
   position: absolute;
@@ -48,8 +46,8 @@
   padding: 0;
   border: none;
   outline: none;
-  box-shadow: 0px 2px 6px 0px rgba(0,0,0,.4);
-  background-color: rgba(255,255,255,0.6);
+  box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.4);
+  background-color: rgba(255, 255, 255, 0.6);
   background-size: 24px 24px;
   background-position: center;
   background-repeat: no-repeat;
@@ -68,7 +66,7 @@
  * explicitly and prevents mixed directionality (e.g. ltr content in an rtl
  * page) from working correctly.
  */
-[dir="rtl"] .i-amphtml-stream-gallery-prev,
-[dir="rtl"] .i-amphtml-stream-gallery-next {
+[dir='rtl'] .i-amphtml-stream-gallery-prev,
+[dir='rtl'] .i-amphtml-stream-gallery-next {
   transform: scaleX(-1);
 }

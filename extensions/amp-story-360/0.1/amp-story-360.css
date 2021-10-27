@@ -1,6 +1,3 @@
-
-
-
 amp-story-360 canvas {
   position: absolute; /* fixes Safari bug */
   width: 100% !important;
@@ -15,7 +12,7 @@ amp-story-360 amp-img {
   position: absolute !important;
   bottom: 12px !important;
   right: 12px !important;
-  background: rgba(0, 0, 0, .8) !important;
+  background: rgba(0, 0, 0, 0.8) !important;
   color: white !important;
   outline: none !important;
   border: none !important;
@@ -71,7 +68,7 @@ amp-story-360 amp-img {
   height: 66% !important;
   perspective: 550px !important;
   perspective-origin: center calc(100% - 145px) !important;
-  background: linear-gradient(transparent, rgba(0, 0, 0, .9)) !important;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9)) !important;
   animation: fadeOut 1s 4s forwards ease-in-out !important;
   z-index: 100000 !important;
 }
@@ -89,7 +86,7 @@ amp-story-360 amp-img {
   position: absolute !important;
   bottom: 95px !important;
   left: calc(50% - 30px) !important;
-  width:  55px !important;
+  width: 55px !important;
   height: 100px !important;
   border: 1px solid white !important;
   border-radius: 10px !important;
@@ -97,7 +94,7 @@ amp-story-360 amp-img {
 }
 
 .i-amphtml-story-360-discovery-animation:before {
-  content: "" !important;
+  content: '' !important;
   position: absolute !important;
   border-top: 1px solid white !important;
   width: 10px !important;
@@ -116,7 +113,7 @@ amp-story-360 amp-img {
   }
   50% {
     animation-timing-function: ease-in-out;
-    transform:  rotateX(-40deg) translate3d(0, -50px, 0);
+    transform: rotateX(-40deg) translate3d(0, -50px, 0);
   }
   75% {
     animation-timing-function: ease-in-out;

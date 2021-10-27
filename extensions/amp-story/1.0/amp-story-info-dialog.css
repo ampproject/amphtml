@@ -35,7 +35,7 @@
 
 /** Black opacity overlay. */
 .i-amphtml-story-info-dialog::before {
-  content: "" !important;
+  content: '' !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -43,12 +43,12 @@
   width: 100% !important;
   background: #000000 !important;
   opacity: 0 !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
 }
 
 .i-amphtml-story-info-dialog.i-amphtml-story-info-dialog-visible::before {
   opacity: 0.55 !important;
-  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-info-dialog-container {
@@ -60,14 +60,14 @@
   background: #fff !important;
   border-radius: 0 0 8px 8px !important;
   transform: translate3d(0, -100%, 0) !important;
-  transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
   padding: 20px !important;
   font-family: 'Roboto', sans-serif !important;
 }
 
 .i-amphtml-story-info-dialog-visible .i-amphtml-story-info-dialog-container {
   transform: translate3d(0, 0, 0) !important;
-  transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: transform 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-info-heading {
@@ -87,7 +87,7 @@
 }
 
 .i-amphtml-story-info-moreinfo {
-  color: #4285F4 !important;
+  color: #4285f4 !important;
   display: none !important;
   font-family: 'Roboto-Medium', sans-serif !important;
   font-size: 12px !important;

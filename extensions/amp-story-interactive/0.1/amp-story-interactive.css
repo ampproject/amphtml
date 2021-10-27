@@ -1,5 +1,3 @@
-
-
 /* 1em = 16px for interactive components, unless overriden by font-size */
 .i-amphtml-story-interactive-container {
   --correct-color: #5bba74 !important;
@@ -21,7 +19,7 @@
 
 .i-amphtml-story-interactive-prompt {
   margin: 0px !important;
-  overflow : hidden !important;
+  overflow: hidden !important;
   text-overflow: ellipsis !important;
   display: -webkit-box !important;
   -webkit-line-clamp: var(--i-amphtml-interactive-prompt-clamp) !important;
@@ -36,10 +34,10 @@
 
 @keyframes i-amphtml-interactive-animation-flash-background {
   0% {
-    opacity: .4;
+    opacity: 0.4;
   }
   100% {
-    opacity: .2;
+    opacity: 0.2;
   }
 }
 
@@ -60,8 +58,8 @@
   }
   21% {
     visibility: visible;
-    transform: scale(.01);
-    animation-timing-function: cubic-bezier(.3, .5, .7, 1);
+    transform: scale(0.01);
+    animation-timing-function: cubic-bezier(0.3, 0.5, 0.7, 1);
   }
   43% {
     transform: scale(1.203);
@@ -77,7 +75,7 @@
     transform: scale(1);
   }
   99% {
-    transform: scale(.998);
+    transform: scale(0.998);
   }
   100% {
     transform: scale(1);
@@ -99,7 +97,8 @@
   justify-content: center;
   z-index: 1 !important;
   transform: scale(0) !important;
-  transition: transform .5s var(--i-amphtml-interactive-ease-out-curve), opacity .5s var(--i-amphtml-interactive-ease-out-curve) !important;
+  transition: transform 0.5s var(--i-amphtml-interactive-ease-out-curve),
+    opacity 0.5s var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-confetti-wrapper.i-amphtml-story-interactive-confetti-wrapper-animate-in {
@@ -117,17 +116,31 @@
 
 /* landing animations variables */
 .i-amphtml-story-interactive-active {
-  --i-amphtml-interactive-landing-animation-delay: .5s;
-  --i-amphtml-interactive-landing-animation-offset: .9;
-  --i-amphtml-interactive-landing-animation-delay-offset-el1: var(--i-amphtml-interactive-landing-animation-delay);
-  --i-amphtml-interactive-landing-animation-delay-offset-el2: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 1);
-  --i-amphtml-interactive-landing-animation-delay-offset-el3: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 2);
-  --i-amphtml-interactive-landing-animation-delay-offset-el4: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 3);
+  --i-amphtml-interactive-landing-animation-delay: 0.5s;
+  --i-amphtml-interactive-landing-animation-offset: 0.9;
+  --i-amphtml-interactive-landing-animation-delay-offset-el1: var(
+    --i-amphtml-interactive-landing-animation-delay
+  );
+  --i-amphtml-interactive-landing-animation-delay-offset-el2: calc(
+    var(--i-amphtml-interactive-landing-animation-delay) +
+      var(--i-amphtml-interactive-animation-time) *
+      var(--i-amphtml-interactive-landing-animation-offset) * 1
+  );
+  --i-amphtml-interactive-landing-animation-delay-offset-el3: calc(
+    var(--i-amphtml-interactive-landing-animation-delay) +
+      var(--i-amphtml-interactive-animation-time) *
+      var(--i-amphtml-interactive-landing-animation-offset) * 2
+  );
+  --i-amphtml-interactive-landing-animation-delay-offset-el4: calc(
+    var(--i-amphtml-interactive-landing-animation-delay) +
+      var(--i-amphtml-interactive-animation-time) *
+      var(--i-amphtml-interactive-landing-animation-offset) * 3
+  );
 }
 
 @keyframes i-amphtml-interactive-animation-landing-animation-flash-background {
   30% {
-    opacity: .4;
+    opacity: 0.4;
   }
 }
 
@@ -137,7 +150,7 @@
   position: absolute !important;
   right: 0 !important;
   top: 0 !important;
-  padding: .25em !important;
+  padding: 0.25em !important;
   font-size: inherit !important;
   transform-origin: bottom right !important;
   background-color: white !important;
@@ -145,9 +158,10 @@
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: 0.25em !important;
-  border: .25em solid var(--interactive-accent-color) !important;
+  border: 0.25em solid var(--interactive-accent-color) !important;
   border-radius: 50% !important;
-  box-shadow: 0 .2em .2em 0 var(--i-amphtml-story-interactive-disclaimer-black-transparent) !important;
+  box-shadow: 0 0.2em 0.2em 0
+    var(--i-amphtml-story-interactive-disclaimer-black-transparent) !important;
   box-sizing: border-box !important;
   cursor: pointer !important;
   pointer-events: all !important;
@@ -160,7 +174,7 @@
   display: none !important;
 }
 
-[dir="rtl"] .i-amphtml-story-interactive-disclaimer-icon {
+[dir='rtl'] .i-amphtml-story-interactive-disclaimer-icon {
   left: 0 !important;
   right: auto !important;
 }

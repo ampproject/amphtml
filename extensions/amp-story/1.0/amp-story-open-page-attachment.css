@@ -1,5 +1,3 @@
-
-
 /**
    * Hiding the element and only showing it on the active page so the animation
    * triggers every time the page becomes active.
@@ -11,10 +9,10 @@
   --i-amphtml-label-text-color: white !important;
   --i-amphtml-arrow-color: black !important;
   --i-amphtml-page-attachment-ui-animation-delay: 1s !important;
-  --i-amphtml-page-attachment-ui-animation-duration: .6s !important;
+  --i-amphtml-page-attachment-ui-animation-duration: 0.6s !important;
 }
 
-[theme="dark"].i-amphtml-story-page-open-attachment {
+[theme='dark'].i-amphtml-story-page-open-attachment {
   --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
   --i-amphtml-img-background-color: black !important;
   --i-amphtml-label-text-color: black !important;
@@ -112,7 +110,7 @@
   white-space: nowrap !important;
 }
 
- .i-amphtml-story-page-attachment-label {
+.i-amphtml-story-page-attachment-label {
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
   font-weight: 700 !important;
@@ -125,11 +123,11 @@
   line-height: 18px !important;
 }
 
- .i-amphtml-story-page-open-attachment-label {
+.i-amphtml-story-page-open-attachment-label {
   color: var(--i-amphtml-label-text-color) !important;
 }
 
- .i-amphtml-story-inline-page-attachment-chip {
+.i-amphtml-story-inline-page-attachment-chip {
   background-color: var(--i-amphtml-chip-background-color) !important;
   display: flex !important;
   border-radius: 24px !important;
@@ -138,8 +136,10 @@
   margin-bottom: 12px !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-inline-page-attachment-chip {
-  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+.i-amphtml-story-page-open-attachment[active]
+  .i-amphtml-story-inline-page-attachment-chip {
+  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration)
+    var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 .i-amphtml-story-inline-page-attachment-chip:only-child {
@@ -186,15 +186,19 @@
   background-repeat: no-repeat !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-inline-page-attachment-arrow:before {
-  animation: move-up-arrow-in-circle var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+.i-amphtml-story-page-open-attachment[active]
+  .i-amphtml-story-inline-page-attachment-arrow:before {
+  animation: move-up-arrow-in-circle
+    var(--i-amphtml-page-attachment-ui-animation-duration)
+    var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
-[theme="dark"] .i-amphtml-story-inline-page-attachment-arrow:before {
+[theme='dark'] .i-amphtml-story-inline-page-attachment-arrow:before {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 8" width="20px" height="8px"><path d="M18,7.7c-0.2,0-0.5-0.1-0.7-0.2l-7.3-4l-7.3,4C2,7.9,1.1,7.7,0.7,6.9c-0.4-0.7-0.1-1.6,0.6-2l8-4.4c0.5-0.2,1-0.2,1.5,0l8,4.4c0.7,0.4,1,1.3,0.6,2C19,7.4,18.5,7.7,18,7.7z"></path></svg>') !important;
 }
 
-.i-amphtml-story-page-open-attachment:not([href]) .i-amphtml-story-page-attachment-label {
+.i-amphtml-story-page-open-attachment:not([href])
+  .i-amphtml-story-page-attachment-label {
   margin-bottom: 20px !important;
   color: var(--i-amphtml-label-text-color) !important;
 }
@@ -204,13 +208,21 @@
 .i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: white !important;
   --i-amphtml-outlink-cta-text-color: black !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0)) !important;
+  background: linear-gradient(
+    0,
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0)
+  ) !important;
 }
 
-[theme="dark"].i-amphtml-story-page-open-attachment {
+[theme='dark'].i-amphtml-story-page-open-attachment {
   --i-amphtml-outlink-cta-background-color: black !important;
   --i-amphtml-outlink-cta-text-color: white !important;
-  background: linear-gradient(0, rgba(255, 255, 255, .25), rgba(255, 255, 255, 0)) !important;
+  background: linear-gradient(
+    0,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0)
+  ) !important;
 }
 
 [href].i-amphtml-story-page-open-attachment {
@@ -219,7 +231,8 @@
 }
 
 [href].i-amphtml-story-page-open-attachment[active] {
-  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+  animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration)
+    var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-arrow {
@@ -230,12 +243,16 @@
   filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3)) !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-outlink-page-attachment-arrow {
-  animation: move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+.i-amphtml-story-page-open-attachment[active]
+  .i-amphtml-story-outlink-page-attachment-arrow {
+  animation: move-up-arrow
+    var(--i-amphtml-page-attachment-ui-animation-duration)
+    var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
 @keyframes move-up-arrow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
@@ -249,7 +266,8 @@
 }
 
 @keyframes move-up-arrow-in-circle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
@@ -263,11 +281,12 @@
 }
 
 @keyframes tap-scale {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   45% {
-    transform: scale(.9);
+    transform: scale(0.9);
   }
 }
 
@@ -281,7 +300,7 @@
   border-radius: 30px !important;
   background: var(--i-amphtml-outlink-cta-background-color) !important;
   place-items: center !important;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, .15) !important;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15) !important;
 }
 
 .i-amphtml-story-outlink-page-attachment-img {
