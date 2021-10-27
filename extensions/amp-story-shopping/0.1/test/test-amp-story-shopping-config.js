@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+import {Layout} from '#core/dom/layout';
 import '../amp-story-shopping';
 
 describes.realWin(
@@ -35,7 +36,7 @@ describes.realWin(
 
     it('should build shopping config component', () => {
       expect(() => shoppingConfig.layoutCallback()).to.not.throw();
-      expect(shoppingConfig.isLayoutSupported('nodisplay')).to.be.true;
+      expect(shoppingConfig.isLayoutSupported(Layout.NODISPLAY)).to.be.true;
     });
   }
 );

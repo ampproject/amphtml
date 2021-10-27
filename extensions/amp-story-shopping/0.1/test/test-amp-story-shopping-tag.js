@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+import {Layout} from '#core/dom/layout';
 import '../amp-story-shopping';
 
 describes.realWin(
@@ -25,7 +26,7 @@ describes.realWin(
       element = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
-        {'layout': 'fixed-height', 'width': 'auto', 'height': '50px'}
+        {'layout': 'fixed-height', 'height': '50px', 'width': 'auto'}
       );
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
@@ -35,7 +36,7 @@ describes.realWin(
 
     it('should build shopping tag component', () => {
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
-      expect(shoppingTag.isLayoutSupported('fixed-height')).to.be.true;
+      expect(shoppingTag.isLayoutSupported(Layout.FIXED_HEIGHT)).to.be.true;
     });
   }
 );
