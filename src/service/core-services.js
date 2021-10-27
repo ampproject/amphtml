@@ -4,6 +4,8 @@ import {installPixel} from '#builtins/amp-pixel/amp-pixel';
 
 import {installInaboxResourcesServiceForDoc} from '#inabox/inabox-resources';
 
+import {installPerformanceService} from '#service/performance-impl';
+
 import {devAssert} from '#utils/log';
 
 import {installActionServiceForDoc} from './action-impl';
@@ -63,6 +65,7 @@ export function installRuntimeServices(global) {
   installXhrService(global);
   installInputService(global);
   installPreconnectService(global);
+  installPerformanceService(global);
 }
 
 /**
