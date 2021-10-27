@@ -1,10 +1,7 @@
 # Bento Iframe
 
-## Usage
-
 Displays an iframe.
-
-Use Bento Iframe as a web component [`<bento-iframe>`](#web-component), or a Preact/React functional component [`<BentoIframe>`](#preactreact-component).
+## Usage
 
 ### Web Component
 

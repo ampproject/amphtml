@@ -1,8 +1,7 @@
 # Bento Lightbox
 
+The Bento Lightbox component displays elements in a full-viewport "lightbox" modal.
 ## Usage
-
-The Bento Lightbox component displays elements in a full-viewport "lightbox" modal. It can be used as a web component [`<bento-lightbox>`](#web-component), or as a Preact/React functional component [`<BentoLightbox>`](#preactreact-component).
 
 ### Web Component
 
