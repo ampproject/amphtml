@@ -1,2 +1,3 @@
-amp-story-shopping {
-}
+
+@import './amp-story-shopping-tag.css';
+@import './amp-story-shopping-attachment.css';

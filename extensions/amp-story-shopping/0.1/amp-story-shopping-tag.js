@@ -19,13 +19,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     super.buildCallback();
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
-    this.element.setAttribute('layout', Layout.FIXED_HEIGHT);
     this.element.appendChild(this.container_);
     applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout === Layout.CONTAINER;
   }
 }

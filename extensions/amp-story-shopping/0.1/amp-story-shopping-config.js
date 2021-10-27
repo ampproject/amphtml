@@ -19,13 +19,12 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     super.buildCallback();
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = this.myText_;
-    this.element.setAttribute('layout', Layout.NODISPLAY);
     this.element.appendChild(this.container_);
     applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout === Layout.NODISPLAY;
   }
 }

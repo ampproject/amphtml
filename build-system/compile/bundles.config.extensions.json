@@ -1090,6 +1090,7 @@
     "options": {
       "hasCss": true,
       "cssBinaries": [
+        "amp-story-shopping",
         "amp-story-shopping-attachment",
         "amp-story-shopping-tag"
       ]

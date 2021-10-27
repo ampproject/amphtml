@@ -17,7 +17,7 @@ html_format: AMP
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
   amp_layout: {
-    supported_layouts: FIXED_HEIGHT
+    supported_layouts: CONTAINER
   }
 }
 tags: {  # <amp-story-shopping-config>
