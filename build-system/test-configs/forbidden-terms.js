@@ -229,8 +229,8 @@ const forbiddenTermsGlobal = {
   'installPerformanceService': {
     message: privateServiceFactory,
     allowlist: [
-      'src/amp.js',
       'src/inabox/amp-inabox.js',
+      'src/service/core-services.js',
       'src/service/performance-impl.js',
     ],
   },

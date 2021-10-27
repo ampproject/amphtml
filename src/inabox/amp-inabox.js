@@ -63,7 +63,7 @@ startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
   installPlatformService(self);
-  installPerformanceService(self);  // Should this be removed/moved now that the performance service is already being installed via installRuntimeServices()?
+  installPerformanceService(self); // Should this be removed/moved now that the performance service is already being installed via installRuntimeServices()?
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
   perf.tick(TickLabel.INSTALL_STYLES);
