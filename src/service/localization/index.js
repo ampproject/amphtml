@@ -59,7 +59,7 @@ function findLocalizedString(
  */
 export function getLanguageCodesFromString(languageCode) {
   if (!languageCode) {
-    return ['en', FALLBACK_LANGUAGE_CODE];
+    return [FALLBACK_LANGUAGE_CODE];
   }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce(
