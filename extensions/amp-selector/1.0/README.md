@@ -10,8 +10,6 @@ You must include each Bento component's required CSS library before adding custo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -22,11 +20,7 @@ npm install @ampproject/bento-selector
 import '@ampproject/bento-selector';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -49,8 +43,6 @@ import '@ampproject/bento-selector';
   </ul>
 </bento-selector>
 ```
-
-[/example]
 
 #### Usage notes
 
@@ -157,8 +149,6 @@ The examples below demonstrate use of the `<BentoSelector>` as a functional comp
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -181,8 +171,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and Style
 

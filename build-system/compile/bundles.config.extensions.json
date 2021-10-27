@@ -835,10 +835,7 @@
   {
     "name": "amp-render",
     "version": "1.0",
-    "latestVersion": "1.0",
-    "options": {
-      "bento": true
-    }
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-resize-observer-polyfill",

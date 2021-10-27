@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-instagram>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,11 +22,7 @@ npm install @ampproject/bento-instagram
 import '@ampproject/bento-instagram';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -59,8 +53,6 @@ import '@ampproject/bento-instagram';
   })();
 </script>
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -113,8 +105,6 @@ The examples below demonstrates use of the `<BentoInstagram>` as a functional co
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -134,8 +124,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 

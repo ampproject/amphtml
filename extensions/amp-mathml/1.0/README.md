@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-mathml>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,14 +22,10 @@ npm install @ampproject/bento-mathml
 import '@ampproject/bento-mathml';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
 
 The example below contains an `bento-mathml` with three sections. The
 `expanded` attribute on the third section expands it on page load.
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -57,8 +51,6 @@ The example below contains an `bento-mathml` with three sections. The
     </p>
 </body>
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -104,8 +96,6 @@ The examples below demonstrates use of the `<BentoMathml>` as a functional compo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -136,8 +126,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 

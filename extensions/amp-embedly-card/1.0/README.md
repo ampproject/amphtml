@@ -17,8 +17,6 @@ The examples below demonstrate use of the `<bento-embedly-card>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -29,11 +27,7 @@ npm install @ampproject/bento-embedly-card
 import '@ampproject/bento-embedly-card';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
@@ -87,8 +81,6 @@ import '@ampproject/bento-embedly-card';
   </script>
 </body>
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -184,8 +176,6 @@ The examples below demonstrate use of the `<BentoEmbedlyCard>` as a functional c
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -206,8 +196,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 
