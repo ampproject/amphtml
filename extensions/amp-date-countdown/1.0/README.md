@@ -7,7 +7,11 @@ The Bento Date Countdown component displays a countdown sequence to a specified 
 <!--
 ### Web Component
 
-We don't support <template> in Standalone Web Components yet.
+TODO(https://go.amp.dev/issue/36619): Restore this section. We don't include it because we don't support <template> in Bento Web Components yet.
+
+An older version of this file contains the removed section, though it's incorrect:
+
+https://github.com/ampproject/amphtml/blob/422d171e87571c4d125a2bf956e78e92444c10e8/extensions/amp-date-countdown/1.0/README.md
 -->
 
 ### Preact/React Component
