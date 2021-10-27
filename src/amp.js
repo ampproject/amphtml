@@ -17,10 +17,7 @@ import {
   installRuntimeServices,
 } from '#service/core-services';
 import {stubElementsForDoc} from '#service/custom-element-registry';
-import {
-  installPerformanceService,
-  installPerformanceServiceForAmpDoc,
-} from '#service/performance-impl';
+import {installPerformanceService} from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
 
 import {installAutoLightboxExtension} from './auto-lightbox';

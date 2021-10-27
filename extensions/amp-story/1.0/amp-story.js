@@ -75,7 +75,6 @@ import {dict, map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
-import {getAmpdoc} from '../../../src/service-helpers';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '#utils/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
