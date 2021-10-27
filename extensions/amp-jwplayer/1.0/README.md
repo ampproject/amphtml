@@ -324,24 +324,25 @@ Or via `className`:
     Accepts A <code>skinUrl</code> string used to pass external CSS skins to the player. See JW Player's <a href="https://developer.jwplayer.com/jwplayer/docs/jw8-css-skin-reference">CSS Skin Reference</a> for more information.
     Accepts a <code>pluginUrl</code> string used to pass external JS plugins to the player.
     Accepts a json property with a JSON string of a player config. This can be used to set specific configuration properties on the player. Advertising configurations can also be specified using this.
-    <pre><code>config={{
-      skinUrl: 'https://playertest.longtailvideo.com/skins/ethan.css',
-      pluginUrl: 'https://playertest.longtailvideo.com/plugins/newsticker.js',
-      json: {
-        playbackRateControls: true,
-        displaytitle: false,
-        advertising: {
-          client: "vast",
-          schedule: [
-            {
-              tag: "http://adserver.com/vastTag.xml",
-              offset: "pre"
-            }
-          ]
-        }
-      }
+     ```javascript
+     config={{
+       skinUrl: 'https://playertest.longtailvideo.com/skins/ethan.css',
+       pluginUrl: 'https://playertest.longtailvideo.com/plugins/newsticker.js',
+       json: {
+         playbackRateControls: true,
+         displaytitle: false,
+         advertising: {
+           client: "vast",
+           schedule: [
+             {
+               tag: "http://adserver.com/vastTag.xml",
+               offset: "pre"
+             }
+           ]
+         }
+       }
     }}
-    </code></pre>
+    ```
     <strong>Media and Float on Scroll properties cannot be configured with this attribute</strong>. Update media properties in your JW Player Dashboard. See JW Player's <a href="https://developer.jwplayer.com/jwplayer/docs/jw8-player-configuration-reference">Player Configuration Reference</a> for more information.</td>
   </tr>
   <tr>
