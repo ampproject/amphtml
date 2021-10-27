@@ -538,11 +538,11 @@ export class Services {
    * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
    */
   static mediaPerformanceMetricsServiceForDoc(nodeOrDoc) {
-  return (
-    /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
-    (getServiceForDocOrNull(nodeOrDoc, 'media-performance-metrics'))
-  );
-}
+    return (
+      /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
+      (getServiceForDocOrNull(nodeOrDoc, 'media-performance-metrics'))
+    );
+  }
 
   /**
    * @param {!Element} el

@@ -120,7 +120,6 @@ try {
 startupChunk(self.document, function initial() {
   /** @const {!./service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
-  console.log(ampdoc);
   installPlatformService(self);
   installPerformanceService(self);
   installPerformanceServiceForAmpDoc(ampdoc);
