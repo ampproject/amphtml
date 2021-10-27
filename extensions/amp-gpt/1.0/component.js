@@ -1,11 +1,9 @@
 import {loadScript} from '#3p/3p';
 
-import {isArray} from '#core/types';
-
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
-import {ContainWrapper} from '#preact/component';
-
+import {ContainWrapper, useIntersectionObserver} from '#preact/component';
+import {useMergeRefs} from '#preact/utils';
 /**
  *
  * @param {*} x
@@ -32,6 +30,35 @@ export function BentoGpt({
   /** References */
   const gptAdDivRef = useRef(null);
   const gptAdSlotRef = useRef(null);
+  const containerRef = useRef(null);
+  const globalScopeRef = useRef(null);
+
+  /**
+   * This callback will be executed when ContainerWrapper is in view.
+   */
+  const ioCallback = useCallback(
+    ({isIntersecting}) => {
+      if (!isIntersecting || disableInitialLoad) {
+        return;
+      }
+
+      /**
+       * If ad is directly in view, ioCallback will be executed before useEffect`
+       * and thus `globalScopeRef.current` will be undefined.
+       */
+      if (globalScopeRef.current) {
+        /** Register refresh when in View */
+        globalScopeRef.current?.googletag.pubads().refresh();
+      } else {
+        /** Register refresh when in View after 250ms */
+        setTimeout(() => {
+          globalScopeRef.current.googletag.pubads().refresh();
+        }, 250);
+      }
+    },
+    [disableInitialLoad]
+  );
+  const inObRef = useIntersectionObserver(ioCallback);
 
   /** Parsed Attributes */
   const parsedSize = useMemo(() => {
@@ -67,6 +94,8 @@ export function BentoGpt({
    */
   const initialiseGpt = useCallback(
     (scope) => {
+      globalScopeRef.current = scope;
+
       /** Retrieve Existing or Initializes New GPT Service */
       scope.googletag = scope.googletag || {cmd: []};
 
@@ -81,7 +110,6 @@ export function BentoGpt({
         if (disableInitialLoad === true) {
           scope.googletag.pubads().disableInitialLoad();
         }
-
         /**
          * Note:  We can add multiple slots,
          *        but this is out of the scope of this component.
@@ -92,7 +120,6 @@ export function BentoGpt({
 
         /** Enable Services */
         scope.googletag.enableServices();
-
         initializeTargets(gptAdSlotRef.current);
 
         /** Display GPT Ad */
@@ -123,7 +150,14 @@ export function BentoGpt({
   }, [initialiseGpt]);
 
   return (
-    <ContainWrapper layout height={height} width={width} paint {...rest}>
+    <ContainWrapper
+      layout
+      height={height}
+      width={width}
+      paint
+      {...rest}
+      ref={useMergeRefs([containerRef, inObRef])}
+    >
       <div id={optDiv} ref={gptAdDivRef} style={{height, width}}></div>
     </ContainWrapper>
   );

@@ -14,15 +14,18 @@ export default {
 
 export const _default = (args) => {
   return (
-    <amp-gpt
-      ad-unit-path="/21730346048/test-skyscraper"
-      opt-div="div1"
-      height="600"
-      width="120"
-      {...args}
-    >
-      This text is inside.
-    </amp-gpt>
+    <>
+      <div style="height: 700px; width: 250px; background: blue;"></div>
+      <amp-gpt
+        ad-unit-path="/21730346048/test-skyscraper"
+        opt-div="div1"
+        height="600"
+        width="120"
+        {...args}
+      >
+        This text is inside.
+      </amp-gpt>
+    </>
   );
 };
 
