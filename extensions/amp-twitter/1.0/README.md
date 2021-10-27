@@ -1,6 +1,7 @@
 # Bento Twitter
 
 The Bento Twitter component allows you to embed a Tweet or Moment.
+
 ## Usage
 
 ### Web Component
