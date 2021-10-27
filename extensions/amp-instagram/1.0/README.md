@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-instagram>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,16 +22,16 @@ npm install @ampproject/bento-instagram
 import '@ampproject/bento-instagram';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
-  <script async custom-element="bento-instagram" src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"></script>
-  <style data-bento-boilerplate>
+  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"
+  ></script>
+  <style>
     bento-instagram {
       display: block;
       overflow: hidden;
@@ -41,39 +39,45 @@ import '@ampproject/bento-instagram';
     }
   </style>
 </head>
-<bento-instagram
-  id="my-instagram"
-  data-shortcode="CKXYAzuj7TE"
-  data-captioned>
-</bento-instagram>
-<button id="change-shortcode">Change shortcode</button>
-</div>
+<body>
+  <bento-instagram
+    id="my-instagram"
+    data-shortcode="CKXYAzuj7TE"
+    data-captioned
+  >
+  </bento-instagram>
+  <button id="change-shortcode">Change shortcode</button>
 
-<script>
-  (async () => {
-    const instagram = document.querySelector('#my-instagram');
-    await customElements.whenDefined('bento-instagram');
+  <script>
+    (async () => {
+      const instagram = document.querySelector('#my-instagram');
+      await customElements.whenDefined('bento-instagram');
 
-    // set up button actions
-    document.querySelector('#change-shortcode').onclick = () => instagram.dataset.shortcode = '1totVhIFXl';
-  })();
-</script>
+      // set up button actions
+      document.querySelector('#change-shortcode').onclick = () => {
+        instagram.dataset.shortcode = '1totVhIFXl';
+      };
+    })();
+  </script>
+</body>
 ```
-
-[/example]
 
 #### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-instagram-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-instagram-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-instagram {
     display: block;
     overflow: hidden;
@@ -113,8 +117,6 @@ The examples below demonstrates use of the `<BentoInstagram>` as a functional co
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -123,19 +125,12 @@ npm install @ampproject/bento-instagram
 
 ```javascript
 import React from 'react';
-import { BentoInstagram } from '@ampproject/bento-instagram/react';
+import {BentoInstagram} from '@ampproject/bento-instagram/react';
 import '@ampproject/bento-instagram/styles.css';
 function App() {
-  return (
-    <BentoInstagram
-      shortcode="CKXYAzuj7TE"
-      captioned
-    />
-  );
+  return <BentoInstagram shortcode="CKXYAzuj7TE" captioned />;
 }
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -144,15 +139,19 @@ function App() {
 The `BentoInstagram` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoInstagram style={{width: '300px', height: '200px'}} shortcode="CKXYAzuj7TE">
-</BentoInstagram>
+<BentoInstagram
+  style={{width: 300, height: 200}}
+  shortcode="CKXYAzuj7TE"
+></BentoInstagram>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoInstagram className='custom-styles' shortcode="CKXYAzuj7TE">
-</BentoInstagram>
+<BentoInstagram
+  className="custom-styles"
+  shortcode="CKXYAzuj7TE"
+></BentoInstagram>
 ```
 
 ```css
