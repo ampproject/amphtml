@@ -26,12 +26,9 @@
     "latestVersion": "0.2"
   },
   {
-    "name": "amp-script",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "name": "amp-render",
+    "version": "1.0",
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-story",
