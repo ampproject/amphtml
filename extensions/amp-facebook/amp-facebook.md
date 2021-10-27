@@ -4,6 +4,8 @@ formats:
   - websites
 teaser:
   text: Displays a Facebook post, video or comment.
+experimental: true
+bento: true
 ---
 
 # amp-facebook
@@ -41,6 +43,15 @@ The following example shows how to embed a comment on a post:
 </amp-facebook>
 [/sourcecode][/example]
 
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-facebook`, see [**`bento-facebook`**](./1.0/README.md).
+
 ## Attributes
 
 ### `data-href`
@@ -49,8 +60,6 @@ The URL of the Facebook post/video/comment. For example, a post or video will
 look like `https://www.facebook.com/zuck/posts/10102593740125791`. A comment or
 comment reply will look like
 `https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185`.
-For comments, see the Facebook documentation on
-[how to get a comment's URL](https://developers.facebook.com/docs/plugins/embedded-comments#how-to-get-a-comments-url).
 
 ### `data-embed-as`
 
@@ -66,9 +75,8 @@ This is not to be confused with
 [`amp-facebook-comments`](https://amp.dev/documentation/examples/components/amp-facebook-comments/).
 
 Check out the documentation for differences between
-[post embeds](https://developers.facebook.com/docs/plugins/embedded-posts),
-[video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player),
-and [comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments).
+[post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and
+[video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
 
 ### `data-include-comment-parent`
 
@@ -102,10 +110,84 @@ For details on strings accepted here please visit the
 
 Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook"`.
 
+### `data-numposts` (optional)
+
+The number of comments to show. Currently Facebook SDK limits this to max 100.
+For details, see the
+[Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
+
+### `data-order-by` (optional)
+
+The order to use when displaying comments. For details, see the
+[Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
+
+### `data-action` (optional)
+
+The verb to display on the button. Can be either `like` or `recommend`. The
+default is `like`.
+
+### `data-kd_site` (optional)
+
+This attribute is also known as `data-kid_directed_site` in the Facebook SDK.
+If your web site or online service, or a portion of your service, is directed to
+children under 13 you must enable this attribute. The default is `false`.
+
+### `data-layout` (optional)
+
+Selects one of the different layouts that are available for the plugin. Can be
+one of `standard`, `button_count`, `button` or `box_count`. The default is
+`standard`.
+
+### `data-ref` (optional)
+
+A label for tracking referrals which must be less than 50 characters and can
+contain alphanumeric characters and some punctuation.
+
+### `data-share` (optional)
+
+Specifies whether to include a share button beside the Like button. This only
+works with the XFBML version. The default is `false`.
+
+### `data-size` (optional)
+
+The size of the button, which can be one of two sizes, `large` or `small`. The
+default is `small`.
+
+For details, see the
+[Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button#settings).
+
+### `data-tabs` (optional)
+
+Specifies the tabs to render (i.e., `timeline`, `events`, `messages`). Use a
+comma-separated list to add multiple tabs (e.g., `timeline, events`). By
+default, the Facebook page plugin shows the timeline activity.
+
+### `data-hide-cover` (optional)
+
+Hides the cover photo in the header. Default value is `false`.
+
+### `data-show-facepile` (optional)
+
+Shows profile photos of friends who like the page. Default value is `true`.
+
+### `data-hide-cta` (optional)
+
+Hides the custom call to action button (if available). Default value is `false`.
+
+### `data-small-header` (optional)
+
+Uses the small header instead. Default value is `false`.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
 extended to AMP components.
+
+### Deprecated attributes
+
+**`data-colorscheme` (optional)**
+
+The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.<br><br><em>Note: This is no longer supported by Facebook. For more details, follow our <a href="https://github.com/ampproject/amphtml/issues/29980">our tracking issue</a> and <a href="https://developers.facebook.com/support/bugs/1759174414250782/">Facebook's bug report</a>.</em>
 
 ## Validation
 

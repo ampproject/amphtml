@@ -5,7 +5,7 @@
  */
 
 const {
-  TEST_FILES_LIST_FILE_NAME,
+  FILELIST_PATH,
   generateCircleCiShardTestFileList,
   skipDependentJobs,
   timedExecOrDie,
@@ -24,7 +24,7 @@ function pushBuildWorkflow() {
   try {
     generateCircleCiShardTestFileList(e2eTestPaths);
     timedExecOrThrow(
-      `amp e2e --nobuild --headless --minified --report --filelist ${TEST_FILES_LIST_FILE_NAME}`,
+      `amp e2e --nobuild --headless --minified --report --filelist ${FILELIST_PATH}`,
       'End-to-end tests failed!'
     );
   } catch (e) {
@@ -43,7 +43,7 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
     generateCircleCiShardTestFileList(e2eTestPaths);
     timedExecOrDie(
-      `amp e2e --nobuild --headless --minified --filelist ${TEST_FILES_LIST_FILE_NAME}`
+      `amp e2e --nobuild --headless --minified --filelist ${FILELIST_PATH}`
     );
   } else {
     skipDependentJobs(

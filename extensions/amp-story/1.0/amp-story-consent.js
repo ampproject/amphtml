@@ -22,7 +22,7 @@ import {
   getTextColorForRGB,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {isArray} from '#core/types';
 import {isJsonScriptTag} from '#core/dom';

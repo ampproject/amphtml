@@ -31,3 +31,6 @@ AmpElement.prototype.unmount;
 
 /** @type {function():?Element} */
 AmpElement.prototype.getPlaceholder;
+
+/** @type {!Element | undefined} */
+AmpElement.prototype.sizerElement;

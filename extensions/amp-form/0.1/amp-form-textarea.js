@@ -6,8 +6,8 @@ import {throttle} from '#core/types/function';
 
 import {Services} from '#service';
 
-import {listen, listenOncePromise} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {listen, listenOncePromise} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 

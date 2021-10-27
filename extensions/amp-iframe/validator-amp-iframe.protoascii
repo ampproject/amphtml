@@ -1,8 +1,25 @@
-tags: {  # amp-iframe
-  html_format: AMP  # Iframes not allowed in ads.
+tags: {  # amp-iframe 1.0
+  html_format: AMP
   tag_name: "SCRIPT"
+  satisfies: "amp-iframe 1.0"
+  excludes: "amp-iframe 0.1"
   extension_spec: {
     name: "amp-iframe"
+    version_name: "v1.0"
+    version: "1.0"
+    bento_supported_version: "1.0"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # amp-iframe 0.1 and latest
+  html_format: AMP  # Iframes not allowed in ads.
+  tag_name: "SCRIPT"
+  satisfies: "amp-iframe 0.1"
+  excludes: "amp-iframe 1.0"
+  extension_spec: {
+    name: "amp-iframe"
+    version_name: "v0.1"
     version: "0.1"
     version: "latest"
     requires_usage: EXEMPTED
@@ -10,6 +27,7 @@ tags: {  # amp-iframe
   }
   attr_lists: "common-extension-attrs"
 }
+
 tags: {  # <amp-iframe>
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "AMP-IFRAME"

@@ -8,8 +8,9 @@ import {deepEquals} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {dev, user} from '#utils/log';
+
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
-import {dev, user} from '../../../src/log';
 import {
   Action,
   StateProperty,
@@ -167,9 +168,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   setAnimateTo_() {
-    const x = parseFloat(this.element_.getAttribute('x') || 0);
-    const y = parseFloat(this.element_.getAttribute('y') || 0);
-    const zoom = parseFloat(this.element_.getAttribute('zoom') || 1);
+    const x = parseFloat(this.element_.getAttribute('data-x') || 0);
+    const y = parseFloat(this.element_.getAttribute('data-y') || 0);
+    const zoom = parseFloat(this.element_.getAttribute('data-zoom') || 1);
     const lockBounds = this.element_.hasAttribute('lock-bounds');
 
     if (lockBounds) {
@@ -294,6 +295,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           right: 'auto',
           top: '0',
           bottom: '0',
+          width: 'auto',
+          height: '100%',
         });
         setImportantStyles(imgEl, {
           width: 'auto',
@@ -305,6 +308,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           right: '0',
           top: 'auto',
           bottom: 'auto',
+          width: '100%',
+          height: 'auto',
         });
         setImportantStyles(imgEl, {
           width: '100%',

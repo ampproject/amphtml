@@ -2,7 +2,10 @@ import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ExpansionOptions, variableServiceForDoc} from '../variables';
 import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
-import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '#testing/helpers/service';
 import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
 import {macroTask} from '#testing/helpers';

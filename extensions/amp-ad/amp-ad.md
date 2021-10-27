@@ -171,6 +171,8 @@ Use to denote that this is a sticky ad unit and specify the position of this uni
 -   top
 -   bottom
 -   bottom-right
+-   left
+-   right
 
 ### `data-foo-bar`
 
@@ -298,6 +300,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Affiliate-B](../../ads/vendors/affiliateb.md)
 -   [AJA](../../ads/vendors/aja.md)
 -   [AMoAd](../../ads/vendors/amoad.md)
+-   [Andbeyond](../../ads/vendors/andbeyond.md)
 -   [Aniview](../../ads/vendors/aniview.md)
 -   [AnyClip](../../ads/vendors/anyclip.md)
 -   [AppNexus](../../ads/vendors/appnexus.md)
@@ -436,6 +439,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [rnetplus](../../ads/vendors/rnetplus.md)
 -   [Rubicon Project](../../ads/vendors/rubicon.md)
 -   [RUNative](../../ads/vendors/runative.md)
+-   [Sabavision](../../ads/vendors/sabavision.md)
 -   [SAS CI 360 Match](../../ads/vendors/sas.md)
 -   [Seeding Alliance](../../ads/vendors/seedingalliance.md)
 -   [Sekindo](../../ads/vendors/sekindo.md)
@@ -497,6 +501,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 
 -   [1wo](../../ads/vendors/1wo.md)
 -   [24smi](../../ads/vendors/24smi.md)
+-   [AdsKeeper](../../ads/vendors/adskeeper.md)
 -   [AdsLoom](../../ads/vendors/adsloom.md)
 -   [Bringhub](../../ads/vendors/bringhub.md)
 -   [Dable](../../ads/vendors/dable.md)
@@ -508,6 +513,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Jubna](../../ads/vendors/jubna.md)
 -   [Lentainform](../../ads/vendors/lentainform.md)
 -   [Mgid](../../ads/vendors/mgid.md)
+-   [Myua](../../ads/vendors/myua.md)
 -   [Outbrain](../../ads/vendors/outbrain.md)
 -   [Postquare](../../ads/vendors/postquare.md)
 -   [PubExchange](../../ads/vendors/pubexchange.md)

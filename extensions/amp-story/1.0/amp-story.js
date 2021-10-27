@@ -70,13 +70,13 @@ import {
 import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
 import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '../../../src/event-helper';
+import {getDetail} from '#utils/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
@@ -167,19 +167,6 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
-/**
- * CSS class for the opacity layer that separates the amp-sidebar and the rest
- * of the story when the amp-sidebar is entering the screen.
- * @const {string}
- */
-const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
-
-/**
- * CSS class for sidebars in stories.
- * @const {string}
- */
-const SIDEBAR_CLASS_NAME = 'i-amphtml-story-sidebar';
-
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -194,14 +181,6 @@ const TAG = 'amp-story';
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#202125';
-
-/**
- * MutationObserverInit options to listen for changes to the `open` attribute.
- */
-const SIDEBAR_OBSERVER_OPTIONS = {
-  attributes: true,
-  attributeFilter: ['open'],
-};
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -311,20 +290,14 @@ export class AmpStory extends AMP.BaseElement {
      */
     this.pausedStateToRestore_ = null;
 
-    /** @private {?Element} */
-    this.sidebar_ = null;
-
-    /** @private {?MutationObserver} */
-    this.sidebarObserver_ = null;
-
-    /** @private {?Element} */
-    this.maskElement_ = null;
-
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
 
     /** @private {?BackgroundBlur} */
     this.backgroundBlur_ = null;
+
+    /** @private {?UIType} */
+    this.uiState_ = null;
   }
 
   /** @override */
@@ -395,7 +368,14 @@ export class AmpStory extends AMP.BaseElement {
     this.initializePageIds_();
     this.initializeStoryPlayer_();
 
-    this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
+    this.uiState_ = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
+    if (this.isLandscapeSupported_()) {
+      this.win.document.documentElement.setAttribute(
+        'data-story-supports-landscape',
+        ''
+      );
+    }
 
     // Removes title in order to prevent incorrect titles appearing on link
     // hover. (See 17654)
@@ -422,13 +402,7 @@ export class AmpStory extends AMP.BaseElement {
           Action.SET_ADVANCEMENT_MODE,
           AdvancementMode.GO_TO_PAGE
         );
-        // If open, closes the sidebar before navigating.
-        const promise = this.storeService_.get(StateProperty.SIDEBAR_STATE)
-          ? Services.historyForDoc(this.getAmpDoc()).goBack()
-          : Promise.resolve();
-        promise.then(() =>
-          this.switchTo_(args['id'], NavigationDirection.NEXT)
-        );
+        this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
     }
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
@@ -503,8 +477,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeStandaloneStory_() {
-    const html = this.win.document.documentElement;
-    html.classList.add('i-amphtml-story-standalone');
     // Lock body to prevent overflow.
     this.lockBody_();
     // Standalone CSS affects sizing of the entire page.
@@ -749,13 +721,6 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.storeService_.subscribe(
-      StateProperty.SIDEBAR_STATE,
-      (sidebarState) => {
-        this.onSidebarStateUpdate_(sidebarState);
-      }
-    );
-
-    this.storeService_.subscribe(
       StateProperty.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
@@ -864,7 +829,6 @@ export class AmpStory extends AMP.BaseElement {
       if (
         embedComponent.state !== EmbeddedComponentState.HIDDEN ||
         this.storeService_.get(StateProperty.ACCESS_STATE) ||
-        this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
         !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
         !this.storeService_.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)
       ) {
@@ -974,7 +938,6 @@ export class AmpStory extends AMP.BaseElement {
     const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
-    this.initializeSidebar_();
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
@@ -1027,14 +990,10 @@ export class AmpStory extends AMP.BaseElement {
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
-    storyLayoutPromise
-      .then(() =>
-        this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS)
-      )
-      .then(() => {
-        this.markStoryAsLoaded_();
-        this.initializeLiveStory_();
-      });
+    this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
+      this.markStoryAsLoaded_();
+      this.initializeLiveStory_();
+    });
 
     this.maybeLoadStoryEducation_();
 
@@ -1121,9 +1080,14 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   whenInitialContentLoaded_(timeoutMs = 0) {
-    const storyLoadPromise = this.pages_[0].element
-      .signals()
-      .whenSignal(CommonSignals.LOAD_END);
+    const initialPageEl = this.element.querySelector(
+      `amp-story-page#${escapeCssSelectorIdent(this.getInitialPageId_())}`
+    );
+    const storyLoadPromise = whenUpgradedToCustomElement(initialPageEl).then(
+      () => {
+        return initialPageEl.signals().whenSignal(CommonSignals.LOAD_END);
+      }
+    );
 
     return this.timer_
       .timeoutPromise(timeoutMs, storyLoadPromise)
@@ -1624,12 +1588,11 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    const uiState = this.getUIType_();
-    this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+    this.uiState_ = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
-
     this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
   }
 
@@ -1685,6 +1648,10 @@ export class AmpStory extends AMP.BaseElement {
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
+          this.win.document.documentElement.setAttribute(
+            'i-amphtml-story-mobile',
+            ''
+          );
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
@@ -1699,6 +1666,9 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
         this.vsync_.mutate(() => {
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.removeAttribute('desktop');
           this.element.classList.add('i-amphtml-story-desktop-one-panel');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
@@ -1706,6 +1676,9 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.vsync_.mutate(() => {
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
@@ -1721,7 +1694,13 @@ export class AmpStory extends AMP.BaseElement {
 
         this.vsync_.mutate(() => {
           this.element.setAttribute('i-amphtml-vertical', '');
+          this.win.document.documentElement.classList.add(
+            'i-amphtml-story-vertical'
+          );
           setImportantStyles(this.win.document.body, {height: 'auto'});
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
           for (let i = 0; i < pageAttachments.length; i++) {
@@ -1756,6 +1735,18 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
+    if (
+      this.uiState_ === UIType.MOBILE &&
+      this.androidSoftKeyboardIsProbablyOpen_()
+    ) {
+      // The opening of the Android soft keyboard triggers a viewport resize
+      // that can cause the story's dimensions to appear to be those of a
+      // desktop. Here, we assume that the soft keyboard is open if the latest
+      // UI state is mobile while an input element has focus, and we then
+      // ensure that the UI type does not unintentionally alter.
+      return UIType.MOBILE;
+    }
+
     if (this.platform_.isBot()) {
       return UIType.VERTICAL;
     }
@@ -1770,6 +1761,23 @@ export class AmpStory extends AMP.BaseElement {
 
     // Desktop one panel UI (default).
     return UIType.DESKTOP_ONE_PANEL;
+  }
+
+  /**
+   * Returns whether the Android soft keyboard is most likely open, as
+   * calculated using multiple factors. Note that this calculation will
+   * incorrectly return true in cases where the user has manually dismissed the
+   * keyboard while retaining focus on a text field.
+   * @return {boolean}
+   * @private
+   */
+  androidSoftKeyboardIsProbablyOpen_() {
+    const platformIsAndroid = this.platform_.isAndroid();
+    const tagNamesThatTriggerKeyboard = ['INPUT', 'TEXTAREA'];
+    const textFieldHasFocus = tagNamesThatTriggerKeyboard.includes(
+      this.win.document.activeElement?.tagName
+    );
+    return platformIsAndroid && textFieldHasFocus;
   }
 
   /**
@@ -1820,108 +1828,6 @@ export class AmpStory extends AMP.BaseElement {
     const pageState = isPaused ? PageState.PAUSED : PageState.PLAYING;
 
     this.activePage_.setState(pageState);
-  }
-
-  /**
-   * Reacts to sidebar state updates.
-   * @param {boolean} sidebarState
-   * @private
-   */
-  onSidebarStateUpdate_(sidebarState) {
-    this.analyticsService_.triggerEvent(
-      sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-      this.sidebar_
-    );
-
-    const actions = Services.actionServiceForDoc(this.element);
-    if (this.win.MutationObserver) {
-      if (!this.sidebarObserver_) {
-        this.sidebarObserver_ = new this.win.MutationObserver(() => {
-          this.storeService_.dispatch(
-            Action.TOGGLE_SIDEBAR,
-            this.sidebar_.hasAttribute('open')
-          );
-        });
-      }
-      if (this.sidebar_ && sidebarState) {
-        this.sidebarObserver_.observe(this.sidebar_, SIDEBAR_OBSERVER_OPTIONS);
-        this.openOpacityMask_();
-        actions.execute(
-          this.sidebar_,
-          'open',
-          /* args */ null,
-          /* source */ null,
-          /* caller */ null,
-          /* event */ null,
-          ActionTrust.HIGH
-        );
-      } else {
-        this.closeOpacityMask_();
-        this.sidebarObserver_.disconnect();
-      }
-    } else if (this.sidebar_ && sidebarState) {
-      this.openOpacityMask_();
-      actions.execute(
-        this.sidebar_,
-        'open',
-        /* args */ null,
-        /* source */ null,
-        /* caller */ null,
-        /* event */ null,
-        ActionTrust.HIGH
-      );
-      this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
-    }
-  }
-
-  /**
-   * @private
-   */
-  initializeOpacityMask_() {
-    if (!this.maskElement_) {
-      const maskEl = this.win.document.createElement('div');
-      maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
-      maskEl.addEventListener('click', () => {
-        const actions = Services.actionServiceForDoc(this.element);
-        if (this.sidebar_) {
-          this.closeOpacityMask_();
-          actions.execute(
-            this.sidebar_,
-            'close',
-            /* args */ null,
-            /* source */ null,
-            /* caller */ null,
-            /* event */ null,
-            ActionTrust.HIGH
-          );
-        }
-      });
-      this.maskElement_ = maskEl;
-      this.mutateElement(() => {
-        this.element.appendChild(this.maskElement_);
-        toggle(dev().assertElement(this.maskElement_), /* display */ false);
-      });
-    }
-  }
-
-  /**
-   * @private
-   */
-  openOpacityMask_() {
-    this.mutateElement(() => {
-      toggle(dev().assertElement(this.maskElement_), /* display */ true);
-    });
-  }
-
-  /**
-   * @private
-   */
-  closeOpacityMask_() {
-    if (this.maskElement_) {
-      this.mutateElement(() => {
-        toggle(dev().assertElement(this.maskElement_), /* display */ false);
-      });
-    }
   }
 
   /**
@@ -2452,32 +2358,6 @@ export class AmpStory extends AMP.BaseElement {
         : NavigationDirection.PREVIOUS;
 
     this.switchTo_(targetPage.element.id, direction);
-  }
-
-  /**
-   * Checks for the presence of a sidebar. If a sidebar does exist, then an icon
-   * permitting for the opening/closing of the sidebar is shown.
-   * @private
-   */
-  initializeSidebar_() {
-    this.sidebar_ = this.element.querySelector('amp-sidebar');
-    if (!this.sidebar_) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
-    });
-
-    this.initializeOpacityMask_();
-    this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR, !!this.sidebar_);
-
-    const actions = [
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'open'},
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
-    ];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**

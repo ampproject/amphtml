@@ -1,7 +1,7 @@
 import {playIgnoringError} from '#core/dom/video';
 import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {
   LayoutPriority,
   applyFillContent,
@@ -11,8 +11,8 @@ import {MessageType} from '#core/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
-import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {user, userAssert} from '../../../src/log';
+import {createCustomEvent, getData, listen} from '#utils/event-helper';
+import {user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';

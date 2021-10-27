@@ -6,12 +6,13 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpO2Player extends AMP.BaseElement {

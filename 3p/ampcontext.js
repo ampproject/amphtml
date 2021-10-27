@@ -5,9 +5,10 @@ import {isObject} from '#core/types';
 import {dict, map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
+import {dev, devAssert} from '#utils/log';
+
 import {IframeMessagingClient} from './iframe-messaging-client';
 
-import {dev, devAssert} from '../src/log';
 import {parseUrlDeprecated} from '../src/url';
 
 export class AbstractAmpContext {

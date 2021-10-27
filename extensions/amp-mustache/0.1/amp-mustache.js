@@ -5,7 +5,7 @@ import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 import mustache from '#third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';

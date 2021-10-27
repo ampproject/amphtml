@@ -148,7 +148,7 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    doBuildJs(jsBundles, 'custom-elements-polyfill.js', options),
+    doBuildJs(jsBundles, 'bento.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -313,17 +313,16 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
-  fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
-  if (options.latestName) {
+  if (options.aliasName) {
     fs.copySync(
       destPath,
-      path.join(destDir, maybeToEsmName(options.latestName))
+      path.join(destDir, maybeToEsmName(options.aliasName))
     );
   }
 
   let name = minifiedName;
-  if (options.latestName) {
-    name += ` → ${maybeToEsmName(options.latestName)}`;
+  if (options.aliasName) {
+    name += ` → ${maybeToEsmName(options.aliasName)}`;
   }
   endBuildStep('Minified', name, timeInfo.startTime);
 }
@@ -360,17 +359,17 @@ function handleBundleError(err, continueOnError, destFilename) {
  */
 async function finishBundle(destDir, destFilename, options, startTime) {
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
-  let {latestName} = options;
-  if (latestName) {
+  let {aliasName} = options;
+  if (aliasName) {
     if (!options.minify) {
-      latestName = latestName.replace(/\.js$/, '.max.js');
+      aliasName = aliasName.replace(/\.js$/, '.max.js');
     }
-    latestName = maybeToEsmName(latestName);
+    aliasName = maybeToEsmName(aliasName);
     fs.copySync(
       path.join(destDir, destFilename),
-      path.join(destDir, latestName)
+      path.join(destDir, aliasName)
     );
-    endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
+    endBuildStep(logPrefix, `${destFilename} → ${aliasName}`, startTime);
   } else {
     const loggingName =
       options.npm && !destFilename.startsWith('amp-')
@@ -417,7 +416,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     };
   }
   const {banner, footer} = splitWrapper();
-  const config = await getAmpConfigForFile(srcFilename, options);
+  const config = await getAmpConfigForFile(destFilename, options);
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
@@ -463,9 +462,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map, {
-        mangle: !compiledFile && options.mangle,
-      }));
+      ({code, map} = await minify(code, map));
       map = await massageSourcemaps(map, options);
     }
 
@@ -524,8 +521,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
 /**
  * Name cache to help terser perform cross-binary property mangling.
- *
- * TODO: ensure this is actually necessary.
  */
 const nameCache = {};
 
@@ -534,12 +529,17 @@ const nameCache = {};
  *
  * @param {string} code
  * @param {string} map
- * @param {{mangle: boolean}} options
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map, {mangle} = {mangle: false}) {
+async function minify(code, map) {
   const terserOptions = {
-    mangle: {},
+    mangle: {
+      properties: {
+        regex: '_AMP_PRIVATE_$',
+        // eslint-disable-next-line google-camelcase/google-camelcase
+        keep_quoted: /** @type {'strict'} */ ('strict'),
+      },
+    },
     compress: {
       // Settled on this count by incrementing number until there was no more
       // effect on minification quality.
@@ -552,21 +552,11 @@ async function minify(code, map, {mangle} = {mangle: false}) {
     },
     sourceMap: {content: map},
     module: !!argv.esm,
+    nameCache,
   };
-
-  // Enabling property mangling requires disabling two other optimization.
-  // - Should not mangle quoted properties (often used for cross-binary purposes)
-  // - Should not convert computed properties into regular property definition
-  if (mangle) {
-    // eslint-disable-next-line google-camelcase/google-camelcase
-    terserOptions.mangle.properties = {keep_quoted: 'strict', regex: '_$'};
-    terserOptions.nameCache = nameCache;
-
-    // TODO: uncomment once terser bugs related to these are fixed
-    // https://github.com/terser/terser/pull/1058
-    terserOptions.compress.computed_props = false; // eslint-disable-line google-camelcase/google-camelcase
-    terserOptions.compress.properties = false;
-  }
+  // Remove the local variable name cache which should not be reused between binaries.
+  // See https://github.com/ampproject/amphtml/issues/36476
+  /** @type {any}*/ (nameCache).vars = {};
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};

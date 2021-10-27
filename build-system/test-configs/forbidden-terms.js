@@ -11,10 +11,6 @@ const privateServiceFactory =
 const shouldNeverBeUsed =
   'Usage of this API is not allowed - only for internal purposes.';
 
-const backwardCompat =
-  'This method must not be called. It is only retained ' +
-  'for backward compatibility during rollout.';
-
 const realiasGetMode =
   'Do not re-alias getMode or its return so it can be ' +
   'DCE\'d. Use explicitly like "getMode().localDev" instead.';
@@ -316,7 +312,7 @@ const forbiddenTermsGlobal = {
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
       'src/utils/display-observer.js',
-      'testing/test-helper.js',
+      'testing/helpers/service.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -332,7 +328,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
-      'src/log.js',
+      'src/utils/log.js',
       'src/error-reporting.js',
       'src/web-worker/web-worker.js',
       'testing/async-errors.js',
@@ -538,7 +534,7 @@ const forbiddenTermsGlobal = {
       ', depending on your use case.',
     allowlist: [
       'src/core/3p-frame-messaging.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/core/dom/event-helper-listen.js',
     ],
   },
@@ -587,9 +583,6 @@ const forbiddenTermsGlobal = {
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use src/open-window-dialog',
     allowlist: ['src/open-window-dialog.js'],
-  },
-  '\\.getWin\\(': {
-    message: backwardCompat,
   },
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
@@ -769,7 +762,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
       'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
       'extensions/amp-youtube/1.0/storybook/Basic.js',
-      'src/builtins/storybook/amp-layout-with-aspect-ratio-css.amp.js',
       'src/builtins/storybook/amp-layout.amp.js',
       'src/preact/storybook/Context.js',
       'src/preact/storybook/Wrappers.js',
@@ -919,7 +911,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Most users should use BaseElement…loadPromise.',
     allowlist: [
       'src/base-element.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/friendly-iframe-embed.js',
       'src/service/resources-impl.js',
       'src/service/variable-source.js',

@@ -40,6 +40,7 @@ jobs:
         with:
           check-latest: true
           registry-url: https://registry.npmjs.org
+          node-version: lts/*
       - name: Get latest scripts
         run: |
           wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/utils.js" -O ./build-system/npm-publish/utils.js

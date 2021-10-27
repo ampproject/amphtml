@@ -152,16 +152,16 @@ t.run('amp-carousel', {}, function () {
         const prevBtn = amp.querySelector('.amp-carousel-button-prev');
         const nextBtn = amp.querySelector('.amp-carousel-button-next');
         expect(prevBtn).to.have.class('amp-disabled');
-        impl.goCallback(-1, false);
+        impl.go(-1, false);
         expect(prevBtn).to.have.class('amp-disabled');
-        impl.goCallback(1, false);
+        impl.go(1, false);
         expect(prevBtn).to.not.have.class('amp-disabled');
-        impl.goCallback(1, false);
-        impl.goCallback(1, false);
+        impl.go(1, false);
+        impl.go(1, false);
         expect(nextBtn).to.have.class('amp-disabled');
-        impl.goCallback(-1, false);
+        impl.go(-1, false);
         expect(prevBtn).to.not.have.class('amp-disabled');
-        impl.goCallback(-1, false);
+        impl.go(-1, false);
         expect(prevBtn).to.have.class('amp-disabled');
       });
 
@@ -173,9 +173,9 @@ t.run('amp-carousel', {}, function () {
         const nextBtn = amp.querySelector('.amp-carousel-button-next');
         expect(prevBtn).to.have.class('amp-disabled');
         expect(nextBtn).to.not.have.class('amp-disabled');
-        impl.goCallback(1, false);
-        impl.goCallback(1, false);
-        impl.goCallback(1, false);
+        impl.go(1, false);
+        impl.go(1, false);
+        impl.go(1, false);
         expect(prevBtn).to.not.have.class('amp-disabled');
         expect(nextBtn).to.have.class('amp-disabled');
       });
@@ -319,8 +319,8 @@ t.run('amp-carousel', {}, function () {
         const nextBtn = amp.querySelector('.amp-carousel-button-next');
         expect(prevBtn).to.have.class('amp-disabled');
         expect(nextBtn).to.not.have.class('amp-disabled');
-        impl.goCallback(1, false);
-        impl.goCallback(1, false);
+        impl.go(1, false);
+        impl.go(1, false);
         expect(prevBtn).to.not.have.class('amp-disabled');
         expect(nextBtn).to.have.class('amp-disabled');
       });

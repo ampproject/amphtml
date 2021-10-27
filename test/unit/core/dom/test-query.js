@@ -4,7 +4,7 @@ import * as query from '#core/dom/query';
 import {isElement} from '#core/types';
 import {toArray} from '#core/types/array';
 
-import {loadPromise} from '../../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 
 /** Helper to execute test cases with and without the polyfills. */
 function itWithPolyfill(description, testFn) {

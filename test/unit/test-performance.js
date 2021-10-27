@@ -1,11 +1,12 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {VisibilityState} from '#core/constants/visibility-state';
+import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
-  LCP_ELEMENT_TYPE,
+  ELEMENT_TYPE,
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
@@ -834,8 +835,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
   let performanceObserver;
   let viewerVisibilityState;
-  let whenFirstVisiblePromise;
-  let whenFirstVisibleResolve;
 
   function setupFakesForVisibilityStateManipulation() {
     env.sandbox.stub(env.win, 'PerformanceObserver');
@@ -849,15 +848,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
     installRuntimeServices(env.win);
 
-    whenFirstVisiblePromise = new Promise((resolve) => {
-      whenFirstVisibleResolve = resolve;
-    });
     const unresolvedPromise = new Promise(() => {});
     const viewportSize = {width: 0, height: 0};
     env.sandbox.stub(Services, 'ampdoc').returns({
       hasBeenVisible: () => {},
       onVisibilityChanged: () => {},
-      whenFirstVisible: () => whenFirstVisiblePromise,
+      whenFirstVisible: () => Promise.resolve(),
       getVisibilityState: () => viewerVisibilityState,
       getFirstVisibleTime: () => 0,
       isSingleDoc: () => true,
@@ -1100,16 +1096,37 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // Flush LCP again.
       toggleVisibility(perf, false);
 
+      // A textual paragraph
+      const p = document.createElement('p');
+      p.textContent = 'hello';
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              startTime: 25,
+              element: p,
+            },
+          ];
+        },
+      });
+      // Flush LCP again.
+      toggleVisibility(perf, false);
+
       const lcptEvents = perf.events_.filter(({label}) =>
         label.startsWith('lcpt')
       );
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: LCP_ELEMENT_TYPE.image,
+        delta: ELEMENT_TYPE.image,
       });
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: LCP_ELEMENT_TYPE.carousel,
+        delta: ELEMENT_TYPE.carousel,
+      });
+      expect(lcptEvents).deep.include({
+        label: 'lcpt',
+        delta: ELEMENT_TYPE.text,
       });
     });
   });
@@ -1162,40 +1179,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     });
   });
 
-  it('forwards first-input-delay polyfill metric', () => {
-    const previousPerfMetrics = env.win.perfMetrics;
-    // Fake window to pretend that the polyfill exists.
-    env.win.perfMetrics = env.win.perfMetrics || {};
-    const callbacks = [];
-    env.win.perfMetrics.onFirstInputDelay = env.sandbox.stub();
-    env.win.perfMetrics.onFirstInputDelay.callsFake((callback) => {
-      callbacks.push(callback);
-    });
-
-    installPerformanceService(env.win);
-    const perf = Services.performanceFor(env.win);
-
-    // Send a fake first input event.
-    const delay = 30;
-    const evt = new Event('touchstart');
-    callbacks.forEach((callback) => {
-      callback(delay, evt);
-    });
-
-    expect(perf.events_.length).to.equal(1);
-    expect(perf.events_[0]).to.be.jsonEqual({
-      label: 'fid-polyfill',
-      delta: 30,
-    });
-
-    // Restore previous window value.
-    if (typeof previousPerfMetrics === 'undefined') {
-      delete env.win.perfMetrics;
-    } else {
-      env.win.perfMetrics = previousPerfMetrics;
-    }
-  });
-
   describe('forwards cumulative layout shift metric', () => {
     beforeEach(() => {
       setupFakesForVisibilityStateManipulation();
@@ -1206,79 +1189,20 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       return Services.performanceFor(env.win);
     }
 
-    // TODO(#33207): Remove after data collection
-    it('Forwards cls-fcp and cls-ofv', async () => {
-      env.win.PerformanceObserver.supportedEntryTypes = [
-        'layout-shift',
-        'paint',
-      ];
-
+    it('should not throw when layout-shift occurs before core services available', () => {
+      // Fake the Performance API.
+      env.win.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
       const perf = getPerformance();
+
+      // Fake layout-shift that occured before core services registered
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+          ];
+        },
+      });
       perf.coreServicesAvailable();
-
-      // Pre-visible and pre-fcp layout shifts
-      performanceObserver.triggerCallback({
-        getEntries() {
-          return [
-            {
-              entryType: 'layout-shift',
-              value: 0.25,
-              hadRecentInput: false,
-              startTime: 0,
-            },
-            {
-              entryType: 'layout-shift',
-              value: 0.25,
-              hadRecentInput: false,
-              startTime: 50,
-            },
-          ];
-        },
-      });
-
-      env.win.performance.now = () => 70;
-      toggleVisibility(perf, true); // First visible
-      whenFirstVisibleResolve();
-      await new Promise(setTimeout);
-      expect(
-        perf.events_.filter((e) => e.label.startsWith('cls')).length
-      ).equal(0);
-
-      // Post visible, pre-fcp layout-shift
-      performanceObserver.triggerCallback({
-        getEntries() {
-          return [
-            {
-              entryType: 'layout-shift',
-              value: 0.5,
-              hadRecentInput: false,
-              startTime: 100,
-            },
-            {
-              entryType: 'paint',
-              name: 'first-contentful-paint',
-              startTime: 150,
-              duration: 0,
-            },
-            {
-              entryType: 'layout-shift',
-              value: 0.5,
-              hadRecentInput: false,
-              startTime: 200,
-            },
-          ];
-        },
-      });
-
-      toggleVisibility(perf, false);
-      const clsEvents = perf.events_.filter((event) =>
-        event.label.startsWith('cls')
-      );
-      expect(clsEvents).jsonEqual([
-        {label: 'cls-ofv', delta: 0.5},
-        {label: 'cls-fcp', delta: 1},
-        {label: 'cls', delta: 1.5},
-      ]);
     });
 
     it('when the viewer visibility changes to inactive', () => {
@@ -1296,13 +1220,30 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = getPerformance();
       perf.coreServicesAvailable();
+      toggleVisibility(perf, true);
+
+      const parent = document.createElement('amp-carousel');
+      const child = document.createElement('amp-img');
+      parent.appendChild(child);
 
       // Fake layout-shift that occured before the Performance service is started.
       performanceObserver.triggerCallback({
         getEntries() {
           return [
-            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
-            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
+            {
+              entryType: 'layout-shift',
+              value: 0.3,
+              startTime: 1,
+              hadRecentInput: false,
+              sources: [{node: child}],
+            },
+            {
+              entryType: 'layout-shift',
+              value: 0.25,
+              startTime: 6000,
+              hadRecentInput: false,
+              sources: [{node: parent}],
+            },
           ];
         },
       });
@@ -1316,6 +1257,14 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       expect(clsEvents.length).to.equal(3);
       expect(perf.events_).deep.include({
         label: 'cls',
+        delta: 0.3,
+      });
+      expect(perf.events_).deep.include({
+        label: 'clstu',
+        delta: 8,
+      });
+      expect(perf.events_).deep.include({
+        label: 'cls-1',
         delta: 0.55,
       });
     });
@@ -1446,7 +1395,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
   });
 });
 
-describes.realWin('log canonicalUrl', {amp: true}, (env) => {
+describes.realWin('log extraParams', {amp: true}, (env) => {
   let win;
   let perf;
   let viewerSendMessageStub;
@@ -1473,6 +1422,18 @@ describes.realWin('log canonicalUrl', {amp: true}, (env) => {
       expect(viewerSendMessageStub.lastCall.args[1].canonicalUrl).to.equal(
         canonicalUrl
       );
+    });
+  });
+
+  it('should add the random eventid to sendCsi', () => {
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('sendCsi');
+      const {eventid} = viewerSendMessageStub.lastCall.args[1];
+      expect(() => {
+        base64UrlDecodeToBytes(eventid);
+      }).not.to.throw();
     });
   });
 });

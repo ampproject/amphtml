@@ -8,12 +8,13 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 
 export class AmpState extends AMP.BaseElement {

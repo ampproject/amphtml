@@ -18,17 +18,18 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {
   parseFavicon,
   parseOgImage,
@@ -603,6 +604,28 @@ export class NextPageService {
           cap: this.getCapabilities_(),
         }
       );
+
+      // Reuse message deliverer from existing viewer.
+      // Even though we have multiple instances of the Viewer service, we only
+      // have a single messaging channel.
+      const messageDeliverer = this.viewer_.maybeGetMessageDeliverer();
+      if (messageDeliverer) {
+        amp.onMessage((eventType, data, awaitResponse) => {
+          // Some messages should be suppressed when coming from the inserted
+          // document. These are related to the viewport, so we allow the host
+          // document to handle these events instead.
+          // Otherwise, we would confuse the viewer and observe issues like the
+          // header appearing unexpectedly.
+          if (
+            eventType === 'documentHeight' ||
+            eventType === 'scroll' ||
+            eventType === 'viewport'
+          ) {
+            return;
+          }
+          messageDeliverer(eventType, data, awaitResponse);
+        });
+      }
 
       const ampdoc = devAssert(amp.ampdoc);
       installStylesForDoc(ampdoc, CSS, null, false, TAG);
