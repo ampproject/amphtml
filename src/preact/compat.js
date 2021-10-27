@@ -1,3 +1,4 @@
+import * as Preact from /*OK*/ 'preact';
 import * as compat from /*OK*/ 'preact/compat';
 
 /**
@@ -10,18 +11,9 @@ export function forwardRef(fn) {
 }
 
 /**
- * @param {PreactDef.VNode} vnode
- * @param {HTMLElement} container
- * @return {PreactDef.VNode}
- */
-export function createPortal(vnode, container) {
-  return compat.createPortal(vnode, container);
-}
-
-/**
  * @param {...PreactDef.Renderable} unusedChildren
  * @return {!Array<PreactDef.Renderable>}
  */
 export function toChildArray(unusedChildren) {
-  return compat.Children.toArray.apply(undefined, arguments);
+  return Preact.toChildArray(unusedChildren);
 }
