@@ -4,7 +4,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 ## Usage
 
-Each of the Bento Carousel component’s immediate children is considered an
+Each of the component’s immediate children is considered an
 item in the carousel. Each of these nodes may also have arbitrary children.
 
 The carousel consists of an arbitrary number of items, as well as optional
@@ -35,7 +35,7 @@ import '@ampproject/bento-base-carousel';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-base-carousel {
@@ -54,31 +54,13 @@ import '@ampproject/bento-base-carousel';
       aspect-ratio: 4/1;
     }
     .red-gradient {
-      background: brown;
-      background: linear-gradient(
-        90deg,
-        brown 50%,
-        lightsalmon 90%,
-        wheat 100%
-      );
+      background: darkred;
     }
     .blue-gradient {
       background: steelblue;
-      background: linear-gradient(
-        90deg,
-        steelblue 50%,
-        plum 90%,
-        lavender 100%
-      );
     }
     .green-gradient {
       background: seagreen;
-      background: linear-gradient(
-        90deg,
-        seagreen 50%,
-        mediumturquoise 90%,
-        turquoise 100%
-      );
     }
   </style>
 </head>
