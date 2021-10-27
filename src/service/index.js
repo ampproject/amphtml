@@ -534,6 +534,17 @@ export class Services {
   }
 
   /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
+   */
+  static mediaPerformanceMetricsServiceForDoc(nodeOrDoc) {
+  return (
+    /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
+    (getServiceForDoc(nodeOrDoc, 'media-performance-metrics'))
+  );
+}
+
+  /**
    * @param {!Element} el
    * @return {!Promise<./service/localization.LocalizationService>}
    */

@@ -108,7 +108,7 @@ export const getMediaPerformanceMetricsService = (win) => {
  * @return {!MediaPerformanceMetricsService}
  */
 export const getMediaPerformanceMetricsServiceForDoc = (nodeOrDoc) => {
-  let service = Services.mediaPerformanceMetricsService(nodeOrDoc);
+  let service = Services.mediaPerformanceMetricsServiceForDoc(nodeOrDoc);
 
   if (!service) {
     service = new MediaPerformanceMetricsService(
