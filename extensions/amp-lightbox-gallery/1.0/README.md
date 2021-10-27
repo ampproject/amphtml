@@ -34,7 +34,7 @@ import '@ampproject/bento-lightbox-gallery';
 
 ```html
 <head>
-    <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
+    <script async src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style data-bento-boilerplate>
       bento-lightbox-gallery[hidden] {

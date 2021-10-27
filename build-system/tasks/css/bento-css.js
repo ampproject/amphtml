@@ -1,5 +1,6 @@
 const CssSelectorTokenizer = require('css-selector-tokenizer');
 const postcss = require('postcss');
+const {getBentoName} = require('../bento-helpers');
 
 /**
  * @param {string} selector
@@ -14,8 +15,7 @@ function renameTagNamesInSelector(selector) {
       continue;
     }
     if (node.type === 'element') {
-      // TODO(https://go.amp.dev/issue/36351): Use shared utility function
-      node.name = node.name.replace(/^amp-/, 'bento-');
+      node.name = getBentoName(node.name);
     }
     if (Array.isArray(node.nodes)) {
       nodes.push(...node.nodes);

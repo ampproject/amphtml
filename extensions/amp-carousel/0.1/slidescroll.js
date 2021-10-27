@@ -3,6 +3,7 @@ import {Animation} from '#utils/animation';
 import {dev, user, userAssert} from '#utils/log';
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
+import {CarouselControls} from './carousel-controls';
 import {bezierCurve} from '#core/data-structures/curve';
 import {
   closestAncestorElementBySelector,
@@ -22,7 +23,6 @@ import {
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {triggerAnalyticsEvent} from '#utils/analytics';
-import {BaseCarousel} from './base-carousel';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
@@ -44,7 +44,7 @@ const CUSTOM_SNAP_TIMEOUT = 100;
 
 const TAG = 'AMP-CAROUSEL';
 
-export class AmpSlideScroll extends BaseCarousel {
+export class AmpSlideScroll extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -165,6 +165,15 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private {?UnlistenDef} */
     this.unobserveIntersections_ = null;
+
+    /** @private {CarouselControls} */
+    this.controls_ = new CarouselControls({
+      element,
+      go: this.go.bind(this),
+      ariaRole: 'button',
+      hasPrev: () => this.hasPrev(),
+      hasNext: () => this.hasNext(),
+    });
   }
 
   /** @override */
@@ -173,6 +182,11 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
+  isRelayoutNeeded() {
+    return true;
+  }
+
+  /** Build carousel elements */
   buildCarousel() {
     this.hasLoop_ = this.element.hasAttribute('loop');
 
@@ -341,18 +355,27 @@ export class AmpSlideScroll extends BaseCarousel {
     this.isTouching_ = true;
   }
 
-  /** @override */
+  /**
+   * Handles when carousel comes into and out of viewport.
+   * @param {boolean} inViewport
+   */
   viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
     if (inViewport) {
       this.autoplay_();
+      this.controls_.hintControls();
     } else {
       this.clearAutoplayTimer_();
     }
   }
 
-  /** @override */
-  goCallback(dir, animate, opt_autoplay) {
+  /**
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   * @param {boolean=} opt_autoplay
+   */
+  go(dir, animate, opt_autoplay) {
     const trust = opt_autoplay ? ActionTrust.LOW : ActionTrust.HIGH;
     this.moveSlide(dir, animate, trust);
     if (opt_autoplay) {
@@ -413,6 +436,13 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
+  buildCallback() {
+    this.buildCarousel();
+    this.controls_.buildDom();
+    this.controls_.initialize();
+  }
+
+  /** @override */
   layoutCallback() {
     this.unobserveIntersections_ = observeIntersections(
       this.element,
@@ -464,15 +494,15 @@ export class AmpSlideScroll extends BaseCarousel {
     this.unobserveIntersections_?.();
     this.unobserveIntersections_ = null;
     this.slideIndex_ = null;
-    return super.unlayoutCallback();
+    return true;
   }
 
-  /** @override */
+  /** @return  {boolean} */
   hasPrev() {
     return this.shouldLoop || this.slideIndex_ > 0;
   }
 
-  /** @override */
+  /** @return {boolean} */
   hasNext() {
     return this.shouldLoop || this.slideIndex_ < this.slides_.length - 1;
   }
@@ -684,22 +714,22 @@ export class AmpSlideScroll extends BaseCarousel {
     );
   }
 
-  /**
-   * @override
-   */
+  /** @return {string} */
   getPrevButtonTitle() {
     const prevIndex = this.getPrevIndex_(this.slideIndex_);
     const index = prevIndex == null ? 0 : prevIndex;
-    return super.getPrevButtonTitle() + this.getButtonTitleSuffix_(index);
+    return (
+      this.controls_.getPrevButtonTitle() + this.getButtonTitleSuffix_(index)
+    );
   }
 
-  /**
-   * @override
-   */
+  /** @return {string} */
   getNextButtonTitle() {
     const nextIndex = this.getNextIndex_(this.slideIndex_);
     const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
-    return super.getNextButtonTitle() + this.getButtonTitleSuffix_(index);
+    return (
+      this.controls_.getNextButtonTitle() + this.getButtonTitleSuffix_(index)
+    );
   }
 
   /**
@@ -843,8 +873,11 @@ export class AmpSlideScroll extends BaseCarousel {
       }
     }
     this.hideRestOfTheSlides_(showIndexArr);
-    this.setControlsState();
-    this.updateButtonTitles();
+    this.controls_.setControlsState();
+    this.controls_.updateButtonTitles(
+      this.getPrevButtonTitle(),
+      this.getNextButtonTitle()
+    );
     return true;
   }
 

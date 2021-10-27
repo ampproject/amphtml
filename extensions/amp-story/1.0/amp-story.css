@@ -17,6 +17,14 @@
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
   font-size: calc(2.5 * var(--story-page-vh, 8px));
 }
+
+body {
+  animation:none !important;
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -ms-animation: none !important;
+}
+
 amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
@@ -224,7 +232,7 @@ amp-story-page:not(:first-of-type):not([distance]):not([active]) {
   transform: translateY(1000vh) !important;
 }
 
-amp-story-page:not([active]) {
+amp-story-page[distance]:not([active]) {
   transform: translateY(1000vh) !important;
 }
 
@@ -233,14 +241,14 @@ amp-story-page:not([active]) {
  * update them in the ampdoc.css file.
  */
 amp-story-page[active],
-amp-story-page[distance="0"],
-amp-story-page[distance="1"] {
+amp-story-page[distance="0"][distance],
+amp-story-page[distance="1"][distance] {
   transform: translateY(0) !important;
 }
 
 amp-story.i-amphtml-experiment-story-load-inactive-outside-viewport:not([desktop])
   amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
-amp-story-page[distance="2"] {
+amp-story-page[distance="2"][distance] {
   transform: translateY(100vh) !important;
 }
 
@@ -277,6 +285,13 @@ amp-story-grid-layer {
   z-index: 2 !important;
   /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
+}
+
+/* Make the story element fullpage. */
+:root:not(.i-amphtml-story-vertical) amp-story {
+  position: absolute !important;
+  top: 0;
+  left: 0;
 }
 
 amp-story-grid-layer[anchor*="left"] {

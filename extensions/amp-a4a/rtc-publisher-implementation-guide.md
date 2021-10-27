@@ -43,6 +43,7 @@ To use RTC, you must meet the following requirements:
 -   Purch
 -   Rubicon
 -   Salesforce
+-   [Snigel](https://www.snigel.com)
 -   T13
 -   Tail
 -   The Ozone Project

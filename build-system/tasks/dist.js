@@ -199,13 +199,13 @@ function buildLoginDone(version) {
   const buildDir = `build/all/amp-access-${version}`;
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
-  const latestName = 'amp-login-done-latest.js';
+  const aliasName = 'amp-login-done-latest.js';
   return compileJs(`./${buildDir}`, builtName, './dist/v0/', {
     watch: argv.watch,
     includePolyfills: true,
     minify: true,
     minifiedName,
-    latestName,
+    aliasName,
     extraGlobs: [
       `${buildDir}/amp-login-done-0.1.max.js`,
       `${buildDir}/amp-login-done-dialog.js`,

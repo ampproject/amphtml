@@ -691,11 +691,11 @@ export class AmpStoryPage extends AMP.BaseElement {
             break;
           case 'amp-audio':
           case 'amp-video':
-            if (mediaEl.readyState >= 2) {
+            const innerMediaEl = mediaEl.querySelector('audio, video');
+            if (innerMediaEl && innerMediaEl.readyState >= 2) {
               resolve();
               return;
             }
-
             mediaEl.addEventListener('canplay', resolve, true /* useCapture */);
             break;
           default:
