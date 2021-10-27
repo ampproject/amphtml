@@ -9,11 +9,11 @@ import './polyfills';
 import * as mode from '#core/mode';
 
 import {installDocService} from '#service/ampdoc-impl';
-import {installPerformanceService} from './performance-impl';
 import {
   installBuiltinElements,
   installRuntimeServices,
 } from '#service/core-services';
+import {installPerformanceService} from '#service/performance-impl';
 
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';

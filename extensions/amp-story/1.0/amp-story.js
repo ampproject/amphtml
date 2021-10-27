@@ -407,7 +407,7 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
-      Services.performanceForDoc(this.element).addEnabledExperiment(
+      Services.performanceFor(this.win).addEnabledExperiment(
         'story-load-first-page-only'
       );
     }
@@ -415,12 +415,12 @@ export class AmpStory extends AMP.BaseElement {
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
       prefersReducedMotion(this.win)
     ) {
-      Services.performanceForDoc(this.element).addEnabledExperiment(
+      Services.performanceFor(this.win).addEnabledExperiment(
         'story-disable-animations-first-page'
       );
     }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
-      Services.performanceForDoc(this.element).addEnabledExperiment(
+      Services.performanceFor(this.win).addEnabledExperiment(
         'story-load-inactive-outside-viewport'
       );
       this.element.classList.add(
