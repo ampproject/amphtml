@@ -6,6 +6,7 @@
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const fastGlob = require('fast-glob');
 const path = require('path');
+const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
@@ -78,7 +79,7 @@ async function writePackageJson() {
   }
 
   const json = {
-    name: `@ampproject/${extension}`,
+    name: `@bentoproject/${getNameWithoutComponentPrefix(extension)}`,
     version,
     description: `AMP HTML ${extension} Component`,
     author: 'The AMP HTML Authors',
