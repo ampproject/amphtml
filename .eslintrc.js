@@ -458,5 +458,12 @@ module.exports = {
       'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],
       'rules': {'local/preact-preferred-props': 2},
     },
+    {
+      'files': ['**/amp-story*/**'],
+      'rules': {
+        // amp-story uses JSX for plain DOM nodes instead of Preact
+        'local/preact': [2, '#core/dom/jsx'],
+      },
+    },
   ],
 };
