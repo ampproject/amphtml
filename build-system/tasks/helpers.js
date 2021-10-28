@@ -535,7 +535,7 @@ async function minify(code, map) {
   const terserOptions = {
     mangle: {
       properties: {
-        regex: '_AMP_PRIVATE_$',
+        regex: '_AMP_PRIVATE_$|^[A-Z]*$',
         // eslint-disable-next-line google-camelcase/google-camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
       },
@@ -798,7 +798,7 @@ function shouldUseClosure() {
   // the release process automatically. Since this experiment is actually on the build system
   // itself instead of runtime, it is never run through babel (where the replacements usually happen).
   // Therefore we must compute this one by hand.
-  return argv.define_experiment_constant !== 'ESBUILD_COMPILATION';
+  return argv.define_experiment_constant !== 'ESBUILD_COMPILATION' && false;
 }
 
 module.exports = {
