@@ -91,11 +91,12 @@ async function getDescriptionFromMarkdown(filename, maxLengthChars = 200) {
     return null;
   }
   const tokens = marked.lexer(markdown);
-  const token = tokens.find((token) => token.type === 'paragraph');
+  const token = tokens.find(({type}) => type === 'paragraph');
   if (!token) {
     return null;
   }
-  const textContent = await getHtmlTextContent(marked.parser([token]));
+  const html = marked.parser([token]);
+  const textContent = await getHtmlTextContent(html);
   const paragraph = textContent.trim();
   if (paragraph.length <= maxLengthChars) {
     return paragraph;
