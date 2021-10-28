@@ -23,8 +23,6 @@ import * as trackPromise from '../../src/impression';
 import {registerServiceBuilder} from '../../src/service-helpers';
 import {parseUrlDeprecated} from '../../src/url';
 
-import {user} from '#utils/log';
-
 describes.sandboxed('UrlReplacements', {}, (env) => {
   let canonical;
   let loadObservable;
