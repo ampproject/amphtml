@@ -48,15 +48,15 @@ async function getStylesheets() {
  * @param {string[]=} out
  * @return {string[]}
  */
-function postHtmlGetPlainTextFromRendered(node, out = []) {
+function getHtmlTextContentRecursive(node, out = []) {
   if (typeof node === 'string') {
     out.push(node);
   } else if (Array.isArray(node)) {
     for (const child of node) {
-      postHtmlGetPlainTextFromRendered(child, out);
+      getHtmlTextContentRecursive(child, out);
     }
   } else if (node?.content) {
-    postHtmlGetPlainTextFromRendered(node.content, out);
+    getHtmlTextContentRecursive(node.content, out);
   }
   return out;
 }
@@ -65,11 +65,11 @@ function postHtmlGetPlainTextFromRendered(node, out = []) {
  * @param {string} html
  * @return {Promise<string>}
  */
-async function getPlainTextFromRendered(html) {
+async function getHtmlTextContent(html) {
   const out = [];
   await PostHTML([
     (tree) => {
-      postHtmlGetPlainTextFromRendered(tree, out);
+      getHtmlTextContentRecursive(tree, out);
     },
   ]).process(html);
   return out.join('');
@@ -95,8 +95,8 @@ async function getDescriptionFromMarkdown(filename, maxLengthChars = 200) {
   if (!token) {
     return null;
   }
-  const plainText = await getPlainTextFromRendered(marked.parser([token]));
-  const paragraph = plainText.trim();
+  const textContent = await getHtmlTextContent(marked.parser([token]));
+  const paragraph = textContent.trim();
   if (paragraph.length <= maxLengthChars) {
     return paragraph;
   }
