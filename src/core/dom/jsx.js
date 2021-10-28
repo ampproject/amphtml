@@ -56,7 +56,7 @@ function setAttribute(element, name, value) {
   if (value === false || value == null) {
     return;
   }
-  if (typeof value == 'function' && name[0] === 'o' && name[1] === 'n') {
+  if (typeof value === 'function' && name[0] === 'o' && name[1] === 'n') {
     const eventName = name.toLowerCase().substr(2);
     element.addEventListener(eventName, value);
     return;
