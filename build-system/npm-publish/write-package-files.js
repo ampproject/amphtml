@@ -95,7 +95,7 @@ async function writePackageJson() {
     // TODO(https://go.amp.dev/issue/36655):
     // Provide a way for components to provide their own description
     description: `Bento${dashToPascalCase(nameDash)} Component`,
-    author: 'The Bento Authors',
+    author: 'Bento Authors',
     license: 'Apache-2.0',
     main: './dist/web-component.js',
     module: './dist/web-component.module.js',
