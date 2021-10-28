@@ -44,6 +44,9 @@ const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 const ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME = 'animate-in-timing-function';
 /** @const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
+/** @const {string} selector for disabling animations on first page when first loaded */
+const DISABLE_ANIMATIONS_FIRST_PAGE_SELECTOR =
+  'amp-story-page:first-of-type:not([i-amphtml-visited])';
 
 /** @const {string} */
 const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
@@ -545,12 +548,6 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
-    /** @private @const {bool} */
-    this.skipAnimations_ =
-      prefersReducedMotion(ampdoc.win) ||
-      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
-        matches(page, 'amp-story-page:first-of-type'));
-
     /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
 
@@ -576,7 +573,7 @@ export class AnimationManager {
   applyFirstFrameOrFinish() {
     return Promise.all(
       this.getOrCreateRunners_().map((runner) =>
-        this.skipAnimations_
+        this.skipAnimations_()
           ? runner.applyLastFrame()
           : runner.applyFirstFrame()
       )
@@ -595,7 +592,8 @@ export class AnimationManager {
 
   /** Starts all entrance animations for the page. */
   animateIn() {
-    if (this.skipAnimations_) {
+    console.log('skip animations', this.skipAnimations_());
+    if (this.skipAnimations_()) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.start());
@@ -617,7 +615,7 @@ export class AnimationManager {
 
   /** Pauses all animations in the page. */
   pauseAll() {
-    if (!this.runners_ || this.skipAnimations_) {
+    if (!this.runners_ || this.skipAnimations_()) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.pause());
@@ -625,7 +623,7 @@ export class AnimationManager {
 
   /** Resumes all animations in the page. */
   resumeAll() {
-    if (!this.runners_ || this.skipAnimations_) {
+    if (!this.runners_ || this.skipAnimations_()) {
       return;
     }
     this.getRunners_().forEach((runner) => runner.resume());
@@ -820,6 +818,21 @@ export class AnimationManager {
     });
 
     return options;
+  }
+
+  /**
+   * Whether to skip the animations on the page, due to reduced motion or first page.
+   * @return {boolean}
+   */
+  skipAnimations_() {
+    return (
+      prefersReducedMotion(this.ampdoc_.win) ||
+      (isExperimentOn(
+        this.ampdoc_.win,
+        'story-disable-animations-first-page'
+      ) &&
+        matches(this.page_, DISABLE_ANIMATIONS_FIRST_PAGE_SELECTOR))
+    );
   }
 }
 
