@@ -28,10 +28,6 @@ defineBentoFitText();
 ```html
 <head>
   <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"
-  ></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-fit-text {

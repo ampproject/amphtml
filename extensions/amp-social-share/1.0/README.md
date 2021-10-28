@@ -40,7 +40,7 @@ defineBentoSocialShare();
       height: 44px;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
