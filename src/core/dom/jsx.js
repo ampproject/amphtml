@@ -31,7 +31,7 @@ import {devAssert} from '#core/assert';
  * @param {*} child
  */
 function appendChild(parent, child) {
-  if (!child && child !== 0) {
+  if (child === false || child == null) {
     return;
   }
   if (Array.isArray(child)) {
