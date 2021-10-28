@@ -73,10 +73,6 @@ describes.fakeWin('localization', {amp: true}, (env) => {
 
       expect(localizationService.getLocalizedString('123')).to.equal('买票');
     });
-
-    expect(localizationService.getLocalizedString('test_string_id')).to.equal(
-      'test string content'
-    );
   });
 
   it('should have language fallbacks', () => {
