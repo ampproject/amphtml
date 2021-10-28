@@ -2,6 +2,8 @@
 
 The Bento Carousel component is a generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
 
+## Usage
+
 Each of the component’s immediate children is considered an
 item in the carousel. Each of these nodes may also have arbitrary children.
 
@@ -10,8 +12,6 @@ navigational arrows to go forward or backwards a single item.
 
 The carousel advances between items if the user swipes or uses the customizable
 arrow buttons.
-
-## Usage
 
 ### Web Component
 
