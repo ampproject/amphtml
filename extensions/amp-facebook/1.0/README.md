@@ -13,11 +13,12 @@ You must include each Bento component's required CSS library before adding custo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-facebook
+npm install @bentoproject/facebook
 ```
 
 ```javascript
-import '@ampproject/bento-facebook';
+import {defineElement as defineBentoFacebook} from '@bentoproject/facebook';
+defineBentoFacebook();
 ```
 
 #### Example: Include via `<script>`
@@ -304,13 +305,13 @@ The examples below demonstrate use of the `<BentoFacebook>` as a functional comp
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-facebook
+npm install @bentoproject/facebook
 ```
 
 ```javascript
 import React from 'react';
-import {BentoFacebook} from '@ampproject/bento-facebook/react';
-import '@ampproject/bento-facebook/styles.css';
+import {BentoFacebook} from '@bentoproject/facebook/react';
+import '@bentoproject/facebook/styles.css';
 
 function App() {
   return (

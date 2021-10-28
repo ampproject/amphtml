@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-mathml>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-mathml
+npm install @bentoproject/mathml
 ```
 
 ```javascript
-import '@ampproject/bento-mathml';
+import {defineElement as defineBentoMathml} from '@bentoproject/mathml';
+defineBentoMathml();
 ```
 
 #### Example: Include via `<script>`
@@ -136,13 +137,13 @@ The examples below demonstrates use of the `<BentoMathml>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-mathml
+npm install @bentoproject/mathml
 ```
 
 ```javascript
 import React from 'react';
-import {BentoMathml} from '@ampproject/bento-mathml/react';
-import '@ampproject/bento-mathml/styles.css';
+import {BentoMathml} from '@bentoproject/mathml/react';
+import '@bentoproject/mathml/styles.css';
 
 function App() {
   return (

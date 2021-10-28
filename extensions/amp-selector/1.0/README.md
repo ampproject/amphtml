@@ -13,11 +13,12 @@ You must include each Bento component's required CSS library before adding custo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-selector
+npm install @bentoproject/selector
 ```
 
 ```javascript
-import '@ampproject/bento-selector';
+import {defineElement as defineBentoSelector} from '@bentoproject/selector';
+defineBentoSelector();
 ```
 
 #### Example: Include via `<script>`
@@ -154,7 +155,7 @@ The examples below demonstrate use of the `<BentoSelector>` as a functional comp
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-selector
+npm install @bentoproject/selector
 ```
 
 ```javascript
@@ -162,8 +163,8 @@ import React from 'react';
 import {
   BentoSelector,
   BentoSelectorOption,
-} from '@ampproject/bento-selector/react';
-import '@ampproject/bento-selector/styles.css';
+} from '@bentoproject/selector/react';
+import '@bentoproject/selector/styles.css';
 
 function App() {
   return (

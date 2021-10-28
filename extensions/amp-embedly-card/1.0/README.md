@@ -20,11 +20,12 @@ The examples below demonstrate use of the `<bento-embedly-card>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-embedly-card
+npm install @bentoproject/embedly-card
 ```
 
 ```javascript
-import '@ampproject/bento-embedly-card';
+import {defineElement as defineBentoEmbedlyCard} from '@bentoproject/embedly-card';
+defineBentoEmbedlyCard();
 ```
 
 #### Example: Include via `<script>`
@@ -190,12 +191,12 @@ The examples below demonstrate use of the `<BentoEmbedlyCard>` as a functional c
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-embedly-card
+npm install @bentoproject/embedly-card
 ```
 
 ```javascript
-import {BentoEmbedlyCard} from '@ampproject/bento-embedly-card/react';
-import '@ampproject/bento-embedly-card/styles.css';
+import {BentoEmbedlyCard} from '@bentoproject/embedly-card/react';
+import '@bentoproject/embedly-card/styles.css';
 
 function App() {
   return (

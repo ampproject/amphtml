@@ -17,11 +17,12 @@ The examples below demonstrate use of the `<bento-sidebar>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-sidebar
+npm install @bentoproject/sidebar
 ```
 
 ```javascript
-import '@ampproject/bento-sidebar';
+import {defineElement as defineBentoSidebar} from '@bentoproject/sidebar';
+defineBentoSidebar();
 ```
 
 #### Example: Include via `<script>`
@@ -216,13 +217,13 @@ The examples below demonstrate use of the `<BentoSidebar>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-sidebar
+npm install @bentoproject/sidebar
 ```
 
 ```javascript
 import React from 'react';
-import {BentoSidebar} from '@ampproject/bento-sidebar/react';
-import '@ampproject/bento-sidebar/styles.css';
+import {BentoSidebar} from '@bentoproject/sidebar/react';
+import '@bentoproject/sidebar/styles.css';
 
 function App() {
   return (

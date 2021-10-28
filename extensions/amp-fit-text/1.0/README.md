@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-fit-text>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-fit-text
+npm install @bentoproject/fit-text
 ```
 
 ```javascript
-import '@ampproject/bento-fit-text';
+import {defineElement as defineBentoFitText} from '@bentoproject/fit-text';
+defineBentoFitText();
 ```
 
 #### Example: Include via `<script>`
@@ -143,13 +144,13 @@ The examples below demonstrate use of the `<BentoFitText>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-fit-text
+npm install @bentoproject/fit-text
 ```
 
 ```javascript
 import React from 'react';
-import {BentoFitText} from '@ampproject/bento-fit-text/react';
-import '@ampproject/bento-fit-text/styles.css';
+import {BentoFitText} from '@bentoproject/fit-text/react';
+import '@bentoproject/fit-text/styles.css';
 
 function App() {
   return (

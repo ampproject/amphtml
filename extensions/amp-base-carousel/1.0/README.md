@@ -24,11 +24,12 @@ The examples below demonstrate use of the `<bento-base-carousel>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-base-carousel
+npm install @bentoproject/base-carousel
 ```
 
 ```javascript
-import '@ampproject/bento-base-carousel';
+import {defineElement as defineBentoBaseCarousel} from '@bentoproject/base-carousel';
+defineBentoBaseCarousel();
 ```
 
 #### Example: Include via `<script>`
@@ -383,13 +384,13 @@ The examples below demonstrate use of the `<BentoBaseCarousel>` as a functional 
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-base-carousel
+npm install @bentoproject/base-carousel
 ```
 
 ```javascript
 import React from 'react';
-import {BentoBaseCarousel} from '@ampproject/bento-base-carousel/react';
-import '@ampproject/bento-base-carousel/styles.css';
+import {BentoBaseCarousel} from '@bentoproject/base-carousel/react';
+import '@bentoproject/base-carousel/styles.css';
 
 function App() {
   return (

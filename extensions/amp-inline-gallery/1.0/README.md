@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-inline-gallery>` web component
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-inline-gallery
+npm install @bentoproject/inline-gallery
 ```
 
 ```javascript
-import '@ampproject/bento-inline-gallery';
+import {defineElement as defineBentoInlineGallery} from '@bentoproject/inline-gallery';
+defineBentoInlineGallery();
 ```
 
 #### Example: Include via `<script>`
@@ -124,13 +125,13 @@ The examples below demonstrates use of the `<BentoInlineGallery>` as a functiona
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-inline-gallery
+npm install @bentoproject/inline-gallery
 ```
 
 ```javascript
 import React from 'react';
-import {BentoInlineGallery} from '@ampproject/bento-inline-gallery/react';
-import '@ampproject/bento-inline-gallery/styles.css';
+import {BentoInlineGallery} from '@bentoproject/inline-gallery/react';
+import '@bentoproject/inline-gallery/styles.css';
 
 function App() {
   return (
@@ -141,7 +142,7 @@ function App() {
         <img src="server.com/static/inline-examples/images/image2.jpg" />
         <img src="server.com/static/inline-examples/images/image3.jpg" />
       </BentoBaseCarousel>
-      <BentoInlineGallery-pagination inset />
+      <BentoInlineGalleryPagination inset />
     </BentoInlineGallery>
   );
 }
