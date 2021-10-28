@@ -278,7 +278,6 @@ jobs:
       name: node-docker-large
     steps:
       - setup_vm
-      - install_chrome
       - run:
           name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js
