@@ -233,7 +233,15 @@ async function launchWebServer() {
  */
 async function launchBrowser(browserFetcher) {
   const browserOptions = {
-    args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
+    args: [
+      '--disable-background-media-suspend',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-extensions',
+      '--disable-gpu',
+      '--disable-renderer-backgrounding',
+      '--no-sandbox',
+    ],
     dumpio: argv.chrome_debug,
     headless: true,
     executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
