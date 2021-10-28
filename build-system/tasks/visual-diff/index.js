@@ -780,6 +780,10 @@ async function performVisualTests(browserFetcher) {
   setDebuggingLevel();
 
   const browser = await launchBrowser(browserFetcher);
+  const handlerProcess = createCtrlcHandler(
+    'visual-diff:headless-browser',
+    browser.process()?.pid
+  );
   await launchWebServer();
 
   try {
@@ -800,6 +804,7 @@ async function performVisualTests(browserFetcher) {
     }
   } finally {
     await browser.close();
+    exitCtrlcHandler(handlerProcess);
     await stopServer();
   }
 }
