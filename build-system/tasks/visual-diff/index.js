@@ -553,7 +553,7 @@ async function snapshotWebpages(browser, webpages) {
       const pagePromise = (async () => {
         try {
           log('verbose', 'Navigating to page', yellow(webpage.url));
-          await page.goto(fullUrl, {waitUntil: 'networkidle2'});
+          await page.goto(fullUrl, {waitUntil: 'networkidle0'});
 
           log(
             'verbose',
