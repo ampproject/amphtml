@@ -1,8 +1,6 @@
 # Bento Carousel
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
-
-## Usage
+The Bento Carousel component is a generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
 
 Each of the component’s immediate children is considered an
 item in the carousel. Each of these nodes may also have arbitrary children.
@@ -12,6 +10,8 @@ navigational arrows to go forward or backwards a single item.
 
 The carousel advances between items if the user swipes or uses the customizable
 arrow buttons.
+
+## Usage
 
 ### Web Component
 
@@ -53,21 +53,21 @@ import '@ampproject/bento-base-carousel';
     bento-base-carousel > div {
       aspect-ratio: 4/1;
     }
-    .red-gradient {
+    .red {
       background: darkred;
     }
-    .blue-gradient {
+    .blue {
       background: steelblue;
     }
-    .green-gradient {
+    .green {
       background: seagreen;
     }
   </style>
 </head>
 <bento-base-carousel id="my-carousel">
-  <div class="red-gradient"></div>
-  <div class="blue-gradient"></div>
-  <div class="green-gradient"></div>
+  <div class="red"></div>
+  <div class="blue"></div>
+  <div class="green"></div>
 </bento-base-carousel>
 <div class="buttons" style="margin-top: 8px">
   <button id="prev-button">Go to previous slide</button>
