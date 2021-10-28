@@ -1,0 +1,55 @@
+
+<head>
+  <script async="" src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <script async="" custom-element="bento-fit-text" src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"></script>
+    <style>
+      .ft {
+       border: 1px solid black;
+       margin: 8px auto;
+       display: block;
+      }
+    </style>
+
+  </head>
+  <body>
+ <h1>FitText</h1>
+
+ <h3>Scale up to cover</h3>
+ <amp-fit-text id="test1" style="width: 300px; height: 200px" class="ft">
+  Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+ </amp-fit-text>
+
+ <h3>Scale up + overflow + ellipsis</h3>
+ <amp-fit-text id="test2" style="width: 300px; height: 200px" class="ft" min-font-size=42>
+  Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+ </amp-fit-text>
+
+ <h3>Scale down</h3>
+ <amp-fit-text id="test3" style="width: 300px; height: 200px" class="ft">
+  Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+ </amp-fit-text>
+
+ <h3>Scale down</h3>
+ <amp-fit-text id="test4" style="width: 108px; height: 78px" class="ft">
+  Specialcase test
+ </amp-fit-text>
+  
+  <div class="buttons" style="margin-top: 8px;">
+    <button id="font-button">Change max-font-size</button>
+    <button id="content-button">Change content</button>
+  </div>
+  
+  <script>
+    (async () => {
+      const fitText = document.querySelector('#my-fit-text');
+      await customElements.whenDefined('bento-fit-text');
+  
+      // set up button actions
+      document.querySelector('#font-button').onclick = () => fitText.setAttribute('max-font-size', '40');
+      document.querySelector('#content-button').onclick = () => fitText.textContent = 'new content';
+    })();
+  </script>
+
+
+</body>
