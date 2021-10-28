@@ -75,17 +75,13 @@ export function createElement(tag, props, ...children) {
   if (typeof tag !== 'string') {
     return tag({...props, children});
   }
-
   const element = self.document.createElement(tag);
-
   appendChild(element, children);
-
   if (props) {
     Object.keys(props).forEach((name) => {
       setAttribute(element, name, props[name]);
     });
   }
-
   return element;
 }
 
