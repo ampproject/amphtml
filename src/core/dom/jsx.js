@@ -35,16 +35,33 @@ function appendChild(parent, child) {
     return;
   }
   if (Array.isArray(child)) {
-    child.forEach((nestedChild) => {
-      appendChild(parent, nestedChild);
+    child.forEach((child) => {
+      appendChild(parent, child);
     });
-  } else {
-    parent.appendChild(
-      child?.nodeType
-        ? /** @type {!Node} */ (child)
-        : self.document.createTextNode(String(child))
-    );
+    return;
   }
+  parent.appendChild(
+    child?.nodeType
+      ? /** @type {!Node} */ (child)
+      : self.document.createTextNode(String(child))
+  );
+}
+
+/**
+ * @param {!Element} element
+ * @param {string} name
+ * @param {*} value
+ */
+function setAttribute(element, name, value) {
+  if (value === false || value == null) {
+    return;
+  }
+  if (typeof value == 'function' && name[0] === 'o' && name[1] === 'n') {
+    const eventName = name.toLowerCase().substr(2);
+    element.addEventListener(eventName, value);
+    return;
+  }
+  element.setAttribute(name, value === true ? '' : String(value));
 }
 
 /**
@@ -60,21 +77,12 @@ export function createElement(tag, props, ...children) {
   }
 
   const element = self.document.createElement(tag);
-  children.forEach((child) => {
-    appendChild(element, child);
-  });
+
+  appendChild(element, children);
 
   if (props) {
     Object.keys(props).forEach((name) => {
-      const value = props[name];
-      if (value === false || value == null) {
-        return;
-      }
-      if (name.startsWith('on') && name.length > 2) {
-        element.addEventListener(name.toLowerCase().substr(2), value);
-        return;
-      }
-      element.setAttribute(name, value === true ? '' : String(value));
+      setAttribute(element, name, props[name]);
     });
   }
 
