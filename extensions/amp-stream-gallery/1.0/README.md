@@ -41,7 +41,7 @@ The example below contains an `bento-stream-gallery` with three sections. The
   <link
     rel="stylesheet"
     type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-streamGallery-1.0.css"
+    href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
   />
 </head>
 <body>
@@ -129,7 +129,7 @@ Each Bento component has a small CSS library you must include to guarantee prope
 <link
   rel="stylesheet"
   type="text/css"
-  href="https://cdn.ampproject.org/v0/bento-streamGallery-1.0.css"
+  href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
 />
 ```
 

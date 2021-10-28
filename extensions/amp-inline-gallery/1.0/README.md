@@ -142,7 +142,7 @@ function App() {
         <img src="server.com/static/inline-examples/images/image2.jpg" />
         <img src="server.com/static/inline-examples/images/image3.jpg" />
       </BentoBaseCarousel>
-      <BentoInlineGallery-pagination inset />
+      <BentoInlineGalleryPagination inset />
     </BentoInlineGallery>
   );
 }
