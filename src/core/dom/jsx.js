@@ -56,7 +56,7 @@ function appendChild(parent, child) {
  */
 export function createElement(tag, props, ...children) {
   if (typeof tag !== 'string') {
-    return tag(children.length ? {...props, children} : props);
+    return tag({...props, children});
   }
 
   const element = self.document.createElement(tag);

@@ -37,8 +37,8 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
   });
 
   it('includes string children', () => {
-    const element = <div>{['foo']}</div>;
-    expect(element.outerHTML).to.equal('<div>foo</div>');
+    const element = <div>{['foo', 'bar']}</div>;
+    expect(element.outerHTML).to.equal('<div>foobar</div>');
   });
 
   it('includes DOM node child', () => {
@@ -76,10 +76,11 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     );
   });
 
-  it('ignores falsy children', () => {
+  it('ignores nullish and false children', () => {
     const element = (
       <div>
         {null}
+        {undefined}
         {false}
       </div>
     );
@@ -97,7 +98,7 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
   });
 
   it('renders child of value `0`', () => {
-    const element = <div>0</div>;
+    const element = <div>{0}</div>;
     expect(element.outerHTML).to.equal('<div>0</div>');
   });
 
