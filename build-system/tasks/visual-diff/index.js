@@ -241,11 +241,13 @@ async function launchBrowser(browserFetcher) {
       '--disable-gpu',
       '--disable-renderer-backgrounding',
       '--no-sandbox',
+      '--no-startup-window',
     ],
     dumpio: argv.chrome_debug,
     headless: true,
     executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
       .executablePath,
+    waitForInitialPage: false,
   };
   return await puppeteer.launch(browserOptions);
 }
@@ -261,7 +263,8 @@ async function launchBrowser(browserFetcher) {
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
 
-  const page = await browser.newPage();
+  const context = await browser.createIncognitoBrowserContext();
+  const page = await context.newPage();
   page.setDefaultNavigationTimeout(0);
   await page.setJavaScriptEnabled(true);
   await page.setRequestInterception(true);
