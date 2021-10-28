@@ -1,8 +1,8 @@
 # Bento Soundcloud
 
-## Usage
+The Bento Soundcloud component allows you to embed a Soundcloud clip.
 
-The Bento Soundcloud component allows you to embed a Soundcloud clip. Use it as a web component [`<bento-soundcloud>`](#web-component), or a Preact/React functional component [`<BentoSoundcloud>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -26,7 +26,7 @@ import '@ampproject/bento-soundcloud';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-soundcloud {

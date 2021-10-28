@@ -1,10 +1,8 @@
 # Bento Iframe
 
-## Usage
-
 Displays an iframe.
 
-Use Bento Iframe as a web component [`<bento-iframe>`](#web-component), or a Preact/React functional component [`<BentoIframe>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -28,7 +26,7 @@ import '@ampproject/bento-iframe';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"

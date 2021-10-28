@@ -1,8 +1,8 @@
 # Bento Timeago
 
-## Usage
+The Bento Timeago component can count up to, or away from, a specified date and time. It replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`.
 
-The Bento Timeago component can count up to, or away from, a specified date and time. It replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`. It can be used as a web component [`<bento-timeago>`](#web-component), or as a Preact/React functional component [`<BentoTimeago>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -26,7 +26,7 @@ import '@ampproject/bento-timeago';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"

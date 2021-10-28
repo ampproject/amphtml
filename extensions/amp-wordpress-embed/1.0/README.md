@@ -1,8 +1,8 @@
 # Bento WordPress Embed
 
-## Usage
+An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post or page.
 
-An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post or page. Use Bento WordPress Embed as a web component [`<bento-wordpress-embed>`](#web-component), or a Preact/React functional component [`<BentoWordPressEmbed>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -26,7 +26,7 @@ import '@ampproject/bento-wordpress-embed';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-wordpress-embed {

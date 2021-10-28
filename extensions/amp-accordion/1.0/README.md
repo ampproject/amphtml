@@ -1,13 +1,9 @@
 # Bento Accordion
 
-## Usage
-
 The Bento Accordion component allows you to display collapsible and expandable
 content sections. This component provides a way for viewers to glance at the
 content outline and jump to any section. Effective use reduces scrolling needs
 on mobile devices.
-
-Use Bento Accordion as a web component ([`<bento-accordion>`](#web-component)), or a Preact/React functional component ([`<BentoAccordion>`](#preactreact-component)).
 
 -   A Bento Accordion accepts one or more `<section>` elements as its direct
     children.
@@ -20,6 +16,8 @@ Use Bento Accordion as a web component ([`<bento-accordion>`](#web-component)), 
 -   A click or tap on a `<section>` heading expands or collapses the section.
 -   A Bento Accordion with a defined `id` preserves the collapsed or expanded
     state of each section while the user remains on your domain.
+
+## Usage
 
 ### Web Component
 
@@ -46,7 +44,7 @@ The example below contains an `bento-accordion` with three sections. The
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"

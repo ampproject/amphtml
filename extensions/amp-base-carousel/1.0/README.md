@@ -1,10 +1,10 @@
 # Bento Carousel
 
+The Bento Carousel component is a generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
+
 ## Usage
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis. Use Bento Carousel as a web component [`<bento-base-carousel>`](#web-component), or a Preact/React functional component [`<BentoBaseCarousel>`](#preactreact-component).
-
-Each of the Bento Carousel component’s immediate children is considered an
+Each of the component’s immediate children is considered an
 item in the carousel. Each of these nodes may also have arbitrary children.
 
 The carousel consists of an arbitrary number of items, as well as optional
@@ -35,7 +35,7 @@ import '@ampproject/bento-base-carousel';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-base-carousel {
@@ -53,39 +53,21 @@ import '@ampproject/bento-base-carousel';
     bento-base-carousel > div {
       aspect-ratio: 4/1;
     }
-    .red-gradient {
-      background: brown;
-      background: linear-gradient(
-        90deg,
-        brown 50%,
-        lightsalmon 90%,
-        wheat 100%
-      );
+    .red {
+      background: darkred;
     }
-    .blue-gradient {
+    .blue {
       background: steelblue;
-      background: linear-gradient(
-        90deg,
-        steelblue 50%,
-        plum 90%,
-        lavender 100%
-      );
     }
-    .green-gradient {
+    .green {
       background: seagreen;
-      background: linear-gradient(
-        90deg,
-        seagreen 50%,
-        mediumturquoise 90%,
-        turquoise 100%
-      );
     }
   </style>
 </head>
 <bento-base-carousel id="my-carousel">
-  <div class="red-gradient"></div>
-  <div class="blue-gradient"></div>
-  <div class="green-gradient"></div>
+  <div class="red"></div>
+  <div class="blue"></div>
+  <div class="green"></div>
 </bento-base-carousel>
 <div class="buttons" style="margin-top: 8px">
   <button id="prev-button">Go to previous slide</button>

@@ -1,8 +1,8 @@
 # Bento Twitter
 
-## Behavior
+The Bento Twitter component allows you to embed a Tweet or Moment.
 
-The Bento Twitter component allows you to embed a Tweet or Moment. Use it as a web component [`<bento-twitter>`](#web-component), or a Preact/React functional component [`<BentoTwitter>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -26,7 +26,7 @@ import '@ampproject/bento-twitter';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-twitter {
