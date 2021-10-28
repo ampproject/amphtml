@@ -5,6 +5,8 @@ import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {Expander} from './url-expander/expander';
 import {
   AsyncResolverDef,
@@ -30,8 +32,6 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-
-import {dev, devAssert, user, userAssert} from '#utils/log';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';

@@ -14,6 +14,8 @@ import {
   installUrlReplacementsServiceForDoc,
 } from '#service/url-replacements-impl';
 
+import {user} from '#utils/log';
+
 import {mockWindowInterface, stubServiceForDoc} from '#testing/helpers/service';
 import {createIframePromise} from '#testing/iframe';
 
