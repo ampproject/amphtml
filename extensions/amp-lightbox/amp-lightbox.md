@@ -29,98 +29,12 @@ component. To show a gallery of images in a lightbox, you can use
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
-#### Example
-
-The example below demonstrates `amp-lightbox` component in standalone use.
-
-[example preview="top-frame" playground="false"]
-
-```html
-<head>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-lightbox-1.0.css">
-  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-1.0.js"></script>
-</head>
-<amp-lightbox id="my-lightbox" layout="nodisplay">
-  Lightboxed content
-  <button id='close-button'>Close lightbox</button>
-</amp-lightbox>
-<button id='open-button'>Open lightbox</button>
-<script>
-  (async () => {
-    const lightbox = document.querySelector('#my-lightbox');
-    await customElements.whenDefined('amp-lightbox');
-    const api = await lightbox.getApi();
-
-    // set up button actions
-    document.querySelector('#open-button').onclick = () => api.open();
-    document.querySelector('#close-button').onclick = () => api.close();
-  })();
-</script>
-```
-
-[/example]
-
-#### Interactivity and API usage
-
-Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
-
-The `amp-lightbox` component API is accessible by including the following script tag in your document:
-
-```js
-await customElements.whenDefined('amp-lightbox');
-const api = await lightbox.getApi();
-```
-
-##### Actions
-
-The `amp-lightbox` API allows you to perform the following actions:
-
-**open()**
-Opens the lightbox.
-
-```js
-api.open();
-```
-
-**close()**
-Closes the lightbox.
-
-```js
-api.close();
-```
-
-##### Events
-
-The `amp-lightbox` API allows you to register and respond to the following events:
-
-**open**
-
-This event is triggered when the lightbox is opened.
-
-```js
-lightbox.addEventListener('open', (e) => console.log(e))
-```
-
-**close**
-
-This event is triggered when the lightbox is closed.
-
-```js
-lightbox.addEventListener('close', (e) => console.log(e))
-```
-
-#### Layout and style
-
-Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
-
-```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-lightbox-1.0.css">
-```
-
-Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+To find the standalone version of `amp-lightbox`, see [**`bento-lightbox`**](./1.0/README.md).
 
 ## Attributes
 

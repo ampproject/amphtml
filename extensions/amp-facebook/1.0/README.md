@@ -10,8 +10,6 @@ You must include each Bento component's required CSS library before adding custo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -22,26 +20,25 @@ npm install @ampproject/bento-facebook
 import '@ampproject/bento-facebook';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-facebook {
       display: block;
       overflow: hidden;
       position: relative;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"
+  ></script>
   <style>
-    bento-facebook{
+    bento-facebook {
       width: 375px;
       height: 472px;
     }
@@ -49,13 +46,13 @@ import '@ampproject/bento-facebook';
 </head>
 
 <!-- Facebook Post -->
-<bento-facebook id="facebook-post"
-    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+<bento-facebook
+  id="facebook-post"
+  data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373"
+>
 </bento-facebook>
-<div class="buttons" style="margin-top: 8px;">
-  <button id="change-facebook-post">
-    Change Facebook post
-  </button>
+<div class="buttons" style="margin-top: 8px">
+  <button id="change-facebook-post">Change Facebook post</button>
 </div>
 
 <script>
@@ -64,82 +61,97 @@ import '@ampproject/bento-facebook';
     await customElements.whenDefined('bento-facebook');
     // set up button actions
     document.querySelector('#change-facebook-post').onclick = () => {
-      facebookPost.setAttribute('data-href', 'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/')
-    }
+      facebookPost.setAttribute(
+        'data-href',
+        'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/'
+      );
+    };
   })();
 </script>
 
 <!-- Facebook Video-->
-<bento-facebook id="facebook-video"
-    data-embed-as="video"
-    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
+<bento-facebook
+  id="facebook-video"
+  data-embed-as="video"
+  data-href="https://www.facebook.com/nasaearth/videos/10155187938052139"
+>
 </bento-facebook>
-<div class="buttons" style="margin-top: 8px;">
-  <button id="change-facebook-video">
-    Change Facebook video
-  </button>
+<div class="buttons" style="margin-top: 8px">
+  <button id="change-facebook-video">Change Facebook video</button>
 </div>
 
 <script>
   (async () => {
-    const facebookVideo= document.querySelector('#facebook-video');
+    const facebookVideo = document.querySelector('#facebook-video');
     await customElements.whenDefined('bento-facebook');
     // set up button actions
     document.querySelector('#change-facebook-video').onclick = () => {
-      facebookVideo.setAttribute('data-href', 'https://www.facebook.com/NASA/videos/846648316199961/')
-    }
+      facebookVideo.setAttribute(
+        'data-href',
+        'https://www.facebook.com/NASA/videos/846648316199961/'
+      );
+    };
   })();
 </script>
 
 <!-- Facebook Page-->
-<bento-facebook id="facebook-video"
-    data-embed-as="video"
-    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
+<bento-facebook
+  id="facebook-video"
+  data-embed-as="video"
+  data-href="https://www.facebook.com/nasaearth/videos/10155187938052139"
+>
 </bento-facebook>
-<div class="buttons" style="margin-top: 8px;">
-  <button id="change-facebook-video">
-    Change Facebook video
-  </button>
+<div class="buttons" style="margin-top: 8px">
+  <button id="change-facebook-video">Change Facebook video</button>
 </div>
 
 <script>
   (async () => {
-    const facebookVideo= document.querySelector('#facebook-video');
+    const facebookVideo = document.querySelector('#facebook-video');
     await customElements.whenDefined('bento-facebook');
     // set up button actions
     document.querySelector('#change-facebook-video').onclick = () => {
-      facebookVideo.setAttribute('data-href', 'https://www.facebook.com/NASA/videos/846648316199961/')
-    }
+      facebookVideo.setAttribute(
+        'data-href',
+        'https://www.facebook.com/NASA/videos/846648316199961/'
+      );
+    };
   })();
 </script>
 
 <!-- Facebook Like-->
-<bento-facebook id="facebook-video"
-    data-embed-as="like"
-    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
+<bento-facebook
+  id="facebook-video"
+  data-embed-as="like"
+  data-href="https://www.facebook.com/nasaearth/videos/10155187938052139"
+>
 </bento-facebook>
 
 <!-- Facebook Comments-->
-<bento-facebook id="facebook-comments"
-    data-embed-as="comments"
-    data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185">
+<bento-facebook
+  id="facebook-comments"
+  data-embed-as="comments"
+  data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185"
+>
 </bento-facebook>
 ```
-
-[/example]
 
 #### Layout and Style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-facebook-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-facebook {
     display: block;
     overflow: hidden;
@@ -289,8 +301,6 @@ The examples below demonstrate use of the `<BentoFacebook>` as a functional comp
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -299,20 +309,18 @@ npm install @ampproject/bento-facebook
 
 ```javascript
 import React from 'react';
-import { BentoFacebook } from '@ampproject/bento-facebook/react';
+import {BentoFacebook} from '@ampproject/bento-facebook/react';
 import '@ampproject/bento-facebook/styles.css';
 
 function App() {
   return (
     <BentoFacebook
-        embedAs="post"
-        href="https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/">
-    </BentoFacebook>
+      embedAs="post"
+      href="https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/"
+    ></BentoFacebook>
   );
 }
 ```
-
-[/example]
 
 #### Props
 

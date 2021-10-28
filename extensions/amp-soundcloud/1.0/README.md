@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-soundcloud>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,24 +22,23 @@ npm install @ampproject/bento-soundcloud
 import '@ampproject/bento-soundcloud';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-soundcloud {
       display: block;
       overflow: hidden;
       position: relative;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
+  ></script>
   <style>
     bento-soundcloud {
       aspect-ratio: 1;
@@ -53,10 +50,8 @@ import '@ampproject/bento-soundcloud';
   data-trackid="243169232"
   data-visual="true"
 ></bento-soundcloud>
-<div class="buttons" style="margin-top: 8px;">
-  <button id="change-track">
-    Change track
-  </button>
+<div class="buttons" style="margin-top: 8px">
+  <button id="change-track">Change track</button>
 </div>
 
 <script>
@@ -66,28 +61,30 @@ import '@ampproject/bento-soundcloud';
 
     // set up button actions
     document.querySelector('#change-track').onclick = () => {
-      soundcloud.setAttribute('data-trackid', '243169232')
-      soundcloud.setAttribute('data-color', 'ff5500')
-      soundcloud.removeAttribute('data-visual')
-    }
+      soundcloud.setAttribute('data-trackid', '243169232');
+      soundcloud.setAttribute('data-color', 'ff5500');
+      soundcloud.removeAttribute('data-visual');
+    };
   })();
 </script>
 ```
-
-[/example]
 
 #### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-soundcloud {
     display: block;
     overflow: hidden;
@@ -140,8 +137,6 @@ The examples below demonstrate use of the `<BentoSoundcloud>` as a functional co
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -150,18 +145,13 @@ npm install @ampproject/bento-soundcloud
 
 ```javascript
 import React from 'react';
-import { BentoSoundcloud } from '@ampproject/bento-soundcloud/react';
+import {BentoSoundcloud} from '@ampproject/bento-soundcloud/react';
 import '@ampproject/bento-soundcloud/styles.css';
 
 function App() {
-  return (
-    <BentoSoundcloud trackId="243169232" visual={true}>
-    </BentoSoundcloud>
-  );
+  return <BentoSoundcloud trackId="243169232" visual={true}></BentoSoundcloud>;
 }
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -170,15 +160,21 @@ function App() {
 The `BentoSoundcloud` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoSoundcloud style={{width: '300px', height: '100px'}} trackId="243169232" visual={true}>
-</BentoSoundcloud>
+<BentoSoundcloud
+  style={{width: 300, height: 100}}
+  trackId="243169232"
+  visual={true}
+></BentoSoundcloud>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoSoundcloud className='custom-styles' trackId="243169232" visual={true}>
-</BentoSoundcloud>
+<BentoSoundcloud
+  className="custom-styles"
+  trackId="243169232"
+  visual={true}
+></BentoSoundcloud>
 ```
 
 ```css

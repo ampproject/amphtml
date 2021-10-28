@@ -31,12 +31,13 @@ jobs:
       - uses: actions/checkout@v2
       - run: bash ./.github/workflows/install_dependencies.sh
       - name: Run tagger
-        run: node ./build-system/release-tagger/index.js \
-          ${{ github.event.inputs.action }} \
-          ${{ github.event.inputs.head }} \
-          ${{ github.event.inputs.base }} \
-          ${{ github.event.inputs.channel }} \
-          ${{ github.event.inputs.time }} \
-          ${{ github.event.inputs.sha }}
+        run: |
+          node ./build-system/release-tagger/index.js \
+            --action ${{ github.event.inputs.action }} \
+            --head ${{ github.event.inputs.head }} \
+            --base ${{ github.event.inputs.base }} \
+            --channel ${{ github.event.inputs.channel }} \
+            --time ${{ github.event.inputs.time }} \
+            --sha ${{ github.event.inputs.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

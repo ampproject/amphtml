@@ -14,8 +14,6 @@ The examples below demonstrate use of the `<bento-social-share>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -26,16 +24,12 @@ npm install @ampproject/bento-social-share
 import '@ampproject/bento-social-share';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-social-share {
       display: inline-block;
       overflow: hidden;
@@ -45,7 +39,11 @@ import '@ampproject/bento-social-share';
       height: 44px;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"></script>
+  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
+  ></script>
   <style>
     bento-social-share {
       width: 375px;
@@ -54,15 +52,14 @@ import '@ampproject/bento-social-share';
   </style>
 </head>
 
-<bento-social-share id="my-share"
+<bento-social-share
+  id="my-share"
   type="twitter"
   aria-label="Share on Twitter"
 ></bento-social-share>
 
-<div class="buttons" style="margin-top: 8px;">
-  <button id="change-share">
-    Change share button
-  </button>
+<div class="buttons" style="margin-top: 8px">
+  <button id="change-share">Change share button</button>
 </div>
 
 <script>
@@ -72,27 +69,29 @@ import '@ampproject/bento-social-share';
 
     // set up button actions
     document.querySelector('#change-share').onclick = () => {
-      twitter.setAttribute('type', 'linkedin')
-      twitter.setAttribute('aria-label', 'Share on LinkedIn')
-    }
+      twitter.setAttribute('type', 'linkedin');
+      twitter.setAttribute('aria-label', 'Share on LinkedIn');
+    };
   })();
 </script>
 ```
-
-[/example]
 
 #### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-social-share-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-social-share-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-social-share {
     display: inline-block;
     overflow: hidden;
@@ -150,7 +149,7 @@ bento-social-share:focus {
 The default focus indicator can be overwritten by defining CSS styles for focus and including them within a `style` tag. In the example below, the first CSS rule-set removes the focus indicator on all `bento-social-share` elements by setting the `outline` property to `none`. The second rule-set specifies a red outline (instead of the default blue) and also sets the `outline-offset` to be `3px` for all `bento-social-share` elements with the class `custom-focus`.
 
 ```css
-bento-social-share:focus{
+bento-social-share:focus {
   outline: none;
 }
 
@@ -330,8 +329,6 @@ The examples below demonstrate use of the `<BentoSocialShare>` as a functional c
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -340,7 +337,7 @@ npm install @ampproject/bento-social-share
 
 ```javascript
 import React from 'react';
-import { BentoSocialShare } from '@ampproject/bento-social-share/react';
+import {BentoSocialShare} from '@ampproject/bento-social-share/react';
 import '@ampproject/bento-social-share/styles.css';
 
 function App() {
@@ -352,8 +349,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -404,7 +399,7 @@ BentoSocialShare:focus {
 The default focus indicator can be overwritten by defining CSS styles for focus and including them within a `style` tag on an AMP HTML page. In the example below, the first CSS rule-set removes the focus indicator on all `BentoSocialShare` elements by setting the `outline` property to `none`. The second rule-set specifies a red outline (instead of the default blue) and also sets the `outline-offset` to be `3px` for all `BentoSocialShare` elements with the class `custom-focus`.
 
 ```css
-BentoSocialShare:focus{
+BentoSocialShare:focus {
   outline: none;
 }
 

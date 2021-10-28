@@ -12,8 +12,6 @@ The examples below demonstrate use of the `<bento-jwplayer>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -24,20 +22,23 @@ npm install @ampproject/bento-jwplayer
 import '@ampproject/bento-jwplayer';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
 
 The example below contains an `bento-jwplayer` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
-[example preview="top-frame" playground="false"]
-
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css">
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+  />
 </head>
 <body>
   <bento-jwplayer
@@ -52,19 +53,16 @@ The example below contains an `bento-jwplayer` with three sections. The
       const twitter = document.querySelector('#jwplayer');
       await customElements.whenDefined('bento-twitter');
 
-      const api = player.getApi()
+      const api = player.getApi();
       api.play();
       api.pause();
       api.mute();
       api.unmute();
       api.requestFullscreen();
-    })()
+    })();
   </script>
-
 </body>
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
@@ -80,21 +78,25 @@ const api = await document.querySelector('bento-accordion').getApi();
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
-  amp-jwplayer {
+<style>
+  bento-jwplayer {
     display: block;
     overflow: hidden;
     position: relative;
   }
 
   /* Pre-upgrade: size-defining element - hide children. */
-  amp-jwplayer:not(.i-amphtml-built)
+  bento-jwplayer:not(.i-amphtml-built)
     > :not([placeholder]):not([slot='i-amphtml-svc']) {
     display: none;
     content-visibility: hidden;
@@ -216,8 +218,6 @@ The examples below demonstrates use of the `<BentoMathml>` as a functional compo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -226,7 +226,7 @@ npm install @ampproject/bento-jwplayer
 
 ```javascript
 import React from 'react';
-import { BentoMathml } from '@ampproject/bento-jwplayer/react';
+import {BentoMathml} from '@ampproject/bento-jwplayer/react';
 import '@ampproject/bento-jwplayer/styles.css';
 
 function App() {
@@ -241,8 +241,6 @@ function App() {
 }
 ```
 
-[/example]
-
 #### Layout and style
 
 **Container type**
@@ -250,17 +248,13 @@ function App() {
 The `BentoMathml` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoMathml style={{width: '300px', height: '100px'}}>
-  ...
-</BentoMathml>
+<BentoMathml style={{width: 300, height: 100}}>...</BentoMathml>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoMathml className='custom-styles'>
-  ...
-</BentoMathml>
+<BentoMathml className="custom-styles">...</BentoMathml>
 ```
 
 ```css

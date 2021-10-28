@@ -1,6 +1,7 @@
-import {copyChildren, removeChildren} from '#core/dom';
-import {applyFillContent} from '#core/dom/layout';
 import {realChildNodes} from '#core/dom/query';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {copyChildren, isServerRendered, removeChildren} from '#core/dom';
+import {applyFillContent} from '#core/dom/layout';
 
 const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
 const CONTENT_CLASS = 'i-amphtml-fit-text-content';
@@ -13,6 +14,10 @@ const CONTENT_WRAPPER_CLASS = 'i-amphtml-fit-text-content-wrapper';
  * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
  */
 export function buildDom(element) {
+  if (isServerRendered(element)) {
+    return queryDom(element);
+  }
+
   const doc = element.ownerDocument;
   const content = doc.createElement('div');
   applyFillContent(content);
@@ -29,6 +34,29 @@ export function buildDom(element) {
   mirrorNode(contentWrapper, measurer);
   element.appendChild(content);
   element.appendChild(measurer);
+
+  return {content, contentWrapper, measurer};
+}
+
+/**
+ * Returns all of the needed ivars from a server rendered element.
+ * @param {!Element} element
+ * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
+ */
+export function queryDom(element) {
+  const content = element.querySelector(
+    `.${escapeCssSelectorIdent(CONTENT_CLASS)}`
+  );
+  const contentWrapper = element.querySelector(
+    `.${escapeCssSelectorIdent(CONTENT_WRAPPER_CLASS)}`
+  );
+  const measurer = element.querySelector(
+    `.${escapeCssSelectorIdent(MEASURER_CLASS)}`
+  );
+
+  if (!content || !contentWrapper || !measurer) {
+    throw new Error('Invalid server render');
+  }
 
   return {content, contentWrapper, measurer};
 }

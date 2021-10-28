@@ -29,8 +29,6 @@ The examples below demonstrate use of the `<bento-accordion>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -41,23 +39,26 @@ npm install @ampproject/bento-accordion
 import '@ampproject/bento-accordion';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
 
 The example below contains an `bento-accordion` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
-[example preview="top-frame" playground="false"]
-
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-accordion-1.0.css">
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+  />
 </head>
 <body>
-  <bento-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
+  <bento-accordion id="my-accordion" disable-session-states>
     <section>
       <h2>Section 1</h2>
       <p>Content in section 1.</p>
@@ -85,8 +86,6 @@ The example below contains an `bento-accordion` with three sections. The
   </script>
 </body>
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
@@ -129,8 +128,12 @@ use its corresponding `id` as the value.
     const api = await accordion.getApi();
 
     // set up button actions
-    document.querySelector('#button1').onclick = () => api.toggle();
-    document.querySelector('#button2').onclick = () => api.toggle('section1');
+    document.querySelector('#button1').onclick = () => {
+      api.toggle();
+    };
+    document.querySelector('#button2').onclick = () => {
+      api.toggle('section1');
+    };
   })();
 </script>
 ```
@@ -150,8 +153,12 @@ expands all sections of the accordion. To specify a section, add the `section` a
     const api = await accordion.getApi();
 
     // set up button actions
-    document.querySelector('#button1').onclick = () => api.expand();
-    document.querySelector('#button2').onclick = () => api.expand('section1');
+    document.querySelector('#button1').onclick = () => {
+      api.expand();
+    };
+    document.querySelector('#button2').onclick = () => {
+      api.expand('section1');
+    };
   })();
 </script>
 ```
@@ -172,8 +179,12 @@ it collapses all sections of the accordion. To specify a section, add the
     const api = await accordion.getApi();
 
     // set up button actions
-    document.querySelector('#button1').onclick = () => api.collapse();
-    document.querySelector('#button2').onclick = () => api.collapse('section1');
+    document.querySelector('#button1').onclick = () => {
+      api.collapse();
+    };
+    document.querySelector('#button2').onclick = () => {
+      api.collapse('section1');
+    };
   })();
 </script>
 ```
@@ -195,7 +206,7 @@ In the example below, `section 1` listens for the `expand` event and expands `se
 See below for example.
 
 ```html
-<bento-accordion id="eventsAccordion" animate='true'>
+<bento-accordion id="eventsAccordion" animate>
   <section id="section1">
     <h2>Section 1</h2>
     <div>Puppies are cute.</div>
@@ -216,8 +227,12 @@ See below for example.
     // when section 2 collapses, section 1 also collapses
     const section1 = document.querySelector('#section1');
     const section2 = document.querySelector('#section2');
-    section1.addEventListener('expand', () => api.expand('section2'));
-    section2.addEventListener('collapse', () => api.collapse('section1'));
+    section1.addEventListener('expand', () => {
+      api.expand('section2');
+    });
+    section2.addEventListener('collapse', () => {
+      api.collapse('section1');
+    });
   })();
 </script>
 ```
@@ -227,25 +242,29 @@ See below for example.
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-accordion-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
-  amp-accordion {
+<style>
+  bento-accordion {
     display: block;
     contain: layout;
   }
 
-  amp-accordion,
-  amp-accordion > section,
-  amp-accordion > section > :first-child {
+  bento-accordion,
+  bento-accordion > section,
+  bento-accordion > section > :first-child {
     margin: 0;
   }
 
-  amp-accordion > section > * {
+  bento-accordion > section > * {
     display: block;
     float: none;
     overflow: hidden; /* clearfix */
@@ -253,7 +272,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
   }
 
   @media (min-width: 1px) {
-    :where(amp-accordion > section) > :first-child {
+    :where(bento-accordion > section) > :first-child {
       cursor: pointer;
       background-color: #efefef;
       padding-right: 20px;
@@ -268,8 +287,10 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
     border: 1px solid #dfdfdf;
   }
 
-  amp-accordion > section:not([expanded]) > :last-child:not(.i-amphtml-animating),
-  amp-accordion
+  bento-accordion
+    > section:not([expanded])
+    > :last-child:not(.i-amphtml-animating),
+  bento-accordion
     > section:not([expanded])
     > :last-child:not(.i-amphtml-animating)
     * {
@@ -286,8 +307,6 @@ Include the `animate` attribute in `<bento-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
 
 This attribute can be configured to based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
-
-[example preview="top-frame" playground="true" imports="bento-accordion:1.0"]
 
 ```html
 <bento-accordion animate>
@@ -306,13 +325,9 @@ This attribute can be configured to based on a [media query](./../../../docs/spe
 </bento-accordion>
 ```
 
-[/example]
-
 ##### expanded
 
 Apply the `expanded` attribute to a nested `<section>` to expand that section when the page loads.
-
-[example preview="top-frame" playground="true" imports="bento-accordion:1.0"]
 
 ```html
 <bento-accordion>
@@ -331,13 +346,9 @@ Apply the `expanded` attribute to a nested `<section>` to expand that section wh
 </bento-accordion>
 ```
 
-[/example]
-
 ##### expand-single-section
 
 Allow only one section to expand at a time by applying the `expand-single-section` attribute to the `<bento-accordion>` element. This means if a user taps on a collapsed `<section>`, it will expand and collapse other expanded `<section>`'s.
-
-[example preview="top-frame" playground="true" imports="bento-accordion:1.0"]
 
 ```html
 <bento-accordion expand-single-section>
@@ -351,16 +362,14 @@ Allow only one section to expand at a time by applying the `expand-single-sectio
   </section>
   <section>
     <h2>Section 3</h2>
-    <amp-img
-      src="{{server_for_email}}/static/inline-examples/images/squirrel.jpg"
+    <img
+      src="https://source.unsplash.com/random/320x256"
       width="320"
       height="256"
-    ></amp-img>
+    />
   </section>
 </bento-accordion>
 ```
-
-[/example]
 
 #### Styling
 
@@ -385,8 +394,6 @@ The examples below demonstrates use of the `<BentoAccordion>` as a functional co
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -395,32 +402,36 @@ npm install @ampproject/bento-accordion
 
 ```javascript
 import React from 'react';
-import { BentoAccordion } from '@ampproject/bento-accordion/react';
+import {BentoAccordion} from '@ampproject/bento-accordion/react';
 import '@ampproject/bento-accordion/styles.css';
 
 function App() {
   return (
     <BentoAccordion>
       <BentoAccordionSection key={1}>
-        <BentoAccordionHeader><h1>Section 1</h1></BentoAccordionHeader>
+        <BentoAccordionHeader>
+          <h1>Section 1</h1>
+        </BentoAccordionHeader>
         <BentoAccordionContent>Content 1</BentoAccordionContent>
       </BentoAccordionSection>
 
       <BentoAccordionSection key={2}>
-        <BentoAccordionHeader><h1>Section 2</h1></BentoAccordionHeader>
+        <BentoAccordionHeader>
+          <h1>Section 2</h1>
+        </BentoAccordionHeader>
         <BentoAccordionContent>Content 2</BentoAccordionContent>
       </BentoAccordionSection>
 
       <BentoAccordionSection key={3}>
-        <BentoAccordionHeader><h1>Section 3</h1></BentoAccordionHeader>
+        <BentoAccordionHeader>
+          <h1>Section 3</h1>
+        </BentoAccordionHeader>
         <BentoAccordionContent>Content 3</BentoAccordionContent>
       </BentoAccordionSection>
     </BentoAccordion>
   );
 }
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
@@ -434,17 +445,23 @@ function App() {
   return (
     <BentoAccordion ref={ref}>
       <BentoAccordionSection id="section1" key={1}>
-        <BentoAccordionHeader><h1>Section 1</h1></BentoAccordionHeader>
+        <BentoAccordionHeader>
+          <h1>Section 1</h1>
+        </BentoAccordionHeader>
         <BentoAccordionContent>Content 1</BentoAccordionContent>
       </BentoAccordionSection>
 
       <BentoAccordionSection id="section2" key={2}>
-        <BentoAccordionHeader><h1>Section 2</h1></BentoAccordionHeader>
+        <BentoAccordionHeader>
+          <h1>Section 2</h1>
+        </BentoAccordionHeader>
         <BentoAccordionContent>Content 2</BentoAccordionContent>
       </BentoAccordionSection>
 
       <BentoAccordionSection id="section3" key={3}>
-        <BentoAccordionHeader><h1>Section 3</h1></BentoAccordionHeader>
+        <BentoAccordionHeader>
+          <h1>Section 3</h1>
+        </BentoAccordionHeader>
         <BentoAccordionContent>Content 3</BentoAccordionContent>
       </BentoAccordionSection>
     </BentoAccordion>
@@ -507,37 +524,46 @@ In the example below, `section 1` listens for the `expand` event and expands `se
 See below for example.
 
 ```jsx
-    <BentoAccordion ref={ref}>
-      <BentoAccordionSection
-        id="section1"
-        key={1}
-        onExpandStateChange={
-          (expanded) => expanded ? alert('section1 expanded') : alert('section1 collapsed')
-        }>
-        <BentoAccordionHeader><h1>Section 1</h1></BentoAccordionHeader>
-        <BentoAccordionContent>Content 1</BentoAccordionContent>
-      </BentoAccordionSection>
+<BentoAccordion ref={ref}>
+  <BentoAccordionSection
+    id="section1"
+    key={1}
+    onExpandStateChange={(expanded) => {
+      alert(expanded ?  'section1 expanded' : 'section1 collapsed');
+    }}
+  >
+    <BentoAccordionHeader>
+      <h1>Section 1</h1>
+    </BentoAccordionHeader>
+    <BentoAccordionContent>Content 1</BentoAccordionContent>
+  </BentoAccordionSection>
 
-      <BentoAccordionSection
-        id="section2"
-        key={2}
-        onExpandStateChange={
-          (expanded) => expanded ? alert('section2 expanded') : alert('section2 collapsed'}
-        }>
-        <BentoAccordionHeader><h1>Section 2</h1></BentoAccordionHeader>
-        <BentoAccordionContent>Content 2</BentoAccordionContent>
-      </BentoAccordionSection>
+  <BentoAccordionSection
+    id="section2"
+    key={2}
+    onExpandStateChange={(expanded) => {
+      alert(expanded ?  'section2 expanded' : 'section2 collapsed');
+    }}
+  >
+    <BentoAccordionHeader>
+      <h1>Section 2</h1>
+    </BentoAccordionHeader>
+    <BentoAccordionContent>Content 2</BentoAccordionContent>
+  </BentoAccordionSection>
 
-      <BentoAccordionSection
-        id="section3"
-        key={3}
-        onExpandStateChange={
-          (expanded) => expanded ? alert('section3 expanded') : alert('section3 collapsed'}
-        }>
-        <BentoAccordionHeader><h1>Section 3</h1></BentoAccordionHeader>
-        <BentoAccordionContent>Content 3</BentoAccordionContent>
-      </BentoAccordionSection>
-    </BentoAccordion>
+  <BentoAccordionSection
+    id="section3"
+    key={3}
+    onExpandStateChange={(expanded) => {
+      alert(expanded ?  'section3 expanded' : 'section3 collapsed');
+    }}
+  >
+    <BentoAccordionHeader>
+      <h1>Section 3</h1>
+    </BentoAccordionHeader>
+    <BentoAccordionContent>Content 3</BentoAccordionContent>
+  </BentoAccordionSection>
+</BentoAccordion>
 ```
 
 #### Layout and style
@@ -547,17 +573,13 @@ See below for example.
 The `BentoAccordion` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoAccordion style={{width: '300px', height: '100px'}}>
-  ...
-</BentoAccordion>
+<BentoAccordion style={{width: 300, height: 100}}>...</BentoAccordion>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoAccordion className='custom-styles'>
-  ...
-</BentoAccordion>
+<BentoAccordion className="custom-styles">...</BentoAccordion>
 ```
 
 ```css

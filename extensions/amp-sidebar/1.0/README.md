@@ -14,8 +14,6 @@ The examples below demonstrate use of the `<bento-sidebar>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -26,21 +24,21 @@ npm install @ampproject/bento-sidebar
 import '@ampproject/bento-sidebar';
 ```
 
-[/example]
-
 #### Example: Include via `<script>`
-
-[example preview="top-frame" playground="false"]
 
 ```html
 <head>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-sidebar:not([open]) {
       display: none !important;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"></script>
+  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"
+  ></script>
 </head>
 <body>
   <bento-sidebar id="sidebar1" side="right">
@@ -54,10 +52,8 @@ import '@ampproject/bento-sidebar';
     </ul>
   </bento-sidebar>
 
-  <div class="buttons" style="margin-top: 8px;">
-    <button id="open-sidebar">
-      Open sidebar
-    </button>
+  <div class="buttons" style="margin-top: 8px">
+    <button id="open-sidebar">Open sidebar</button>
   </div>
 
   <script>
@@ -72,8 +68,6 @@ import '@ampproject/bento-sidebar';
   </script>
 </body>
 ```
-
-[/example]
 
 #### Bento Toolbar
 
@@ -152,13 +146,17 @@ api.toggle(0);
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-sidebar-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-sidebar:not([open]) {
     display: none !important;
   }
@@ -215,8 +213,6 @@ The examples below demonstrate use of the `<BentoSidebar>` as a functional compo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
@@ -225,7 +221,7 @@ npm install @ampproject/bento-sidebar
 
 ```javascript
 import React from 'react';
-import { BentoSidebar } from '@ampproject/bento-sidebar/react';
+import {BentoSidebar} from '@ampproject/bento-sidebar/react';
 import '@ampproject/bento-sidebar/styles.css';
 
 function App() {
@@ -244,8 +240,6 @@ function App() {
 }
 ```
 
-[/example]
-
 #### Bento Toolbar
 
 You can create a Bento Toolbar element that displays in the `<body>` by specifying the `toolbar` prop with a media query and a `toolbarTarget` prop with an element id on a `<BentoSidebarToolbar>` component that is a child of `<BentoSidebar>`. The `toolbar` duplicates the `<BentoSidebarToolbar>` element and its children and appends the element into the `toolbarTarget` element.
@@ -262,24 +256,29 @@ You can create a Bento Toolbar element that displays in the `<body>` by specifyi
 In the following example, we display a `toolbar` if the window width is less than or equal to 767px. The `toolbar` contains a search input element. The `toolbar` element will be appended to the `<div id="target-element">` element.
 
 ```jsx
-<BentoSidebar>
-  <ul>
-    <li>Nav item 1</li>
-    <li>Nav item 2</li>
-    <li>Nav item 3</li>
-    <li>Nav item 4</li>
-    <li>Nav item 5</li>
-    <li>Nav item 6</li>
-  </ul>
-  <BentoSidebarToolbar toolbar="(max-width: 767px)" toolbarTarget="toolbar-target">
+<>
+  <BentoSidebar>
     <ul>
-      <li>Toolbar Item 1</li>
-      <li>Toolbar Item 2</li>
+      <li>Nav item 1</li>
+      <li>Nav item 2</li>
+      <li>Nav item 3</li>
+      <li>Nav item 4</li>
+      <li>Nav item 5</li>
+      <li>Nav item 6</li>
     </ul>
-  </BentoSidebarToolbar>
-</BentoSidebar>
+    <BentoSidebarToolbar
+      toolbar="(max-width: 767px)"
+      toolbarTarget="target-element"
+    >
+      <ul>
+        <li>Toolbar Item 1</li>
+        <li>Toolbar Item 2</li>
+      </ul>
+    </BentoSidebarToolbar>
+  </BentoSidebar>
 
-<div id="target-element"></div>
+  <div id="target-element"></div>
+</>
 ```
 
 #### Interactivity and API usage
@@ -314,21 +313,21 @@ The `BentoSidebar` API allows you to perform the following actions:
 Opens the sidebar.
 
 ```javascript
-ref.current..open();
+ref.current.open();
 ```
 
 **close()**
 Closes the sidebar.
 
 ```javascript
-ref.current..close();
+ref.current.close();
 ```
 
 **toggle()**
 Toggles the sidebar open state.
 
 ```javascript
-ref.current..toggle(0);
+ref.current.toggle(0);
 ```
 
 #### Layout and style
@@ -341,7 +340,7 @@ The `BentoSidebar` component can be styled with standard CSS.
 To ensure the component renders how you want it to, be sure to apply a size to the component. These can be applied inline:
 
 ```jsx
-<BentoSidebar style={{width: '300px', height: '100%'}}>
+<BentoSidebar style={{width: 300, height: '100%'}}>
   <ul>
     <li>Nav item 1</li>
     <li>Nav item 2</li>
@@ -356,7 +355,7 @@ To ensure the component renders how you want it to, be sure to apply a size to t
 Or via `className`:
 
 ```jsx
-<BentoSidebar className='custom-styles'>
+<BentoSidebar className="custom-styles">
   <ul>
     <li>Nav item 1</li>
     <li>Nav item 2</li>
