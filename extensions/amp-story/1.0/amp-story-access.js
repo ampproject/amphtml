@@ -25,7 +25,7 @@ export const Type = {
 
 /**
  * Story access blocking type template.
- * @param {{logoSrc: ?string|undefined}} props
+ * @param {{logoSrc: (?string|undefined)}} props
  * @return {!Element}
  */
 function BlockingNotification({logoSrc}) {

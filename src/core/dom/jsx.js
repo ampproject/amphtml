@@ -40,7 +40,9 @@ function appendChild(parent, child) {
     });
   } else {
     parent.appendChild(
-      child.nodeType ? child : self.document.createTextNode(child)
+      child?.nodeType
+        ? /** @type {!Node} */ (child)
+        : self.document.createTextNode(String(child))
     );
   }
 }
@@ -54,7 +56,7 @@ function appendChild(parent, child) {
  */
 export function createElement(tag, props, ...children) {
   if (typeof tag !== 'string') {
-    return tag(children?.length ? {...props, children} : props);
+    return tag(children.length ? {...props, children} : props);
   }
 
   const element = self.document.createElement(tag);
@@ -65,24 +67,27 @@ export function createElement(tag, props, ...children) {
   if (props) {
     Object.keys(props).forEach((name) => {
       const value = props[name];
+      if (value === false || value == null) {
+        return;
+      }
       if (name.startsWith('on') && name.length > 2) {
         element.addEventListener(name.toLowerCase().substr(2), value);
         return;
       }
-      if (value !== false && value != null) {
-        element.setAttribute(name, value === true ? '' : value.toString());
-      }
+      element.setAttribute(name, value === true ? '' : String(value));
     });
   }
 
   return element;
 }
 
-/** */
+/**
+ * @return {null}
+ */
 export function Fragment() {
-  devAssert(
-    false,
-    "Don't use Fragment (<></>) with jsx-dom. " +
+  return devAssert(
+    null,
+    "Don't use Fragment (<></>) with #core/dom/jsx. " +
       'Use a root node or an array of nodes instead.'
   );
 }
