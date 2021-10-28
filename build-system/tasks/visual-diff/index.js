@@ -693,7 +693,7 @@ async function snapshotWebpages(browser, webpages) {
           yellow(name),
           hasWarnings ? 'with warnings' : ''
         );
-        page.removeListener('console', consoleLogger);
+        page.off('console', consoleLogger);
         availablePages.push(page);
       })();
       pagePromises.push(pagePromise);
