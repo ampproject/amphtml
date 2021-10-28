@@ -4,6 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const fs = require('fs');
 const JSON5 = require('json5');
+const os = require('os');
 const path = require('path');
 const Percy = require('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
@@ -62,8 +63,10 @@ const HOST = 'localhost';
 const PORT = 8000;
 const PERCY_AGENT_PORT = 5338;
 const NAVIGATE_TIMEOUT_MS = 30000;
-const MAX_PARALLEL_TABS = 5;
 const WAIT_FOR_TABS_MS = 1000;
+
+// Multiple tabs speed up the performance of the visual diff tests.
+const MAX_PARALLEL_TABS = os.cpus().length;
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
