@@ -44,6 +44,10 @@ declare module '#core/dom' {
   export var dispatchCustomEvent: any;
 }
 
+declare module '#core/window' {
+  export var getWin: (element: Element) => Window;
+}
+
 declare module '#core/dom/query' {
   export var realChildElements: any;
   export var closestAncestorElementBySelector: any;

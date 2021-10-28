@@ -6,6 +6,7 @@
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const fastGlob = require('fast-glob');
 const path = require('path');
+const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
@@ -58,7 +59,11 @@ async function writePackageJson() {
   }
 
   const exports = {
-    '.': './preact',
+    '.': './web-component',
+    './web-component': {
+      import: './dist/web-component.module.js',
+      require: './dist/web-component.js',
+    },
     './preact': {
       import: './dist/component-preact.module.js',
       require: './dist/component-preact.js',
@@ -74,13 +79,13 @@ async function writePackageJson() {
   }
 
   const json = {
-    name: `@ampproject/${extension}`,
+    name: `@bentoproject/${getNameWithoutComponentPrefix(extension)}`,
     version,
     description: `AMP HTML ${extension} Component`,
     author: 'The AMP HTML Authors',
     license: 'Apache-2.0',
-    main: './dist/component-preact.js',
-    module: './dist/component-preact.module.js',
+    main: './dist/web-component.js',
+    module: './dist/web-component.module.js',
     exports,
     files: ['dist/*', 'react.js'],
     repository: {

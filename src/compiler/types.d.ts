@@ -1,4 +1,4 @@
-import {TreeProto} from '@ampproject/bento-compiler';
+import {TreeProto, NodeProto} from '@ampproject/bento-compiler';
 
 /**
  * AMP Components must implement this "buildDom" function in order to be server-rendered.
@@ -16,10 +16,14 @@ export type BuildDom = (Element) => void;
 /**
  * Contains component versioning data via a map from tagName --> version.
  */
-export type Versions = {[tagName: string]: string};
+export type Versions = Array<{component: string; version: string}>;
 
-export type CompilerRequest = {document: TreeProto; versions: Versions};
+export type CompilerRequest = {
+  document?: TreeProto;
+  nodes?: NodeProto[];
+  versions: Versions;
+};
 
-export type CompilerResponse = {document: TreeProto};
+export type CompilerResponse = {document: TreeProto} | {nodes: NodeProto[]};
 
 export type BuilderMap = {[tagName: string]: BuildDom};

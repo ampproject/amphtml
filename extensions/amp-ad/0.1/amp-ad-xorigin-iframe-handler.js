@@ -457,7 +457,7 @@ export class AmpAdXOriginIframeHandler {
             } else {
               this.lastRejectedResizeTime_ = 0;
             }
-            this.uiHandler_.onResizeSuccess();
+            this.uiHandler_.adjustPadding();
             this.sendEmbedSizeResponse_(
               info.success,
               id,

@@ -200,7 +200,10 @@ async function getZindex() {
   const filesData = Object.assign(
     {},
     ...(await Promise.all([
-      getZindexSelectors('{css,src,extensions}/**/*.css'),
+      getZindexSelectors([
+        '{css,src,extensions}/**/*.css',
+        '!**/dist/**/*.css',
+      ]),
       getZindexChainsInJs([
         '{3p,src,extensions}/**/*.js',
         '!**/dist/**/*.js',

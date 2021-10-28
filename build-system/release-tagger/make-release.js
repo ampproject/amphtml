@@ -9,7 +9,6 @@ const {
   createTag,
   getPullRequestsBetweenCommits,
   getRef,
-  getRelease,
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
@@ -193,17 +192,6 @@ function _createBody(head, base, prs) {
 }
 
 /**
- * Get release if exists
- * @param {string} head
- * @return {!Promise}
- */
-async function maybeGetRelease(head) {
-  try {
-    return await getRelease(head);
-  } catch {}
-}
-
-/**
  * Make release
  * @param {string} head
  * @param {string} base
@@ -225,4 +213,4 @@ async function makeRelease(head, base, channel, sha) {
   return await createRelease(head, headRef.sha, body, prerelease);
 }
 
-module.exports = {maybeGetRelease, makeRelease};
+module.exports = {makeRelease};

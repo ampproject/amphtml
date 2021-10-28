@@ -210,7 +210,7 @@ function createPageOutlink_(doc, uiMetadata, container) {
     'a',
     dict({
       'class': 'i-amphtml-story-ad-link',
-      'target': '_blank',
+      'target': '_top',
       'href': uiMetadata[A4AVarNames.CTA_URL],
     })
   );

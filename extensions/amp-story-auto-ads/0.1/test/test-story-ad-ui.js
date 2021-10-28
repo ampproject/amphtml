@@ -268,7 +268,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
           'https://www.cats.com/'
         );
         expect(containerElem.children[0].textContent).to.equal('SHOP');
-        expect(containerElem.children[0].target).to.equal('_blank');
+        expect(containerElem.children[0].target).to.equal('_top');
         expect(containerElem.children[0].tagName).to.equal('A');
       });
     });
