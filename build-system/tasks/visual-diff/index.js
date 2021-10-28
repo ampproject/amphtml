@@ -28,7 +28,7 @@ const {
   shortSha,
 } = require('../../common/git');
 const {buildRuntime} = require('../../common/utils');
-const {cyan, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
 
@@ -470,6 +470,32 @@ async function runVisualTests(browser, webpages) {
 }
 
 /**
+ * Pretty-prints the current test status of each page.
+ * @param {!Array<!puppeteer.Page>} allPages
+ * @param {!Array<!puppeteer.Page>} availablePages
+ * @param {!puppeteer.Page} thisPage
+ * @param {string} thisPageText
+ * @return {string}
+ */
+function drawBoxes(allPages, availablePages, thisPage, thisPageText) {
+  return (
+    '[' +
+    allPages
+      .map((page) => {
+        if (page === thisPage) {
+          return thisPageText;
+        } else if (availablePages.includes(page)) {
+          return ' ';
+        } else {
+          return yellow('█');
+        }
+      })
+      .join(' ') +
+    ']'
+  );
+}
+
+/**
  * Generates Percy snapshots for a set of given webpages.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
@@ -511,10 +537,9 @@ async function snapshotWebpages(browser, webpages) {
       const name = testName ? `${pageName} (${testName})` : pageName;
       log(
         'info',
+        drawBoxes(allPages, availablePages, page, yellow('▄')),
         'Starting test',
-        yellow(name),
-        'on tab',
-        yellow(`#${allPages.indexOf(page) + 1}`)
+        yellow(name)
       );
 
       await resetPage(page, viewport);
@@ -657,7 +682,13 @@ async function snapshotWebpages(browser, webpages) {
         }
 
         log(
-          hasWarnings ? 'warning' : 'info',
+          'info',
+          drawBoxes(
+            allPages,
+            availablePages,
+            page,
+            (hasWarnings ? red : green)('▀')
+          ),
           'Finished test',
           yellow(name),
           hasWarnings ? 'with warnings' : ''
