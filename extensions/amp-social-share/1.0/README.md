@@ -17,11 +17,12 @@ The examples below demonstrate use of the `<bento-social-share>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-social-share
+npm install @bentoproject/social-share
 ```
 
 ```javascript
-import '@ampproject/bento-social-share';
+import {defineElement as defineBentoSocialShare} from '@bentoproject/social-share';
+defineBentoSocialShare();
 ```
 
 #### Example: Include via `<script>`
@@ -332,13 +333,13 @@ The examples below demonstrate use of the `<BentoSocialShare>` as a functional c
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-social-share
+npm install @bentoproject/social-share
 ```
 
 ```javascript
 import React from 'react';
-import {BentoSocialShare} from '@ampproject/bento-social-share/react';
-import '@ampproject/bento-social-share/styles.css';
+import {BentoSocialShare} from '@bentoproject/social-share/react';
+import '@bentoproject/social-share/styles.css';
 
 function App() {
   return (

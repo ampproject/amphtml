@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-wordpress-embed>` web componen
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-wordpress-embed
+npm install @bentoproject/wordpress-embed
 ```
 
 ```javascript
-import '@ampproject/bento-wordpress-embed';
+import {defineElement as defineBentoWordpressEmbed} from '@bentoproject/wordpress-embed';
+defineBentoWordpressEmbed();
 ```
 
 #### Example: Include via `<script>`
@@ -113,12 +114,12 @@ The examples below demonstrate use of the `<BentoWordPressEmbed>` as a functiona
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-wordpress-embed
+npm install @bentoproject/wordpress-embed
 ```
 
 ```jsx
 import React from 'react';
-import {BentoWordPressEmbed} from '@ampproject/bento-wordpress-embed/react';
+import {BentoWordPressEmbed} from '@bentoproject/wordpress-embed/react';
 
 function App() {
   return (

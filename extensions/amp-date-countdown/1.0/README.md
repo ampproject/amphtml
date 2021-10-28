@@ -23,13 +23,13 @@ The examples below demonstrates use of the `<BentoDateCountdown>` as a functiona
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-countdown
+npm install @bentoproject/date-countdown
 ```
 
 ```javascript
 import React from 'react';
-import {BentoDateCountdown} from '@ampproject/bento-date-countdown/react';
-import '@ampproject/bento-date-countdown/styles.css';
+import {BentoDateCountdown} from '@bentoproject/date-countdown/react';
+import '@bentoproject/date-countdown/styles.css';
 
 function App() {
   return (

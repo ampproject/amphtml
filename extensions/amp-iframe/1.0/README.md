@@ -17,11 +17,12 @@ The examples below demonstrate use of the `<bento-iframe>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-iframe
+npm install @bentoproject/iframe
 ```
 
 ```javascript
-import '@ampproject/bento-iframe';
+import {defineElement as defineBentoIframe} from '@bentoproject/iframe';
+defineBentoIframe();
 ```
 
 #### Example: Include via `<script>`
@@ -149,13 +150,13 @@ The examples below demonstrates use of the `<BentoIframe>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-iframe
+npm install @bentoproject/iframe
 ```
 
 ```javascript
 import React from 'react';
-import {BentoIframe} from '@ampproject/bento-iframe/react';
-import '@ampproject/bento-iframe/styles.css';
+import {BentoIframe} from '@bentoproject/iframe/react';
+import '@bentoproject/iframe/styles.css';
 
 function App() {
   return (

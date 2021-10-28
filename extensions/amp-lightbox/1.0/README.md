@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-lightbox>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-lightbox
+npm install @bentoproject/lightbox
 ```
 
 ```javascript
-import '@ampproject/bento-lightbox';
+import {defineElement as defineBentoLightbox} from '@bentoproject/lightbox';
+defineBentoLightbox();
 ```
 
 #### Example: Import via `<script>`
@@ -156,13 +157,13 @@ The examples below demonstrates use of the `<BentoLightbox>` as a functional com
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-lightbox
+npm install @bentoproject/lightbox
 ```
 
 ```javascript
 import React from 'react';
-import {BentoLightbox} from '@ampproject/bento-lightbox/react';
-import '@ampproject/bento-lightbox/styles.css';
+import {BentoLightbox} from '@bentoproject/lightbox/react';
+import '@bentoproject/lightbox/styles.css';
 function App() {
   return (
     <BentoLightbox

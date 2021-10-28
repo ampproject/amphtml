@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-instagram>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-instagram
+npm install @bentoproject/instagram
 ```
 
 ```javascript
-import '@ampproject/bento-instagram';
+import {defineElement as defineBentoInstagram} from '@bentoproject/instagram';
+defineBentoInstagram();
 ```
 
 #### Example: Include via `<script>`
@@ -120,13 +121,13 @@ The examples below demonstrates use of the `<BentoInstagram>` as a functional co
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-instagram
+npm install @bentoproject/instagram
 ```
 
 ```javascript
 import React from 'react';
-import {BentoInstagram} from '@ampproject/bento-instagram/react';
-import '@ampproject/bento-instagram/styles.css';
+import {BentoInstagram} from '@bentoproject/instagram/react';
+import '@bentoproject/instagram/styles.css';
 function App() {
   return <BentoInstagram shortcode="CKXYAzuj7TE" captioned />;
 }

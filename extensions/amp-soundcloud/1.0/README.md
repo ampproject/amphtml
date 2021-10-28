@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-soundcloud>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-soundcloud
+npm install @bentoproject/soundcloud
 ```
 
 ```javascript
-import '@ampproject/bento-soundcloud';
+import {defineElement as defineBentoSoundcloud} from '@bentoproject/soundcloud';
+defineBentoSoundcloud();
 ```
 
 #### Example: Include via `<script>`
@@ -140,13 +141,13 @@ The examples below demonstrate use of the `<BentoSoundcloud>` as a functional co
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-soundcloud
+npm install @bentoproject/soundcloud
 ```
 
 ```javascript
 import React from 'react';
-import {BentoSoundcloud} from '@ampproject/bento-soundcloud/react';
-import '@ampproject/bento-soundcloud/styles.css';
+import {BentoSoundcloud} from '@bentoproject/soundcloud/react';
+import '@bentoproject/soundcloud/styles.css';
 
 function App() {
   return <BentoSoundcloud trackId="243169232" visual={true}></BentoSoundcloud>;

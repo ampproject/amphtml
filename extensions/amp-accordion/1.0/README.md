@@ -32,11 +32,12 @@ The examples below demonstrate use of the `<bento-accordion>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-accordion
+npm install @bentoproject/accordion
 ```
 
 ```javascript
-import '@ampproject/bento-accordion';
+import {defineElement as defineBentoAccordion} from '@bentoproject/accordion';
+defineBentoAccordion();
 ```
 
 #### Example: Include via `<script>`
@@ -397,13 +398,13 @@ The examples below demonstrates use of the `<BentoAccordion>` as a functional co
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-accordion
+npm install @bentoproject/accordion
 ```
 
 ```javascript
 import React from 'react';
-import {BentoAccordion} from '@ampproject/bento-accordion/react';
-import '@ampproject/bento-accordion/styles.css';
+import {BentoAccordion} from '@bentoproject/accordion/react';
+import '@bentoproject/accordion/styles.css';
 
 function App() {
   return (

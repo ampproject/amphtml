@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-twitter>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-twitter
+npm install @bentoproject/twitter
 ```
 
 ```javascript
-import '@ampproject/bento-twitter';
+import {defineElement as defineBentoTwitters} from '@bentoproject/twitter';
+defineBentoTwitters();
 ```
 
 #### Example: Include via `<script>`
@@ -135,13 +136,13 @@ The examples below demonstrate use of the `<BentoTwitter>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-twitter
+npm install @bentoproject/twitter
 ```
 
 ```javascript
 import React from 'react';
-import {BentoTwitter} from '@ampproject/bento-twitter/react';
-import '@ampproject/bento-twitter/styles.css';
+import {BentoTwitter} from '@bentoproject/twitter/react';
+import '@bentoproject/twitter/styles.css';
 
 function App() {
   return <BentoTwitter tweetid="1356304203044499462"></BentoTwitter>;

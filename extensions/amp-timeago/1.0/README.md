@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-timeago>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-timeago
+npm install @bentoproject/timeago
 ```
 
 ```javascript
-import '@ampproject/bento-timeago';
+import {defineElement as defineBentoTimeago} from '@bentoproject/timeago';
+defineBentoTimeago();
 ```
 
 #### Example: Import via `<script>`
@@ -159,13 +160,13 @@ The examples below demonstrates use of the `<BentoTimeago>` as a functional comp
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-display
+npm install @bentoproject/timeago
 ```
 
 ```javascript
 import React from 'react';
-import {BentoTimeago} from '@ampproject/bento-timeago/react';
-import '@ampproject/bento-timeago/styles.css';
+import {BentoTimeago} from '@bentoproject/timeago/react';
+import '@bentoproject/timeago/styles.css';
 
 function App() {
   return (

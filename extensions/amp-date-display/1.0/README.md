@@ -28,13 +28,13 @@ The examples below demonstrates use of the `<BentoDateDisplay>` as a functional 
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-display
+npm install @bentoproject/date-display
 ```
 
 ```javascript
 import React from 'react';
-import {BentoDateDisplay} from '@ampproject/bento-date-display/react';
-import '@ampproject/bento-date-display/styles.css';
+import {BentoDateDisplay} from '@bentoproject/date-display/react';
+import '@bentoproject/date-display/styles.css';
 
 function App() {
   return (

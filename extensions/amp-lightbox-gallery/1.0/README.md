@@ -17,11 +17,12 @@ The examples below demonstrate use of the `<bento-lightbox-gallery>` web compone
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-lightbox-gallery
+npm install @bentoproject/lightbox-gallery
 ```
 
 ```javascript
-import '@ampproject/bento-lightbox-gallery';
+import {defineElement as defineBentoLightboxGallery} from '@bentoproject/lightbox-gallery';
+defineBentoLightboxGallery();
 ```
 
 ### Example: Import via `<script>`
@@ -163,7 +164,7 @@ The preact/react version of the bentolightboxgallery functions differently than 
 ### Example: Import Via npm
 
 ```sh
-npm install @ampproject/bento-lightbox-gallery
+npm install @bentoproject/lightbox-gallery
 ```
 
 ```javascript
@@ -171,7 +172,7 @@ import React from 'react';
 import {
   BentoLightboxGalleryProvider,
   WithBentoLightboxGallery,
-} from '@ampproject/bento-lightbox-gallery/react';
+} from '@bentoproject/lightbox-gallery/react';
 
 function App() {
   return (
@@ -194,7 +195,7 @@ import {BentoBaseCarousel} from '../../../bento-base-carousel/1.0/component';
 import {
   BentoLightboxGalleryProvider,
   WithBentoLightboxGallery,
-} from '@ampproject/bento-lightbox-gallery/react';
+} from '@bentoproject/lightbox-gallery/react';
 
 function App() {
   return (
