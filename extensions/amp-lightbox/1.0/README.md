@@ -31,7 +31,7 @@ import '@ampproject/bento-lightbox';
     type="text/css"
     href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css"
   />
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
