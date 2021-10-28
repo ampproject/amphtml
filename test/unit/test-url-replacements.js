@@ -14,8 +14,6 @@ import {
   installUrlReplacementsServiceForDoc,
 } from '#service/url-replacements-impl';
 
-import {user} from '#utils/log';
-
 import {mockWindowInterface, stubServiceForDoc} from '#testing/helpers/service';
 import {createIframePromise} from '#testing/iframe';
 
@@ -24,6 +22,8 @@ import {setCookie} from '../../src/cookies';
 import * as trackPromise from '../../src/impression';
 import {registerServiceBuilder} from '../../src/service-helpers';
 import {parseUrlDeprecated} from '../../src/url';
+
+import {user} from '#utils/log';
 
 describes.sandboxed('UrlReplacements', {}, (env) => {
   let canonical;
@@ -987,8 +987,14 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
       });
 
-      it('should replace UACH', () => {
+      it('should replace UACH platform', () => {
         return expandUrlAsync('?sh=UACH(platform)').then((res) => {
+          expect(res).to.match(/sh=\w?/);
+        });
+      });
+
+      it('should replace UACH brands', () => {
+        return expandUrlAsync('?sh=UACH(brands)').then((res) => {
           expect(res).to.match(/sh=\w?/);
         });
       });
