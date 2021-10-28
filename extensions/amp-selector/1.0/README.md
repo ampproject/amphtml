@@ -1,8 +1,8 @@
 # Bento Selector
 
-## Usage
+The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
 
-The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text. It can be used as a web component[`<bento-selector>`](#web-component), or as a Preact/React functional component [`<BentoSelector>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
