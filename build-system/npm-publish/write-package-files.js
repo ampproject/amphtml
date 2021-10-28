@@ -95,7 +95,7 @@ async function getDescriptionFromMarkdown(filename, maxLengthChars = 200) {
   if (!token) {
     return null;
   }
-  const plainText = await getPlainTextFromRendered(marked(token.raw));
+  const plainText = await getPlainTextFromRendered(marked.parser([token]));
   const paragraph = plainText.trim();
   if (paragraph.length <= maxLengthChars) {
     return paragraph;
