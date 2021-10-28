@@ -13,6 +13,15 @@ const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
 /**
+ * Convert dash-case-name to PascalCaseName.
+ * @param {string} name
+ * @return {string}
+ */
+function dashToPascalCase(name) {
+  return name.replace(/(?:-|^)([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+/**
  * Determines whether to skip
  * @return {Promise<boolean>}
  */
@@ -78,11 +87,15 @@ async function writePackageJson() {
     exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
   }
 
+  const nameDash = getNameWithoutComponentPrefix(extension);
+
   const json = {
-    name: `@bentoproject/${getNameWithoutComponentPrefix(extension)}`,
+    name: `@bentoproject/${nameDash}`,
     version,
-    description: `AMP HTML ${extension} Component`,
-    author: 'The AMP HTML Authors',
+    // TODO(https://go.amp.dev/issue/36655):
+    // Provide a way for components to provide their own description
+    description: `Bento${dashToPascalCase(nameDash)} Component`,
+    author: 'The Bento Authors',
     license: 'Apache-2.0',
     main: './dist/web-component.js',
     module: './dist/web-component.module.js',
