@@ -76,9 +76,12 @@ async function getPlainTextFromRendered(html) {
 }
 
 /**
+ * Uses either the first paragraph, or the first sentence from a Markdown file,
+ * as long as it's under maxLengthChars.
  * @param {string} filename
  * @param {number=} maxLengthChars
- * @return {Promise<?string>}
+ * @return {Promise<?string>} Returns plain text with any Markdown or HTML
+ *  syntax stripped out.
  */
 async function getDescriptionFromMarkdown(filename, maxLengthChars = 200) {
   let markdown;
