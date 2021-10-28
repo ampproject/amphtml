@@ -36,7 +36,6 @@ defineBentoTwitters();
       position: relative;
     }
   </style>
-  <!-- TODO(wg-bento): Once available, change src to bento-twitter.js -->
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
