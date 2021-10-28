@@ -156,6 +156,7 @@
     "magic-string": "0.25.7",
     "markdown-link-check": "3.8.7",
     "markdown-toc": "1.2.0",
+    "marked": "3.0.8",
     "minimatch": "3.0.4",
     "minimist": "1.2.5",
     "mocha": "9.1.3",
