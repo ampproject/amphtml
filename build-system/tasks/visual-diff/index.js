@@ -62,7 +62,6 @@ const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
 const PERCY_AGENT_PORT = 5338;
-const NAVIGATE_TIMEOUT_MS = 30000;
 const WAIT_FOR_TABS_MS = 1000;
 
 // Multiple tabs speed up the performance of the visual diff tests.
@@ -515,45 +514,10 @@ async function snapshotWebpages(browser, webpages) {
       };
       page.on('console', consoleLogger);
 
-      // Puppeteer is flaky when it comes to catching navigation requests, so
-      // retry the page navigation up to NAVIGATE_RETRIES times and eventually
-      // ignore a final timeout. If this ends up being a real non-loading page
-      // error, this will be caught in the resulting Percy build. Also attempt
-      // to wait until there are no more network requests. This method is flaky
-      // since Puppeteer doesn't always understand Chrome's network activity, so
-      // ignore timeouts again.
       const pagePromise = (async () => {
         try {
-          /** @type {Promise<void>} */
-          const responseWatcher = new Promise((resolve, reject) => {
-            const responseTimeout = setTimeout(() => {
-              reject(
-                new puppeteer.TimeoutError(
-                  `Response was not received in test ${testName} for page ` +
-                    `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
-                )
-              );
-            }, NAVIGATE_TIMEOUT_MS);
-
-            page.once('response', (response) => {
-              log(
-                'verbose',
-                'Response for url',
-                yellow(response.url()),
-                'with status',
-                cyan(response.status()),
-                cyan(response.statusText())
-              );
-              clearTimeout(responseTimeout);
-              resolve();
-            });
-          });
-
           log('verbose', 'Navigating to page', yellow(webpage.url));
-          await Promise.all([
-            responseWatcher,
-            page.goto(fullUrl, {waitUntil: 'networkidle2'}),
-          ]);
+          await page.goto(fullUrl, {waitUntil: 'networkidle2'});
 
           log(
             'verbose',
