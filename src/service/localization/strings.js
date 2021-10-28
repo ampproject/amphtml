@@ -118,15 +118,7 @@ export const LocalizedStringId = {
 };
 
 /**
- * @typedef {{
- *   string: string,
- *   description: string,
- * }}
- */
-export let LocalizedStringDef;
-
-/**
- * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
+ * @typedef {!Object<!LocalizedStringId, string>}
  */
 export let LocalizedStringBundleDef;
 
@@ -162,11 +154,8 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
     const localizedStringId = /** @type {!LocalizedStringId} */ (
       localizedStringIdAsStr
     );
-    pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
-      localizedStringBundle[localizedStringId].string
-    );
-    pseudoLocaleStringBundle[localizedStringId].fallback = localizationFn(
-      localizedStringBundle[localizedStringId].fallback
+    pseudoLocaleStringBundle[localizedStringId] = localizationFn(
+      localizedStringBundle[localizedStringId]
     );
   });
 
