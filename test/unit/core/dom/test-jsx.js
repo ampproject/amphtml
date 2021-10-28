@@ -87,11 +87,11 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     expect(element.outerHTML).to.equal('<div></div>');
   });
 
-  it('ignores nested falsy children', () => {
+  it('ignores nested nullish and false children', () => {
     const element = (
       <div>
         {null}
-        {[false, [null]]}
+        {[false, [undefined]]}
       </div>
     );
     expect(element.outerHTML).to.equal('<div></div>');
