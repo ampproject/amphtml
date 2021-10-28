@@ -26,7 +26,7 @@ import '@ampproject/bento-twitter';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-twitter {

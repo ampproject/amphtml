@@ -29,7 +29,7 @@ The example below contains an `bento-mathml` with three sections. The
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-mathml-1.0.js"

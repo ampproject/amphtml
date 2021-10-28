@@ -28,7 +28,7 @@ import '@ampproject/bento-iframe';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"

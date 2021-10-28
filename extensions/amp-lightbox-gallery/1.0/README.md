@@ -28,7 +28,7 @@ import '@ampproject/bento-lightbox-gallery';
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-lightbox-gallery[hidden] {
