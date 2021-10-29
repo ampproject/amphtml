@@ -45,10 +45,9 @@ const ForwardButtonStates = {
 };
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildPaginationButton = (element) => (
+const renderPaginationButton = () => (
   <div class="i-amphtml-story-button-container">
     <button class="i-amphtml-story-button-move"></button>
   </div>
@@ -69,7 +68,7 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = buildPaginationButton(doc);
+    this.element = renderPaginationButton();
 
     /** @private @const {!Element} */
     this.buttonElement_ = dev().assertElement(

@@ -129,10 +129,9 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildPlayMessageElement = (element) => (
+const renderPlayMessageElement = () => (
   <button
     role="button"
     class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
@@ -143,10 +142,9 @@ const buildPlayMessageElement = (element) => (
 );
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildErrorMessageElement = (element) => (
+const renderErrorMessageElement = () => (
   <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
     <span class="i-amphtml-story-page-error-label"></span>
     <span class="i-amphtml-story-page-error-icon"></span>
@@ -1633,7 +1631,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
-    this.playMessageEl_ = buildPlayMessageElement(this.element);
+    this.playMessageEl_ = renderPlayMessageElement();
     const labelEl = this.playMessageEl_.querySelector(
       '.i-amphtml-story-page-play-label'
     );
@@ -1681,7 +1679,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendErrorMessage_() {
-    this.errorMessageEl_ = buildErrorMessageElement(this.element);
+    this.errorMessageEl_ = renderErrorMessageElement();
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );

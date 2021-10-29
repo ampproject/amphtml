@@ -27,10 +27,9 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
- * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = (element) => {
+const renderShareMenu = () => {
   return (
     <div
       class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
@@ -52,10 +51,9 @@ const getTemplate = (element) => {
 
 /**
  * System amp-social-share button template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getAmpSocialSystemShareTemplate = (element) => {
+const renderAmpSocialSystemShareElement = () => {
   return <amp-social-share type="system"></amp-social-share>;
 };
 
@@ -138,7 +136,7 @@ export class ShareMenu {
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
+    this.element_ = renderAmpSocialSystemShareElement();
 
     this.initializeListeners_();
 
@@ -160,7 +158,7 @@ export class ShareMenu {
     const root = this.win_.document.createElement('div');
     root.classList.add('i-amphtml-story-share-menu-host');
 
-    this.element_ = getTemplate(this.parentEl_);
+    this.element_ = renderShareMenu();
     createShadowRootWithStyle(root, this.element_, CSS);
 
     this.closeButton_ = dev().assertElement(

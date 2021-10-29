@@ -5,7 +5,7 @@ import {HistoryState, setHistoryState} from './history';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
+import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
 import {dev} from '#utils/log';
 import {getHistoryState} from '#core/window/history';
@@ -256,7 +256,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       link.prepend(ctaImgEl);
     } else if (!openImgAttr) {
       // Attach link icon SVG by default.
-      const linkImage = buildOutlinkLinkIconElement(link);
+      const linkImage = renderOutlinkLinkIconElement();
       link.prepend(linkImage);
     }
 

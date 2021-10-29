@@ -25,10 +25,9 @@ const CtaAccentElement = {
 
 /**
  * For amp-story-page-attachment elements.
- * @param {!Element} element
  * @return {!Element}
  */
-export const buildInlineElement = (element) => (
+export const renderInlineElement = () => (
   <a
     class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
     role="button"
@@ -42,10 +41,9 @@ export const buildInlineElement = (element) => (
 /**
  * UI template for amp-story-page-outlink elements and
  * the legacy amp-story-page-attachment with href.
- * @param {!Element} element
  * @return {!Element}
  */
-const buildOutlinkElement = (element) => (
+const renderOutlinkElement = () => (
   <a class="i-amphtml-story-page-open-attachment" role="button" target="_top">
     <svg
       class="i-amphtml-story-outlink-page-attachment-arrow"
@@ -70,10 +68,9 @@ const buildOutlinkElement = (element) => (
 
 /**
  * Link icon used in amp-story-page-outlink UI and drawer.
- * @param {!Element} element
  * @return {!Element}
  */
-export const buildOutlinkLinkIconElement = (element) => (
+export const renderOutlinkLinkIconElement = () => (
   <svg
     class="i-amphtml-story-page-open-attachment-link-icon"
     xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +110,7 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
  * @return {!Element}
  */
 const renderOutlinkUI = (pageEl, attachmentEl) => {
-  const openAttachmentEl = buildOutlinkElement(pageEl);
+  const openAttachmentEl = renderOutlinkElement();
 
   // amp-story-page-outlink requires an anchor element child for SEO and analytics optimisations.
   // amp-story-page-attachment uses this same codepath and allows an href attribute.
@@ -174,7 +171,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
     chipEl.prepend(ctaImgEl);
   } else if (!openImgAttr) {
     // Attach link icon SVG by default.
-    const linkImage = buildOutlinkLinkIconElement(attachmentEl);
+    const linkImage = renderOutlinkLinkIconElement();
     chipEl.prepend(linkImage);
   }
 
@@ -188,7 +185,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
  * @return {!Element}
  */
 const renderInlineUi = (pageEl, attachmentEl) => {
-  const openAttachmentEl = buildInlineElement(pageEl);
+  const openAttachmentEl = renderInlineElement();
 
   // Set theme.
   const theme = attachmentEl.getAttribute('theme');
