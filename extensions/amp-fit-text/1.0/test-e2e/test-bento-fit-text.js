@@ -10,22 +10,15 @@ describes.endtoend(
       version: '1.0',
       fixture: 'bento/bento-fit-text.html',
       environments: ['single'],
-      experiments: ['amp-fit-text-v2'],
     },
     (env) => {
       let controller;
 
   
-      beforeEach( async function() {
+      beforeEach(function() {
         this.timeout(testTimeout);
         controller = env.controller;
       });
-  
-      const setup = async () => {
-        return [
-          await controller.findElement('bento-fit-text'),
-        ];
-      };
 
     it('should render in correct font-size', async function () {
       await verifyElementStyles(await selectContentDiv('test1'), {

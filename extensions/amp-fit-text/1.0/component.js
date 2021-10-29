@@ -32,7 +32,6 @@ export function BentoFitText({
       minFontSize,
       maxFontSize
     );
-    console.log('HERE');
     setOverflowStyle(measurerRef.current, clientHeight, fontSize);
   }, [maxFontSize, minFontSize]);
 
