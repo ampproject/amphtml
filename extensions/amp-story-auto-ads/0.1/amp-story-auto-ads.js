@@ -2,6 +2,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {svgFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
+import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
@@ -190,7 +191,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       if (json) {
         const obj = tryParseJson(json);
         const ids = obj['experimentIds'];
-        ids &&
+        isArray(ids) &&
           ids.forEach((id) => {
             const relevantExp = RELEVANT_PLAYER_EXPS[id];
             if (relevantExp) {
