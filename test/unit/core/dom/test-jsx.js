@@ -125,10 +125,10 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     expect(onFooBar).to.have.been.calledOnce;
   });
 
-  it('`on` attribute is not treated like an event handler function', () => {
-    const element = <button on="tap:lightbox.open" />;
+  it('non-function `on` attribute is not treated like an event handler function', () => {
+    const element = <button on="tap:lightbox.open" onClick="foo()" />;
     expect(element.outerHTML).to.equal(
-      '<button on="tap:lightbox.open"></button>'
+      '<button on="tap:lightbox.open" onclick="foo()"></button>'
     );
   });
 
