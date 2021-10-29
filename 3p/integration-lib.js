@@ -30,6 +30,7 @@ const AMP_EMBED_ALLOWED = {
   adsloom: true,
   adstyle: true,
   bringhub: true,
+  colombiafeed: true,
   dable: true,
   engageya: true,
   epeex: true,

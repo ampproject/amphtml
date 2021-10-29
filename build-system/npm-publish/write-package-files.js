@@ -6,10 +6,13 @@
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const fastGlob = require('fast-glob');
 const path = require('path');
+const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
+
+const packageName = getNameWithoutComponentPrefix(extension);
 
 /**
  * Determines whether to skip
@@ -76,12 +79,11 @@ async function writePackageJson() {
   for (const stylesheet of await getStylesheets()) {
     exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
   }
-
   const json = {
-    name: `@ampproject/${extension}`,
+    name: `@bentoproject/${packageName}`,
     version,
-    description: `AMP HTML ${extension} Component`,
-    author: 'The AMP HTML Authors',
+    description: `Bento ${packageName} Component`,
+    author: 'Bento Authors',
     license: 'Apache-2.0',
     main: './dist/web-component.js',
     module: './dist/web-component.module.js',
@@ -105,7 +107,7 @@ async function writePackageJson() {
       JSON.stringify(json, null, 2)
     );
     log(
-      extension,
+      json.name,
       extensionVersion,
       ': created package.json for',
       json.version
@@ -128,7 +130,7 @@ async function writeReactJs() {
       `extensions/${extension}/${extensionVersion}/react.js`,
       content
     );
-    log(extension, extensionVersion, ': created react.js');
+    log(packageName, extensionVersion, ': created react.js');
   } catch (e) {
     log(e);
     process.exitCode = 1;

@@ -16,6 +16,7 @@ declare module 'extensions/amp-fit-text/0.1/build-dom' {
 declare module '#core/dom' {
   export const copyChildren: (from: Node, to: Node) => void;
   export const removeChildren: (node: Node) => void;
+  export const isServerRendered: (node: Node) => boolean;
 }
 
 declare module '#core/dom/query' {
@@ -27,4 +28,12 @@ declare module '#core/dom/layout' {
     node: Node,
     replacedContent?: boolean
   ) => void;
+}
+
+declare module '#core/static-layout' {
+  export const applyStaticLayout: (node: Node) => void;
+}
+
+declare module '#core/dom/css-selectors' {
+  export const escapeCssSelectorIdent: (ident: string) => string;
 }

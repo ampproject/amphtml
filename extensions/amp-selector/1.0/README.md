@@ -1,8 +1,8 @@
 # Bento Selector
 
-## Usage
+The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
 
-The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text. It can be used as a web component[`<bento-selector>`](#web-component), or as a Preact/React functional component [`<BentoSelector>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -10,34 +10,32 @@ You must include each Bento component's required CSS library before adding custo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-selector
+npm install @bentoproject/selector
 ```
 
 ```javascript
-import '@ampproject/bento-selector';
+import {defineElement as defineBentoSelector} from '@bentoproject/selector';
+defineBentoSelector();
 ```
-
-[/example]
 
 #### Example: Include via `<script>`
 
-[example preview="top-frame" playground="false"]
-
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-selector {
       display: block;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-selector-1.0.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-selector-1.0.js"
+  ></script>
 </head>
 
 <bento-selector class="sample-selector">
@@ -49,8 +47,6 @@ import '@ampproject/bento-selector';
   </ul>
 </bento-selector>
 ```
-
-[/example]
 
 #### Usage notes
 
@@ -70,8 +66,8 @@ Each Bento component has a small CSS library you must include to guarantee prope
 You may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
-  bento-selector{
+<style>
+  bento-selector {
     display: block;
   }
 </style>
@@ -125,8 +121,8 @@ api.selectBy(-2); // Select the option that is two previous in DOM sequence.
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
 ```js
-api.toggle("a"); // Toggle the item with the attribute `option="a"`.
-api.toggle("1", true); // Select the item with the attribute `option="1"`.
+api.toggle('a'); // Toggle the item with the attribute `option="a"`.
+api.toggle('1', true); // Select the item with the attribute `option="1"`.
 ```
 
 #### Events
@@ -148,7 +144,7 @@ Tapping disabled options does not trigger the `select` event.
 </ul>
 
 ```js
-selector.addEventListener("select", (e) => console.log(e.data.targetOption))
+selector.addEventListener('select', (e) => console.log(e.data.targetOption));
 ```
 
 ### Preact/React Component
@@ -157,18 +153,19 @@ The examples below demonstrate use of the `<BentoSelector>` as a functional comp
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-selector
+npm install @bentoproject/selector
 ```
 
 ```javascript
 import React from 'react';
-import { BentoSelector, BentoSelectorOption} from '@ampproject/bento-selector/react';
-import '@ampproject/bento-selector/styles.css';
+import {
+  BentoSelector,
+  BentoSelectorOption,
+} from '@bentoproject/selector/react';
+import '@bentoproject/selector/styles.css';
 
 function App() {
   return (
@@ -182,8 +179,6 @@ function App() {
 }
 ```
 
-[/example]
-
 #### Layout and Style
 
 **Container type**
@@ -194,7 +189,7 @@ The `width` and `height` of the `BentoSelector` may both be set in order to adju
 To ensure the component renders how you want it to, be sure to apply a size to the component. These can be applied inline:
 
 ```jsx
-<BentoSelector style={{width: "100px", height:"400px"}}>
+<BentoSelector style={{width: 100, height: 400}}>
   <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
 </BentoSelector>
 ```
@@ -202,15 +197,15 @@ To ensure the component renders how you want it to, be sure to apply a size to t
 Or via `className`:
 
 ```jsx
-<BentoSelector className='custom-styles'>
+<BentoSelector className="custom-styles">
   <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
 </BentoSelector>
 ```
 
 ```css
 .custom-styles {
-  width: "100px";
-  height: "400px";
+  width: 100px;
+  height: 400px;
 }
 ```
 
@@ -254,7 +249,6 @@ Bento components are highly interactive through their API. The `BentoSelector` c
 import React, {createRef} from 'react';
 const ref = createRef();
 
-
 function App() {
   return (
     <BentoSelector ref={ref}>
@@ -283,8 +277,8 @@ ref.current.selectBy(-2); // Select the option that is two previous in DOM seque
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
 ```js
-ref.current.toggle("1"); // Toggle the item with the attribute `option="1"`.
-ref.current.toggle("2", true); // Select the item with the attribute `option="2"`.
+ref.current.toggle('1'); // Toggle the item with the attribute `option="1"`.
+ref.current.toggle('2', true); // Select the item with the attribute `option="2"`.
 ```
 
 #### Events
@@ -300,16 +294,16 @@ The `onChange` prop gives you two key options:
 -   `value` which returns an array of which `BentoSelectorOptions` are currently selected in the order they were selected.
 
 ```jsx
-    <BentoSelector
-      as="ul"
-      multiple
-      onChange={({option, value}) => console.log(option, value)}
-    >
-      <BentoSelectorOption as="li" option="1">
-        Option 1
-      </BentoSelectorOption>
-      <BentoSelectorOption as="li" option="2">
-        Option 2
-      </BentoSelectorOption>
-    </BentoSelector>
+<BentoSelector
+  as="ul"
+  multiple
+  onChange={({option, value}) => console.log(option, value)}
+>
+  <BentoSelectorOption as="li" option="1">
+    Option 1
+  </BentoSelectorOption>
+  <BentoSelectorOption as="li" option="2">
+    Option 2
+  </BentoSelectorOption>
+</BentoSelector>
 ```
