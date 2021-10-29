@@ -887,8 +887,6 @@ visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {
   'main': 'Include a blank snapshot (baseline for skipped builds)',
   'empty': 'Create a dummy Percy build with only a blank snapshot',
-  'config':
-    'Set the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'chrome_debug': 'Print debug info from Chrome',
   'webserver_debug': 'Print debug info from the local amp webserver',
   'percy_agent_debug': 'Print debug info from the @percy/agent instance',
