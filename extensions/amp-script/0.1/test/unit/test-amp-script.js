@@ -1,5 +1,3 @@
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
-
 import {Services} from '#service';
 
 import {user} from '#utils/log';
@@ -15,6 +13,7 @@ import {
   AmpScriptService,
   SanitizerImpl,
   StorageLocation,
+  setWorkerDOMForTest,
 } from '../../amp-script';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
@@ -45,9 +44,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
     // Make @ampproject/worker-dom dependency essentially a noop for these tests.
-    env.sandbox
-      .stub(WorkerDOM, 'upgrade')
-      .callsFake((unused, scriptsPromise) => scriptsPromise);
+    setWorkerDOMForTest({upgrade: (unused, scriptsPromise) => scriptsPromise});
   });
 
   function stubFetch(url, headers, text, responseUrl) {
