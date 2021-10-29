@@ -1,31 +1,24 @@
 /** @const */
 export const StoryAdSegmentExp = {
   ID: 'story-ad-progress-segment',
-  CONTROL: '31061402',
-  SIX_SECONDS: '31061403',
-  EIGHT_SECONDS: '31061404',
-  TEN_SECONDS: '31061405',
+  CONTROL: '31063366', // No advance, no new cta.
+  NO_ADVANCE: '31063367', // No advance, new cta.
+  TEN_SECONDS: '31063368', // Advance with new cta for the rest.
+  TWELVE_SECONDS: '31063369',
+  FOURTEEN_SECONDS: '31063370',
 };
 
 /** @const */
 export const StoryAdSegmentTimes = {
   SENTINEL: '999999ms',
-  SIX_SECONDS: '6000ms',
-  EIGHT_SECONDS: '8000ms',
   TEN_SECONDS: '10000ms',
-};
-
-/** @const */
-export const ViewerSetTimeToBranch = {
-  [StoryAdSegmentTimes.SIX_SECONDS]: StoryAdSegmentExp.SIX_SECONDS,
-  [StoryAdSegmentTimes.EIGHT_SECONDS]: StoryAdSegmentExp.EIGHT_SECONDS,
-  [StoryAdSegmentTimes.TEN_SECONDS]: StoryAdSegmentExp.TEN_SECONDS,
-  [StoryAdSegmentTimes.SENTINEL]: StoryAdSegmentExp.CONTROL,
+  TWELVE_SECONDS: '12000ms',
+  FOURTEEN_SECONDS: '14000ms',
 };
 
 /** @const */
 export const BranchToTimeValues = {
-  [StoryAdSegmentExp.SIX_SECONDS]: StoryAdSegmentTimes.SIX_SECONDS,
-  [StoryAdSegmentExp.EIGHT_SECONDS]: StoryAdSegmentTimes.EIGHT_SECONDS,
   [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentTimes.TEN_SECONDS,
+  [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentTimes.TWELVE_SECONDS,
+  [StoryAdSegmentExp.FOURTEEN_SECONDS]: StoryAdSegmentTimes.FOURTEEN_SECONDS,
 };
