@@ -1,4 +1,4 @@
-import * as WorkerDOMImport from '@ampproject/worker-dom/dist/amp-production/main.mjs';
+import * as WorkerDOM from './stubbable-worker-dom';
 
 import {Deferred} from '#core/data-structures/promise';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -63,18 +63,6 @@ export const StorageLocation = {
   SESSION: 1,
   AMP_STATE: 2,
 };
-
-/** @private {{upgrade: *}}  */
-let WorkerDOM = WorkerDOMImport;
-
-/**
- * Set the WorkerDOM Module for stubbing in tests.
- * @param {{upgrade: *}} workerDomModule the module to replace WorkerDOM with.
- * @visibleForTesting
- */
-export function setWorkerDOMForTest(workerDomModule) {
-  WorkerDOM = workerDomModule;
-}
 
 export class AmpScript extends AMP.BaseElement {
   /**
