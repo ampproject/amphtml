@@ -61,7 +61,10 @@ async function writePackageJson() {
   }
 
   const exports = {
-    '.': './web-component',
+    '.': {
+      import: './dist/web-component.module.js',
+      require: './dist/web-component.js',
+    },
     './web-component': {
       import: './dist/web-component.module.js',
       require: './dist/web-component.js',
