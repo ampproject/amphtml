@@ -55,7 +55,8 @@ const MUSTACHE_TAG = 'amp-mustache';
  */
 const RELEVANT_PLAYER_EXPS = {
   [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.NO_ADVANCE]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
   [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentExp.ID,
   [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentExp.ID,
   [StoryAdSegmentExp.FOURTEEN_SECONDS]: StoryAdSegmentExp.ID,

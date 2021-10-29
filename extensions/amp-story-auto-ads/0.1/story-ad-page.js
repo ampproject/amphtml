@@ -314,7 +314,8 @@ export class StoryAdPage {
     if (
       segmentExpBranch &&
       segmentExpBranch !== StoryAdSegmentExp.CONTROL &&
-      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE
+      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_BOTH &&
+      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_AD
     ) {
       attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
     }

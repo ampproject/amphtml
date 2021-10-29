@@ -429,7 +429,8 @@ export class ProgressBar {
     if (
       !segmentExpBranch ||
       segmentExpBranch === StoryAdSegmentExp.CONTROL ||
-      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE
+      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_BOTH ||
+      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_AD
     ) {
       return;
     }
