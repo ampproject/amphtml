@@ -39,10 +39,10 @@ function findLocalizedString(
 
   languageCodes.some((languageCode) => {
     const localizedStringBundle = localizedStringBundles[languageCode];
-    if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
+    const entry = localizedStringBundle?.[localizedStringId];
+    if (entry) {
       localizedString =
-        localizedStringBundle[localizedStringId].string ||
-        localizedStringBundle[localizedStringId].fallback;
+        typeof entry === 'string' ? entry : entry.string || entry.fallback;
       return !!localizedString;
     }
 
