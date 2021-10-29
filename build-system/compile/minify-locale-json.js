@@ -9,7 +9,10 @@ const pattern = ['extensions/**/_locales/*.json', '!**/build/**'];
 // otherwise pased through
 // - {"string": "my string", "foo": "..."}
 // + "my string"
-const reformat = (value) => value?.string || value;
+const reformat = (value) =>
+  // Always default to original `value` since `reformat()` is called for any
+  // property pair, including the higher-level containing object.
+  value?.string || value;
 
 const getMinifiedLocaleJsonFilename = (filename) =>
   `${dirname(filename)}/build/${basename(filename)}`;
