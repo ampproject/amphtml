@@ -2,11 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const {
-  getMinifiedLocaleJsonFilename,
-  isSourceLocaleJsonFilename,
-} = require('../compile/minify-locale-json');
-const {resolvePath} = require('babel-plugin-module-resolver');
 
 const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
 let tsConfigPaths = null;
@@ -47,32 +42,16 @@ function readJsconfigPaths() {
 
 /**
  * Import map configuration.
- * @param {boolean=} isProd
  * @return {!Object}
  */
-function getImportResolver(isProd = false) {
-  // Our custom resolvePath() is ignored unless we omit the alias config object.
-  // We call the stock resolvePath() with the alias object in case a path
-  // does not match our logic.
-  const opts = {
+function getImportResolver() {
+  return {
     root: ['.'],
+    alias: readJsconfigPaths(),
     babelOptions: {
       caller: {
         name: 'import-resolver',
       },
-    },
-  };
-  const optsWithAlias = {
-    alias: readJsconfigPaths(),
-    ...opts,
-  };
-  return {
-    ...opts,
-    resolvePath(sourcePath, currentFile) {
-      if (isProd && isSourceLocaleJsonFilename(sourcePath)) {
-        return getMinifiedLocaleJsonFilename(sourcePath);
-      }
-      return resolvePath(sourcePath, currentFile, optsWithAlias);
     },
   };
 }
@@ -93,11 +72,10 @@ function getRelativeAliasMap(rootDir) {
 
 /**
  * Import resolver Babel plugin configuration.
- * @param {boolean=} isProd
  * @return {!Array}
  */
-function getImportResolverPlugin(isProd) {
-  return ['module-resolver', getImportResolver(isProd)];
+function getImportResolverPlugin() {
+  return ['module-resolver', getImportResolver()];
 }
 
 module.exports = {

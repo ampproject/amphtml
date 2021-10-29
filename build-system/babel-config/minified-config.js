@@ -25,7 +25,7 @@ function getMinifiedConfig() {
 
   const plugins = [
     'optimize-objstr',
-    getImportResolverPlugin(isProd),
+    getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
