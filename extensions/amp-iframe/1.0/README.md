@@ -3,8 +3,7 @@
 The Bento Iframe component is used to display an iframe. However, it has other important differences from vanilla iframes:
 
 1. Allows dynamic resizing when the component is outside to the viewport. This is to avoid content shifts.
-1. Bento Iframe can be set up to receive `IntersectionObserver` style
-[change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
+1. Bento Iframe can be set up to receive `IntersectionObserver` style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
 
 ## Usage
 
