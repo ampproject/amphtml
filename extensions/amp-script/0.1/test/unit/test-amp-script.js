@@ -13,7 +13,7 @@ import {
   AmpScriptService,
   SanitizerImpl,
   StorageLocation,
-  setWorkerDOMForTest,
+  setUpgradeForTest,
 } from '../../amp-script';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
@@ -49,7 +49,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
     // Make @ampproject/worker-dom dependency essentially a noop for these tests.
-    setWorkerDOMForTest({upgrade: (unused, scriptsPromise) => scriptsPromise});
+    setUpgradeForTest((unused, scriptsPromise) => scriptsPromise);
   });
 
   afterEach(() => {

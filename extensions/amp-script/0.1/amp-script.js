@@ -1,4 +1,4 @@
-import {upgrade as upgradeImported} from '@ampproject/worker-dom/dist/amp-production/main.mjs';
+import {upgrade} from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 
 import {Deferred} from '#core/data-structures/promise';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -65,15 +65,15 @@ export const StorageLocation = {
 };
 
 /** @private {*}  */
-let upgrade = upgradeImported;
+let upgradeForTest = null;
 
 /**
- * Set the WorkerDOM Module for stubbing in tests.
+ * Set the WorkerDOM.upgrade function for tests.
  * @param {*} fn the function to use instead of WorkerDOM.upgrade.
  * @visibleForTesting
  */
-export function setWorkerDOMUpgradeForTest(fn) {
-  upgrade = fn;
+export function setUpgradeForTest(fn) {
+  upgradeForTest = fn;
 }
 
 export class AmpScript extends AMP.BaseElement {
@@ -319,7 +319,7 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    return upgrade(
+    return (upgradeForTest || upgrade)(
       container || this.element,
       workerAndAuthorScripts,
       config
