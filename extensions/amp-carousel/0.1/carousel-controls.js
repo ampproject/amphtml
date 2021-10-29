@@ -1,6 +1,5 @@
 import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {isAmp4Email} from '#core/document/format';
 import {toggleAttribute} from '#core/dom';
 import {getWin} from '#core/window';
 
@@ -17,30 +16,18 @@ export class CarouselControls {
    * @param {{
    *  element: !AmpElement,
    *  go: !GoFunctionDef,
-   *  ariaRole: 'button' | 'presentation',
    *  hasPrev: () => boolean,
    *  hasNext: () => boolean,
    *  prevButton: !HTMLDivElement,
    *  nextButton: !HTMLDivElement,
    * }} param0
    */
-  constructor({
-    ariaRole,
-    element,
-    go,
-    hasNext,
-    hasPrev,
-    nextButton,
-    prevButton,
-  }) {
+  constructor({element, go, hasNext, hasPrev, nextButton, prevButton}) {
     /** @private @type {!AmpElement} */
     this.element_ = element;
 
     /** @private @type {!GoFunctionDef} */
     this.go_ = go;
-
-    /** @private @type {'button' | 'presentation'} */
-    this.ariaRole_ = ariaRole;
 
     /** @private @type {!Window} */
     this.win_ = getWin(element);
@@ -68,7 +55,6 @@ export class CarouselControls {
    * Meant to be called during carousel's buildCallback().
    */
   initialize_() {
-    this.updateButtonTitles();
     this.setControlsState();
     this.setupButtonInteraction(this.prevButton_, () => this.handlePrev());
     this.setupButtonInteraction(this.nextButton_, () => this.handleNext());
@@ -146,32 +132,12 @@ export class CarouselControls {
    * Updates the titles for the next/previous buttons.
    * Uses given params if provided, otherwise uses sensible defaults.
    *
-   * @param {string=} prevTitle
-   * @param {string=} nextTitle
+   * @param {string} prevTitle
+   * @param {string} nextTitle
    */
   updateButtonTitles(prevTitle, nextTitle) {
-    this.prevButton_.title = prevTitle ?? this.getPrevButtonTitle();
-    this.nextButton_.title = nextTitle ?? this.getNextButtonTitle();
-  }
-
-  /**
-   * @return {string} The default title to use for the next button.
-   */
-  getNextButtonTitle() {
-    return (
-      this.element_.getAttribute('data-next-button-aria-label') ||
-      'Next item in carousel'
-    );
-  }
-
-  /**
-   * @return {string} The default title to use for the pevious button.
-   */
-  getPrevButtonTitle() {
-    return (
-      this.element_.getAttribute('data-prev-button-aria-label') ||
-      'Previous item in carousel'
-    );
+    this.prevButton_.title = prevTitle;
+    this.nextButton_.title = nextTitle;
   }
 
   /**
@@ -188,9 +154,9 @@ export class CarouselControls {
    * Called on user interaction to proceed to the next position.
    */
   handleNext() {
-    const isEnabled = !this.prevButton_.classList.contains('amp-disabled');
+    const isEnabled = !this.nextButton_.classList.contains('amp-disabled');
     if (isEnabled) {
-      this.go_(/* dir */ -1, /* animate */ true, /* autoplay */ false);
+      this.go_(/* dir */ 1, /* animate */ true, /* autoplay */ false);
     }
   }
 }

@@ -8,7 +8,6 @@ import {isLayoutSizeFixed} from '#core/dom/layout';
 import {listen} from '#utils/event-helper';
 import {numeric} from '#core/dom/transition';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {realChildElements} from '#core/dom/query';
 import {buildDom} from './build-dom';
 
 /** @const {string} */
@@ -89,7 +88,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const {prevButton, nextButton, container, cells} = buildDom(this.element);
+    const {cells, container, nextButton, prevButton} = buildDom(this.element);
     this.container_ = container;
     this.cells_ = cells;
 
@@ -100,17 +99,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       go: this.go.bind(this),
       hasPrev: this.hasPrev.bind(this),
       hasNext: this.hasNext.bind(this),
-
-      /**
-       * In scrollable carousel, the next/previous buttons add no functionality
-       * for screen readers as scrollable carousel is just a horizontally
-       * scrollable div which ATs navigate just like any other content.
-       * To avoid confusion, we therefore set the role to presentation for the
-       * controls in this case.
-       */
-      ariaRole: 'presentation',
     });
-
     this.setupBehavior_();
   }
 
