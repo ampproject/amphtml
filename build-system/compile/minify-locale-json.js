@@ -20,23 +20,24 @@ const isSourceLocaleJsonFilename = (filename) =>
   filename.endsWith('.json');
 
 /**
- * Minifies locale JSON files.
+ * @param {string} filename
+ * @return {Promise}
+ */
+async function minifyLocaleJsonFile(filename) {
+  const reviver = (_, value) => reformat(value);
+  const output = await readJson(filename, {reviver});
+  const outputFilename = getMinifiedLocaleJsonFilename(filename);
+  await outputJson(outputFilename, output);
+}
+
+/**
+ * Minifies all locale JSON files.
  * @return {Promise}
  */
 async function minifyLocaleJson() {
   const startTime = Date.now();
-
-  const reviver = (_, value) => reformat(value);
   const filenames = globby.sync(pattern);
-
-  await Promise.all(
-    filenames.map(async (filename) => {
-      const compressed = await readJson(filename, {reviver});
-      const outputFilename = getMinifiedLocaleJsonFilename(filename);
-      await outputJson(outputFilename, compressed);
-    })
-  );
-
+  await Promise.all(filenames.map(minifyLocaleJsonFile));
   endBuildStep('Minified', `${filenames.length} locale JSON files`, startTime);
 }
 
