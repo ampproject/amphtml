@@ -1,11 +1,11 @@
-import '../amp-jwplayer';
+import '#bento/components/amp-jwplayer/1.0/amp-jwplayer';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
 
 import {waitFor} from '#testing/helpers/service';
 
-import * as consent from '../../../../src/consent';
+import * as consent from '../../../../../src/consent';
 
 /**
  * @param {Document} doc

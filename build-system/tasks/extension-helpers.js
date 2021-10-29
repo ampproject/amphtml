@@ -961,11 +961,21 @@ async function copyWorkerDomResources(version) {
 }
 
 module.exports = {
+  buildBinaries,
+  buildExtensionCss,
+  buildExtensionJs,
   buildExtensions,
+  buildNpmBinaries,
+  buildNpmCss,
+  declareExtension,
+  dedupe,
   doBuildExtension,
   extensions,
+  getBentoBuildFilename,
+  getExtensionsFromArg,
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
   setExtensionsToBuildFromDocuments,
+  INABOX_EXTENSION_SET,
 };

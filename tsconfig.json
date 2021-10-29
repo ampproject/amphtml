@@ -7,6 +7,8 @@
     "paths": {
       "#3p/*": ["./3p/*"],
       "#ads/*": ["./ads/*"],
+      "#bento": ["./bento"],
+      "#bento/*": ["./bento/*"],
       "#build/*": ["./build/*"],
 
       "#builtins/*": ["./src/builtins/*"],

@@ -1,5 +1,8 @@
 'use strict';
+const bentoBundles = require('./bundles.config.bento.json');
 const extensionBundles = require('./bundles.config.extensions.json');
+
+exports.bentoBundles = bentoBundles;
 const wrappers = require('./compile-wrappers');
 const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
@@ -205,6 +208,11 @@ exports.jsBundles = {
 exports.extensionBundles = extensionBundles;
 
 /**
+ * Used to generate component build targets
+ */
+exports.bentoBundles = bentoBundles;
+
+/**
  * Used to alias a version of an extension to an older deprecated version.
  */
 exports.extensionAliasBundles = {
@@ -232,8 +240,11 @@ function verifyBundle_(condition, field, message, name, found) {
   }
 }
 
-exports.verifyExtensionBundles = function () {
-  extensionBundles.forEach((bundle, i) => {
+/**
+ * @param {Array<Object>} bundles
+ */
+function verifyBundles(bundles) {
+  bundles.forEach((bundle, i) => {
     const bundleString = JSON.stringify(bundle, null, 2);
     verifyBundle_(
       'name' in bundle,
@@ -243,9 +254,9 @@ exports.verifyExtensionBundles = function () {
       bundleString
     );
     verifyBundle_(
-      i === 0 || bundle.name.localeCompare(extensionBundles[i - 1].name) >= 0,
+      i === 0 || bundle.name.localeCompare(bundles[i - 1].name) >= 0,
       'name',
-      'is out of order. extensionBundles should be alphabetically sorted by name.',
+      'is out of order. bundles should be alphabetically sorted by name.',
       bundle.name,
       bundleString
     );
@@ -263,7 +274,7 @@ exports.verifyExtensionBundles = function () {
       bundle.name,
       bundleString
     );
-    const duplicates = exports.extensionBundles.filter(
+    const duplicates = bundles.filter(
       (duplicate) => duplicate.name === bundle.name
     );
     verifyBundle_(
@@ -276,4 +287,12 @@ exports.verifyExtensionBundles = function () {
       JSON.stringify(duplicates, null, 2)
     );
   });
+}
+
+exports.verifyExtensionBundles = function () {
+  verifyBundles(extensionBundles);
+};
+
+exports.verifyBentoBundles = function () {
+  verifyBundles(bentoBundles);
 };

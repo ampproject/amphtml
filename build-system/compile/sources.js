@@ -63,6 +63,7 @@ const BABEL_SRC_GLOBS = [
   'builtins/**/*.js',
   'build/**/*.js',
   'extensions/**/*.js',
+  'bento/components/**/*.js',
   '3p/**/*.js',
   'ads/**/*.js',
 ].concat(COMMON_GLOBS);

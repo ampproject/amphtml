@@ -9,6 +9,7 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {buildComponents} = require('./build-bento');
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
@@ -50,6 +51,7 @@ async function build() {
     await compileAllJs(options);
   }
   await buildExtensions(options);
+  await buildComponents(options);
 
   if (!argv.core_runtime_only) {
     await buildVendorConfigs(options);
