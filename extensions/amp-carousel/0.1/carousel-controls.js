@@ -59,13 +59,20 @@ export class CarouselControls {
 
     /** @private {() => boolean} */
     this.hasPrev_ = hasPrev;
+
+    this.initialize_();
   }
 
   /**
    * Runs side effects to initialize controls.
    * Meant to be called during carousel's buildCallback().
    */
-  initialize() {
+  initialize_() {
+    this.updateButtonTitles();
+    this.setControlsState();
+    this.setupButtonInteraction(this.prevButton_, () => this.handlePrev());
+    this.setupButtonInteraction(this.nextButton_, () => this.handleNext());
+
     if (this.element_.hasAttribute('controls')) {
       this.showControls_ = true;
       return;
@@ -83,17 +90,6 @@ export class CarouselControls {
         this.element_.classList.add(_HAS_CONTROL_CLASS);
       }
     }, true);
-  }
-
-  /**
-   * Meant to be called as part of carousel's buildCallback().
-   * TODO(samouri): extract to build-dom.js file.
-   */
-  buildDom() {
-    this.updateButtonTitles();
-    this.setupButtonInteraction(this.prevButton_, () => this.handlePrev());
-    this.setupButtonInteraction(this.nextButton_, () => this.handleNext());
-    this.setControlsState();
   }
 
   /**

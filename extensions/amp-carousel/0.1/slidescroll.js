@@ -186,8 +186,11 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return true;
   }
 
-  /** Build carousel elements */
-  buildCarousel() {
+  /**
+   * Attaches event handlers
+   * @private
+   */
+  setupBehavior_() {
     this.hasLoop_ = this.element.hasAttribute('loop');
 
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');

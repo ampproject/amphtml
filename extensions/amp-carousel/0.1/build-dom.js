@@ -1,5 +1,6 @@
 import {isAmp4Email} from '#core/document/format';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {realChildElements} from '#core/dom/query';
 
 export const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
 
@@ -37,7 +38,12 @@ function buildButton(element, type) {
 /**
  * Builds the DOM necessary for amp-carousel.
  * @param {!Element} element
- * @return {{prevButton: !HTMLDivElement, nextButton: !HTMLDivElement}}
+ * @return {{
+ *   prevButton: !HTMLDivElement,
+ *   nextButton: !HTMLDivElement,
+ *   container?: !HTMLDivElement
+ *   cells?: !HTMLDivElement[]
+ * }}
  */
 export function buildDom(element) {
   const doc = element.ownerDocument;
@@ -48,7 +54,25 @@ export function buildDom(element) {
   const prevButton = buildButton(element, 'prev');
   const nextButton = buildButton(element, 'next');
 
-  return {prevButton, nextButton};
+  return {prevButton, nextButton, ...buildScrollableCarousel(element)};
+}
+
+function buildScrollableCarousel(element) {
+  const doc = element.ownerDocument;
+  const cells = realChildElements(element);
+  const container = doc.createElement('div');
+
+  container.classList.add('i-amphtml-scrollable-carousel-container');
+  // Focusable container makes it possible to fully consume Arrow key events.
+  container.setAttribute('tabindex', '-1');
+  element.appendChild(container);
+  cells.forEach((cell) => {
+    cell.classList.add('amp-carousel-slide');
+    cell.classList.add('amp-scrollable-carousel-slide');
+    this.container_.appendChild(cell);
+  });
+
+  return {cells, container};
 }
 
 /**
