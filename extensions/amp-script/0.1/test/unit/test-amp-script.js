@@ -23,6 +23,11 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let xhr;
 
   beforeEach(() => {
+    registerServiceBuilderForDoc(
+      env.win.document,
+      'amp-script',
+      AmpScriptService
+    );
     element = document.createElement('amp-script');
     env.ampdoc.getBody().appendChild(element);
 
@@ -45,6 +50,10 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
     // Make @ampproject/worker-dom dependency essentially a noop for these tests.
     setWorkerDOMForTest({upgrade: (unused, scriptsPromise) => scriptsPromise});
+  });
+
+  afterEach(() => {
+    resetServiceForTesting(env.win, 'amp-script');
   });
 
   function stubFetch(url, headers, text, responseUrl) {
@@ -87,15 +96,9 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     xhr.fetchText
       .withArgs(env.sandbox.match(/amp-script-worker-nodom-0.1.js/))
       .resolves({text: () => Promise.resolve('/* noop */')});
-    registerServiceBuilderForDoc(
-      env.win.document,
-      'amp-script',
-      AmpScriptService
-    );
 
     await script.buildCallback();
     await script.layoutCallback();
-    resetServiceForTesting(env.win, 'amp-script');
   });
 
   it('should work with "text/javascript" content-type for same-origin src', () => {
@@ -228,17 +231,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   });
 
   describe('development mode', () => {
-    beforeEach(() => {
-      registerServiceBuilderForDoc(
-        env.win.document,
-        'amp-script',
-        AmpScriptService
-      );
-    });
-    afterEach(() => {
-      resetServiceForTesting(env.win, 'amp-script');
-    });
-
     it('should not be in dev mode by default', () => {
       script.buildCallback();
       expect(script.development_).false;
