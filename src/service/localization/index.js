@@ -40,7 +40,7 @@ function findLocalizedString(
     if (entry != null) {
       // In unminified builds, this is an object {"string": "foo", ...}.
       // In minified builds, this is the actual string "foo".
-      return entry.string || entry;
+      return entry['string'] || entry;
     }
   }
   return null;
