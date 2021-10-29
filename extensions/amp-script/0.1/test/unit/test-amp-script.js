@@ -44,7 +44,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       fetchText: env.sandbox.stub(),
     };
     xhr.fetchText
-      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .withArgs(env.sandbox.match(/amp-script-worker/))
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
