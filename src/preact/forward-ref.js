@@ -1,7 +1,8 @@
 // Taken from handwritten artisinal shim: https://gist.github.com/developit/974b5e4e582df8e954c5a7981603cd37
 
-import {options} from /*OK*/ 'preact';
+// import {options} from /*OK*/ 'preact';
 
+const options = (self.__AMP_cannotDceOptions = {}); // eslint-disable-line
 options.__b = function (o, v) {
   if (v.type && v.type._f && (v.props.ref = v.ref)) {
     v.ref = null;
