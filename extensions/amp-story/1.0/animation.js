@@ -592,7 +592,6 @@ export class AnimationManager {
 
   /** Starts all entrance animations for the page. */
   animateIn() {
-    console.log('skip animations', this.skipAnimations_());
     if (this.skipAnimations_()) {
       return;
     }
