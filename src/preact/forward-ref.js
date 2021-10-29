@@ -1,52 +1,30 @@
-// Taken from https://github.com/preactjs/preact/blob/master/compat/src/forwardRef.js
+// Taken from handwritten artisinal shim: https://gist.github.com/developit/974b5e4e582df8e954c5a7981603cd37
 
-import {options} from 'preact';
+import {options} from /*OK*/ 'preact';
 
-let oldDiffHook = options._diff;
-options._diff = (vnode) => {
-  if (vnode.type && vnode.type._forwarded && vnode.ref) {
-    vnode.props.ref = vnode.ref;
-    vnode.ref = null;
+options.__b = function (o, v) {
+  if (v.type && v.type._f && (v.props.ref = v.ref)) {
+    v.ref = null;
   }
-  if (oldDiffHook) oldDiffHook(vnode);
-};
-
-const REACT_FORWARD_SYMBOL =
-  (typeof Symbol != 'undefined' &&
-    Symbol.for &&
-    Symbol.for('react.forward_ref')) ||
-  0xf47;
+  o && o(v);
+}.bind(0, options.__b);
 
 /**
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
  * wrap components. Using `forwardRef` there is an easy way to get a reference
  * of the wrapped component instead of one of the wrapper itself.
- * @param {import('./index').ForwardFn} fn
- * @returns {import('./internal').FunctionComponent}
+ * @param {*} fn
+ * @return {*}
  */
 export function forwardRef(fn) {
-  // We always have ref in props.ref, except for
-  // mobx-react. It will call this function directly
-  // and always pass ref as the second argument.
-  function Forwarded(props, ref) {
-    let clone = Object.assign({}, props);
-    delete clone.ref;
-    ref = props.ref || ref;
-    return fn(
-      clone,
-      !ref || (typeof ref === 'object' && !('current' in ref)) ? null : ref
-    );
+  /**
+   * @param {*} p
+   * @return {*}
+   */
+  function F(p) {
+    const {ref} = p;
+    delete p.ref;
+    return fn(p, ref);
   }
-
-  // mobx-react checks for this being present
-  Forwarded.$$typeof = REACT_FORWARD_SYMBOL;
-  // mobx-react heavily relies on implementation details.
-  // It expects an object here with a `render` property,
-  // and prototype.render will fail. Without this
-  // mobx-react throws.
-  Forwarded.render = Forwarded;
-
-  Forwarded.prototype.isReactComponent = Forwarded._forwarded = true;
-  Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
-  return Forwarded;
+  return (F._f = F);
 }
