@@ -9,6 +9,7 @@ import {listen} from '#utils/event-helper';
 import {numeric} from '#core/dom/transition';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
+import {buildDom} from './build-dom';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -37,21 +38,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.unobserveIntersections_ = null;
 
     /** @private {CarouselControls} */
-    this.controls_ = new CarouselControls({
-      element,
-      go: this.go.bind(this),
-      hasPrev: () => this.hasPrev(),
-      hasNext: () => this.hasNext(),
-
-      /**
-       * In scrollable carousel, the next/previous buttons add no functionality
-       * for screen readers as scrollable carousel is just a horizontally
-       * scrollable div which ATs navigate just like any other content.
-       * To avoid confusion, we therefore set the role to presentation for the
-       * controls in this case.
-       */
-      ariaRole: 'presentation',
-    });
+    this.controls_ = null;
   }
 
   /** @override */
@@ -64,23 +51,11 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     return true;
   }
 
-  /** Build carousel elements */
-  buildCarousel() {
-    this.cells_ = realChildElements(this.element);
-
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.add('i-amphtml-scrollable-carousel-container');
-    // Focusable container makes it possible to fully consume Arrow key events.
-    this.container_.setAttribute('tabindex', '-1');
-    this.element.appendChild(this.container_);
-
-    this.cells_.forEach((cell) => {
-      Services.ownersForDoc(this.element).setOwner(cell, this.element);
-      cell.classList.add('amp-carousel-slide');
-      cell.classList.add('amp-scrollable-carousel-slide');
-      this.container_.appendChild(cell);
-    });
-
+  /**
+   * Attaches event handlers.
+   * @private
+   */
+  setupBehavior_() {
     this.cancelTouchEvents_();
 
     this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
@@ -88,6 +63,10 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       'keydown',
       this.keydownHandler_.bind(this)
     );
+
+    this.cells_.forEach((cell) => {
+      Services.ownersForDoc(this.element).setOwner(cell, this.element);
+    });
 
     this.registerAction(
       'goToSlide',
@@ -110,9 +89,29 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.buildCarousel();
-    this.controls_.buildDom();
-    this.controls_.initialize();
+    const {prevButton, nextButton, container, cells} = buildDom(this.element);
+    this.container_ = container;
+    this.cells_ = cells;
+
+    this.controls_ = new CarouselControls({
+      element: this.element,
+      prevButton,
+      nextButton,
+      go: this.go.bind(this),
+      hasPrev: this.hasPrev.bind(this),
+      hasNext: this.hasNext.bind(this),
+
+      /**
+       * In scrollable carousel, the next/previous buttons add no functionality
+       * for screen readers as scrollable carousel is just a horizontally
+       * scrollable div which ATs navigate just like any other content.
+       * To avoid confusion, we therefore set the role to presentation for the
+       * controls in this case.
+       */
+      ariaRole: 'presentation',
+    });
+
+    this.setupBehavior_();
   }
 
   /** @override */
@@ -151,9 +150,8 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {boolean=} opt_autoplay
    */
-  go(dir, animate, opt_autoplay) {
+  go(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
     const oldPos = this.pos_;
 
