@@ -7,7 +7,7 @@ const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const fastGlob = require('fast-glob');
 const marked = require('marked');
 const path = require('path');
-const PostHTML = require('posthtml');
+const posthtml = require('posthtml');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
@@ -44,69 +44,63 @@ async function getStylesheets() {
 }
 
 /**
- * @param {*} node
- * @param {string[]=} out
- * @return {string[]}
- */
-function getHtmlTextContentRecursive(node, out = []) {
-  if (typeof node === 'string') {
-    out.push(node);
-  } else if (Array.isArray(node)) {
-    for (const child of node) {
-      getHtmlTextContentRecursive(child, out);
-    }
-  } else if (node?.content) {
-    getHtmlTextContentRecursive(node.content, out);
-  }
-  return out;
-}
-
-/**
  * @param {string} html
  * @return {Promise<string>}
  */
 async function getHtmlTextContent(html) {
-  const out = [];
-  await PostHTML([
-    (tree) => {
-      getHtmlTextContentRecursive(tree, out);
-    },
+  const getTextContent = (node, out = []) => {
+    if (typeof node === 'string') {
+      out.push(node);
+    } else if (Array.isArray(node)) {
+      for (const child of node) {
+        getTextContent(child, out);
+      }
+    } else if (node?.content) {
+      getTextContent(node.content, out);
+    }
+    return out;
+  };
+  const result = await posthtml([
+    (node) => getTextContent(node).join(''),
   ]).process(html);
-  return out.join('');
+  return result.html.trim();
 }
 
 /**
- * Uses either the first paragraph, or the first sentence from a Markdown file,
- * as long as it's under maxLengthChars.
- * @param {string} filename
- * @param {number=} maxLengthChars
- * @return {Promise<?string>} Returns plain text with any Markdown or HTML
- *  syntax stripped out.
+ * @param {string} markdown
+ * @param {number} maxLengthChars
+ * @return {Promise<?string>}
  */
-async function getDescriptionFromMarkdown(filename, maxLengthChars = 200) {
-  let markdown;
-  try {
-    markdown = await readFile(filename, 'utf8');
-  } catch (_) {
-    return null;
-  }
-  const tokens = marked.lexer(markdown);
-  const token = tokens.find(({type}) => type === 'paragraph');
+async function getFirstParagraphOrSentence(markdown, maxLengthChars) {
+  const token = marked.lexer(markdown).find(({type}) => type === 'paragraph');
   if (!token) {
     return null;
   }
   const html = marked.parser([token]);
-  const textContent = await getHtmlTextContent(html);
-  const paragraph = textContent.trim();
+  const paragraph = await getHtmlTextContent(html);
   if (paragraph.length <= maxLengthChars) {
     return paragraph;
   }
-  let [sentence] = paragraph.split('.', 1);
-  sentence += '.';
-  if (sentence.length <= maxLengthChars) {
-    return sentence;
+  const [sentence] = paragraph.split('.', 1);
+  if (sentence.length < maxLengthChars) {
+    return `${sentence}.`;
   }
   return null;
+}
+
+/**
+ * Get package description from its README.md file, or a generic description
+ * if the file does not exist.
+ * @return {Promise<string>}
+ */
+async function getDescription() {
+  let description = `Bento ${packageName} Component`;
+  try {
+    const markdown = await readFile(`${dir}/README.md`, 'utf8');
+    description =
+      (await getFirstParagraphOrSentence(markdown, 200)) || description;
+  } catch {}
+  return description;
 }
 
 /**
@@ -151,14 +145,10 @@ async function writePackageJson() {
     exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
   }
 
-  const description =
-    (await getDescriptionFromMarkdown(`${dir}/README.md`)) ||
-    `Bento ${packageName} Component`;
-
   const json = {
     name: `@bentoproject/${packageName}`,
     version,
-    description,
+    description: await getDescription(),
     author: 'Bento Authors',
     license: 'Apache-2.0',
     main: './dist/web-component.js',
