@@ -39,7 +39,7 @@ import {MediaPool} from './media-pool';
 import {Services} from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
-import {addAttributesToElement, iterateCursor} from '#core/dom';
+import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
@@ -340,12 +340,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
           : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
 
-      addAttributesToElement(
-        this.element,
-        dict({
-          'auto-advance-after': autoAdvanceAttr,
-        })
-      );
+      this.element.setAttribute('auto-advance-after', autoAdvanceAttr);
     }
   }
 
@@ -371,12 +366,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     ) {
       return;
     }
-    addAttributesToElement(
-      this.element,
-      dict({
-        'auto-advance-after': storyNextUpParam,
-      })
-    );
+    this.element.setAttribute('auto-advance-after', storyNextUpParam);
     this.listenAndUpdateAutoAdvanceDuration_();
   }
 
@@ -422,10 +412,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.updateTimeDelay(duration + 's');
     // 'auto-advance-after' is only read during buildCallback(), but we update it
     // here to keep the DOM consistent with the AdvancementConfig.
-    addAttributesToElement(
-      this.element,
-      dict({'auto-advance-after': duration + 's'})
-    );
+    this.element.setAttribute('auto-advance-after', duration + 's');
   }
 
   /**

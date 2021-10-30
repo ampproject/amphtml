@@ -17,7 +17,7 @@ import {EventType, dispatch} from './events';
 import {Keys} from '#core/constants/key-codes';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
-import {addAttributesToElement, tryFocus} from '#core/dom';
+import {tryFocus} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
@@ -910,10 +910,9 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipBehavior_(target) {
     if (matches(target, LAUNCHABLE_COMPONENTS['a'].selector)) {
-      addAttributesToElement(
-        dev().assertElement(this.tooltip_),
-        dict({'href': this.getElementHref_(target)})
-      );
+      dev()
+        .assertElement(this.tooltip_)
+        .setAttribute('href', this.getElementHref_(target));
       return;
     }
 
