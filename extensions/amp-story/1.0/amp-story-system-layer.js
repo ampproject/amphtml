@@ -150,9 +150,11 @@ const getTemplate = (element) => ({
               attrs: dict({
                 'class': 'i-amphtml-story-has-new-page-text',
               }),
-              children: localize(element, [
-                LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
-              ]),
+              children: [
+                localize(element, [
+                  LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+                ]),
+              ],
             },
           ],
         },
