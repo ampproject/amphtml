@@ -308,7 +308,10 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       StoryAdSegmentExp.ID
     );
 
-    if (storyAdSegmentBranch !== StoryAdSegmentExp.CONTROL) {
+    if (
+      storyAdSegmentBranch &&
+      storyAdSegmentBranch !== StoryAdSegmentExp.CONTROL
+    ) {
       return createPageOutlink_(doc, uiMetadata, container);
     } else {
       return createCtaLayer_(a, doc, container);

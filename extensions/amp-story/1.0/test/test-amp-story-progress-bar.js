@@ -37,7 +37,7 @@ describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
       forceExperimentBranch(
         win,
         StoryAdSegmentExp.ID,
-        StoryAdSegmentExp.EIGHT_SECONDS
+        StoryAdSegmentExp.TEN_SECONDS
       );
       expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).not.to
         .exist;
