@@ -7,11 +7,11 @@ import {
 } from '#core/window/clipboard';
 import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
 import {listen} from '#utils/event-helper';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {renderAsElement} from './simple-template';
 
 /**
  * Maps share provider type to visible name.
@@ -81,7 +81,8 @@ function buildLinkShareItemTemplate(el) {
       'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
       'tabindex': 0,
       'role': 'button',
-      'aria-label': getLocalizationService(el).getLocalizedString(
+      'aria-label': localize(
+        el,
         LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK
       ),
     }),
@@ -89,8 +90,9 @@ function buildLinkShareItemTemplate(el) {
       {
         tag: 'span',
         attrs: dict({'class': 'i-amphtml-story-share-label'}),
-        localizedStringId:
-          LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+        children: [
+          localize(el, LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK),
+        ],
       },
     ],
   };
@@ -119,7 +121,7 @@ function buildProviderParams(opt_params) {
  * @param {!Document} doc
  * @param {string} shareType
  * @param {!JsonObject=} opt_params
- * @return {!Node}
+ * @return {!Element}
  */
 function buildProvider(doc, shareType, opt_params) {
   const shareProviderLocalizedStringId = devAssert(
@@ -127,32 +129,27 @@ function buildProvider(doc, shareType, opt_params) {
     `No localized string to display name for share type ${shareType}.`
   );
 
-  return renderSimpleTemplate(
-    doc,
-    /** @type {!Array<!./simple-template.ElementDef>} */ ([
+  return renderAsElement(doc, {
+    tag: 'amp-social-share',
+    attrs: /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({
+          'width': 48,
+          'height': 48,
+          'class': 'i-amphtml-story-share-icon',
+          'type': shareType,
+        }),
+        buildProviderParams(opt_params)
+      )
+    ),
+    children: [
       {
-        tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (
-          Object.assign(
-            dict({
-              'width': 48,
-              'height': 48,
-              'class': 'i-amphtml-story-share-icon',
-              'type': shareType,
-            }),
-            buildProviderParams(opt_params)
-          )
-        ),
-        children: [
-          {
-            tag: 'span',
-            attrs: dict({'class': 'i-amphtml-story-share-label'}),
-            localizedStringId: shareProviderLocalizedStringId,
-          },
-        ],
+        tag: 'span',
+        attrs: dict({'class': 'i-amphtml-story-share-label'}),
+        children: [localize(doc, shareProviderLocalizedStringId)],
       },
-    ])
-  );
+    ],
+  });
 }
 
 /**
@@ -169,13 +166,17 @@ function buildCopySuccessfulToast(doc, url) {
       children: [
         {
           tag: 'div',
-          localizedStringId:
-            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT,
+          children: [
+            localize(
+              doc,
+              LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+            ),
+          ],
         },
         {
           tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-copy-url'}),
-          unlocalizedString: url,
+          chilren: [url],
         },
       ],
     })
@@ -276,9 +277,8 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      const localizationService = getLocalizationService(this.storyEl);
-      devAssert(localizationService, 'Could not retrieve LocalizationService.');
-      const failureString = localizationService.getLocalizedString(
+      const failureString = localize(
+        this.storyEl_,
         LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl, dev().assertString(failureString));

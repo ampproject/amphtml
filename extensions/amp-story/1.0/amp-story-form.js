@@ -1,9 +1,8 @@
 import {Action, getStoreService} from './amp-story-store-service';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
-import {devAssert} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 
@@ -123,8 +122,8 @@ function createFormResultEl_(win, formEl, isSuccess) {
   resultEl.firstElementChild.appendChild(iconEl);
 
   const textEl = win.document.createElement('div');
-  const localizationService = getLocalizationService(devAssert(win.document));
-  textEl.textContent = localizationService.getLocalizedString(
+  textEl.textContent = localize(
+    win.document,
     isSuccess
       ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS
       : LocalizedStringId.AMP_STORY_FORM_SUBMIT_ERROR

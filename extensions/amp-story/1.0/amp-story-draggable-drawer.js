@@ -10,8 +10,8 @@ import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '#utils/log';
-import {getLocalizationService} from './amp-story-localization-service';
+import {dev} from '#utils/log';
+import {localize} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {listen} from '#utils/event-helper';
@@ -142,13 +142,11 @@ export class DraggableDrawer extends AMP.BaseElement {
     spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
     spacerEl.classList.add('i-amphtml-story-system-reset');
     spacerEl.setAttribute('role', 'button');
-    const localizationService = getLocalizationService(devAssert(this.element));
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      spacerEl.setAttribute('aria-label', localizedCloseString);
-    }
+    const localizedCloseString = localize(
+      this.element,
+      LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+    );
+    spacerEl.setAttribute('aria-label', localizedCloseString);
     this.containerEl.insertBefore(spacerEl, this.contentEl);
     this.contentEl.appendChild(headerShadowRootEl);
 

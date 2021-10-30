@@ -26,7 +26,7 @@ import {
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
@@ -662,15 +662,10 @@ export class AmpStoryEmbeddedComponent {
         '.i-amphtml-expanded-view-close-button'
       )
     );
-    const localizationService = getLocalizationService(
-      devAssert(this.storyEl_)
+    closeButton.setAttribute(
+      'aria-label',
+      localize(this.storyEl_, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
     );
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      closeButton.setAttribute('aria-label', localizedCloseString);
-    }
     this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
       this.componentPage_.appendChild(this.expandedViewOverlay_)
     );
@@ -1131,9 +1126,7 @@ export class AmpStoryEmbeddedComponent {
   updateTooltipText_(target, embedConfig) {
     const tooltipText =
       target.getAttribute('data-tooltip-text') ||
-      getLocalizationService(this.storyEl_).getLocalizedString(
-        embedConfig.localizedStringId
-      ) ||
+      localize(this.storyEl_, embedConfig.localizedStringId) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText = this.tooltip_.querySelector(
       '.i-amphtml-tooltip-text'

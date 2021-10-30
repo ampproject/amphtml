@@ -5,14 +5,17 @@ import {createShadowRootWithStyle} from './utils';
 import {dict} from '#core/types/object';
 import {removeElement} from '#core/dom';
 import {renderAsElement} from './simple-template';
+import {localize} from './amp-story-localization-service';
 
 /** @const {string} Class for the continue anyway button */
 const CONTINUE_ANYWAY_BUTTON_CLASS = 'i-amphtml-continue-button';
+
 /**
  * Full viewport black layer indicating browser is not supported.
- * @private @const {!./simple-template.ElementDef}
+ * @param {!Element} element
+ * @return {!./simple-template.ElementDef}
  */
-const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
+const renderTemplate = (element) => ({
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
   children: [
@@ -27,8 +30,12 @@ const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
         {
           tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-          localizedStringId:
-            LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
+          children: [
+            localize(
+              element,
+              LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
+            ),
+          ],
         },
         // The continue button functionality will only be present in the default
         // layer. Publisher provided fallbacks will not provide users with the
@@ -36,13 +43,17 @@ const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
         {
           tag: 'button',
           attrs: dict({'class': 'i-amphtml-continue-button'}),
-          localizedStringId:
-            LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL,
+          children: [
+            localize(
+              element,
+              LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
+            ),
+          ],
         },
       ],
     },
   ],
-};
+});
 
 /**
  * Unsupported browser layer UI.
@@ -79,7 +90,7 @@ export class UnsupportedBrowserLayer {
     this.root_ = this.win_.document.createElement('div');
     this.element_ = renderAsElement(
       this.win_.document,
-      UNSUPPORTED_BROWSER_LAYER_TEMPLATE
+      renderTemplate(this.win_.document)
     );
     createShadowRootWithStyle(this.root_, this.element_, CSS);
     this.continueButton_ = this.element_./*OK*/ querySelector(

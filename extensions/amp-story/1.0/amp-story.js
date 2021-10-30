@@ -77,6 +77,7 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '#utils/event-helper';
+// eslint-disable-next-line local/no-forbidden-terms
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
@@ -279,9 +280,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?AmpStoryViewerMessagingHandler} */
     this.viewerMessagingHandler_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
-
     /**
      * Store the current paused state, to make sure the story does not play on
      * resume if it was previously paused. null when nothing to restore.
@@ -307,9 +305,8 @@ export class AmpStory extends AMP.BaseElement {
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
 
-    this.localizationService_ = getLocalizationService(this.element);
-
-    this.localizationService_
+    // eslint-disable-next-line local/no-forbidden-terms
+    getLocalizationService(this.element)
       .registerLocalizedStringBundle('default', LocalizedStringsEn)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
       .registerLocalizedStringBundle('de', LocalizedStringsDe)
@@ -331,16 +328,11 @@ export class AmpStory extends AMP.BaseElement {
       .registerLocalizedStringBundle('tr', LocalizedStringsTr)
       .registerLocalizedStringBundle('vi', LocalizedStringsVi)
       .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
-      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
-
-    const enXaPseudoLocaleBundle = createPseudoLocale(
-      LocalizedStringsEn,
-      (s) => `[${s} one two]`
-    );
-    this.localizationService_.registerLocalizedStringBundle(
-      'en-xa',
-      enXaPseudoLocaleBundle
-    );
+      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
+      .registerLocalizedStringBundle(
+        'en-xa',
+        createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
+      );
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();

@@ -16,7 +16,7 @@ import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
 
 /** @const {string} Class to toggle the info dialog. */
@@ -47,9 +47,6 @@ export class InfoDialog {
 
     /** @private {boolean} */
     this.isBuilt_ = false;
-
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
@@ -206,7 +203,8 @@ export class InfoDialog {
    * @return {*} TODO(#23582): Specify return type
    */
   setHeading_() {
-    const label = this.localizationService_.getLocalizedString(
+    const label = localize(
+      this.parentEl_,
       LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
     );
     const headingEl = dev().assertElement(
@@ -252,7 +250,8 @@ export class InfoDialog {
     );
 
     return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {
-      const label = this.localizationService_.getLocalizedString(
+      const label = localize(
+        this.parentEl_,
         LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
       );
       this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
