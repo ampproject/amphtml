@@ -77,7 +77,6 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '#utils/event-helper';
-// eslint-disable-next-line local/no-forbidden-terms
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
@@ -305,7 +304,6 @@ export class AmpStory extends AMP.BaseElement {
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
 
-    // eslint-disable-next-line local/no-forbidden-terms
     getLocalizationService(this.element)
       .registerLocalizedStringBundle('default', LocalizedStringsEn)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
