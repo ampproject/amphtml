@@ -1,8 +1,5 @@
 import {CommonSignals} from '#core/constants/common-signals';
 
-import {forceExperimentBranch} from '#experiments';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
-
 import {macroTask} from '#testing/helpers';
 
 import {Gestures} from '../../../../src/gesture';
@@ -83,17 +80,6 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const glassPane = glassPaneGridLayer.firstChild;
       expect(glassPane).to.have.class('i-amphtml-glass-pane');
-    });
-
-    it('sets auto-advance if in the experiment', () => {
-      // TODO(#33969) remove when launched.
-      forceExperimentBranch(
-        win,
-        StoryAdAutoAdvance.ID,
-        StoryAdAutoAdvance.SIX_SECONDS
-      );
-      const pageElement = storyAdPage.build();
-      expect(pageElement).to.have.attribute('auto-advance-after');
     });
   });
 
