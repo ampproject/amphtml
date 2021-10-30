@@ -91,8 +91,8 @@ class PaginationButton {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
 
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
   }
 
   /** @param {!ButtonState_1_0_Def} state */
@@ -133,7 +133,7 @@ class PaginationButton {
 
     if (this.state_.triggers) {
       dispatch(
-        this.win_,
+        this.win,
         this.element,
         devAssert(this.state_.triggers),
         /* payload */ undefined,

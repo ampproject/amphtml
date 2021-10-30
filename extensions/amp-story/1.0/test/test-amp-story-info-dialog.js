@@ -62,14 +62,14 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   it('should build the info dialog', async () => {
     await infoDialog.build();
     expect(infoDialog.isBuilt()).to.be.true;
-    expect(infoDialog.element_).to.exist;
+    expect(infoDialog.element).to.exist;
   });
 
   it('should hide more info link when there is no viewer messaging', async () => {
     embedded = false;
 
     await infoDialog.build();
-    expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).not.to.have.class(
+    expect(infoDialog.element.querySelector(MOREINFO_CLASS)).not.to.have.class(
       MOREINFO_VISIBLE_CLASS
     );
   });
@@ -78,7 +78,7 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
     moreInfoLinkUrl = null;
 
     await infoDialog.build();
-    expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).not.to.have.class(
+    expect(infoDialog.element.querySelector(MOREINFO_CLASS)).not.to.have.class(
       MOREINFO_VISIBLE_CLASS
     );
   });
@@ -87,7 +87,7 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
     moreInfoLinkUrl = 'https://example.com/more-info.html';
 
     await infoDialog.build();
-    expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).to.have.class(
+    expect(infoDialog.element.querySelector(MOREINFO_CLASS)).to.have.class(
       MOREINFO_VISIBLE_CLASS
     );
   });
@@ -100,15 +100,15 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   it('should show the info dialog on store property update', async () => {
     await infoDialog.build();
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-    expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
+    expect(infoDialog.element).to.have.class(DIALOG_VISIBLE_CLASS);
   });
 
   it('should hide the info dialog on click on the overlay', async () => {
     await infoDialog.build();
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-    infoDialog.element_.dispatchEvent(new Event('click'));
+    infoDialog.element.dispatchEvent(new Event('click'));
 
-    expect(infoDialog.element_).not.to.have.class(DIALOG_VISIBLE_CLASS);
+    expect(infoDialog.element).not.to.have.class(DIALOG_VISIBLE_CLASS);
     expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.false;
   });
 
@@ -117,7 +117,7 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
     infoDialog.innerContainerEl_.dispatchEvent(new Event('click'));
 
-    expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
+    expect(infoDialog.element).to.have.class(DIALOG_VISIBLE_CLASS);
     expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;
   });
 });

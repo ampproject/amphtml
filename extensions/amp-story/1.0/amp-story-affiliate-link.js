@@ -26,11 +26,11 @@ export class AmpStoryAffiliateLink {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private {!Window} */
-    this.win_ = win;
+    /** @public {!Window} */
+    this.win = win;
 
-    /** @private {!Element} */
-    this.element_ = element;
+    /** @public {!Element} */
+    this.element = element;
 
     /** @private {?Element} */
     this.textEl_ = null;
@@ -39,29 +39,29 @@ export class AmpStoryAffiliateLink {
     this.launchEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {string} */
-    this.text_ = this.element_.textContent;
+    this.text_ = this.element.textContent;
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, element);
+    this.analyticsService_ = getAnalyticsService(this.win, element);
   }
 
   /**
    * Builds affiliate link.
    */
   build() {
-    if (this.element_[AFFILIATE_LINK_BUILT]) {
+    if (this.element[AFFILIATE_LINK_BUILT]) {
       return;
     }
 
-    this.mutator_.mutateElement(this.element_, () => {
-      this.element_.textContent = '';
-      this.element_.setAttribute('pristine', '');
+    this.mutator_.mutateElement(this.element, () => {
+      this.element.textContent = '';
+      this.element.setAttribute('pristine', '');
       this.addPulseElement_();
       this.addIconElement_();
       this.addText_();
@@ -69,7 +69,7 @@ export class AmpStoryAffiliateLink {
     });
 
     this.initializeListeners_();
-    this.element_[AFFILIATE_LINK_BUILT] = true;
+    this.element[AFFILIATE_LINK_BUILT] = true;
   }
 
   /**
@@ -80,32 +80,32 @@ export class AmpStoryAffiliateLink {
     this.storeService_.subscribe(
       StateProperty.AFFILIATE_LINK_STATE,
       (elementToToggleExpand) => {
-        const expand = this.element_ === elementToToggleExpand;
+        const expand = this.element === elementToToggleExpand;
         if (expand) {
-          this.element_.setAttribute('expanded', '');
+          this.element.setAttribute('expanded', '');
           this.textEl_.removeAttribute('hidden');
           this.launchEl_.removeAttribute('hidden');
         } else {
-          this.element_.removeAttribute('expanded');
+          this.element.removeAttribute('expanded');
           this.textEl_.setAttribute('hidden', '');
           this.launchEl_.setAttribute('hidden', '');
         }
         if (expand) {
-          this.element_.removeAttribute('pristine');
+          this.element.removeAttribute('pristine');
           this.analyticsService_.triggerEvent(
             StoryAnalyticsEvent.FOCUS,
-            this.element_
+            this.element
           );
         }
       }
     );
 
-    this.element_.addEventListener('click', (event) => {
-      if (this.element_.hasAttribute('expanded')) {
+    this.element.addEventListener('click', (event) => {
+      if (this.element.hasAttribute('expanded')) {
         event.stopPropagation();
         this.analyticsService_.triggerEvent(
           StoryAnalyticsEvent.CLICK_THROUGH,
-          this.element_
+          this.element
         );
       }
     });
@@ -116,7 +116,7 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addIconElement_() {
-    const iconEl = htmlFor(this.element_)`
+    const iconEl = htmlFor(this.element)`
       <div class="i-amphtml-story-affiliate-link-circle">
         <i class="i-amphtml-story-affiliate-link-icon"></i>
         <div class="i-amphtml-story-reset i-amphtml-hidden">
@@ -124,7 +124,7 @@ export class AmpStoryAffiliateLink {
           <i class="i-amphtml-story-affiliate-link-launch" hidden></i>
         </div>
       </div>`;
-    this.element_.appendChild(iconEl);
+    this.element.appendChild(iconEl);
   }
 
   /**
@@ -132,7 +132,7 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addText_() {
-    this.textEl_ = this.element_.querySelector(
+    this.textEl_ = this.element.querySelector(
       '.i-amphtml-story-affiliate-link-text'
     );
 
@@ -145,7 +145,7 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addLaunchElement_() {
-    this.launchEl_ = this.element_.querySelector(
+    this.launchEl_ = this.element.querySelector(
       '.i-amphtml-story-affiliate-link-launch'
     );
 
@@ -157,8 +157,8 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addPulseElement_() {
-    const pulseEl = htmlFor(this.element_)`
+    const pulseEl = htmlFor(this.element)`
       <div class="i-amphtml-story-affiliate-link-pulse"></div>`;
-    this.element_.appendChild(pulseEl);
+    this.element.appendChild(pulseEl);
   }
 }

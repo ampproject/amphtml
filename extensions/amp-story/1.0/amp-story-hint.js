@@ -118,20 +118,20 @@ export class AmpStoryHint {
    * @param {!Element} parentEl Element where to append the component
    */
   constructor(win, parentEl) {
-    /** @private {!Window} */
-    this.win_ = win;
+    /** @public {!Window} */
+    this.win = win;
 
     /** @private {boolean} Whether the component is built. */
     this.isBuilt_ = false;
 
     /** @private {!Document} */
-    this.document_ = this.win_.document;
+    this.document_ = this.win.document;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win_);
+    this.timer_ = Services.timerFor(this.win);
 
     /** @private {?Element} */
     this.hintContainer_ = null;
@@ -140,7 +140,7 @@ export class AmpStoryHint {
     this.hintTimeout_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;

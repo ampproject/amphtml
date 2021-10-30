@@ -30,8 +30,8 @@ export class AmpStoryMediaQueryService {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @private {?Promise} */
     this.initializePromise_ = null;
@@ -41,7 +41,7 @@ export class AmpStoryMediaQueryService {
 
     /** @private @const {!Element} */
     this.storyEl_ = dev().assertElement(
-      this.win_.document.querySelector('amp-story')
+      this.win.document.querySelector('amp-story')
     );
   }
 
@@ -72,7 +72,7 @@ export class AmpStoryMediaQueryService {
     }
 
     this.initializePromise_ = new Promise((resolve) => {
-      this.matcher_ = this.win_.document.createElement('iframe');
+      this.matcher_ = this.win.document.createElement('iframe');
       this.matcher_.classList.add('i-amphtml-story-media-query-matcher');
       this.matcher_.onload = resolve;
       this.storyEl_.appendChild(this.matcher_);

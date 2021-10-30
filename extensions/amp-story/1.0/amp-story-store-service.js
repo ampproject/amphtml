@@ -458,8 +458,8 @@ export class AmpStoryStoreService {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @private {!Object<string, !Observable>} */
     this.listeners_ = {};
@@ -594,7 +594,7 @@ export class AmpStoryStoreService {
    * @protected
    */
   getEmbedOverrides_() {
-    const embedMode = parseEmbedMode(this.win_.location.hash);
+    const embedMode = parseEmbedMode(this.win.location.hash);
     switch (embedMode) {
       case EmbedMode.NAME_TBD:
         return {

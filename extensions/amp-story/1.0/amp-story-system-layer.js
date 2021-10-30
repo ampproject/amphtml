@@ -326,8 +326,8 @@ export class SystemLayer {
    * @param {!Element} parentEl
    */
   constructor(win, parentEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
@@ -360,13 +360,13 @@ export class SystemLayer {
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win_);
+    this.timer_ = Services.timerFor(this.win);
 
     /** @private {?number|?string} */
     this.timeoutId_ = null;
@@ -389,9 +389,9 @@ export class SystemLayer {
 
     this.isBuilt_ = true;
 
-    this.root_ = this.win_.document.createElement('div');
+    this.root_ = this.win.document.createElement('div');
     this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.systemLayerEl_ = renderAsElement(this.win.document, TEMPLATE);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
@@ -424,13 +424,13 @@ export class SystemLayer {
       true /* callToInitialize */
     );
 
-    if (Services.platformFor(this.win_).isIos()) {
+    if (Services.platformFor(this.win).isIos()) {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    this.viewer_ = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewer_ = Services.viewerForDoc(this.win.document.documentElement);
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
-      ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
 
     if (shouldShowStoryUrlInfo(this.viewer_, this.storeService_)) {
@@ -1010,7 +1010,7 @@ export class SystemLayer {
           defaultConfig.selector
         );
       } else {
-        element = this.win_.document.createElement('button');
+        element = this.win.document.createElement('button');
         this.vsync_.mutate(() => {
           element.classList.add('i-amphtml-story-button');
           this.buttonsContainer_.appendChild(element);

@@ -52,20 +52,20 @@ export class UnsupportedBrowserLayer {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @private {?Element} */
     this.root_ = null;
 
-    /** @private {?Element} */
-    this.element_ = null;
+    /** @public {?Element} */
+    this.element = null;
 
     /** @private {?Element} */
     this.continueButton_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
   }
 
   /**
@@ -76,13 +76,13 @@ export class UnsupportedBrowserLayer {
     if (this.root_) {
       return this.root_;
     }
-    this.root_ = this.win_.document.createElement('div');
-    this.element_ = renderAsElement(
-      this.win_.document,
+    this.root_ = this.win.document.createElement('div');
+    this.element = renderAsElement(
+      this.win.document,
       UNSUPPORTED_BROWSER_LAYER_TEMPLATE
     );
-    createShadowRootWithStyle(this.root_, this.element_, CSS);
-    this.continueButton_ = this.element_./*OK*/ querySelector(
+    createShadowRootWithStyle(this.root_, this.element, CSS);
+    this.continueButton_ = this.element./*OK*/ querySelector(
       `.${CONTINUE_ANYWAY_BUTTON_CLASS}`
     );
     this.continueButton_.addEventListener('click', () => {

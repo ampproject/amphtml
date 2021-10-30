@@ -351,8 +351,8 @@ export class UpdateSourcesTask extends MediaTask {
   constructor(win, newSources) {
     super('update-src');
 
-    /** @private {!Window} */
-    this.win_ = win;
+    /** @public {!Window} */
+    this.win = win;
 
     /** @private @const {!Sources} */
     this.newSources_ = newSources;
@@ -360,8 +360,8 @@ export class UpdateSourcesTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    Sources.removeFrom(this.win_, mediaEl);
-    this.newSources_.applyToElement(this.win_, mediaEl);
+    Sources.removeFrom(this.win, mediaEl);
+    this.newSources_.applyToElement(this.win, mediaEl);
     return Promise.resolve();
   }
 

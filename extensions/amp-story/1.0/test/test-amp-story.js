@@ -1150,7 +1150,7 @@ describes.realWin(
 
           await story.layoutCallback();
           const clickEvent = new MouseEvent('click', {clientX: 200});
-          story.shareMenu_.element_.dispatchEvent(clickEvent);
+          story.shareMenu_.element.dispatchEvent(clickEvent);
 
           expect(story.activePage_.element.id).to.equal('cover');
         });

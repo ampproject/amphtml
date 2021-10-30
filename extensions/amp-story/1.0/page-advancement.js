@@ -254,8 +254,8 @@ export class ManualAdvancement extends AdvancementConfig {
   constructor(win, element) {
     super();
 
-    /** @private @const {!Element} */
-    this.element_ = element;
+    /** @public @const {!Element} */
+    this.element = element;
 
     /** @private {number|string|null} */
     this.timeoutId_ = null;
@@ -312,17 +312,17 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   startListening_() {
-    this.element_.addEventListener(
+    this.element.addEventListener(
       'touchstart',
       this.onTouchstart_.bind(this),
       true
     );
-    this.element_.addEventListener(
+    this.element.addEventListener(
       'touchend',
       this.onTouchend_.bind(this),
       true
     );
-    this.element_.addEventListener(
+    this.element.addEventListener(
       'click',
       this.maybePerformNavigation_.bind(this),
       true
@@ -420,7 +420,7 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         return hasTapAction(el);
       },
-      /* opt_stopAt */ this.element_
+      /* opt_stopAt */ this.element
     );
   }
 
@@ -442,7 +442,7 @@ export class ManualAdvancement extends AdvancementConfig {
         }
         return false;
       },
-      /* opt_stopAt */ this.element_
+      /* opt_stopAt */ this.element
     );
   }
 
@@ -496,7 +496,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         return false;
       },
-      /* opt_stopAt */ this.element_
+      /* opt_stopAt */ this.element
     );
 
     return shouldHandleEvent;
@@ -536,7 +536,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
         return tagName === 'amp-story-page' && valid;
       },
-      /* opt_stopAt */ this.element_
+      /* opt_stopAt */ this.element
     );
 
     if (
@@ -753,9 +753,9 @@ export class ManualAdvancement extends AdvancementConfig {
   getStoryPageRect_() {
     const uiState = this.storeService_.get(StateProperty.UI_STATE);
     if (uiState !== UIType.DESKTOP_ONE_PANEL) {
-      return this.element_.getLayoutBox();
+      return this.element.getLayoutBox();
     } else {
-      return this.element_
+      return this.element
         .querySelector('amp-story-page[active]')
         ./*OK*/ getBoundingClientRect();
     }
@@ -975,8 +975,8 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private {!Element} */
-    this.element_ = element;
+    /** @public {!Element} */
+    this.element = element;
 
     /** @private {?Element} */
     this.mediaElement_ = null;
@@ -1005,7 +1005,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
    * @private
    */
   isVideoInterfaceVideo_() {
-    return this.element_.classList.contains('i-amphtml-video-interface');
+    return this.element.classList.contains('i-amphtml-video-interface');
   }
 
   /**
@@ -1014,17 +1014,17 @@ export class MediaBasedAdvancement extends AdvancementConfig {
    * @private
    */
   getMediaElement_() {
-    const tagName = this.element_.tagName.toLowerCase();
+    const tagName = this.element.tagName.toLowerCase();
 
-    if (this.element_ instanceof HTMLMediaElement) {
-      return this.element_;
+    if (this.element instanceof HTMLMediaElement) {
+      return this.element;
     } else if (
-      this.element_.hasAttribute('background-audio') &&
+      this.element.hasAttribute('background-audio') &&
       tagName === 'amp-story-page'
     ) {
-      return this.element_.querySelector('.i-amphtml-story-background-audio');
+      return this.element.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
-      return this.element_.querySelector('audio');
+      return this.element.querySelector('audio');
     }
 
     return null;
@@ -1035,7 +1035,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     super.start();
 
     // Prevents race condition when checking for video interface classname.
-    (this.element_.build ? this.element_.build() : Promise.resolve()).then(() =>
+    (this.element.build ? this.element.build() : Promise.resolve()).then(() =>
       this.startWhenBuilt_()
     );
   }
@@ -1058,7 +1058,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
 
     user().error(
       'AMP-STORY-PAGE',
-      `Element with ID ${this.element_.id} is not a media element ` +
+      `Element with ID ${this.element.id} is not a media element ` +
         'supported for automatic advancement.'
     );
   }
@@ -1087,15 +1087,15 @@ export class MediaBasedAdvancement extends AdvancementConfig {
 
   /** @private */
   startVideoInterfaceElement_() {
-    this.element_.getImpl().then((video) => {
+    this.element.getImpl().then((video) => {
       this.video_ = video;
     });
 
     // Removes [loop] attribute if specified, so the 'ended' event can trigger.
-    this.element_.querySelector('video').removeAttribute('loop');
+    this.element.querySelector('video').removeAttribute('loop');
 
     this.unlistenFns_.push(
-      listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
+      listenOnce(this.element, VideoEvents.ENDED, () => this.onAdvance(), {
         capture: true,
       })
     );

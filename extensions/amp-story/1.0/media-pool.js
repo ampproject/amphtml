@@ -124,8 +124,8 @@ export class MediaPool {
    *     dependant, as long as it is consistent between invocations.
    */
   constructor(win, maxCounts, distanceFn) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
@@ -183,7 +183,7 @@ export class MediaPool {
     /** @const {!Object<string, (function(): !PoolBoundElementDef)>} */
     this.mediaFactory_ = {
       [MediaType.AUDIO]: () => {
-        const audioEl = this.win_.document.createElement('audio');
+        const audioEl = this.win.document.createElement('audio');
         audioEl.setAttribute('muted', '');
         audioEl.muted = true;
         audioEl.classList.add('i-amphtml-pool-media');
@@ -191,7 +191,7 @@ export class MediaPool {
         return audioEl;
       },
       [MediaType.VIDEO]: () => {
-        const videoEl = this.win_.document.createElement('video');
+        const videoEl = this.win.document.createElement('video');
         videoEl.setAttribute('muted', '');
         videoEl.muted = true;
         videoEl.setAttribute('playsinline', '');
@@ -509,7 +509,7 @@ export class MediaPool {
       .then(() =>
         this.enqueueMediaElementTask_(
           poolMediaEl,
-          new UpdateSourcesTask(this.win_, sources)
+          new UpdateSourcesTask(this.win, sources)
         )
       )
       .then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()))
@@ -551,7 +551,7 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new UpdateSourcesTask(this.win_, defaultSources)
+      new UpdateSourcesTask(this.win, defaultSources)
     ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
   }
 
@@ -715,7 +715,7 @@ export class MediaPool {
 
     // This media element has not yet been registered.
     placeholderEl.id = id;
-    const sources = Sources.removeFrom(this.win_, placeholderEl);
+    const sources = Sources.removeFrom(this.win, placeholderEl);
     this.sources_[id] = sources;
     this.placeholderEls_[id] = placeholderEl;
 

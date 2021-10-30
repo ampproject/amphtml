@@ -36,11 +36,11 @@ export class InfoDialog {
    * @param {!Element} parentEl Element where to append the component
    */
   constructor(win, parentEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
-    /** @private {?Element} */
-    this.element_ = null;
+    /** @public {?Element} */
+    this.element = null;
 
     /** @private {?Element} */
     this.innerContainerEl_ = null;
@@ -52,16 +52,16 @@ export class InfoDialog {
     this.localizationService_ = getLocalizationService(parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, parentEl);
+    this.analyticsService_ = getAnalyticsService(this.win, parentEl);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
@@ -81,9 +81,9 @@ export class InfoDialog {
     }
 
     this.isBuilt_ = true;
-    const root = this.win_.document.createElement('div');
+    const root = this.win.document.createElement('div');
     const html = htmlFor(this.parentEl_);
-    this.element_ = html`
+    this.element = html`
       <div class="i-amphtml-story-info-dialog i-amphtml-story-system-reset">
         <div class="i-amphtml-story-info-dialog-container">
           <h1 class="i-amphtml-story-info-heading"></h1>
@@ -93,10 +93,10 @@ export class InfoDialog {
       </div>
     `;
 
-    createShadowRootWithStyle(root, this.element_, CSS);
+    createShadowRootWithStyle(root, this.element, CSS);
     this.initializeListeners_();
 
-    this.innerContainerEl_ = this.element_.querySelector(
+    this.innerContainerEl_ = this.element.querySelector(
       '.i-amphtml-story-info-dialog-container'
     );
 
@@ -134,7 +134,7 @@ export class InfoDialog {
       this.onInfoDialogStateUpdated_(isOpen);
     });
 
-    this.element_.addEventListener('click', (event) =>
+    this.element.addEventListener('click', (event) =>
       this.onInfoDialogClick_(event)
     );
   }
@@ -146,14 +146,14 @@ export class InfoDialog {
    * @private
    */
   onInfoDialogStateUpdated_(isOpen) {
-    this.mutator_.mutateElement(dev().assertElement(this.element_), () => {
-      this.element_.classList.toggle(DIALOG_VISIBLE_CLASS, isOpen);
+    this.mutator_.mutateElement(dev().assertElement(this.element), () => {
+      this.element.classList.toggle(DIALOG_VISIBLE_CLASS, isOpen);
     });
 
-    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-info-dialog';
+    this.element[ANALYTICS_TAG_NAME] = 'amp-story-info-dialog';
     this.analyticsService_.triggerEvent(
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-      this.element_
+      this.element
     );
   }
 
@@ -164,7 +164,7 @@ export class InfoDialog {
   onInfoDialogClick_(event) {
     const el = dev().assertElement(event.target);
     // Closes the dialog if click happened outside of the dialog main container.
-    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
+    if (!closest(el, (el) => el === this.innerContainerEl_, this.element)) {
       this.close_();
     }
     const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
@@ -210,7 +210,7 @@ export class InfoDialog {
       LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
     );
     const headingEl = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-heading')
+      this.element.querySelector('.i-amphtml-story-info-heading')
     );
 
     return this.mutator_.mutateElement(headingEl, () => {
@@ -225,7 +225,7 @@ export class InfoDialog {
    */
   setPageLink_(pageUrl) {
     const linkEl = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-link')
+      this.element.querySelector('.i-amphtml-story-info-link')
     );
 
     return this.mutator_.mutateElement(linkEl, () => {
@@ -248,7 +248,7 @@ export class InfoDialog {
     }
 
     this.moreInfoLinkEl_ = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-moreinfo')
+      this.element.querySelector('.i-amphtml-story-info-moreinfo')
     );
 
     return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {

@@ -441,8 +441,8 @@ export class AmpStoryEmbeddedComponent {
    * @param {!Element} storyEl
    */
   constructor(win, storyEl) {
-    /** @private {!Window} */
-    this.win_ = win;
+    /** @public {!Window} */
+    this.win = win;
 
     /** @private {!Element} */
     this.storyEl_ = storyEl;
@@ -460,19 +460,19 @@ export class AmpStoryEmbeddedComponent {
     this.tooltipArrow_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
+    this.analyticsService_ = getAnalyticsService(this.win, storyEl);
 
     /** @private @const {!../../../src/service/owners-interface.OwnersInterface} */
-    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
+    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win.document));
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win_);
+    this.timer_ = Services.timerFor(this.win);
 
     /** @private {?Element} */
     this.expandedViewOverlay_ = null;
@@ -504,9 +504,7 @@ export class AmpStoryEmbeddedComponent {
     );
 
     /** @type {!../../../src/service/history-impl.History} */
-    this.historyService_ = Services.historyForDoc(
-      getAmpdoc(this.win_.document)
-    );
+    this.historyService_ = Services.historyForDoc(getAmpdoc(this.win.document));
 
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
@@ -702,10 +700,10 @@ export class AmpStoryEmbeddedComponent {
    * @return {Node}
    */
   buildFocusedState_() {
-    this.shadowRoot_ = this.win_.document.createElement('div');
+    this.shadowRoot_ = this.win.document.createElement('div');
 
     this.focusedStateOverlay_ = devAssert(
-      this.buildFocusedStateTemplate_(this.win_.document)
+      this.buildFocusedStateTemplate_(this.win.document)
     );
     createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
 
@@ -846,7 +844,7 @@ export class AmpStoryEmbeddedComponent {
       }
     });
 
-    this.win_.addEventListener('keyup', (event) => {
+    this.win.addEventListener('keyup', (event) => {
       if (
         event.key === Keys.ESCAPE &&
         this.state_ === EmbeddedComponentState.EXPANDED
@@ -1443,7 +1441,7 @@ export class AmpStoryEmbeddedComponent {
       AdvancementMode.MANUAL_ADVANCE
     );
     dispatch(
-      this.win_,
+      this.win,
       dev().assertElement(this.shadowRoot_),
       direction,
       undefined,

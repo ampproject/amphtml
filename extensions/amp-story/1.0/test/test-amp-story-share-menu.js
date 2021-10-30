@@ -53,7 +53,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     shareMenu.build();
 
     expect(shareMenu.isBuilt()).to.be.true;
-    expect(shareMenu.element_).to.exist;
+    expect(shareMenu.element).to.exist;
   });
 
   it('should append the sharing menu in the parentEl on build', () => {
@@ -83,7 +83,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     shareMenu.build();
 
-    expect(shareMenu.element_.querySelector('.foo')).to.exist;
+    expect(shareMenu.element.querySelector('.foo')).to.exist;
     shareWidgetMock.verify();
   });
 
@@ -92,16 +92,16 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
-    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.element).to.have.class(VISIBLE_CLASS);
   });
 
   it('should hide the share menu on click on the overlay', () => {
     shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
-    shareMenu.element_.dispatchEvent(new Event('click'));
+    shareMenu.element.dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.element).not.to.have.class(VISIBLE_CLASS);
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
   });
 
@@ -111,7 +111,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     shareMenu.innerContainerEl_.dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.element).to.have.class(VISIBLE_CLASS);
   });
 
   it('should hide the share menu on escape key press', () => {
@@ -134,7 +134,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     shareMenu.build();
 
-    expect(shareMenu.element_.tagName).to.equal('AMP-SOCIAL-SHARE');
+    expect(shareMenu.element.tagName).to.equal('AMP-SOCIAL-SHARE');
   });
 
   it('should hide the amp-social-share button if system share', () => {
@@ -142,7 +142,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     shareMenu.build();
 
-    expect(getStyle(shareMenu.element_, 'visibility')).to.equal('hidden');
+    expect(getStyle(shareMenu.element, 'visibility')).to.equal('hidden');
   });
 
   it('should load the amp-social-share extension if system share', () => {
@@ -160,7 +160,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     shareMenu.build();
 
     const clickCallbackSpy = env.sandbox.spy();
-    shareMenu.element_.addEventListener('click', clickCallbackSpy);
+    shareMenu.element.addEventListener('click', clickCallbackSpy);
 
     // Toggling the share menu dispatches a click event on the amp-social-share
     // button, which triggers the native sharing menu.

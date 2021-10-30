@@ -67,8 +67,8 @@ export class ProgressBar {
    * @param {!Element} storyEl
    */
   constructor(win, storyEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -86,7 +86,7 @@ export class ProgressBar {
     this.activeSegmentProgress_ = 1;
 
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = Services.ampdocServiceFor(this.win_).getSingleDoc();
+    this.ampdoc_ = Services.ampdocServiceFor(this.win).getSingleDoc();
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
@@ -95,7 +95,7 @@ export class ProgressBar {
     this.segmentIdMap_ = map();
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {string} */
     this.activeSegmentId_ = '';
@@ -139,7 +139,7 @@ export class ProgressBar {
       return this.getRoot();
     }
 
-    this.root_ = this.win_.document.createElement('ol');
+    this.root_ = this.win.document.createElement('ol');
     this.root_.setAttribute('aria-hidden', true);
     this.root_.classList.add('i-amphtml-story-progress-bar');
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
@@ -196,7 +196,7 @@ export class ProgressBar {
     });
 
     Services.viewportForDoc(this.ampdoc_).onResize(
-      debounce(this.win_, () => this.onResize_(), 300)
+      debounce(this.win, () => this.onResize_(), 300)
     );
 
     this.segmentsAddedPromise_.then(() => {
@@ -423,7 +423,7 @@ export class ProgressBar {
    */
   onAdStateUpdate_(adState) {
     const segmentExpBranch = getExperimentBranch(
-      this.win_,
+      this.win,
       StoryAdSegmentExp.ID
     );
     if (
@@ -458,7 +458,7 @@ export class ProgressBar {
         index + 2
       )})`
     );
-    const adSegment = this.win_.document.createElement('div');
+    const adSegment = this.win.document.createElement('div');
     adSegment.className = 'i-amphtml-story-ad-progress-value';
     setStyle(adSegment, 'animationDuration', animationDuration);
     this.currentAdSegment_ = adSegment;
@@ -479,9 +479,9 @@ export class ProgressBar {
    * @private
    */
   buildSegmentEl_() {
-    const segmentProgressBar = this.win_.document.createElement('li');
+    const segmentProgressBar = this.win.document.createElement('li');
     segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
-    const segmentProgressValue = this.win_.document.createElement('div');
+    const segmentProgressValue = this.win.document.createElement('div');
     segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
     segmentProgressBar.appendChild(segmentProgressValue);
     this.getRoot().appendChild(segmentProgressBar);

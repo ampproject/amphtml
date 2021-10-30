@@ -75,10 +75,10 @@ export class StoryAnalyticsService {
    */
   constructor(win, element) {
     /** @protected @const {!Window} */
-    this.win_ = win;
+    this.win = win;
 
-    /** @private @const {!Element} */
-    this.element_ = element;
+    /** @public @const {!Element} */
+    this.element = element;
 
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
@@ -124,7 +124,7 @@ export class StoryAnalyticsService {
     this.incrementPageEventCount_(eventType);
 
     triggerAnalyticsEvent(
-      this.element_,
+      this.element,
       eventType,
       this.updateDetails(eventType, element)
     );

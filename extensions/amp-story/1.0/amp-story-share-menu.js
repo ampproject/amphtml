@@ -59,11 +59,11 @@ export class ShareMenu {
    * @param {!Element} storyEl Element where to append the component
    */
   constructor(win, storyEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
-    /** @private {?Element} */
-    this.element_ = null;
+    /** @public {?Element} */
+    this.element = null;
 
     /** @private {?Element} */
     this.closeButton_ = null;
@@ -78,19 +78,19 @@ export class ShareMenu {
     this.isSystemShareSupported_ = false;
 
     /** @private @const {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(this.win_, storyEl);
+    this.shareWidget_ = ShareWidget.create(this.win, storyEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.storeService_ = getStoreService(this.win);
 
     /** @private {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
+    this.analyticsService_ = getAnalyticsService(this.win, storyEl);
 
     /** @private @const {!Element} */
     this.parentEl_ = storyEl;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
+    this.vsync_ = Services.vsyncFor(this.win);
   }
 
   /**
@@ -129,17 +129,17 @@ export class ShareMenu {
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
+    this.element = getAmpSocialSystemShareTemplate(this.parentEl_);
 
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      setStyles(dev().assertElement(this.element_), {
+      setStyles(dev().assertElement(this.element), {
         'visibility': 'hidden',
         'pointer-events': 'none',
         'z-index': -1,
       });
-      this.parentEl_.appendChild(this.element_);
+      this.parentEl_.appendChild(this.element);
     });
   }
 
@@ -148,14 +148,14 @@ export class ShareMenu {
    * @private
    */
   buildForFallbackSharing_() {
-    const root = this.win_.document.createElement('div');
+    const root = this.win.document.createElement('div');
     root.classList.add('i-amphtml-story-share-menu-host');
 
-    this.element_ = getTemplate(this.parentEl_);
-    createShadowRootWithStyle(root, this.element_, CSS);
+    this.element = getTemplate(this.parentEl_);
+    createShadowRootWithStyle(root, this.element, CSS);
 
     this.closeButton_ = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
+      this.element.querySelector('.i-amphtml-story-share-menu-close-button')
     );
     const localizationService = getLocalizationService(
       devAssert(this.parentEl_)
@@ -171,7 +171,7 @@ export class ShareMenu {
 
     this.vsync_.run({
       measure: () => {
-        this.innerContainerEl_ = this.element_./*OK*/ querySelector(
+        this.innerContainerEl_ = this.element./*OK*/ querySelector(
           '.i-amphtml-story-share-menu-container'
         );
       },
@@ -203,11 +203,11 @@ export class ShareMenu {
     // Don't listen to click events if the system share is supported, since the
     // native layer handles all the UI interactions.
     if (!this.isSystemShareSupported_) {
-      this.element_.addEventListener('click', (event) =>
+      this.element.addEventListener('click', (event) =>
         this.onShareMenuClick_(event)
       );
 
-      this.win_.addEventListener('keyup', (event) => {
+      this.win.addEventListener('keyup', (event) => {
         if (event.key == Keys.ESCAPE) {
           event.preventDefault();
           this.close_();
@@ -226,7 +226,7 @@ export class ShareMenu {
     if (this.isSystemShareSupported_ && isOpen) {
       // Dispatches a click event on the amp-social-share button to trigger the
       // native system sharing UI. This has to be done upon user interaction.
-      this.element_.dispatchEvent(new Event('click'));
+      this.element.dispatchEvent(new Event('click'));
 
       // There is no way to know when the user dismisses the native system share
       // menu, so we pretend it is closed on the story end, and let the native
@@ -236,14 +236,14 @@ export class ShareMenu {
 
     if (!this.isSystemShareSupported_) {
       this.vsync_.mutate(() => {
-        this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
-        this.element_.setAttribute('aria-hidden', !isOpen);
+        this.element.classList.toggle(VISIBLE_CLASS, isOpen);
+        this.element.setAttribute('aria-hidden', !isOpen);
       });
     }
-    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
+    this.element[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
     this.analyticsService_.triggerEvent(
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-      this.element_
+      this.element
     );
   }
 
@@ -259,7 +259,7 @@ export class ShareMenu {
     }
 
     // Closes the menu if click happened outside of the menu main container.
-    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
+    if (!closest(el, (el) => el === this.innerContainerEl_, this.element)) {
       this.close_();
     }
   }
@@ -272,8 +272,8 @@ export class ShareMenu {
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
       uiState !== UIType.MOBILE
-        ? this.element_.setAttribute('desktop', '')
-        : this.element_.removeAttribute('desktop');
+        ? this.element.setAttribute('desktop', '')
+        : this.element.removeAttribute('desktop');
     });
   }
 

@@ -43,8 +43,8 @@ export class DevelopmentModeLogButtonSet {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @private {?Element} */
     this.root_ = null;
@@ -75,24 +75,24 @@ export class DevelopmentModeLogButtonSet {
    */
   build(logButtonActionFn) {
     this.errorButton_ = createButton(
-      this.win_,
+      this.win,
       ['i-amphtml-story-error-button', 'i-amphtml-story-dev-logs-button'],
       () => logButtonActionFn()
     );
 
     this.warningButton_ = createButton(
-      this.win_,
+      this.win,
       ['i-amphtml-story-warning-button', 'i-amphtml-story-dev-logs-button'],
       () => logButtonActionFn()
     );
 
     this.successButton_ = createButton(
-      this.win_,
+      this.win,
       ['i-amphtml-story-success-button', 'i-amphtml-story-dev-logs-button'],
       () => logButtonActionFn()
     );
 
-    this.root_ = this.win_.document.createElement('div');
+    this.root_ = this.win.document.createElement('div');
     this.root_.appendChild(this.errorButton_);
     this.root_.appendChild(this.warningButton_);
     this.root_.appendChild(this.successButton_);
@@ -155,8 +155,8 @@ export class DevelopmentModeLog {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
     /** @private {?Element} */
     this.root_ = null;
@@ -181,29 +181,29 @@ export class DevelopmentModeLog {
    * @return {?Element}
    */
   build() {
-    this.contextStringEl_ = this.win_.document.createElement('span');
+    this.contextStringEl_ = this.win.document.createElement('span');
     this.contextStringEl_.classList.add(
       'i-amphtml-story-developer-log-context'
     );
-    const titleEl = this.win_.document.createElement('div');
+    const titleEl = this.win.document.createElement('div');
     titleEl.textContent = 'Developer logs for page ';
     titleEl.appendChild(this.contextStringEl_);
 
     const closeDeveloperLogEl = createButton(
-      this.win_,
+      this.win,
       'i-amphtml-story-developer-log-close',
       () => this.hide()
     );
 
-    const headerEl = this.win_.document.createElement('div');
+    const headerEl = this.win.document.createElement('div');
     headerEl.classList.add('i-amphtml-story-developer-log-header');
     headerEl.appendChild(titleEl);
     headerEl.appendChild(closeDeveloperLogEl);
 
-    this.entriesEl_ = this.win_.document.createElement('ul');
+    this.entriesEl_ = this.win.document.createElement('ul');
     this.entriesEl_.classList.add('i-amphtml-story-developer-log-entries');
 
-    this.root_ = this.win_.document.createElement('div');
+    this.root_ = this.win.document.createElement('div');
     this.root_.classList.add('i-amphtml-story-developer-log');
     toggle(this.root_, false);
     this.root_.appendChild(headerEl);
@@ -253,7 +253,7 @@ export class DevelopmentModeLog {
     const logLevelClass = this.getCssLogLevelClass_(logEntry.level);
     const conformanceClass = this.getCssConformanceClass_(logEntry.conforms);
 
-    const logEntryUi = this.win_.document.createElement('li');
+    const logEntryUi = this.win.document.createElement('li');
     logEntryUi.classList.add('i-amphtml-story-developer-log-entry');
 
     if (logLevelClass) {
@@ -272,7 +272,7 @@ export class DevelopmentModeLog {
    * Clears all entries from the developer logs.
    */
   clear() {
-    Services.vsyncFor(this.win_).mutate(() => {
+    Services.vsyncFor(this.win).mutate(() => {
       removeChildren(dev().assertElement(this.entriesEl_));
     });
   }
@@ -292,7 +292,7 @@ export class DevelopmentModeLog {
   toggle() {
     const newHiddenState = !this.root_.hasAttribute('hidden');
     toggleHiddenAttribute(
-      Services.vsyncFor(this.win_),
+      Services.vsyncFor(this.win),
       dev().assertElement(this.root_),
       newHiddenState
     );
@@ -303,7 +303,7 @@ export class DevelopmentModeLog {
    */
   hide() {
     toggleHiddenAttribute(
-      Services.vsyncFor(this.win_),
+      Services.vsyncFor(this.win),
       dev().assertElement(this.root_),
       /* isHidden */ true
     );

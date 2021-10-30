@@ -25,11 +25,11 @@ export class BackgroundBlur {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @public @const {!Window} */
+    this.win = win;
 
-    /** @private @const {!Element} */
-    this.element_ = element;
+    /** @public @const {!Element} */
+    this.element = element;
 
     /** @private @const {!Array<Element>} */
     this.mediaElements_ = null;
@@ -38,7 +38,7 @@ export class BackgroundBlur {
     this.canvas_ = null;
 
     /** @private @const {Element} */
-    this.offscreenCanvas_ = this.win_.document.createElement('canvas');
+    this.offscreenCanvas_ = this.win.document.createElement('canvas');
     this.offscreenCanvas_.width = this.offscreenCanvas_.height = CANVAS_SIZE;
 
     /**  @private {?number} */
@@ -52,7 +52,7 @@ export class BackgroundBlur {
    * Setup canvas and attach it to the document.
    */
   attach() {
-    this.canvas_ = this.win_.document.createElement('canvas');
+    this.canvas_ = this.win.document.createElement('canvas');
     this.canvas_.width = this.canvas_.height = CANVAS_SIZE;
     setImportantStyles(this.canvas_, {
       width: '100%',
@@ -61,14 +61,14 @@ export class BackgroundBlur {
       left: 0,
       top: 0,
     });
-    this.element_.appendChild(this.canvas_);
+    this.element.appendChild(this.canvas_);
   }
 
   /**
    * Remove canvas from the document and cancel the RAF.
    */
   detach() {
-    this.element_.removeChild(this.canvas_);
+    this.element.removeChild(this.canvas_);
     cancelAnimationFrame(this.currentRAF_);
   }
 
@@ -137,7 +137,7 @@ export class BackgroundBlur {
       return false;
     }
     const imgEl = mediaEl.querySelector('img');
-    const canvas = this.win_.document.createElement('canvas');
+    const canvas = this.win.document.createElement('canvas');
     canvas.width = canvas.height = CANVAS_SIZE;
     const context = canvas.getContext('2d');
     context.drawImage(imgEl, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
