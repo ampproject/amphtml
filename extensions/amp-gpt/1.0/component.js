@@ -1,7 +1,7 @@
 import {loadScript} from '#3p/3p';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {useCallback, useEffect, useMemo, useRef} from '#preact';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {useMergeRefs} from '#preact/utils';
 /**
@@ -31,7 +31,6 @@ export function BentoGpt({
   const gptAdDivRef = useRef(null);
   const gptAdSlotRef = useRef(null);
   const containerRef = useRef(null);
-  const globalScopeRef = useRef(null);
 
   /**
    * This callback will be executed when ContainerWrapper is in view.
@@ -44,19 +43,15 @@ export function BentoGpt({
 
       /**
        * If ad is directly in view, ioCallback will be executed before useEffect`
-       * and thus `globalScopeRef.current` will be undefined.
+       * and thus `global.googletag` will be undefined.
        */
-      if (globalScopeRef.current) {
+      if (global.googletag) {
         /** Register refresh when in View */
-        globalScopeRef.current?.googletag
-          .pubads()
-          .refresh([gptAdSlotRef.current]);
+        global.googletag?.pubads().refresh([gptAdSlotRef.current]);
       } else {
         /** Register refresh when in View after 250ms */
         setTimeout(() => {
-          globalScopeRef.current.googletag
-            .pubads()
-            .refresh([gptAdSlotRef.current]);
+          global.googletag?.pubads().refresh([gptAdSlotRef.current]);
         }, 250);
       }
     },
@@ -96,60 +91,65 @@ export function BentoGpt({
   /**
    * Initializes Google GPT Script and Service
    */
-  const initialiseGpt = useCallback(
-    (scope) => {
-      globalScopeRef.current = scope;
+  const initialiseGpt = useCallback(() => {
+    /** Retrieve Existing or Initializes New GPT Service */
+    global.googletag = global.googletag || {cmd: []};
 
-      /** Retrieve Existing or Initializes New GPT Service */
-      scope.googletag = scope.googletag || {cmd: []};
+    /** Adds element to the execution queue */
+    global.googletag.cmd.push(function () {
+      /** Define slot and related parameters */
+      gptAdSlotRef.current = global.googletag
+        .defineSlot(adUnitPath, parsedSize, optDiv)
+        .addService(global.googletag.pubads());
 
-      /** Adds element to the execution queue */
-      scope.googletag.cmd.push(function () {
-        /** Define slot and related parameters */
-        gptAdSlotRef.current = scope.googletag
-          .defineSlot(adUnitPath, parsedSize, optDiv)
-          .addService(scope.googletag.pubads());
+      /** Disable Initial Load */
+      global.googletag.pubads().disableInitialLoad();
 
-        /** Disable Initial Load */
-        scope.googletag.pubads().disableInitialLoad();
+      /**
+       * Note:  We can add multiple slots,
+       *        but this is out of the scope of this component.
+       */
+      // scope.googletag
+      //   .defineSlot('/21730346048/test-skyscraper', [120, 600], 'sample-div2')
+      //   .addService(scope.googletag.pubads());
 
-        /**
-         * Note:  We can add multiple slots,
-         *        but this is out of the scope of this component.
-         */
-        // scope.googletag
-        //   .defineSlot('/21730346048/test-skyscraper', [120, 600], 'sample-div2')
-        //   .addService(scope.googletag.pubads());
+      /** Enable Services */
+      global.googletag.enableServices();
+      initializeTargets(gptAdSlotRef.current);
 
-        /** Enable Services */
-        scope.googletag.enableServices();
-        initializeTargets(gptAdSlotRef.current);
-
-        /** Display GPT Ad */
-        display(gptAdDivRef.current);
-      });
-    },
-    [
-      adUnitPath,
-      disableInitialLoad,
-      display,
-      gptAdSlotRef,
-      initializeTargets,
-      optDiv,
-      parsedSize,
-    ]
-  );
+      /** Display GPT Ad */
+      display(gptAdDivRef.current);
+    });
+  }, [
+    adUnitPath,
+    display,
+    gptAdSlotRef,
+    initializeTargets,
+    optDiv,
+    parsedSize,
+  ]);
 
   useEffect(() => {
-    /** Load GPT Script async once component initialized */
-    loadScript(
-      global,
-      'https://www.googletagservices.com/tag/js/gpt.js',
-      () => {
-        /** Script loaded successfully, now Initialize GPT Library */
-        initialiseGpt(global);
-      }
-    );
+    /**
+     * Load `gpt.js` only once by checking `global.bentogpt` flag.
+     */
+    if (!global.bentogpt) {
+      /** Set `global.bentogpt` so no more further requests are made for `gpt.js` */
+      global.bentogpt = true;
+
+      /** Load GPT Script async once component initialized */
+      loadScript(
+        global,
+        'https://www.googletagservices.com/tag/js/gpt.js',
+        () => {
+          /** Script loaded successfully, now Initialize GPT Library for this component */
+          initialiseGpt(global);
+        }
+      );
+    } else {
+      /** `gpt.js` is already loaded, now Initialize GPT Library for this component */
+      initialiseGpt(global);
+    }
   }, [initialiseGpt]);
 
   return (
