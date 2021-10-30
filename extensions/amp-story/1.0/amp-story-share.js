@@ -194,7 +194,7 @@ export class ShareWidget {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
-    /** @protected @const {!Window} */
+    /** @public @const {!Window} */
     this.win = win;
 
     /** @protected @const {!Element} */
