@@ -94,13 +94,12 @@ async function getFirstParagraphOrSentence(markdown, maxLengthChars) {
  * @return {Promise<string>}
  */
 async function getDescription() {
-  let description = `Bento ${packageName} Component`;
+  let description;
   try {
     const markdown = await readFile(`${dir}/README.md`, 'utf8');
-    description =
-      (await getFirstParagraphOrSentence(markdown, 200)) || description;
+    description = await getFirstParagraphOrSentence(markdown, 200);
   } catch {}
-  return description;
+  return description || `Bento ${packageName} Component`;
 }
 
 /**
