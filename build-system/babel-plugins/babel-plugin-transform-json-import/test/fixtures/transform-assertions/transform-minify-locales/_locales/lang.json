@@ -4,6 +4,6 @@
   },
   "15": {
     "string": "bar",
-    "description": "removed"
+    "description": "This field is stripped out in the output. The object is replaced with the value of the `string` key."
   }
 }
