@@ -31,18 +31,18 @@ import {devAssert} from '#core/assert';
 /**
  * @typedef {Node|Object|string|number|bigint|boolean|null|undefined}
  */
-let ChildDef;
+let DomJsxChildDef;
 
 /**
  * @param {!Element} parent
- * @param {!ChildDef|Array<!ChildDef>} child
+ * @param {!DomJsxChildDef|Array<!DomJsxChildDef>} child
  */
 function appendChild(parent, child) {
   if (!!child === child || child == null) {
     return;
   }
   if (Array.isArray(child)) {
-    const children = /** @type {!Array<!ChildDef>} */ (child);
+    const children = /** @type {!Array<!DomJsxChildDef>} */ (child);
     children.forEach((child) => {
       appendChild(parent, child);
     });
