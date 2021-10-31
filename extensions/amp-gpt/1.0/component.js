@@ -1,9 +1,23 @@
 import {loadScript} from '#3p/3p';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef} from '#preact';
+import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {useMergeRefs} from '#preact/utils';
+
+/**
+ * Displays given component with supplied props.
+ * @param {*} props
+ * @param {{current: ?Element}} ref
+ * @return {PreactDef.Renderable}
+ */
+function DisplayAsWithRef({as: Comp = 'div', ...rest}, ref) {
+  return <Comp {...rest} ref={ref} />;
+}
+
+const DisplayAs = forwardRef(DisplayAsWithRef);
+
 /**
  *
  * @param {*} x
@@ -20,6 +34,7 @@ function isString(x) {
 export function BentoGpt({
   adUnitPath,
   disableInitialLoad = false,
+  fallback,
   height,
   optDiv,
   size,
@@ -27,10 +42,15 @@ export function BentoGpt({
   width,
   ...rest
 }) {
+  /** States */
+  const [errorOnScriptLoad, setErrorOnScriptLoad] = useState(false);
+
   /** References */
   const gptAdDivRef = useRef(null);
   const gptAdSlotRef = useRef(null);
   const containerRef = useRef(null);
+  const fallbackDivRef = useRef(null);
+  const fallbackTimerRef = useRef(null);
 
   /**
    * This callback will be executed when ContainerWrapper is in view.
@@ -113,8 +133,22 @@ export function BentoGpt({
       //   .defineSlot('/21730346048/test-skyscraper', [120, 600], 'sample-div2')
       //   .addService(scope.googletag.pubads());
 
+      global.googletag.pubads().addEventListener('slotRequested', function () {
+        fallbackTimerRef.current = setTimeout(() => {
+          setErrorOnScriptLoad(true);
+        }, 2500);
+      });
+
+      global.googletag
+        .pubads()
+        .addEventListener('slotResponseReceived', function () {
+          clearTimeout(fallbackTimerRef.current);
+          setErrorOnScriptLoad(false);
+        });
+
       /** Enable Services */
       global.googletag.enableServices();
+
       initializeTargets(gptAdSlotRef.current);
 
       /** Display GPT Ad */
@@ -144,6 +178,10 @@ export function BentoGpt({
         () => {
           /** Script loaded successfully, now Initialize GPT Library for this component */
           initialiseGpt(global);
+        },
+        () => {
+          /** Error while loading `gpt.js` script, show fallback */
+          setErrorOnScriptLoad(true);
         }
       );
     } else {
@@ -161,7 +199,10 @@ export function BentoGpt({
       {...rest}
       ref={useMergeRefs([containerRef, inObRef])}
     >
-      <div id={optDiv} ref={gptAdDivRef} style={{height, width}}></div>
+      {!errorOnScriptLoad && (
+        <div id={optDiv} ref={gptAdDivRef} style={{height, width}}></div>
+      )}
+      {errorOnScriptLoad && <DisplayAs as={fallback} ref={fallbackDivRef} />}
     </ContainWrapper>
   );
 }

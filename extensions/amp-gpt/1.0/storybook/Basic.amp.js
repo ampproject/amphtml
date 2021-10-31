@@ -21,7 +21,7 @@ export const _default = (args) => {
       width="120"
       {...args}
     >
-      This text is inside.
+      <div slot="fallback">Error while loading script.</div>
     </amp-gpt>
   );
 };
@@ -38,7 +38,7 @@ export const intersectionObserverInAction = (args) => {
         style="margin:10px"
         {...args}
       >
-        This text is inside.
+        <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
       <amp-gpt
         ad-unit-path="/21730346048/test-skyscraper"
@@ -48,7 +48,7 @@ export const intersectionObserverInAction = (args) => {
         style="margin:10px"
         {...args}
       >
-        This text is inside.
+        <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
     </>
   );
@@ -67,7 +67,7 @@ export const targeting = (args) => {
         {...args}
         targeting={JSON.stringify(targetingAtf)}
       >
-        This text is inside.
+        <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
       <amp-gpt
         ad-unit-path="/6355419/Travel/Asia"
@@ -77,7 +77,7 @@ export const targeting = (args) => {
         {...args}
         targeting={JSON.stringify(targetingBtf)}
       >
-        This text is inside.
+        <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
     </>
   );
@@ -96,7 +96,7 @@ export const disableInitialLoad = (args) => {
           disable-initial-load={disableInitialLoad}
           {...args}
         >
-          This text is inside.
+          <div slot="fallback">Error while loading script.</div>
         </amp-gpt>
       </div>
       <div style="padding: 0 10px 10px 10px;">
@@ -112,7 +112,7 @@ export const disableInitialLoad = (args) => {
         disable-initial-load={disableInitialLoad}
         {...args}
       >
-        This text is inside.
+        <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
       <button
         onclick="

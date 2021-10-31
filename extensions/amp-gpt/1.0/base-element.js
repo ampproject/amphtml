@@ -11,12 +11,18 @@ BaseElement['Component'] = BentoGpt;
 /** @override */
 BaseElement['props'] = {
   adUnitPath: {attr: 'ad-unit-path', type: 'string'},
+  disableInitialLoad: {attr: 'disable-initial-load', type: 'boolean'},
+  fallback: {
+    as: true,
+    clone: true,
+    selector: 'div[slot="fallback"]',
+    single: true,
+  },
+  height: {attr: 'height', type: 'number'},
   optDiv: {attr: 'opt-div', type: 'string'},
   size: {attr: 'size'},
   targeting: {attr: 'targeting'},
-  height: {attr: 'height', type: 'number'},
   width: {attr: 'width', type: 'number'},
-  disableInitialLoad: {attr: 'disable-initial-load', type: 'boolean'},
 };
 
 /** @override */

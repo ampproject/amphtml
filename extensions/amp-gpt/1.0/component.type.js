@@ -6,6 +6,7 @@ var BentoGptDef = {};
 /**
  * @typedef {{
  *   adUnitPath: (string),
+ *   fallback: (?PreactDef.Renderable),
  *   optDiv: (string|undefined),
  *   size: (!Array<!Array<number>>|undefined),
  *   targeting: (!Array<!Array<string>>|undefined),
