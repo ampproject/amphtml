@@ -28,7 +28,7 @@ export const Type = {
  * Story access blocking type template.
  * @return {!Element}
  */
-const getBlockingTemplate = () => {
+const renderBlockingElement = () => {
   return (
     <div class="i-amphtml-story-access-overflow">
       <div class="i-amphtml-story-access-container">
@@ -45,7 +45,7 @@ const getBlockingTemplate = () => {
  * Story access notification type template.
  * @return {!Element}
  */
-const getNotificationTemplate = () => {
+const renderNotificationElement = () => {
   return (
     <div class="i-amphtml-story-access-overflow">
       <div class="i-amphtml-story-access-container">
@@ -198,7 +198,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
   renderDrawerEl_() {
     switch (this.getType_()) {
       case Type.BLOCKING:
-        const drawerEl = getBlockingTemplate();
+        const drawerEl = renderBlockingElement();
 
         const logoSrc = getStoryAttributeSrc(
           this.element,
@@ -216,7 +216,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
         return drawerEl;
         break;
       case Type.NOTIFICATION:
-        return getNotificationTemplate();
+        return renderNotificationElement();
         break;
       default:
         user().error(
