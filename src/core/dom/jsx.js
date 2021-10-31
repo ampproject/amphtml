@@ -23,27 +23,34 @@
  *
  * 🚫 No dangerouslySetInnerHTML
  *   - You should not do this anyway.
+ *
+ * TODO(https://go.amp.dev/issue/36679): Lint these unsupported features.
  */
 import {devAssert} from '#core/assert';
 
 /**
+ * @typedef {Node|Object|string|number|bigint|boolean|null|undefined}
+ */
+let ChildDef;
+
+/**
  * @param {!Element} parent
- * @param {*} child
+ * @param {!ChildDef|Array<!ChildDef>} child
  */
 function appendChild(parent, child) {
-  if (child === false || child == null) {
+  if (!!child === child || child == null) {
     return;
   }
   if (Array.isArray(child)) {
-    child.forEach((child) => {
+    const children = /** @type {!Array<!ChildDef>} */ (child);
+    children.forEach((child) => {
       appendChild(parent, child);
     });
     return;
   }
+  const maybeNode = /** @type {!Node} */ (child);
   parent.appendChild(
-    child?.nodeType
-      ? /** @type {!Node} */ (child)
-      : self.document.createTextNode(String(child))
+    maybeNode.nodeType ? maybeNode : self.document.createTextNode(String(child))
   );
 }
 

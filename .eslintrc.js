@@ -460,7 +460,12 @@ module.exports = {
     },
     {
       // Files that use JSX for plain DOM nodes instead of Preact
-      'files': ['**/amp-story*/**'],
+      'files': [
+        'extensions/amp-story/**',
+        'extensions/amp-story-*/**',
+        // Extensions whose version is lower than 1.0 do not use Preact
+        'extensions/*/0.*/**',
+      ],
       'rules': {'local/preact': [2, '#core/dom/jsx']},
     },
   ],
