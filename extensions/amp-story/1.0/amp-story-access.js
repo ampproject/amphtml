@@ -1,4 +1,3 @@
-import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
@@ -9,8 +8,10 @@ import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
 import {dev, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
+import {htmlFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
+import {setImportantStyles} from '#core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-access';
@@ -25,42 +26,38 @@ export const Type = {
 
 /**
  * Story access blocking type template.
- * @param {{logoSrc: (?string|undefined)}} props
+ * @param {!Element} element
  * @return {!Element}
  */
-function BlockingNotification({logoSrc}) {
-  return (
-    <div class="i-amphtml-story-access-overflow">
-      <div class="i-amphtml-story-access-container">
-        <div class="i-amphtml-story-access-header">
-          <div
-            class="i-amphtml-story-access-logo"
-            style={logoSrc ? `background-image: url(${logoSrc});` : null}
-          ></div>
+const getBlockingTemplate = (element) => {
+  return htmlFor(element)`
+      <div class="i-amphtml-story-access-overflow">
+        <div class="i-amphtml-story-access-container">
+          <div class="i-amphtml-story-access-header">
+            <div class="i-amphtml-story-access-logo"></div>
+          </div>
+          <div class="i-amphtml-story-access-content"></div>
         </div>
-        <div class="i-amphtml-story-access-content"></div>
-      </div>
-    </div>
-  );
-}
+      </div>`;
+};
 
 /**
  * Story access notification type template.
+ * @param {!Element} element
  * @return {!Element}
  */
-function renderNotificationElement() {
-  return (
-    <div class="i-amphtml-story-access-overflow">
-      <div class="i-amphtml-story-access-container">
-        <div class="i-amphtml-story-access-content">
-          <span class="i-amphtml-story-access-close-button" role="button">
-            &times;
-          </span>
+const getNotificationTemplate = (element) => {
+  return htmlFor(element)`
+      <div class="i-amphtml-story-access-overflow">
+        <div class="i-amphtml-story-access-container">
+          <div class="i-amphtml-story-access-content">
+            <span class="i-amphtml-story-access-close-button" role="button">
+              &times;
+            </span>
+          </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      </div>`;
+};
 
 /**
  * The <amp-story-access> custom element.
@@ -201,15 +198,25 @@ export class AmpStoryAccess extends AMP.BaseElement {
   renderDrawerEl_() {
     switch (this.getType_()) {
       case Type.BLOCKING:
+        const drawerEl = getBlockingTemplate(this.element);
+
         const logoSrc = getStoryAttributeSrc(
           this.element,
           'publisher-logo-src',
           /* warn */ true
         );
-        return <BlockingNotification logoSrc={logoSrc} />;
+
+        if (logoSrc) {
+          const logoEl = dev().assertElement(
+            drawerEl.querySelector('.i-amphtml-story-access-logo')
+          );
+          setImportantStyles(logoEl, {'background-image': `url(${logoSrc})`});
+        }
+
+        return drawerEl;
         break;
       case Type.NOTIFICATION:
-        return renderNotificationElement();
+        return getNotificationTemplate(this.element);
         break;
       default:
         user().error(
