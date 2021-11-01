@@ -213,7 +213,7 @@ async function launchPercyAgent(browserFetcher) {
             'Percy agent is enabled and reachable on port',
             PERCY_AGENT_PORT
           );
-          resolve(true);
+          return resolve(true);
         }
       } catch {
         // Ignore transient errors. Promise will reject after WAIT_FOR_AGENT_MS.
