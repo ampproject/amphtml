@@ -162,11 +162,11 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
     const localizedStringId = /** @type {!LocalizedStringId} */ (
       localizedStringIdAsStr
     );
-    pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
-      localizedStringBundle[localizedStringId].string
-    );
-    pseudoLocaleStringBundle[localizedStringId].fallback = localizationFn(
-      localizedStringBundle[localizedStringId].fallback
+    const entry = localizedStringBundle[localizedStringId];
+    // In unminified builds, this is an object {"string": "foo", ...}.
+    // In minified builds, this is the actual string "foo".
+    pseudoLocaleStringBundle[localizedStringId] = localizationFn(
+      entry['string'] || entry
     );
   });
 
