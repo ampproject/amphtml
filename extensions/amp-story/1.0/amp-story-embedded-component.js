@@ -32,6 +32,7 @@ import {htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+import objstr from 'obj-str';
 
 /**
  * Action icons to be placed in tooltip.
@@ -1358,27 +1359,37 @@ export class AmpStoryEmbeddedComponent {
   renderFocusedStateElement_() {
     const tooltipOverlay = (
       <section
-        class="i-amphtml-story-focused-state-layer
-            i-amphtml-story-system-reset i-amphtml-hidden"
+        class={objstr({
+          'i-amphtml-story-focused-state-layer': true,
+          'i-amphtml-story-system-reset i-amphtml-hidden': true,
+        })}
       >
         <div
-          class="i-amphtml-story-focused-state-layer-nav-button-container
-              i-amphtml-story-tooltip-nav-button-left"
+          class={objstr({
+            'i-amphtml-story-focused-state-layer-nav-button-container': true,
+            'i-amphtml-story-tooltip-nav-button-left': true,
+          })}
         >
           <button
             ref="buttonLeft"
-            class="i-amphtml-story-focused-state-layer-nav-button
-                i-amphtml-story-tooltip-nav-button-left"
+            class={objstr({
+              'i-amphtml-story-focused-state-layer-nav-button': true,
+              'i-amphtml-story-tooltip-nav-button-left': true,
+            })}
           ></button>
         </div>
         <div
-          class="i-amphtml-story-focused-state-layer-nav-button-container
-              i-amphtml-story-tooltip-nav-button-right"
+          class={objstr({
+            'i-amphtml-story-focused-state-layer-nav-button-container': true,
+            'i-amphtml-story-tooltip-nav-button-right': true,
+          })}
         >
           <button
             ref="buttonRight"
-            class="i-amphtml-story-focused-state-layer-nav-button
-                    i-amphtml-story-tooltip-nav-button-right"
+            class={objstr({
+              'i-amphtml-story-focused-state-layer-nav-button': true,
+              'i-amphtml-story-tooltip-nav-button-right': true,
+            })}
           ></button>
         </div>
         <a
