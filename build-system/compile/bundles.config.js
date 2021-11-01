@@ -2,7 +2,6 @@
 const bentoBundles = require('./bundles.config.bento.json');
 const extensionBundles = require('./bundles.config.extensions.json');
 
-exports.bentoBundles = bentoBundles;
 const wrappers = require('./compile-wrappers');
 const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');

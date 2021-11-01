@@ -2,7 +2,7 @@ const debounce = require('../../common/debounce');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
 const path = require('path');
-const {buildComponents} = require('../build-bento');
+const {buildBentoComponents} = require('../build-bento');
 const {buildExtensions} = require('../extension-helpers');
 const {endBuildStep, watchDebounceDelay} = require('../helpers');
 const {jsifyCssAsync} = require('./jsify-css');
@@ -140,7 +140,7 @@ async function compileCss(options = {}) {
   }
   const buildOptions = {compileOnlyCss: true};
   await buildExtensions(buildOptions);
-  await buildComponents(buildOptions);
+  await buildBentoComponents(buildOptions);
   endBuildStep('Recompiled all CSS files into', 'build/', startTime);
 }
 

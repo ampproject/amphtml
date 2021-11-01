@@ -26,8 +26,8 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
+const {buildBentoComponents} = require('./build-bento');
 const {buildCompiler} = require('../compile/build-compiler');
-const {buildComponents} = require('./build-bento');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, copyCss} = require('./css');
@@ -133,7 +133,7 @@ async function dist() {
 
   // This step internally parses the various extension* flags.
   await buildExtensions(options);
-  await buildComponents(options);
+  await buildBentoComponents(options);
 
   // This step is to be run only during a full `amp dist`.
   if (

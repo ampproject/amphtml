@@ -18,7 +18,6 @@ const {
   getExtensionsFromArg,
 } = require('./extension-helpers');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
-const {compileJison} = require('./compile-jison');
 const {doBuildJs, endBuildStep, watchDebounceDelay} = require('./helpers');
 const {existsSync, mkdirSync} = require('fs');
 const {getBentoName} = require('./bento-helpers');
@@ -194,7 +193,6 @@ async function buildComponent(
       return;
     }
   }
-  await compileJison(`${componentsDir}/**/*.jison`);
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
@@ -255,7 +253,7 @@ async function doBuildComponent(components, component, options) {
  * @param {!Object} options
  * @return {!Promise<void>}
  */
-async function buildComponents(options) {
+async function buildBentoComponents(options) {
   const startTime = Date.now();
   maybeInitializeComponents();
   const componentsToBuild = getComponentsToBuild();
@@ -278,4 +276,4 @@ async function buildComponents(options) {
   }
 }
 
-module.exports = {buildComponents};
+module.exports = {buildBentoComponents};

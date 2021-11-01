@@ -17,7 +17,7 @@ function getTestConfig() {
         'ads/**/*.js',
         'build-system/**/*.js',
         'extensions/**/test/**/*.js',
-        'bento/components/**/test/**/*.js',
+        'src/bento/components/**/test/**/*.js',
         'third_party/**/*.js',
         'test/**/*.js',
         'testing/**/*.js',
