@@ -301,10 +301,9 @@ Now, verify your test by executing it:
     -   You can verify that your page looks as intented by running `amp serve --minified` and opening it in a browser
 -   Execute the visual diff tests:
     ```sh
-    amp visual-diff --nobuild
+    amp visual-diff
     ```
     -   Add `--grep="<regular expression>"` to the command to execute a subset of the tests. e.g., `amp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
-    -   Note that if you drop the `--nobuild` flag, `amp visual-diff` will run `amp dist --fortesting` on each execution. This is time consuming, so only drop it if you are changing the runtime/extension code and not just the test files
     -   To see debugging info during Percy runs, you can add `--chrome_debug`, `--webserver_debug`, or `--debug` for both.
 -   When the test finishes executing it will print a URL to Percy where you can inspect the results. It should take about a minute to finish processing.
 -   Inspect the build on Percy. If you are not happy with the results, fix your page or code, and repeat. If all is well, approve it. This creates a new baseline on Percy, against which all following builds will be compared.

@@ -27,7 +27,6 @@ const {
   gitCommitterEmail,
   shortSha,
 } = require('../../common/git');
-const {buildRuntime} = require('../../common/utils');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
@@ -826,22 +825,18 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
     return;
   }
 
-  if (argv.nobuild) {
-    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
+  const isBuiltInTestMode =
+    fs.existsSync('dist/v0.js') &&
+    /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
       fs.readFileSync('dist/v0.js', 'utf8')
     );
-    if (!isInTestMode) {
-      log(
-        'fatal',
-        'The AMP runtime was not built in test mode. Run',
-        cyan('amp dist --fortesting'),
-        'or remove the',
-        cyan('--nobuild'),
-        'option from this command'
-      );
-    }
-  } else {
-    await buildRuntime(/* opt_compiled */ true);
+  if (!isBuiltInTestMode) {
+    log(
+      'fatal',
+      'The AMP runtime was not built or not build in test mode. Run',
+      cyan('amp dist --fortesting'),
+      'before executing visual diff tests.'
+    );
   }
 }
 
@@ -897,5 +892,4 @@ visualDiff.flags = {
   'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
     'Disable Percy integration (for testing local changes only)',
-  'nobuild': 'Skip build',
 };
