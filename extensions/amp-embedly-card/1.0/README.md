@@ -17,36 +17,34 @@ The examples below demonstrate use of the `<bento-embedly-card>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-embedly-card
+npm install @bentoproject/embedly-card
 ```
 
 ```javascript
-import '@ampproject/bento-embedly-card';
+import {defineElement as defineBentoEmbedlyCard} from '@bentoproject/embedly-card';
+defineBentoEmbedlyCard();
 ```
-
-[/example]
 
 #### Example: Include via `<script>`
 
-[example preview="top-frame" playground="false"]
-
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-embedly-card {
       display: block;
       overflow: hidden;
       position: relative;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
+  ></script>
   <style>
     bento-embedly-card {
       width: 375px;
@@ -65,13 +63,14 @@ import '@ampproject/bento-embedly-card';
   >
   </bento-embedly-card>
 
-  <bento-embedly-card id="my-url" data-url="https://www.youtube.com/watch?v=LZcKdHinUhE">
+  <bento-embedly-card
+    id="my-url"
+    data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+  >
   </bento-embedly-card>
 
-  <div class="buttons" style="margin-top: 8px;">
-    <button id="change-url">
-      Change embed
-    </button>
+  <div class="buttons" style="margin-top: 8px">
+    <button id="change-url">Change embed</button>
   </div>
 
   <script>
@@ -81,27 +80,32 @@ import '@ampproject/bento-embedly-card';
 
       // set up button actions
       document.querySelector('#change-url').onclick = () => {
-        embedlyCard.setAttribute('data-url', 'https://www.youtube.com/watch?v=wcJSHR0US80')
-      }
+        embedlyCard.setAttribute(
+          'data-url',
+          'https://www.youtube.com/watch?v=wcJSHR0US80'
+        );
+      };
     })();
   </script>
 </body>
 ```
-
-[/example]
 
 #### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-embedly-card-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-embedly-card {
     display: block;
     overflow: hidden;
@@ -184,30 +188,26 @@ The examples below demonstrate use of the `<BentoEmbedlyCard>` as a functional c
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-embedly-card
+npm install @bentoproject/embedly-card
 ```
 
 ```javascript
-import React from 'react';
-import { BentoEmbedlyCard } from '@ampproject/bento-embedly-card/react';
-import '@ampproject/bento-embedly-card/styles.css';
+import {BentoEmbedlyCard} from '@bentoproject/embedly-card/react';
+import '@bentoproject/embedly-card/styles.css';
 
 function App() {
   return (
-    <BentoEmbedlyContext.Provider value={apiKey: '12af2e3543ee432ca35ac30a4b4f656a'}>
-      <BentoEmbedlyCard url="https://www.youtube.com/watch?v=LZcKdHinUhE">
-      </BentoEmbedlyCard>
+    <BentoEmbedlyContext.Provider
+      value={{apiKey: '12af2e3543ee432ca35ac30a4b4f656a'}}
+    >
+      <BentoEmbedlyCard url="https://www.youtube.com/watch?v=LZcKdHinUhE"></BentoEmbedlyCard>
     </BentoEmbedlyContext.Provider>
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -216,15 +216,19 @@ function App() {
 The `BentoEmbedlyCard` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoEmbedlyCard style={{width: '300px', height: '100px'}} url="https://www.youtube.com/watch?v=LZcKdHinUhE">
-</BentoEmbedlyCard>
+<BentoEmbedlyCard
+  style={{width: 300, height: 100}}
+  url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+></BentoEmbedlyCard>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoEmbedlyCard className='custom-styles' url="https://www.youtube.com/watch?v=LZcKdHinUhE">
-</BentoEmbedlyCard>
+<BentoEmbedlyCard
+  className="custom-styles"
+  url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+></BentoEmbedlyCard>
 ```
 
 ```css

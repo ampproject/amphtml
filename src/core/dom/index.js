@@ -548,3 +548,12 @@ export function getChildJsonConfig(element) {
     throw new Error('Failed to parse <script> contents. Is it valid JSON?');
   }
 }
+
+/**
+ * Returns true if an element was server rendered.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isServerRendered(element) {
+  return element.hasAttribute('i-amphtml-ssr');
+}
