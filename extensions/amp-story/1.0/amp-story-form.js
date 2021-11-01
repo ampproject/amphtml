@@ -1,9 +1,9 @@
+import * as Preact from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {localize} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 
 /**
@@ -143,8 +143,11 @@ function createFormResultEl_(win, formEl, isSuccess) {
  * @private
  */
 function createResponseAttributeEl_(formEl, responseAttribute) {
-  const statusEl = htmlFor(formEl)`
-    <div><div class="i-amphtml-story-page-attachment-form-submission-status"></div></div>`;
+  const statusEl = (
+    <div>
+      <div class="i-amphtml-story-page-attachment-form-submission-status"></div>
+    </div>
+  );
   statusEl.setAttribute(responseAttribute, '');
   return statusEl;
 }

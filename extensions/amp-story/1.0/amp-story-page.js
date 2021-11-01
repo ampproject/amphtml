@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 /**
  * @fileoverview Embeds a single page in a story
  *
@@ -53,7 +54,6 @@ import {localize} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
@@ -132,23 +132,26 @@ const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
  * @param {!Element} element
  * @return {!Element}
  */
-const buildPlayMessageElement = (element) =>
-  htmlFor(element)`
-      <button role="button" class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-play-label"></span>
-        <span class='i-amphtml-story-page-play-icon'></span>
-      </button>`;
+const buildPlayMessageElement = (element) => (
+  <button
+    role="button"
+    class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
+  >
+    <span class="i-amphtml-story-page-play-label"></span>
+    <span class="i-amphtml-story-page-play-icon"></span>
+  </button>
+);
 
 /**
  * @param {!Element} element
  * @return {!Element}
  */
-const buildErrorMessageElement = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-error-label"></span>
-        <span class='i-amphtml-story-page-error-icon'></span>
-      </div>`;
+const buildErrorMessageElement = (element) => (
+  <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
+    <span class="i-amphtml-story-page-error-label"></span>
+    <span class="i-amphtml-story-page-error-icon"></span>
+  </div>
+);
 
 /**
  * amp-story-page states.

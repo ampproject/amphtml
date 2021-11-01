@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -19,7 +20,6 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
 
 /** @const {string} Class to toggle the share menu. */
@@ -31,14 +31,23 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
  * @return {!Element}
  */
 const getTemplate = (element) => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
+  return (
+    <div
+      class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
+      aria-hidden="true"
+      role="alert"
+    >
       <div class="i-amphtml-story-share-menu-container">
-        <button class="i-amphtml-story-share-menu-close-button" aria-label="close" role="button">
+        <button
+          class="i-amphtml-story-share-menu-close-button"
+          aria-label="close"
+          role="button"
+        >
           &times;
         </button>
       </div>
-    </div>`;
+    </div>
+  );
 };
 
 /**
@@ -47,7 +56,7 @@ const getTemplate = (element) => {
  * @return {!Element}
  */
 const getAmpSocialSystemShareTemplate = (element) => {
-  return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
+  return <amp-social-share type="system"></amp-social-share>;
 };
 
 /**

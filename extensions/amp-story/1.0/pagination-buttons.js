@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
@@ -8,8 +9,6 @@ import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
-
-import {htmlFor} from '#core/dom/static-template';
 import {localize} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
@@ -49,11 +48,11 @@ const ForwardButtonStates = {
  * @param {!Element} element
  * @return {!Element}
  */
-const buildPaginationButton = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-button-container">
-        <button class="i-amphtml-story-button-move"></button>
-      </div>`;
+const buildPaginationButton = (element) => (
+  <div class="i-amphtml-story-button-container">
+    <button class="i-amphtml-story-button-move"></button>
+  </div>
+);
 
 /**
  * Desktop navigation buttons.
