@@ -11,7 +11,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
 import {listen} from '#utils/event-helper';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {renderAsElementForStory, renderSimpleTemplate} from './simple-template';
 
 /**
  * Maps share provider type to visible name.
@@ -161,7 +161,7 @@ function buildProvider(doc, shareType, opt_params) {
  * @return {!Element}
  */
 function buildCopySuccessfulToast(doc, url) {
-  return renderAsElement(
+  return renderAsElementForStory(
     doc,
     /** @type {!./simple-template.ElementDef} */ ({
       tag: 'div',
@@ -225,7 +225,7 @@ export class ShareWidget {
 
     this.ampdoc_ = ampdoc;
 
-    this.root = renderAsElement(this.win.document, TEMPLATE);
+    this.root = renderAsElementForStory(this.win.document, TEMPLATE, this.storyEl);
 
     this.loadProviders();
     this.maybeAddLinkShareButton_();
@@ -248,9 +248,10 @@ export class ShareWidget {
       return;
     }
 
-    const linkShareButton = renderAsElement(
+    const linkShareButton = renderAsElementForStory(
       this.win.document,
-      buildLinkShareItemTemplate(this.storyEl)
+      buildLinkShareItemTemplate(this.storyEl),
+      this.storyEl
     );
 
     this.add_(linkShareButton);
@@ -285,7 +286,7 @@ export class ShareWidget {
       return;
     }
 
-    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url));
+    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url, this.storyEl));
   }
 
   /** @private */
@@ -390,7 +391,7 @@ export class ShareWidget {
    */
   add_(node) {
     const list = devAssert(this.root).lastElementChild;
-    const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
+    const item = renderAsElementForStory(this.win.document, SHARE_ITEM_TEMPLATE, this.storyEl);
 
     item.appendChild(node);
 
