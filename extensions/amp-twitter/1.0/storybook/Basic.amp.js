@@ -30,16 +30,13 @@ export const Default = () => {
   const cards = boolean('show cards', true) ? undefined : 'hidden';
   const conversation = boolean('show conversation', false) ? undefined : 'none';
   return (
-    <>
-      <div style="height:2000px;">Scroll Down to load the tweet</div>
-      <amp-twitter
-        width="300"
-        height="200"
-        data-tweetid={tweetId}
-        data-cards={cards}
-        data-conversation={conversation}
-      />
-    </>
+    <amp-twitter
+      width="300"
+      height="200"
+      data-tweetid={tweetId}
+      data-cards={cards}
+      data-conversation={conversation}
+    />
   );
 };
 

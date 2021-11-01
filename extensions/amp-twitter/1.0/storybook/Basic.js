@@ -17,15 +17,12 @@ export const _default = () => {
   const cards = boolean('show cards', true) ? undefined : 'hidden';
   const conversation = boolean('show conversation', false) ? undefined : 'none';
   return (
-    <>
-      <div style="height:2000px;">Scroll Down to load the tweet</div>
-      <BentoTwitter
-        cards={cards}
-        conversation={conversation}
-        tweetid={tweetId}
-        style={{width: '300px', height: '200px'}}
-      />
-    </>
+    <BentoTwitter
+      cards={cards}
+      conversation={conversation}
+      tweetid={tweetId}
+      style={{width: '300px', height: '200px'}}
+    />
   );
 };
 
@@ -57,5 +54,26 @@ export const timelines = () => {
       timelineUserId={timelineUserId}
       style={{width: '300px', height: '200px'}}
     />
+  );
+};
+
+export const lazyloaded = () => {
+  const tweetId = select(
+    'tweet id',
+    ['1356304203044499462', '495719809695621121', '463440424141459456'],
+    '1356304203044499462'
+  );
+  const cards = boolean('show cards', true) ? undefined : 'hidden';
+  const conversation = boolean('show conversation', false) ? undefined : 'none';
+  return (
+    <>
+      <div style="height:2000px;">Scroll Down to load the tweet</div>
+      <BentoTwitter
+        cards={cards}
+        conversation={conversation}
+        tweetid={tweetId}
+        style={{width: '300px', height: '200px'}}
+      />
+    </>
   );
 };
