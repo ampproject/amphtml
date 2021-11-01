@@ -29,6 +29,7 @@ const {
 } = require('../../common/git');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
+const {isPercyEnabled} = require('@percy/sdk-utils');
 const {startServer, stopServer} = require('../serve');
 
 // CSS injected in every page tested.
@@ -62,6 +63,7 @@ const HOST = 'localhost';
 const PORT = 8000;
 const PERCY_AGENT_PORT = 5338;
 const WAIT_FOR_TABS_MS = 1000;
+const WAIT_FOR_AGENT_MS = 5000;
 
 // Multiple tabs speed up the performance of the visual diff tests.
 const MAX_PARALLEL_TABS = os.cpus().length;
@@ -196,7 +198,29 @@ async function launchPercyAgent(browserFetcher) {
     },
   });
 
-  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
+  await new Promise((resolve, reject) => {
+    const percyIsEnabledTimeout = setTimeout(() => {
+      log('fatal', 'Percy agent is unreachable after', WAIT_FOR_AGENT_MS, 'ms');
+      reject(false);
+    }, WAIT_FOR_AGENT_MS);
+
+    while (true) {
+      try {
+        if (isPercyEnabled()) {
+          clearTimeout(percyIsEnabledTimeout);
+          log(
+            'info',
+            'Percy agent is enabled and reachable on port',
+            PERCY_AGENT_PORT
+          );
+          return resolve(true);
+        }
+      } catch {
+        // Ignore transient errors. Promise will reject after WAIT_FOR_AGENT_MS.
+      }
+    }
+  });
+
   if (process.env['PERCY_TARGET_COMMIT']) {
     log(
       'info',
