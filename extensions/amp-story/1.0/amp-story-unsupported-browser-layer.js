@@ -24,7 +24,12 @@ const renderUnsuportedBrowserLayerElement = (element) => (
           LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
         )}
       </div>
-      <button class="i-amphtml-continue-button">
+      <button
+        // The continue button functionality will only be present in the default
+        // layer. Publisher provided fallbacks will not provide users with the
+        // ability to continue with an unsupported browser
+        class="i-amphtml-continue-button"
+      >
         {localize(
           element,
           LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
