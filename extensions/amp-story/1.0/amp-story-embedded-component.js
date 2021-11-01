@@ -1355,11 +1355,7 @@ export class AmpStoryEmbeddedComponent {
    * @return {!Element}
    * @private
    */
-<<<<<<< HEAD
   renderFocusedStateElement_() {
-=======
-  renderFocusedStateElement_(doc) {
->>>>>>> 6b1c66c541 (names)
     const tooltipOverlay = (
       <section
         class="i-amphtml-story-focused-state-layer
