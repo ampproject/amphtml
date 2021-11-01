@@ -1587,7 +1587,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendVideoLoadingSpinner_() {
-    this.loadingSpinner_ = new LoadingSpinner(this.win.document);
+    this.loadingSpinner_ = new LoadingSpinner();
     const loadingSpinnerEl = this.loadingSpinner_.build();
     loadingSpinnerEl.setAttribute('aria-label', 'Loading video');
     this.element.appendChild(loadingSpinnerEl);

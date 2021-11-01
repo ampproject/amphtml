@@ -53,7 +53,7 @@ export function setupResponseAttributeElements(win, formEl) {
 
   // Create and append fallback form attribute elements, if necessary.
   if (!submittingEl) {
-    submittingEl = createFormSubmittingEl_(win, formEl);
+    submittingEl = createFormSubmittingEl_(formEl);
     formEl.appendChild(submittingEl);
   }
   if (!successEl) {
@@ -83,18 +83,17 @@ export function getResponseAttributeElements(formEl) {
 /**
  * Create an element that is used to display the in-progress state of a form
  * submission attempt.
- * @param {!Window} win
  * @param {!Element} formEl The form to which the `submitting` element will be
  *     added.
  * @return {!Element}
  * @private
  */
-function createFormSubmittingEl_(win, formEl) {
+function createFormSubmittingEl_(formEl) {
   const submittingEl = createResponseAttributeEl_(
     formEl,
     FormResponseAttribute.SUBMITTING
   );
-  const loadingSpinner = new LoadingSpinner(win.document);
+  const loadingSpinner = new LoadingSpinner();
   submittingEl.firstElementChild.appendChild(loadingSpinner.build());
   loadingSpinner.toggle(true /* isActive */);
   return submittingEl;

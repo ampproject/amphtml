@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {dev} from '#utils/log';
 
 /** @const {string} */
@@ -20,12 +21,8 @@ const renderSpinnerElement = () => (
  */
 export class LoadingSpinner {
   /**
-   * @param {!Document} doc
    */
-  constructor(doc) {
-    /** @private @const {!Document} */
-    this.doc_ = doc;
-
+  constructor() {
     /** @public {?Element} */
     this.root_ = null;
 

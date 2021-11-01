@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
@@ -69,7 +70,7 @@ function buildLinkShareItemTemplate(el) {
   return (
     <div
       class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
-      tabindex={0}
+      tabIndex={0}
       role="button"
       aria-label={localize(
         el,
