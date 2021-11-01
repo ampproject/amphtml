@@ -29,6 +29,7 @@ import {isJsonScriptTag} from '#core/dom';
 
 import {parseJson} from '#core/types/object/json';
 import {renderAsElement} from './simple-template';
+import {localize} from './amp-story-localization-service';
 
 /** @const {string} */
 const TAG = 'amp-story-consent';
@@ -45,13 +46,14 @@ const DEFAULT_OPTIONAL_PARAMETERS = {
 // TODO(gmajoulet): switch to `htmlFor` static template helper.
 /**
  * Story consent template.
+ * @param {!Element} element
  * @param {!Object} config
  * @param {string} consentId
  * @param {?string} logoSrc
  * @return {!./simple-template.ElementDef}
  * @private @const
  */
-const getTemplate = (config, consentId, logoSrc) => ({
+const getTemplate = (element, config, consentId, logoSrc) => ({
   tag: 'div',
   attrs: dict({
     'class': 'i-amphtml-story-consent i-amphtml-story-system-reset',
@@ -77,7 +79,6 @@ const getTemplate = (config, consentId, logoSrc) => ({
                       ? `background-image: url('${logoSrc}') !important;`
                       : '',
                   }),
-                  children: [],
                 },
               ],
             },
@@ -87,15 +88,11 @@ const getTemplate = (config, consentId, logoSrc) => ({
               children: [
                 {
                   tag: 'h3',
-                  attrs: dict({}),
-                  children: [],
-                  unlocalizedString: config.title,
+                  children: [config.title],
                 },
                 {
                   tag: 'p',
-                  attrs: dict({}),
-                  children: [],
-                  unlocalizedString: config.message,
+                  children: [config.message],
                 },
                 {
                   tag: 'ul',
@@ -105,8 +102,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
                     config.vendors.map((vendor) => ({
                       tag: 'li',
                       attrs: dict({'class': 'i-amphtml-story-consent-vendor'}),
-                      children: [],
-                      unlocalizedString: vendor,
+                      children: [vendor],
                     })),
                 },
                 {
@@ -121,8 +117,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
                     'target': '_top',
                     'title': config.externalLink.title,
                   }),
-                  children: [],
-                  unlocalizedString: config.externalLink.title,
+                  children: [config.externalLink.title],
                 },
               ],
             },
@@ -141,9 +136,12 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   (config.onlyAccept === true ? ' i-amphtml-hidden' : ''),
                 'on': `tap:${consentId}.reject`,
               }),
-              children: [],
-              localizedStringId:
-                LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL,
+              children: [
+                localize(
+                  element,
+                  LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
+                ),
+              ],
             },
             {
               tag: 'button',
@@ -153,9 +151,12 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   'i-amphtml-story-consent-action-accept',
                 'on': `tap:${consentId}.accept`,
               }),
-              children: [],
-              localizedStringId:
-                LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL,
+              children: [
+                localize(
+                  element,
+                  LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
+                ),
+              ],
             },
           ],
         },
@@ -220,7 +221,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     if (this.storyConsentConfig_) {
       this.storyConsentEl_ = renderAsElement(
         this.win.document,
-        getTemplate(this.storyConsentConfig_, consentId, logoSrc)
+        getTemplate(this.element, this.storyConsentConfig_, consentId, logoSrc)
       );
       createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 

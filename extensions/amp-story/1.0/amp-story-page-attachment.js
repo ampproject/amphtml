@@ -6,9 +6,9 @@ import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
-import {dev, devAssert} from '#utils/log';
+import {dev} from '#utils/log';
 import {getHistoryState} from '#core/window/history';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {
@@ -128,14 +128,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
           </button>`;
-    const localizationService = getLocalizationService(devAssert(this.element));
-
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      closeButtonEl.setAttribute('aria-label', localizedCloseString);
-    }
+    closeButtonEl.setAttribute(
+      'aria-label',
+      localize(this.element, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
+    );
 
     const titleAndCloseWrapperEl = this.headerEl.appendChild(
       htmlFor(this.element)`
@@ -252,13 +248,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     // Set url prevew text.
-    const localizationService = getLocalizationService(devAssert(this.element));
-    if (localizationService) {
-      const localizedOpenString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
-      );
-      openStringEl.textContent = localizedOpenString;
-    }
+    const localizedOpenString = localize(
+      this.element,
+      LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
+    );
+    openStringEl.textContent = localizedOpenString;
     urlStringEl.textContent = hrefAttr;
 
     this.contentEl.appendChild(link);

@@ -5,7 +5,7 @@ import {AttachmentTheme} from './amp-story-page-attachment';
 import {LocalizedStringId} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {dev} from '#utils/log';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
@@ -133,9 +133,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
     attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
     ? openLabelAttr.trim()
-    : getLocalizationService(pageEl).getLocalizedString(
-        LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-      );
+    : localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
   ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
@@ -178,9 +176,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
-    getLocalizationService(pageEl).getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-    );
+    localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   if (openLabel !== 'none') {

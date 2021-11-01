@@ -16,9 +16,9 @@ import {Services} from '#service';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '#utils/log';
+import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
 
@@ -157,15 +157,10 @@ export class ShareMenu {
     this.closeButton_ = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
     );
-    const localizationService = getLocalizationService(
-      devAssert(this.parentEl_)
+    this.closeButton_.setAttribute(
+      'aria-label',
+      localize(this.parentEl_, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
     );
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      this.closeButton_.setAttribute('aria-label', localizedCloseString);
-    }
 
     this.initializeListeners_();
 

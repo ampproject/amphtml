@@ -10,9 +10,13 @@ import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
+import {localize} from './amp-story-localization-service';
 
-/** @private @const {!./simple-template.ElementDef} */
-const TEMPLATE = {
+/**
+ * @param {!Element} element
+ * @return {!./simple-template.ElementDef}
+ */
+const getTemplate = (element) => ({
   tag: 'aside',
   attrs: dict({
     'class':
@@ -51,8 +55,12 @@ const TEMPLATE = {
                   attrs: dict({
                     'class': 'i-amphtml-story-hint-tap-button-text',
                   }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL,
+                  children: [
+                    localize(
+                      element,
+                      LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL
+                    ),
+                  ],
                 },
               ],
             },
@@ -85,8 +93,12 @@ const TEMPLATE = {
                   attrs: dict({
                     'class': 'i-amphtml-story-hint-tap-button-text',
                   }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL,
+                  children: [
+                    localize(
+                      element,
+                      LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL
+                    ),
+                  ],
                 },
               ],
             },
@@ -95,7 +107,7 @@ const TEMPLATE = {
       ],
     },
   ],
-};
+});
 
 /** @type {string} */
 const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
@@ -157,7 +169,10 @@ export class AmpStoryHint {
     this.isBuilt_ = true;
 
     const root = this.document_.createElement('div');
-    this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
+    this.hintContainer_ = renderAsElement(
+      this.document_,
+      getTemplate(this.parentEl_)
+    );
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(

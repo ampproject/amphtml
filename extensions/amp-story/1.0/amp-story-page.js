@@ -49,7 +49,7 @@ import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
@@ -1634,9 +1634,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     const labelEl = this.playMessageEl_.querySelector(
       '.i-amphtml-story-page-play-label'
     );
-    labelEl.textContent = getLocalizationService(
-      this.element
-    ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO);
+    labelEl.textContent = localize(
+      this.element,
+      LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO
+    );
 
     this.playMessageEl_.addEventListener('click', () => {
       this.togglePlayMessage_(false);
@@ -1681,9 +1682,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );
-    labelEl.textContent = getLocalizationService(
-      this.element
-    ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO);
+    labelEl.textContent = localize(
+      this.element,
+      LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO
+    );
 
     this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));
   }

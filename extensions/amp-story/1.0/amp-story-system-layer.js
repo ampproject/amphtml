@@ -31,6 +31,7 @@ import {renderAsElement} from './simple-template';
 
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+import {localize} from './amp-story-localization-service';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -86,8 +87,11 @@ const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
-/** @private @const {!./simple-template.ElementDef} */
-const TEMPLATE = {
+/**
+ * @param {!Element} element
+ * @return {!./simple-template.ElementDef}
+ */
+const getTemplate = (element) => ({
   tag: 'aside',
   attrs: dict({
     'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
@@ -146,7 +150,11 @@ const TEMPLATE = {
               attrs: dict({
                 'class': 'i-amphtml-story-has-new-page-text',
               }),
-              localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+              children: [
+                localize(element, [
+                  LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+                ]),
+              ],
             },
           ],
         },
@@ -161,8 +169,11 @@ const TEMPLATE = {
           attrs: dict({
             'role': 'button',
             'class': INFO_CLASS + ' i-amphtml-story-button',
+            'aria-label': localize(
+              element,
+              LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL
+            ),
           }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
         },
         {
           tag: 'div',
@@ -182,24 +193,36 @@ const TEMPLATE = {
                   attrs: dict({
                     'class': 'i-amphtml-story-mute-text',
                   }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
+                  children: [
+                    localize(
+                      element,
+                      LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
+                    ),
+                  ],
                 },
                 {
                   tag: 'div',
                   attrs: dict({
                     'class': 'i-amphtml-story-unmute-sound-text',
                   }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT,
+                  children: [
+                    localize(
+                      element,
+                      LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
+                    ),
+                  ],
                 },
                 {
                   tag: 'div',
                   attrs: dict({
                     'class': 'i-amphtml-story-unmute-no-sound-text',
                   }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT,
+                  children: [
+                    localize(
+                      element,
+                      LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
+                    ),
+                  ],
                 },
               ],
             },
@@ -207,17 +230,21 @@ const TEMPLATE = {
               tag: 'button',
               attrs: dict({
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
+                'aria-label': localize(
+                  element,
+                  LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
+                ),
               }),
-              localizedLabelId:
-                LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
             },
             {
               tag: 'button',
               attrs: dict({
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
+                'aria-label': localize(
+                  element,
+                  LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
+                ),
               }),
-              localizedLabelId:
-                LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
             },
           ],
         },
@@ -231,15 +258,21 @@ const TEMPLATE = {
               tag: 'button',
               attrs: dict({
                 'class': PAUSE_CLASS + ' i-amphtml-story-button',
+                'aria-label': localize(
+                  element,
+                  LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL
+                ),
               }),
-              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
             },
             {
               tag: 'button',
               attrs: dict({
                 'class': PLAY_CLASS + ' i-amphtml-story-button',
+                'aria-label': localize(
+                  element,
+                  LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL
+                ),
               }),
-              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
             },
           ],
         },
@@ -249,16 +282,21 @@ const TEMPLATE = {
             'class':
               SKIP_TO_NEXT_CLASS +
               ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+            'aria-label': localize(
+              element,
+              LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
+            ),
           }),
-          localizedLabelId:
-            LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL,
         },
         {
           tag: 'button',
           attrs: dict({
             'class': SHARE_CLASS + ' i-amphtml-story-button',
+            'aria-label': localize(
+              element,
+              LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL
+            ),
           }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
         },
         {
           tag: 'button',
@@ -266,8 +304,11 @@ const TEMPLATE = {
             'class':
               CLOSE_CLASS +
               ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
+            'aria-label': localize(
+              element,
+              LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+            ),
           }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL,
         },
       ],
     },
@@ -278,7 +319,7 @@ const TEMPLATE = {
       }),
     },
   ],
-};
+});
 
 /**
  * Contains the event name belonging to the viewer control.
@@ -391,7 +432,10 @@ export class SystemLayer {
 
     this.root_ = this.win_.document.createElement('div');
     this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.systemLayerEl_ = renderAsElement(
+      this.win_.document,
+      getTemplate(this.parentEl_)
+    );
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
