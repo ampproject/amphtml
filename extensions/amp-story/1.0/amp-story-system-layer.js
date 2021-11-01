@@ -428,7 +428,7 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    this.viewer_ = Services.viewerForDoc(this.win_.document.documentElement);
+    this.viewer_ = Services.viewerForDoc(this.parentEl_);
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
       : null;
