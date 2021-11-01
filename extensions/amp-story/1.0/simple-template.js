@@ -17,6 +17,8 @@ import {isArray} from '#core/types';
  */
 export let ElementDef;
 
+// Original functions
+
 /**
  * @param {!Document} doc
  * @param {!ElementDef|!Array<!ElementDef>} elementsDef
@@ -94,6 +96,95 @@ function renderSingle(doc, elementDef) {
   if (hasOwn(elementDef, 'children')) {
     el.appendChild(
       renderMulti(doc, /** @type {!Array<!ElementDef>} */ (elementDef.children))
+    );
+  }
+
+  return el;
+}
+
+// New functions to support Shadow AMP stories
+
+/**
+ * @param {!Document} doc
+ * @param {!ElementDef|!Array<!ElementDef>} elementsDef
+ * @param {!Element} storyEl
+ * @return {!Node}
+ */
+ export function renderSimpleTemplateForStory(doc, elementsDef, storyEl) {
+  if (isArray(elementsDef)) {
+    return renderMultiForStory(doc, /** @type {!Array<!ElementDef>} */ (elementsDef), storyEl);
+  }
+  return renderSingleForStory(doc, /** @type {!ElementDef} */ (elementsDef), storyEl);
+}
+
+/**
+ * @param {!Document} doc
+ * @param {!ElementDef} elementDef
+ * @param {!Element} storyEl
+ * @return {!Element}
+ */
+export function renderAsElementForStory(doc, elementDef, storyEl) {
+  return renderSingleForStory(doc, elementDef, storyEl);
+}
+
+/**
+ * @param {!Document} doc
+ * @param {!Array<!ElementDef>} elementsDef
+ * @param {!Element} storyEl
+ * @return {!Node}
+ */
+function renderMultiForStory(doc, elementsDef, storyEl) {
+  const fragment = doc.createDocumentFragment();
+  elementsDef.forEach((elementDef) =>
+    fragment.appendChild(renderSingleForStory(doc, elementDef, storyEl))
+  );
+  return fragment;
+}
+
+/**
+ * @param {!Document} doc
+ * @param {!ElementDef} elementDef
+ * @param {!Element} storyEl
+ * @return {!Element}
+ */
+function renderSingleForStory(doc, elementDef, storyEl) {
+  const el = hasOwn(elementDef, 'attrs')
+    ? createElementWithAttributes(
+        doc,
+        elementDef.tag,
+        /** @type {!JsonObject} */ (elementDef.attrs)
+      )
+    : doc.createElement(elementDef.tag);
+
+  const hasLocalizedTextContent = hasOwn(elementDef, 'localizedStringId');
+  const hasLocalizedLabel = hasOwn(elementDef, 'localizedLabelId');
+  if (hasLocalizedTextContent || hasLocalizedLabel) {
+    const localizationService = getLocalizationService(devAssert(storyEl));
+    devAssert(localizationService, 'Could not retrieve LocalizationService.');
+
+    if (hasLocalizedTextContent) {
+      el.textContent = localizationService.getLocalizedString(
+        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+      );
+    }
+
+    if (hasLocalizedLabel) {
+      const labelString = localizationService.getLocalizedString(
+        /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
+      );
+      if (labelString) {
+        el.setAttribute('aria-label', labelString);
+      }
+    }
+  }
+
+  if (hasOwn(elementDef, 'unlocalizedString')) {
+    el.textContent = elementDef.unlocalizedString;
+  }
+
+  if (hasOwn(elementDef, 'children')) {
+    el.appendChild(
+      renderMultiForStory(doc, /** @type {!Array<!ElementDef>} */ (elementDef.children), storyEl)
     );
   }
 

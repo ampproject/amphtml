@@ -27,7 +27,7 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 
-import {renderAsElement} from './simple-template';
+import {renderAsElementForStory} from './simple-template';
 
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
@@ -323,7 +323,7 @@ const VIEWER_CONTROL_DEFAULTS = {
 export class SystemLayer {
   /**
    * @param {!Window} win
-   * @param {!Element} parentEl
+   * @param {!Element} parentEl The parent element (expected to be an `amp-story`)
    */
   constructor(win, parentEl) {
     /** @private @const {!Window} */
@@ -391,7 +391,7 @@ export class SystemLayer {
 
     this.root_ = this.win_.document.createElement('div');
     this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.systemLayerEl_ = renderAsElementForStory(this.win_.document, TEMPLATE, this.parentEl_);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
