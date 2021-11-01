@@ -60,17 +60,17 @@ const buildPaginationButton = (element) =>
  */
 class PaginationButton {
   /**
-   * @param {!Document} doc
+   * @param {!Element} storyEl
    * @param {!ButtonState_1_0_Def} initialState
    * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
    * @param {!Window} win
    */
-  constructor(doc, initialState, storeService, win) {
+  constructor(storyEl, initialState, storeService, win) {
     /** @private {!ButtonState_1_0_Def} */
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = buildPaginationButton(doc);
+    this.element = buildPaginationButton(storyEl);
 
     /** @private @const {!Element} */
     this.buttonElement_ = dev().assertElement(
@@ -78,7 +78,7 @@ class PaginationButton {
     );
 
     /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(doc);
+    this.localizationService_ = getLocalizationService(storyEl);
 
     this.element.classList.add(initialState.className);
     initialState.label &&
@@ -158,12 +158,11 @@ export class PaginationButtons {
     this.ampStory_ = ampStory;
 
     const {win} = this.ampStory_;
-    const doc = win.document;
     this.storeService_ = getStoreService(win);
 
     /** @private @const {!PaginationButton} */
     this.forwardButton_ = new PaginationButton(
-      doc,
+      ampStory.element,
       ForwardButtonStates.NEXT_PAGE,
       this.storeService_,
       win
@@ -171,7 +170,7 @@ export class PaginationButtons {
 
     /** @private @const {!PaginationButton} */
     this.backButton_ = new PaginationButton(
-      doc,
+      ampStory.element,
       BackButtonStates.HIDDEN,
       this.storeService_,
       win
