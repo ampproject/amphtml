@@ -43,7 +43,6 @@ const DEFAULT_OPTIONAL_PARAMETERS = {
   onlyAccept: false,
 };
 
-// TODO(gmajoulet): switch to `htmlFor` static template helper.
 /**
  * Story consent template.
  * @param {!Element} element
