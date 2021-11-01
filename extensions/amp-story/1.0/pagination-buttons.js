@@ -103,7 +103,7 @@ class PaginationButton {
     state.label
       ? this.buttonElement_.setAttribute(
           'aria-label',
-          localize(this.element, state.label)
+          localize(this.win_.document, state.label)
         )
       : this.buttonElement_.removeAttribute('aria-label');
 
