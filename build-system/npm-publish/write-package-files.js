@@ -5,14 +5,18 @@
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const fastGlob = require('fast-glob');
+const marked = require('marked');
 const path = require('path');
+const posthtml = require('posthtml');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
+const {readFile} = require('fs-extra');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
 const packageName = getNameWithoutComponentPrefix(extension);
+const dir = `extensions/${extension}/${extensionVersion}`;
 
 /**
  * Determines whether to skip
@@ -20,7 +24,7 @@ const packageName = getNameWithoutComponentPrefix(extension);
  */
 async function shouldSkip() {
   try {
-    await stat(`extensions/${extension}/${extensionVersion}`);
+    await stat(dir);
     return false;
   } catch {
     log(`${extension} ${extensionVersion} : skipping, does not exist`);
@@ -34,11 +38,68 @@ async function shouldSkip() {
  * @return {Promise<string[]>}
  */
 async function getStylesheets() {
-  const extDir = `extensions/${extension}/${extensionVersion}/dist`
-    .split('/')
-    .join(path.sep);
+  const extDir = `${dir}/dist`.split('/').join(path.sep);
   const files = await fastGlob(path.join(extDir, '**', '*.css'));
   return files.map((file) => path.relative(extDir, file));
+}
+
+/**
+ * @param {string} html
+ * @return {Promise<string>}
+ */
+async function getHtmlTextContent(html) {
+  const getTextContent = (node, out = []) => {
+    if (typeof node === 'string') {
+      out.push(node);
+    } else if (Array.isArray(node)) {
+      for (const child of node) {
+        getTextContent(child, out);
+      }
+    } else if (node?.content) {
+      getTextContent(node.content, out);
+    }
+    return out;
+  };
+  const result = await posthtml([
+    (node) => getTextContent(node).join(''),
+  ]).process(html);
+  return result.html.trim();
+}
+
+/**
+ * @param {string} markdown
+ * @param {number} maxLengthChars
+ * @return {Promise<?string>}
+ */
+async function getFirstParagraphOrSentence(markdown, maxLengthChars) {
+  const token = marked.lexer(markdown).find(({type}) => type === 'paragraph');
+  if (!token) {
+    return null;
+  }
+  const html = marked.parser([token]);
+  const paragraph = await getHtmlTextContent(html);
+  if (paragraph.length <= maxLengthChars) {
+    return paragraph;
+  }
+  const [sentence] = paragraph.split('.', 1);
+  if (sentence.length < maxLengthChars) {
+    return `${sentence}.`;
+  }
+  return null;
+}
+
+/**
+ * Get package description from its README.md file, or a generic description
+ * if the file does not exist.
+ * @return {Promise<string>}
+ */
+async function getDescription() {
+  let description;
+  try {
+    const markdown = await readFile(`${dir}/README.md`, 'utf8');
+    description = await getFirstParagraphOrSentence(markdown, 200);
+  } catch {}
+  return description || `Bento ${packageName} Component`;
 }
 
 /**
@@ -82,10 +143,11 @@ async function writePackageJson() {
   for (const stylesheet of await getStylesheets()) {
     exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
   }
+
   const json = {
     name: `@bentoproject/${packageName}`,
     version,
-    description: `Bento ${packageName} Component`,
+    description: await getDescription(),
     author: 'Bento Authors',
     license: 'Apache-2.0',
     main: './dist/web-component.js',
@@ -105,10 +167,7 @@ async function writePackageJson() {
   };
 
   try {
-    await writeFile(
-      `extensions/${extension}/${extensionVersion}/package.json`,
-      JSON.stringify(json, null, 2)
-    );
+    await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
     log(
       json.name,
       extensionVersion,
@@ -129,10 +188,7 @@ async function writePackageJson() {
 async function writeReactJs() {
   const content = "module.exports = require('./dist/component-react');";
   try {
-    await writeFile(
-      `extensions/${extension}/${extensionVersion}/react.js`,
-      content
-    );
+    await writeFile(`${dir}/react.js`, content);
     log(packageName, extensionVersion, ': created react.js');
   } catch (e) {
     log(e);
