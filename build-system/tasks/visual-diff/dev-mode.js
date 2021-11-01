@@ -1,19 +1,21 @@
 'use strict';
 
 const inquirer = require('inquirer');
+const path = require('path');
 const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
   waitForPageLoad,
 } = require('./verifiers');
-const {BASE_TEST_FUNCTION} = require('./consts');
 const {cyan, yellow} = require('kleur/colors');
 const {HOST, PORT} = require('./consts');
 const {log} = require('./log');
 const {newPage} = require('./browser');
 const {sleep} = require('./helpers');
 const {WebpageDef} = require('./types');
+
+const ROOT_DIR = path.resolve(__dirname, '../../../');
 
 /**
  * Runs a development mode.
@@ -58,26 +60,23 @@ async function devMode(browser, webpages) {
   }
 
   let testName = '';
-  let testFunction = Object.values(webpage.tests_)[0];
-  if (Object.entries(webpage.tests_).length > 1) {
-    [testName, testFunction] = (
+  if (Object.keys(webpage.tests_).length > 1) {
+    testName = (
       await inquirer.prompt([
         {
           type: 'list',
-          name: 'test_',
+          name: 'testName',
           message:
             'Select which interactive test from ' +
             cyan(webpage.interactive_tests) +
             ' to run:',
-          choices: Object.entries(webpage.tests_).map(
-            ([testName, testFunction]) => ({
-              name: testName || '(base test)',
-              value: [testName, testFunction],
-            })
-          ),
+          choices: Object.keys(webpage.tests_).map((testName) => ({
+            name: testName || '(base test)',
+            value: testName,
+          })),
         },
       ])
-    ).test_;
+    ).testName;
   }
 
   log('info', 'The test will now run in a browser window...');
@@ -104,9 +103,13 @@ async function devMode(browser, webpages) {
       await sleep(webpage.loading_complete_delay_ms);
     }
 
-    if (testFunction !== BASE_TEST_FUNCTION) {
+    if (testName) {
       log('info', 'Executing custom test function', cyan(testName));
       try {
+        // Reload the interactive test file without caching on every iteration.
+        const testsFile = path.resolve(ROOT_DIR, webpage.interactive_tests);
+        delete require.cache[require.resolve(testsFile)];
+        const testFunction = require(testsFile)[testName];
         await testFunction(page, webpage.name);
       } catch (e) {
         log('warning', 'Custom test function did not execute correctly:', e);
