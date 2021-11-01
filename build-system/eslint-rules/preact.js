@@ -1,5 +1,7 @@
 'use strict';
 
+const astUtils = require('eslint/lib/rules/utils/ast-utils');
+
 // Enforces importing a Preact namespace specifier if using JSX
 //
 // Good
@@ -59,16 +61,19 @@ module.exports = {
 
     let imported = false;
     let warned = false;
+    let staticTemplate = false;
 
     return {
       Program() {
         imported = false;
         warned = false;
+        staticTemplate = false;
       },
 
       ImportNamespaceSpecifier(node) {
         if (node.local.name === 'Preact') {
           imported = true;
+          staticTemplate = node.parent.source.value !== '#preact';
         }
       },
 
@@ -78,6 +83,53 @@ module.exports = {
 
       JSXFragment(node) {
         requirePreact(node);
+      },
+
+      JSXOpeningElement(node) {
+        if (!imported || !staticTemplate) {
+          return;
+        }
+
+        const {name} = node;
+        if (name.type === 'JSXMemberExpression') {
+          return context.report({
+            node,
+            message: [
+              'Static JSX Templates are required to use regular DOM nodes or Imported Components',
+              'This prevents an issue with `<json.type></json.type>` accidentally creating a <script> node.',
+            ].join('\n\t'),
+          });
+        }
+
+        if (name.name && /^[a-z]/.test(name.name)) {
+          return;
+        }
+
+        const variable = astUtils.getVariableByName(
+          context.getScope(),
+          name.name
+        );
+
+        if (!variable || variable.defs.length === 0) {
+          return context.report({
+            node,
+            message: `Could not find ${name.name} in the lexcial scope`,
+          });
+        }
+
+        for (const def of variable.defs) {
+          if (def.type === 'ImportBinding' || def.type === 'FunctionName') {
+            continue;
+          }
+
+          context.report({
+            node,
+            message: [
+              'Static JSX Templates are required to use regular DOM nodes or Imported Components',
+              'This prevents an issue with `<UserProvidedType></json.type>UserProvidedType` accidentally creating a <script> node.',
+            ].join('\n\t'),
+          });
+        }
       },
     };
   },
