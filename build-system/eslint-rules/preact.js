@@ -85,8 +85,22 @@ module.exports = {
         requirePreact(node);
       },
 
+      JSXSpreadAttribute(node) {
+        if (!staticTemplate) {
+          return;
+        }
+
+        context.report({
+          node,
+          message: [
+            'Static JSX Templates are required to use static attribute definitions',
+            'This prevents an issue with spread attributes accidentally overriding a "safe" attribute with user-provided data.',
+          ].join('\n\t'),
+        });
+      },
+
       JSXOpeningElement(node) {
-        if (!imported || !staticTemplate) {
+        if (!staticTemplate) {
           return;
         }
 
@@ -96,7 +110,7 @@ module.exports = {
             node,
             message: [
               'Static JSX Templates are required to use regular DOM nodes or Imported Components',
-              'This prevents an issue with `<json.type></json.type>` accidentally creating a <script> node.',
+              'This prevents an issue with `<json.type />` accidentally creating a <script> node.',
             ].join('\n\t'),
           });
         }
@@ -126,7 +140,7 @@ module.exports = {
             node,
             message: [
               'Static JSX Templates are required to use regular DOM nodes or Imported Components',
-              'This prevents an issue with `<UserProvidedType></json.type>UserProvidedType` accidentally creating a <script> node.',
+              'This prevents an issue with `<UserProvidedType />` accidentally creating a <script> node.',
             ].join('\n\t'),
           });
         }
