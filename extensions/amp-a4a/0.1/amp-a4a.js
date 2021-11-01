@@ -21,8 +21,6 @@ import {padStart} from '#core/types/string';
 import {utf8Decode} from '#core/types/string/bytes';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
-import {isExperimentOn} from '#experiments';
-
 import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
@@ -2552,7 +2550,8 @@ export function isPlatformSupported(win) {
   // Require Shadow DOM support for a4a.
   if (
     !isNative(win.Element.prototype.attachShadow) &&
-    isExperimentOn(win, 'disable-a4a-non-sd')
+    /* isExperimentOn(win, 'disable-a4a-non-sd') // launched: true */
+    true
   ) {
     return false;
   }
