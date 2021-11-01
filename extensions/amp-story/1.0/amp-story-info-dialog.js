@@ -33,7 +33,7 @@ export const MOREINFO_VISIBLE_CLASS = 'i-amphtml-story-info-moreinfo-visible';
 export class InfoDialog {
   /**
    * @param {!Window} win
-   * @param {!Element} parentEl Element where to append the component
+   * @param {!Element} parentEl Element where to append the component (expected to be amp-story)
    */
   constructor(win, parentEl) {
     /** @private @const {!Window} */
@@ -61,7 +61,7 @@ export class InfoDialog {
     this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.parentEl_));
 
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
