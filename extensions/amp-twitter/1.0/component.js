@@ -2,9 +2,10 @@ import * as Preact from '#preact';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
-import {useCallback, useMemo, useState} from '#preact';
+import {useCallback, useMemo, useRef, useState} from '#preact';
 import {useIntersectionObserver, useValueRef} from '#preact/component';
 import {useMergeRefs} from '#preact/utils';
+import {setStyle} from '#core/dom/style';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -41,6 +42,14 @@ function BentoTwitterWithRef(
   const [inView, setinView] = useState(false);
   const onLoadRef = useValueRef(onLoad);
   const onErrorRef = useValueRef(onError);
+  const bentoTwitterRef = useRef(null);
+
+  const setComponentHeight = useCallback(
+    (height) => {
+      setStyle(bentoTwitterRef.current, 'height', height, 'px');
+    },
+    [bentoTwitterRef]
+  );
 
   const messageHandler = useCallback(
     (event) => {
@@ -52,6 +61,7 @@ function BentoTwitterWithRef(
           setHeight(FULL_HEIGHT);
         } else {
           setHeight(height);
+          setComponentHeight(height);
         }
 
         onLoadRef.current?.();
@@ -59,8 +69,9 @@ function BentoTwitterWithRef(
         onErrorRef.current?.();
       }
     },
-    [requestResize, onLoadRef, onErrorRef]
+    [requestResize, onLoadRef, onErrorRef, setComponentHeight]
   );
+
   const options = useMemo(
     () => ({
       cards,
@@ -88,9 +99,15 @@ function BentoTwitterWithRef(
     ]
   );
 
-  const observerCb = useIntersectionObserver(({isIntersecting}) => {
+  const observerCb = useIntersectionObserver(({isIntersecting, target}) => {
     if (isIntersecting) {
       setinView(true);
+
+      /**
+       * Get Main bento-twitter reference. Used the alternative way here to
+       * get the <bento-twitter> reference as using offsetParent is forbidden.
+       */
+      bentoTwitterRef.current = target.parentNode.parentNode.host;
 
       // unobserve element once it's rendered
       observerCb(null);
