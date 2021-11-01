@@ -1,48 +1,19 @@
 import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {renderAsElement} from './simple-template';
 
 /** @const {string} */
 const SPINNER_ACTIVE_ATTRIBUTE = 'active';
 
-/** @private @const {!./simple-template.ElementDef} */
-const SPINNER = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-spinner',
-    'aria-hidden': 'true',
-  }),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-spinner-container',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-spinner-layer',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-spinner-circle-clipper left',
-              }),
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-spinner-circle-clipper right',
-              }),
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
+/** @return {!Element} */
+const renderSpinnerElement = () => (
+  <div class="i-amphtml-story-spinner" aria-hidden="true">
+    <div class="i-amphtml-story-spinner-container">
+      <div class="i-amphtml-story-spinner-layer">
+        <div class="i-amphtml-story-spinner-circle-clipper left" />
+        <div class="i-amphtml-story-spinner-circle-clipper right" />
+      </div>
+    </div>
+  </div>
+);
 
 /**
  * Loading spinner UI element.
@@ -70,7 +41,7 @@ export class LoadingSpinner {
       return this.root_;
     }
 
-    this.root_ = renderAsElement(this.doc_, SPINNER);
+    this.root_ = renderSpinnerElement();
 
     return this.getRoot();
   }

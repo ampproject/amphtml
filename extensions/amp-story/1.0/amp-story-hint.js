@@ -8,106 +8,46 @@ import {
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '#core/types/object';
-import {renderAsElement} from './simple-template';
 import {localize} from './amp-story-localization-service';
 
 /**
  * @param {!Element} element
- * @return {!./simple-template.ElementDef}
+ * @return {!Element}
  */
-const getTemplate = (element) => ({
-  tag: 'aside',
-  attrs: dict({
-    'class':
+const renderHintElement = (element) => (
+  <aside
+    class={
       'i-amphtml-story-hint-container ' +
-      'i-amphtml-story-system-reset i-amphtml-hidden',
-  }),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-navigation-help-overlay'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-navigation-help-section prev-page',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
-              children: [
-                {
-                  tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
-                  children: [
-                    {
-                      tag: 'div',
-                      attrs: dict({
-                        'class': 'i-amphtml-story-hint-tap-button-icon',
-                      }),
-                    },
-                  ],
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-hint-tap-button-text',
-                  }),
-                  children: [
-                    localize(
-                      element,
-                      LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL
-                    ),
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-navigation-help-section next-page',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
-              children: [
-                {
-                  tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
-                  children: [
-                    {
-                      tag: 'div',
-                      attrs: dict({
-                        'class': 'i-amphtml-story-hint-tap-button-icon',
-                      }),
-                    },
-                  ],
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-hint-tap-button-text',
-                  }),
-                  children: [
-                    localize(
-                      element,
-                      LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL
-                    ),
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-});
+      'i-amphtml-story-system-reset i-amphtml-hidden'
+    }
+  >
+    <div class="i-amphtml-story-navigation-help-overlay">
+      <div class="i-amphtml-story-navigation-help-section prev-page">
+        <div class="i-amphtml-story-hint-placeholder">
+          <div class="i-amphtml-story-hint-tap-button">
+            <div class="i-amphtml-story-hint-tap-button-icon" />
+          </div>
+          <div class="i-amphtml-story-hint-tap-button-text">
+            {localize(
+              element,
+              LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL
+            )}
+          </div>
+        </div>
+      </div>
+      <div class="i-amphtml-story-navigation-help-section next-page">
+        <div class="i-amphtml-story-hint-placeholder">
+          <div class="i-amphtml-story-hint-tap-button">
+            <div class="i-amphtml-story-hint-tap-button-icon" />
+          </div>
+          <div class="i-amphtml-story-hint-tap-button-text">
+            {localize(element, LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+);
 
 /** @type {string} */
 const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
@@ -169,10 +109,7 @@ export class AmpStoryHint {
     this.isBuilt_ = true;
 
     const root = this.document_.createElement('div');
-    this.hintContainer_ = renderAsElement(
-      this.document_,
-      getTemplate(this.parentEl_)
-    );
+    this.hintContainer_ = renderHintElement(this.parentEl_);
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(

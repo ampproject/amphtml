@@ -2,9 +2,7 @@ import {Action, getStoreService} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 import {LocalizedStringId} from '#service/localization/strings';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '#core/types/object';
 import {removeElement} from '#core/dom';
-import {renderAsElement} from './simple-template';
 import {localize} from './amp-story-localization-service';
 
 /** @const {string} Class for the continue anyway button */
@@ -13,47 +11,27 @@ const CONTINUE_ANYWAY_BUTTON_CLASS = 'i-amphtml-continue-button';
 /**
  * Full viewport black layer indicating browser is not supported.
  * @param {!Element} element
- * @return {!./simple-template.ElementDef}
+ * @return {!Element}
  */
-const renderTemplate = (element) => ({
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-overlay-container'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-gear-icon'}),
-        },
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-          children: [
-            localize(
-              element,
-              LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
-            ),
-          ],
-        },
-        // The continue button functionality will only be present in the default
-        // layer. Publisher provided fallbacks will not provide users with the
-        // ability to continue with an unsupported browser
-        {
-          tag: 'button',
-          attrs: dict({'class': 'i-amphtml-continue-button'}),
-          children: [
-            localize(
-              element,
-              LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
-            ),
-          ],
-        },
-      ],
-    },
-  ],
-});
+const renderUnsuportedBrowserLayerElement = (element) => (
+  <div class="i-amphtml-story-unsupported-browser-overlay">
+    <div class="i-amphtml-overlay-container">
+      <div class="i-amphtml-gear-icon" />
+      <div class="i-amphtml-story-overlay-text">
+        {localize(
+          element,
+          LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
+        )}
+      </div>
+      <button class="i-amphtml-continue-button">
+        {localize(
+          element,
+          LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
+        )}
+      </button>
+    </div>
+  </div>
+);
 
 /**
  * Unsupported browser layer UI.
@@ -88,10 +66,7 @@ export class UnsupportedBrowserLayer {
       return this.root_;
     }
     this.root_ = this.win_.document.createElement('div');
-    this.element_ = renderAsElement(
-      this.win_.document,
-      renderTemplate(this.win_.document)
-    );
+    this.element_ = renderUnsuportedBrowserLayerElement(this.win_.document);
     createShadowRootWithStyle(this.root_, this.element_, CSS);
     this.continueButton_ = this.element_./*OK*/ querySelector(
       `.${CONTINUE_ANYWAY_BUTTON_CLASS}`
