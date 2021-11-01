@@ -358,11 +358,11 @@ t.run('amp-carousel', {}, function () {
           'able to get past the first and last item',
         () => {
           document.body.classList.add('amp-mode-mouse');
-          const amp = document.querySelector('#carousel-1');
-          const prevBtn = amp.querySelector('.amp-carousel-button-prev');
-          const nextBtn = amp.querySelector('.amp-carousel-button-next');
-          expect(amp.hasAttribute('loop')).to.be.true;
-          expect(amp.hasAttribute('controls')).to.be.true;
+          const carousel = document.querySelector('#carousel-1');
+          const prevBtn = carousel.querySelector('.amp-carousel-button-prev');
+          const nextBtn = carousel.querySelector('.amp-carousel-button-next');
+          expect(carousel.hasAttribute('loop')).to.be.true;
+          expect(carousel.hasAttribute('controls')).to.be.true;
           expect(prevBtn).to.not.be.null;
           expect(nextBtn).to.not.be.null;
           expect(prevBtn).to.be.visible;
