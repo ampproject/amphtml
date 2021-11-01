@@ -2,7 +2,7 @@ describes.endtoend(
   'bento-timeago',
   {
     version: '1.0',
-    fixture: 'bento/bento-timeago.html',
+    fixture: 'bento/timeago.html',
     environments: ['single'],
   },
   (env) => {
