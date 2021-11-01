@@ -235,8 +235,7 @@ async function buildComponent(
  */
 async function doBuildComponent(components, component, options) {
   const e = components[component];
-  let o = {...options};
-  o = Object.assign(o, e);
+  const o = {...options, ...e};
   await buildComponent(
     e.name,
     e.version,
@@ -256,12 +255,12 @@ async function doBuildComponent(components, component, options) {
 async function buildBentoComponents(options) {
   const startTime = Date.now();
   maybeInitializeComponents();
-  const componentsToBuild = getComponentsToBuild();
+  const toBuild = getComponentsToBuild();
   const results = [];
   for (const component in components) {
     if (
       options.compileOnlyCss ||
-      componentsToBuild.includes(components[component].name)
+      toBuild.includes(components[component].name)
     ) {
       results.push(doBuildComponent(components, component, options));
     }
