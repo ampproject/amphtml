@@ -115,15 +115,14 @@ function buildProvider(doc, shareType, opt_params) {
   );
 
   return (
-    <amp-social-share>
-      <span
-        class="i-amphtml-story-share-label"
-        width={48}
-        height={48}
-        class="i-amphtml-story-share-icon"
-        type={shareType}
-        {...buildProviderParams(opt_params)}
-      >
+    <amp-social-share
+      width={48}
+      height={48}
+      class="i-amphtml-story-share-icon"
+      type={shareType}
+      {...buildProviderParams(opt_params)}
+    >
+      <span class="i-amphtml-story-share-label">
         {localize(doc, shareProviderLocalizedStringId)}
       </span>
     </amp-social-share>
