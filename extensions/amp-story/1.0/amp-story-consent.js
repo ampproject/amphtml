@@ -69,12 +69,12 @@ const renderElement = (element, config, consentId, logoSrc) => (
           <p>{config.message}</p>
           <ul class="i-amphtml-story-consent-vendors" />
           <a
-            class={
-              'i-amphtml-story-consent-external-link ' +
-              (!(config.externalLink.title && config.externalLink.href)
-                ? 'i-amphtml-hidden'
-                : '')
-            }
+            class={objstr({
+              'i-amphtml-story-consent-external-link': true,
+              'i-amphtml-hidden': !(
+                config.externalLink.title && config.externalLink.href
+              ),
+            })}
             href={config.externalLink.href}
             target="_top"
             title={config.externalLink.title}
@@ -98,10 +98,10 @@ const renderElement = (element, config, consentId, logoSrc) => (
           )}
         </button>
         <button
-          class={
-            'i-amphtml-story-consent-action ' +
-            'i-amphtml-story-consent-action-accept'
-          }
+          class={objstr({
+            'i-amphtml-story-consent-action': true,
+            'i-amphtml-story-consent-action-accept': true,
+          })}
           on={`tap:${consentId}.accept`}
         >
           {localize(
