@@ -185,6 +185,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   setupBehavior_() {
     this.hasLoop_ = this.element.hasAttribute('loop');
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+    this.noOfSlides_ = this.slides_.length;
     this.shouldLoop_ = this.hasLoop_ && this.isLoopingEligible();
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
@@ -227,8 +228,6 @@ export class AmpSlideScroll extends AMP.BaseElement {
     if (this.shouldDisableCssSnap_) {
       this.hasNativeSnapPoints_ = false;
     }
-
-    this.noOfSlides_ = this.slides_.length;
 
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     // https://bugs.webkit.org/show_bug.cgi?id=169800
@@ -331,7 +330,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   viewportCallback(inViewport) {
     if (inViewport) {
       this.autoplay_();
-      this.controls_.hintControls();
+      this.controls_?.hintControls();
     } else {
       this.clearAutoplayTimer_();
     }
@@ -855,8 +854,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
       }
     }
     this.hideRestOfTheSlides_(showIndexArr);
-    this.controls_.setControlsState();
-    this.controls_.updateButtonTitles(
+    this.controls_?.setControlsState();
+    this.controls_?.updateButtonTitles(
       this.getPrevButtonTitle(),
       this.getNextButtonTitle()
     );
