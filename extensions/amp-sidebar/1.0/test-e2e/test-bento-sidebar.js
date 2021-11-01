@@ -2,7 +2,7 @@ describes.endtoend(
   'bento-sidebar',
   {
     version: '1.0',
-    fixture: 'bento/bento-sidebar.html',
+    fixture: 'bento/sidebar.html',
     environments: ['single'],
   },
   (env) => {
