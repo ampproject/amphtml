@@ -67,7 +67,11 @@ const renderElement = (element, config, consentId, logoSrc) => (
         <div class="i-amphtml-story-consent-content">
           <h3>{config.title}</h3>
           <p>{config.message}</p>
-          <ul class="i-amphtml-story-consent-vendors" />
+          <ul class="i-amphtml-story-consent-vendors">
+            {config.vendors?.map((vendor) => (
+              <li class="i-amphtml-story-consent-vendor">{vendor}</li>
+            ))}
+          </ul>
           <a
             class={objstr({
               'i-amphtml-story-consent-external-link': true,
