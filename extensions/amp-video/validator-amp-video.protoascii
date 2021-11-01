@@ -185,7 +185,7 @@ tags: {  # <amp-video> in amp-story
   }
   attrs: {
     name: "volume"
-    value_regex: "^(?:0*(?:\.\d+)?|1(\.0*)?)$"
+    value_regex: "^((0?\.[1-9]+)?|1(\.0*)?)$"
   }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
