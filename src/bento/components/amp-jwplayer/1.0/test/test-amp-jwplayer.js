@@ -5,7 +5,7 @@ import {toggleExperiment} from '#experiments';
 
 import {waitFor} from '#testing/helpers/service';
 
-import * as consent from '../../../../../src/consent';
+import * as consent from '../../../../../consent';
 
 /**
  * @param {Document} doc

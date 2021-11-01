@@ -3,12 +3,12 @@ import {dict} from '#core/types/object';
 
 import {BentoJwplayer} from './component';
 
-import {VideoBaseElement} from '../../../../extensions/amp-video/1.0/video-base-element';
+import {VideoBaseElement} from '../../../../../extensions/amp-video/1.0/video-base-element';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
-} from '../../../../src/consent';
+} from '../../../../consent';
 
 export class BaseElement extends VideoBaseElement {
   /** @override */

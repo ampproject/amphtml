@@ -139,7 +139,7 @@ async function watchComponent(
 
 /**
  * Copies components from
- * bento/components/$name/$name.js
+ * src/bento/components/$name/$name.js
  * to
  * dist/v0/$name-$version.js
  *
@@ -170,7 +170,7 @@ async function buildComponent(
   if (options.compileOnlyCss && !hasCss) {
     return;
   }
-  const componentsDir = `bento/components/${name}/${version}`;
+  const componentsDir = `src/bento/components/${name}/${version}`;
   if (options.watch) {
     await watchComponent(
       componentsDir,

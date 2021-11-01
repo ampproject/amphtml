@@ -1,4 +1,3 @@
-
 const {isCiBuild} = require('../build-system/common/ci');
 
 module.exports = {
@@ -58,6 +57,7 @@ module.exports = {
         './polyfills/custom-elements.extern.js',
         './experiments/experiments.extern.js',
         './experiments/shame.extern.js',
+        './bento/components/amp-jwplayer/1.0/component.js',
       ],
       'rules': {'local/no-global': 0},
     },

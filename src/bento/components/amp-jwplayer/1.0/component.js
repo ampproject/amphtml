@@ -8,8 +8,8 @@ import {forwardRef} from '#preact/compat';
 
 import {JwplayerToDom, makeJwplayerIframeSrc} from './jwplayer-api';
 
-import {VideoIframe} from '../../../../extensions/amp-video/1.0/video-iframe';
-import {isJsonOrObj, objOrParseJson} from '../../../../src/iframe-video';
+import {VideoIframe} from '../../../../../extensions/amp-video/1.0/video-iframe';
+import {isJsonOrObj, objOrParseJson} from '../../../../iframe-video';
 
 const JWPLAYER_ORIGIN = /https:\/\/content\.jwplatform\.com/;
 
