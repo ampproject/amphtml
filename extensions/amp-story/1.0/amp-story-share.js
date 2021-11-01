@@ -66,7 +66,7 @@ const renderShareItemListElement = (child) => (
  * @param {!Element} el
  * @return {!Element}
  */
-function buildLinkShareItemTemplate(el) {
+function renderLinkShareButtonElement(el) {
   return (
     <div
       class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
@@ -215,7 +215,7 @@ export class ShareWidget {
       return;
     }
 
-    const linkShareButton = buildLinkShareItemTemplate(this.storyEl);
+    const linkShareButton = renderLinkShareButtonElement(this.storyEl);
 
     this.add_(linkShareButton);
 
