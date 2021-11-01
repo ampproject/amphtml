@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   BranchToTimeValues,
   StoryAdSegmentExp,
@@ -16,7 +17,7 @@ import {escapeCssSelectorNth} from '#core/dom/css-selectors';
 import {getExperimentBranch} from 'src/experiments';
 import {hasOwn, map} from '#core/types/object';
 import {removeChildren} from '#core/dom';
-import {scale, setImportantStyles, setStyle} from '#core/dom/style';
+import {scale, setImportantStyles} from '#core/dom/style';
 import {scopedQuerySelector} from '#core/dom/query';
 
 /**
@@ -139,9 +140,9 @@ export class ProgressBar {
       return this.getRoot();
     }
 
-    this.root_ = this.win_.document.createElement('ol');
-    this.root_.setAttribute('aria-hidden', true);
-    this.root_.classList.add('i-amphtml-story-progress-bar');
+    this.root_ = (
+      <ol aria-hidden="true" class="i-amphtml-story-progress-bar"></ol>
+    );
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
     });
@@ -458,9 +459,12 @@ export class ProgressBar {
         index + 2
       )})`
     );
-    const adSegment = this.win_.document.createElement('div');
-    adSegment.className = 'i-amphtml-story-ad-progress-value';
-    setStyle(adSegment, 'animationDuration', animationDuration);
+    const adSegment = (
+      <div
+        class="i-amphtml-story-ad-progress-value"
+        style={`animation-duration: ${animationDuration}`}
+      ></div>
+    );
     this.currentAdSegment_ = adSegment;
     progressEl.appendChild(adSegment);
   }
@@ -479,11 +483,11 @@ export class ProgressBar {
    * @private
    */
   buildSegmentEl_() {
-    const segmentProgressBar = this.win_.document.createElement('li');
-    segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
-    const segmentProgressValue = this.win_.document.createElement('div');
-    segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
-    segmentProgressBar.appendChild(segmentProgressValue);
+    const segmentProgressBar = (
+      <li class="i-amphtml-story-page-progress-bar">
+        <div class="i-amphtml-story-page-progress-value"></div>
+      </li>
+    );
     this.getRoot().appendChild(segmentProgressBar);
     this.segments_.push(segmentProgressBar);
   }

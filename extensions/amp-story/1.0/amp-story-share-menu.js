@@ -20,30 +20,37 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
-import {setStyles} from '#core/dom/style';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
+ * @param {!Element} element
+ * @param {!Element} shareWidgetElement
+ * @param {function(Event)} onClick
  * @return {!Element}
  */
-const renderShareMenu = () => {
+const renderForFallbackSharing = (element, shareWidgetElement, onClick) => {
   return (
     <div
       class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
+      onClick={onClick}
       aria-hidden="true"
       role="alert"
     >
       <div class="i-amphtml-story-share-menu-container">
         <button
           class="i-amphtml-story-share-menu-close-button"
-          aria-label="close"
+          aria-label={localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+          )}
           role="button"
         >
           &times;
         </button>
+        {shareWidgetElement}
       </div>
     </div>
   );
@@ -53,8 +60,13 @@ const renderShareMenu = () => {
  * System amp-social-share button template.
  * @return {!Element}
  */
-const renderAmpSocialSystemShareElement = () => {
-  return <amp-social-share type="system"></amp-social-share>;
+const getAmpSocialSystemShareTemplate = () => {
+  return (
+    <amp-social-share
+      type="system"
+      style="visibility: hidden; pointer-events: none; z-index: -1;"
+    ></amp-social-share>
+  );
 };
 
 /**
@@ -71,12 +83,6 @@ export class ShareMenu {
 
     /** @private {?Element} */
     this.element_ = null;
-
-    /** @private {?Element} */
-    this.closeButton_ = null;
-
-    /** @private {?Element} */
-    this.innerContainerEl_ = null;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -116,9 +122,15 @@ export class ShareMenu {
       getAmpdoc(this.parentEl_)
     );
 
-    this.isSystemShareSupported_
+    const child = this.isSystemShareSupported_
       ? this.buildForSystemSharing_()
       : this.buildForFallbackSharing_();
+
+    this.initializeListeners_();
+
+    this.vsync_.mutate(() => {
+      this.parentEl_.appendChild(child);
+    });
   }
 
   /**
@@ -133,60 +145,40 @@ export class ShareMenu {
    * Builds a hidden amp-social-share button that triggers the native system
    * sharing UI.
    * @private
+   * @return {!Element}
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ = renderAmpSocialSystemShareElement();
-
-    this.initializeListeners_();
-
-    this.vsync_.mutate(() => {
-      setStyles(dev().assertElement(this.element_), {
-        'visibility': 'hidden',
-        'pointer-events': 'none',
-        'z-index': -1,
-      });
-      this.parentEl_.appendChild(this.element_);
-    });
+    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
+    return this.element_;
   }
 
   /**
    * Builds and appends the fallback UI.
    * @private
+   * @return {!Element}
    */
   buildForFallbackSharing_() {
-    const root = this.win_.document.createElement('div');
-    root.classList.add('i-amphtml-story-share-menu-host');
+    const root = <div class="i-amphtml-story-share-menu-host"></div>;
 
-    this.element_ = renderShareMenu();
+    this.element_ = renderForFallbackSharing(
+      this.parentEl_,
+      this.shareWidget_.build(getAmpdoc(this.parentEl_)),
+      (event) => this.onShareMenuClick_(event)
+    );
+
     createShadowRootWithStyle(root, this.element_, CSS);
 
-    this.closeButton_ = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
-    );
-    this.closeButton_.setAttribute(
-      'aria-label',
-      localize(
-        this.parentEl_,
-        LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-      )
-    );
-
-    this.initializeListeners_();
-
-    this.vsync_.run({
-      measure: () => {
-        this.innerContainerEl_ = this.element_./*OK*/ querySelector(
-          '.i-amphtml-story-share-menu-container'
-        );
-      },
-      mutate: () => {
-        this.parentEl_.appendChild(root);
-        // Preloads and renders the share widget content.
-        const shareWidget = this.shareWidget_.build(getAmpdoc(this.parentEl_));
-        this.innerContainerEl_.appendChild(shareWidget);
-      },
+    // Only listen for closing when system share is unsupported, since the
+    // native layer would handle all the UI interactions.
+    this.win_.addEventListener('keyup', (event) => {
+      if (event.key == Keys_Enum.ESCAPE) {
+        event.preventDefault();
+        this.close_();
+      }
     });
+
+    return root;
   }
 
   /**
@@ -204,21 +196,6 @@ export class ShareMenu {
     this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
       this.onShareMenuStateUpdate_(isOpen);
     });
-
-    // Don't listen to click events if the system share is supported, since the
-    // native layer handles all the UI interactions.
-    if (!this.isSystemShareSupported_) {
-      this.element_.addEventListener('click', (event) =>
-        this.onShareMenuClick_(event)
-      );
-
-      this.win_.addEventListener('keyup', (event) => {
-        if (event.key == Keys_Enum.ESCAPE) {
-          event.preventDefault();
-          this.close_();
-        }
-      });
-    }
   }
 
   /**
@@ -258,13 +235,13 @@ export class ShareMenu {
    */
   onShareMenuClick_(event) {
     const el = dev().assertElement(event.target);
+    const {firstElementChild} = this.element_;
 
-    if (el === this.closeButton_) {
-      this.close_();
-    }
-
-    // Closes the menu if click happened outside of the menu main container.
-    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
+    if (
+      el.classList.has('.i-amphtml-story-share-menu-close-button') ||
+      // Click happened outside of the menu main container:
+      !closest(el, (el) => el === firstElementChild, this.element_)
+    ) {
       this.close_();
     }
   }

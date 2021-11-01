@@ -250,7 +250,7 @@ export class ShareWidget {
         this.storyEl,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
-      Toast.show(this.storyEl, dev().assertString(failureString));
+      Toast.show(this.storyEl, devAssert(failureString));
       return;
     }
 

@@ -16,6 +16,7 @@ import {localize} from './amp-story-localization-service';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {listen} from '#utils/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+import objStr from 'obj-str';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
@@ -122,7 +123,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.element.classList.add('amp-story-draggable-drawer-root');
 
     const templateEl = renderDrawerElement();
-    const headerShadowRootEl = this.win.document.createElement('div');
+    const headerShadowRootEl = <div />;
     this.headerEl = renderHeaderElement();
 
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl, CSS);
@@ -136,15 +137,20 @@ export class DraggableDrawer extends AMP.BaseElement {
       )
     );
 
-    const spacerEl = this.win.document.createElement('button');
-    spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
-    spacerEl.classList.add('i-amphtml-story-system-reset');
-    spacerEl.setAttribute('role', 'button');
-    const localizedCloseString = localize(
-      this.element,
-      LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+    const spacerEl = (
+      <button
+        role="button"
+        class={objStr({
+          'i-amphtml-story-draggable-drawer-spacer': true,
+          'i-amphtml-story-system-reset': true,
+        })}
+        aria-label={localize(
+          this.element,
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+      ></button>
     );
-    spacerEl.setAttribute('aria-label', localizedCloseString);
+
     this.containerEl.insertBefore(spacerEl, this.contentEl);
     this.contentEl.appendChild(headerShadowRootEl);
 

@@ -310,8 +310,7 @@ export class SystemLayer {
 
     this.isBuilt_ = true;
 
-    this.root_ = this.win_.document.createElement('div');
-    this.root_.classList.add('i-amphtml-system-layer-host');
+    this.root_ = <div class="i-amphtml-system-layer-host"></div>;
     this.systemLayerEl_ = renderSystemLayerElement(this.parentEl_);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
@@ -931,9 +930,8 @@ export class SystemLayer {
           defaultConfig.selector
         );
       } else {
-        element = this.win_.document.createElement('button');
+        element = <button class="i-amphtml-story-button" />;
         this.vsync_.mutate(() => {
-          element.classList.add('i-amphtml-story-button');
           this.buttonsContainer_.appendChild(element);
         });
       }

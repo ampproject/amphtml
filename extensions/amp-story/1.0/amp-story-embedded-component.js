@@ -275,14 +275,10 @@ export class AmpStoryEmbeddedComponent {
    * @return {Node}
    */
   buildFocusedState_() {
-    this.shadowRoot_ = this.win_.document.createElement('div');
+    this.shadowRoot_ = <div />;
 
     this.focusedStateOverlay_ = this.renderFocusedStateElement_();
     createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
-
-    this.focusedStateOverlay_.addEventListener('click', (event) =>
-      this.onOutsideTooltipClick_(event)
-    );
 
     this.tooltip_.addEventListener(
       'click',
@@ -725,6 +721,7 @@ export class AmpStoryEmbeddedComponent {
   renderFocusedStateElement_() {
     const tooltipOverlay = (
       <section
+        onClick={(e) => this.onOutsideTooltipClick_(e)}
         class={objstr({
           'i-amphtml-story-focused-state-layer': true,
           'i-amphtml-story-system-reset i-amphtml-hidden': true,
@@ -742,6 +739,12 @@ export class AmpStoryEmbeddedComponent {
               'i-amphtml-story-focused-state-layer-nav-button': true,
               'i-amphtml-story-tooltip-nav-button-left': true,
             })}
+            onClick={(e) =>
+              this.onNavigationalClick_(
+                e,
+                rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
+              )
+            }
           ></button>
         </div>
         <div
@@ -756,6 +759,12 @@ export class AmpStoryEmbeddedComponent {
               'i-amphtml-story-focused-state-layer-nav-button': true,
               'i-amphtml-story-tooltip-nav-button-right': true,
             })}
+            onClick={(e) =>
+              this.onNavigationalClick_(
+                e,
+                rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE
+              )
+            }
           ></button>
         </div>
         <a
@@ -780,20 +789,6 @@ export class AmpStoryEmbeddedComponent {
     this.buttonLeft_ = buttonLeft;
     this.buttonRight_ = buttonRight;
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
-
-    this.buttonLeft_.addEventListener('click', (e) =>
-      this.onNavigationalClick_(
-        e,
-        rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
-      )
-    );
-
-    this.buttonRight_.addEventListener('click', (e) =>
-      this.onNavigationalClick_(
-        e,
-        rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE
-      )
-    );
 
     return tooltipOverlay;
   }

@@ -42,9 +42,6 @@ export class InfoDialog {
     /** @private {?Element} */
     this.element_ = null;
 
-    /** @private {?Element} */
-    this.innerContainerEl_ = null;
-
     /** @private {boolean} */
     this.isBuilt_ = false;
 
@@ -59,9 +56,6 @@ export class InfoDialog {
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
-
-    /** @private {?Element} */
-    this.moreInfoLinkEl_ = null;
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.parentEl_);
@@ -78,36 +72,52 @@ export class InfoDialog {
     }
 
     this.isBuilt_ = true;
-    const root = this.win_.document.createElement('div');
+
+    const {canonicalUrl} = Services.documentInfoForDoc(
+      getAmpdoc(this.parentEl_)
+    );
+
     this.element_ = (
-      <div class="i-amphtml-story-info-dialog i-amphtml-story-system-reset">
+      <div
+        class="i-amphtml-story-info-dialog i-amphtml-story-system-reset"
+        onClick={(event) => {
+          this.onInfoDialogClick_(event);
+        }}
+      >
         <div class="i-amphtml-story-info-dialog-container">
-          <h1 class="i-amphtml-story-info-heading"></h1>
-          <a class="i-amphtml-story-info-link"></a>
-          <a class="i-amphtml-story-info-moreinfo"></a>
+          <h1 class="i-amphtml-story-info-heading">
+            {localize(
+              this.element_,
+              LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
+            )}
+          </h1>
+          <a class="i-amphtml-story-info-link" href={canonicalUrl}>
+            {
+              // Add zero-width space character (\u200B) after "." and "/"
+              // characters to help line-breaks occur more naturally.
+              canonicalUrl.replace(/([/.]+)/gi, '$1\u200B')
+            }
+          </a>
+          <a class="i-amphtml-story-info-moreinfo" target="_blank">
+            {localize(
+              this.element_,
+              LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
+            )}
+          </a>
         </div>
       </div>
     );
 
+    const root = <div />;
     createShadowRootWithStyle(root, this.element_, CSS);
     this.initializeListeners_();
-
-    this.innerContainerEl_ = this.element_.querySelector(
-      '.i-amphtml-story-info-dialog-container'
-    );
 
     const appendPromise = this.mutator_.mutateElement(this.parentEl_, () => {
       this.parentEl_.appendChild(root);
     });
 
-    const pageUrl = Services.documentInfoForDoc(
-      getAmpdoc(this.parentEl_)
-    ).canonicalUrl;
-
     return Promise.all([
       appendPromise,
-      this.setHeading_(),
-      this.setPageLink_(pageUrl),
       this.requestMoreInfoLink_().then((moreInfoUrl) =>
         this.setMoreInfoLinkUrl_(moreInfoUrl)
       ),
@@ -129,10 +139,6 @@ export class InfoDialog {
     this.storeService_.subscribe(StateProperty.INFO_DIALOG_STATE, (isOpen) => {
       this.onInfoDialogStateUpdated_(isOpen);
     });
-
-    this.element_.addEventListener('click', (event) =>
-      this.onInfoDialogClick_(event)
-    );
   }
 
   /**
@@ -160,12 +166,13 @@ export class InfoDialog {
   onInfoDialogClick_(event) {
     const el = dev().assertElement(event.target);
     // Closes the dialog if click happened outside of the dialog main container.
-    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
+    const mainContainer = this.element_.firstElementChild;
+    if (!closest(el, (el) => el === mainContainer, this.element_)) {
       this.close_();
     }
     const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
     if (anchorClicked) {
-      triggerClickFromLightDom(anchorClicked, this.element);
+      triggerClickFromLightDom(anchorClicked, this.element_);
       event.preventDefault();
     }
   }
@@ -198,43 +205,6 @@ export class InfoDialog {
   }
 
   /**
-   * Sets the heading on the dialog.
-   * @return {*} TODO(#23582): Specify return type
-   */
-  setHeading_() {
-    const label = localize(
-      this.parentEl_,
-      LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
-    );
-    const headingEl = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-heading')
-    );
-
-    return this.mutator_.mutateElement(headingEl, () => {
-      headingEl.textContent = label;
-    });
-  }
-
-  /**
-   * @param {string} pageUrl The URL to the canonical version of the current
-   *     document.
-   * @return {*} TODO(#23582): Specify return type
-   */
-  setPageLink_(pageUrl) {
-    const linkEl = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-link')
-    );
-
-    return this.mutator_.mutateElement(linkEl, () => {
-      linkEl.setAttribute('href', pageUrl);
-
-      // Add zero-width space character (\u200B) after "." and "/" characters
-      // to help line-breaks occur more naturally.
-      linkEl.textContent = pageUrl.replace(/([/.]+)/gi, '$1\u200B');
-    });
-  }
-
-  /**
    * @param {?string} moreInfoUrl The URL to the "more info" page, if there is
    * one.
    * @return {*} TODO(#23582): Specify return type
@@ -244,22 +214,13 @@ export class InfoDialog {
       return Promise.resolve();
     }
 
-    this.moreInfoLinkEl_ = dev().assertElement(
+    const linkElement = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-info-moreinfo')
     );
 
-    return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {
-      const label = localize(
-        this.parentEl_,
-        LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
-      );
-      this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
-      this.moreInfoLinkEl_.setAttribute(
-        'href',
-        dev().assertString(moreInfoUrl)
-      );
-      this.moreInfoLinkEl_.setAttribute('target', '_blank');
-      this.moreInfoLinkEl_.textContent = label;
+    return this.mutator_.mutateElement(linkElement, () => {
+      linkElement.classList.add(MOREINFO_VISIBLE_CLASS);
+      linkElement.setAttribute('href', dev().assertString(moreInfoUrl));
     });
   }
 }

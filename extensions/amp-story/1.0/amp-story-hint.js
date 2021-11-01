@@ -80,9 +80,6 @@ export class AmpStoryHint {
     /** @private {boolean} Whether the component is built. */
     this.isBuilt_ = false;
 
-    /** @private {!Document} */
-    this.document_ = this.win_.document;
-
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
@@ -112,7 +109,7 @@ export class AmpStoryHint {
 
     this.isBuilt_ = true;
 
-    const root = this.document_.createElement('div');
+    const root = <div />;
     this.hintContainer_ = renderHintElement(this.parentEl_);
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 

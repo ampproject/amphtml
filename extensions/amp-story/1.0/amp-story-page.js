@@ -109,14 +109,17 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
 
 /**
+ * @param {string|Node} label
+ * @param {function(Event)} onClick
  * @return {!Element}
  */
-const renderPlayMessageElement = () => (
+const renderPlayMessageElement = (label, onClick) => (
   <button
     role="button"
     class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
+    onClick={onClick}
   >
-    <span class="i-amphtml-story-page-play-label"></span>
+    <span class="i-amphtml-story-page-play-label">{label}</span>
     <span class="i-amphtml-story-page-play-icon"></span>
   </button>
 );
@@ -1489,22 +1492,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
-    this.playMessageEl_ = renderPlayMessageElement();
-    const labelEl = this.playMessageEl_.querySelector(
-      '.i-amphtml-story-page-play-label'
+    this.playMessageEl_ = renderPlayMessageElement(
+      localize(this.element, LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO),
+      () => {
+        this.togglePlayMessage_(false);
+        this.startMeasuringAllVideoPerformance_();
+        this.mediaPoolPromise_
+          .then((mediaPool) => mediaPool.blessAll())
+          .then(() => this.playAllMedia_());
+      }
     );
-    labelEl.textContent = localize(
-      this.element,
-      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
-    );
-
-    this.playMessageEl_.addEventListener('click', () => {
-      this.togglePlayMessage_(false);
-      this.startMeasuringAllVideoPerformance_();
-      this.mediaPoolPromise_
-        .then((mediaPool) => mediaPool.blessAll())
-        .then(() => this.playAllMedia_());
-    });
 
     this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
   }
@@ -1606,15 +1603,17 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.openAttachmentEl_.setAttribute('active', '');
       }
 
-      const container = this.win.document.createElement('div');
-      container.classList.add('i-amphtml-story-page-open-attachment-host');
-      container.setAttribute('role', 'button');
-
-      container.addEventListener('click', (e) => {
-        // Prevent default so link can be opened programmatically after URL preview is shown.
-        e.preventDefault();
-        this.openAttachment();
-      });
+      const container = (
+        <div
+          class="i-amphtml-story-page-open-attachment-host"
+          role="button"
+          onClick={(e) => {
+            // Prevent default so link can be opened programmatically after URL preview is shown.
+            e.preventDefault();
+            this.openAttachment();
+          }}
+        ></div>
+      );
 
       this.mutateElement(() => {
         this.element.appendChild(container);
