@@ -1,8 +1,8 @@
 # Bento Timeago
 
-## Usage
+The Bento Timeago component can count up to, or away from, a specified date and time. It replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`.
 
-The Bento Timeago component can count up to, or away from, a specified date and time. It replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`. It can be used as a web component [`<bento-timeago>`](#web-component), or as a Preact/React functional component [`<BentoTimeago>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -15,18 +15,19 @@ The examples below demonstrate use of the `<bento-timeago>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-timeago
+npm install @bentoproject/timeago
 ```
 
 ```javascript
-import '@ampproject/bento-timeago';
+import {defineElement as defineBentoTimeago} from '@bentoproject/timeago';
+defineBentoTimeago();
 ```
 
 #### Example: Import via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
@@ -39,8 +40,12 @@ import '@ampproject/bento-timeago';
     }
   </style>
 </head>
-<bento-timeago id="my-timeago" datetime="2017-04-11T00:37:33.809Z" locale="en">
-  Saturday 11 April 2017 00.37
+<bento-timeago
+  id="my-timeago"
+  datetime="2017-04-11T00:37:33.809Z"
+  locale="en"
+  style="height: 30px">
+    Saturday 11 April 2017 00.37
 </bento-timeago>
 <div class="buttons" style="margin-top: 8px">
   <button id="ar-button">Change locale to Arabic</button>
@@ -159,13 +164,13 @@ The examples below demonstrates use of the `<BentoTimeago>` as a functional comp
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-display
+npm install @bentoproject/timeago
 ```
 
 ```javascript
 import React from 'react';
-import {BentoTimeago} from '@ampproject/bento-timeago/react';
-import '@ampproject/bento-timeago/styles.css';
+import {BentoTimeago} from '@bentoproject/timeago/react';
+import '@bentoproject/timeago/styles.css';
 
 function App() {
   return (

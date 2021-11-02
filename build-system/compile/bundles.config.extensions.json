@@ -233,6 +233,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "bento": true
     }
   },
@@ -1078,6 +1079,19 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story-shopping",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "cssBinaries": [
+        "amp-story-shopping",
+        "amp-story-shopping-attachment",
+        "amp-story-shopping-tag"
+      ]
     }
   },
   {

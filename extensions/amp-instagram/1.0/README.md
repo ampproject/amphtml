@@ -1,8 +1,8 @@
 # Bento Instagram
 
-## Usage
+The Bento Instagram component allows you embed an Instagram post.
 
-The Bento Instagram component allows you embed an Instagram post. It can be used as a web component [`<bento-instagram>`](#web-component), or as a Preact/React functional component [`<BentoInstagram>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -15,18 +15,19 @@ The examples below demonstrate use of the `<bento-instagram>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-instagram
+npm install @bentoproject/instagram
 ```
 
 ```javascript
-import '@ampproject/bento-instagram';
+import {defineElement as defineBentoInstagram} from '@bentoproject/instagram';
+defineBentoInstagram();
 ```
 
 #### Example: Include via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"
@@ -44,6 +45,7 @@ import '@ampproject/bento-instagram';
     id="my-instagram"
     data-shortcode="CKXYAzuj7TE"
     data-captioned
+    style="height: 800px; width: 400px;"
   >
   </bento-instagram>
   <button id="change-shortcode">Change shortcode</button>
@@ -120,13 +122,13 @@ The examples below demonstrates use of the `<BentoInstagram>` as a functional co
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-instagram
+npm install @bentoproject/instagram
 ```
 
 ```javascript
 import React from 'react';
-import {BentoInstagram} from '@ampproject/bento-instagram/react';
-import '@ampproject/bento-instagram/styles.css';
+import {BentoInstagram} from '@bentoproject/instagram/react';
+import '@bentoproject/instagram/styles.css';
 function App() {
   return <BentoInstagram shortcode="CKXYAzuj7TE" captioned />;
 }

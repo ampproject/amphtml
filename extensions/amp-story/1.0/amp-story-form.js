@@ -1,10 +1,9 @@
+import * as Preact from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '#service/localization/strings';
-import {devAssert} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {localize} from './amp-story-localization-service';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 
 /**
@@ -54,7 +53,7 @@ export function setupResponseAttributeElements(win, formEl) {
 
   // Create and append fallback form attribute elements, if necessary.
   if (!submittingEl) {
-    submittingEl = createFormSubmittingEl_(win, formEl);
+    submittingEl = createFormSubmittingEl_(formEl);
     formEl.appendChild(submittingEl);
   }
   if (!successEl) {
@@ -84,18 +83,17 @@ export function getResponseAttributeElements(formEl) {
 /**
  * Create an element that is used to display the in-progress state of a form
  * submission attempt.
- * @param {!Window} win
  * @param {!Element} formEl The form to which the `submitting` element will be
  *     added.
  * @return {!Element}
  * @private
  */
-function createFormSubmittingEl_(win, formEl) {
+function createFormSubmittingEl_(formEl) {
   const submittingEl = createResponseAttributeEl_(
     formEl,
     FormResponseAttribute.SUBMITTING
   );
-  const loadingSpinner = new LoadingSpinner(win.document);
+  const loadingSpinner = new LoadingSpinner();
   submittingEl.firstElementChild.appendChild(loadingSpinner.build());
   loadingSpinner.toggle(true /* isActive */);
   return submittingEl;
@@ -123,8 +121,8 @@ function createFormResultEl_(win, formEl, isSuccess) {
   resultEl.firstElementChild.appendChild(iconEl);
 
   const textEl = win.document.createElement('div');
-  const localizationService = getLocalizationService(devAssert(win.document));
-  textEl.textContent = localizationService.getLocalizedString(
+  textEl.textContent = localize(
+    win.document,
     isSuccess
       ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS
       : LocalizedStringId.AMP_STORY_FORM_SUBMIT_ERROR
@@ -144,8 +142,11 @@ function createFormResultEl_(win, formEl, isSuccess) {
  * @private
  */
 function createResponseAttributeEl_(formEl, responseAttribute) {
-  const statusEl = htmlFor(formEl)`
-    <div><div class="i-amphtml-story-page-attachment-form-submission-status"></div></div>`;
+  const statusEl = (
+    <div>
+      <div class="i-amphtml-story-page-attachment-form-submission-status"></div>
+    </div>
+  );
   statusEl.setAttribute(responseAttribute, '');
   return statusEl;
 }

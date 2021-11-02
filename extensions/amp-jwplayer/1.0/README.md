@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-jwplayer>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-jwplayer
+npm install @bentoproject/jwplayer
 ```
 
 ```javascript
-import '@ampproject/bento-jwplayer';
+import {defineElement as defineBentoJwplayer} from '@bentoproject/jwplayer';
+defineBentoJwplayer();
 ```
 
 #### Example: Include via `<script>`
@@ -29,7 +30,7 @@ The example below contains an `bento-jwplayer` with three sections. The
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
@@ -221,13 +222,13 @@ The examples below demonstrates use of the `<BentoMathml>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-jwplayer
+npm install @bentoproject/jwplayer
 ```
 
 ```javascript
 import React from 'react';
-import {BentoMathml} from '@ampproject/bento-jwplayer/react';
-import '@ampproject/bento-jwplayer/styles.css';
+import {BentoMathml} from '@bentoproject/jwplayer/react';
+import '@bentoproject/jwplayer/styles.css';
 
 function App() {
   return (

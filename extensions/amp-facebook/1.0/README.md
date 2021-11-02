@@ -1,8 +1,8 @@
 # Bento Facebook
 
-## Usage
+The Bento Facebook component allows you to embed a Facebook post, a Facebook video, or a comment on a Facebook post.
 
-The Bento Facebook component allows you to embed a Facebook post, a Facebook video, or a comment on a Facebook post. It can be used as a web component [`<bento-facebook>`](#web-component), or as a Preact/React functional component [`<BentoFacebook>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -13,18 +13,19 @@ You must include each Bento component's required CSS library before adding custo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-facebook
+npm install @bentoproject/facebook
 ```
 
 ```javascript
-import '@ampproject/bento-facebook';
+import {defineElement as defineBentoFacebook} from '@bentoproject/facebook';
+defineBentoFacebook();
 ```
 
 #### Example: Include via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-facebook {
@@ -304,13 +305,13 @@ The examples below demonstrate use of the `<BentoFacebook>` as a functional comp
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-facebook
+npm install @bentoproject/facebook
 ```
 
 ```javascript
 import React from 'react';
-import {BentoFacebook} from '@ampproject/bento-facebook/react';
-import '@ampproject/bento-facebook/styles.css';
+import {BentoFacebook} from '@bentoproject/facebook/react';
+import '@bentoproject/facebook/styles.css';
 
 function App() {
   return (

@@ -1,8 +1,8 @@
 # Bento Date Countdown
 
-## Usage
-
 The Bento Date Countdown component displays a countdown sequence to a specified date. The Bento Date Countdown extension provides a list of time parameters. Refer to the [returned time parameters section](#returned-time-parameters) below for more information on the available time parameters.
+
+## Usage
 
 <!--
 ### Web Component
@@ -23,13 +23,13 @@ The examples below demonstrates use of the `<BentoDateCountdown>` as a functiona
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-countdown
+npm install @bentoproject/date-countdown
 ```
 
 ```javascript
 import React from 'react';
-import {BentoDateCountdown} from '@ampproject/bento-date-countdown/react';
-import '@ampproject/bento-date-countdown/styles.css';
+import {BentoDateCountdown} from '@bentoproject/date-countdown/react';
+import '@bentoproject/date-countdown/styles.css';
 
 function App() {
   return (

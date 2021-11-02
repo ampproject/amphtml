@@ -1,10 +1,8 @@
 # Bento Fit Text
 
-## Usage
-
-Expands or shrinks its font size to fit the content within the space given to it. Use Bento Fit Text as a web component [`<bento-fit-text>`](#web-component), or a Preact/React functional component [`<BentoFitText>`](#preactreact-component).
-
 The Bento Fit Text component allows you to manage the size and fit of text within a specified area. For content contained in a Bento Fit Text component, it determines the best font size to fit all of the content within the available space. The expected content for Bento Fit Text is text or other inline content, but it can also contain non-inline content.
+
+## Usage
 
 ### Web Component
 
@@ -17,23 +15,20 @@ The examples below demonstrate use of the `<bento-fit-text>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-fit-text
+npm install @bentoproject/fit-text
 ```
 
 ```javascript
-import '@ampproject/bento-fit-text';
+import {defineElement as defineBentoFitText} from '@bentoproject/fit-text';
+defineBentoFitText();
 ```
 
 #### Example: Include via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"
-  ></script>
   <style>
     bento-fit-text {
       display: block;
@@ -145,13 +140,13 @@ The examples below demonstrate use of the `<BentoFitText>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-fit-text
+npm install @bentoproject/fit-text
 ```
 
 ```javascript
 import React from 'react';
-import {BentoFitText} from '@ampproject/bento-fit-text/react';
-import '@ampproject/bento-fit-text/styles.css';
+import {BentoFitText} from '@bentoproject/fit-text/react';
+import '@bentoproject/fit-text/styles.css';
 
 function App() {
   return (

@@ -4,6 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const fs = require('fs');
 const JSON5 = require('json5');
+const os = require('os');
 const path = require('path');
 const Percy = require('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
@@ -26,9 +27,9 @@ const {
   gitCommitterEmail,
   shortSha,
 } = require('../../common/git');
-const {buildRuntime} = require('../../common/utils');
-const {cyan, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
+const {isPercyEnabled} = require('@percy/sdk-utils');
 const {startServer, stopServer} = require('../serve');
 
 // CSS injected in every page tested.
@@ -61,9 +62,11 @@ const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
 const PERCY_AGENT_PORT = 5338;
-const NAVIGATE_TIMEOUT_MS = 30000;
-const MAX_PARALLEL_TABS = 5;
 const WAIT_FOR_TABS_MS = 1000;
+const WAIT_FOR_AGENT_MS = 5000;
+
+// Multiple tabs speed up the performance of the visual diff tests.
+const MAX_PARALLEL_TABS = os.cpus().length;
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
@@ -195,7 +198,29 @@ async function launchPercyAgent(browserFetcher) {
     },
   });
 
-  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
+  await new Promise((resolve, reject) => {
+    const percyIsEnabledTimeout = setTimeout(() => {
+      log('fatal', 'Percy agent is unreachable after', WAIT_FOR_AGENT_MS, 'ms');
+      reject(false);
+    }, WAIT_FOR_AGENT_MS);
+
+    while (true) {
+      try {
+        if (isPercyEnabled()) {
+          clearTimeout(percyIsEnabledTimeout);
+          log(
+            'info',
+            'Percy agent is enabled and reachable on port',
+            PERCY_AGENT_PORT
+          );
+          return resolve(true);
+        }
+      } catch {
+        // Ignore transient errors. Promise will reject after WAIT_FOR_AGENT_MS.
+      }
+    }
+  });
+
   if (process.env['PERCY_TARGET_COMMIT']) {
     log(
       'info',
@@ -231,11 +256,21 @@ async function launchWebServer() {
  */
 async function launchBrowser(browserFetcher) {
   const browserOptions = {
-    args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
+    args: [
+      '--disable-background-media-suspend',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-extensions',
+      '--disable-gpu',
+      '--disable-renderer-backgrounding',
+      '--no-sandbox',
+      '--no-startup-window',
+    ],
     dumpio: argv.chrome_debug,
     headless: true,
     executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
       .executablePath,
+    waitForInitialPage: false,
   };
   return await puppeteer.launch(browserOptions);
 }
@@ -251,7 +286,8 @@ async function launchBrowser(browserFetcher) {
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
 
-  const page = await browser.newPage();
+  const context = await browser.createIncognitoBrowserContext();
+  const page = await context.newPage();
   page.setDefaultNavigationTimeout(0);
   await page.setJavaScriptEnabled(true);
   await page.setRequestInterception(true);
@@ -457,6 +493,32 @@ async function runVisualTests(browser, webpages) {
 }
 
 /**
+ * Pretty-prints the current test status of each page.
+ * @param {!Array<!puppeteer.Page>} allPages
+ * @param {!Array<!puppeteer.Page>} availablePages
+ * @param {!puppeteer.Page} thisPage
+ * @param {string} thisPageText
+ * @return {string}
+ */
+function drawBoxes(allPages, availablePages, thisPage, thisPageText) {
+  return (
+    '[' +
+    allPages
+      .map((page) => {
+        if (page === thisPage) {
+          return thisPageText;
+        } else if (availablePages.includes(page)) {
+          return ' ';
+        } else {
+          return yellow('█');
+        }
+      })
+      .join(' ') +
+    ']'
+  );
+}
+
+/**
  * Generates Percy snapshots for a set of given webpages.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
@@ -498,10 +560,9 @@ async function snapshotWebpages(browser, webpages) {
       const name = testName ? `${pageName} (${testName})` : pageName;
       log(
         'info',
+        drawBoxes(allPages, availablePages, page, yellow('▄')),
         'Starting test',
-        yellow(name),
-        'on tab',
-        yellow(`#${allPages.indexOf(page) + 1}`)
+        yellow(name)
       );
 
       await resetPage(page, viewport);
@@ -512,45 +573,10 @@ async function snapshotWebpages(browser, webpages) {
       };
       page.on('console', consoleLogger);
 
-      // Puppeteer is flaky when it comes to catching navigation requests, so
-      // retry the page navigation up to NAVIGATE_RETRIES times and eventually
-      // ignore a final timeout. If this ends up being a real non-loading page
-      // error, this will be caught in the resulting Percy build. Also attempt
-      // to wait until there are no more network requests. This method is flaky
-      // since Puppeteer doesn't always understand Chrome's network activity, so
-      // ignore timeouts again.
       const pagePromise = (async () => {
         try {
-          /** @type {Promise<void>} */
-          const responseWatcher = new Promise((resolve, reject) => {
-            const responseTimeout = setTimeout(() => {
-              reject(
-                new puppeteer.TimeoutError(
-                  `Response was not received in test ${testName} for page ` +
-                    `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
-                )
-              );
-            }, NAVIGATE_TIMEOUT_MS);
-
-            page.once('response', (response) => {
-              log(
-                'verbose',
-                'Response for url',
-                yellow(response.url()),
-                'with status',
-                cyan(response.status()),
-                cyan(response.statusText())
-              );
-              clearTimeout(responseTimeout);
-              resolve();
-            });
-          });
-
           log('verbose', 'Navigating to page', yellow(webpage.url));
-          await Promise.all([
-            responseWatcher,
-            page.goto(fullUrl, {waitUntil: 'networkidle2'}),
-          ]);
+          await page.goto(fullUrl, {waitUntil: 'networkidle0'});
 
           log(
             'verbose',
@@ -679,12 +705,18 @@ async function snapshotWebpages(browser, webpages) {
         }
 
         log(
-          hasWarnings ? 'warning' : 'info',
+          'info',
+          drawBoxes(
+            allPages,
+            availablePages,
+            page,
+            (hasWarnings ? red : green)('▀')
+          ),
           'Finished test',
           yellow(name),
           hasWarnings ? 'with warnings' : ''
         );
-        page.removeListener('console', consoleLogger);
+        page.off('console', consoleLogger);
         availablePages.push(page);
       })();
       pagePromises.push(pagePromise);
@@ -780,6 +812,10 @@ async function performVisualTests(browserFetcher) {
   setDebuggingLevel();
 
   const browser = await launchBrowser(browserFetcher);
+  const handlerProcess = createCtrlcHandler(
+    'visual-diff:headless-browser',
+    browser.process()?.pid
+  );
   await launchWebServer();
 
   try {
@@ -800,6 +836,7 @@ async function performVisualTests(browserFetcher) {
     }
   } finally {
     await browser.close();
+    exitCtrlcHandler(handlerProcess);
     await stopServer();
   }
 }
@@ -812,22 +849,18 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
     return;
   }
 
-  if (argv.nobuild) {
-    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
+  const isBuiltInTestMode =
+    fs.existsSync('dist/v0.js') &&
+    /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
       fs.readFileSync('dist/v0.js', 'utf8')
     );
-    if (!isInTestMode) {
-      log(
-        'fatal',
-        'The AMP runtime was not built in test mode. Run',
-        cyan('amp dist --fortesting'),
-        'or remove the',
-        cyan('--nobuild'),
-        'option from this command'
-      );
-    }
-  } else {
-    await buildRuntime(/* opt_compiled */ true);
+  if (!isBuiltInTestMode) {
+    log(
+      'fatal',
+      'The AMP runtime was not built or not build in test mode. Run',
+      cyan('amp dist --fortesting'),
+      'before executing visual diff tests.'
+    );
   }
 }
 
@@ -873,8 +906,6 @@ visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {
   'main': 'Include a blank snapshot (baseline for skipped builds)',
   'empty': 'Create a dummy Percy build with only a blank snapshot',
-  'config':
-    'Set the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'chrome_debug': 'Print debug info from Chrome',
   'webserver_debug': 'Print debug info from the local amp webserver',
   'percy_agent_debug': 'Print debug info from the @percy/agent instance',
@@ -885,5 +916,4 @@ visualDiff.flags = {
   'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
     'Disable Percy integration (for testing local changes only)',
-  'nobuild': 'Skip build',
 };

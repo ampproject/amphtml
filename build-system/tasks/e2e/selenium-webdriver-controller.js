@@ -411,6 +411,18 @@ class SeleniumWebDriverController {
       this.getWaitFn_(() => webElement.isEnabled())
     );
   }
+
+  /**
+   * @param {!ElementHandle} handle
+   * @return {!Promise<boolean>}
+   */
+  isElementDisplayed(handle) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+      webElement.isDisplayed(),
+      this.getWaitFn_(() => webElement.isDisplayed())
+    );
+  }
   /**
    * @return {!Promise<Array<string>>}
    */

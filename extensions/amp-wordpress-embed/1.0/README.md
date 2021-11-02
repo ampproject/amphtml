@@ -1,8 +1,8 @@
 # Bento WordPress Embed
 
-## Usage
+An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post or page.
 
-An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post or page. Use Bento WordPress Embed as a web component [`<bento-wordpress-embed>`](#web-component), or a Preact/React functional component [`<BentoWordPressEmbed>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -15,18 +15,19 @@ The examples below demonstrate use of the `<bento-wordpress-embed>` web componen
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-wordpress-embed
+npm install @bentoproject/wordpress-embed
 ```
 
 ```javascript
-import '@ampproject/bento-wordpress-embed';
+import {defineElement as defineBentoWordpressEmbed} from '@bentoproject/wordpress-embed';
+defineBentoWordpressEmbed();
 ```
 
 #### Example: Include via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-wordpress-embed {
@@ -113,12 +114,12 @@ The examples below demonstrate use of the `<BentoWordPressEmbed>` as a functiona
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-wordpress-embed
+npm install @bentoproject/wordpress-embed
 ```
 
 ```jsx
 import React from 'react';
-import {BentoWordPressEmbed} from '@ampproject/bento-wordpress-embed/react';
+import {BentoWordPressEmbed} from '@bentoproject/wordpress-embed/react';
 
 function App() {
   return (

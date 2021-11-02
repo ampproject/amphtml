@@ -1,8 +1,8 @@
 # Bento Lightbox
 
-## Usage
+The Bento Lightbox component displays elements in a full-viewport "lightbox" modal.
 
-The Bento Lightbox component displays elements in a full-viewport "lightbox" modal. It can be used as a web component [`<bento-lightbox>`](#web-component), or as a Preact/React functional component [`<BentoLightbox>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -15,11 +15,12 @@ The examples below demonstrate use of the `<bento-lightbox>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-lightbox
+npm install @bentoproject/lightbox
 ```
 
 ```javascript
-import '@ampproject/bento-lightbox';
+import {defineElement as defineBentoLightbox} from '@bentoproject/lightbox';
+defineBentoLightbox();
 ```
 
 #### Example: Import via `<script>`
@@ -31,7 +32,7 @@ import '@ampproject/bento-lightbox';
     type="text/css"
     href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css"
   />
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
@@ -156,13 +157,13 @@ The examples below demonstrates use of the `<BentoLightbox>` as a functional com
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-lightbox
+npm install @bentoproject/lightbox
 ```
 
 ```javascript
 import React from 'react';
-import {BentoLightbox} from '@ampproject/bento-lightbox/react';
-import '@ampproject/bento-lightbox/styles.css';
+import {BentoLightbox} from '@bentoproject/lightbox/react';
+import '@bentoproject/lightbox/styles.css';
 function App() {
   return (
     <BentoLightbox

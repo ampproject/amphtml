@@ -1,8 +1,8 @@
 # Bento Twitter
 
-## Behavior
+The Bento Twitter component allows you to embed a Tweet or Moment.
 
-The Bento Twitter component allows you to embed a Tweet or Moment. Use it as a web component [`<bento-twitter>`](#web-component), or a Preact/React functional component [`<BentoTwitter>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -15,18 +15,19 @@ The examples below demonstrate use of the `<bento-twitter>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-twitter
+npm install @bentoproject/twitter
 ```
 
 ```javascript
-import '@ampproject/bento-twitter';
+import {defineElement as defineBentoTwitters} from '@bentoproject/twitter';
+defineBentoTwitters();
 ```
 
 #### Example: Include via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-twitter {
@@ -35,7 +36,6 @@ import '@ampproject/bento-twitter';
       position: relative;
     }
   </style>
-  <!-- TODO(wg-bento): Once available, change src to bento-twitter.js -->
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
@@ -135,13 +135,13 @@ The examples below demonstrate use of the `<BentoTwitter>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-twitter
+npm install @bentoproject/twitter
 ```
 
 ```javascript
 import React from 'react';
-import {BentoTwitter} from '@ampproject/bento-twitter/react';
-import '@ampproject/bento-twitter/styles.css';
+import {BentoTwitter} from '@bentoproject/twitter/react';
+import '@bentoproject/twitter/styles.css';
 
 function App() {
   return <BentoTwitter tweetid="1356304203044499462"></BentoTwitter>;

@@ -1,8 +1,2 @@
-const key = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}", function (key, val) {
-  if (typeof val === 'object') Object.freeze(val);
-  return val;
-});
-const string = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}", function (key, val) {
-  if (typeof val === 'object') Object.freeze(val);
-  return val;
-});
+const key = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}");
+const string = JSON.parse("{\"plugins\":[\"../../../..\"],\"sourceType\":\"module\"}");

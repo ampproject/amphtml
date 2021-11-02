@@ -2,7 +2,7 @@ describes.endtoend(
   'bento-youtube',
   {
     version: '1.0',
-    fixture: 'bento/bento-youtube.html',
+    fixture: 'bento/youtube.html',
     environments: ['single'],
   },
   (env) => {

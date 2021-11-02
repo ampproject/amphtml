@@ -18,11 +18,12 @@ The examples below demonstrate use of the `<bento-stream-gallery>` web component
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-stream-gallery
+npm install @bentoproject/stream-gallery
 ```
 
 ```javascript
-import '@ampproject/bento-stream-gallery';
+import {defineElement as defineBentoStreamGallery} from '@bentoproject/stream-gallery';
+defineBentoStreamGallery();
 ```
 
 #### Example: Include via `<script>`
@@ -32,7 +33,7 @@ The example below contains an `bento-stream-gallery` with three sections. The
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
@@ -40,7 +41,7 @@ The example below contains an `bento-stream-gallery` with three sections. The
   <link
     rel="stylesheet"
     type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-streamGallery-1.0.css"
+    href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
   />
 </head>
 <body>
@@ -128,7 +129,7 @@ Each Bento component has a small CSS library you must include to guarantee prope
 <link
   rel="stylesheet"
   type="text/css"
-  href="https://cdn.ampproject.org/v0/bento-streamGallery-1.0.css"
+  href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
 />
 ```
 
@@ -221,13 +222,13 @@ The examples below demonstrates use of the `<BentoStreamGallery>` as a functiona
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-stream-gallery
+npm install @bentoproject/stream-gallery
 ```
 
 ```javascript
 import React from 'react';
-import {BentoStreamGallery} from '@ampproject/bento-stream-gallery/react';
-import '@ampproject/bento-stream-gallery/styles.css';
+import {BentoStreamGallery} from '@bentoproject/stream-gallery/react';
+import '@bentoproject/stream-gallery/styles.css';
 
 function App() {
   return (

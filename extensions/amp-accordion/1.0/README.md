@@ -1,13 +1,9 @@
 # Bento Accordion
 
-## Usage
-
 The Bento Accordion component allows you to display collapsible and expandable
 content sections. This component provides a way for viewers to glance at the
 content outline and jump to any section. Effective use reduces scrolling needs
 on mobile devices.
-
-Use Bento Accordion as a web component ([`<bento-accordion>`](#web-component)), or a Preact/React functional component ([`<BentoAccordion>`](#preactreact-component)).
 
 -   A Bento Accordion accepts one or more `<section>` elements as its direct
     children.
@@ -21,6 +17,8 @@ Use Bento Accordion as a web component ([`<bento-accordion>`](#web-component)), 
 -   A Bento Accordion with a defined `id` preserves the collapsed or expanded
     state of each section while the user remains on your domain.
 
+## Usage
+
 ### Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
@@ -32,11 +30,12 @@ The examples below demonstrate use of the `<bento-accordion>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-accordion
+npm install @bentoproject/accordion
 ```
 
 ```javascript
-import '@ampproject/bento-accordion';
+import {defineElement as defineBentoAccordion} from '@bentoproject/accordion';
+defineBentoAccordion();
 ```
 
 #### Example: Include via `<script>`
@@ -46,7 +45,7 @@ The example below contains an `bento-accordion` with three sections. The
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
@@ -397,13 +396,13 @@ The examples below demonstrates use of the `<BentoAccordion>` as a functional co
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-accordion
+npm install @bentoproject/accordion
 ```
 
 ```javascript
 import React from 'react';
-import {BentoAccordion} from '@ampproject/bento-accordion/react';
-import '@ampproject/bento-accordion/styles.css';
+import {BentoAccordion} from '@bentoproject/accordion/react';
+import '@bentoproject/accordion/styles.css';
 
 function App() {
   return (

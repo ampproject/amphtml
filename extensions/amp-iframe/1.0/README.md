@@ -1,10 +1,11 @@
 # Bento Iframe
 
+The Bento Iframe component is used to display an iframe. However, it has other important differences from vanilla iframes:
+
+1. Allows dynamic resizing when the component is outside to the viewport. This is to avoid content shifts.
+1. Bento Iframe can be set up to receive `IntersectionObserver` style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
+
 ## Usage
-
-Displays an iframe.
-
-Use Bento Iframe as a web component [`<bento-iframe>`](#web-component), or a Preact/React functional component [`<BentoIframe>`](#preactreact-component).
 
 ### Web Component
 
@@ -17,18 +18,19 @@ The examples below demonstrate use of the `<bento-iframe>` web component.
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-iframe
+npm install @bentoproject/iframe
 ```
 
 ```javascript
-import '@ampproject/bento-iframe';
+import {defineElement as defineBentoIframe} from '@bentoproject/iframe';
+defineBentoIframe();
 ```
 
 #### Example: Include via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <script
     async
     src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
@@ -38,13 +40,6 @@ import '@ampproject/bento-iframe';
     type="text/css"
     href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
   />
-  <style>
-    bento-iframe {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
 </head>
 <bento-iframe
   id="my-iframe"
@@ -149,13 +144,13 @@ The examples below demonstrates use of the `<BentoIframe>` as a functional compo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-iframe
+npm install @bentoproject/iframe
 ```
 
 ```javascript
 import React from 'react';
-import {BentoIframe} from '@ampproject/bento-iframe/react';
-import '@ampproject/bento-iframe/styles.css';
+import {BentoIframe} from '@bentoproject/iframe/react';
+import '@bentoproject/iframe/styles.css';
 
 function App() {
   return (

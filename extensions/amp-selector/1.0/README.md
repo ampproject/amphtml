@@ -1,8 +1,8 @@
 # Bento Selector
 
-## Usage
+The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
 
-The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text. It can be used as a web component[`<bento-selector>`](#web-component), or as a Preact/React functional component [`<BentoSelector>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -13,18 +13,19 @@ You must include each Bento component's required CSS library before adding custo
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-selector
+npm install @bentoproject/selector
 ```
 
 ```javascript
-import '@ampproject/bento-selector';
+import {defineElement as defineBentoSelector} from '@bentoproject/selector';
+defineBentoSelector();
 ```
 
 #### Example: Include via `<script>`
 
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
   <style>
     bento-selector {
@@ -155,7 +156,7 @@ The examples below demonstrate use of the `<BentoSelector>` as a functional comp
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-selector
+npm install @bentoproject/selector
 ```
 
 ```javascript
@@ -163,8 +164,8 @@ import React from 'react';
 import {
   BentoSelector,
   BentoSelectorOption,
-} from '@ampproject/bento-selector/react';
-import '@ampproject/bento-selector/styles.css';
+} from '@bentoproject/selector/react';
+import '@bentoproject/selector/styles.css';
 
 function App() {
   return (
