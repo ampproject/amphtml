@@ -1,5 +1,5 @@
 /** @protected @enum {string} */
-export const Side = {
+export const SIDE_ENUM = {
   LEFT: 'left',
   RIGHT: 'right',
 };

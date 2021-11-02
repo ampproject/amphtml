@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
@@ -38,11 +38,11 @@ import {
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  PlayingStates,
-  VideoAnalyticsEvents,
-  VideoAttributes,
-  VideoEvents,
-  VideoServiceSignals,
+  PLAYING_STATES_ENUM,
+  VIDEO_ANALYTICS_EVENTS_ENUM,
+  VIDEO_ATTRIBUTES_ENUM,
+  VIDEO_EVENTS_ENUM,
+  VIDEO_SERVICE_SIGNALS_ENUM,
   setIsMediaComponent,
   userInteractedWith,
   videoAnalyticsCustomEventTypeKey,
@@ -139,8 +139,8 @@ export class VideoManager {
   secondsPlaying_() {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      if (entry.getPlayingState() !== PlayingStates.PAUSED) {
-        analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+      if (entry.getPlayingState() !== PLAYING_STATES_ENUM.PAUSED) {
+        analyticsEvent(entry, VIDEO_ANALYTICS_EVENTS_ENUM.SECONDS_PLAYED);
         this.timeUpdateActionEvent_(entry);
       }
     }
@@ -169,7 +169,12 @@ export class VideoManager {
         `${TAG}.${name}`,
         dict({'time': currentTime, 'percent': perc})
       );
-      this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
+      this.actions_.trigger(
+        entry.video.element,
+        name,
+        event,
+        ACTION_TRUST_ENUM.LOW
+      );
     }
   }
 
@@ -206,14 +211,16 @@ export class VideoManager {
       );
     }
     this.viewportObserver_.observe(videoBE.element);
-    listen(videoBE.element, VideoEvents.RELOAD, () => entry.videoLoaded());
+    listen(videoBE.element, VIDEO_EVENTS_ENUM.RELOAD, () =>
+      entry.videoLoaded()
+    );
 
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
     this.entries_.push(entry);
 
     const {element} = entry.video;
-    dispatchCustomEvent(element, VideoEvents.REGISTERED);
+    dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.REGISTERED);
 
     setIsMediaComponent(element);
 
@@ -224,7 +231,7 @@ export class VideoManager {
       video
     ).signals();
 
-    signals.signal(VideoEvents.REGISTERED);
+    signals.signal(VIDEO_EVENTS_ENUM.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
     element.classList.add('i-amphtml-video-interface');
@@ -241,7 +248,7 @@ export class VideoManager {
   registerCommonActions_(video) {
     // Only require ActionTrust.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
-    const trust = ActionTrust.LOW;
+    const trust = ACTION_TRUST_ENUM.LOW;
 
     registerAction('play', () => tryPlay(video, /* isAutoplay */ false));
     registerAction('pause', () => video.pause());
@@ -390,7 +397,7 @@ export class VideoManager {
       if (
         entry.isPlaybackManaged() &&
         entry !== entryBeingPlayed &&
-        entry.getPlayingState() == PlayingStates.PLAYING_MANUAL
+        entry.getPlayingState() == PLAYING_STATES_ENUM.PLAYING_MANUAL
       ) {
         entry.video.pause();
       }
@@ -444,14 +451,14 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(() =>
-      analyticsEvent(this, VideoAnalyticsEvents.SESSION)
+      analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.SESSION)
     );
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(() =>
-      analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
+      analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.SESSION_VISIBLE)
     );
 
     /** @private @const {function(): !AnalyticsPercentageTracker} */
@@ -476,7 +483,9 @@ class VideoEntry {
     /** @private {boolean} */
     this.hasSeenPlayEvent_ = false;
 
-    this.hasAutoplay = video.element.hasAttribute(VideoAttributes.AUTOPLAY);
+    this.hasAutoplay = video.element.hasAttribute(
+      VIDEO_ATTRIBUTES_ENUM.AUTOPLAY
+    );
 
     if (this.hasAutoplay) {
       this.manager_.installAutoplayStyles();
@@ -497,20 +506,20 @@ class VideoEntry {
       this.video.pause();
     };
 
-    listen(video.element, VideoEvents.LOAD, () => this.videoLoaded());
-    listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
-    listen(video.element, VideoEvents.PLAY, () => {
+    listen(video.element, VIDEO_EVENTS_ENUM.LOAD, () => this.videoLoaded());
+    listen(video.element, VIDEO_EVENTS_ENUM.PAUSE, () => this.videoPaused_());
+    listen(video.element, VIDEO_EVENTS_ENUM.PLAY, () => {
       this.hasSeenPlayEvent_ = true;
-      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+      analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.PLAY);
     });
-    listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
-    listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
-    listen(video.element, VideoEvents.UNMUTED, () => {
+    listen(video.element, VIDEO_EVENTS_ENUM.PLAYING, () => this.videoPlayed_());
+    listen(video.element, VIDEO_EVENTS_ENUM.MUTED, () => (this.muted_ = true));
+    listen(video.element, VIDEO_EVENTS_ENUM.UNMUTED, () => {
       this.muted_ = false;
       this.manager_.pauseOtherVideos(this);
     });
 
-    listen(video.element, VideoEvents.CUSTOM_TICK, (e) => {
+    listen(video.element, VIDEO_EVENTS_ENUM.CUSTOM_TICK, (e) => {
       const data = getData(e);
       const eventType = data['eventType'];
       if (!eventType) {
@@ -522,24 +531,24 @@ class VideoEntry {
       this.logCustomAnalytics_(eventType, data['vars']);
     });
 
-    listen(video.element, VideoEvents.ENDED, () => {
+    listen(video.element, VIDEO_EVENTS_ENUM.ENDED, () => {
       this.isRollingAd_ = false;
-      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
+      analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.ENDED);
     });
 
-    listen(video.element, VideoEvents.AD_START, () => {
+    listen(video.element, VIDEO_EVENTS_ENUM.AD_START, () => {
       this.isRollingAd_ = true;
-      analyticsEvent(this, VideoAnalyticsEvents.AD_START);
+      analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.AD_START);
     });
 
-    listen(video.element, VideoEvents.AD_END, () => {
+    listen(video.element, VIDEO_EVENTS_ENUM.AD_END, () => {
       this.isRollingAd_ = false;
-      analyticsEvent(this, VideoAnalyticsEvents.AD_END);
+      analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.AD_END);
     });
 
     video
       .signals()
-      .whenSignal(VideoEvents.REGISTERED)
+      .whenSignal(VIDEO_EVENTS_ENUM.REGISTERED)
       .then(() => this.onRegister_());
 
     /**
@@ -548,7 +557,7 @@ class VideoEntry {
      */
     this.firstPlayEventOrNoop_ = once(() => {
       const firstPlay = 'firstPlay';
-      const trust = ActionTrust.LOW;
+      const trust = ACTION_TRUST_ENUM.LOW;
       const event = createCustomEvent(
         this.ampdoc_.win,
         firstPlay,
@@ -578,19 +587,21 @@ class VideoEntry {
       prefixedVars[`custom_${key}`] = vars[key];
     });
 
-    analyticsEvent(this, VideoAnalyticsEvents.CUSTOM, prefixedVars);
+    analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.CUSTOM, prefixedVars);
   }
 
   /** Listens for signals to delegate playback to a different module. */
   listenForPlaybackDelegation_() {
     const signals = this.video.signals();
-    signals.whenSignal(VideoServiceSignals.PLAYBACK_DELEGATED).then(() => {
-      this.managePlayback_ = false;
+    signals
+      .whenSignal(VIDEO_SERVICE_SIGNALS_ENUM.PLAYBACK_DELEGATED)
+      .then(() => {
+        this.managePlayback_ = false;
 
-      if (this.isPlaying_) {
-        this.video.pause();
-      }
-    });
+        if (this.isPlaying_) {
+          this.video.pause();
+        }
+      });
   }
 
   /** @return {boolean} */
@@ -622,7 +633,7 @@ class VideoEntry {
     const {element} = this.video;
     if (
       this.video.preimplementsAutoFullscreen() ||
-      !element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)
+      !element.hasAttribute(VIDEO_ATTRIBUTES_ENUM.ROTATE_TO_FULLSCREEN)
     ) {
       return false;
     }
@@ -641,7 +652,7 @@ class VideoEntry {
   videoPlayed_() {
     this.isPlaying_ = true;
 
-    if (this.getPlayingState() == PlayingStates.PLAYING_MANUAL) {
+    if (this.getPlayingState() == PLAYING_STATES_ENUM.PLAYING_MANUAL) {
       this.firstPlayEventOrNoop_();
       this.manager_.pauseOtherVideos(this);
     }
@@ -672,7 +683,7 @@ class VideoEntry {
     // PLAYING. Hence we treat the PLAYING as an indication to emit the
     // Analytics PLAY event if we haven't seen PLAY.
     if (!this.hasSeenPlayEvent_) {
-      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+      analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.PLAY);
     }
   }
 
@@ -681,7 +692,7 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
+    analyticsEvent(this, VIDEO_ANALYTICS_EVENTS_ENUM.PAUSE);
     this.isPlaying_ = false;
 
     // Prevent double-trigger of session if video is autoplay and the video
@@ -824,8 +835,8 @@ class VideoEntry {
     const {element, win} = this.video;
 
     if (
-      element.hasAttribute(VideoAttributes.NO_AUDIO) ||
-      element.signals().get(VideoServiceSignals.USER_INTERACTED)
+      element.hasAttribute(VIDEO_ATTRIBUTES_ENUM.NO_AUDIO) ||
+      element.signals().get(VIDEO_SERVICE_SIGNALS_ENUM.USER_INTERACTED)
     ) {
       return;
     }
@@ -850,17 +861,19 @@ class VideoEntry {
     }
 
     const unlisteners = [
-      listen(element, VideoEvents.PAUSE, () => toggleAnimation(false)),
-      listen(element, VideoEvents.PLAYING, () => toggleAnimation(true)),
-      listen(element, VideoEvents.AD_START, () => {
+      listen(element, VIDEO_EVENTS_ENUM.PAUSE, () => toggleAnimation(false)),
+      listen(element, VIDEO_EVENTS_ENUM.PLAYING, () => toggleAnimation(true)),
+      listen(element, VIDEO_EVENTS_ENUM.AD_START, () => {
         toggleElements(false);
         video.showControls();
       }),
-      listen(element, VideoEvents.AD_END, () => {
+      listen(element, VIDEO_EVENTS_ENUM.AD_END, () => {
         toggleElements(true);
         video.hideControls();
       }),
-      listen(element, VideoEvents.UNMUTED, () => userInteractedWith(video)),
+      listen(element, VIDEO_EVENTS_ENUM.UNMUTED, () =>
+        userInteractedWith(video)
+      ),
     ];
 
     if (video.isInteractive()) {
@@ -883,7 +896,7 @@ class VideoEntry {
 
     video
       .signals()
-      .whenSignal(VideoServiceSignals.USER_INTERACTED)
+      .whenSignal(VIDEO_SERVICE_SIGNALS_ENUM.USER_INTERACTED)
       .then(() => {
         this.firstPlayEventOrNoop_();
         if (video.isInteractive()) {
@@ -954,7 +967,7 @@ class VideoEntry {
    */
   getPlayingState() {
     if (!this.isPlaying_) {
-      return PlayingStates.PAUSED;
+      return PLAYING_STATES_ENUM.PAUSED;
     }
 
     if (
@@ -962,10 +975,10 @@ class VideoEntry {
       this.playCalledByAutoplay_ &&
       !this.userInteracted()
     ) {
-      return PlayingStates.PLAYING_AUTO;
+      return PLAYING_STATES_ENUM.PLAYING_AUTO;
     }
 
-    return PlayingStates.PLAYING_MANUAL;
+    return PLAYING_STATES_ENUM.PLAYING_MANUAL;
   }
 
   /** @return {boolean} */
@@ -979,7 +992,8 @@ class VideoEntry {
    */
   userInteracted() {
     return (
-      this.video.signals().get(VideoServiceSignals.USER_INTERACTED) != null
+      this.video.signals().get(VIDEO_SERVICE_SIGNALS_ENUM.USER_INTERACTED) !=
+      null
     );
   }
 
@@ -1072,7 +1086,7 @@ export class AutoFullscreenManager {
      * @return {boolean}
      */
     this.boundIncludeOnlyPlaying_ = (video) =>
-      this.getPlayingState_(video) == PlayingStates.PLAYING_MANUAL;
+      this.getPlayingState_(video) == PLAYING_STATES_ENUM.PLAYING_MANUAL;
 
     /**
      * @param {!IntersectionObserverEntry} a
@@ -1102,13 +1116,13 @@ export class AutoFullscreenManager {
 
     this.entries_.push(video);
 
-    listen(element, VideoEvents.PAUSE, this.boundSelectBestCentered_);
-    listen(element, VideoEvents.PLAYING, this.boundSelectBestCentered_);
-    listen(element, VideoEvents.ENDED, this.boundSelectBestCentered_);
+    listen(element, VIDEO_EVENTS_ENUM.PAUSE, this.boundSelectBestCentered_);
+    listen(element, VIDEO_EVENTS_ENUM.PLAYING, this.boundSelectBestCentered_);
+    listen(element, VIDEO_EVENTS_ENUM.ENDED, this.boundSelectBestCentered_);
 
     video
       .signals()
-      .whenSignal(VideoServiceSignals.USER_INTERACTED)
+      .whenSignal(VIDEO_SERVICE_SIGNALS_ENUM.USER_INTERACTED)
       .then(this.boundSelectBestCentered_);
 
     // Set always
@@ -1455,7 +1469,7 @@ export class AnalyticsPercentageTracker {
       this.calculate_(this.triggerId_);
     } else {
       this.unlisteners_.push(
-        listenOnce(element, VideoEvents.LOADEDMETADATA, () => {
+        listenOnce(element, VIDEO_EVENTS_ENUM.LOADEDMETADATA, () => {
           if (this.hasDuration_()) {
             this.calculate_(this.triggerId_);
           }
@@ -1464,7 +1478,7 @@ export class AnalyticsPercentageTracker {
     }
 
     this.unlisteners_.push(
-      listen(element, VideoEvents.ENDED, () => {
+      listen(element, VIDEO_EVENTS_ENUM.ENDED, () => {
         if (this.hasDuration_()) {
           this.maybeTrigger_(/* normalizedPercentage */ 100);
         }
@@ -1537,7 +1551,7 @@ export class AnalyticsPercentageTracker {
 
     const calculateAgain = () => this.calculate_(triggerId);
 
-    if (entry.getPlayingState() == PlayingStates.PAUSED) {
+    if (entry.getPlayingState() == PLAYING_STATES_ENUM.PAUSED) {
       timer.delay(calculateAgain, PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS);
       return;
     }
@@ -1586,7 +1600,7 @@ export class AnalyticsPercentageTracker {
    * @private
    */
   analyticsEventForTesting_(normalizedPercentage) {
-    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, {
+    analyticsEvent(this.entry_, VIDEO_ANALYTICS_EVENTS_ENUM.PERCENTAGE_PLAYED, {
       'normalizedPercentage': normalizedPercentage.toString(),
     });
   }

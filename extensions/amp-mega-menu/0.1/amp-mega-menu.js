@@ -1,7 +1,7 @@
-import {AmpEvents} from '#core/constants/amp-events';
-import {Keys} from '#core/constants/key-codes';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {
   closest,
@@ -75,7 +75,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.FIXED_HEIGHT;
+    return layout === LAYOUT_ENUM.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -88,7 +88,10 @@ export class AmpMegaMenu extends AMP.BaseElement {
     this.registerMenuItems_();
     // items may not be present after build if dynamically rendered via amp-list,
     // in which case register them after DOM update instead.
-    this.element.addEventListener(AmpEvents.DOM_UPDATE, this.domUpdateHandler_);
+    this.element.addEventListener(
+      AMP_EVENTS_ENUM.DOM_UPDATE,
+      this.domUpdateHandler_
+    );
 
     if (!this.maskElement_) {
       this.maskElement_ = this.createMaskElement_();
@@ -100,7 +103,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.element.removeEventListener(
-      AmpEvents.DOM_UPDATE,
+      AMP_EVENTS_ENUM.DOM_UPDATE,
       this.domUpdateHandler_
     );
     // Ensure that menu is closed when hidden via media query.
@@ -225,7 +228,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * @private
    */
   handleRootKeyDown_(event) {
-    if (event.key === Keys.ESCAPE && this.collapse_()) {
+    if (event.key === KEYS_ENUM.ESCAPE && this.collapse_()) {
       event.preventDefault();
     }
   }
@@ -282,12 +285,12 @@ export class AmpMegaMenu extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.LEFT_ARROW: /* fallthrough */
-      case Keys.RIGHT_ARROW:
+      case KEYS_ENUM.LEFT_ARROW: /* fallthrough */
+      case KEYS_ENUM.RIGHT_ARROW:
         this.handleNavigationKeyDown_(event);
         return;
-      case Keys.ENTER: /* fallthrough */
-      case Keys.SPACE:
+      case KEYS_ENUM.ENTER: /* fallthrough */
+      case KEYS_ENUM.SPACE:
         if (event.target == event.currentTarget) {
           this.handleHeadingClick_(event);
         }
@@ -305,7 +308,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
     const index = this.items_.indexOf(item);
     if (index !== -1) {
       event.preventDefault();
-      let dir = event.key == Keys.LEFT_ARROW ? -1 : 1;
+      let dir = event.key == KEYS_ENUM.LEFT_ARROW ? -1 : 1;
       // Left is 'previous' in LTR and 'next' in RTL; vice versa for Right.
       if (isRTL(this.document_)) {
         dir = -dir;

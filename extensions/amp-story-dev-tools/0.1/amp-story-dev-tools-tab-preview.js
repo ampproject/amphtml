@@ -372,7 +372,7 @@ function parseDevices(queryHash) {
 }
 
 /** @enum {string} */
-const PREVIEW_ACTIONS = {
+const PREVIEW_ACTIONS_ENUM = {
   SHOW_HELP_DIALOG: 'showHelpDialog',
   SHOW_ADD_DEVICE_DIALIG: 'showAddDeviceDialog',
   CLOSE_DIALOG: 'closeDialog',
@@ -453,7 +453,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     addDeviceButton.classList.add('i-amphtml-story-dev-tools-button');
     addDeviceButton.setAttribute(
       'data-action',
-      PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG
+      PREVIEW_ACTIONS_ENUM.SHOW_ADD_DEVICE_DIALIG
     );
     addDeviceButton.querySelector(
       '.i-amphtml-story-dev-tools-device-chip-name'
@@ -468,7 +468,10 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   buildHelpButton_() {
     const addHelpButton = buildHelpButtonTemplate(this.element);
-    addHelpButton.setAttribute('data-action', PREVIEW_ACTIONS.SHOW_HELP_DIALOG);
+    addHelpButton.setAttribute(
+      'data-action',
+      PREVIEW_ACTIONS_ENUM.SHOW_HELP_DIALOG
+    );
     return addHelpButton;
   }
 
@@ -517,17 +520,17 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       return;
     }
     switch (actionElement.getAttribute('data-action')) {
-      case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
+      case PREVIEW_ACTIONS_ENUM.SHOW_HELP_DIALOG:
         this.showHelpDialog_();
         break;
-      case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
+      case PREVIEW_ACTIONS_ENUM.SHOW_ADD_DEVICE_DIALIG:
         this.showAddDeviceDialog_();
         break;
-      case PREVIEW_ACTIONS.CLOSE_DIALOG:
+      case PREVIEW_ACTIONS_ENUM.CLOSE_DIALOG:
         this.hideCurrentDialog_();
         break;
-      case PREVIEW_ACTIONS.REMOVE_DEVICE:
-      case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
+      case PREVIEW_ACTIONS_ENUM.REMOVE_DEVICE:
+      case PREVIEW_ACTIONS_ENUM.TOGGLE_DEVICE_CHIP:
         this.onDeviceChipToggled_(actionElement);
         break;
     }
@@ -630,7 +633,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     deviceChip.querySelector(
       '.i-amphtml-story-dev-tools-device-chip-name'
     ).textContent = deviceName;
-    deviceChip.setAttribute('data-action', PREVIEW_ACTIONS.REMOVE_DEVICE);
+    deviceChip.setAttribute('data-action', PREVIEW_ACTIONS_ENUM.REMOVE_DEVICE);
     deviceChip.setAttribute('data-device', deviceName);
     return deviceChip;
   }
@@ -745,7 +748,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     // Add a chip for each device on the right category, and mark as inactive if device not selected.
     ALL_DEVICES.forEach((device) => {
       const chip = this.buildDeviceChip_(device.name);
-      chip.setAttribute('data-action', PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP);
+      chip.setAttribute('data-action', PREVIEW_ACTIONS_ENUM.TOGGLE_DEVICE_CHIP);
       chip.setAttribute('data-spaces', device.deviceSpaces);
       if (!this.devices_.find((d) => d.name == device.name)) {
         chip.setAttribute('inactive', '');

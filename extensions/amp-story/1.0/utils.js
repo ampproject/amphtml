@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {StateProperty} from './amp-story-store-service';
+import {STATE_PROPERTY_ENUM} from './amp-story-store-service';
 import {
   assertHttpsUrl,
   getSourceOrigin,
@@ -241,7 +241,7 @@ export function resolveImgSrc(win, url) {
  * @return {boolean}
  */
 export function shouldShowStoryUrlInfo(viewer, storeService) {
-  if (!storeService.get(StateProperty.CAN_SHOW_STORY_URL_INFO)) {
+  if (!storeService.get(STATE_PROPERTY_ENUM.CAN_SHOW_STORY_URL_INFO)) {
     return false;
   }
   const showStoryUrlInfo = viewer.getParam('showStoryUrlInfo');

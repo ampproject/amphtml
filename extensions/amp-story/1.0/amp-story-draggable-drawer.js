@@ -1,12 +1,12 @@
 import {
-  Action,
-  StateProperty,
-  UIType,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
+  UI_TYPE_ENUM,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LAYOUT_ENUM} from '#core/dom/layout';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
@@ -23,7 +23,7 @@ const TOGGLE_THRESHOLD_PX = 50;
 /**
  * @enum {number}
  */
-export const DrawerState = {
+export const DRAWER_STATE_ENUM = {
   CLOSED: 0,
   DRAGGING_TO_CLOSE: 1,
   DRAGGING_TO_OPEN: 2,
@@ -87,7 +87,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.ignoreCurrentSwipeYGesture_ = false;
 
     /** @protected {!DrawerState} */
-    this.state = DrawerState.CLOSED;
+    this.state = DRAWER_STATE_ENUM.CLOSED;
 
     /** @protected @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService = getStoreService(this.win);
@@ -116,7 +116,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.NODISPLAY;
+    return layout === LAYOUT_ENUM.NODISPLAY;
   }
 
   /** @override */
@@ -144,7 +144,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     spacerEl.setAttribute('role', 'button');
     const localizedCloseString = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      LOCALIZED_STRING_ID_ENUM.AMP_STORY_CLOSE_BUTTON_LABEL
     );
     spacerEl.setAttribute('aria-label', localizedCloseString);
     this.containerEl.insertBefore(spacerEl, this.contentEl);
@@ -179,7 +179,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService.subscribe(
-      StateProperty.UI_STATE,
+      STATE_PROPERTY_ENUM.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
@@ -215,7 +215,10 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     // Reset scroll position on end of close transiton.
     this.element.addEventListener('transitionend', (e) => {
-      if (e.propertyName === 'transform' && this.state === DrawerState.CLOSED) {
+      if (
+        e.propertyName === 'transform' &&
+        this.state === DRAWER_STATE_ENUM.CLOSED
+      ) {
         this.containerEl./*OK*/ scrollTop = 0;
       }
     });
@@ -227,7 +230,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   onUIStateUpdate_(uiState) {
-    const isMobile = uiState === UIType.MOBILE;
+    const isMobile = uiState === UI_TYPE_ENUM.MOBILE;
 
     isMobile
       ? this.startListeningForTouchEvents_()
@@ -325,7 +328,10 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.touchEventState_.swipingUp = y < this.touchEventState_.lastY;
     this.touchEventState_.lastY = y;
 
-    if (this.state === DrawerState.CLOSED && !this.touchEventState_.swipingUp) {
+    if (
+      this.state === DRAWER_STATE_ENUM.CLOSED &&
+      !this.touchEventState_.swipingUp
+    ) {
       return;
     }
 
@@ -359,8 +365,9 @@ export class DraggableDrawer extends AMP.BaseElement {
    */
   shouldStopPropagation_() {
     return (
-      this.state !== DrawerState.CLOSED ||
-      (this.state === DrawerState.CLOSED && this.touchEventState_.swipingUp)
+      this.state !== DRAWER_STATE_ENUM.CLOSED ||
+      (this.state === DRAWER_STATE_ENUM.CLOSED &&
+        this.touchEventState_.swipingUp)
     );
   }
 
@@ -405,7 +412,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     // If the drawer is open, figure out if the user is trying to scroll the
     // content, or actually close the drawer.
-    if (this.state === DrawerState.OPEN) {
+    if (this.state === DRAWER_STATE_ENUM.OPEN) {
       const isContentSwipe = this.isDrawerContentDescendant_(
         dev().assertElement(gesture.event.target)
       );
@@ -428,13 +435,13 @@ export class DraggableDrawer extends AMP.BaseElement {
     gesture.event.preventDefault();
 
     if (data.last === true) {
-      if (this.state === DrawerState.DRAGGING_TO_CLOSE) {
+      if (this.state === DRAWER_STATE_ENUM.DRAGGING_TO_CLOSE) {
         !swipingUp && deltaY > TOGGLE_THRESHOLD_PX
           ? this.close_()
           : this.open();
       }
 
-      if (this.state === DrawerState.DRAGGING_TO_OPEN) {
+      if (this.state === DRAWER_STATE_ENUM.DRAGGING_TO_OPEN) {
         swipingUp && -deltaY > TOGGLE_THRESHOLD_PX
           ? this.open()
           : this.close_();
@@ -444,7 +451,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     }
 
     if (
-      this.state === DrawerState.DRAGGING_TO_OPEN &&
+      this.state === DRAWER_STATE_ENUM.DRAGGING_TO_OPEN &&
       swipingUp &&
       -deltaY > this.openThreshold_
     ) {
@@ -500,22 +507,22 @@ export class DraggableDrawer extends AMP.BaseElement {
     let translate;
 
     switch (this.state) {
-      case DrawerState.CLOSED:
-      case DrawerState.DRAGGING_TO_OPEN:
+      case DRAWER_STATE_ENUM.CLOSED:
+      case DRAWER_STATE_ENUM.DRAGGING_TO_OPEN:
         if (deltaY > 0) {
           return;
         }
-        this.state = DrawerState.DRAGGING_TO_OPEN;
+        this.state = DRAWER_STATE_ENUM.DRAGGING_TO_OPEN;
         const drag = Math.max(deltaY, -this.dragCap_) - this.spacerElHeight_;
 
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
-      case DrawerState.OPEN:
-      case DrawerState.DRAGGING_TO_CLOSE:
+      case DRAWER_STATE_ENUM.OPEN:
+      case DRAWER_STATE_ENUM.DRAGGING_TO_CLOSE:
         if (deltaY < 0) {
           return;
         }
-        this.state = DrawerState.DRAGGING_TO_CLOSE;
+        this.state = DRAWER_STATE_ENUM.DRAGGING_TO_CLOSE;
         translate = `translate3d(0, ${deltaY}px, 0)`;
         break;
     }
@@ -534,13 +541,13 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @param {boolean=} shouldAnimate
    */
   open(shouldAnimate = true) {
-    if (this.state === DrawerState.OPEN) {
+    if (this.state === DRAWER_STATE_ENUM.OPEN) {
       return;
     }
 
-    this.state = DrawerState.OPEN;
+    this.state = DRAWER_STATE_ENUM.OPEN;
 
-    this.storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    this.storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', false);
@@ -577,13 +584,13 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   closeInternal_(shouldAnimate = true) {
-    if (this.state === DrawerState.CLOSED) {
+    if (this.state === DRAWER_STATE_ENUM.CLOSED) {
       return;
     }
 
-    this.state = DrawerState.CLOSED;
+    this.state = DRAWER_STATE_ENUM.CLOSED;
 
-    this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    this.storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
     this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {

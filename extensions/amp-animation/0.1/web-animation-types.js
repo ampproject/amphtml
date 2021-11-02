@@ -155,7 +155,7 @@ export let WebAnimationBuilderOptionsDef;
  * See https://developer.mozilla.org/en-US/docs/Web/API/Animation/playState
  * @enum {string}
  */
-export const WebAnimationPlayState = {
+export const WEB_ANIMATION_PLAY_STATE_ENUM = {
   IDLE: 'idle',
   PENDING: 'pending',
   RUNNING: 'running',
@@ -167,7 +167,7 @@ export const WebAnimationPlayState = {
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/direction
  * @enum {string}
  */
-export const WebAnimationTimingDirection = {
+export const WEB_ANIMATION_TIMING_DIRECTION_ENUM = {
   NORMAL: 'normal',
   REVERSE: 'reverse',
   ALTERNATE: 'alternate',
@@ -178,7 +178,7 @@ export const WebAnimationTimingDirection = {
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/fill
  * @enum {string}
  */
-export const WebAnimationTimingFill = {
+export const WEB_ANIMATION_TIMING_FILL_ENUM = {
   NONE: 'none',
   FORWARDS: 'forwards',
   BACKWARDS: 'backwards',

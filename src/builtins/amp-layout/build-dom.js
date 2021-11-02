@@ -1,5 +1,5 @@
 import {isServerRendered} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {LAYOUT_ENUM, applyFillContent} from '#core/dom/layout';
 import {realChildNodes} from '#core/dom/query';
 import {getEffectiveLayout} from '#core/static-layout';
 
@@ -14,7 +14,7 @@ export function buildDom(element) {
   }
 
   const layout = getEffectiveLayout(element);
-  if (layout == Layout.CONTAINER) {
+  if (layout == LAYOUT_ENUM.CONTAINER) {
     return;
   }
 

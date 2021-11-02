@@ -1,11 +1,11 @@
 import {signingServerURLs} from '#ads/_a4a-config';
 
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
 import {
-  Layout,
-  LayoutPriority,
+  LAYOUT_ENUM,
+  LAYOUT_PRIORITY_ENUM,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -40,7 +40,10 @@ import {
   createSecureFrame,
   isAttributionReportingSupported,
 } from './secure-frame';
-import {SignatureVerifier, VerificationStatus} from './signature-verifier';
+import {
+  SignatureVerifier,
+  VERIFICATION_STATUS_ENUM,
+} from './signature-verifier';
 import {whenWithinViewport} from './within-viewport';
 
 import {
@@ -69,7 +72,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {GEO_IN_GROUP_ENUM} from '../../amp-geo/0.1/amp-geo-in-group';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -112,7 +115,7 @@ export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
 export const IFRAME_GET = 'IFRAME-GET';
 
 /** @enum {string} */
-export const XORIGIN_MODE = {
+export const XORIGIN_MODE_ENUM = {
   CLIENT_CACHE: 'client_cache',
   SAFEFRAME: 'safeframe',
   NAMEFRAME: 'nameframe',
@@ -143,7 +146,7 @@ export let SizeInfoDef;
 export let CreativeMetaDataDef;
 
 /** @typedef {{
-      consentState: (?CONSENT_POLICY_STATE|undefined),
+      consentState: (?CONSENT_POLICY_STATE_ENUM|undefined),
       consentString: (?string|undefined),
       consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
@@ -155,7 +158,7 @@ export let ConsentTupleDef;
  * Name of A4A lifecycle triggers.
  * @enum {string}
  */
-export const AnalyticsTrigger = {
+export const ANALYTICS_TRIGGER_ENUM = {
   AD_REQUEST_START: 'ad-request-start',
   AD_RESPONSE_END: 'ad-response-end',
   AD_RENDER_START: 'ad-render-start',
@@ -171,15 +174,15 @@ export const AnalyticsTrigger = {
  * @const {!Object<string, !AnalyticsTrigger>}
  */
 const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
-  'adRequestStart': AnalyticsTrigger.AD_REQUEST_START,
-  'adRequestEnd': AnalyticsTrigger.AD_RESPONSE_END,
-  'renderFriendlyStart': AnalyticsTrigger.AD_RENDER_START,
-  'renderCrossDomainStart': AnalyticsTrigger.AD_RENDER_START,
-  'renderSafeFrameStart': AnalyticsTrigger.AD_RENDER_START,
-  'renderFriendlyEnd': AnalyticsTrigger.AD_RENDER_END,
-  'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
-  'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
-  'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
+  'adRequestStart': ANALYTICS_TRIGGER_ENUM.AD_REQUEST_START,
+  'adRequestEnd': ANALYTICS_TRIGGER_ENUM.AD_RESPONSE_END,
+  'renderFriendlyStart': ANALYTICS_TRIGGER_ENUM.AD_RENDER_START,
+  'renderCrossDomainStart': ANALYTICS_TRIGGER_ENUM.AD_RENDER_START,
+  'renderSafeFrameStart': ANALYTICS_TRIGGER_ENUM.AD_RENDER_START,
+  'renderFriendlyEnd': ANALYTICS_TRIGGER_ENUM.AD_RENDER_END,
+  'renderCrossDomainEnd': ANALYTICS_TRIGGER_ENUM.AD_RENDER_END,
+  'friendlyIframeIniLoad': ANALYTICS_TRIGGER_ENUM.AD_IFRAME_LOADED,
+  'crossDomainIframeLoaded': ANALYTICS_TRIGGER_ENUM.AD_IFRAME_LOADED,
 };
 
 /**
@@ -379,7 +382,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LAYOUT_PRIORITY_ENUM.METADATA : LAYOUT_PRIORITY_ENUM.ADS;
   }
 
   /** @override */
@@ -594,7 +597,7 @@ export class AmpA4A extends AMP.BaseElement {
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
     const fixedSizeZeroHeightOrWidth =
-      this.getLayout() != Layout.FLUID &&
+      this.getLayout() != LAYOUT_ENUM.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);
     if (
       fixedSizeZeroHeightOrWidth ||
@@ -727,7 +730,7 @@ export class AmpA4A extends AMP.BaseElement {
             consentPolicyId
           ).catch((err) => {
             user().error(TAG, 'Error determining consent state', err);
-            return CONSENT_POLICY_STATE.UNKNOWN;
+            return CONSENT_POLICY_STATE_ENUM.UNKNOWN;
           });
 
           const consentStringPromise = getConsentPolicyInfo(
@@ -805,7 +808,7 @@ export class AmpA4A extends AMP.BaseElement {
         // renderViaIframeGet
         if (!this.isXhrAllowed() && !!this.adUrl_) {
           this.experimentalNonAmpCreativeRenderMethod_ =
-            XORIGIN_MODE.IFRAME_GET;
+            XORIGIN_MODE_ENUM.IFRAME_GET;
           return Promise.reject(IFRAME_GET);
         }
         return adUrl && this.sendXhrRequest(adUrl);
@@ -861,7 +864,8 @@ export class AmpA4A extends AMP.BaseElement {
         );
         this.experimentalNonAmpCreativeRenderMethod_ = method;
         if (
-          this.experimentalNonAmpCreativeRenderMethod_ == XORIGIN_MODE.NAMEFRAME
+          this.experimentalNonAmpCreativeRenderMethod_ ==
+          XORIGIN_MODE_ENUM.NAMEFRAME
         ) {
           Services.preconnectFor(this.win).preload(
             this.getAmpDoc(),
@@ -993,7 +997,7 @@ export class AmpA4A extends AMP.BaseElement {
         if (!sanitizedHeadElement) {
           return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
         }
-        this.updateLayoutPriority(LayoutPriority.CONTENT);
+        this.updateLayoutPriority(LAYOUT_PRIORITY_ENUM.CONTENT);
         this.isVerifiedAmpCreative_ = true;
         return sanitizedHeadElement;
       });
@@ -1011,7 +1015,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Experiment to give non-AMP creatives same benefits as AMP so
     // update priority.
     if (this.inNonAmpPreferenceExp()) {
-      this.updateLayoutPriority(LayoutPriority.CONTENT);
+      this.updateLayoutPriority(LAYOUT_PRIORITY_ENUM.CONTENT);
     }
     return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
       checkStillCurrent();
@@ -1077,7 +1081,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.creativeSize_ = size || this.creativeSize_;
           if (
             this.experimentalNonAmpCreativeRenderMethod_ !=
-              XORIGIN_MODE.CLIENT_CACHE &&
+              XORIGIN_MODE_ENUM.CLIENT_CACHE &&
             bytes
           ) {
             this.creativeBody_ = bytes;
@@ -1111,13 +1115,13 @@ export class AmpA4A extends AMP.BaseElement {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
               // update priority.
-              this.updateLayoutPriority(LayoutPriority.CONTENT);
+              this.updateLayoutPriority(LAYOUT_PRIORITY_ENUM.CONTENT);
             }
             return null;
           }
 
           // Update priority.
-          this.updateLayoutPriority(LayoutPriority.CONTENT);
+          this.updateLayoutPriority(LAYOUT_PRIORITY_ENUM.CONTENT);
 
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
@@ -1161,7 +1165,7 @@ export class AmpA4A extends AMP.BaseElement {
         ) {
           // do not verify signature for fake type ad, unless the ad
           // specfically requires via 'checksig' attribute
-          return Promise.resolve(VerificationStatus.OK);
+          return Promise.resolve(VERIFICATION_STATUS_ENUM.OK);
         }
         return signatureVerifierFor(this.win).verify(bytes, headers);
       })
@@ -1169,23 +1173,23 @@ export class AmpA4A extends AMP.BaseElement {
         checkStillCurrent();
         let result = null;
         switch (status) {
-          case VerificationStatus.OK:
+          case VERIFICATION_STATUS_ENUM.OK:
             result = bytes;
             break;
-          case VerificationStatus.CRYPTO_UNAVAILABLE:
+          case VERIFICATION_STATUS_ENUM.CRYPTO_UNAVAILABLE:
             result = this.shouldPreferentialRenderWithoutCrypto()
               ? bytes
               : null;
             break;
           // TODO(@taymonbeal, #9274): differentiate between these
-          case VerificationStatus.ERROR_KEY_NOT_FOUND:
-          case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
+          case VERIFICATION_STATUS_ENUM.ERROR_KEY_NOT_FOUND:
+          case VERIFICATION_STATUS_ENUM.ERROR_SIGNATURE_MISMATCH:
             user().error(
               TAG,
               this.element.getAttribute('type'),
               'Signature verification failed'
             );
-          case VerificationStatus.UNVERIFIED:
+          case VERIFICATION_STATUS_ENUM.UNVERIFIED:
         }
         if (this.isSinglePageStoryAd && !result) {
           throw new Error(INVALID_SPSA_RESPONSE);
@@ -1245,7 +1249,7 @@ export class AmpA4A extends AMP.BaseElement {
       return this.mutateElement(() => {
         // Fire an ad-refresh event so that 3rd parties can track when an ad
         // has changed.
-        triggerAnalyticsEvent(this.element, AnalyticsTrigger.AD_REFRESH);
+        triggerAnalyticsEvent(this.element, ANALYTICS_TRIGGER_ENUM.AD_REFRESH);
 
         this.togglePlaceholder(true);
         // This delay provides a 1 second buffer where the ad loader is
@@ -1551,9 +1555,9 @@ export class AmpA4A extends AMP.BaseElement {
       const locations = blockRtcLocations.split(',');
       for (let i = 0; i < locations.length; i++) {
         const geoGroup = geoService.isInCountryGroup(locations[i]);
-        if (geoGroup === GEO_IN_GROUP.IN) {
+        if (geoGroup === GEO_IN_GROUP_ENUM.IN) {
           return true;
-        } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+        } else if (geoGroup === GEO_IN_GROUP_ENUM.NOT_DEFINED) {
           user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
         }
       }
@@ -1752,7 +1756,8 @@ export class AmpA4A extends AMP.BaseElement {
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     let renderPromise = Promise.resolve(false);
     if (
-      (method == XORIGIN_MODE.SAFEFRAME || method == XORIGIN_MODE.NAMEFRAME) &&
+      (method == XORIGIN_MODE_ENUM.SAFEFRAME ||
+        method == XORIGIN_MODE_ENUM.NAMEFRAME) &&
       this.creativeBody_
     ) {
       renderPromise = this.renderViaNameAttrOfXOriginIframe_(
@@ -2132,7 +2137,8 @@ export class AmpA4A extends AMP.BaseElement {
     /** @type {?string} */
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     devAssert(
-      method == XORIGIN_MODE.SAFEFRAME || method == XORIGIN_MODE.NAMEFRAME,
+      method == XORIGIN_MODE_ENUM.SAFEFRAME ||
+        method == XORIGIN_MODE_ENUM.NAMEFRAME,
       'Unrecognized A4A cross-domain rendering mode: %s',
       method
     );
@@ -2143,10 +2149,10 @@ export class AmpA4A extends AMP.BaseElement {
       let srcPath;
       let name = '';
       switch (method) {
-        case XORIGIN_MODE.SAFEFRAME:
+        case XORIGIN_MODE_ENUM.SAFEFRAME:
           srcPath = this.getSafeframePath() + '?n=0';
           break;
-        case XORIGIN_MODE.NAMEFRAME:
+        case XORIGIN_MODE_ENUM.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
           // Name will be set for real below in nameframe case.
           break;
@@ -2169,16 +2175,16 @@ export class AmpA4A extends AMP.BaseElement {
         this.win,
         this.element,
         this.sentinel,
-        this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
+        this.getAdditionalContextMetadata(method == XORIGIN_MODE_ENUM.SAFEFRAME)
       );
 
       const intersection = this.element.getIntersectionChangeEntry();
       contextMetadata['initialIntersection'] =
         intersectionEntryToJson(intersection);
-      if (method == XORIGIN_MODE.NAMEFRAME) {
+      if (method == XORIGIN_MODE_ENUM.NAMEFRAME) {
         contextMetadata['creative'] = creative;
         name = JSON.stringify(contextMetadata);
-      } else if (method == XORIGIN_MODE.SAFEFRAME) {
+      } else if (method == XORIGIN_MODE_ENUM.SAFEFRAME) {
         contextMetadata = JSON.stringify(contextMetadata);
         name =
           `${this.safeframeVersion};${creative.length};${creative}` +
@@ -2379,7 +2385,7 @@ export class AmpA4A extends AMP.BaseElement {
    * If it is not supported by the network, but the publisher has included
    * the rtc-config attribute on the amp-ad element, warn. Additionaly,
    * if the publisher has included a valid `block-rtc` attribute, don't send.
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?CONSENT_POLICY_STATE_ENUM} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
@@ -2430,7 +2436,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (headerValue) {
-      if (!isEnumValue(XORIGIN_MODE, headerValue)) {
+      if (!isEnumValue(XORIGIN_MODE_ENUM, headerValue)) {
         dev().error(
           'AMP-A4A',
           `cross-origin render mode header ${headerValue}`
@@ -2440,7 +2446,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
     }
     return Services.platformFor(this.win).isIos()
-      ? XORIGIN_MODE.NAMEFRAME
+      ? XORIGIN_MODE_ENUM.NAMEFRAME
       : null;
   }
 

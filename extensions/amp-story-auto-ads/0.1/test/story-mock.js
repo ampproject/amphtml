@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 
 /**
  * Fake story implementation mocking public methods.
@@ -9,8 +9,8 @@ export class MockStoryImpl extends AMP.BaseElement {
     this.element = element;
     this.pages_ = [];
     // Fire these events so that story ads thinks the parent story is ready.
-    element.signals().signal(CommonSignals.BUILT);
-    element.signals().signal(CommonSignals.INI_LOAD);
+    element.signals().signal(COMMON_SIGNALS_ENUM.BUILT);
+    element.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
   }
 
   addPage(pageImpl) {
@@ -87,7 +87,7 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
     const page = doc.createElement('amp-story-page');
     page.id = 'story-page-' + i;
     element.appendChild(page);
-    page.signals().signal(CommonSignals.BUILT);
+    page.signals().signal(COMMON_SIGNALS_ENUM.BUILT);
     const implPromise = page
       .getImpl()
       .then((pageImpl) => storyImpl.addPage(pageImpl));
@@ -107,7 +107,7 @@ export function fireBuildSignals(doc, additonalSelectors = []) {
   const selectors = defaultSelectors.concat(additonalSelectors).join(',');
   doc.querySelectorAll(selectors).forEach((element) => {
     const signals = element.signals();
-    signals.signal(CommonSignals.BUILT);
-    signals.signal(CommonSignals.INI_LOAD);
+    signals.signal(COMMON_SIGNALS_ENUM.BUILT);
+    signals.signal(COMMON_SIGNALS_ENUM.INI_LOAD);
   });
 }

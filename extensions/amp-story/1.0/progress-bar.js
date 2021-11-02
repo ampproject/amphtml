@@ -6,8 +6,8 @@ import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '#service';
 import {
-  StateProperty,
-  UIType,
+  STATE_PROPERTY_ENUM,
+  UI_TYPE_ENUM,
   getStoreService,
 } from './amp-story-store-service';
 import {debounce} from '#core/types/function';
@@ -147,7 +147,7 @@ export class ProgressBar {
     });
 
     this.storeService_.subscribe(
-      StateProperty.PAGE_IDS,
+      STATE_PROPERTY_ENUM.PAGE_IDS,
       (pageIds) => {
         if (this.isBuilt_) {
           this.clear_();
@@ -176,7 +176,7 @@ export class ProgressBar {
     );
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      STATE_PROPERTY_ENUM.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -184,14 +184,14 @@ export class ProgressBar {
     );
 
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      STATE_PROPERTY_ENUM.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, (adState) => {
+    this.storeService_.subscribe(STATE_PROPERTY_ENUM.AD_STATE, (adState) => {
       this.onAdStateUpdate_(adState);
     });
 
@@ -266,7 +266,7 @@ export class ProgressBar {
    * @private
    */
   transform_(segment, translateX, width) {
-    if (this.storeService_.get(StateProperty.RTL_STATE)) {
+    if (this.storeService_.get(STATE_PROPERTY_ENUM.RTL_STATE)) {
       translateX *= -1;
     }
 
@@ -403,11 +403,11 @@ export class ProgressBar {
    */
   onUIStateUpdate_(uiState) {
     switch (uiState) {
-      case UIType.DESKTOP_FULLBLEED:
+      case UI_TYPE_ENUM.DESKTOP_FULLBLEED:
         MAX_SEGMENTS = 70;
         ELLIPSE_WIDTH_PX = 3;
         break;
-      case UIType.MOBILE:
+      case UI_TYPE_ENUM.MOBILE:
         MAX_SEGMENTS = 20;
         ELLIPSE_WIDTH_PX = 2;
         break;
@@ -449,7 +449,9 @@ export class ProgressBar {
    * @param {string} animationDuration
    */
   createAdSegment_(animationDuration) {
-    const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
+    const index = this.storeService_.get(
+      STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX
+    );
     // Fill in segment before ad segment.
     this.updateProgressByIndex_(index, 1, false);
     const progressEl = this.getRoot()?.querySelector(

@@ -1,4 +1,4 @@
-import {Side} from './sidebar-config';
+import {SIDE_ENUM} from './sidebar-config';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {useLayoutEffect, useRef} from '#preact';
 import {useValueRef} from '#preact/component';
@@ -108,13 +108,13 @@ export function useSidebarAnimation(
       }
       safelySetStyles(
         sidebarElement,
-        side === Side.LEFT
+        side === SIDE_ENUM.LEFT
           ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
       const sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
+        side === SIDE_ENUM.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -142,7 +142,7 @@ export function useSidebarAnimation(
         return;
       }
       const sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
+        side === SIDE_ENUM.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {

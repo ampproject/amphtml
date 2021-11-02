@@ -8,7 +8,7 @@ import {
   // the compiler does not output types for enums, but we want to distinguish
   // between LocalizedStringId enum values and any other strings.
   // eslint-disable-next-line no-unused-vars
-  LocalizedStringId,
+  LOCALIZED_STRING_ID_ENUM,
 } from './strings';
 
 /**

@@ -34,7 +34,7 @@ const jsonFilesWithSchemas = [];
  *
  * @enum {string}
  */
-const Targets = {
+const TARGETS_ENUM = {
   AVA: 'AVA',
   BABEL_PLUGIN: 'BABEL_PLUGIN',
   BUILD_SYSTEM: 'BUILD_SYSTEM',
@@ -67,18 +67,18 @@ const Targets = {
  * will trigger all the runtime tests.
  */
 const nonRuntimeTargets = [
-  Targets.AVA,
-  Targets.DEV_DASHBOARD,
-  Targets.DOCS,
-  Targets.E2E_TEST,
-  Targets.IGNORE_LIST,
-  Targets.INTEGRATION_TEST,
-  Targets.OWNERS,
-  Targets.RENOVATE_CONFIG,
-  Targets.UNIT_TEST,
-  Targets.VALIDATOR,
-  Targets.VALIDATOR_WEBUI,
-  Targets.VISUAL_DIFF,
+  TARGETS_ENUM.AVA,
+  TARGETS_ENUM.DEV_DASHBOARD,
+  TARGETS_ENUM.DOCS,
+  TARGETS_ENUM.E2E_TEST,
+  TARGETS_ENUM.IGNORE_LIST,
+  TARGETS_ENUM.INTEGRATION_TEST,
+  TARGETS_ENUM.OWNERS,
+  TARGETS_ENUM.RENOVATE_CONFIG,
+  TARGETS_ENUM.UNIT_TEST,
+  TARGETS_ENUM.VALIDATOR,
+  TARGETS_ENUM.VALIDATOR_WEBUI,
+  TARGETS_ENUM.VISUAL_DIFF,
 ];
 
 /**
@@ -114,13 +114,13 @@ function isValidatorFile(file) {
  * matchers must first make sure they're not matching an owners file.
  */
 const targetMatchers = {
-  [Targets.AVA]: (file) => {
+  [TARGETS_ENUM.AVA]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return shouldTriggerAva(file);
   },
-  [Targets.BABEL_PLUGIN]: (file) => {
+  [TARGETS_ENUM.BABEL_PLUGIN]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -135,7 +135,7 @@ const targetMatchers = {
       file.startsWith('build-system/babel-config/')
     );
   },
-  [Targets.BUILD_SYSTEM]: (file) => {
+  [TARGETS_ENUM.BUILD_SYSTEM]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -148,7 +148,7 @@ const targetMatchers = {
           file.endsWith('.json')))
     );
   },
-  [Targets.DOCS]: (file) => {
+  [TARGETS_ENUM.DOCS]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -158,7 +158,7 @@ const targetMatchers = {
       file.startsWith('build-system/tasks/markdown-toc/')
     );
   },
-  [Targets.E2E_TEST]: (file) => {
+  [TARGETS_ENUM.E2E_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -169,21 +169,21 @@ const targetMatchers = {
       })
     );
   },
-  [Targets.HTML_FIXTURES]: (file) => {
+  [TARGETS_ENUM.HTML_FIXTURES]: (file) => {
     return (
       fileLists.htmlFixtureFiles.includes(file) ||
       file == 'build-system/tasks/validate-html-fixtures.js' ||
       file.startsWith('build-system/test-configs')
     );
   },
-  [Targets.IGNORE_LIST]: (file) => {
+  [TARGETS_ENUM.IGNORE_LIST]: (file) => {
     return (
       ignoreListFiles.includes(file) ||
       file === 'build-system/tasks/check-ignore-lists.js' ||
       file === 'build-system/tasks/clean.js'
     );
   },
-  [Targets.INTEGRATION_TEST]: (file) => {
+  [TARGETS_ENUM.INTEGRATION_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -196,21 +196,21 @@ const targetMatchers = {
       })
     );
   },
-  [Targets.INVALID_WHITESPACES]: (file) => {
+  [TARGETS_ENUM.INVALID_WHITESPACES]: (file) => {
     return (
       fileLists.invalidWhitespaceFiles.includes(file) ||
       file == 'build-system/tasks/check-invalid-whitespaces.js' ||
       file.startsWith('build-system/test-configs')
     );
   },
-  [Targets.JSON_FILES]: (file) => {
+  [TARGETS_ENUM.JSON_FILES]: (file) => {
     return (
       jsonFilesWithSchemas.includes(file) ||
       file == 'build-system/tasks/check-json-schemas.js' ||
       file == '.vscode/settings.json'
     );
   },
-  [Targets.LINT]: (file) => {
+  [TARGETS_ENUM.LINT]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -220,7 +220,7 @@ const targetMatchers = {
       file.startsWith('build-system/test-configs')
     );
   },
-  [Targets.LINT_RULES]: (file) => {
+  [TARGETS_ENUM.LINT_RULES]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -234,13 +234,13 @@ const targetMatchers = {
       file == 'package.json'
     );
   },
-  [Targets.OWNERS]: (file) => {
+  [TARGETS_ENUM.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
-  [Targets.PACKAGE_UPGRADE]: (file) => {
+  [TARGETS_ENUM.PACKAGE_UPGRADE]: (file) => {
     return file.endsWith('package.json') || file.endsWith('package-lock.json');
   },
-  [Targets.PRESUBMIT]: (file) => {
+  [TARGETS_ENUM.PRESUBMIT]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -250,7 +250,7 @@ const targetMatchers = {
       file.startsWith('build-system/test-configs')
     );
   },
-  [Targets.PRETTIFY]: (file) => {
+  [TARGETS_ENUM.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
     return (
       fileLists.prettifyFiles.includes(file) ||
@@ -259,19 +259,19 @@ const targetMatchers = {
       file == 'build-system/tasks/prettify.js'
     );
   },
-  [Targets.RENOVATE_CONFIG]: (file) => {
+  [TARGETS_ENUM.RENOVATE_CONFIG]: (file) => {
     return (
       file == '.renovaterc.json' ||
       file == 'build-system/tasks/check-renovate-config.js'
     );
   },
-  [Targets.RUNTIME]: (file) => {
+  [TARGETS_ENUM.RUNTIME]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return file.startsWith('src/');
   },
-  [Targets.SERVER]: (file) => {
+  [TARGETS_ENUM.SERVER]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -281,7 +281,7 @@ const targetMatchers = {
       file.startsWith('build-system/server/')
     );
   },
-  [Targets.UNIT_TEST]: (file) => {
+  [TARGETS_ENUM.UNIT_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -293,7 +293,7 @@ const targetMatchers = {
       })
     );
   },
-  [Targets.VALIDATOR]: (file) => {
+  [TARGETS_ENUM.VALIDATOR]: (file) => {
     if (isOwnersFile(file) || file.startsWith('validator/js/webui/')) {
       return false;
     }
@@ -303,7 +303,7 @@ const targetMatchers = {
       isValidatorFile(file)
     );
   },
-  [Targets.VALIDATOR_WEBUI]: (file) => {
+  [TARGETS_ENUM.VALIDATOR_WEBUI]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -312,7 +312,7 @@ const targetMatchers = {
       file === 'build-system/tasks/validator.js'
     );
   },
-  [Targets.VISUAL_DIFF]: (file) => {
+  [TARGETS_ENUM.VISUAL_DIFF]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -349,7 +349,7 @@ function determineBuildTargets() {
       }
     });
     if (isRuntimeFile) {
-      buildTargets.add(Targets.RUNTIME);
+      buildTargets.add(TARGETS_ENUM.RUNTIME);
     }
   }
   const loggingPrefix = getLoggingPrefix();
@@ -358,7 +358,7 @@ function determineBuildTargets() {
     cyan(Array.from(buildTargets).sort().join(', '))
   );
   // Test all targets during CI builds for package upgrades.
-  if (isCiBuild() && buildTargets.has(Targets.PACKAGE_UPGRADE)) {
+  if (isCiBuild() && buildTargets.has(TARGETS_ENUM.PACKAGE_UPGRADE)) {
     logWithoutTimestamp(
       `${loggingPrefix} Running all tests since this PR contains package upgrades...`
     );
@@ -419,5 +419,5 @@ function expandFileLists() {
 module.exports = {
   buildTargetsInclude,
   determineBuildTargets,
-  Targets,
+  TARGETS_ENUM,
 };

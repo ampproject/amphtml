@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
 import {hasNextNodeInDocumentOrder} from '#core/dom';
@@ -13,7 +13,7 @@ import {Services} from '#service';
 import {listen, loadPromise} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 
-import {Resource, ResourceState} from './resource';
+import {RESOURCE_STATE_ENUM, Resource} from './resource';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {TaskQueue} from './task-queue';
 
@@ -305,7 +305,7 @@ export class ResourcesImpl {
     let resource = Resource.forElementOptional(element);
     if (
       resource &&
-      resource.getState() != ResourceState.NOT_BUILT &&
+      resource.getState() != RESOURCE_STATE_ENUM.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
       resource.requestMeasure();
@@ -358,7 +358,7 @@ export class ResourcesImpl {
     // prerendered. This avoids wasting our prerender build quota.
     // See isUnderBuildQuota_() for more details.
     const shouldBuildResource =
-      this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
+      this.ampdoc.getVisibilityState() != VISIBILITY_STATE_ENUM.PRERENDER ||
       resource.prerenderAllowed();
     if (!shouldBuildResource) {
       return;
@@ -473,7 +473,7 @@ export class ResourcesImpl {
       resource.pauseOnRemove();
     }
 
-    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+    if (resource.getState() === RESOURCE_STATE_ENUM.LAYOUT_SCHEDULED) {
       resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
@@ -1058,7 +1058,7 @@ export class ResourcesImpl {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (
-        r.getState() == ResourceState.NOT_BUILT &&
+        r.getState() == RESOURCE_STATE_ENUM.NOT_BUILT &&
         !r.isBuilding() &&
         !r.element.R1()
       ) {
@@ -1069,7 +1069,7 @@ export class ResourcesImpl {
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
-        r.getState() == ResourceState.NOT_LAID_OUT
+        r.getState() == RESOURCE_STATE_ENUM.NOT_LAID_OUT
       ) {
         relayoutCount++;
       }
@@ -1096,7 +1096,7 @@ export class ResourcesImpl {
         }
         let needsMeasure =
           relayoutAll ||
-          r.getState() == ResourceState.NOT_LAID_OUT ||
+          r.getState() == RESOURCE_STATE_ENUM.NOT_LAID_OUT ||
           !r.hasBeenMeasured() ||
           r.isMeasureRequested() ||
           (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
@@ -1152,7 +1152,7 @@ export class ResourcesImpl {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (
-        r.getState() == ResourceState.NOT_BUILT ||
+        r.getState() == RESOURCE_STATE_ENUM.NOT_BUILT ||
         r.hasOwner() ||
         r.element.R1()
       ) {
@@ -1191,7 +1191,10 @@ export class ResourcesImpl {
             /* ignoreQuota */ true
           );
         }
-        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+        if (
+          r.getState() != RESOURCE_STATE_ENUM.READY_FOR_LAYOUT ||
+          r.hasOwner()
+        ) {
           continue;
         }
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
@@ -1214,7 +1217,7 @@ export class ResourcesImpl {
       ) {
         const r = this.resources_[i];
         if (
-          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          r.getState() == RESOURCE_STATE_ENUM.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
           !r.element.R1() &&
           r.isDisplayed() &&
@@ -1234,7 +1237,7 @@ export class ResourcesImpl {
       ) {
         const r = this.resources_[i];
         if (
-          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          r.getState() == RESOURCE_STATE_ENUM.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
           !r.element.R1() &&
           r.isDisplayed()
@@ -1489,7 +1492,7 @@ export class ResourcesImpl {
   isLayoutAllowed_(resource, forceOutsideViewport) {
     // Only built and displayed elements can be loaded.
     if (
-      resource.getState() == ResourceState.NOT_BUILT ||
+      resource.getState() == RESOURCE_STATE_ENUM.NOT_BUILT ||
       !resource.isDisplayed()
     ) {
       return false;
@@ -1499,7 +1502,7 @@ export class ResourcesImpl {
     // (and they can't prerender).
     if (!this.visible_) {
       if (
-        this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
+        this.ampdoc.getVisibilityState() != VISIBILITY_STATE_ENUM.PRERENDER ||
         !resource.prerenderAllowed()
       ) {
         return false;
@@ -1529,7 +1532,7 @@ export class ResourcesImpl {
     if (resource.element.R1()) {
       return;
     }
-    const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
+    const isBuilt = resource.getState() != RESOURCE_STATE_ENUM.NOT_BUILT;
     const isDisplayed = resource.isDisplayed();
     if (!isBuilt || !isDisplayed) {
       devAssert(
@@ -1629,7 +1632,7 @@ export class ResourcesImpl {
       PAUSED: paused,
       PRERENDER: prerender,
       VISIBLE: visible,
-    } = VisibilityState;
+    } = VISIBILITY_STATE_ENUM;
     const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
@@ -1723,8 +1726,8 @@ export class ResourcesImpl {
    */
   cleanupTasks_(resource, opt_removePending) {
     if (
-      resource.getState() == ResourceState.NOT_LAID_OUT ||
-      resource.getState() == ResourceState.READY_FOR_LAYOUT
+      resource.getState() == RESOURCE_STATE_ENUM.NOT_LAID_OUT ||
+      resource.getState() == RESOURCE_STATE_ENUM.READY_FOR_LAYOUT
     ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
@@ -1743,7 +1746,7 @@ export class ResourcesImpl {
     }
 
     if (
-      resource.getState() == ResourceState.NOT_BUILT &&
+      resource.getState() == RESOURCE_STATE_ENUM.NOT_BUILT &&
       opt_removePending &&
       this.pendingBuildResources_
     ) {

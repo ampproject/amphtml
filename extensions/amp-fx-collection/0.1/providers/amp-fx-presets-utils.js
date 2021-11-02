@@ -9,7 +9,7 @@ import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
-import {FxType} from '../fx-type';
+import {FX_TYPE_ENUM} from '../fx-type';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;
@@ -61,24 +61,24 @@ export function resolvePercentageToNumber(val) {
  */
 export function installStyles(element, fxType) {
   switch (fxType) {
-    case FxType.PARALLAX:
+    case FX_TYPE_ENUM.PARALLAX:
       return {
         'will-change': 'transform',
       };
-    case FxType.FADE_IN:
+    case FX_TYPE_ENUM.FADE_IN:
       return {
         'will-change': 'opacity',
         'opacity': 0,
       };
-    case FxType.FADE_IN_SCROLL:
+    case FX_TYPE_ENUM.FADE_IN_SCROLL:
       return {
         'will-change': 'opacity',
         'opacity': 0,
       };
-    case FxType.FLY_IN_BOTTOM:
-    case FxType.FLY_IN_TOP:
-    case FxType.FLY_IN_LEFT:
-    case FxType.FLY_IN_RIGHT:
+    case FX_TYPE_ENUM.FLY_IN_BOTTOM:
+    case FX_TYPE_ENUM.FLY_IN_TOP:
+    case FX_TYPE_ENUM.FLY_IN_LEFT:
+    case FX_TYPE_ENUM.FLY_IN_RIGHT:
       return {
         'will-change': 'transform',
       };
@@ -98,12 +98,12 @@ export function installStyles(element, fxType) {
  */
 export function defaultDurationValues(ampdoc, fxType) {
   switch (fxType) {
-    case FxType.FADE_IN:
+    case FX_TYPE_ENUM.FADE_IN:
       return '1000ms';
-    case FxType.FLY_IN_BOTTOM:
-    case FxType.FLY_IN_TOP:
-    case FxType.FLY_IN_LEFT:
-    case FxType.FLY_IN_RIGHT:
+    case FX_TYPE_ENUM.FLY_IN_BOTTOM:
+    case FX_TYPE_ENUM.FLY_IN_TOP:
+    case FX_TYPE_ENUM.FLY_IN_LEFT:
+    case FX_TYPE_ENUM.FLY_IN_RIGHT:
       const {width} = Services.viewportForDoc(ampdoc).getSize();
       return (
         mapRange(
@@ -128,8 +128,8 @@ export function defaultDurationValues(ampdoc, fxType) {
  */
 export function defaultFlyInDistanceValues(ampdoc, fxType) {
   switch (fxType) {
-    case FxType.FLY_IN_BOTTOM:
-    case FxType.FLY_IN_TOP:
+    case FX_TYPE_ENUM.FLY_IN_BOTTOM:
+    case FX_TYPE_ENUM.FLY_IN_TOP:
       const {width} = Services.viewportForDoc(ampdoc).getSize();
       if (width < MAX_TABLET_WIDTH) {
         // mobile and tablets
@@ -137,8 +137,8 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
       }
       // laptops and desktops
       return 33;
-    case FxType.FLY_IN_LEFT:
-    case FxType.FLY_IN_RIGHT:
+    case FX_TYPE_ENUM.FLY_IN_LEFT:
+    case FX_TYPE_ENUM.FLY_IN_RIGHT:
       return 100;
     default:
       return 1;
@@ -153,15 +153,15 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
  */
 export function defaultMarginValues(fxType) {
   switch (fxType) {
-    case FxType.FADE_IN:
-    case FxType.FLY_IN_RIGHT:
-    case FxType.FLY_IN_LEFT:
-    case FxType.FLY_IN_TOP:
-    case FxType.FLY_IN_BOTTOM:
+    case FX_TYPE_ENUM.FADE_IN:
+    case FX_TYPE_ENUM.FLY_IN_RIGHT:
+    case FX_TYPE_ENUM.FLY_IN_LEFT:
+    case FX_TYPE_ENUM.FLY_IN_TOP:
+    case FX_TYPE_ENUM.FLY_IN_BOTTOM:
       return {
         'start': 0.05,
       };
-    case FxType.FADE_IN_SCROLL:
+    case FX_TYPE_ENUM.FADE_IN_SCROLL:
       return {
         'start': 0,
         'end': 0.5,
@@ -182,12 +182,12 @@ export function defaultMarginValues(fxType) {
  */
 export function defaultEasingValues(fxType) {
   switch (fxType) {
-    case FxType.FADE_IN:
+    case FX_TYPE_ENUM.FADE_IN:
       return 'ease-in';
-    case FxType.FLY_IN_RIGHT:
-    case FxType.FLY_IN_LEFT:
-    case FxType.FLY_IN_TOP:
-    case FxType.FLY_IN_BOTTOM:
+    case FX_TYPE_ENUM.FLY_IN_RIGHT:
+    case FX_TYPE_ENUM.FLY_IN_LEFT:
+    case FX_TYPE_ENUM.FLY_IN_TOP:
+    case FX_TYPE_ENUM.FLY_IN_BOTTOM:
       return 'ease-out';
     default:
       return 'ease-in';

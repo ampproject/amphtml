@@ -1,7 +1,7 @@
 import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
 import {getPositionObserver} from '#ads/inabox/position-observer';
 
-import {MessageType} from '#core/3p-frame-messaging';
+import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
 import {devAssert, devAssertElement} from '#core/assert';
 import {Observable} from '#core/data-structures/observable';
 import {isIframed} from '#core/dom';
@@ -502,8 +502,8 @@ export class ViewportBindingInabox {
   /** @private */
   listenForPosition_() {
     this.iframeClient_.makeRequest(
-      MessageType.SEND_POSITIONS,
-      MessageType.POSITION,
+      MESSAGE_TYPE_ENUM.SEND_POSITIONS,
+      MESSAGE_TYPE_ENUM.POSITION,
       (data) => {
         dev().fine(TAG, 'Position changed: ', data);
         this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
@@ -670,8 +670,8 @@ export class ViewportBindingInabox {
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise((resolve) => {
         this.iframeClient_.requestOnce(
-          MessageType.SEND_POSITIONS,
-          MessageType.POSITION,
+          MESSAGE_TYPE_ENUM.SEND_POSITIONS,
+          MESSAGE_TYPE_ENUM.POSITION,
           (data) => {
             this.requestPositionPromise_ = null;
             devAssert(data['targetRect'], 'Host should send targetRect');
@@ -739,8 +739,8 @@ export class ViewportBindingInabox {
         }
       } else {
         this.iframeClient_.requestOnce(
-          MessageType.FULL_OVERLAY_FRAME,
-          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          MESSAGE_TYPE_ENUM.FULL_OVERLAY_FRAME,
+          MESSAGE_TYPE_ENUM.FULL_OVERLAY_FRAME_RESPONSE,
           (response) => {
             if (response['success']) {
               this.updateBoxRect_(response['boxRect']);
@@ -775,8 +775,8 @@ export class ViewportBindingInabox {
         }
       } else {
         this.iframeClient_.requestOnce(
-          MessageType.CANCEL_FULL_OVERLAY_FRAME,
-          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          MESSAGE_TYPE_ENUM.CANCEL_FULL_OVERLAY_FRAME,
+          MESSAGE_TYPE_ENUM.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           (response) => {
             this.updateBoxRect_(response['boxRect']);
             resolve();

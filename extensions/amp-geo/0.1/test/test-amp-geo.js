@@ -5,7 +5,7 @@ import {user} from '#utils/log';
 
 import {urls} from '../../../../src/config';
 import {AmpGeo} from '../amp-geo';
-import {GEO_IN_GROUP} from '../amp-geo-in-group';
+import {GEO_IN_GROUP_ENUM} from '../amp-geo-in-group';
 
 describes.realWin(
   'amp-geo',
@@ -289,12 +289,14 @@ describes.realWin(
         expect(geo.ISOCountry).to.equal('nz');
 
         /* multi group case */
-        expect(geo.isInCountryGroup('nafta, anz')).to.equal(GEO_IN_GROUP.IN);
+        expect(geo.isInCountryGroup('nafta, anz')).to.equal(
+          GEO_IN_GROUP_ENUM.IN
+        );
         expect(geo.isInCountryGroup('nafta, unknown')).to.equal(
-          GEO_IN_GROUP.NOT_IN
+          GEO_IN_GROUP_ENUM.NOT_IN
         );
         expect(geo.isInCountryGroup('nafta, foobar')).to.equal(
-          GEO_IN_GROUP.NOT_DEFINED
+          GEO_IN_GROUP_ENUM.NOT_DEFINED
         );
       });
     });
@@ -308,10 +310,12 @@ describes.realWin(
         expect(geo.ISOCountry).to.equal('nz');
 
         /* single group case */
-        expect(geo.isInCountryGroup('anz')).to.equal(GEO_IN_GROUP.IN);
-        expect(geo.isInCountryGroup('nafta')).to.equal(GEO_IN_GROUP.NOT_IN);
+        expect(geo.isInCountryGroup('anz')).to.equal(GEO_IN_GROUP_ENUM.IN);
+        expect(geo.isInCountryGroup('nafta')).to.equal(
+          GEO_IN_GROUP_ENUM.NOT_IN
+        );
         expect(geo.isInCountryGroup('foobar')).to.equal(
-          GEO_IN_GROUP.NOT_DEFINED
+          GEO_IN_GROUP_ENUM.NOT_DEFINED
         );
       });
     });

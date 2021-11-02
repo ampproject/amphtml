@@ -1,5 +1,5 @@
-import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '#core/dom/layout';
+import {INLINE_GALLERY_EVENTS_ENUM} from './inline-gallery-events';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {createCustomEvent} from '#utils/event-helper';
 import {devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
@@ -59,7 +59,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout == LAYOUT_ENUM.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -128,7 +128,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     content.onclick = () => {
       const event = createCustomEvent(
         this.win,
-        InlineGalleryEvents.GO_TO_SLIDE,
+        INLINE_GALLERY_EVENTS_ENUM.GO_TO_SLIDE,
         dict({
           'index': index,
         }),

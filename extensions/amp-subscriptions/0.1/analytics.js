@@ -10,7 +10,7 @@ const TAG = 'amp-subscriptions';
  * for backward compatibility with existing publisher code.
  * @enum {string}
  */
-export const SubscriptionAnalyticsEvents = {
+export const SUBSCRIPTION_ANALYTICS_EVENTS_ENUM = {
   PLATFORM_ACTIVATED: 'subscriptions-service-activated',
   PLATFORM_ACTIVATED_DEPRECATED: 'subscriptions-platform-activated',
   PAYWALL_ACTIVATED: 'subscriptions-paywall-activated',
@@ -31,7 +31,7 @@ export const SubscriptionAnalyticsEvents = {
 };
 
 /** @enum {string} */
-export const Action = {
+export const ACTION_ENUM = {
   LOGIN: 'login',
   LOGOUT: 'logout',
   LINK: 'link',
@@ -42,7 +42,7 @@ export const Action = {
 };
 
 /** @enum {string} */
-export const ActionStatus = {
+export const ACTION_STATUS_ENUM = {
   STARTED: 'started',
   REJECTED: 'rejected',
   FAILED: 'failed',
@@ -108,7 +108,7 @@ export class SubscriptionAnalytics {
     internalVars = internalVars || dict({});
 
     const loggedString =
-      eventType !== SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION
+      eventType !== SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.SUBSCRIPTIONS_ACTION
         ? eventType
         : eventType + `-${internalVars['action']}-${internalVars['status']}`;
 
@@ -135,7 +135,7 @@ export class SubscriptionAnalytics {
    */
   actionEvent(platformKey, action, status, opt_vars) {
     this.serviceEvent(
-      SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.SUBSCRIPTIONS_ACTION,
       platformKey,
       opt_vars,
       dict({

@@ -3,14 +3,14 @@
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 
 import {listenOncePromise} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';
@@ -19,8 +19,8 @@ import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {
-  Action,
-  StateProperty,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {timeStrToMillis} from '../../amp-story/1.0/utils';
 
@@ -361,29 +361,35 @@ export class AmpStory360 extends AMP.BaseElement {
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         this.storeService_ = storeService;
 
-        storeService.subscribe(StateProperty.PAGE_SIZE, () =>
+        storeService.subscribe(STATE_PROPERTY_ENUM.PAGE_SIZE, () =>
           this.resizeRenderer_()
         );
 
         if (attr('controls') === 'gyroscope') {
           storeService.subscribe(
-            StateProperty.GYROSCOPE_PERMISSION_STATE,
+            STATE_PROPERTY_ENUM.GYROSCOPE_PERMISSION_STATE,
             (permissionState) => this.onPermissionState_(permissionState)
           );
           this.checkGyroscopePermissions_();
         }
 
-        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
-          this.isOnActivePage_ = currPageId === this.getPageId_();
-          this.onPageNavigation_();
-          this.maybeShowDiscoveryAnimation_();
-        });
-
-        this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-          if (this.isOnActivePage_) {
-            isPaused ? this.pause_() : this.play_();
+        storeService.subscribe(
+          STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
+          (currPageId) => {
+            this.isOnActivePage_ = currPageId === this.getPageId_();
+            this.onPageNavigation_();
+            this.maybeShowDiscoveryAnimation_();
           }
-        });
+        );
+
+        this.storeService_.subscribe(
+          STATE_PROPERTY_ENUM.PAUSED_STATE,
+          (isPaused) => {
+            if (this.isOnActivePage_) {
+              isPaused ? this.pause_() : this.play_();
+            }
+          }
+        );
       }),
 
       Services.localizationServiceForOrNull(this.element).then(
@@ -554,7 +560,7 @@ export class AmpStory360 extends AMP.BaseElement {
         discoveryTemplate.querySelector(
           '.i-amphtml-story-360-discovery-text'
         ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_DISCOVERY_DIALOG_TEXT
+          LOCALIZED_STRING_ID_ENUM.AMP_STORY_DISCOVERY_DIALOG_TEXT
         );
       });
       this.mutateElement(() => page.appendChild(discoveryTemplate));
@@ -594,7 +600,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.activateButton_.querySelector(
       '.i-amphtml-story-360-activate-text'
     ).textContent = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
+      LOCALIZED_STRING_ID_ENUM.AMP_STORY_ACTIVATE_BUTTON_TEXT
     );
 
     this.activateButton_.addEventListener('click', () =>
@@ -623,9 +629,15 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   setPermissionState_(permissionState) {
     if (permissionState === 'granted') {
-      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'granted');
+      this.storeService_.dispatch(
+        ACTION_ENUM.SET_GYROSCOPE_PERMISSION,
+        'granted'
+      );
     } else if (permissionState === 'denied') {
-      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'denied');
+      this.storeService_.dispatch(
+        ACTION_ENUM.SET_GYROSCOPE_PERMISSION,
+        'denied'
+      );
     }
   }
 
@@ -712,7 +724,7 @@ export class AmpStory360 extends AMP.BaseElement {
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() => ampImgEl.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_END))
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
@@ -734,7 +746,9 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   setupAmpVideoRenderer_() {
     return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
-      .then(() => this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() =>
+        this.ampVideoEl_.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
+      )
       .then(() => {
         const alreadyHasData =
           dev().assertElement(this.ampVideoEl_.querySelector('video'))

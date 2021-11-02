@@ -2,7 +2,7 @@
  * Possible versions of Shadow DOM spec
  * @enum {string}
  */
-export const ShadowDomVersion = {
+export const SHADOW_DOM_VERSION_ENUM = {
   NONE: 'none',
   V0: 'v0',
   V1: 'v1',
@@ -41,7 +41,7 @@ export function setShadowCssSupportedForTesting(val) {
  * @return {boolean}
  */
 export function isShadowDomSupported() {
-  return getShadowDomSupportedVersion() != ShadowDomVersion.NONE;
+  return getShadowDomSupportedVersion() != SHADOW_DOM_VERSION_ENUM.NONE;
 }
 
 /**
@@ -91,9 +91,9 @@ export function getShadowDomSupportedVersion(opt_elementClass) {
  */
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {
-    return ShadowDomVersion.V1;
+    return SHADOW_DOM_VERSION_ENUM.V1;
   } else if (!!element.prototype.createShadowRoot) {
-    return ShadowDomVersion.V0;
+    return SHADOW_DOM_VERSION_ENUM.V0;
   }
-  return ShadowDomVersion.NONE;
+  return SHADOW_DOM_VERSION_ENUM.NONE;
 }

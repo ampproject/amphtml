@@ -1,10 +1,10 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
+  ASYNC_INPUT_ATTRIBUTES_ENUM,
+  ASYNC_INPUT_CLASSES_ENUM,
 } from '#core/constants/async-input';
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
 import {
@@ -35,7 +35,7 @@ import {setupAMPCors, setupInit, setupInput} from '#utils/xhr-utils';
 
 import {AmpFormTextarea} from './amp-form-textarea';
 import {FormDirtiness} from './form-dirtiness';
-import {FormEvents} from './form-events';
+import {FORM_EVENTS_ENUM} from './form-events';
 import {installFormProxy} from './form-proxy';
 import {FormSubmitService} from './form-submit-service';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
@@ -67,7 +67,7 @@ const TAG = 'amp-form';
 const EXTERNAL_DEPS = ['amp-selector'];
 
 /** @const @enum {string} */
-const FormState = {
+const FORM_STATE_ENUM = {
   INITIAL: 'initial',
   VERIFYING: 'verifying',
   VERIFY_ERROR: 'verify-error',
@@ -77,7 +77,7 @@ const FormState = {
 };
 
 /** @const @enum {string} */
-const UserValidityState = {
+const USER_VALIDITY_STATE_ENUM = {
   NONE: 'none',
   USER_VALID: 'valid',
   USER_INVALID: 'invalid',
@@ -184,7 +184,7 @@ export class AmpForm {
     this.form_.classList.add('i-amphtml-form');
 
     /** @private {!FormState} */
-    this.state_ = FormState.INITIAL;
+    this.state_ = FORM_STATE_ENUM.INITIAL;
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
@@ -355,7 +355,7 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ACTION_TRUST_ENUM.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'submit') {
@@ -415,7 +415,7 @@ export class AmpForm {
     );
 
     this.form_.addEventListener(
-      AmpEvents.FORM_VALUE_CHANGE,
+      AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
       (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
@@ -434,18 +434,18 @@ export class AmpForm {
           this.validator_.onBlur(e);
 
           // Only make the verify XHR if the user hasn't pressed submit.
-          if (this.state_ === FormState.VERIFYING) {
+          if (this.state_ === FORM_STATE_ENUM.VERIFYING) {
             if (errors.length) {
-              this.setState_(FormState.VERIFY_ERROR);
+              this.setState_(FORM_STATE_ENUM.VERIFY_ERROR);
               this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
                 this.triggerAction_(
-                  FormEvents.VERIFY_ERROR,
+                  FORM_EVENTS_ENUM.VERIFY_ERROR,
                   errors,
-                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                  ACTION_TRUST_ENUM.DEFAULT // DEFAULT because async after gesture.
                 );
               });
             } else {
-              this.setState_(FormState.INITIAL);
+              this.setState_(FORM_STATE_ENUM.INITIAL);
             }
           }
         });
@@ -503,7 +503,7 @@ export class AmpForm {
    * @private
    */
   handleSubmitAction_(invocation) {
-    if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
+    if (this.state_ == FORM_STATE_ENUM.SUBMITTING || !this.checkValidity_()) {
       return Promise.resolve(null);
     }
     // "submit" has the same trust level as the action that caused it.
@@ -516,7 +516,7 @@ export class AmpForm {
    */
   handleClearAction_() {
     this.form_.reset();
-    this.setState_(FormState.INITIAL);
+    this.setState_(FORM_STATE_ENUM.INITIAL);
     this.form_.classList.remove('user-valid');
     this.form_.classList.remove('user-invalid');
 
@@ -558,7 +558,7 @@ export class AmpForm {
    * @private
    */
   handleSubmitEvent_(event) {
-    if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
+    if (this.state_ == FORM_STATE_ENUM.SUBMITTING || !this.checkValidity_()) {
       event.stopImmediatePropagation();
       event.preventDefault();
       return Promise.resolve(null);
@@ -569,7 +569,7 @@ export class AmpForm {
     }
 
     // Submits caused by user input have high trust.
-    return this.submit_(ActionTrust.HIGH, event);
+    return this.submit_(ACTION_TRUST_ENUM.HIGH, event);
   }
 
   /**
@@ -593,7 +593,7 @@ export class AmpForm {
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
     const asyncInputs = this.form_.getElementsByClassName(
-      AsyncInputClasses.ASYNC_INPUT
+      ASYNC_INPUT_CLASSES_ENUM.ASYNC_INPUT
     );
 
     this.dirtinessHandler_.onSubmitting();
@@ -629,7 +629,7 @@ export class AmpForm {
     }
 
     // Set ourselves to the SUBMITTING State
-    this.setState_(FormState.SUBMITTING);
+    this.setState_(FORM_STATE_ENUM.SUBMITTING);
 
     // Promises to run before submit without timeout.
     const requiredActionPromises = [];
@@ -639,7 +639,9 @@ export class AmpForm {
     iterateCursor(asyncInputs, (asyncInput) => {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
-        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+        asyncInput.classList.contains(
+          ASYNC_INPUT_CLASSES_ENUM.ASYNC_REQUIRED_ACTION
+        )
       ) {
         requiredActionPromises.push(asyncCall);
       } else {
@@ -708,11 +710,15 @@ export class AmpForm {
    * @private
    */
   handleXhrVerify_() {
-    if (this.state_ === FormState.SUBMITTING) {
+    if (this.state_ === FORM_STATE_ENUM.SUBMITTING) {
       return Promise.resolve();
     }
-    this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormEvents.VERIFY, /* detail */ null, ActionTrust.HIGH);
+    this.setState_(FORM_STATE_ENUM.VERIFYING);
+    this.triggerAction_(
+      FORM_EVENTS_ENUM.VERIFY,
+      /* detail */ null,
+      ACTION_TRUST_ENUM.HIGH
+    );
 
     return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
       this.doVerifyXhr_()
@@ -754,7 +760,7 @@ export class AmpForm {
       .then(() => {
         return this.actions_.trigger(
           this.form_,
-          FormEvents.SUBMIT,
+          FORM_EVENTS_ENUM.SUBMIT,
           /* event */ null,
           trust
         );
@@ -851,7 +857,7 @@ export class AmpForm {
     this.renderTemplate_(values).then(() => {
       this.actions_.trigger(
         this.form_,
-        FormEvents.SUBMIT,
+        FORM_EVENTS_ENUM.SUBMIT,
         /* event */ null,
         trust
       );
@@ -886,7 +892,7 @@ export class AmpForm {
       .getImpl()
       .then((implementation) => implementation.getValue())
       .then((value) => {
-        const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+        const name = asyncInput.getAttribute(ASYNC_INPUT_ATTRIBUTES_ENUM.NAME);
         let input = this.form_.querySelector(
           `input[name=${escapeCssSelectorIdent(name)}]`
         );
@@ -895,7 +901,7 @@ export class AmpForm {
             this.win_.document,
             'input',
             dict({
-              'name': asyncInput.getAttribute(AsyncInputAttributes.NAME),
+              'name': asyncInput.getAttribute(ASYNC_INPUT_ATTRIBUTES_ENUM.NAME),
               'hidden': 'true',
             })
           );
@@ -998,13 +1004,13 @@ export class AmpForm {
    * @private
    */
   handleSubmitSuccess_(result, incomingTrust, opt_eventData) {
-    this.setState_(FormState.SUBMIT_SUCCESS);
+    this.setState_(FORM_STATE_ENUM.SUBMIT_SUCCESS);
     // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
       this.renderTemplate_(result || {}).then(() => {
         const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
         this.triggerAction_(
-          FormEvents.SUBMIT_SUCCESS,
+          FORM_EVENTS_ENUM.SUBMIT_SUCCESS,
           opt_eventData === undefined ? result : opt_eventData,
           outgoingTrust
         );
@@ -1046,14 +1052,14 @@ export class AmpForm {
    * @private
    */
   handleSubmitFailure_(error, json, incomingTrust, opt_eventData) {
-    this.setState_(FormState.SUBMIT_ERROR);
+    this.setState_(FORM_STATE_ENUM.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
     // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
         const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
         this.triggerAction_(
-          FormEvents.SUBMIT_ERROR,
+          FORM_EVENTS_ENUM.SUBMIT_ERROR,
           opt_eventData === undefined ? json : opt_eventData,
           outgoingTrust
         );
@@ -1085,7 +1091,7 @@ export class AmpForm {
     if (shouldSubmitFormElement) {
       this.form_.submit();
     }
-    this.setState_(FormState.INITIAL);
+    this.setState_(FORM_STATE_ENUM.INITIAL);
   }
 
   /**
@@ -1280,7 +1286,7 @@ export class AmpForm {
                 container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
-                  AmpEvents.DOM_UPDATE,
+                  AMP_EVENTS_ENUM.DOM_UPDATE,
                   /* detail */ null,
                   {bubbles: true}
                 );
@@ -1445,12 +1451,12 @@ function checkUserValidityOnSubmission(form) {
  */
 function getUserValidityStateFor(element) {
   if (element.classList.contains('user-valid')) {
-    return UserValidityState.USER_VALID;
+    return USER_VALIDITY_STATE_ENUM.USER_VALID;
   } else if (element.classList.contains('user-invalid')) {
-    return UserValidityState.USER_INVALID;
+    return USER_VALIDITY_STATE_ENUM.USER_INVALID;
   }
 
-  return UserValidityState.NONE;
+  return USER_VALIDITY_STATE_ENUM.NONE;
 }
 
 /**
@@ -1511,15 +1517,16 @@ function checkUserValidity(element, propagate = false) {
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();
   if (
-    previousValidityState != UserValidityState.USER_VALID &&
+    previousValidityState != USER_VALIDITY_STATE_ENUM.USER_VALID &&
     isCurrentlyValid
   ) {
     element.classList.add('user-valid');
     element.classList.remove('user-invalid');
     // Don't propagate user-valid unless it was marked invalid before.
-    shouldPropagate = previousValidityState == UserValidityState.USER_INVALID;
+    shouldPropagate =
+      previousValidityState == USER_VALIDITY_STATE_ENUM.USER_INVALID;
   } else if (
-    previousValidityState != UserValidityState.USER_INVALID &&
+    previousValidityState != USER_VALIDITY_STATE_ENUM.USER_INVALID &&
     !isCurrentlyValid
   ) {
     element.classList.add('user-invalid');
@@ -1572,9 +1579,14 @@ export class AmpFormService {
     if (getMode().test) {
       this.whenInitialized_.then(() => {
         const {win} = ampdoc;
-        const event = createCustomEvent(win, FormEvents.SERVICE_INIT, null, {
-          bubbles: true,
-        });
+        const event = createCustomEvent(
+          win,
+          FORM_EVENTS_ENUM.SERVICE_INIT,
+          null,
+          {
+            bubbles: true,
+          }
+        );
         win.dispatchEvent(event);
       });
     }
@@ -1643,7 +1655,7 @@ export class AmpFormService {
    * @private
    */
   installDomUpdateEventListener_(doc) {
-    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    doc.addEventListener(AMP_EVENTS_ENUM.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }
@@ -1657,7 +1669,7 @@ export class AmpFormService {
     doc.addEventListener('keydown', (e) => {
       if (
         e.defaultPrevented ||
-        e.key != Keys.ENTER ||
+        e.key != KEYS_ENUM.ENTER ||
         !(e.ctrlKey || e.metaKey) ||
         e.target.tagName !== 'TEXTAREA'
       ) {

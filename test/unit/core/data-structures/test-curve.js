@@ -1,4 +1,4 @@
-import {Curves, bezierCurve, getCurve} from '#core/data-structures/curve';
+import {CURVES_ENUM, bezierCurve, getCurve} from '#core/data-structures/curve';
 
 describes.sandboxed('data structures - Curve', {}, () => {
   it('bezierCurve', () => {
@@ -23,11 +23,11 @@ describes.sandboxed('data structures - Curve', {}, () => {
     expect(getCurve(func)).to.equal(func);
 
     // String is translated.
-    expect(getCurve('linear')).to.equal(Curves.LINEAR);
-    expect(getCurve('ease')).to.equal(Curves.EASE);
-    expect(getCurve('ease-in')).to.equal(Curves.EASE_IN);
-    expect(getCurve('ease-out')).to.equal(Curves.EASE_OUT);
-    expect(getCurve('ease-in-out')).to.equal(Curves.EASE_IN_OUT);
+    expect(getCurve('linear')).to.equal(CURVES_ENUM.LINEAR);
+    expect(getCurve('ease')).to.equal(CURVES_ENUM.EASE);
+    expect(getCurve('ease-in')).to.equal(CURVES_ENUM.EASE_IN);
+    expect(getCurve('ease-out')).to.equal(CURVES_ENUM.EASE_OUT);
+    expect(getCurve('ease-in-out')).to.equal(CURVES_ENUM.EASE_IN_OUT);
   });
 
   it('getCurve on cubic-bezier curves', () => {

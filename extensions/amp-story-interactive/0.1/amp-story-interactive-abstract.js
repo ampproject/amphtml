@@ -1,13 +1,13 @@
 import {
   ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
+  STORY_ANALYTICS_EVENT_ENUM,
 } from '../../amp-story/1.0/story-analytics';
 import {clamp} from '#core/math';
 import {
-  Action,
-  StateProperty,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
+import {ANALYTICS_VARIABLE_ENUM} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
 import {Services} from '#service';
 import {
@@ -45,7 +45,7 @@ export const POST_SELECTION_CLASS =
 /**
  * @const @enum {number}
  */
-export const InteractiveType = {
+export const INTERACTIVE_TYPE_ENUM = {
   QUIZ: 0,
   POLL: 1,
   RESULTS: 2,
@@ -456,7 +456,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      STATE_PROPERTY_ENUM.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -465,7 +465,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     // Check if the component page is active, and add class.
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
+      STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
       (currPageId) => {
         this.mutateElement(() => {
           const toggle = currPageId === this.getPageEl().getAttribute('id');
@@ -526,21 +526,21 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   triggerAnalytics_(optionIndex) {
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTIVE_ID,
+      ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
+      ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_RESPONSE,
       optionIndex
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTIVE_TYPE,
+      ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_TYPE,
       this.interactiveType_
     );
 
     this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.INTERACTIVE,
+      STORY_ANALYTICS_EVENT_ENUM.INTERACTIVE,
       this.element
     );
   }
@@ -814,7 +814,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       interactiveId: this.getInteractiveId_(),
       type: this.interactiveType_,
     };
-    this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
+    this.storeService_.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, update);
   }
 
   /**

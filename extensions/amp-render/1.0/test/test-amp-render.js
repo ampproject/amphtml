@@ -6,7 +6,7 @@ import * as BatchedJsonModule from '../../../../src/batched-json';
 import * as Style from '#core/dom/style';
 import * as log from '#utils/log';
 import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {waitFor} from '#testing/helpers/service';
@@ -52,7 +52,7 @@ describes.realWin(
       const source = null;
       const caller = null;
       const event = null;
-      const trust = ActionTrust.DEFAULT;
+      const trust = ACTION_TRUST_ENUM.DEFAULT;
       return new ActionInvocation(
         element,
         method,

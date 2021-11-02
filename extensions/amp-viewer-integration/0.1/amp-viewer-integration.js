@@ -30,7 +30,7 @@ const APP = '__AMPHTML__';
 /**
  * @enum {string}
  */
-const RequestNames = {
+const REQUEST_NAMES_ENUM = {
   CHANNEL_OPEN: 'channelOpen',
   UNLOADED: 'unloaded',
 };
@@ -174,7 +174,7 @@ export class AmpViewerIntegration {
     const srcUrl = getSourceUrl(ampdocUrl);
     return messaging
       .sendRequest(
-        RequestNames.CHANNEL_OPEN,
+        REQUEST_NAMES_ENUM.CHANNEL_OPEN,
         dict({
           'url': ampdocUrl,
           'sourceUrl': srcUrl,
@@ -236,7 +236,7 @@ export class AmpViewerIntegration {
    * @private
    */
   handleUnload_(messaging) {
-    return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
+    return messaging.sendRequest(REQUEST_NAMES_ENUM.UNLOADED, dict(), true);
   }
 
   /**

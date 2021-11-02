@@ -1,7 +1,7 @@
 import * as IniLoad from '../../../../src/ini-load';
 import {AmpDocShadow} from '#service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
-import {AnalyticsEventType, CustomEventTracker} from '../events';
+import {ANALYTICS_EVENT_TYPE_ENUM, CustomEventTracker} from '../events';
 import {ScrollManager} from '../scroll-manager';
 import {
   VisibilityManagerForDoc,
@@ -51,7 +51,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
 
   it('should add tracker, reuse and dispose', () => {
     const tracker = root.getTracker(
-      AnalyticsEventType.CUSTOM,
+      ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
       CustomEventTracker
     );
     expect(tracker).to.be.instanceOf(CustomEventTracker);
@@ -59,9 +59,9 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
 
     // Reused.
     expect(
-      root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+      root.getTracker(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM, CustomEventTracker)
     ).to.equal(tracker);
-    expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(
+    expect(root.getTrackerOptional(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM)).to.equal(
       tracker
     );
 
@@ -69,7 +69,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
     const stub = env.sandbox.stub(tracker, 'dispose');
     root.dispose();
     expect(stub).to.be.calledOnce;
-    expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.be.null;
+    expect(root.getTrackerOptional(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM)).to.be
+      .null;
   });
 
   it('should init with ampdoc signals', () => {
@@ -581,7 +582,7 @@ describes.realWin(
 
     it('should add tracker, reuse and dispose', () => {
       const tracker = root.getTracker(
-        AnalyticsEventType.CUSTOM,
+        ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
         CustomEventTracker
       );
       expect(tracker).to.be.instanceOf(CustomEventTracker);
@@ -589,17 +590,18 @@ describes.realWin(
 
       // Reused.
       expect(
-        root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+        root.getTracker(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM, CustomEventTracker)
       ).to.equal(tracker);
-      expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(
-        tracker
-      );
+      expect(
+        root.getTrackerOptional(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM)
+      ).to.equal(tracker);
 
       // Dispose.
       const stub = env.sandbox.stub(tracker, 'dispose');
       root.dispose();
       expect(stub).to.be.calledOnce;
-      expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.be.null;
+      expect(root.getTrackerOptional(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM)).to.be
+        .null;
     });
 
     it('should create and reuse trackers, but not if not in allowlist', () => {
@@ -607,7 +609,7 @@ describes.realWin(
         'custom': CustomEventTracker,
       };
       const customTracker = root.getTrackerForAllowlist(
-        AnalyticsEventType.CUSTOM,
+        ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
         allowlist
       );
       expect(customTracker).to.be.instanceOf(CustomEventTracker);
@@ -617,10 +619,10 @@ describes.realWin(
       expect(noneTracker).to.be.null;
 
       expect(
-        root.getTrackerForAllowlist(AnalyticsEventType.CUSTOM, allowlist)
+        root.getTrackerForAllowlist(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM, allowlist)
       ).to.equal(customTracker);
       expect(
-        root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+        root.getTracker(ANALYTICS_EVENT_TYPE_ENUM.CUSTOM, CustomEventTracker)
       ).to.equal(customTracker);
     });
 

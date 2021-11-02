@@ -1,6 +1,6 @@
 import {AmpContext} from '#3p/ampcontext';
 
-import {MessageType, serializeMessage} from '#core/3p-frame-messaging';
+import {MESSAGE_TYPE_ENUM, serializeMessage} from '#core/3p-frame-messaging';
 
 import {Platform} from '#service/platform-impl';
 
@@ -174,7 +174,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send an intersection message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.INTERSECTION,
+      type: MESSAGE_TYPE_ENUM.INTERSECTION,
       changes: 'changes',
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
@@ -215,7 +215,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a page visibility message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_STATE,
+      type: MESSAGE_TYPE_ENUM.EMBED_STATE,
       pageHidden: true,
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
@@ -272,7 +272,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize success message down
     const messagePayloadSuccess = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_CHANGED,
+      type: MESSAGE_TYPE_ENUM.EMBED_SIZE_CHANGED,
       id: initialId,
       requestedHeight: 300,
       requestedWidth: 200,
@@ -285,7 +285,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize failure message down
     const messagePayloadFailure = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_DENIED,
+      type: MESSAGE_TYPE_ENUM.EMBED_SIZE_DENIED,
       id: initialId + 1,
       requestedHeight: 300,
       requestedWidth: 200,
@@ -328,7 +328,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize success message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_CHANGED,
+      type: MESSAGE_TYPE_ENUM.EMBED_SIZE_CHANGED,
       requestedHeight: 300,
       requestedWidth: 200,
     };
@@ -374,7 +374,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize denied message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_DENIED,
+      type: MESSAGE_TYPE_ENUM.EMBED_SIZE_DENIED,
       requestedHeight: 300,
       requestedWidth: 200,
     };

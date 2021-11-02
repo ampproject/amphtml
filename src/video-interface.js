@@ -196,7 +196,7 @@ VideoInterface.prototype.win;
  *
  * @enum {string}
  */
-export const VideoAttributes = {
+export const VIDEO_ATTRIBUTES_ENUM = {
   /**
    * autoplay
    *
@@ -254,7 +254,7 @@ export const VideoAttributes = {
  *
  * @enum {string}
  */
-export const VideoEvents = {
+export const VIDEO_EVENTS_ENUM = {
   /**
    * registered
    *
@@ -416,7 +416,7 @@ export let PlayingStateDef;
  *
  * @enum {string}
  */
-export const PlayingStates = {
+export const PLAYING_STATES_ENUM = {
   /**
    * playing_manual
    *
@@ -447,7 +447,7 @@ export const PlayingStates = {
 };
 
 /** @enum {string} */
-export const VideoAnalyticsEvents = {
+export const VIDEO_ANALYTICS_EVENTS_ENUM = {
   /**
    * video-ended
    *
@@ -563,11 +563,11 @@ export let VideoOrBaseElementDef;
  * @return {boolean}
  */
 export function isDockable(element) {
-  return element.hasAttribute(VideoAttributes.DOCK);
+  return element.hasAttribute(VIDEO_ATTRIBUTES_ENUM.DOCK);
 }
 
 /** @enum {string} */
-export const VideoServiceSignals = {
+export const VIDEO_SERVICE_SIGNALS_ENUM = {
   USER_INTERACTED: 'user-interacted',
   PLAYBACK_DELEGATED: 'playback-delegated',
 };
@@ -575,13 +575,13 @@ export const VideoServiceSignals = {
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
   whenUpgradedToCustomElement(devAssertElement(video)).then((el) => {
-    el.signals().signal(VideoServiceSignals.PLAYBACK_DELEGATED);
+    el.signals().signal(VIDEO_SERVICE_SIGNALS_ENUM.PLAYBACK_DELEGATED);
   });
 }
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function userInteractedWith(video) {
-  video.signals().signal(VideoServiceSignals.USER_INTERACTED);
+  video.signals().signal(VIDEO_SERVICE_SIGNALS_ENUM.USER_INTERACTED);
 }
 
 /**

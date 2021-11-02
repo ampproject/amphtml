@@ -21,10 +21,10 @@ import {Services} from '#service';
 
 import {dev, user} from '#utils/log';
 
-import {WebPushWidgetVisibilities} from './amp-web-push-widget';
+import {WEB_PUSH_WIDGET_VISIBILITIES_ENUM} from './amp-web-push-widget';
 import {IFrameHost} from './iframehost';
 import {
-  NotificationPermission,
+  NOTIFICATION_PERMISSION_ENUM,
   SERVICE_TAG,
   StorageKeys,
   TAG,
@@ -579,7 +579,7 @@ export class WebPushService {
             frame does not support retrieving the remote storage value. Assume
             the permission is default to provide the best user experience.
           */
-          return Promise.resolve(NotificationPermission.DEFAULT);
+          return Promise.resolve(NOTIFICATION_PERMISSION_ENUM.DEFAULT);
         }
       })
       .then((canonicalNotificationPermission) => {
@@ -591,10 +591,13 @@ export class WebPushService {
               - Default or Granted
                 - Resume flow
           */
-        if (canonicalNotificationPermission === NotificationPermission.DENIED) {
+        if (
+          canonicalNotificationPermission ===
+          NOTIFICATION_PERMISSION_ENUM.DENIED
+        ) {
           if (
             this.doesWidgetCategoryMarkupExist_(
-              WebPushWidgetVisibilities.BLOCKED
+              WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED
             )
           ) {
             this.updateWidgetVisibilitiesBlocked_();
@@ -632,15 +635,15 @@ export class WebPushService {
             const isSubscribed = reply;
             if (isSubscribed) {
               this.setWidgetVisibilities(
-                WebPushWidgetVisibilities.UNSUBSCRIBED,
+                WEB_PUSH_WIDGET_VISIBILITIES_ENUM.UNSUBSCRIBED,
                 false
               );
               this.setWidgetVisibilities(
-                WebPushWidgetVisibilities.SUBSCRIBED,
+                WEB_PUSH_WIDGET_VISIBILITIES_ENUM.SUBSCRIBED,
                 true
               );
               this.setWidgetVisibilities(
-                WebPushWidgetVisibilities.BLOCKED,
+                WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED,
                 false
               );
             } else {
@@ -664,16 +667,31 @@ export class WebPushService {
 
   /** @private */
   updateWidgetVisibilitiesUnsubscribed_() {
-    this.setWidgetVisibilities(WebPushWidgetVisibilities.UNSUBSCRIBED, true);
-    this.setWidgetVisibilities(WebPushWidgetVisibilities.SUBSCRIBED, false);
-    this.setWidgetVisibilities(WebPushWidgetVisibilities.BLOCKED, false);
+    this.setWidgetVisibilities(
+      WEB_PUSH_WIDGET_VISIBILITIES_ENUM.UNSUBSCRIBED,
+      true
+    );
+    this.setWidgetVisibilities(
+      WEB_PUSH_WIDGET_VISIBILITIES_ENUM.SUBSCRIBED,
+      false
+    );
+    this.setWidgetVisibilities(
+      WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED,
+      false
+    );
   }
 
   /** @private */
   updateWidgetVisibilitiesBlocked_() {
-    this.setWidgetVisibilities(WebPushWidgetVisibilities.UNSUBSCRIBED, false);
-    this.setWidgetVisibilities(WebPushWidgetVisibilities.SUBSCRIBED, false);
-    this.setWidgetVisibilities(WebPushWidgetVisibilities.BLOCKED, true);
+    this.setWidgetVisibilities(
+      WEB_PUSH_WIDGET_VISIBILITIES_ENUM.UNSUBSCRIBED,
+      false
+    );
+    this.setWidgetVisibilities(
+      WEB_PUSH_WIDGET_VISIBILITIES_ENUM.SUBSCRIBED,
+      false
+    );
+    this.setWidgetVisibilities(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED, true);
   }
 
   /**
@@ -703,7 +721,7 @@ export class WebPushService {
               need to open a popup to ask for permissions. Subscribe in the
               background using the helper frame.
             */
-          case NotificationPermission.GRANTED:
+          case NOTIFICATION_PERMISSION_ENUM.GRANTED:
             return this.onPermissionGrantedSubscribe_().then(() => {
               resolve();
             });
@@ -780,12 +798,12 @@ export class WebPushService {
     /** @type {function ({closeFrame: boolean})} */
     const reply = result[1];
     switch (permission) {
-      case NotificationPermission.DENIED:
-      case NotificationPermission.DEFAULT:
+      case NOTIFICATION_PERMISSION_ENUM.DENIED:
+      case NOTIFICATION_PERMISSION_ENUM.DEFAULT:
         // User clicked X or blocked
         reply({closeFrame: true});
         return this.updateWidgetVisibilities();
-      case NotificationPermission.GRANTED:
+      case NOTIFICATION_PERMISSION_ENUM.GRANTED:
         // User allowed
         reply({closeFrame: true});
         this.onPermissionGrantedSubscribe_();
@@ -955,11 +973,11 @@ export class WebPushService {
 
     this.queryNotificationPermission().then((permission) => {
       switch (permission) {
-        case NotificationPermission.DENIED:
-        case NotificationPermission.DEFAULT:
+        case NOTIFICATION_PERMISSION_ENUM.DENIED:
+        case NOTIFICATION_PERMISSION_ENUM.DEFAULT:
           // User blocked or clicked X
           return this.updateWidgetVisibilities();
-        case NotificationPermission.GRANTED:
+        case NOTIFICATION_PERMISSION_ENUM.GRANTED:
           // User allowed
           this.onPermissionGrantedSubscribe_();
           break;

@@ -2,7 +2,11 @@ import {tryParseJson} from '#core/types/object/json';
 import {utf8Decode} from '#core/types/string/bytes';
 
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
-import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
+import {
+  AD_RESPONSE_TYPE_ENUM,
+  VALIDATOR_RESULT_ENUM,
+  Validator,
+} from './amp-ad-type-defs';
 import {
   extensionsHasElement,
   getAmpAdMetadata,
@@ -47,8 +51,8 @@ export class TemplateValidator extends Validator {
           creativeData: {
             creative: body,
           },
-          adResponseType: AdResponseType.TEMPLATE,
-          type: ValidatorResult.NON_AMP,
+          adResponseType: AD_RESPONSE_TYPE_ENUM.TEMPLATE,
+          type: VALIDATOR_RESULT_ENUM.NON_AMP,
         })
       );
     }
@@ -89,8 +93,8 @@ export class TemplateValidator extends Validator {
               templateData: parsedResponseBody,
               creativeMetadata,
             },
-            adResponseType: AdResponseType.TEMPLATE,
-            type: ValidatorResult.AMP,
+            adResponseType: AD_RESPONSE_TYPE_ENUM.TEMPLATE,
+            type: VALIDATOR_RESULT_ENUM.AMP,
           })
         );
       });

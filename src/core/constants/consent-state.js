@@ -4,7 +4,7 @@
  * Possible consent policy state to proceed with.
  * @enum {number}
  */
-export const CONSENT_POLICY_STATE = {
+export const CONSENT_POLICY_STATE_ENUM = {
   // Enum value has external dependency. Please do not change existing value.
   // If new values are added, please notify the AMP for Ads team to assure
   // correct Real Time Config behavior is maintained for Fast Fetch.
@@ -19,7 +19,7 @@ export const CONSENT_POLICY_STATE = {
  * in by consent iframe metadata.
  * @enum {number}
  */
-export const CONSENT_STRING_TYPE = {
+export const CONSENT_STRING_TYPE_ENUM = {
   // Enum value has external dependency for metadata collection.
   // It is up to the vendor to interpret an undefined CONSENT_STRING_TYPE.
   TCF_V1: 1,

@@ -9,7 +9,7 @@ import {isFiniteNumber} from '#core/types';
 /**
  * @enum {string}
  */
-export const Layout = {
+export const LAYOUT_ENUM = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   FIXED_HEIGHT: 'fixed-height',
@@ -26,7 +26,7 @@ export const Layout = {
  * BaseElement#updateLayoutPriority().
  * @enum {number}
  */
-export const LayoutPriority = {
+export const LAYOUT_PRIORITY_ENUM = {
   CONTENT: 0,
   METADATA: 1,
   ADS: 2,
@@ -54,7 +54,7 @@ export let DimensionsDef;
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ = {
+export const LOADING_ELEMENTS_ENUM = {
   'AMP-AD': true,
   'AMP-ANIM': true,
   'AMP-EMBED': true,
@@ -87,9 +87,9 @@ const videoPlayerTagNameRe =
  *   the layout string.
  */
 export function parseLayout(s) {
-  for (const k in Layout) {
-    if (Layout[k] == s) {
-      return Layout[k];
+  for (const k in LAYOUT_ENUM) {
+    if (LAYOUT_ENUM[k] == s) {
+      return LAYOUT_ENUM[k];
     }
   }
   return undefined;
@@ -110,13 +110,13 @@ export function getLayoutClass(layout) {
  */
 export function isLayoutSizeDefined(layout) {
   return (
-    layout == Layout.FIXED ||
-    layout == Layout.FIXED_HEIGHT ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.FILL ||
-    layout == Layout.FLEX_ITEM ||
-    layout == Layout.FLUID ||
-    layout == Layout.INTRINSIC
+    layout == LAYOUT_ENUM.FIXED ||
+    layout == LAYOUT_ENUM.FIXED_HEIGHT ||
+    layout == LAYOUT_ENUM.RESPONSIVE ||
+    layout == LAYOUT_ENUM.FILL ||
+    layout == LAYOUT_ENUM.FLEX_ITEM ||
+    layout == LAYOUT_ENUM.FLUID ||
+    layout == LAYOUT_ENUM.INTRINSIC
   );
 }
 
@@ -126,7 +126,7 @@ export function isLayoutSizeDefined(layout) {
  * @return {boolean}
  */
 export function isLayoutSizeFixed(layout) {
-  return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+  return layout == LAYOUT_ENUM.FIXED || layout == LAYOUT_ENUM.FIXED_HEIGHT;
 }
 
 /**
@@ -216,7 +216,9 @@ export function getLengthNumeral(length) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
+  return (
+    LOADING_ELEMENTS_ENUM[tagName] || isIframeVideoPlayerComponent(tagName)
+  );
 }
 
 /**

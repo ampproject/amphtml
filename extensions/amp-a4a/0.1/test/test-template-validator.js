@@ -3,7 +3,10 @@ import {utf8Encode} from '#core/types/string/bytes';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 
 import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
+import {
+  AD_RESPONSE_TYPE_ENUM,
+  VALIDATOR_RESULT_ENUM,
+} from '../amp-ad-type-defs';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
@@ -66,7 +69,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
     it('should have AMP validator result', () => {
       return validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
-        expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
+        expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.AMP);
       });
     });
 
@@ -92,7 +95,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
         )
         .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
+          expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.AMP);
         });
     });
 
@@ -100,7 +103,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
       return validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.adResponseType).to.equal(
-          AdResponseType.TEMPLATE
+          AD_RESPONSE_TYPE_ENUM.TEMPLATE
         );
       });
     });
@@ -175,7 +178,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
         )
         .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+          expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.NON_AMP);
         });
     });
 
@@ -197,7 +200,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
         )
         .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+          expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.NON_AMP);
         });
     });
 
@@ -217,7 +220,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
         .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.adResponseType).to.equal(
-            AdResponseType.TEMPLATE
+            AD_RESPONSE_TYPE_ENUM.TEMPLATE
           );
         });
     });

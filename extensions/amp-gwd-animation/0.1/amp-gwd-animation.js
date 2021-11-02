@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 
@@ -235,7 +235,7 @@ export class GwdAnimation extends AMP.BaseElement {
       this.element,
       timelineEventName,
       event,
-      ActionTrust.HIGH
+      ACTION_TRUST_ENUM.HIGH
     );
   }
 

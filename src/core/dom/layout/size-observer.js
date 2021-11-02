@@ -8,7 +8,7 @@ import {LayoutSizeDef} from './rect';
 /** @typedef {!LayoutSizeDef|!ResizeObserverSize} TargetSize */
 
 /** @enum {number} */
-const Type = {
+const TYPE_ENUM = {
   /**
    * Mapped to the `ResizeObserverEntry.contentRect` and returns a
    * `LayoutSizeDef` value.
@@ -42,7 +42,7 @@ const targetEntryMap = /* #__PURE__ */ new WeakMap();
  * @param {function(!LayoutSizeDef)} callback
  */
 export function observeContentSize(element, callback) {
-  observeSize(element, Type.CONTENT, callback);
+  observeSize(element, TYPE_ENUM.CONTENT, callback);
 }
 
 /**
@@ -50,7 +50,7 @@ export function observeContentSize(element, callback) {
  * @param {function(!LayoutSizeDef)} callback
  */
 export function unobserveContentSize(element, callback) {
-  unobserveSize(element, Type.CONTENT, callback);
+  unobserveSize(element, TYPE_ENUM.CONTENT, callback);
 }
 
 /**
@@ -73,7 +73,7 @@ export function measureContentSize(element) {
  * @param {function(!ResizeObserverSize)} callback
  */
 export function observeBorderBoxSize(element, callback) {
-  observeSize(element, Type.BORDER_BOX, callback);
+  observeSize(element, TYPE_ENUM.BORDER_BOX, callback);
 }
 
 /**
@@ -82,7 +82,7 @@ export function observeBorderBoxSize(element, callback) {
  * @param {function(!ResizeObserverSize)} callback
  */
 export function unobserveBorderBoxSize(element, callback) {
-  unobserveSize(element, Type.BORDER_BOX, callback);
+  unobserveSize(element, TYPE_ENUM.BORDER_BOX, callback);
 }
 
 /**
@@ -192,13 +192,13 @@ function processEntries(entries) {
  * @param {!ResizeObserverEntry} entry
  */
 function computeAndCall(type, callback, entry) {
-  if (type == Type.CONTENT) {
+  if (type == TYPE_ENUM.CONTENT) {
     const {contentRect} = entry;
     const {height, width} = contentRect;
     /** @type {!LayoutSizeDef} */
     const size = {width, height};
     tryCallback(callback, size);
-  } else if (type == Type.BORDER_BOX) {
+  } else if (type == TYPE_ENUM.BORDER_BOX) {
     const {borderBoxSize: borderBoxSizeArray} = entry;
     /** @type {!ResizeObserverSize} */
     let borderBoxSize;

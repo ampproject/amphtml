@@ -9,7 +9,7 @@ import {devAssert, user} from '#utils/log';
 const TAG = 'amp-fx';
 
 /** @enum {string} */
-export const ScrollTogglePosition = {
+export const SCROLL_TOGGLE_POSITION_ENUM = {
   TOP: 'top',
   BOTTOM: 'bottom',
 };
@@ -138,7 +138,7 @@ export function getScrollToggleFloatInOffset(element, isShown, position) {
     return 0;
   }
   const offset = element./*OK*/ getBoundingClientRect().height;
-  if (position == ScrollTogglePosition.TOP) {
+  if (position == SCROLL_TOGGLE_POSITION_ENUM.TOP) {
     return -offset;
   }
   return offset;

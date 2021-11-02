@@ -10,14 +10,14 @@ import {user, userAssert} from '#utils/log';
 const TAG = 'amp-story-auto-ads:config';
 
 /** @enum {boolean} */
-const DisallowedAdAttributes = {
+const DISALLOWED_AD_ATTRIBUTES_ENUM = {
   'height': true,
   'layout': true,
   'width': true,
 };
 
 /** @enum {boolean} */
-const AllowedAdTypes = {
+const ALLOWED_AD_TYPES_ENUM = {
   'adsense': true,
   'custom': true,
   'doubleclick': true,
@@ -73,7 +73,7 @@ export class StoryAdConfig {
       if (isObject(value)) {
         adAttributes[attr] = JSON.stringify(value);
       }
-      if (DisallowedAdAttributes[attr]) {
+      if (DISALLOWED_AD_ATTRIBUTES_ENUM[attr]) {
         user().warn(TAG, 'ad-attribute "%s" is not allowed', attr);
         delete adAttributes[attr];
       }
@@ -118,7 +118,7 @@ export class StoryAdConfig {
    */
   validateType_(type) {
     userAssert(
-      !!AllowedAdTypes[type],
+      !!ALLOWED_AD_TYPES_ENUM[type],
       `${TAG} "${type}" ad type is missing or not supported`
     );
 

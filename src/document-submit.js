@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 
@@ -152,7 +152,7 @@ export function onDocumentFormSubmit_(e) {
       /*source*/ form,
       /*caller*/ form,
       e,
-      ActionTrust.HIGH
+      ACTION_TRUST_ENUM.HIGH
     );
   }
 }

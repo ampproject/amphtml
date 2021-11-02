@@ -1,6 +1,6 @@
 import {
+  FX_TYPE_ENUM,
   FxBindings,
-  FxType,
   getFxTypes,
   isValidTypeCombination,
   sanitizeFxTypes,
@@ -23,10 +23,12 @@ describes.fakeWin('amp-fx types', {amp: false}, (env) => {
     const expectedKey = (type) => type.replace(/\-/g, '_').toUpperCase();
 
     it('has matching FxType for each type', () => {
-      expect(Object.keys(FxType), 'FxType').to.have.length(validFxTypes.length);
+      expect(Object.keys(FX_TYPE_ENUM), 'FxType').to.have.length(
+        validFxTypes.length
+      );
 
       validFxTypes.forEach((type) => {
-        expect(FxType).to.include({[expectedKey(type)]: type});
+        expect(FX_TYPE_ENUM).to.include({[expectedKey(type)]: type});
       });
     });
 

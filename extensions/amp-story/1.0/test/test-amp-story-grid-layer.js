@@ -1,8 +1,8 @@
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {ACTION_ENUM, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
-import {MediaType} from '../media-pool';
+import {MEDIA_TYPE_ENUM} from '../media-pool';
 import {Services} from '#service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {setStyles} from '#core/dom/style';
@@ -26,8 +26,8 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
       getMaxMediaElementCounts: () => ({
-        [MediaType.VIDEO]: 8,
-        [MediaType.AUDIO]: 8,
+        [MEDIA_TYPE_ENUM.VIDEO]: 8,
+        [MEDIA_TYPE_ENUM.AUDIO]: 8,
       }),
     };
 
@@ -111,7 +111,10 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   it('should apply the aspect-ratio attribute from the responsiveness preset', async () => {
     gridLayerEl.setAttribute('preset', '2021-foreground');
 
-    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+    storeService.dispatch(ACTION_ENUM.SET_PAGE_SIZE, {
+      width: 1000,
+      height: 1000,
+    });
 
     expect(
       getComputedStyle(gridLayerEl).getPropertyValue('--aspect-ratio')

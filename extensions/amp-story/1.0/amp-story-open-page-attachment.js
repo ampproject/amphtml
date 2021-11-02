@@ -1,8 +1,8 @@
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
-import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '#service/localization/strings';
+import {ATTACHMENT_THEME_ENUM} from './amp-story-page-attachment';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {dev} from '#utils/log';
 import {localize} from './amp-story-localization-service';
@@ -17,7 +17,7 @@ import {getWin} from '#core/window';
 /**
  * @enum {string}
  */
-const CtaAccentElement = {
+const CTA_ACCENT_ELEMENT_ENUM = {
   TEXT: 'text',
   BACKGROUND: 'background',
 };
@@ -122,7 +122,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   }
   openAttachmentEl.setAttribute('theme', themeAttribute);
 
-  if (themeAttribute === AttachmentTheme.CUSTOM) {
+  if (themeAttribute === ATTACHMENT_THEME_ENUM.CUSTOM) {
     setCustomThemeStyles(attachmentEl, openAttachmentEl);
   }
 
@@ -133,7 +133,10 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
     attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
     ? openLabelAttr.trim()
-    : localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+    : localize(
+        pageEl,
+        LOCALIZED_STRING_ID_ENUM.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      );
   ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
@@ -166,8 +169,8 @@ const renderInlineUi = (pageEl, attachmentEl) => {
 
   // Set theme.
   const theme = attachmentEl.getAttribute('theme');
-  if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-    openAttachmentEl.setAttribute('theme', AttachmentTheme.DARK);
+  if (theme && ATTACHMENT_THEME_ENUM.DARK === theme.toLowerCase()) {
+    openAttachmentEl.setAttribute('theme', ATTACHMENT_THEME_ENUM.DARK);
   }
 
   // Append text & aria-label if defined.
@@ -176,7 +179,10 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
-    localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+    localize(
+      pageEl,
+      LOCALIZED_STRING_ID_ENUM.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    );
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   if (openLabel !== 'none') {
@@ -243,7 +249,7 @@ export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
   });
   if (
     attachmentEl.getAttribute('cta-accent-element') ===
-    CtaAccentElement.BACKGROUND
+    CTA_ACCENT_ELEMENT_ENUM.BACKGROUND
   ) {
     setImportantStyles(openAttachmentEl, {
       '--i-amphtml-outlink-cta-background-color': accentColor,

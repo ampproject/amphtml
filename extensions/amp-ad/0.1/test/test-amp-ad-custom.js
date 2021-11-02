@@ -1,5 +1,5 @@
 import {AmpAdCustom} from '../amp-ad-custom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {Services} from '#service';
 import {createElementWithAttributes, removeChildren} from '#core/dom';
 
@@ -193,7 +193,9 @@ describes.sandboxed.skip('#getLayoutPriority', {}, () => {
           /*body*/ env.ampdoc.getBody()
         );
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+        expect(customAd.getLayoutPriority()).to.equal(
+          LAYOUT_PRIORITY_ENUM.CONTENT
+        );
       });
     }
   );
@@ -214,7 +216,9 @@ describes.sandboxed.skip('#getLayoutPriority', {}, () => {
           /*body*/ env.ampdoc.getBody()
         );
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+        expect(customAd.getLayoutPriority()).to.equal(
+          LAYOUT_PRIORITY_ENUM.CONTENT
+        );
       });
     }
   );

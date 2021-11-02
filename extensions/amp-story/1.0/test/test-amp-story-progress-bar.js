@@ -1,4 +1,4 @@
-import {Action, getStoreService} from '../amp-story-store-service';
+import {ACTION_ENUM, getStoreService} from '../amp-story-store-service';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '#service';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
@@ -21,7 +21,7 @@ describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
     });
     storeService = getStoreService(env.win);
     const storyEl = doc.createElement('amp-story');
-    storeService.dispatch(Action.SET_PAGE_IDS, [
+    storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, [
       'page-1',
       'page-2',
       'page-3',
@@ -41,9 +41,9 @@ describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
       );
       expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).not.to
         .exist;
-      storeService.dispatch(Action.TOGGLE_AD, true);
+      storeService.dispatch(ACTION_ENUM.TOGGLE_AD, true);
       expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).to.exist;
-      storeService.dispatch(Action.TOGGLE_AD, false);
+      storeService.dispatch(ACTION_ENUM.TOGGLE_AD, false);
       expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).not.to
         .exist;
     });

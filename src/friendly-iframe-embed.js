@@ -1,5 +1,5 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {isDocumentReady} from '#core/document/ready';
@@ -436,7 +436,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   whenRenderStarted() {
-    return this.signals_.whenSignal(CommonSignals.RENDER_START);
+    return this.signals_.whenSignal(COMMON_SIGNALS_ENUM.RENDER_START);
   }
 
   /**
@@ -455,7 +455,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   whenIniLoaded() {
-    return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+    return this.signals_.whenSignal(COMMON_SIGNALS_ENUM.INI_LOAD);
   }
 
   /**
@@ -480,7 +480,7 @@ export class FriendlyIframeEmbed {
    */
   pause() {
     if (this.ampdoc) {
-      this.ampdoc.overrideVisibilityState(VisibilityState.PAUSED);
+      this.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.PAUSED);
     }
   }
 
@@ -489,7 +489,7 @@ export class FriendlyIframeEmbed {
    */
   resume() {
     if (this.ampdoc) {
-      this.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+      this.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.VISIBLE);
     }
   }
 
@@ -501,7 +501,7 @@ export class FriendlyIframeEmbed {
     if (this.host) {
       this.host.renderStarted();
     } else {
-      this.signals_.signal(CommonSignals.RENDER_START);
+      this.signals_.signal(COMMON_SIGNALS_ENUM.RENDER_START);
     }
 
     // TODO(ccordry): remove when no-signing launched.
@@ -537,7 +537,7 @@ export class FriendlyIframeEmbed {
       this.whenRenderComplete(),
       whenContentIniLoad(this.ampdoc, this.win, rect),
     ]).then(() => {
-      this.signals_.signal(CommonSignals.INI_LOAD);
+      this.signals_.signal(COMMON_SIGNALS_ENUM.INI_LOAD);
     });
   }
 

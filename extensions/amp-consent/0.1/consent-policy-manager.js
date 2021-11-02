@@ -1,9 +1,9 @@
 import {
-  CONSENT_ITEM_STATE,
+  CONSENT_ITEM_STATE_ENUM,
   ConsentInfoDef,
-  PURPOSE_CONSENT_STATE,
+  PURPOSE_CONSENT_STATE_ENUM,
 } from './consent-info';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
@@ -188,23 +188,23 @@ export class ConsentPolicyManager {
     this.consentString_ = consentStr;
     this.consentMetadata_ = consentMetadata;
     this.purposeConsents_ = purposeConsents;
-    if (state === CONSENT_ITEM_STATE.UNKNOWN) {
+    if (state === CONSENT_ITEM_STATE_ENUM.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
     }
 
-    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
+    if (state == CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED) {
       const shouldOverwrite =
-        this.consentState_ != CONSENT_ITEM_STATE.ACCEPTED &&
-        this.consentState_ != CONSENT_ITEM_STATE.REJECTED;
+        this.consentState_ != CONSENT_ITEM_STATE_ENUM.ACCEPTED &&
+        this.consentState_ != CONSENT_ITEM_STATE_ENUM.REJECTED;
       // Ignore the consent item state and overwrite state value.
       if (shouldOverwrite) {
-        this.consentState_ = CONSENT_ITEM_STATE.NOT_REQUIRED;
+        this.consentState_ = CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED;
       }
-    } else if (state == CONSENT_ITEM_STATE.DISMISSED) {
+    } else if (state == CONSENT_ITEM_STATE_ENUM.DISMISSED) {
       // When dismissed, use the old value
       if (this.consentState_ === null) {
-        this.consentState_ = CONSENT_ITEM_STATE.UNKNOWN;
+        this.consentState_ = CONSENT_ITEM_STATE_ENUM.UNKNOWN;
       }
       // None of the supplementary consent data changes with dismiss action
       this.consentString_ = prevConsentStr;
@@ -243,7 +243,7 @@ export class ConsentPolicyManager {
         'can not find policy %s, only predefined policies are supported',
         policyId
       );
-      return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
+      return Promise.resolve(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
     }
     return this.whenPolicyInstanceRegistered_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
@@ -334,7 +334,7 @@ export class ConsentPolicyManager {
       }
       const shouldUnblock = (purpose) =>
         hasOwn(this.purposeConsents_, purpose) &&
-        this.purposeConsents_[purpose] === PURPOSE_CONSENT_STATE.ACCEPTED;
+        this.purposeConsents_[purpose] === PURPOSE_CONSENT_STATE_ENUM.ACCEPTED;
       return purposes.every(shouldUnblock);
     });
   }
@@ -375,12 +375,12 @@ export class ConsentPolicyInstance {
     this.readyResolver_ = readyDeferred.resolve;
 
     /** @private {CONSENT_POLICY_STATE} */
-    this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
+    this.status_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
 
     /** @private {!Array<CONSENT_POLICY_STATE>} */
     this.unblockStateLists_ = config['unblockOn'] || [
-      CONSENT_POLICY_STATE.SUFFICIENT,
-      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+      CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
+      CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
     ];
   }
 
@@ -406,7 +406,7 @@ export class ConsentPolicyInstance {
           timeoutConfig['fallbackAction'] &&
           timeoutConfig['fallbackAction'] == 'reject'
         ) {
-          fallbackState = CONSENT_ITEM_STATE.REJECTED;
+          fallbackState = CONSENT_ITEM_STATE_ENUM.REJECTED;
         } else if (
           timeoutConfig['fallbackAction'] &&
           timeoutConfig['fallbackAction'] != 'dismiss'
@@ -431,7 +431,7 @@ export class ConsentPolicyInstance {
     if (timeoutSecond != null) {
       win.setTimeout(() => {
         // Force evaluate on timeout
-        fallbackState = fallbackState || CONSENT_ITEM_STATE.UNKNOWN;
+        fallbackState = fallbackState || CONSENT_ITEM_STATE_ENUM.UNKNOWN;
         this.evaluate(fallbackState, true);
       }, timeoutSecond * 1000);
     }
@@ -454,14 +454,14 @@ export class ConsentPolicyInstance {
       return;
     }
 
-    if (state === CONSENT_ITEM_STATE.ACCEPTED) {
-      this.status_ = CONSENT_POLICY_STATE.SUFFICIENT;
-    } else if (state === CONSENT_ITEM_STATE.REJECTED) {
-      this.status_ = CONSENT_POLICY_STATE.INSUFFICIENT;
-    } else if (state === CONSENT_ITEM_STATE.NOT_REQUIRED) {
-      this.status_ = CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
+    if (state === CONSENT_ITEM_STATE_ENUM.ACCEPTED) {
+      this.status_ = CONSENT_POLICY_STATE_ENUM.SUFFICIENT;
+    } else if (state === CONSENT_ITEM_STATE_ENUM.REJECTED) {
+      this.status_ = CONSENT_POLICY_STATE_ENUM.INSUFFICIENT;
+    } else if (state === CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED) {
+      this.status_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED;
     } else {
-      this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
+      this.status_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
     }
 
     if (this.readyResolver_) {

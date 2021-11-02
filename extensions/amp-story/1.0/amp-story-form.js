@@ -1,6 +1,6 @@
-import {Action, getStoreService} from './amp-story-store-service';
+import {ACTION_ENUM, getStoreService} from './amp-story-store-service';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {localize} from './amp-story-localization-service';
 import {htmlFor} from '#core/dom/static-template';
@@ -9,7 +9,7 @@ import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 /**
  * @enum {string}
  */
-const FormResponseAttribute = {
+const FORM_RESPONSE_ATTRIBUTE_ENUM = {
   SUBMITTING: 'submitting',
   SUCCESS: 'submit-success',
   ERROR: 'submit-error',
@@ -18,10 +18,12 @@ const FormResponseAttribute = {
 /**
  * @enum {string}
  */
-const AttributeElementSelector = {
-  SUBMITTING: `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`,
-  SUCCESS: `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`,
-  ERROR: `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`,
+const ATTRIBUTE_ELEMENT_SELECTOR_ENUM = {
+  SUBMITTING: `[${escapeCssSelectorIdent(
+    FORM_RESPONSE_ATTRIBUTE_ENUM.SUBMITTING
+  )}]`,
+  SUCCESS: `[${escapeCssSelectorIdent(FORM_RESPONSE_ATTRIBUTE_ENUM.SUCCESS)}]`,
+  ERROR: `[${escapeCssSelectorIdent(FORM_RESPONSE_ATTRIBUTE_ENUM.ERROR)}]`,
 };
 
 /**
@@ -30,7 +32,7 @@ const AttributeElementSelector = {
  */
 export function allowlistFormActions(win) {
   const storeService = getStoreService(win);
-  storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
+  storeService.dispatch(ACTION_ENUM.ADD_TO_ACTIONS_ALLOWLIST, [
     {tagOrTarget: 'FORM', method: 'clear'},
     {tagOrTarget: 'FORM', method: 'submit'},
   ]);
@@ -46,10 +48,16 @@ export function allowlistFormActions(win) {
 export function setupResponseAttributeElements(win, formEl) {
   let submittingEl = scopedQuerySelector(
     formEl,
-    AttributeElementSelector.SUBMITTING
+    ATTRIBUTE_ELEMENT_SELECTOR_ENUM.SUBMITTING
   );
-  let successEl = scopedQuerySelector(formEl, AttributeElementSelector.SUCCESS);
-  let errorEl = scopedQuerySelector(formEl, AttributeElementSelector.ERROR);
+  let successEl = scopedQuerySelector(
+    formEl,
+    ATTRIBUTE_ELEMENT_SELECTOR_ENUM.SUCCESS
+  );
+  let errorEl = scopedQuerySelector(
+    formEl,
+    ATTRIBUTE_ELEMENT_SELECTOR_ENUM.ERROR
+  );
 
   // Create and append fallback form attribute elements, if necessary.
   if (!submittingEl) {
@@ -74,9 +82,9 @@ export function setupResponseAttributeElements(win, formEl) {
  */
 export function getResponseAttributeElements(formEl) {
   const selector = `
-    ${AttributeElementSelector.SUBMITTING},
-    ${AttributeElementSelector.SUCCESS},
-    ${AttributeElementSelector.ERROR}`;
+    ${ATTRIBUTE_ELEMENT_SELECTOR_ENUM.SUBMITTING},
+    ${ATTRIBUTE_ELEMENT_SELECTOR_ENUM.SUCCESS},
+    ${ATTRIBUTE_ELEMENT_SELECTOR_ENUM.ERROR}`;
   return Array.from(scopedQuerySelectorAll(formEl, selector));
 }
 
@@ -92,7 +100,7 @@ export function getResponseAttributeElements(formEl) {
 function createFormSubmittingEl_(win, formEl) {
   const submittingEl = createResponseAttributeEl_(
     formEl,
-    FormResponseAttribute.SUBMITTING
+    FORM_RESPONSE_ATTRIBUTE_ENUM.SUBMITTING
   );
   const loadingSpinner = new LoadingSpinner(win.document);
   submittingEl.firstElementChild.appendChild(loadingSpinner.build());
@@ -112,7 +120,9 @@ function createFormSubmittingEl_(win, formEl) {
 function createFormResultEl_(win, formEl, isSuccess) {
   const resultEl = createResponseAttributeEl_(
     formEl,
-    isSuccess ? FormResponseAttribute.SUCCESS : FormResponseAttribute.ERROR
+    isSuccess
+      ? FORM_RESPONSE_ATTRIBUTE_ENUM.SUCCESS
+      : FORM_RESPONSE_ATTRIBUTE_ENUM.ERROR
   );
 
   const iconEl = win.document.createElement('div');
@@ -125,8 +135,8 @@ function createFormResultEl_(win, formEl, isSuccess) {
   textEl.textContent = localize(
     win.document,
     isSuccess
-      ? LocalizedStringId.AMP_STORY_FORM_SUBMIT_SUCCESS
-      : LocalizedStringId.AMP_STORY_FORM_SUBMIT_ERROR
+      ? LOCALIZED_STRING_ID_ENUM.AMP_STORY_FORM_SUBMIT_SUCCESS
+      : LOCALIZED_STRING_ID_ENUM.AMP_STORY_FORM_SUBMIT_ERROR
   );
   resultEl.firstElementChild.appendChild(textEl);
 

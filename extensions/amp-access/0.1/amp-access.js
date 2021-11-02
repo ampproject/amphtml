@@ -1,6 +1,6 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
-import {TickLabel} from '#core/constants/enums';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {TICK_LABEL_ENUM} from '#core/constants/enums';
 import {Observable} from '#core/data-structures/observable';
 import {isJsonScriptTag} from '#core/dom';
 import {isArray} from '#core/types';
@@ -15,7 +15,7 @@ import {dev, user, userAssert} from '#utils/log';
 
 import {AmpAccessEvaluator} from './access-expr';
 import {AccessVars} from './access-vars';
-import {AccessSource, AccessType} from './amp-access-source';
+import {ACCESS_TYPE_ENUM, AccessSource} from './amp-access-source';
 
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {cancellation} from '../../../src/error-reporting';
@@ -122,9 +122,9 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tick(TICK_LABEL_ENUM.ACCESS_AUTHORIZATION);
         this.performance_.tickSinceVisible(
-          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+          TICK_LABEL_ENUM.ACCESS_AUTHORIZATION_VISIBLE
         );
         this.performance_.flush();
       }
@@ -133,7 +133,10 @@ export class AccessService {
     // Re-authorize newly added sections.
     ampdoc
       .getRootNode()
-      .addEventListener(AmpEvents.DOM_UPDATE, this.onDomUpdate_.bind(this));
+      .addEventListener(
+        AMP_EVENTS_ENUM.DOM_UPDATE,
+        this.onDomUpdate_.bind(this)
+      );
   }
 
   /** @override from AccessVars */
@@ -248,7 +251,7 @@ export class AccessService {
   getVendorSource(name) {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
-      if (source.getType() == AccessType.VENDOR) {
+      if (source.getType() == ACCESS_TYPE_ENUM.VENDOR) {
         const vendorAdapter =
           /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
             source.getAdapter()
@@ -693,7 +696,7 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ACTION_TRUST_ENUM.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'login') {

@@ -1,4 +1,4 @@
-import {Key} from '../../../../build-system/tasks/e2e/e2e-types';
+import {KEY_ENUM} from '../../../../build-system/tasks/e2e/e2e-types';
 
 describes.endtoend(
   'custom browser events',
@@ -49,7 +49,7 @@ describes.endtoend(
       await controller.click(changedInputField);
       await sleep(300);
       await controller.type(changedInputField, 'test-text');
-      await controller.type(changedInputField, Key.Enter);
+      await controller.type(changedInputField, KEY_ENUM.Enter);
 
       // Sleep 1 second for the change event to be sent
       await sleep(1000);
@@ -62,7 +62,7 @@ describes.endtoend(
 
       await controller.click(changedDropdown);
       await controller.type(changedDropdown, '1');
-      await controller.type(changedDropdown, Key.Enter);
+      await controller.type(changedDropdown, KEY_ENUM.Enter);
       // Sleep 1 second for the change event to be sent
       await sleep(1000);
       await expect('https://foo.com/event?type=change&eventId=dropDown').to.have

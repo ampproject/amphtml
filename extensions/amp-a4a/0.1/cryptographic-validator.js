@@ -4,9 +4,16 @@ import {utf8Decode} from '#core/types/string/bytes';
 
 import {user} from '#utils/log';
 
-import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
+import {
+  AD_RESPONSE_TYPE_ENUM,
+  VALIDATOR_RESULT_ENUM,
+  Validator,
+} from './amp-ad-type-defs';
 import {getAmpAdMetadata} from './amp-ad-utils';
-import {SignatureVerifier, VerificationStatus} from './signature-verifier';
+import {
+  SignatureVerifier,
+  VERIFICATION_STATUS_ENUM,
+} from './signature-verifier';
 
 export const SIGNATURE_VERIFIER_PROPERTY_NAME =
   'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
@@ -41,9 +48,9 @@ export class CryptographicValidator extends Validator {
     return /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
       type:
         verificationSucceeded && !!creativeData.creativeMetadata
-          ? ValidatorResult.AMP
-          : ValidatorResult.NON_AMP,
-      adResponseType: AdResponseType.CRYPTO,
+          ? VALIDATOR_RESULT_ENUM.AMP
+          : VALIDATOR_RESULT_ENUM.NON_AMP,
+      adResponseType: AD_RESPONSE_TYPE_ENUM.CRYPTO,
       creativeData,
     });
   }
@@ -58,15 +65,15 @@ export class CryptographicValidator extends Validator {
       )
       .then((status) => {
         switch (status) {
-          case VerificationStatus.OK:
+          case VERIFICATION_STATUS_ENUM.OK:
             return this.createOutput_(true, unvalidatedBytes);
-          case VerificationStatus.UNVERIFIED:
+          case VERIFICATION_STATUS_ENUM.UNVERIFIED:
           // TODO(levitzky) Preferential render without crypto in some
           // instances.
-          case VerificationStatus.CRYPTO_UNAVAILABLE:
+          case VERIFICATION_STATUS_ENUM.CRYPTO_UNAVAILABLE:
           // TODO(@taymonbeal, #9274): differentiate between these
-          case VerificationStatus.ERROR_KEY_NOT_FOUND:
-          case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
+          case VERIFICATION_STATUS_ENUM.ERROR_KEY_NOT_FOUND:
+          case VERIFICATION_STATUS_ENUM.ERROR_SIGNATURE_MISMATCH:
             user().error(
               TAG,
               `Signature verification failed with status ${status}.`

@@ -1,7 +1,7 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
 import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
 import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
@@ -111,7 +111,7 @@ describes.realWin(
       const source = null;
       const caller = null;
       const event = null;
-      const trust = ActionTrust.DEFAULT;
+      const trust = ACTION_TRUST_ENUM.DEFAULT;
       return new ActionInvocation(
         element,
         method,

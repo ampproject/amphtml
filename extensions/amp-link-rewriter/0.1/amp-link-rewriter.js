@@ -1,6 +1,6 @@
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {LinkRewriter} from './link-rewriter';
-import {Priority} from '#service/navigation';
+import {PRIORITY_ENUM} from '#service/navigation';
 import {Services} from '#service';
 
 export class AmpLinkRewriter extends AMP.BaseElement {
@@ -51,14 +51,14 @@ export class AmpLinkRewriter extends AMP.BaseElement {
     const nav = Services.navigationForDoc(this.getAmpDoc());
     nav.registerAnchorMutator((anchor) => {
       this.rewriter_.handleClick(anchor);
-    }, Priority.LINK_REWRITER_MANAGER);
+    }, PRIORITY_ENUM.LINK_REWRITER_MANAGER);
 
     return true;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.NODISPLAY;
+    return layout === LAYOUT_ENUM.NODISPLAY;
   }
 }
 

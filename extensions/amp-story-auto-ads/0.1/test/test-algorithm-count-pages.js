@@ -2,11 +2,14 @@ import {macroTask} from '#testing/helpers';
 
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
-  Action,
+  ACTION_ENUM,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {CountPagesAlgorithm} from '../algorithm-count-pages';
-import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
+import {
+  INSERTION_STATE_ENUM,
+  StoryAdPageManager,
+} from '../story-ad-page-manager';
 
 describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
   let storeService;
@@ -23,14 +26,14 @@ describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
   describe('#isStoryEligible', () => {
     it('returns false for stories < eight pages', () => {
       const pageIds = ['1', '2', '3', '4', '5', '6', '7'];
-      storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
+      storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
       const algo = new CountPagesAlgorithm(storeService, pageManager);
       expect(algo.isStoryEligible()).to.be.false;
     });
 
     it('returns false for stories >= eight pages', () => {
       const pageIds = ['1', '2', '3', '4', '5', '6', '7', '8'];
-      storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
+      storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
       const algo = new CountPagesAlgorithm(storeService, pageManager);
       expect(algo.isStoryEligible()).to.be.true;
     });
@@ -57,7 +60,7 @@ describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
         .returns({isLoaded: () => true, hasTimedOut: () => false});
       const insertionStub = env.sandbox
         .stub(pageManager, 'maybeInsertPageAfter')
-        .resolves(InsertionState.SUCCESS);
+        .resolves(INSERTION_STATE_ENUM.SUCCESS);
       const algo = new CountPagesAlgorithm(storeService, pageManager);
       // We do not get page change signal for page one.
       algo.onPageChange('2');
@@ -147,14 +150,14 @@ describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
 
     it('will place another ad after first view and 7 pages seen', async () => {
       const pageIds = new Array(15).fill(0).map((_, i) => (i + 1).toString());
-      storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
+      storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
       env.sandbox.stub(pageManager, 'hasUnusedAdPage').returns(true);
       env.sandbox
         .stub(pageManager, 'getUnusedAdPage')
         .returns({isLoaded: () => true, hasTimedOut: () => false});
       const insertionStub = env.sandbox
         .stub(pageManager, 'maybeInsertPageAfter')
-        .resolves(InsertionState.SUCCESS);
+        .resolves(INSERTION_STATE_ENUM.SUCCESS);
       const createPageStub = env.sandbox.stub(pageManager, 'createAdPage');
       const algo = new CountPagesAlgorithm(storeService, pageManager);
       // We do not get page change signal for page one.
@@ -187,7 +190,7 @@ describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
         .returns({isLoaded: () => true, hasTimedOut: () => false});
       const insertionStub = env.sandbox
         .stub(pageManager, 'maybeInsertPageAfter')
-        .resolves(InsertionState.SUCCESS);
+        .resolves(INSERTION_STATE_ENUM.SUCCESS);
       const algo = new CountPagesAlgorithm(storeService, pageManager);
       // We do not get page change signal for page one.
       algo.onPageChange('2');
@@ -240,7 +243,7 @@ describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
   describe('#onNewAdView', () => {
     it('should call to create next ad if > 7 pages left', () => {
       const pageIds = ['1', '2', '3', '4', '5', '6', '7', '8'];
-      storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
+      storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
       const createPageStub = env.sandbox.stub(pageManager, 'createAdPage');
       const algo = new CountPagesAlgorithm(storeService, pageManager);
       algo.onNewAdView(0);
@@ -249,7 +252,7 @@ describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
 
     it('should not call to create next ad if < 7 pages left', () => {
       const pageIds = ['1', '2', '3', '4', '5', '6', '7', '8'];
-      storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
+      storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
       const createPageStub = env.sandbox.stub(pageManager, 'createAdPage');
       const algo = new CountPagesAlgorithm(storeService, pageManager);
       algo.onNewAdView(1);

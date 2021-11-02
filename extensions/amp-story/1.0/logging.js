@@ -1,4 +1,4 @@
-import {LogLevel, devAssert} from '#utils/log';
+import {LOG_LEVEL_ENUM, devAssert} from '#utils/log';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {tryResolve} from '#core/data-structures/promise';
 
@@ -71,13 +71,13 @@ function getPosterFromVideo(el) {
 }
 
 /** @enum {!AmpStoryLogType_1_0_Def} */
-const LogType = {
+const LOG_TYPE_ENUM = {
   /** Errors */
   VIDEOS_POSTER_SPECIFIED: {
     message: 'Videos should specify a poster image.',
     moreInfo: AMPPROJECT_DOCS + '/reference/components/amp-video#poster',
     selector: 'video:not([poster])',
-    level: LogLevel.ERROR,
+    level: LOG_LEVEL_ENUM.ERROR,
   },
 
   /** Warnings */
@@ -88,28 +88,28 @@ const LogType = {
     moreInfo: AMPPROJECT_DOCS + '/guides/responsive/art_direction#srcset',
     selector: 'img:not([srcset])',
     predicate: (el) => el.naturalWidth <= 720 && el.naturalHeight <= 1280,
-    level: LogLevel.WARN,
+    level: LOG_LEVEL_ENUM.WARN,
   },
 
   IMAGES_PORTRAIT: {
     message: 'Full-bleed images should be in portrait orientation.',
     selector: 'amp-story-grid-layer[template="fill"] > amp-img > img',
     predicate: (el) => el.naturalWidth < el.naturalHeight,
-    level: LogLevel.WARN,
+    level: LOG_LEVEL_ENUM.WARN,
   },
 
   VIDEOS_MAX_720P: {
     message: 'Videos should not be larger than 720p.',
     selector: 'video',
     predicate: (el) => el.videoWidth <= 720 && el.videoHeight <= 1280,
-    level: LogLevel.WARN,
+    level: LOG_LEVEL_ENUM.WARN,
   },
 
   VIDEOS_PORTRAIT: {
     message: 'Full-bleed videos should be in portrait orientation.',
     selector: 'amp-story-grid-layer[template="fill"] > amp-video > video',
     predicate: (el) => el.videoWidth < el.videoHeight,
-    level: LogLevel.WARN,
+    level: LOG_LEVEL_ENUM.WARN,
   },
 
   VIDEO_POSTER_MAX_720P: {
@@ -119,7 +119,7 @@ const LogType = {
       getPosterFromVideo(el).then((poster) => {
         return poster.naturalWidth <= 720 && poster.naturalHeight <= 1280;
       }),
-    level: LogLevel.WARN,
+    level: LOG_LEVEL_ENUM.WARN,
   },
 
   VIDEO_POSTER_POTRAIT: {
@@ -132,7 +132,7 @@ const LogType = {
       getPosterFromVideo(el).then(
         (poster) => poster.naturalWidth < poster.naturalHeight
       ),
-    level: LogLevel.WARN,
+    level: LOG_LEVEL_ENUM.WARN,
   },
 };
 
@@ -142,7 +142,7 @@ const LogType = {
  * @return {!AmpStoryLogType_1_0_Def}
  */
 function getLogType(logTypeKey) {
-  const logType = LogType[logTypeKey];
+  const logType = LOG_TYPE_ENUM[logTypeKey];
   devAssert(logType, `There is no log type "${logTypeKey}".`);
   devAssert(
     logType.message,
@@ -218,7 +218,7 @@ function logEntryCompareFn(logEntryA, logEntryB) {
  * @return {!Promise<!Array<!AmpStoryLogEntryDef>>}
  */
 export function getLogEntries(rootElement) {
-  const logEntryPromises = Object.keys(LogType).reduce((entries, key) => {
+  const logEntryPromises = Object.keys(LOG_TYPE_ENUM).reduce((entries, key) => {
     const logType = getLogType(key);
     const newEntries = getLogEntriesForType(rootElement, logType);
     return entries.concat(newEntries);

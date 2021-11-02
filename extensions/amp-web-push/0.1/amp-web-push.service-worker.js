@@ -28,7 +28,7 @@
  */
 
 /** @enum {string} */
-const WorkerMessengerCommand = {
+const WORKER_MESSENGER_COMMAND_ENUM = {
   /*
     Used to request the current subscription state.
    */
@@ -70,13 +70,13 @@ self.addEventListener('message', (event) => {
   const {command} = event.data;
 
   switch (command) {
-    case WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE:
+    case WORKER_MESSENGER_COMMAND_ENUM.AMP_SUBSCRIPTION_STATE:
       onMessageReceivedSubscriptionState();
       break;
-    case WorkerMessengerCommand.AMP_SUBSCRIBE:
+    case WORKER_MESSENGER_COMMAND_ENUM.AMP_SUBSCRIBE:
       onMessageReceivedSubscribe();
       break;
-    case WorkerMessengerCommand.AMP_UNSUBSCRIBE:
+    case WORKER_MESSENGER_COMMAND_ENUM.AMP_UNSUBSCRIBE:
       onMessageReceivedUnsubscribe();
       break;
   }
@@ -101,12 +101,15 @@ function onMessageReceivedSubscriptionState() {
     })
     .then((permissionStateOrNull) => {
       if (permissionStateOrNull == null) {
-        broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE, false);
+        broadcastReply(
+          WORKER_MESSENGER_COMMAND_ENUM.AMP_SUBSCRIPTION_STATE,
+          false
+        );
       } else {
         const isSubscribed =
           !!retrievedPushSubscription && permissionStateOrNull === 'granted';
         broadcastReply(
-          WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE,
+          WORKER_MESSENGER_COMMAND_ENUM.AMP_SUBSCRIPTION_STATE,
           isSubscribed
         );
       }
@@ -138,7 +141,7 @@ function onMessageReceivedSubscribe() {
     })
     .then(() => {
       // IMPLEMENT: Forward the push subscription to your server here
-      broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIBE, null);
+      broadcastReply(WORKER_MESSENGER_COMMAND_ENUM.AMP_SUBSCRIBE, null);
     });
 }
 
@@ -153,7 +156,7 @@ function onMessageReceivedUnsubscribe() {
     .then((subscription) => subscription.unsubscribe())
     .then(() => {
       // OPTIONALLY IMPLEMENT: Forward the unsubscription to your server here
-      broadcastReply(WorkerMessengerCommand.AMP_UNSUBSCRIBE, null);
+      broadcastReply(WORKER_MESSENGER_COMMAND_ENUM.AMP_UNSUBSCRIBE, null);
     });
 }
 

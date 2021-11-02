@@ -1,6 +1,6 @@
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {STATE_PROPERTY_ENUM} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {number} */
 const BEGINNING_OF_STORY_BUFFER = 3;
@@ -65,7 +65,7 @@ export class PredeterminedPositionAlgorithm {
     this.targetInterval_ = this.getIntervalFromExpId_(placementsExpBranch);
 
     /** @private {!Array<string>} */
-    this.storyPageIds_ = storeService.get(StateProperty.PAGE_IDS);
+    this.storyPageIds_ = storeService.get(STATE_PROPERTY_ENUM.PAGE_IDS);
 
     /** @private {!Array<number>} */
     this.adPositions_ = [];

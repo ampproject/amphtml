@@ -14,7 +14,7 @@ const overflowHeight = 40;
  * @enum {number}
  * @visibleForTesting
  */
-export const AD_TYPE = {
+export const AD_TYPE_ENUM = {
   /** Value if we can't determine which product to request */
   UNSUPPORTED: 0,
   /** AdSense for Search */
@@ -182,17 +182,17 @@ function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
   const callbackBackfill = callbackWithBackfill.bind(null, global, afsP, afsA);
 
   switch (type) {
-    case AD_TYPE.AFS:
+    case AD_TYPE_ENUM.AFS:
       /** Do not backfill, request AFS */
       afsA['adLoadedCallback'] = callback;
       global._googCsa('ads', afsP, afsA);
       break;
-    case AD_TYPE.AFSH:
+    case AD_TYPE_ENUM.AFSH:
       /** Do not backfill, request AFSh */
       afshA['adLoadedCallback'] = callback;
       global._googCsa('plas', afshP, afshA);
       break;
-    case AD_TYPE.AFSH_BACKFILL:
+    case AD_TYPE_ENUM.AFSH_BACKFILL:
       /** Backfill with AFS, request AFSh */
       afshA['adLoadedCallback'] = callbackBackfill;
       global._googCsa('plas', afshP, afshA);
@@ -207,15 +207,15 @@ function requestCsaAds(global, data, afsP, afsA, afshP, afshA) {
  */
 function getAdType(data) {
   if (data['afsPageOptions'] != null && data['afshPageOptions'] == null) {
-    return AD_TYPE.AFS;
+    return AD_TYPE_ENUM.AFS;
   }
   if (data['afsPageOptions'] == null && data['afshPageOptions'] != null) {
-    return AD_TYPE.AFSH;
+    return AD_TYPE_ENUM.AFSH;
   }
   if (data['afsPageOptions'] != null && data['afshPageOptions'] != null) {
-    return AD_TYPE.AFSH_BACKFILL;
+    return AD_TYPE_ENUM.AFSH_BACKFILL;
   } else {
-    return AD_TYPE.UNSUPPORTED;
+    return AD_TYPE_ENUM.UNSUPPORTED;
   }
 }
 

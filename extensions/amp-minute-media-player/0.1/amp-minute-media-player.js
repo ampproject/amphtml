@@ -5,7 +5,7 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {LAYOUT_ENUM, isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -23,7 +23,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-minute-media-player';
@@ -103,7 +103,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == Layout.FLEX_ITEM;
+    return isLayoutSizeDefined(layout) || layout == LAYOUT_ENUM.FLEX_ITEM;
   }
 
   /**
@@ -164,12 +164,12 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     }
 
     redispatch(this.element, data['event'], {
-      'ready': VideoEvents.LOAD,
-      'playing': VideoEvents.PLAYING,
-      'pause': VideoEvents.PAUSE,
-      'ended': [VideoEvents.ENDED, VideoEvents.PAUSE],
-      'ads-ad-started': VideoEvents.AD_START,
-      'ads-ad-ended': VideoEvents.AD_END,
+      'ready': VIDEO_EVENTS_ENUM.LOAD,
+      'playing': VIDEO_EVENTS_ENUM.PLAYING,
+      'pause': VIDEO_EVENTS_ENUM.PAUSE,
+      'ended': [VIDEO_EVENTS_ENUM.ENDED, VIDEO_EVENTS_ENUM.PAUSE],
+      'ads-ad-started': VIDEO_EVENTS_ENUM.AD_START,
+      'ads-ad-ended': VIDEO_EVENTS_ENUM.AD_END,
     });
 
     if (data['event'] === 'mute') {
@@ -220,7 +220,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      dispatchCustomEvent(element, VideoEvents.LOAD);
+      dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;

@@ -1,5 +1,5 @@
 import {DEFAULT_ACTION} from '#core/constants/action-constants';
-import {LayoutPriority} from '#core/dom/layout';
+import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {Services} from '#service';
@@ -33,7 +33,7 @@ describes.realWin('BaseElement', {amp: true}, (env) => {
       resources,
       'updateLayoutPriority'
     );
-    element.updateLayoutPriority(LayoutPriority.METADATA);
+    element.updateLayoutPriority(LAYOUT_PRIORITY_ENUM.METADATA);
     expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
 

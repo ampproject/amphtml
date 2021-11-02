@@ -1,10 +1,10 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred} from '#core/data-structures/promise';
 import {hasNextNodeInDocumentOrder} from '#core/dom';
 
 import {Services} from '#service';
-import {Resource, ResourceState} from '#service/resource';
+import {RESOURCE_STATE_ENUM, Resource} from '#service/resource';
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 
 import {dev} from '#utils/log';
@@ -57,10 +57,10 @@ export class InaboxResources {
     if (getMode(this.win).runtime != 'inabox') {
       ampdoc.onVisibilityChanged(() => {
         switch (ampdoc.getVisibilityState()) {
-          case VisibilityState.PAUSED:
+          case VISIBILITY_STATE_ENUM.PAUSED:
             this.resources_.forEach((r) => r.pause());
             break;
-          case VisibilityState.VISIBLE:
+          case VISIBILITY_STATE_ENUM.VISIBLE:
             this.resources_.forEach((r) => r.resume());
             this./*OK*/ schedulePass();
             break;
@@ -205,7 +205,7 @@ export class InaboxResources {
     this.resources_.forEach((resource) => {
       if (
         !resource.element.R1() &&
-        resource.getState() === ResourceState.READY_FOR_LAYOUT &&
+        resource.getState() === RESOURCE_STATE_ENUM.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
         resource.layoutScheduled(now);

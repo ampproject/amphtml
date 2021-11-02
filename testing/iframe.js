@@ -1,5 +1,5 @@
 import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
-import {AmpEvents} from '#core/constants/amp-events';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 
 import {install as installCustomElements} from '#polyfills/custom-elements';
 
@@ -17,8 +17,8 @@ import {FakeLocation} from './fake-dom';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
-import {FormEvents} from '../extensions/amp-form/0.1/form-events';
+import {BIND_EVENTS_ENUM} from '../extensions/amp-bind/0.1/bind-events';
+import {FORM_EVENTS_ENUM} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
 
 let iframeCount = 0;
@@ -61,17 +61,17 @@ export function createFixtureIframe(
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      [AmpEvents.ATTACHED]: 0,
-      [AmpEvents.DOM_UPDATE]: 0,
-      [AmpEvents.ERROR]: 0,
-      [AmpEvents.LOAD_END]: 0,
-      [AmpEvents.LOAD_START]: 0,
-      [AmpEvents.STUBBED]: 0,
-      [AmpEvents.UNLOAD]: 0,
-      [BindEvents.INITIALIZE]: 0,
-      [BindEvents.SET_STATE]: 0,
-      [BindEvents.RESCAN_TEMPLATE]: 0,
-      [FormEvents.SERVICE_INIT]: 0,
+      [AMP_EVENTS_ENUM.ATTACHED]: 0,
+      [AMP_EVENTS_ENUM.DOM_UPDATE]: 0,
+      [AMP_EVENTS_ENUM.ERROR]: 0,
+      [AMP_EVENTS_ENUM.LOAD_END]: 0,
+      [AMP_EVENTS_ENUM.LOAD_START]: 0,
+      [AMP_EVENTS_ENUM.STUBBED]: 0,
+      [AMP_EVENTS_ENUM.UNLOAD]: 0,
+      [BIND_EVENTS_ENUM.INITIALIZE]: 0,
+      [BIND_EVENTS_ENUM.SET_STATE]: 0,
+      [BIND_EVENTS_ENUM.RESCAN_TEMPLATE]: 0,
+      [FORM_EVENTS_ENUM.SERVICE_INIT]: 0,
     };
     let html = __html__[fixture] // eslint-disable-line no-undef
       .replace(

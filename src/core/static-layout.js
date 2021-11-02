@@ -1,6 +1,6 @@
 import {devAssert, devAssertString, userAssert} from '#core/assert';
 import {
-  Layout,
+  LAYOUT_ENUM,
   getLayoutClass,
   getLengthNumeral,
   getLengthUnits,
@@ -104,14 +104,14 @@ export function applyStaticLayout(element) {
       devAssert(parseLayout(completedLayoutAttr))
     );
     if (
-      (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) &&
+      (layout == LAYOUT_ENUM.RESPONSIVE || layout == LAYOUT_ENUM.INTRINSIC) &&
       element.firstElementChild
     ) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
         element.querySelector('i-amphtml-sizer') || undefined;
       element.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
-    } else if (layout == Layout.NODISPLAY) {
+    } else if (layout == LAYOUT_ENUM.NODISPLAY) {
       toggle(element, false);
     }
     return layout;
@@ -127,18 +127,18 @@ export function applyStaticLayout(element) {
   if (isLayoutSizeDefined(layout)) {
     element.classList.add('i-amphtml-layout-size-defined');
   }
-  if (layout == Layout.NODISPLAY) {
+  if (layout == LAYOUT_ENUM.NODISPLAY) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
     toggle(element, false);
-  } else if (layout == Layout.FIXED) {
+  } else if (layout == LAYOUT_ENUM.FIXED) {
     setStyles(element, {
       width: devAssertString(width),
       height: devAssertString(height),
     });
-  } else if (layout == Layout.FIXED_HEIGHT) {
+  } else if (layout == LAYOUT_ENUM.FIXED_HEIGHT) {
     setStyle(element, 'height', devAssertString(height));
-  } else if (layout == Layout.RESPONSIVE) {
+  } else if (layout == LAYOUT_ENUM.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     sizer.setAttribute('slot', 'i-amphtml-svc');
     setStyles(sizer, {
@@ -147,7 +147,7 @@ export function applyStaticLayout(element) {
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
-  } else if (layout == Layout.INTRINSIC) {
+  } else if (layout == LAYOUT_ENUM.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work because other things expect the
     // i-amphtml-sizer element
@@ -163,13 +163,13 @@ export function applyStaticLayout(element) {
     );
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
-  } else if (layout == Layout.FILL) {
+  } else if (layout == LAYOUT_ENUM.FILL) {
     // Do nothing.
-  } else if (layout == Layout.CONTAINER) {
+  } else if (layout == LAYOUT_ENUM.CONTAINER) {
     // Do nothing. Elements themselves will check whether the supplied
     // layout value is acceptable. In particular container is only OK
     // sometimes.
-  } else if (layout == Layout.FLEX_ITEM) {
+  } else if (layout == LAYOUT_ENUM.FLEX_ITEM) {
     // Set height and width to a flex item if they exist.
     // The size set to a flex item could be overridden by `display: flex` later.
     if (width) {
@@ -178,7 +178,7 @@ export function applyStaticLayout(element) {
     if (height) {
       setStyle(element, 'height', height);
     }
-  } else if (layout == Layout.FLUID) {
+  } else if (layout == LAYOUT_ENUM.FLUID) {
     element.classList.add('i-amphtml-layout-awaiting-size');
     if (width) {
       setStyle(element, 'width', width);
@@ -268,8 +268,8 @@ function getEffectiveLayoutInternal(element) {
   // Calculate effective width and height.
   if (
     (!inputLayout ||
-      inputLayout == Layout.FIXED ||
-      inputLayout == Layout.FIXED_HEIGHT) &&
+      inputLayout == LAYOUT_ENUM.FIXED ||
+      inputLayout == LAYOUT_ENUM.FIXED_HEIGHT) &&
     (!inputWidth || !inputHeight) &&
     hasNaturalDimensions(element.tagName)
   ) {
@@ -277,7 +277,7 @@ function getEffectiveLayoutInternal(element) {
     // width/height and are defined to have natural browser dimensions.
     const dimensions = getNaturalDimensions(element);
     width =
-      inputWidth || inputLayout == Layout.FIXED_HEIGHT
+      inputWidth || inputLayout == LAYOUT_ENUM.FIXED_HEIGHT
         ? inputWidth
         : dimensions.width;
     height = inputHeight || dimensions.height;
@@ -290,26 +290,26 @@ function getEffectiveLayoutInternal(element) {
   if (inputLayout) {
     layout = inputLayout;
   } else if (!width && !height) {
-    layout = Layout.CONTAINER;
+    layout = LAYOUT_ENUM.CONTAINER;
   } else if (height == 'fluid') {
-    layout = Layout.FLUID;
+    layout = LAYOUT_ENUM.FLUID;
   } else if (height && (!width || width == 'auto')) {
-    layout = Layout.FIXED_HEIGHT;
+    layout = LAYOUT_ENUM.FIXED_HEIGHT;
   } else if (height && width && (sizesAttr || heightsAttr)) {
-    layout = Layout.RESPONSIVE;
+    layout = LAYOUT_ENUM.RESPONSIVE;
   } else {
-    layout = Layout.FIXED;
+    layout = LAYOUT_ENUM.FIXED;
   }
 
   if (
-    layout == Layout.FIXED ||
-    layout == Layout.FIXED_HEIGHT ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.INTRINSIC
+    layout == LAYOUT_ENUM.FIXED ||
+    layout == LAYOUT_ENUM.FIXED_HEIGHT ||
+    layout == LAYOUT_ENUM.RESPONSIVE ||
+    layout == LAYOUT_ENUM.INTRINSIC
   ) {
     userAssert(height, 'The "height" attribute is missing: %s', element);
   }
-  if (layout == Layout.FIXED_HEIGHT) {
+  if (layout == LAYOUT_ENUM.FIXED_HEIGHT) {
     userAssert(
       !width || width == 'auto',
       'The "width" attribute must be missing or "auto": %s',
@@ -317,9 +317,9 @@ function getEffectiveLayoutInternal(element) {
     );
   }
   if (
-    layout == Layout.FIXED ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.INTRINSIC
+    layout == LAYOUT_ENUM.FIXED ||
+    layout == LAYOUT_ENUM.RESPONSIVE ||
+    layout == LAYOUT_ENUM.INTRINSIC
   ) {
     userAssert(
       width && width != 'auto',
@@ -328,7 +328,7 @@ function getEffectiveLayoutInternal(element) {
     );
   }
 
-  if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
+  if (layout == LAYOUT_ENUM.RESPONSIVE || layout == LAYOUT_ENUM.INTRINSIC) {
     userAssert(
       getLengthUnits(width) == getLengthUnits(height),
       'Length units should be the same for "width" and "height": %s, %s, %s',

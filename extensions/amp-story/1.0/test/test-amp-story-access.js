@@ -1,9 +1,9 @@
 import {
-  Action,
+  ACTION_ENUM,
   AmpStoryStoreService,
-  StateProperty,
+  STATE_PROPERTY_ENUM,
 } from '../amp-story-store-service';
-import {AmpStoryAccess, Type} from '../amp-story-access';
+import {AmpStoryAccess, TYPE_ENUM} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {afterRenderPromise} from '#testing/helpers';
 
@@ -67,17 +67,17 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
   it('should display the access blocking paywall on state update', async () => {
     storyAccess.buildCallback();
 
-    storeService.dispatch(Action.TOGGLE_ACCESS, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_ACCESS, true);
 
     await afterRenderPromise(win);
     expect(storyAccess.element).to.have.class('i-amphtml-story-access-visible');
   });
 
   it('should show the access notification on state update', async () => {
-    storyAccess.element.setAttribute('type', Type.NOTIFICATION);
+    storyAccess.element.setAttribute('type', TYPE_ENUM.NOTIFICATION);
     storyAccess.buildCallback();
 
-    storeService.dispatch(Action.CHANGE_PAGE, {
+    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
       id: 'foo',
       index: 0,
     });
@@ -90,7 +90,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
   });
@@ -105,7 +105,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'SCRIPT',
@@ -125,7 +125,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
 
     // Both namespaced and default actions are allowed.
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
     expect(actions).to.deep.contain({
@@ -153,7 +153,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'SCRIPT',

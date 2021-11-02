@@ -3,8 +3,8 @@ import {findIndex} from '#core/types/array';
 import {devAssert} from '#utils/log';
 
 import {
-  AnalyticsEvents,
-  AnalyticsVars,
+  ANALYTICS_EVENTS_ENUM,
+  ANALYTICS_VARS_ENUM,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {ButtonTextFitter} from './story-ad-button-text-fitter';
@@ -18,7 +18,7 @@ import {getStoreService} from '../../amp-story/1.0/amp-story-store-service';
 const TAG = 'amp-story-auto-ads:page-manager';
 
 /** @enum {number} */
-export const InsertionState = {
+export const INSERTION_STATE_ENUM = {
   DELAYED: 0,
   FAILURE: 1,
   SUCCESS: 2,
@@ -89,9 +89,9 @@ export class StoryAdPageManager {
    */
   discardCurrentAd() {
     this.adsConsumed_++;
-    this.analyticsEvent_(AnalyticsEvents.AD_DISCARDED, {
-      [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
-      [AnalyticsVars.AD_DISCARDED]: Date.now(),
+    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_DISCARDED, {
+      [ANALYTICS_VARS_ENUM.AD_INDEX]: this.adsConsumed_,
+      [ANALYTICS_VARS_ENUM.AD_DISCARDED]: Date.now(),
     });
   }
 
@@ -167,7 +167,7 @@ export class StoryAdPageManager {
     const pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
     const pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
     if (!pageAfterAd) {
-      return Promise.resolve(InsertionState.DELAYED);
+      return Promise.resolve(INSERTION_STATE_ENUM.DELAYED);
     }
 
     // We will not insert an ad in any slot containing `next-page-no-ad` nor
@@ -177,13 +177,13 @@ export class StoryAdPageManager {
       pageBeforeAd.isAd() ||
       pageAfterAd.isAd()
     ) {
-      return Promise.resolve(InsertionState.DELAYED);
+      return Promise.resolve(INSERTION_STATE_ENUM.DELAYED);
     }
 
     return nextAdPage.maybeCreateCta().then((ctaCreated) => {
       if (!ctaCreated) {
         this.discardCurrentAd();
-        return InsertionState.FAILURE;
+        return INSERTION_STATE_ENUM.FAILURE;
       }
       return this.insertIntoParentStory_(nextAdPage, pageBeforeAdId);
     });
@@ -205,11 +205,11 @@ export class StoryAdPageManager {
     const pageNumber = this.ampStory_.getPageIndexById(pageBeforeAdId);
 
     this.analytics_.then((analytics) =>
-      analytics.setVar(adIndex, AnalyticsVars.POSITION, pageNumber + 1)
+      analytics.setVar(adIndex, ANALYTICS_VARS_ENUM.POSITION, pageNumber + 1)
     );
 
     this.currentAdInserted_();
-    return InsertionState.SUCCESS;
+    return INSERTION_STATE_ENUM.SUCCESS;
   }
 
   /**
@@ -217,9 +217,9 @@ export class StoryAdPageManager {
    */
   currentAdInserted_() {
     this.adsConsumed_++;
-    this.analyticsEvent_(AnalyticsEvents.AD_INSERTED, {
-      [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
-      [AnalyticsVars.AD_INSERTED]: Date.now(),
+    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_INSERTED, {
+      [ANALYTICS_VARS_ENUM.AD_INDEX]: this.adsConsumed_,
+      [ANALYTICS_VARS_ENUM.AD_INSERTED]: Date.now(),
     });
   }
 

@@ -14,7 +14,7 @@ export const CONSTANTS = {
 };
 
 /** @enum {string} */
-export const MessageType = {
+export const MESSAGE_TYPE_ENUM = {
   // For amp-ad
   SEND_EMBED_STATE: 'send-embed-state',
   EMBED_STATE: 'embed-state',

@@ -6,7 +6,7 @@ import {
 } from '../animation';
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
-import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
+import {WEB_ANIMATION_PLAY_STATE_ENUM} from '../../../amp-animation/0.1/web-animation-types';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {presets} from '../animation-presets';
@@ -186,7 +186,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       const target = html`<div></div>`;
 
       const webAnimationRunner = {
-        getPlayState: () => WebAnimationPlayState.IDLE,
+        getPlayState: () => WEB_ANIMATION_PLAY_STATE_ENUM.IDLE,
         onPlayStateChanged: () => {},
       };
 
@@ -238,7 +238,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       const page = html`<div></div>`;
 
       const webAnimationRunner = {
-        getPlayState: () => WebAnimationPlayState.IDLE,
+        getPlayState: () => WEB_ANIMATION_PLAY_STATE_ENUM.IDLE,
         onPlayStateChanged: () => {},
       };
 
@@ -276,7 +276,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       const webAnimationRunner = {
         start: env.sandbox.spy(),
-        getPlayState: () => WebAnimationPlayState.IDLE,
+        getPlayState: () => WEB_ANIMATION_PLAY_STATE_ENUM.IDLE,
         onPlayStateChanged: () => {},
       };
 
@@ -314,7 +314,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       const webAnimationRunner = {
         start: env.sandbox.spy(),
-        getPlayState: () => WebAnimationPlayState.IDLE,
+        getPlayState: () => WEB_ANIMATION_PLAY_STATE_ENUM.IDLE,
         onPlayStateChanged: () => {},
       };
 
@@ -364,7 +364,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       let onPlayStateChangedCallback;
       const webAnimationRunner = {
-        getPlayState: () => WebAnimationPlayState.IDLE,
+        getPlayState: () => WEB_ANIMATION_PLAY_STATE_ENUM.IDLE,
         onPlayStateChanged: (callback) => {
           onPlayStateChangedCallback = callback;
         },
@@ -396,7 +396,7 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       expect(sequence.notifyFinish).to.not.have.been.called;
 
-      onPlayStateChangedCallback(WebAnimationPlayState.FINISHED);
+      onPlayStateChangedCallback(WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED);
 
       expect(sequence.notifyFinish.withArgs(targetId)).to.have.been.calledOnce;
     });

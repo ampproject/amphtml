@@ -1,6 +1,6 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {isJsonScriptTag, removeElement} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {
   childElementsByAttr,
   childElementsByTag,
@@ -19,7 +19,7 @@ import {NextPageService} from './next-page-service';
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {
-  UrlReplacementPolicy,
+  URL_REPLACEMENT_POLICY_ENUM,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -35,7 +35,7 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == LAYOUT_ENUM.CONTAINER;
   }
 
   /** @override */
@@ -101,17 +101,17 @@ export class AmpNextPage extends AMP.BaseElement {
         const consent = consentPolicyId
           ? getConsentPolicyState(element, consentPolicyId).catch((err) => {
               user().error(TAG, 'Error determining consent state', err);
-              return CONSENT_POLICY_STATE.UNKNOWN;
+              return CONSENT_POLICY_STATE_ENUM.UNKNOWN;
             })
-          : Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+          : Promise.resolve(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
 
         pagesPromise = consent
           .then((state) =>
             this.fetchAdSensePages_(
               client,
               slot,
-              state === CONSENT_POLICY_STATE.SUFFICIENT ||
-                state === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
+              state === CONSENT_POLICY_STATE_ENUM.SUFFICIENT ||
+                state === CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
             )
           )
           .catch((error) => {
@@ -259,7 +259,7 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   fetchConfig_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = URL_REPLACEMENT_POLICY_ENUM.ALL;
     return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
   }
 

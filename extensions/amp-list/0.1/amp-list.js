@@ -1,10 +1,10 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
 import {removeChildren, tryFocus} from '#core/dom';
 import {
-  Layout,
+  LAYOUT_ENUM,
   applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
@@ -40,7 +40,7 @@ import {LoadMoreService} from './service/load-more-service';
 
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
-  UrlReplacementPolicy,
+  URL_REPLACEMENT_POLICY_ENUM,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
@@ -177,7 +177,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER) {
+    if (layout === LAYOUT_ENUM.CONTAINER) {
       const doc = this.element.ownerDocument;
       const isEmail = doc && isAmp4Email(doc);
       const hasPlaceholder =
@@ -701,7 +701,12 @@ export class AmpList extends AMP.BaseElement {
           dict({'response': error.response})
         )
       : null;
-    this.action_.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+    this.action_.trigger(
+      this.element,
+      'fetch-error',
+      event,
+      ACTION_TRUST_ENUM.LOW
+    );
   }
 
   /**
@@ -1141,7 +1146,7 @@ export class AmpList extends AMP.BaseElement {
 
       const event = createCustomEvent(
         this.win,
-        AmpEvents.DOM_UPDATE,
+        AMP_EVENTS_ENUM.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );
@@ -1324,7 +1329,7 @@ export class AmpList extends AMP.BaseElement {
    */
   attemptToFit_(target) {
     if (
-      this.element.getAttribute('layout') == Layout.CONTAINER &&
+      this.element.getAttribute('layout') == LAYOUT_ENUM.CONTAINER &&
       !this.enableManagedResizing_
     ) {
       return Promise.resolve(true);
@@ -1360,7 +1365,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+    if (this.element.getAttribute('layout') == LAYOUT_ENUM.CONTAINER) {
       return;
     }
     this.measureElement(() => {
@@ -1401,15 +1406,15 @@ export class AmpList extends AMP.BaseElement {
     // TODO(amphtml): Remove [width] and [height] attributes too?
     if (
       [
-        Layout.FIXED,
-        Layout.FLEX_ITEM,
-        Layout.FLUID,
-        Layout.INTRINSIC,
-        Layout.RESPONSIVE,
+        LAYOUT_ENUM.FIXED,
+        LAYOUT_ENUM.FLEX_ITEM,
+        LAYOUT_ENUM.FLUID,
+        LAYOUT_ENUM.INTRINSIC,
+        LAYOUT_ENUM.RESPONSIVE,
       ].includes(layout)
     ) {
       setStyles(this.element, {width: '', height: ''});
-    } else if (layout == Layout.FIXED_HEIGHT) {
+    } else if (layout == LAYOUT_ENUM.FIXED_HEIGHT) {
       setStyles(this.element, {height: ''});
     }
 
@@ -1437,7 +1442,7 @@ export class AmpList extends AMP.BaseElement {
     }
     const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
-    if (previousLayout == Layout.CONTAINER) {
+    if (previousLayout == LAYOUT_ENUM.CONTAINER) {
       return Promise.resolve();
     }
     return this.mutateElement(() => {
@@ -1626,12 +1631,12 @@ export class AmpList extends AMP.BaseElement {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = URL_REPLACEMENT_POLICY_ENUM.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = URL_REPLACEMENT_POLICY_ENUM.ALL;
     }
     return policy;
   }

@@ -1,11 +1,11 @@
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {
-  EmbeddedComponentState,
-  StateProperty,
-  UIType,
+  EMBEDDED_COMPONENT_STATE_ENUM,
+  STATE_PROPERTY_ENUM,
+  UI_TYPE_ENUM,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '#core/types/object';
@@ -58,7 +58,7 @@ const getTemplate = (element) => ({
                   children: [
                     localize(
                       element,
-                      LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL
+                      LOCALIZED_STRING_ID_ENUM.AMP_STORY_HINT_UI_PREVIOUS_LABEL
                     ),
                   ],
                 },
@@ -96,7 +96,7 @@ const getTemplate = (element) => ({
                   children: [
                     localize(
                       element,
-                      LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL
+                      LOCALIZED_STRING_ID_ENUM.AMP_STORY_HINT_UI_NEXT_LABEL
                     ),
                   ],
                 },
@@ -176,7 +176,7 @@ export class AmpStoryHint {
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      STATE_PROPERTY_ENUM.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -184,19 +184,19 @@ export class AmpStoryHint {
     );
 
     this.storeService_.subscribe(
-      StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+      STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
 
     this.storeService_.subscribe(
-      StateProperty.INTERACTIVE_COMPONENT_STATE,
+      STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE,
       /** @param {./amp-story-store-service.InteractiveComponentDef} component */ (
         component
       ) => {
         this.hideOnFocusedState_(
-          component.state === EmbeddedComponentState.FOCUSED
+          component.state === EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED
         );
       }
     );
@@ -220,7 +220,10 @@ export class AmpStoryHint {
    * @private
    */
   showHint_(hintClass) {
-    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE) {
+    if (
+      this.storeService_.get(STATE_PROPERTY_ENUM.UI_STATE) !==
+      UI_TYPE_ENUM.MOBILE
+    ) {
       return;
     }
 
@@ -250,7 +253,7 @@ export class AmpStoryHint {
    */
   showNavigationOverlay() {
     // Don't show the overlay if the share menu is open.
-    if (this.storeService_.get(StateProperty.SHARE_MENU_STATE)) {
+    if (this.storeService_.get(STATE_PROPERTY_ENUM.SHARE_MENU_STATE)) {
       return;
     }
 

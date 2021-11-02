@@ -1,12 +1,12 @@
 import {
-  Action,
-  StateProperty,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LAYOUT_ENUM} from '#core/dom/layout';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
@@ -139,7 +139,7 @@ const getTemplate = (element, config, consentId, logoSrc) => ({
               children: [
                 localize(
                   element,
-                  LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
+                  LOCALIZED_STRING_ID_ENUM.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
                 ),
               ],
             },
@@ -154,7 +154,7 @@ const getTemplate = (element, config, consentId, logoSrc) => ({
               children: [
                 localize(
                   element,
-                  LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
+                  LOCALIZED_STRING_ID_ENUM.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
                 ),
               ],
             },
@@ -231,7 +231,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         {tagOrTarget: 'AMP-CONSENT', method: 'prompt'},
         {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
       ];
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
+      this.storeService_.dispatch(
+        ACTION_ENUM.ADD_TO_ACTIONS_ALLOWLIST,
+        actions
+      );
 
       this.setAcceptButtonFontColor_();
 
@@ -241,7 +244,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == LAYOUT_ENUM.NODISPLAY;
   }
 
   /**
@@ -255,7 +258,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      STATE_PROPERTY_ENUM.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -277,7 +280,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     }
     if (event.target.hasAttribute('on')) {
       const targetEl = dev().assertElement(event.target);
-      this.actions_.trigger(targetEl, 'tap', event, ActionTrust.HIGH);
+      this.actions_.trigger(targetEl, 'tap', event, ACTION_TRUST_ENUM.HIGH);
     }
     const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
     if (anchorClicked) {
@@ -394,7 +397,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   storeConsentId_(consentId) {
     // checkConsentHref response overrides the amp-geo config, if provided.
     if (this.consentConfig_.checkConsentHref) {
-      this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+      this.storeService_.dispatch(ACTION_ENUM.SET_CONSENT_ID, consentId);
       return;
     }
 
@@ -409,7 +412,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }
-        this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+        this.storeService_.dispatch(ACTION_ENUM.SET_CONSENT_ID, consentId);
       });
     }
   }

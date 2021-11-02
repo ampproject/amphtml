@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 
 import {userAssert} from '#utils/log';
 
@@ -30,6 +30,6 @@ export class AmpEmbedlyKey extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.NODISPLAY;
+    return layout === LAYOUT_ENUM.NODISPLAY;
   }
 }

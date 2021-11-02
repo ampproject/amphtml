@@ -2,7 +2,7 @@ import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
 import {tryPlay} from '#core/dom/video';
 import {Deferred} from '#core/data-structures/promise';
-import {Loading} from '#core/constants/loading-instructions';
+import {LOADING_ENUM} from '#core/constants/loading-instructions';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {
   MetadataDef,
@@ -11,7 +11,7 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {ReadyState} from '#core/constants/ready-state';
+import {READY_STATE_ENUM} from '#core/constants/ready-state';
 import {dict} from '#core/types/object';
 import {forwardRef} from '#preact/compat';
 import {once} from '#core/types/function';
@@ -87,7 +87,7 @@ function VideoWrapperWithRef(
   useResourcesNotify();
   const {playable} = useAmpContext();
   const loading = useLoading(loadingProp);
-  const load = loading !== Loading.UNLOAD;
+  const load = loading !== LOADING_ENUM.UNLOAD;
 
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying_] = useState(false);
@@ -103,7 +103,7 @@ function VideoWrapperWithRef(
   // <source>s change.
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const readyStateRef = useRef(ReadyState.LOADING);
+  const readyStateRef = useRef(READY_STATE_ENUM.LOADING);
   // The `onReadyStateRef` is passed via a ref to avoid the changed values
   // of `onReadyState` re-triggering the side effects.
   const onReadyStateRef = useValueRef(onReadyState);
@@ -165,7 +165,9 @@ function VideoWrapperWithRef(
   useLayoutEffect(() => {
     const readyState = playerRef.current?.readyState;
     if (readyState != null) {
-      setReadyState(readyState > 0 ? ReadyState.COMPLETE : ReadyState.LOADING);
+      setReadyState(
+        readyState > 0 ? READY_STATE_ENUM.COMPLETE : READY_STATE_ENUM.LOADING
+      );
     }
   }, [setReadyState]);
 
@@ -262,7 +264,7 @@ function VideoWrapperWithRef(
           controls={controls && (!autoplay || hasUserInteracted)}
           onCanPlay={() => {
             readyDeferred.resolve();
-            setReadyState(ReadyState.COMPLETE);
+            setReadyState(READY_STATE_ENUM.COMPLETE);
           }}
           onLoadedMetadata={() => {
             if (mediasession) {
@@ -270,13 +272,13 @@ function VideoWrapperWithRef(
                 setMetadata(getMetadata(playerRef.current, rest));
               });
             }
-            setReadyState(ReadyState.COMPLETE);
+            setReadyState(READY_STATE_ENUM.COMPLETE);
           }}
           onPlaying={() => setPlayingState(true)}
           onPause={() => setPlayingState(false)}
           onEnded={() => setPlayingState(false)}
           onError={(e) => {
-            setReadyState(ReadyState.ERROR, e);
+            setReadyState(READY_STATE_ENUM.ERROR, e);
             readyDeferred.reject(e);
           }}
           class={classes.fillStretch}

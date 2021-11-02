@@ -1,5 +1,5 @@
 /** @enum {string} */
-export const FilterType = {
+export const FILTER_TYPE_ENUM = {
   CLICK_DELAY: 'clickDelay',
   CLICK_LOCATION: 'clickLocation',
   INACTIVE_ELEMENT: 'inactiveElement',

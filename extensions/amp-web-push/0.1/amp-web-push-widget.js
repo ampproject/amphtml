@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 
 /**
  * @fileoverview
@@ -31,7 +31,7 @@ export class WebPushWidget extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+    return layout == LAYOUT_ENUM.FIXED;
   }
 
   /** @override */
@@ -42,7 +42,7 @@ export class WebPushWidget extends AMP.BaseElement {
 }
 
 /** @enum {string} */
-export const WebPushWidgetVisibilities = {
+export const WEB_PUSH_WIDGET_VISIBILITIES_ENUM = {
   /*
    * Describes the state when the user is subscribed.
    */

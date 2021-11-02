@@ -5,8 +5,8 @@ import {devAssert} from '#utils/log';
 import {addParamToUrl} from '../../../src/url';
 import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
 import {
-  AdResponseType,
-  ValidatorResult,
+  AD_RESPONSE_TYPE_ENUM,
+  VALIDATOR_RESULT_ENUM,
 } from '../../amp-a4a/0.1/amp-ad-type-defs';
 import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
 import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
@@ -25,9 +25,9 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
   constructor(element) {
     super(element);
 
-    this.registerValidator(validator, AdResponseType.TEMPLATE);
-    this.registerRenderer(new TemplateRenderer(), ValidatorResult.AMP);
-    this.registerRenderer(nameFrameRenderer, ValidatorResult.NON_AMP);
+    this.registerValidator(validator, AD_RESPONSE_TYPE_ENUM.TEMPLATE);
+    this.registerRenderer(new TemplateRenderer(), VALIDATOR_RESULT_ENUM.AMP);
+    this.registerRenderer(nameFrameRenderer, VALIDATOR_RESULT_ENUM.NON_AMP);
 
     /** @const {string} */
     this.baseRequestUrl_ = this.element.getAttribute('src');

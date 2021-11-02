@@ -1,6 +1,6 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {tryFocus} from '#core/dom';
-import {Layout, getLayoutClass} from '#core/dom/layout';
+import {LAYOUT_ENUM, getLayoutClass} from '#core/dom/layout';
 import {computedStyle, toggle} from '#core/dom/style';
 import {isFiniteNumber} from '#core/types';
 import {getWin} from '#core/window';
@@ -113,7 +113,7 @@ export class StandardActions {
    */
   handleAmpTarget_(invocation) {
     // All global `AMP` actions require default trust.
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ACTION_TRUST_ENUM.DEFAULT)) {
       return null;
     }
     const {args, method, node} = invocation;
@@ -322,7 +322,7 @@ export class StandardActions {
     const target = dev().assertElement(node);
     const ownerWindow = getWin(target);
 
-    if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
+    if (target.classList.contains(getLayoutClass(LAYOUT_ENUM.NODISPLAY))) {
       user().warn(
         TAG,
         'Elements with layout=nodisplay cannot be dynamically shown.',

@@ -1,8 +1,8 @@
 import * as AmpAnalytics from '#utils/analytics';
 import {
-  ActionStatus,
+  ACTION_STATUS_ENUM,
+  SUBSCRIPTION_ANALYTICS_EVENTS_ENUM,
   SubscriptionAnalytics,
-  SubscriptionAnalyticsEvents,
 } from '../analytics';
 import {user} from '#utils/log';
 
@@ -12,7 +12,7 @@ const TAG = 'amp-subscriptions';
 const OPT_VARS = {'serviceId': 'platform1'};
 const INT_VARS = {
   'action': 'action1',
-  'status': ActionStatus.SUCCESS,
+  'status': ACTION_STATUS_ENUM.SUCCESS,
 };
 
 describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
@@ -27,7 +27,7 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
   it('should not fail', () => {
     analytics.event('event1');
     analytics.serviceEvent('event1', 'serviceId');
-    analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
+    analytics.actionEvent('platform1', 'action1', ACTION_STATUS_ENUM.SUCCESS);
   });
 
   describe('internal routing', () => {
@@ -43,9 +43,9 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
     });
 
     it('should trigger an action event', () => {
-      analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
+      analytics.actionEvent('platform1', 'action1', ACTION_STATUS_ENUM.SUCCESS);
       expect(eventStub).to.be.calledOnce.calledWith(
-        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.SUBSCRIPTIONS_ACTION,
         OPT_VARS,
         INT_VARS
       );
@@ -62,21 +62,21 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
     });
 
     it('should log an event', () => {
-      analytics.event(SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED);
+      analytics.event(SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED);
       expect(userLogStub).to.be.calledOnce.calledWith(
         TAG,
-        SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED,
         ''
       );
       expect(ampLogStub).to.be.calledOnce.calledWith(
         analytics.element_,
-        SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED,
         {}
       );
     });
 
     it('should log an action event', () => {
-      analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
+      analytics.actionEvent('platform1', 'action1', ACTION_STATUS_ENUM.SUCCESS);
       expect(userLogStub).to.be.calledOnce.calledWith(
         TAG,
         'subscriptions-action-action1-success',
@@ -91,17 +91,17 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
 
     it('should log a service event', () => {
       analytics.serviceEvent(
-        SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
         'platform1'
       );
       expect(userLogStub).to.be.calledOnce.calledWith(
         TAG,
-        SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
         OPT_VARS
       );
       expect(ampLogStub).to.be.calledOnce.calledWith(
         analytics.element_,
-        SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
         OPT_VARS
       );
     });
@@ -135,9 +135,9 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
     });
 
     it('should notify about action events', () => {
-      analytics.actionEvent('platform1', 'action1', ActionStatus.SUCCESS);
+      analytics.actionEvent('platform1', 'action1', ACTION_STATUS_ENUM.SUCCESS);
       expect(eventStr).to.equal(
-        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.SUBSCRIPTIONS_ACTION
       );
       expect(optParams).to.deep.equal(OPT_VARS);
       expect(intParams).to.deep.equal(INT_VARS);

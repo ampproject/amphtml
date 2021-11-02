@@ -1,9 +1,9 @@
 import {ClickDelayFilter} from '../../filters/click-delay';
-import {FilterType} from '../../filters/filter';
+import {FILTER_TYPE_ENUM} from '../../filters/filter';
 
 describes.sandboxed('click-delay', {}, (env) => {
   const DEFAULT_CONFIG = {
-    type: FilterType.CLICK_DELAY,
+    type: FILTER_TYPE_ENUM.CLICK_DELAY,
     delay: 123,
     startTimingEvent: 'navigationStart',
   };
@@ -21,10 +21,22 @@ describes.sandboxed('click-delay', {}, (env) => {
     const win = {performance: {timing: {'navigationStart': 456}}};
     const tests = [
       {config: {type: 'bar', delay: 123}, win, err: invalid},
-      {config: {type: FilterType.CLICK_DELAY}, win, err: invalid},
-      {config: {type: FilterType.CLICK_DELAY, delay: 0}, win, err: invalid},
-      {config: {type: FilterType.CLICK_DELAY, delay: -1}, win, err: invalid},
-      {config: {type: FilterType.CLICK_DELAY, delay: 'ac'}, win, err: invalid},
+      {config: {type: FILTER_TYPE_ENUM.CLICK_DELAY}, win, err: invalid},
+      {
+        config: {type: FILTER_TYPE_ENUM.CLICK_DELAY, delay: 0},
+        win,
+        err: invalid,
+      },
+      {
+        config: {type: FILTER_TYPE_ENUM.CLICK_DELAY, delay: -1},
+        win,
+        err: invalid,
+      },
+      {
+        config: {type: FILTER_TYPE_ENUM.CLICK_DELAY, delay: 'ac'},
+        win,
+        err: invalid,
+      },
       {config: DEFAULT_CONFIG, win: {}},
       {config: DEFAULT_CONFIG, win: {performance: {}}},
       {config: DEFAULT_CONFIG, win: {performance: {timing: {}}}},

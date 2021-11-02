@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {
   createElementWithAttributes,
   isJsonScriptTag,
@@ -19,12 +19,12 @@ import {getData, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
 import {
-  AnalyticsEvents,
-  AnalyticsVars,
+  ANALYTICS_EVENTS_ENUM,
+  ANALYTICS_VARS_ENUM,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {
-  A4AVarNames,
+  A_4_A_VAR_NAMES_ENUM,
   START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
@@ -39,8 +39,8 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
-  StateProperty,
-  UIType,
+  STATE_PROPERTY_ENUM,
+  UI_TYPE_ENUM,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -56,7 +56,7 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
 
 /** @enum {string} */
-const PageAttributes = {
+const PAGE_ATTRIBUTES_ENUM = {
   LOADING: 'i-amphtml-loading',
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
 };
@@ -185,12 +185,15 @@ export class StoryAdPage {
     if (this.adDoc_) {
       toggleAttribute(
         dev().assertElement(this.adDoc_.body),
-        PageAttributes.IFRAME_BODY_VISIBLE
+        PAGE_ATTRIBUTES_ENUM.IFRAME_BODY_VISIBLE
       );
       // TODO(#24829) Remove alternate body when we have full ad network support.
       const alternateBody = this.adDoc_.querySelector('#x-a4a-former-body');
       alternateBody &&
-        toggleAttribute(alternateBody, PageAttributes.IFRAME_BODY_VISIBLE);
+        toggleAttribute(
+          alternateBody,
+          PAGE_ATTRIBUTES_ENUM.IFRAME_BODY_VISIBLE
+        );
     }
   }
 
@@ -219,8 +222,8 @@ export class StoryAdPage {
     this.listenForAdLoadSignals_();
     this.listenForSwipes_();
 
-    this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
-      [AnalyticsVars.AD_REQUESTED]: Date.now(),
+    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_REQUESTED, {
+      [ANALYTICS_VARS_ENUM.AD_REQUESTED]: Date.now(),
     });
 
     return this.pageElement_;
@@ -259,18 +262,18 @@ export class StoryAdPage {
         return false;
       }
 
-      uiMetadata[A4AVarNames.CTA_TYPE] =
+      uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE] =
         localizeCtaText(
-          uiMetadata[A4AVarNames.CTA_TYPE],
+          uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE],
           this.localizationService_
-        ) || uiMetadata[A4AVarNames.CTA_TYPE];
+        ) || uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE];
 
       // Store the cta-type as an accesible var for any further pings.
       this.analytics_.then((analytics) =>
         analytics.setVar(
           this.index_, // adIndex
-          AnalyticsVars.CTA_TYPE,
-          uiMetadata[A4AVarNames.CTA_TYPE]
+          ANALYTICS_VARS_ENUM.CTA_TYPE,
+          uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE]
         )
       );
 
@@ -282,7 +285,7 @@ export class StoryAdPage {
         ))
       ) {
         this.storeService_.subscribe(
-          StateProperty.UI_STATE,
+          STATE_PROPERTY_ENUM.UI_STATE,
           (uiState) => {
             this.onUIStateUpdate_(uiState);
           },
@@ -351,7 +354,7 @@ export class StoryAdPage {
     this.adElement_
       .signals()
       // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(CommonSignals.INI_LOAD)
+      .whenSignal(COMMON_SIGNALS_ENUM.INI_LOAD)
       .then(() => this.onAdLoaded_());
 
     // Inabox custom event.
@@ -378,8 +381,8 @@ export class StoryAdPage {
       false /* shouldStopPropogation */
     );
     gestures.onGesture(SwipeXRecognizer, () => {
-      this.analyticsEvent_(AnalyticsEvents.AD_SWIPED, {
-        [AnalyticsVars.AD_SWIPED]: Date.now(),
+      this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_SWIPED, {
+        [ANALYTICS_VARS_ENUM.AD_SWIPED]: Date.now(),
       });
       gestures.cleanup();
     });
@@ -411,10 +414,10 @@ export class StoryAdPage {
 
     // Remove loading attribute once loaded so that desktop CSS will position
     // offscren with all other pages.
-    this.pageElement_.removeAttribute(PageAttributes.LOADING);
+    this.pageElement_.removeAttribute(PAGE_ATTRIBUTES_ENUM.LOADING);
 
-    this.analyticsEvent_(AnalyticsEvents.AD_LOADED, {
-      [AnalyticsVars.AD_LOADED]: Date.now(),
+    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_LOADED, {
+      [ANALYTICS_VARS_ENUM.AD_LOADED]: Date.now(),
     });
 
     if (this.getAdFrame_() && !this.is3pAdFrame_) {
@@ -446,9 +449,9 @@ export class StoryAdPage {
         // the appropriate time.
         anchor.addEventListener('click', () => {
           const vars = {
-            [AnalyticsVars.AD_CLICKED]: Date.now(),
+            [ANALYTICS_VARS_ENUM.AD_CLICKED]: Date.now(),
           };
-          this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
+          this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_CLICKED, vars);
         });
         return true;
       }
@@ -491,7 +494,7 @@ export class StoryAdPage {
           Object.keys(config['targets']) &&
           config['targets'][Object.keys(config['targets'])[0]];
         const finalUrl = target && target['finalUrl'];
-        return target ? {[A4AVarNames.CTA_URL]: finalUrl} : {};
+        return target ? {[A_4_A_VAR_NAMES_ENUM.CTA_URL]: finalUrl} : {};
       } catch (e) {
         dev().error(TAG, e);
         return {};
@@ -512,7 +515,7 @@ export class StoryAdPage {
 
     this.adChoicesIcon_.classList.toggle(
       DESKTOP_FULLBLEED_CLASS,
-      uiState === UIType.DESKTOP_FULLBLEED
+      uiState === UI_TYPE_ENUM.DESKTOP_FULLBLEED
     );
   }
 

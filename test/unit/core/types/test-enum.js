@@ -3,7 +3,7 @@ import {isEnumValue} from '#core/types/enum';
 describes.sandboxed('type helpers - enums', {}, () => {
   describe('isEnumValue', () => {
     /** @enum {string} */
-    const enumObj = {
+    const ENUM_OBJ_ENUM = {
       X: 'x',
       Y: 'y',
       Z: 'z',
@@ -11,7 +11,8 @@ describes.sandboxed('type helpers - enums', {}, () => {
 
     it('should return true for valid enum values', () => {
       ['x', 'y', 'z'].forEach((value) => {
-        expect(isEnumValue(enumObj, value), 'enum value = ' + value).to.be.true;
+        expect(isEnumValue(ENUM_OBJ_ENUM, value), 'enum value = ' + value).to.be
+          .true;
       });
     });
 
@@ -29,7 +30,7 @@ describes.sandboxed('type helpers - enums', {}, () => {
         /y/,
         42,
       ].forEach((value) => {
-        expect(isEnumValue(enumObj, value), 'enum value = ' + value).to.be
+        expect(isEnumValue(ENUM_OBJ_ENUM, value), 'enum value = ' + value).to.be
           .false;
       });
     });

@@ -10,7 +10,7 @@ export const ENTITLEMENTS_REQUEST_TIMEOUT = 3000;
  * Possible score factors.
  * @const @enum {string}
  */
-export const SubscriptionsScoreFactor = {
+export const SUBSCRIPTIONS_SCORE_FACTOR_ENUM = {
   // User is known to platform and has a form of payment registered
   IS_READY_TO_PAY: 'isReadyToPay',
   // Platform supports the current viewer environment

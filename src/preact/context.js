@@ -1,5 +1,5 @@
 import {
-  Loading,
+  LOADING_ENUM,
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
 
@@ -26,7 +26,7 @@ function getAmpContext() {
     (context = createContext({
       renderable: true,
       playable: true,
-      loading: Loading.AUTO,
+      loading: LOADING_ENUM.AUTO,
     }))
   );
 }
@@ -48,7 +48,7 @@ export function WithAmpContext({
   const renderable = renderableProp && parent.renderable;
   const playable = renderable && playableProp && parent.playable;
   const loading = loadingReducer(
-    renderable ? Loading.AUTO : Loading.LAZY,
+    renderable ? LOADING_ENUM.AUTO : LOADING_ENUM.LAZY,
     loadingReducer(loadingProp, parent.loading)
   );
   const notify = notifyProp || parent.notify;

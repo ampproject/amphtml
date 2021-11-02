@@ -4,7 +4,7 @@ import {createElementWithAttributes} from '#core/dom';
 import {listenOncePromise} from '#utils/event-helper';
 
 import * as consent from '../../../../src/consent';
-import {VideoEvents} from '../../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-nexxtv-player',
@@ -85,16 +85,16 @@ describes.realWin(
       });
       const iframe = nexxtv.querySelector('iframe');
       await Promise.resolve();
-      const p1 = listenOncePromise(nexxtv, VideoEvents.PLAYING);
+      const p1 = listenOncePromise(nexxtv, VIDEO_EVENTS_ENUM.PLAYING);
       await sendFakeMessage(nexxtv, iframe, {event: 'play'});
       await p1;
-      const p2 = listenOncePromise(nexxtv, VideoEvents.MUTED);
+      const p2 = listenOncePromise(nexxtv, VIDEO_EVENTS_ENUM.MUTED);
       await sendFakeMessage(nexxtv, iframe, {event: 'mute'});
       await p2;
-      const p3 = listenOncePromise(nexxtv, VideoEvents.PAUSE);
+      const p3 = listenOncePromise(nexxtv, VIDEO_EVENTS_ENUM.PAUSE);
       await sendFakeMessage(nexxtv, iframe, {event: 'pause'});
       await p3;
-      const p4 = listenOncePromise(nexxtv, VideoEvents.UNMUTED);
+      const p4 = listenOncePromise(nexxtv, VIDEO_EVENTS_ENUM.UNMUTED);
       await sendFakeMessage(nexxtv, iframe, {event: 'unmute'});
       return p4;
     });

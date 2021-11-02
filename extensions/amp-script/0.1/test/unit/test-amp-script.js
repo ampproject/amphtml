@@ -11,8 +11,8 @@ import {
 import {
   AmpScript,
   AmpScriptService,
+  STORAGE_LOCATION_ENUM,
   SanitizerImpl,
-  StorageLocation,
   setUpgradeForTest,
 } from '../../amp-script';
 
@@ -425,20 +425,22 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
   describe('localStorage & sessionStorage', () => {
     it('getStorage()', () => {
       it('should be initially empty', () => {
-        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({});
-        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({});
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.LOCAL)).to.deep.equal({});
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.SESSION)).to.deep.equal({});
       });
 
       it('should return localStorage data', () => {
         win.localStorage.setItem('foo', 'bar');
-        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({foo: 'bar'});
-        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({});
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.LOCAL)).to.deep.equal({
+          foo: 'bar',
+        });
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.SESSION)).to.deep.equal({});
       });
 
       it('should return sessionStorage data', () => {
         win.sessionStorage.setItem('abc', '123');
-        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({});
-        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.LOCAL)).to.deep.equal({});
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.SESSION)).to.deep.equal({
           abc: '123',
         });
       });
@@ -446,31 +448,33 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
       it('should filter amp-* keys', () => {
         win.localStorage.setItem('amp-foo', 'bar');
         win.sessionStorage.setItem('amp-baz', 'qux');
-        expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({foo: 'bar'});
-        expect(s.getStorage(StorageLocation.SESSION)).to.deep.equal({});
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.LOCAL)).to.deep.equal({
+          foo: 'bar',
+        });
+        expect(s.getStorage(STORAGE_LOCATION_ENUM.SESSION)).to.deep.equal({});
       });
     });
 
     describe('setStorage()', () => {
       it('should set items', () => {
-        s.setStorage(StorageLocation.LOCAL, 'x', '1');
+        s.setStorage(STORAGE_LOCATION_ENUM.LOCAL, 'x', '1');
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');
 
-        s.setStorage(StorageLocation.SESSION, 'y', '2');
+        s.setStorage(STORAGE_LOCATION_ENUM.SESSION, 'y', '2');
         expect(win.sessionStorage.length).to.equal(1);
         expect(win.sessionStorage.getItem('y')).to.equal('2');
       });
 
       it('should not set items with amp-* keys', () => {
         allowConsoleError(() => {
-          s.setStorage(StorageLocation.LOCAL, 'amp-x', '1');
+          s.setStorage(STORAGE_LOCATION_ENUM.LOCAL, 'amp-x', '1');
         });
         expect(win.localStorage.length).to.equal(0);
         expect(win.localStorage.getItem('amp-x')).to.be.null;
 
         allowConsoleError(() => {
-          s.setStorage(StorageLocation.SESSION, 'amp-y', '2');
+          s.setStorage(STORAGE_LOCATION_ENUM.SESSION, 'amp-y', '2');
         });
         expect(win.sessionStorage.length).to.equal(0);
         expect(win.sessionStorage.getItem('amp-y')).to.be.null;
@@ -478,12 +482,12 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
 
       it('should remove items', () => {
         win.localStorage.setItem('x', '1');
-        s.setStorage(StorageLocation.LOCAL, 'x', null);
+        s.setStorage(STORAGE_LOCATION_ENUM.LOCAL, 'x', null);
         expect(win.localStorage.length).to.equal(0);
         expect(win.localStorage.getItem('x')).to.be.null;
 
         win.sessionStorage.setItem('y', '2');
-        s.setStorage(StorageLocation.SESSION, 'y', null);
+        s.setStorage(STORAGE_LOCATION_ENUM.SESSION, 'y', null);
         expect(win.sessionStorage.length).to.equal(0);
         expect(win.sessionStorage.getItem('y')).to.be.null;
       });
@@ -491,14 +495,14 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
       it('should not remove items with amp-* keys', () => {
         win.localStorage.setItem('amp-x', '1');
         allowConsoleError(() => {
-          s.setStorage(StorageLocation.LOCAL, 'amp-x', null);
+          s.setStorage(STORAGE_LOCATION_ENUM.LOCAL, 'amp-x', null);
         });
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('amp-x')).to.equal('1');
 
         win.sessionStorage.setItem('amp-y', '2');
         allowConsoleError(() => {
-          s.setStorage(StorageLocation.SESSION, 'amp-y', null);
+          s.setStorage(STORAGE_LOCATION_ENUM.SESSION, 'amp-y', null);
         });
         expect(win.sessionStorage.length).to.equal(1);
         expect(win.sessionStorage.getItem('amp-y')).to.equal('2');
@@ -507,7 +511,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
       it('should not support Storage.clear()', () => {
         win.localStorage.setItem('x', '1');
         allowConsoleError(() => {
-          s.setStorage(StorageLocation.LOCAL, null, null);
+          s.setStorage(STORAGE_LOCATION_ENUM.LOCAL, null, null);
         });
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');
@@ -531,7 +535,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
       s = getSanitizer({byUserGesture: false, byFixedSize: false});
 
       await s.setStorage(
-        StorageLocation.AMP_STATE,
+        STORAGE_LOCATION_ENUM.AMP_STATE,
         /* key */ null,
         '{"foo":"bar"}'
       );
@@ -547,7 +551,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
       s = getSanitizer({byUserGesture: true, byFixedSize: false});
 
       await s.setStorage(
-        StorageLocation.AMP_STATE,
+        STORAGE_LOCATION_ENUM.AMP_STATE,
         /* key */ null,
         '{"foo":"bar"}'
       );
@@ -563,7 +567,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
       s = getSanitizer({byGesture: false, byFixedSize: true});
 
       await s.setStorage(
-        StorageLocation.AMP_STATE,
+        STORAGE_LOCATION_ENUM.AMP_STATE,
         /* key */ null,
         '{"foo":"bar"}'
       );
@@ -578,7 +582,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
     it('AMP.setState(not_json)', async () => {
       expectAsyncConsoleError(/Invalid AMP.setState/);
       await s.setStorage(
-        StorageLocation.AMP_STATE,
+        STORAGE_LOCATION_ENUM.AMP_STATE,
         /* key */ null,
         '"foo":"bar'
       );
@@ -589,7 +593,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
     it('AMP.getState(string)', async () => {
       bind.getStateValue.returns('bar');
 
-      const state = await s.getStorage(StorageLocation.AMP_STATE, 'foo');
+      const state = await s.getStorage(STORAGE_LOCATION_ENUM.AMP_STATE, 'foo');
       expect(state).to.equal('bar');
 
       expect(bind.getStateValue).to.be.calledOnce;
@@ -599,7 +603,7 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
     it('AMP.getState()', async () => {
       bind.getStateValue.returns({foo: 'bar'});
 
-      const state = await s.getStorage(StorageLocation.AMP_STATE, '');
+      const state = await s.getStorage(STORAGE_LOCATION_ENUM.AMP_STATE, '');
       expect(state).to.deep.equal({foo: 'bar'});
 
       expect(bind.getStateValue).to.be.calledOnce;

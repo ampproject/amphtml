@@ -1,7 +1,7 @@
 import '../amp-gfycat';
 import {listenOncePromise} from '#utils/event-helper';
 
-import {VideoEvents} from '../../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-gfycat',
@@ -81,12 +81,12 @@ describes.realWin(
         const iframe = gfycat.querySelector('iframe');
         return Promise.resolve()
           .then(async () => {
-            const p = listenOncePromise(gfycat, VideoEvents.PLAYING);
+            const p = listenOncePromise(gfycat, VIDEO_EVENTS_ENUM.PLAYING);
             await sendFakeMessage(gfycat, iframe, 'playing');
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(gfycat, VideoEvents.PAUSE);
+            const p = listenOncePromise(gfycat, VIDEO_EVENTS_ENUM.PAUSE);
             await sendFakeMessage(gfycat, iframe, 'paused');
             return p;
           });

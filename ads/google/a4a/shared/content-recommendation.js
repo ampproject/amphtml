@@ -9,7 +9,7 @@
  * Layout types for Content Recommendation responsive.
  * @enum {string}
  */
-export const LayoutType = {
+export const LAYOUT_TYPE_ENUM = {
   IMAGE_STACKED: 'image_stacked',
   IMAGE_SIDEBYSIDE: 'image_sidebyside',
   MOBILE_BANNER_IMAGE_SIDEBYSIDE: 'mobile_banner_image_sidebyside',
@@ -27,7 +27,7 @@ export const LayoutType = {
  * publishers directly.
  * @enum {string}
  */
-export const ExternalCorePubVars = {
+export const EXTERNAL_CORE_PUB_VARS_ENUM = {
   UI_TYPE: 'data-matched-content-ui-type',
   COLUMNS_NUM: 'data-matched-content-columns-num',
   ROWS_NUM: 'data-matched-content-rows-num',
@@ -66,15 +66,15 @@ const MAX_PUB_CONTROL_DIMENSION = 1500;
  * @const {!Object<!LayoutType, number>}
  */
 const LAYOUT_ASPECT_RATIO_MAP = {
-  [LayoutType.IMAGE_STACKED]: 1 / 1.91,
-  [LayoutType.IMAGE_SIDEBYSIDE]: 1 / 3.82,
-  [LayoutType.MOBILE_BANNER_IMAGE_SIDEBYSIDE]: 1 / 3.82,
-  [LayoutType.PUB_CONTROL_IMAGE_STACKED]: 1 / 1.91,
-  [LayoutType.PUB_CONTROL_IMAGE_SIDEBYSIDE]: 1 / 3.82,
-  [LayoutType.PUB_CONTROL_IMAGE_CARD_STACKED]: 1 / 1.91,
-  [LayoutType.PUB_CONTROL_IMAGE_CARD_SIDEBYSIDE]: 1 / 3.74,
-  [LayoutType.PUB_CONTROL_TEXT]: 0,
-  [LayoutType.PUB_CONTROL_TEXT_CARD]: 0,
+  [LAYOUT_TYPE_ENUM.IMAGE_STACKED]: 1 / 1.91,
+  [LAYOUT_TYPE_ENUM.IMAGE_SIDEBYSIDE]: 1 / 3.82,
+  [LAYOUT_TYPE_ENUM.MOBILE_BANNER_IMAGE_SIDEBYSIDE]: 1 / 3.82,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_STACKED]: 1 / 1.91,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_SIDEBYSIDE]: 1 / 3.82,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_CARD_STACKED]: 1 / 1.91,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_CARD_SIDEBYSIDE]: 1 / 3.74,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_TEXT]: 0,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_TEXT_CARD]: 0,
 };
 
 /**
@@ -87,15 +87,15 @@ const LAYOUT_ASPECT_RATIO_MAP = {
  * @const {!Object<!LayoutType, number>}
  */
 const LAYOUT_TEXT_HEIGHT_MAP = {
-  [LayoutType.IMAGE_STACKED]: 80,
-  [LayoutType.IMAGE_SIDEBYSIDE]: 0,
-  [LayoutType.MOBILE_BANNER_IMAGE_SIDEBYSIDE]: 0,
-  [LayoutType.PUB_CONTROL_IMAGE_STACKED]: 80,
-  [LayoutType.PUB_CONTROL_IMAGE_SIDEBYSIDE]: 0,
-  [LayoutType.PUB_CONTROL_IMAGE_CARD_STACKED]: 85,
-  [LayoutType.PUB_CONTROL_IMAGE_CARD_SIDEBYSIDE]: 0,
-  [LayoutType.PUB_CONTROL_TEXT]: 80,
-  [LayoutType.PUB_CONTROL_TEXT_CARD]: 80,
+  [LAYOUT_TYPE_ENUM.IMAGE_STACKED]: 80,
+  [LAYOUT_TYPE_ENUM.IMAGE_SIDEBYSIDE]: 0,
+  [LAYOUT_TYPE_ENUM.MOBILE_BANNER_IMAGE_SIDEBYSIDE]: 0,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_STACKED]: 80,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_SIDEBYSIDE]: 0,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_CARD_STACKED]: 85,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_CARD_SIDEBYSIDE]: 0,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_TEXT]: 80,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_TEXT_CARD]: 80,
 };
 
 /**
@@ -104,12 +104,12 @@ const LAYOUT_TEXT_HEIGHT_MAP = {
  * @const {!Object<!LayoutType, number>}
  */
 const LAYOUT_AD_WIDTH_MAP = {
-  [LayoutType.PUB_CONTROL_IMAGE_STACKED]: 100,
-  [LayoutType.PUB_CONTROL_IMAGE_SIDEBYSIDE]: 200,
-  [LayoutType.PUB_CONTROL_IMAGE_CARD_STACKED]: 150,
-  [LayoutType.PUB_CONTROL_IMAGE_CARD_SIDEBYSIDE]: 250,
-  [LayoutType.PUB_CONTROL_TEXT]: 100,
-  [LayoutType.PUB_CONTROL_TEXT_CARD]: 150,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_STACKED]: 100,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_SIDEBYSIDE]: 200,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_CARD_STACKED]: 150,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_CARD_SIDEBYSIDE]: 250,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_TEXT]: 100,
+  [LAYOUT_TYPE_ENUM.PUB_CONTROL_TEXT_CARD]: 150,
 };
 
 const PUB_CONTROL_LAYOUT_PREFIX = 'pub_control_';
@@ -176,7 +176,7 @@ export class CoReConfig {
 export function getAutoConfig(availableWidth, isMobile) {
   if (availableWidth < MIN_PUB_CONTROL_WIDTH_OF_DESKTOP) {
     if (isMobile) {
-      const layoutType = LayoutType.MOBILE_BANNER_IMAGE_SIDEBYSIDE;
+      const layoutType = LAYOUT_TYPE_ENUM.MOBILE_BANNER_IMAGE_SIDEBYSIDE;
       const numColumns = 1;
       const numRows = 12;
       const slotSize = getLargerAdOneColumnSidebysideSize(
@@ -199,7 +199,7 @@ export function getAutoConfig(availableWidth, isMobile) {
         slotHeight: slotSize.height,
         numberOfColumns: 1,
         numberOfRows: 13,
-        layoutType: LayoutType.IMAGE_SIDEBYSIDE,
+        layoutType: LAYOUT_TYPE_ENUM.IMAGE_SIDEBYSIDE,
       };
     }
   } else {
@@ -209,7 +209,7 @@ export function getAutoConfig(availableWidth, isMobile) {
       slotHeight: slotSize.height,
       numberOfColumns: 4,
       numberOfRows: 2,
-      layoutType: LayoutType.IMAGE_STACKED,
+      layoutType: LAYOUT_TYPE_ENUM.IMAGE_STACKED,
     };
   }
 }
@@ -243,7 +243,7 @@ export function getPubControlConfig(availableWidth, rawPubControlParams) {
       numberOfRows: 0,
       // set any layout, doesn't matter because it's error and it won't be used
       // anyway
-      layoutType: LayoutType.IMAGE_STACKED,
+      layoutType: LAYOUT_TYPE_ENUM.IMAGE_STACKED,
       validationError: pubParams.validationError,
     };
   }
@@ -320,7 +320,7 @@ function validateAndParsePubControlParams(params) {
   }
   if (numberOfPubControlParams < 3) {
     return {
-      validationError: `Tags ${ExternalCorePubVars.UI_TYPE}, ${ExternalCorePubVars.COLUMNS_NUM} and ${ExternalCorePubVars.ROWS_NUM} should be set together.`,
+      validationError: `Tags ${EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE}, ${EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM} and ${EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM} should be set together.`,
     };
   }
 
@@ -335,14 +335,14 @@ function validateAndParsePubControlParams(params) {
     layoutTypes.length !== numberOfColumns.length
   ) {
     return {
-      validationError: `Lengths of parameters ${ExternalCorePubVars.UI_TYPE}, ${ExternalCorePubVars.COLUMNS_NUM} and ${ExternalCorePubVars.ROWS_NUM} must match. Example: ${PUB_CONTROL_EXAMPLE}`,
+      validationError: `Lengths of parameters ${EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE}, ${EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM} and ${EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM} must match. Example: ${PUB_CONTROL_EXAMPLE}`,
     };
   }
 
   if (layoutTypes.length > 2) {
     return {
       validationError:
-        `The parameter length of attribute ${ExternalCorePubVars.UI_TYPE}, ${ExternalCorePubVars.COLUMNS_NUM} and ${ExternalCorePubVars.ROWS_NUM} is too long. At most 2 parameters for each ` +
+        `The parameter length of attribute ${EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE}, ${EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM} and ${EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM} is too long. At most 2 parameters for each ` +
         'attribute are needed: one for mobile and one for desktop, while ' +
         `you are providing ${layoutTypes.length} parameters. Example: ${PUB_CONTROL_EXAMPLE}.`,
     };
@@ -354,14 +354,14 @@ function validateAndParsePubControlParams(params) {
     const row = Number(numberOfRows[i]);
     if (isNaN(row) || row === 0) {
       return {
-        validationError: `Wrong value '${numberOfRows[i]}' for ${ExternalCorePubVars.ROWS_NUM}.`,
+        validationError: `Wrong value '${numberOfRows[i]}' for ${EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM}.`,
       };
     }
     numberOfRowsAsNumbers.push(row);
     const col = Number(numberOfColumns[i]);
     if (isNaN(col) || col === 0) {
       return {
-        validationError: `Wrong value '${numberOfColumns[i]}' for ${ExternalCorePubVars.COLUMNS_NUM}.`,
+        validationError: `Wrong value '${numberOfColumns[i]}' for ${EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM}.`,
       };
     }
     numberOfColumnsAsNumbers.push(col);

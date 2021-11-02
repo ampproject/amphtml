@@ -1,4 +1,4 @@
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {LAYOUT_ENUM, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {registerElement} from '#service/custom-element-registry';
 
@@ -14,7 +14,7 @@ export class AmpLayout extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
+    return layout == LAYOUT_ENUM.CONTAINER || isLayoutSizeDefined(layout);
   }
 
   /** @override */

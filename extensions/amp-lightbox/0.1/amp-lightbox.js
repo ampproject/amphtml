@@ -1,9 +1,9 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {applyFillContent} from '#core/dom/layout';
@@ -33,7 +33,7 @@ import {unmountAll} from '#core/dom/resource-container-helper';
 const TAG = 'amp-lightbox';
 
 /**  @enum {string} */
-const LightboxEvents = {
+const LIGHTBOX_EVENTS_ENUM = {
   OPEN: 'lightboxOpen',
   CLOSE: 'lightboxClose',
 };
@@ -237,7 +237,7 @@ class AmpLightbox extends AMP.BaseElement {
 
       element.classList.add('i-amphtml-scrollable');
 
-      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      element.addEventListener(AMP_EVENTS_ENUM.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
         this.updateChildrenInViewport_(this.pos_);
       });
@@ -303,9 +303,9 @@ class AmpLightbox extends AMP.BaseElement {
       // Mutations via AMP.setState() require default trust.
       if (open) {
         // This suppose that the element that trigered the open is where the focus currently is
-        this.open_(ActionTrust.DEFAULT, document.activeElement);
+        this.open_(ACTION_TRUST_ENUM.DEFAULT, document.activeElement);
       } else {
-        this.close(ActionTrust.DEFAULT);
+        this.close(ACTION_TRUST_ENUM.DEFAULT);
       }
     }
   }
@@ -383,7 +383,7 @@ class AmpLightbox extends AMP.BaseElement {
     const owners = Services.ownersForDoc(this.element);
     owners.scheduleLayout(this.element, container);
     owners.scheduleResume(this.element, container);
-    this.triggerEvent_(LightboxEvents.OPEN, trust);
+    this.triggerEvent_(LIGHTBOX_EVENTS_ENUM.OPEN, trust);
 
     this.getHistory_()
       .push((unused) => this.close(trust))
@@ -506,7 +506,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnClick_() {
-    this.close(ActionTrust.HIGH);
+    this.close(ACTION_TRUST_ENUM.HIGH);
   }
 
   /**
@@ -515,10 +515,10 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.key == Keys.ESCAPE) {
+    if (event.key == KEYS_ENUM.ESCAPE) {
       event.preventDefault();
       // Keypress gesture is high trust.
-      this.close(ActionTrust.HIGH);
+      this.close(ACTION_TRUST_ENUM.HIGH);
     }
   }
 
@@ -529,10 +529,10 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEnter_(event) {
-    if (event.key == Keys.ENTER) {
+    if (event.key == KEYS_ENUM.ENTER) {
       event.preventDefault();
       // Keypress gesture is high trust.
-      this.close(ActionTrust.HIGH);
+      this.close(ACTION_TRUST_ENUM.HIGH);
     }
   }
 
@@ -615,7 +615,7 @@ class AmpLightbox extends AMP.BaseElement {
       dev().assertElement(this.container_)
     );
     this.active_ = false;
-    this.triggerEvent_(LightboxEvents.CLOSE, trust);
+    this.triggerEvent_(LIGHTBOX_EVENTS_ENUM.CLOSE, trust);
 
     if (this.openerElement_) {
       tryFocus(this.openerElement_);
@@ -649,7 +649,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   onFocusin_() {
     if (!this.hasCurrentFocus_()) {
-      this.close(ActionTrust.HIGH);
+      this.close(ACTION_TRUST_ENUM.HIGH);
     }
   }
 

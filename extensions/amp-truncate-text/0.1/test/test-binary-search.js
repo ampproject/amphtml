@@ -1,12 +1,12 @@
 import {
-  BinarySearchPreference,
-  BinarySearchStop,
+  BINARY_SEARCH_PREFERENCE_ENUM,
+  BINARY_SEARCH_STOP_ENUM,
   binarySearch,
 } from '../binary-search';
 
 describes.sandboxed('binarySearch', {}, () => {
-  const {NEXT, PREV} = BinarySearchPreference;
-  const {LEFT, RIGHT} = BinarySearchStop;
+  const {NEXT, PREV} = BINARY_SEARCH_PREFERENCE_ENUM;
+  const {LEFT, RIGHT} = BINARY_SEARCH_STOP_ENUM;
 
   /**
    * @param {!Array<number>} arr

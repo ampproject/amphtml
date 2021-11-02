@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
@@ -67,7 +67,7 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported() {
-    return Layout.FLEX_ITEM;
+    return LAYOUT_ENUM.FLEX_ITEM;
   }
 
   /** @override */

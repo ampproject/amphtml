@@ -1,9 +1,9 @@
 import '../../../amp-mustache/0.1/amp-mustache';
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
+  ASYNC_INPUT_ATTRIBUTES_ENUM,
+  ASYNC_INPUT_CLASSES_ENUM,
 } from '#core/constants/async-input';
 import {createElementWithAttributes} from '#core/dom';
 import {fromIterator} from '#core/types/array';
@@ -148,9 +148,9 @@ describes.repeated(
             // Create our async input element
             // With the required fields
             const asyncInput = createElement('amp-mock-async-input');
-            asyncInput.classList.add(AsyncInputClasses.ASYNC_INPUT);
+            asyncInput.classList.add(ASYNC_INPUT_CLASSES_ENUM.ASYNC_INPUT);
             asyncInput.setAttribute(
-              AsyncInputAttributes.NAME,
+              ASYNC_INPUT_ATTRIBUTES_ENUM.NAME,
               'mock-async-input'
             );
 
@@ -171,13 +171,13 @@ describes.repeated(
                 'amp-mock-async-input-required-action'
               );
               asyncInputRequiredAction.classList.add(
-                AsyncInputClasses.ASYNC_INPUT
+                ASYNC_INPUT_CLASSES_ENUM.ASYNC_INPUT
               );
               asyncInputRequiredAction.classList.add(
-                AsyncInputClasses.ASYNC_REQUIRED_ACTION
+                ASYNC_INPUT_CLASSES_ENUM.ASYNC_REQUIRED_ACTION
               );
               asyncInput.setAttribute(
-                AsyncInputAttributes.NAME,
+                ASYNC_INPUT_ATTRIBUTES_ENUM.NAME,
                 'mock-async-input-required-action'
               );
 
@@ -861,7 +861,7 @@ describes.repeated(
 
             const event = createCustomEvent(
               env.win,
-              AmpEvents.FORM_VALUE_CHANGE,
+              AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
               /* detail */ null,
               {bubbles: true}
             );
@@ -1274,7 +1274,7 @@ describes.repeated(
                 .then(() => {
                   expect(spyDispatchEvent.calledOnce).to.be.true;
                   expect(spyDispatchEvent).calledWithMatch({
-                    type: AmpEvents.DOM_UPDATE,
+                    type: AMP_EVENTS_ENUM.DOM_UPDATE,
                     bubbles: true,
                   });
                   env.sandbox.assert.callOrder(
@@ -1488,7 +1488,7 @@ describes.repeated(
             env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
 
             // Setup some Promises
-            const submitPromise = ampForm.submit_(ActionTrust.HIGH);
+            const submitPromise = ampForm.submit_(ACTION_TRUST_ENUM.HIGH);
 
             // Fetch
             expect(ampForm.xhr_.fetch).to.have.not.been.called;
@@ -1601,12 +1601,12 @@ describes.repeated(
             form,
             'submit-success',
             /* CustomEvent */ env.sandbox.match.has('detail'),
-            ActionTrust.DEFAULT // Expect: ActionTrust.HIGH - 1
+            ACTION_TRUST_ENUM.DEFAULT // Expect: ActionTrust.HIGH - 1
           );
 
           await ampForm.handleSubmitAction_({
             method: 'submit',
-            trust: ActionTrust.DEFAULT,
+            trust: ACTION_TRUST_ENUM.DEFAULT,
           });
 
           expect(actions.trigger.callCount).to.equal(4);
@@ -1614,7 +1614,7 @@ describes.repeated(
             form,
             'submit-success',
             /* CustomEvent */ env.sandbox.match.has('detail'),
-            ActionTrust.LOW // Expect: ActionTrust.DEFAULT - 1
+            ACTION_TRUST_ENUM.LOW // Expect: ActionTrust.DEFAULT - 1
           );
         });
 
@@ -2366,7 +2366,7 @@ describes.repeated(
               env.sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
               env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
 
-              const submitPromise = ampForm.submit_(ActionTrust.HIGH);
+              const submitPromise = ampForm.submit_(ACTION_TRUST_ENUM.HIGH);
               expect(ampForm.xhr_.fetch).to.have.not.been.called;
               expect(ampForm.urlReplacement_.expandInputValueSync).to.not.have
                 .been.called;
@@ -2424,7 +2424,7 @@ describes.repeated(
               env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
 
               env.sandbox.stub(ampForm, 'handleXhrSubmitSuccess_').resolves();
-              const submitPromise = ampForm.submit_(ActionTrust.HIGH);
+              const submitPromise = ampForm.submit_(ACTION_TRUST_ENUM.HIGH);
 
               expect(ampForm.xhr_.fetch).to.have.not.been.called;
               expect(ampForm.urlReplacement_.expandInputValueSync).to.not.have
@@ -2999,7 +2999,7 @@ describes.repeated(
             'source',
             'caller',
             'event',
-            ActionTrust.HIGH
+            ACTION_TRUST_ENUM.HIGH
           );
           expect(clearSpy).to.be.called;
 
@@ -3012,7 +3012,7 @@ describes.repeated(
             'source',
             'caller',
             'event',
-            ActionTrust.HIGH
+            ACTION_TRUST_ENUM.HIGH
           );
           await whenCalled(submitSpy);
           expect(submitSpy).to.be.calledWith(
@@ -3024,7 +3024,7 @@ describes.repeated(
               method: 'submit',
               node: element,
               source: 'source',
-              trust: ActionTrust.HIGH,
+              trust: ACTION_TRUST_ENUM.HIGH,
             })
           );
         });
@@ -3041,7 +3041,7 @@ describes.repeated(
                 'assertNoSensitiveFields_'
               );
 
-              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+              return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                 expect(assertNoSensitiveFieldsStub).to.be.called;
               });
             });
@@ -3064,10 +3064,12 @@ describes.repeated(
                 preventDefault: () => {},
               };
 
-              return ampForm.submit_(ActionTrust.HIGH, mockEvent).then(() => {
-                expect(getValueStub).to.be.called;
-                expect(formElementSubmitSpy).to.be.calledOnce;
-              });
+              return ampForm
+                .submit_(ACTION_TRUST_ENUM.HIGH, mockEvent)
+                .then(() => {
+                  expect(getValueStub).to.be.called;
+                  expect(formElementSubmitSpy).to.be.calledOnce;
+                });
             });
           });
 
@@ -3075,7 +3077,7 @@ describes.repeated(
             return getAmpFormWithAsyncInput().then((response) => {
               const {ampForm, getValueStub} = response;
 
-              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+              return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                 expect(getValueStub).to.be.called;
               });
             });
@@ -3088,9 +3090,9 @@ describes.repeated(
               return getAmpFormWithAsyncInput().then((response) => {
                 const {ampForm, asyncInput} = response;
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                   const name = asyncInput.getAttribute(
-                    AsyncInputAttributes.NAME
+                    ASYNC_INPUT_ATTRIBUTES_ENUM.NAME
                   );
                   const hiddenInput = ampForm.form_.querySelector(
                     `input[hidden][name=${name}]`
@@ -3108,9 +3110,9 @@ describes.repeated(
               return getAmpFormWithAsyncInput().then((response) => {
                 const {ampForm, asyncInput, asyncInputValue} = response;
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                   const name = asyncInput.getAttribute(
-                    AsyncInputAttributes.NAME
+                    ASYNC_INPUT_ATTRIBUTES_ENUM.NAME
                   );
                   const hiddenInput = ampForm.form_.querySelector(
                     `input[hidden][name=${name}]`
@@ -3135,12 +3137,12 @@ describes.repeated(
                 let previousHiddenInputCount;
 
                 return ampForm
-                  .submit_(ActionTrust.HIGH)
+                  .submit_(ACTION_TRUST_ENUM.HIGH)
                   .then(() => {
                     previousHiddenInputCount =
                       ampForm.form_.querySelectorAll('input[hidden]').length;
                     const name = asyncInput.getAttribute(
-                      AsyncInputAttributes.NAME
+                      ASYNC_INPUT_ATTRIBUTES_ENUM.NAME
                     );
                     hiddenInput = ampForm.form_.querySelector(
                       `input[hidden][name=${name}]`
@@ -3149,7 +3151,7 @@ describes.repeated(
                     expect(value).to.be.equal(asyncInputValue);
 
                     getValueStub.resolves(newAsyncInputValue);
-                    return ampForm.submit_(ActionTrust.HIGH);
+                    return ampForm.submit_(ACTION_TRUST_ENUM.HIGH);
                   })
                   .then(() => {
                     const totalHiddenInputs =
@@ -3179,7 +3181,7 @@ describes.repeated(
                   'handlePresubmitSuccess_'
                 );
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                   expect(handlePresubmitSuccessStub).to.be.called;
                 });
               });
@@ -3196,7 +3198,7 @@ describes.repeated(
                 ampForm,
                 'handlePresubmitSuccess_'
               );
-              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+              return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                 expect(getValueStubRequiredAction).to.be.called;
                 expect(handlePresubmitSuccessStub).to.be.called;
               });
@@ -3214,7 +3216,7 @@ describes.repeated(
                 getValueStub.rejects(getValueError);
 
                 const stub = env.sandbox.stub(ampForm, 'handleSubmitFailure_');
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                   expect(stub).to.be.called;
                   expect(stub).to.be.calledWith(getValueError, {
                     'error': 'amp-async-input-error',
@@ -3233,7 +3235,7 @@ describes.repeated(
 
                 const setStateStub = env.sandbox.stub(ampForm, 'setState_');
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                   expect(setStateStub).to.be.calledWith('submitting');
                 });
               });
@@ -3251,7 +3253,7 @@ describes.repeated(
 
                 const setStateStub = env.sandbox.stub(ampForm, 'setState_');
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                   expect(setStateStub).to.be.calledWith('initial');
                 });
               });
@@ -3269,7 +3271,7 @@ describes.repeated(
                 getValueStub.rejects(getValueError);
                 const setStateStub = env.sandbox.stub(ampForm, 'setState_');
 
-                return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                return ampForm.submit_(ACTION_TRUST_ENUM.HIGH).then(() => {
                   expect(setStateStub).to.be.calledWith('submit-error');
                 });
               });
@@ -3302,7 +3304,7 @@ describes.repeated(
             ampForm.xhrAction_ = null;
 
             changeInput(input, 'Another Name');
-            await ampForm.submit_(ActionTrust.HIGH);
+            await ampForm.submit_(ACTION_TRUST_ENUM.HIGH);
 
             expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
           });
@@ -3313,7 +3315,7 @@ describes.repeated(
               .resolves({json: async () => {}});
 
             changeInput(input, 'Another Name');
-            await ampForm.submit_(ActionTrust.HIGH);
+            await ampForm.submit_(ACTION_TRUST_ENUM.HIGH);
 
             expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
           });
@@ -3322,7 +3324,7 @@ describes.repeated(
             env.sandbox.stub(ampForm.xhr_, 'fetch').rejects({});
 
             changeInput(input, 'Another Name');
-            await ampForm.submit_(ActionTrust.HIGH);
+            await ampForm.submit_(ACTION_TRUST_ENUM.HIGH);
 
             expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
           });

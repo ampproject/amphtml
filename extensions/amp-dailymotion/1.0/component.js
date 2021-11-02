@@ -3,7 +3,7 @@ import {forwardRef} from '#preact/compat';
 import {useMemo} from '#preact';
 import {dispatchCustomEvent} from '#core/dom';
 import {
-  DailymotionEvents,
+  DAILYMOTION_EVENTS_ENUM,
   getDailymotionIframeSrc,
   makeDailymotionMessage,
 } from '../dailymotion-api';
@@ -35,14 +35,14 @@ function makeMethodMessage(method) {
 function onMessage({currentTarget, data}) {
   const parsedData = parseQueryString(/** @type {string} */ (data));
   const event = parsedData?.['event'];
-  if (event === DailymotionEvents.PAUSE) {
+  if (event === DAILYMOTION_EVENTS_ENUM.PAUSE) {
     dispatchCustomEvent(currentTarget, 'pause');
-  } else if (event === DailymotionEvents.PLAY) {
+  } else if (event === DAILYMOTION_EVENTS_ENUM.PLAY) {
     dispatchCustomEvent(currentTarget, 'playing');
-  } else if (event === DailymotionEvents.END) {
+  } else if (event === DAILYMOTION_EVENTS_ENUM.END) {
     dispatchCustomEvent(currentTarget, 'pause');
     dispatchCustomEvent(currentTarget, 'end');
-  } else if (event === DailymotionEvents.API_READY) {
+  } else if (event === DAILYMOTION_EVENTS_ENUM.API_READY) {
     dispatchCustomEvent(currentTarget, 'canplay');
   }
 }

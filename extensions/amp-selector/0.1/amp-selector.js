@@ -1,6 +1,6 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
-import {Keys} from '#core/constants/key-codes';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {isRTL, tryFocus} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {mod} from '#core/math';
@@ -22,7 +22,7 @@ const TAG = 'amp-selector';
  *
  * @enum {string}
  */
-const KEYBOARD_SELECT_MODES = {
+const KEYBOARD_SELECT_MODES_ENUM = {
   NONE: 'none',
   FOCUS: 'focus',
   SELECT: 'select',
@@ -62,7 +62,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.focusedIndex_ = 0;
 
     /** @private {!KEYBOARD_SELECT_MODES} */
-    this.kbSelectMode_ = KEYBOARD_SELECT_MODES.NONE;
+    this.kbSelectMode_ = KEYBOARD_SELECT_MODES_ENUM.NONE;
   }
 
   /** @override */
@@ -91,16 +91,18 @@ export class AmpSelector extends AMP.BaseElement {
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
       userAssert(
-        isEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode),
+        isEnumValue(KEYBOARD_SELECT_MODES_ENUM, kbSelectMode),
         `Unknown keyboard-select-mode: ${kbSelectMode}`
       );
       userAssert(
-        !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
+        !(
+          this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES_ENUM.SELECT
+        ),
         '[keyboard-select-mode=select] not supported for multiple ' +
           'selection amp-selector'
       );
     } else {
-      kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
+      kbSelectMode = KEYBOARD_SELECT_MODES_ENUM.NONE;
     }
     this.kbSelectMode_ = /** @type {!KEYBOARD_SELECT_MODES} */ (kbSelectMode);
 
@@ -118,7 +120,7 @@ export class AmpSelector extends AMP.BaseElement {
         const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
         this.select_(delta, trust);
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
 
     this.registerAction(
@@ -128,7 +130,7 @@ export class AmpSelector extends AMP.BaseElement {
         const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
         this.select_(delta, trust);
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
 
     this.registerAction(
@@ -147,7 +149,7 @@ export class AmpSelector extends AMP.BaseElement {
           return Promise.reject("'index' must be specified");
         }
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
 
     /** If the element is in an `email` document, allow its `clear`,
@@ -160,7 +162,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     // Triggers on DOM children updates
     this.element.addEventListener(
-      AmpEvents.DOM_UPDATE,
+      AMP_EVENTS_ENUM.DOM_UPDATE,
       this.maybeRefreshOnUpdate_.bind(this)
     );
   }
@@ -236,7 +238,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   updateFocus_(opt_focusEl) {
-    if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.NONE) {
+    if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES_ENUM.NONE) {
       // Don't manage focus.
       return;
     }
@@ -364,7 +366,7 @@ export class AmpSelector extends AMP.BaseElement {
       // Newly picked option should always have focus.
       this.updateFocus_(el);
       // User gesture trigger is "high" trust.
-      this.fireSelectEvent_(el, ActionTrust.HIGH);
+      this.fireSelectEvent_(el, ACTION_TRUST_ENUM.HIGH);
     });
   }
 
@@ -498,18 +500,18 @@ export class AmpSelector extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.LEFT_ARROW: /* fallthrough */
-      case Keys.UP_ARROW: /* fallthrough */
-      case Keys.RIGHT_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW: /* fallthrough */
-      case Keys.HOME: /* fallthrough */
-      case Keys.END:
-        if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
+      case KEYS_ENUM.LEFT_ARROW: /* fallthrough */
+      case KEYS_ENUM.UP_ARROW: /* fallthrough */
+      case KEYS_ENUM.RIGHT_ARROW: /* fallthrough */
+      case KEYS_ENUM.DOWN_ARROW: /* fallthrough */
+      case KEYS_ENUM.HOME: /* fallthrough */
+      case KEYS_ENUM.END:
+        if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES_ENUM.NONE) {
           return this.navigationKeyDownHandler_(event);
         }
         return Promise.resolve();
-      case Keys.ENTER: /* fallthrough */
-      case Keys.SPACE:
+      case KEYS_ENUM.ENTER: /* fallthrough */
+      case KEYS_ENUM.SPACE:
         this.selectionKeyDownHandler_(event);
         return Promise.resolve();
     }
@@ -527,27 +529,27 @@ export class AmpSelector extends AMP.BaseElement {
     const doc = this.win.document;
     let dir = 0;
     switch (event.key) {
-      case Keys.LEFT_ARROW:
+      case KEYS_ENUM.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isRTL(doc) ? 1 : -1;
         break;
-      case Keys.UP_ARROW:
+      case KEYS_ENUM.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
-      case Keys.RIGHT_ARROW:
+      case KEYS_ENUM.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isRTL(doc) ? -1 : 1;
         break;
-      case Keys.DOWN_ARROW:
+      case KEYS_ENUM.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
-      case Keys.HOME:
+      case KEYS_ENUM.HOME:
         // Home looks for first nonhidden element, in 'next' direction.
         dir = 1;
         break;
-      case Keys.END:
+      case KEYS_ENUM.END:
         // End looks for last nonhidden element, in 'previous' direction.
         dir = -1;
         break;
@@ -564,10 +566,10 @@ export class AmpSelector extends AMP.BaseElement {
 
       // For Home/End keys, start at end/beginning respectively and wrap around
       switch (event.key) {
-        case Keys.HOME:
+        case KEYS_ENUM.HOME:
           this.focusedIndex_ = this.elements_.length - 1;
           break;
-        case Keys.END:
+        case KEYS_ENUM.END:
           this.focusedIndex_ = 0;
           break;
       }
@@ -594,7 +596,7 @@ export class AmpSelector extends AMP.BaseElement {
       tryFocus(newSelectedOption);
 
       const focusedOption = this.elements_[this.focusedIndex_];
-      if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES.SELECT) {
+      if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES_ENUM.SELECT) {
         this.onOptionPicked_(focusedOption);
       }
     });
@@ -607,7 +609,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   selectionKeyDownHandler_(event) {
     const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
+    if (key == KEYS_ENUM.SPACE || key == KEYS_ENUM.ENTER) {
       if (this.elements_.includes(dev().assertElement(event.target))) {
         event.preventDefault();
         const el = dev().assertElement(event.target);

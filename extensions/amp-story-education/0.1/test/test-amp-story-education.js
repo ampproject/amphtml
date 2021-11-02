@@ -4,11 +4,11 @@ import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  Action,
+  ACTION_ENUM,
   AmpStoryStoreService,
-  StateProperty,
+  STATE_PROPERTY_ENUM,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStoryEducation, State} from '../amp-story-education';
+import {AmpStoryEducation, STATE_ENUM} from '../amp-story-education';
 
 describes.realWin('amp-story-education', {amp: true}, (env) => {
   let ampdoc;
@@ -61,59 +61,59 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
     storyEducation.buildCallback();
     // TODO(gmajoulet): remove private method call when viewer messaging is
     // introduced.
-    storyEducation.setState_(State.NAVIGATION_TAP);
+    storyEducation.setState_(STATE_ENUM.NAVIGATION_TAP);
     expect(storyEducation.containerEl_).to.not.have.attribute('hidden');
   });
 
   it('should propagate the dir attribute', () => {
     storyEducation.buildCallback();
-    storeService.dispatch(Action.TOGGLE_RTL, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_RTL, true);
     expect(storyEducation.containerEl_).to.have.attribute('dir', 'rtl');
   });
 
   describe('amp-story-education paused state', () => {
     it('should not update the paused state when hidden', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+      storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
       storyEducation.buildCallback();
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.false;
+      expect(storeService.get(STATE_PROPERTY_ENUM.PAUSED_STATE)).to.be.false;
     });
 
     it('should pause the story when visible', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+      storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
-      storyEducation.setState_(State.NAVIGATION_TAP);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_TAP);
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+      expect(storeService.get(STATE_PROPERTY_ENUM.PAUSED_STATE)).to.be.true;
     });
 
     it('should unpause the story once the education is dismissed', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+      storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
-      storyEducation.setState_(State.NAVIGATION_SWIPE);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_SWIPE);
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.false;
+      expect(storeService.get(STATE_PROPERTY_ENUM.PAUSED_STATE)).to.be.false;
     });
 
     it('should not unpause a story that was already paused', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, true);
+      storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, true);
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
-      storyEducation.setState_(State.NAVIGATION_SWIPE);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_SWIPE);
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+      expect(storeService.get(STATE_PROPERTY_ENUM.PAUSED_STATE)).to.be.true;
     });
   });
 
@@ -124,7 +124,7 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
-      storyEducation.setState_(State.NAVIGATION_TAP);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_TAP);
       const navigationTapEl =
         storyEducation.containerEl_.querySelector('[step="tap"]');
 
@@ -137,7 +137,7 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
-      storyEducation.setState_(State.NAVIGATION_SWIPE);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_SWIPE);
       const navigationSwipeEl =
         storyEducation.containerEl_.querySelector('[step="swipe"]');
 
@@ -148,7 +148,7 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       hasSwipeCap = false;
       storyEducation.buildCallback();
 
-      storyEducation.setState_(State.NAVIGATION_TAP);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_TAP);
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
@@ -160,7 +160,7 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       storyEducation.buildCallback();
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
-      storyEducation.setState_(State.NAVIGATION_TAP);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_TAP);
 
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
@@ -175,7 +175,7 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       storyEducation.buildCallback();
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
-      storyEducation.setState_(State.NAVIGATION_SWIPE);
+      storyEducation.setState_(STATE_ENUM.NAVIGATION_SWIPE);
 
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);

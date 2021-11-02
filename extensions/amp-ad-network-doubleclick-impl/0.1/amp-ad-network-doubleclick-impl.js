@@ -40,14 +40,14 @@ import {
 import {getMultiSizeDimensions} from '#ads/google/utils';
 
 import {
-  CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
+  CONSENT_POLICY_STATE_ENUM,
+  CONSENT_STRING_TYPE_ENUM,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {LAYOUT_ENUM, isLayoutSizeDefined} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {
   assertDoesNotContainDisplay,
@@ -97,7 +97,7 @@ import {
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
+  XORIGIN_MODE_ENUM,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
@@ -126,7 +126,7 @@ const RTC_SUCCESS = '2';
 const DOUBLECLICK_SRA_EXP = 'doubleclickSraExp';
 
 /** @const @enum{string} */
-const DOUBLECLICK_SRA_EXP_BRANCHES = {
+const DOUBLECLICK_SRA_EXP_BRANCHES_ENUM = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
@@ -136,7 +136,7 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
 const ZINDEX_EXP = 'zIndexExp';
 
 /**@const @enum{string} */
-const ZINDEX_EXP_BRANCHES = {
+const ZINDEX_EXP_BRANCHES_ENUM = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
 };
@@ -145,7 +145,7 @@ const ZINDEX_EXP_BRANCHES = {
 const IDLE_CWV_EXP = 'dfp-render-on-idle-cwv-exp';
 
 /** @const @enum{string} */
-const IDLE_CWV_EXP_BRANCHES = {
+const IDLE_CWV_EXP_BRANCHES_ENUM = {
   CONTROL: '20208860',
   EXPERIMENT: '20208859',
 };
@@ -383,9 +383,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win,
       IDLE_CWV_EXP
     );
-    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
+    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES_ENUM.CONTROL) {
       this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
-    } else if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT) {
+    } else if (
+      idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES_ENUM.EXPERIMENT
+    ) {
       fallbackRange = 3;
       this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
     }
@@ -417,7 +419,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
+    this.isFluidPrimaryRequest_ = layout == LAYOUT_ENUM.FLUID;
     this.isFluidRequest_ = this.isFluidRequest_ || this.isFluidPrimaryRequest_;
     return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }
@@ -438,9 +440,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (urlExperimentId) {
       forcedExperimentId = {
         // SRA
-        '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
-        '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
-        '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+        '7': DOUBLECLICK_SRA_EXP_BRANCHES_ENUM.SRA_CONTROL,
+        '8': DOUBLECLICK_SRA_EXP_BRANCHES_ENUM.SRA,
+        '9': DOUBLECLICK_SRA_EXP_BRANCHES_ENUM.SRA_NO_RECOVER,
       }[urlExperimentId];
       if (forcedExperimentId) {
         this.experimentIds.push(forcedExperimentId);
@@ -457,14 +459,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 'amp-ad[type=doubleclick][data-enable-refresh], ' +
                 'meta[name=amp-ad-doubleclick-sra]'
             ),
-          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-            (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES_ENUM).map(
+            (key) => DOUBLECLICK_SRA_EXP_BRANCHES_ENUM[key]
           ),
         },
         {
           experimentId: ZINDEX_EXP,
           isTrafficEligible: () => true,
-          branches: Object.values(ZINDEX_EXP_BRANCHES),
+          branches: Object.values(ZINDEX_EXP_BRANCHES_ENUM),
         },
         {
           experimentId: IDLE_CWV_EXP,
@@ -474,7 +476,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               !this.element.getAttribute('data-loading-strategy')
             );
           },
-          branches: Object.values(IDLE_CWV_EXP_BRANCHES),
+          branches: Object.values(IDLE_CWV_EXP_BRANCHES_ENUM),
         },
       ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
@@ -486,7 +488,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
     }
-    if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
+    if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES_ENUM.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
     }
 
@@ -590,8 +592,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         /(\?|&)force_sra=true(&|$)/.test(this.win.location.search)) ||
         pubEnabledSra ||
         [
-          DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
-          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+          DOUBLECLICK_SRA_EXP_BRANCHES_ENUM.SRA,
+          DOUBLECLICK_SRA_EXP_BRANCHES_ENUM.SRA_NO_RECOVER,
         ].some((eid) => this.experimentIds.indexOf(eid) >= 0));
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
@@ -630,8 +632,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {
       'ptt': 13,
       'npa':
-        consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        consentTuple.consentState == CONSENT_POLICY_STATE_ENUM.INSUFFICIENT ||
+        consentTuple.consentState == CONSENT_POLICY_STATE_ENUM.UNKNOWN ||
         this.serveNpaSignal_
           ? 1
           : null,
@@ -642,12 +644,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent':
-        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+        consentStringType != CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
           ? consentString
           : null,
       'addtl_consent': additionalConsent,
       'us_privacy':
-        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+        consentStringType == CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
           ? consentString
           : null,
     };
@@ -768,7 +770,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.serveNpaSignal_ = !!opt_serveNpaSignal;
     const consentTuple = opt_consentTuple || {};
     if (
-      consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      consentTuple.consentState == CONSENT_POLICY_STATE_ENUM.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -1696,7 +1698,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
     const noFallbackExp = this.experimentIds.includes(
-      DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER
+      DOUBLECLICK_SRA_EXP_BRANCHES_ENUM.SRA_NO_RECOVER
     );
     sraRequests =
       sraRequests ||
@@ -1880,7 +1882,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
     return this.forceSafeframe || this.isFluidRequest_
-      ? XORIGIN_MODE.SAFEFRAME
+      ? XORIGIN_MODE_ENUM.SAFEFRAME
       : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 

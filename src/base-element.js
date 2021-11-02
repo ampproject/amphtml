@@ -1,6 +1,9 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ACTION_TRUST_ENUM,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {dispatchCustomEvent} from '#core/dom';
-import {Layout, LayoutPriority} from '#core/dom/layout';
+import {LAYOUT_ENUM, LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {isArray} from '#core/types';
 import {getWin} from '#core/window';
 
@@ -94,7 +97,7 @@ import {getMode} from './mode';
 export class BaseElement {
   /**
    * Whether this element supports R1 protocol, which includes:
-   * 1. Layout/unlayout are not managed by the runtime, but instead are
+   * 1. layout/unlayout are not managed by the runtime, but instead are
    *    implemented by the element as needed.
    * 2. The element can defer its build until later. See `deferredMount`.
    * 3. The construction of the element is delayed until mount.
@@ -175,14 +178,14 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LayoutPriority.CONTENT.
+   * The default priority for base elements is LAYOUT_PRIORITY_ENUM.CONTENT.
    *
    * @param {!AmpElement} unusedElement
    * @return {number}
    * @nocollapse
    */
   static getBuildPriority(unusedElement) {
-    return LayoutPriority.CONTENT;
+    return LAYOUT_PRIORITY_ENUM.CONTENT;
   }
 
   /**
@@ -238,7 +241,7 @@ export class BaseElement {
      * trust required to invoke the handler.
      * @private {?Object<string, {
      *   handler: function(!./service/action-impl.ActionInvocation),
-     *   minTrust: ActionTrust,
+     *   minTrust: ACTION_TRUST_ENUM,
      * }>} */
     this['actionMap_'] = null;
 
@@ -269,12 +272,12 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LayoutPriority.CONTENT.
+   * The default priority for base elements is LAYOUT_PRIORITY_ENUM.CONTENT.
    * @return {number}
    * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutPriority() {
-    return LayoutPriority.CONTENT;
+    return LAYOUT_PRIORITY_ENUM.CONTENT;
   }
 
   /**
@@ -294,7 +297,7 @@ export class BaseElement {
       .updateLayoutPriority(this.element, newLayoutPriority);
   }
 
-  /** @return {!Layout} */
+  /** @return {!LAYOUT_ENUM} */
   getLayout() {
     return this.element.getLayout();
   }
@@ -354,14 +357,14 @@ export class BaseElement {
 
   /**
    * Intended to be implemented by subclasses. Tests whether the element
-   * supports the specified layout. By default only Layout.NODISPLAY is
+   * supports the specified layout. By default only LAYOUT_ENUM.NODISPLAY is
    * supported.
-   * @param {!Layout} layout
+   * @param {!LAYOUT_ENUM} layout
    * @return {boolean}
    * @public
    */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == LAYOUT_ENUM.NODISPLAY;
   }
 
   /**
@@ -664,10 +667,10 @@ export class BaseElement {
    *
    * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
-   * @param {ActionTrust} minTrust
+   * @param {ACTION_TRUST_ENUM} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
+  registerAction(alias, handler, minTrust = ACTION_TRUST_ENUM.DEFAULT) {
     initActionMap(this);
     this['actionMap_'][alias] = {handler, minTrust};
   }
@@ -676,13 +679,13 @@ export class BaseElement {
    * Registers the default action for this component.
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {string=} alias
-   * @param {ActionTrust=} minTrust
+   * @param {ACTION_TRUST_ENUM=} minTrust
    * @public
    */
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.DEFAULT
+    minTrust = ACTION_TRUST_ENUM.DEFAULT
   ) {
     devAssert(
       !this['defaultActionAlias_'],

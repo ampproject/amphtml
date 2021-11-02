@@ -1,5 +1,5 @@
 import {addParamsToUrl} from '../../src/url';
-import {VideoEvents} from '../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../src/video-interface';
 
 /**
  * Maps events coming from the Brightcove frame to events to be dispatched from the
@@ -11,12 +11,12 @@ import {VideoEvents} from '../../src/video-interface';
  * @const {!Object<string, ?string>}
  */
 export const BRIGHTCOVE_EVENTS = {
-  'playing': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
-  'ads-ad-started': VideoEvents.AD_START,
-  'ads-ad-ended': VideoEvents.AD_END,
-  'loadedmetadata': VideoEvents.LOADEDMETADATA,
+  'playing': VIDEO_EVENTS_ENUM.PLAYING,
+  'pause': VIDEO_EVENTS_ENUM.PAUSE,
+  'ended': VIDEO_EVENTS_ENUM.ENDED,
+  'ads-ad-started': VIDEO_EVENTS_ENUM.AD_START,
+  'ads-ad-ended': VIDEO_EVENTS_ENUM.AD_END,
+  'loadedmetadata': VIDEO_EVENTS_ENUM.LOADEDMETADATA,
 };
 
 /**

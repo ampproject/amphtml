@@ -1,6 +1,6 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {DomFingerprint} from '#core/dom/fingerprint';
-import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
+import {GEO_IN_GROUP_ENUM} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {buildUrl} from './shared/url-builder';
 import {dev, devAssert, user} from '#utils/log';
@@ -24,7 +24,7 @@ const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 const MAX_URL_LENGTH = 15360;
 
 /** @enum {string} */
-const AmpAdImplementation = {
+const AMP_AD_IMPLEMENTATION_ENUM = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
   AMP_AD_IFRAME_GET: '5',
@@ -327,8 +327,8 @@ export function googlePageParameters(a4a, startTime) {
     const visibilityState = ampDoc.getVisibilityState();
     return {
       'is_amp': a4a.isXhrAllowed()
-        ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
-        : AmpAdImplementation.AMP_AD_IFRAME_GET,
+        ? AMP_AD_IMPLEMENTATION_ENUM.AMP_AD_XHR_TO_IFRAME_OR_AMP
+        : AMP_AD_IMPLEMENTATION_ENUM.AMP_AD_IFRAME_GET,
       'amp_v': mode.version(),
       'd_imp': '1',
       'c': getCorrelator(win, ampDoc, clientId),
@@ -962,10 +962,10 @@ export function getIdentityToken(win, ampDoc, consentPolicyId) {
     win['goog_identity_prom'] ||
     (consentPolicyId
       ? getConsentPolicyState(ampDoc.getHeadNode(), consentPolicyId)
-      : Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED)
+      : Promise.resolve(CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED)
     ).then((consentState) =>
-      consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-      consentState == CONSENT_POLICY_STATE.UNKNOWN
+      consentState == CONSENT_POLICY_STATE_ENUM.INSUFFICIENT ||
+      consentState == CONSENT_POLICY_STATE_ENUM.UNKNOWN
         ? /** @type {!IdentityToken} */ ({})
         : executeIdentityTokenFetch(win, ampDoc)
     );
@@ -1090,7 +1090,7 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
  * than 32 capabilities to this enum.
  * @enum {number}
  */
-const Capability = {
+const CAPABILITY_ENUM = {
   SVG_SUPPORTED: 1 << 0,
   SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
   SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
@@ -1105,17 +1105,17 @@ function getBrowserCapabilitiesBitmap(win) {
   let browserCapabilities = 0;
   const doc = win.document;
   if (win.SVGElement && doc.createElementNS) {
-    browserCapabilities |= Capability.SVG_SUPPORTED;
+    browserCapabilities |= CAPABILITY_ENUM.SVG_SUPPORTED;
   }
   const iframeEl = doc.createElement('iframe');
   if (iframeEl.sandbox && iframeEl.sandbox.supports) {
     if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+        CAPABILITY_ENUM.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
     }
     if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+        CAPABILITY_ENUM.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
     }
   }
   return browserCapabilities;
@@ -1156,9 +1156,9 @@ export function getServeNpaPromise(element) {
     const locations = npaSignal.split(',');
     for (let i = 0; i < locations.length; i++) {
       const geoGroup = geoService.isInCountryGroup(locations[i]);
-      if (geoGroup === GEO_IN_GROUP.IN) {
+      if (geoGroup === GEO_IN_GROUP_ENUM.IN) {
         return true;
-      } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+      } else if (geoGroup === GEO_IN_GROUP_ENUM.NOT_DEFINED) {
         user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
       }
     }

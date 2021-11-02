@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -139,7 +139,7 @@ export class Amp3dGltf extends AMP.BaseElement {
           (e) => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
   }
 

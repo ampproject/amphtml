@@ -2,7 +2,7 @@ import {dict} from '#core/types/object';
 
 import {postMessageWhenAvailable} from '../../src/iframe-video';
 import {addParamsToUrl} from '../../src/url';
-import {VideoEvents} from '../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../src/video-interface';
 
 /**
  * @fileoverview
@@ -25,9 +25,9 @@ export const getVimeoOriginRegExp = () =>
  * @const {!Object<string, ?string>}
  */
 export const VIMEO_EVENTS = {
-  'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
+  'play': VIDEO_EVENTS_ENUM.PLAYING,
+  'pause': VIDEO_EVENTS_ENUM.PAUSE,
+  'ended': VIDEO_EVENTS_ENUM.ENDED,
   'volumechange': null,
 };
 

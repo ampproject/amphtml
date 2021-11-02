@@ -1,4 +1,4 @@
-import {LocalizedStringId} from '#service/localization/strings';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
 import {
@@ -20,17 +20,18 @@ import {renderAsElement} from './simple-template';
  * @const {!Object<string, !LocalizedStringId>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
-  'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
-  'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
-  'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
-  'line': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
-  'linkedin': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
-  'pinterest': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
-  'gplus': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
-  'tumblr': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
-  'twitter': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
-  'whatsapp': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
-  'sms': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
+  'system': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
+  'email': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
+  'facebook': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'line': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
+  'linkedin': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
+  'pinterest':
+    LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
+  'gplus': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
+  'tumblr': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
+  'twitter': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
+  'whatsapp': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
+  'sms': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
 
 /**
@@ -83,7 +84,7 @@ function buildLinkShareItemTemplate(el) {
       'role': 'button',
       'aria-label': localize(
         el,
-        LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+        LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_LINK
       ),
     }),
     children: [
@@ -91,7 +92,10 @@ function buildLinkShareItemTemplate(el) {
         tag: 'span',
         attrs: dict({'class': 'i-amphtml-story-share-label'}),
         children: [
-          localize(el, LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK),
+          localize(
+            el,
+            LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+          ),
         ],
       },
     ],
@@ -169,7 +173,7 @@ function buildCopySuccessfulToast(doc, url) {
           children: [
             localize(
               doc,
-              LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+              LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
             ),
           ],
         },
@@ -279,7 +283,7 @@ export class ShareWidget {
     if (!copyTextToClipboard(this.win, url)) {
       const failureString = localize(
         this.storyEl_,
-        LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+        LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl, dev().assertString(failureString));
       return;

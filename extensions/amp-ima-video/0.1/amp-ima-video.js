@@ -22,7 +22,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getConsentPolicyState} from '../../../src/consent';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -307,18 +307,18 @@ class AmpImaVideo extends AMP.BaseElement {
     }
 
     const videoEvent = eventData['event'];
-    if (isEnumValue(VideoEvents, videoEvent)) {
+    if (isEnumValue(VIDEO_EVENTS_ENUM, videoEvent)) {
       switch (videoEvent) {
-        case VideoEvents.LOAD:
+        case VIDEO_EVENTS_ENUM.LOAD:
           this.playerReadyResolver_(this.iframe_);
           break;
-        case VideoEvents.AD_START:
-        case VideoEvents.PLAY:
-        case VideoEvents.PLAYING:
+        case VIDEO_EVENTS_ENUM.AD_START:
+        case VIDEO_EVENTS_ENUM.PLAY:
+        case VIDEO_EVENTS_ENUM.PLAYING:
           this.pauseHelper_.updatePlaying(true);
           break;
-        case VideoEvents.PAUSE:
-        case VideoEvents.ENDED:
+        case VIDEO_EVENTS_ENUM.PAUSE:
+        case VIDEO_EVENTS_ENUM.ENDED:
           this.pauseHelper_.updatePlaying(false);
           break;
       }
@@ -327,7 +327,7 @@ class AmpImaVideo extends AMP.BaseElement {
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
-      dispatchCustomEvent(this.element, VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(this.element, VIDEO_EVENTS_ENUM.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {

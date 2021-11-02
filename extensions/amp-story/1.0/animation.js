@@ -59,7 +59,7 @@ export function hasAnimations(element) {
 }
 
 /** @enum {number} */
-const PlaybackActivity = {
+const PLAYBACK_ACTIVITY_ENUM = {
   START: 0,
   FINISH: 1,
 };
@@ -335,7 +335,7 @@ export class AnimationRunner {
       return;
     }
 
-    this.playback_(PlaybackActivity.START, this.getStartWaitPromise_());
+    this.playback_(PLAYBACK_ACTIVITY_ENUM.START, this.getStartWaitPromise_());
   }
 
   /**
@@ -360,7 +360,7 @@ export class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return (
-      this.isActivityScheduled_(PlaybackActivity.START) ||
+      this.isActivityScheduled_(PLAYBACK_ACTIVITY_ENUM.START) ||
       (!!this.runner_ &&
         devAssert(this.runner_).getPlayState() == WebAnimationPlayState.RUNNING)
     );
@@ -371,7 +371,7 @@ export class AnimationRunner {
     if (!this.runner_) {
       this.notifyFinish_();
     }
-    this.playback_(PlaybackActivity.FINISH);
+    this.playback_(PLAYBACK_ACTIVITY_ENUM.FINISH);
   }
 
   /** Pauses the animation. */
@@ -473,9 +473,9 @@ export class AnimationRunner {
       this.scheduledWait_ = null;
 
       switch (activity) {
-        case PlaybackActivity.START:
+        case PLAYBACK_ACTIVITY_ENUM.START:
           return this.startWhenReady_(runner);
-        case PlaybackActivity.FINISH:
+        case PLAYBACK_ACTIVITY_ENUM.FINISH:
           return this.finishWhenReady_(runner);
       }
     });

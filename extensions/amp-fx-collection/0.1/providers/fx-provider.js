@@ -6,7 +6,7 @@ import {
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {POSITION_OBSERVER_FIDELITY_ENUM} from '#service/position-observer/position-observer-worker';
 
 import {devAssert} from '#utils/log';
 
@@ -25,10 +25,10 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
-import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
+import {FX_TYPE_ENUM} from '../fx-type'; // eslint-disable-line no-unused-vars
 import {
   ScrollToggleDispatch,
-  ScrollTogglePosition, // eslint-disable-line no-unused-vars
+  SCROLL_TOGGLE_POSITION_ENUM, // eslint-disable-line no-unused-vars
   assertValidScrollToggleElement,
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
@@ -70,7 +70,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
       scrollToggle(
         element,
         isShown,
-        /** @type {!ScrollTogglePosition} */ (devAssert(position))
+        /** @type {!SCROLL_TOGGLE_POSITION_ENUM} */ (devAssert(position))
       );
     });
   };
@@ -88,7 +88,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
 /**
  * @param {!Element} element
  * @param {boolean} isShown
- * @param {!ScrollTogglePosition} position
+ * @param {!SCROLL_TOGGLE_POSITION_ENUM} position
  */
 function scrollToggle(element, isShown, position) {
   let offset = 0;
@@ -219,7 +219,7 @@ export class FxElement {
   observePositionChanges_() {
     this.positionObserver_.observe(
       this.element,
-      PositionObserverFidelity.HIGH,
+      POSITION_OBSERVER_FIDELITY_ENUM.HIGH,
       Presets[this.fxType_].update.bind(this)
     );
 

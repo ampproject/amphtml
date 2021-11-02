@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {Loading} from '#core/constants/loading-instructions';
+import {LOADING_ENUM} from '#core/constants/loading-instructions';
 import {rediscoverChildren, removeProp, setProp} from '#core/context';
 import {
   loadAll,
@@ -117,7 +117,7 @@ export function useSlotContext(ref, opt_props) {
 
     // Mount children, unless lazy loading requested. If so the element should
     // use `BaseElement.setAsContainer`.
-    if (loading != Loading.LAZY) {
+    if (loading != LOADING_ENUM.LAZY) {
       // TODO(#31915): switch to `mount`.
       execute(slot, loadAll, true);
     }

@@ -16,7 +16,7 @@ import {
   AmpA4A,
   EXPERIMENT_FEATURE_HEADER_NAME,
   RENDERING_TYPE_HEADER,
-  XORIGIN_MODE,
+  XORIGIN_MODE_ENUM,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {
@@ -459,7 +459,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       devAssert(!(opt_xhrFail && opt_allInvalid));
       // Start with nameframe method, SRA will override to use safeframe.
       const headers = {};
-      headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
+      headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE_ENUM.NAMEFRAME;
       // Assume all implementations have same data slot.
       const iuParts = encodeURIComponent(
         validInstances[0].element
@@ -517,7 +517,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
     function generateNonSraXhrMockCall(impl, creative) {
       // Start with nameframe method, SRA will override to use safeframe.
       const headers = {
-        [RENDERING_TYPE_HEADER]: XORIGIN_MODE.NAMEFRAME,
+        [RENDERING_TYPE_HEADER]: XORIGIN_MODE_ENUM.NAMEFRAME,
         [EXPERIMENT_FEATURE_HEADER_NAME]: 'foo=bar',
       };
       const iu = encodeURIComponent(impl.element.getAttribute('data-slot'));
@@ -792,7 +792,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
         expect(fetchResponse.headers.get('c')).to.equal('123');
         expect(
           fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase())
-        ).to.equal(XORIGIN_MODE.SAFEFRAME);
+        ).to.equal(XORIGIN_MODE_ENUM.SAFEFRAME);
         expect(fetchResponse.headers.has('unknown')).to.be.false;
         return fetchResponse
           .arrayBuffer()
@@ -827,7 +827,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       expect(fetchResponse.headers.get('c')).to.equal('123');
       expect(
         fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase())
-      ).to.equal(XORIGIN_MODE.SAFEFRAME);
+      ).to.equal(XORIGIN_MODE_ENUM.SAFEFRAME);
       expect(fetchResponse.headers.has('unknown')).to.be.false;
 
       const text = await fetchResponse.text();
@@ -872,7 +872,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
             );
             expect(
               fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase())
-            ).to.equal(XORIGIN_MODE.SAFEFRAME);
+            ).to.equal(XORIGIN_MODE_ENUM.SAFEFRAME);
             expect(fetchResponse.headers.has('unknown')).to.be.false;
             return fetchResponse
               .arrayBuffer()

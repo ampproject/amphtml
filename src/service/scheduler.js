@@ -1,10 +1,10 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {
   containsNotSelf,
   hasNextNodeInDocumentOrder,
   isIframed,
 } from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {removeItem} from '#core/types/array';
 
 import {READY_SCAN_SIGNAL} from './resources-interface';
@@ -184,9 +184,9 @@ export class Scheduler {
   docVisibilityChanged_() {
     const vs = this.ampdoc_.getVisibilityState();
     if (
-      vs == VisibilityState.VISIBLE ||
-      vs == VisibilityState.HIDDEN ||
-      vs == VisibilityState.PRERENDER
+      vs == VISIBILITY_STATE_ENUM.VISIBLE ||
+      vs == VISIBILITY_STATE_ENUM.HIDDEN ||
+      vs == VISIBILITY_STATE_ENUM.PRERENDER
     ) {
       this.targets_.forEach((_, target) => this.maybeBuild_(target));
     }
@@ -270,11 +270,11 @@ export class Scheduler {
     const toBuild =
       parsed &&
       (asap || isIntersecting) &&
-      (vs == VisibilityState.VISIBLE ||
+      (vs == VISIBILITY_STATE_ENUM.VISIBLE ||
         // Hidden (hidden tab) allows full build.
-        vs == VisibilityState.HIDDEN ||
+        vs == VISIBILITY_STATE_ENUM.HIDDEN ||
         // Prerender can only proceed when allowed.
-        (vs == VisibilityState.PRERENDER && target.prerenderAllowed()));
+        (vs == VISIBILITY_STATE_ENUM.PRERENDER && target.prerenderAllowed()));
     if (!toBuild) {
       return;
     }
@@ -285,7 +285,7 @@ export class Scheduler {
     // elements are scheduled via the `requestIdleCallback`.
     const {win} = this.ampdoc_;
     const scheduler =
-      asap || target.getBuildPriority() <= LayoutPriority.CONTENT
+      asap || target.getBuildPriority() <= LAYOUT_PRIORITY_ENUM.CONTENT
         ? win.setTimeout
         : win.requestIdleCallback || win.setTimeout;
     scheduler(() => target.mountInternal());

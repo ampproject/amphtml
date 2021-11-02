@@ -21,7 +21,7 @@ export const NamedMasks = {
 };
 
 /** @enum {string} */
-export const OutputMode = {
+export const OUTPUT_MODE_ENUM = {
   RAW: 'raw',
   ALPHANUMERIC: 'alphanumeric',
 };

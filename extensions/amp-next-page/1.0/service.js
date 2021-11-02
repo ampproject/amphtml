@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {
   insertAtStart,
   isJsonScriptTag,
@@ -21,13 +21,15 @@ import {Services} from '#service';
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
+import {HIDDEN_DOC_CLASS, HostPage, PAGE_STATE_ENUM, Page} from './page';
 import {validatePage, validateUrl} from './utils';
-import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+import VisibilityObserver, {
+  VIEWPORT_RELATIVE_POS_ENUM,
+} from './visibility-observer';
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {
-  UrlReplacementPolicy,
+  URL_REPLACEMENT_POLICY_ENUM,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {
@@ -272,10 +274,12 @@ export class NextPageService {
   maybeFetchNext(force = false) {
     // If we already fetched the maximum number of pages
     const exceededMaximum =
-      this.pages_.filter((page) => !page.is(PageState.QUEUED)).length >
+      this.pages_.filter((page) => !page.is(PAGE_STATE_ENUM.QUEUED)).length >
       this.maxPages_;
     // If a page is already queued to be fetched, we need to wait for it
-    const isFetching = this.pages_.some((page) => page.is(PageState.FETCHING));
+    const isFetching = this.pages_.some((page) =>
+      page.is(PAGE_STATE_ENUM.FETCHING)
+    );
     // If we're still too far from the bottom, we don't need to perform this now
     const isTooEarly =
       this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force;
@@ -290,7 +294,7 @@ export class NextPageService {
       return nextPage
         .fetch()
         .then(() => {
-          if (nextPage.is(PageState.FAILED)) {
+          if (nextPage.is(PAGE_STATE_ENUM.FAILED)) {
             // Silently skip this page
             this.setLastFetchedPage(nextPage);
           }
@@ -330,13 +334,15 @@ export class NextPageService {
    */
   updateVisibility() {
     this.pages_.forEach((page, index) => {
-      if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
+      if (page.relativePos === VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisibility(VisibilityState.HIDDEN);
+          page.setVisibility(VISIBILITY_STATE_ENUM.HIDDEN);
         }
-      } else if (page.relativePos !== ViewportRelativePos.LEAVING_VIEWPORT) {
+      } else if (
+        page.relativePos !== VIEWPORT_RELATIVE_POS_ENUM.LEAVING_VIEWPORT
+      ) {
         if (!page.isVisible()) {
-          page.setVisibility(VisibilityState.VISIBLE);
+          page.setVisibility(VISIBILITY_STATE_ENUM.VISIBLE);
         }
         this.hidePreviousPages_(index);
         this.resumePausedPages_(index);
@@ -345,7 +351,7 @@ export class NextPageService {
 
     // If no page is visible then the host page should be
     if (!this.pages_.some((page) => page.isVisible())) {
-      this.hostPage_.setVisibility(VisibilityState.VISIBLE);
+      this.hostPage_.setVisibility(VISIBILITY_STATE_ENUM.VISIBLE);
     }
 
     // Hide elements if necessary
@@ -390,7 +396,7 @@ export class NextPageService {
       this.visibilityObserver_.isScrollingDown() &&
       this.hostPage_.isVisible()
     ) {
-      this.hostPage_.setVisibility(VisibilityState.HIDDEN);
+      this.hostPage_.setVisibility(VISIBILITY_STATE_ENUM.HIDDEN);
     }
 
     // Get all the pages that the user scrolled past (or didn't see yet)
@@ -403,12 +409,14 @@ export class NextPageService {
       previousPages
         .filter((page) => {
           // Pages that are outside of the viewport should be hidden
-          return page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
+          return (
+            page.relativePos === VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT
+          );
         })
         .map((page, away) => {
           // Hide all pages whose visibility state have changed to hidden
           if (page.isVisible()) {
-            page.setVisibility(VisibilityState.HIDDEN);
+            page.setVisibility(VISIBILITY_STATE_ENUM.HIDDEN);
           }
           // Pause those that are too far away
           if (away >= pausePageCount) {
@@ -442,7 +450,7 @@ export class NextPageService {
         Math.max(0, index - pausePageCount - 1),
         Math.min(this.pages_.length, index + pausePageCount + 1)
       )
-      .filter((page) => page.is(PageState.PAUSED));
+      .filter((page) => page.is(PAGE_STATE_ENUM.PAUSED));
 
     return Promise.all(nearViewportPages.map((page) => page.resume()));
   }
@@ -500,8 +508,8 @@ export class NextPageService {
           title: title || '',
           image,
         },
-        PageState.INSERTED /** initState */,
-        VisibilityState.VISIBLE /** initVisibility */,
+        PAGE_STATE_ENUM.INSERTED /** initState */,
+        VISIBILITY_STATE_ENUM.VISIBLE /** initVisibility */,
         this.doc_
       )
     );
@@ -575,7 +583,7 @@ export class NextPageService {
     // will need to replace placeholder
     // TODO(wassgha) This wouldn't be needed once we can resume a ShadowDoc
     if (!shadowRoot) {
-      devAssert(page.is(PageState.PAUSED));
+      devAssert(page.is(PAGE_STATE_ENUM.PAUSED));
       const placeholder = dev().assertElement(
         scopedQuerySelector(
           container,
@@ -600,7 +608,7 @@ export class NextPageService {
         content,
         page.url,
         {
-          visibilityState: VisibilityState.PRERENDER,
+          visibilityState: VISIBILITY_STATE_ENUM.PRERENDER,
           cap: this.getCapabilities_(),
         }
       );
@@ -655,7 +663,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   closeDocument(page) {
-    if (page.is(PageState.PAUSED)) {
+    if (page.is(PAGE_STATE_ENUM.PAUSED)) {
       return Promise.resolve();
     }
 
@@ -927,7 +935,7 @@ export class NextPageService {
       this.ampdoc_,
       this.getHost_(),
       {
-        urlReplacement: UrlReplacementPolicy.ALL,
+        urlReplacement: URL_REPLACEMENT_POLICY_ENUM.ALL,
         xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
       }
     )
@@ -1058,7 +1066,9 @@ export class NextPageService {
 
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
-        .filter((page) => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .filter(
+          (page) => !page.isLoaded() && !page.is(PAGE_STATE_ENUM.FETCHING)
+        )
         .map((page) => ({
           title: page.title,
           url: page.url,
@@ -1087,7 +1097,9 @@ export class NextPageService {
     const recBox = dev().assertElement(this.recBox_);
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
-        .filter((page) => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .filter(
+          (page) => !page.isLoaded() && !page.is(PAGE_STATE_ENUM.FETCHING)
+        )
         .map((page) => ({
           title: page.title,
           url: page.url,

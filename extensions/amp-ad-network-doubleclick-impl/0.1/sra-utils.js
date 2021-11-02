@@ -8,7 +8,10 @@ import {utf8Encode} from '#core/types/string/bytes';
 
 import {dev, devAssert} from '#utils/log';
 
-import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
+import {
+  RENDERING_TYPE_HEADER,
+  XORIGIN_MODE_ENUM,
+} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -410,7 +413,7 @@ export function sraBlockCallbackHandler(
     }, {});
   }
   // Force safeframe rendering method.
-  headersObj[RENDERING_TYPE_HEADER.toLowerCase()] = XORIGIN_MODE.SAFEFRAME;
+  headersObj[RENDERING_TYPE_HEADER.toLowerCase()] = XORIGIN_MODE_ENUM.SAFEFRAME;
   // Construct pseudo fetch response to be passed down the A4A
   // promise chain for this block.
   const headers =

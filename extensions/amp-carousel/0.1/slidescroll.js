@@ -1,7 +1,7 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {Animation} from '#utils/animation';
 import {dev, user, userAssert} from '#utils/log';
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {CarouselControls} from './carousel-controls';
 import {bezierCurve} from '#core/data-structures/curve';
@@ -216,7 +216,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
           this.toggleAutoplay_(!this.hasAutoplay_);
         }
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
   }
 
@@ -313,10 +313,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
       (invocation) => {
         const {args} = invocation;
         if (args) {
-          this.goToSlide(args['index'], ActionTrust.HIGH);
+          this.goToSlide(args['index'], ACTION_TRUST_ENUM.HIGH);
         }
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
   }
 
@@ -342,7 +342,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.goToSlide(slide, ActionTrust.HIGH);
+      this.goToSlide(slide, ACTION_TRUST_ENUM.HIGH);
     }
   }
 
@@ -376,7 +376,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @param {boolean=} opt_autoplay
    */
   go(dir, animate, opt_autoplay) {
-    const trust = opt_autoplay ? ActionTrust.LOW : ActionTrust.HIGH;
+    const trust = opt_autoplay ? ACTION_TRUST_ENUM.LOW : ACTION_TRUST_ENUM.HIGH;
     this.moveSlide(dir, animate, trust);
     if (opt_autoplay) {
       this.autoplay_();
@@ -406,9 +406,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
         const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
         if (this.hasNativeSnapPoints_) {
-          this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
+          this.updateOnScroll_(currentScrollLeft, ACTION_TRUST_ENUM.LOW);
         } else {
-          this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
+          this.customSnap_(currentScrollLeft, undefined, ACTION_TRUST_ENUM.LOW);
         }
       }, timeout)
     );
@@ -566,7 +566,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    */
   keydownHandler_(event) {
     const {key} = event;
-    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+    if (key == KEYS_ENUM.LEFT_ARROW || key == KEYS_ENUM.RIGHT_ARROW) {
       event.stopPropagation();
     }
   }
@@ -887,7 +887,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @param {ActionTrust=} opt_trust LOW by default.
    * @private
    */
-  showSlideAndTriggerAction_(newIndex, opt_trust = ActionTrust.LOW) {
+  showSlideAndTriggerAction_(newIndex, opt_trust = ACTION_TRUST_ENUM.LOW) {
     const slideChanged = this.showSlide_(newIndex);
 
     if (slideChanged) {

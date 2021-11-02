@@ -26,9 +26,9 @@
  * </code>
  */
 
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {removeElement} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {px, setStyle, toggle} from '#core/dom/style';
 import {isObject} from '#core/types';
 import {dict} from '#core/types/object';
@@ -74,7 +74,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == LAYOUT_ENUM.NODISPLAY;
   }
 
   /** @override */
@@ -208,7 +208,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       /* source */ null,
       /* caller */ null,
       /* event */ null,
-      ActionTrust.DEFAULT
+      ACTION_TRUST_ENUM.DEFAULT
     );
     return true;
   }

@@ -1,14 +1,14 @@
 import {
-  ActionStatus,
+  ACTION_STATUS_ENUM,
+  SUBSCRIPTION_ANALYTICS_EVENTS_ENUM,
   SubscriptionAnalytics,
-  SubscriptionAnalyticsEvents,
 } from './analytics';
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
-import {Entitlement, GrantReason} from './entitlement';
+import {Entitlement, GRANT_REASON_ENUM} from './entitlement';
 import {Metering} from './metering';
 import {
   PageConfig as PageConfigInterface,
@@ -126,7 +126,9 @@ export class SubscriptionService {
    */
   start() {
     this.initialize_().then(() => {
-      this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
+      this.subscriptionAnalytics_.event(
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.STARTED
+      );
       this.renderer_.toggleLoading(true);
 
       userAssert(this.pageConfig_, 'Page config is null');
@@ -280,12 +282,12 @@ export class SubscriptionService {
         subscriptionPlatform
       );
       this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REGISTERED,
         subscriptionPlatform.getPlatformKey()
       );
       // Deprecated event fired for backward compatibility
       this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REGISTERED_DEPRECATED,
         subscriptionPlatform.getPlatformKey()
       );
       this.fetchEntitlements_(subscriptionPlatform);
@@ -394,7 +396,7 @@ export class SubscriptionService {
       );
     }
     this.subscriptionAnalytics_.serviceEvent(
-      SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
+      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ENTITLEMENT_RESOLVED,
       platformKey
     );
   }
@@ -567,7 +569,7 @@ export class SubscriptionService {
       if (granted) {
         const grantCameFromAmpMetering =
           entitlement &&
-          entitlement.grantReason === GrantReason.METERING &&
+          entitlement.grantReason === GRANT_REASON_ENUM.METERING &&
           entitlement.service === this.metering_.platformKey;
 
         if (!grantCameFromAmpMetering) {
@@ -656,26 +658,26 @@ export class SubscriptionService {
       selectedPlatform.activate(selectedEntitlement, grantEntitlement);
 
       this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
         selectedPlatform.getPlatformKey()
       );
       // Deprecated events are fire for backwards compatibility
       this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED_DEPRECATED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED_DEPRECATED,
         selectedPlatform.getPlatformKey()
       );
       if (bestEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.ACCESS_GRANTED,
+          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACCESS_GRANTED,
           bestEntitlement.service
         );
       } else {
         this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
+          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED,
           selectedPlatform.getPlatformKey()
         );
         this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.ACCESS_DENIED,
+          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACCESS_DENIED,
           selectedPlatform.getPlatformKey()
         );
       }
@@ -737,12 +739,12 @@ export class SubscriptionService {
         this.fetchEntitlements_(subscriptionPlatform);
       });
     this.subscriptionAnalytics_.serviceEvent(
-      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REAUTHORIZED,
       ''
     );
     // deprecated event fired for backward compatibility
     this.subscriptionAnalytics_.serviceEvent(
-      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
+      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REAUTHORIZED_DEPRECATED,
       ''
     );
     this.startAuthorizationFlow_();
@@ -787,14 +789,14 @@ export class SubscriptionService {
       this.platformStore_.onPlatformResolves(platformKey, (platform) => {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
-          SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACTION_DELEGATED,
           dict({
             'action': action,
             'serviceId': platformKey,
           }),
           dict({
             'action': action,
-            'status': ActionStatus.STARTED,
+            'status': ACTION_STATUS_ENUM.STARTED,
           })
         );
         resolve(platform.executeAction(action, sourceId));
@@ -832,7 +834,7 @@ export class SubscriptionService {
         source: '',
         raw: '',
         granted: true,
-        grantReason: GrantReason.FREE,
+        grantReason: GRANT_REASON_ENUM.FREE,
         dataObject: {},
       })
     );

@@ -9,7 +9,7 @@ import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from './url';
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
 /** @enum {string} */
-export const SameSite = {
+export const SAME_SITE_ENUM = {
   LAX: 'Lax',
   STRICT: 'Strict',
   NONE: 'None',

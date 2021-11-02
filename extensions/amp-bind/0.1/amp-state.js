@@ -1,7 +1,7 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag} from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
 import {dict, map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
@@ -12,7 +12,7 @@ import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
 import {
-  UrlReplacementPolicy,
+  URL_REPLACEMENT_POLICY_ENUM,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {getSourceOrigin} from '../../../src/url';
@@ -39,7 +39,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return LayoutPriority.METADATA;
+    return LAYOUT_PRIORITY_ENUM.METADATA;
   }
 
   /** @override */
@@ -173,8 +173,8 @@ export class AmpState extends AMP.BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     const policy =
       isCorsFetch && !isInit
-        ? UrlReplacementPolicy.OPT_IN
-        : UrlReplacementPolicy.ALL;
+        ? URL_REPLACEMENT_POLICY_ENUM.OPT_IN
+        : URL_REPLACEMENT_POLICY_ENUM.ALL;
 
     return this.fetch_(ampdoc, policy, opt_refresh).catch((error) => {
       const event = error
@@ -186,7 +186,7 @@ export class AmpState extends AMP.BaseElement {
         : null;
       // Trigger "fetch-error" event on fetch failure.
       const actions = Services.actionServiceForDoc(element);
-      actions.trigger(element, 'fetch-error', event, ActionTrust.LOW);
+      actions.trigger(element, 'fetch-error', event, ACTION_TRUST_ENUM.LOW);
     });
   }
 

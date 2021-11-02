@@ -9,8 +9,8 @@ import {Services} from '#service';
 
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {
-  MESSAGE_FIELDS,
-  SERVICE,
+  MESSAGE_FIELDS_ENUM,
+  SERVICE_ENUM,
   SafeframeHostApi,
   removeSafeframeListener,
   safeframeListener,
@@ -80,17 +80,17 @@ describes.realWin(
      */
     function sendSetupMessage() {
       const messageData = {};
-      messageData[MESSAGE_FIELDS.SENTINEL] = doubleclickImpl.sentinel;
-      messageData[MESSAGE_FIELDS.CHANNEL] = safeframeChannel;
+      messageData[MESSAGE_FIELDS_ENUM.SENTINEL] = doubleclickImpl.sentinel;
+      messageData[MESSAGE_FIELDS_ENUM.CHANNEL] = safeframeChannel;
       receiveMessage(messageData, doubleclickImpl.iframe.contentWindow);
     }
 
     function sendRegisterDoneMessage() {
       const message = {};
-      message[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
-      message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
-      message[MESSAGE_FIELDS.SERVICE] = SERVICE.REGISTER_DONE;
-      message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+      message[MESSAGE_FIELDS_ENUM.CHANNEL] = safeframeHost.channel;
+      message[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY] = 1;
+      message[MESSAGE_FIELDS_ENUM.SERVICE] = SERVICE_ENUM.REGISTER_DONE;
+      message[MESSAGE_FIELDS_ENUM.PAYLOAD] = JSON.stringify({
         initialHeight: '100',
         initialWidth: '100',
         sentinel: safeframeHost.sentinel_,
@@ -129,18 +129,18 @@ describes.realWin(
         // Verify that first response message was sent properly
         const firstPostMessageArgs = postMessageStub.firstCall.args;
         let connectMessage = JSON.parse(firstPostMessageArgs[0]);
-        let payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
+        let payload = JSON.parse(connectMessage[MESSAGE_FIELDS_ENUM.PAYLOAD]);
         expect(payload).to.deep.equal({
           'c': safeframeChannel,
           'message': 'connect',
         });
-        expect(connectMessage[MESSAGE_FIELDS.CHANNEL]).to.equal(
+        expect(connectMessage[MESSAGE_FIELDS_ENUM.CHANNEL]).to.equal(
           safeframeChannel
         );
-        expect(connectMessage[MESSAGE_FIELDS.SENTINEL]).to.equal(
+        expect(connectMessage[MESSAGE_FIELDS_ENUM.SENTINEL]).to.equal(
           doubleclickImpl.sentinel
         );
-        expect(connectMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY]).to.equal(
+        expect(connectMessage[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY]).to.equal(
           safeframeHost.endpointIdentity_
         );
 
@@ -150,16 +150,16 @@ describes.realWin(
           .then(() => {
             const secondPostMessageArgs = postMessageStub.secondCall.args;
             connectMessage = JSON.parse(secondPostMessageArgs[0]);
-            expect(connectMessage[MESSAGE_FIELDS.CHANNEL]).to.equal(
+            expect(connectMessage[MESSAGE_FIELDS_ENUM.CHANNEL]).to.equal(
               safeframeChannel
             );
-            expect(connectMessage[MESSAGE_FIELDS.SENTINEL]).to.equal(
+            expect(connectMessage[MESSAGE_FIELDS_ENUM.SENTINEL]).to.equal(
               doubleclickImpl.sentinel
             );
-            expect(connectMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY]).to.equal(
-              safeframeHost.endpointIdentity_
-            );
-            payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
+            expect(
+              connectMessage[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY]
+            ).to.equal(safeframeHost.endpointIdentity_);
+            payload = JSON.parse(connectMessage[MESSAGE_FIELDS_ENUM.PAYLOAD]);
             expect(Object.keys(payload)).to.deep.equal(['newGeometry', 'uid']);
             expect(
               Object.keys(JSON.parse(payload['newGeometry']))
@@ -365,7 +365,7 @@ describes.realWin(
                 '"xInView":1}'
             );
             expect(payload['uid']).to.equal(safeframeHost.uid_);
-            expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+            expect(messageType).to.equal(SERVICE_ENUM.GEOMETRY_UPDATE);
           });
       });
 
@@ -408,7 +408,7 @@ describes.realWin(
                 '"xInView":1}'
             );
             expect(payload['uid']).to.equal(safeframeHost.uid_);
-            expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+            expect(messageType).to.equal(SERVICE_ENUM.GEOMETRY_UPDATE);
           });
       });
 
@@ -483,7 +483,7 @@ describes.realWin(
                 '"allowedExpansion_l":0,"yInView":0.5,"xInView":1}'
             );
             expect(payload['uid']).to.equal(safeframeHost.uid_);
-            expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+            expect(messageType).to.equal(SERVICE_ENUM.GEOMETRY_UPDATE);
           });
       });
     });
@@ -524,7 +524,7 @@ describes.realWin(
               safeframeHost.currentGeometry_
             );
             expect(payload['uid']).to.equal(safeframeHost.uid_);
-            expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+            expect(messageType).to.equal(SERVICE_ENUM.GEOMETRY_UPDATE);
             return Services.timerFor(env.win)
               .promise(1000)
               .then(() => {
@@ -535,7 +535,7 @@ describes.realWin(
                   safeframeHost.currentGeometry_
                 );
                 expect(payload['uid']).to.equal(safeframeHost.uid_);
-                expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+                expect(messageType).to.equal(SERVICE_ENUM.GEOMETRY_UPDATE);
               });
           });
       });
@@ -591,7 +591,7 @@ describes.realWin(
           safeframeHost,
           'sendMessage_'
         );
-        safeframeHost.sendResizeResponse(true, SERVICE.COLLAPSE_REQUEST);
+        safeframeHost.sendResizeResponse(true, SERVICE_ENUM.COLLAPSE_REQUEST);
         safeframeHost.baseInstance_.promiseId_++;
         return Services.timerFor(env.win)
           .promise(0)
@@ -610,7 +610,7 @@ describes.realWin(
         safeframeHost.resizeAmpAdAndSafeframe(
           100,
           100,
-          SERVICE.COLLAPSE_REQUEST
+          SERVICE_ENUM.COLLAPSE_REQUEST
         );
         safeframeHost.baseInstance_.promiseId_++;
         return Services.timerFor(env.win)
@@ -697,10 +697,11 @@ describes.realWin(
        */
       function sendExpandMessage(height, width) {
         const expandMessage = {};
-        expandMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
-        expandMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
-        expandMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.EXPAND_REQUEST;
-        expandMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        expandMessage[MESSAGE_FIELDS_ENUM.CHANNEL] = safeframeHost.channel;
+        expandMessage[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY] = 1;
+        expandMessage[MESSAGE_FIELDS_ENUM.SERVICE] =
+          SERVICE_ENUM.EXPAND_REQUEST;
+        expandMessage[MESSAGE_FIELDS_ENUM.PAYLOAD] = JSON.stringify({
           'uid': 0.623462509818004,
           'expand_t': 0,
           'expand_r': width,
@@ -733,7 +734,7 @@ describes.realWin(
             expect(safeframeMock.style.width).to.equal('350px');
             expect(sendResizeResponseSpy).to.be.calledWith(
               true,
-              SERVICE.EXPAND_RESPONSE
+              SERVICE_ENUM.EXPAND_RESPONSE
             );
             expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
           });
@@ -767,7 +768,7 @@ describes.realWin(
             expect(safeframeMock.style.width).to.equal('350px');
             expect(sendResizeResponseSpy).to.be.calledWith(
               true,
-              SERVICE.EXPAND_RESPONSE
+              SERVICE_ENUM.EXPAND_RESPONSE
             );
             expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
           });
@@ -805,7 +806,7 @@ describes.realWin(
               expect(safeframeMock.style.width).to.equal('850px');
               expect(sendResizeResponseSpy).to.be.calledWith(
                 true,
-                SERVICE.EXPAND_RESPONSE
+                SERVICE_ENUM.EXPAND_RESPONSE
               );
               expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
             });
@@ -823,14 +824,14 @@ describes.realWin(
         safeframeHost.resizeAmpAdAndSafeframe(
           550,
           550,
-          SERVICE.EXPAND_RESPONSE
+          SERVICE_ENUM.EXPAND_RESPONSE
         );
         return Services.timerFor(env.win)
           .promise(100)
           .then(() => {
             expect(sendResizeResponseSpy).to.be.calledWith(
               false,
-              SERVICE.EXPAND_RESPONSE
+              SERVICE_ENUM.EXPAND_RESPONSE
             );
           });
       });
@@ -846,7 +847,7 @@ describes.realWin(
           .then(() => {
             expect(sendResizeResponseSpy).to.be.calledWith(
               false,
-              SERVICE.EXPAND_RESPONSE
+              SERVICE_ENUM.EXPAND_RESPONSE
             );
           });
       });
@@ -857,10 +858,11 @@ describes.realWin(
        */
       it('expand_request fails if invalid values sent', () => {
         const expandMessage = {};
-        expandMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
-        expandMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
-        expandMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.EXPAND_REQUEST;
-        expandMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        expandMessage[MESSAGE_FIELDS_ENUM.CHANNEL] = safeframeHost.channel;
+        expandMessage[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY] = 1;
+        expandMessage[MESSAGE_FIELDS_ENUM.SERVICE] =
+          SERVICE_ENUM.EXPAND_REQUEST;
+        expandMessage[MESSAGE_FIELDS_ENUM.PAYLOAD] = JSON.stringify({
           'uid': 0.623462509818004,
           'expand_t': 'text',
           'expand_r': 'Also text',
@@ -877,7 +879,7 @@ describes.realWin(
           .then(() => {
             expect(sendResizeResponseSpy).to.be.calledWith(
               false,
-              SERVICE.EXPAND_RESPONSE
+              SERVICE_ENUM.EXPAND_RESPONSE
             );
           });
       });
@@ -903,7 +905,7 @@ describes.realWin(
               expect(safeframeMock.width).to.equal('50');
               expect(sendResizeResponseSpy).to.be.calledWith(
                 false,
-                SERVICE.EXPAND_RESPONSE
+                SERVICE_ENUM.EXPAND_RESPONSE
               );
               expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
             });
@@ -912,10 +914,11 @@ describes.realWin(
 
       function sendCollapseMessage() {
         const collapseMessage = {};
-        collapseMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
-        collapseMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
-        collapseMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.COLLAPSE_REQUEST;
-        collapseMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        collapseMessage[MESSAGE_FIELDS_ENUM.CHANNEL] = safeframeHost.channel;
+        collapseMessage[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY] = 1;
+        collapseMessage[MESSAGE_FIELDS_ENUM.SERVICE] =
+          SERVICE_ENUM.COLLAPSE_REQUEST;
+        collapseMessage[MESSAGE_FIELDS_ENUM.PAYLOAD] = JSON.stringify({
           'uid': 0.623462509818004,
           'push': false,
           'sentinel': safeframeHost.sentinel_,
@@ -941,7 +944,7 @@ describes.realWin(
             expect(safeframeMock.style.width).to.equal('300px');
             expect(sendResizeResponseSpy).to.be.calledWith(
               true,
-              SERVICE.COLLAPSE_RESPONSE
+              SERVICE_ENUM.COLLAPSE_RESPONSE
             );
             expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
           });
@@ -973,7 +976,7 @@ describes.realWin(
             expect(safeframeMock.style.width).to.equal('300px');
             expect(sendResizeResponseSpy).to.be.calledWith(
               true,
-              SERVICE.COLLAPSE_RESPONSE
+              SERVICE_ENUM.COLLAPSE_RESPONSE
             );
             expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
           });
@@ -987,7 +990,7 @@ describes.realWin(
           .then(() => {
             expect(sendResizeResponseSpy).to.be.calledWith(
               false,
-              SERVICE.COLLAPSE_RESPONSE
+              SERVICE_ENUM.COLLAPSE_RESPONSE
             );
           });
       });
@@ -1001,7 +1004,7 @@ describes.realWin(
           .then(() => {
             expect(sendResizeResponseSpy).to.be.calledWith(
               false,
-              SERVICE.COLLAPSE_RESPONSE
+              SERVICE_ENUM.COLLAPSE_RESPONSE
             );
           });
       });
@@ -1015,10 +1018,11 @@ describes.realWin(
        */
       function sendResizeMessage(top, bottom, left, right) {
         const resizeMessage = {};
-        resizeMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
-        resizeMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
-        resizeMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.RESIZE_REQUEST;
-        resizeMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        resizeMessage[MESSAGE_FIELDS_ENUM.CHANNEL] = safeframeHost.channel;
+        resizeMessage[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY] = 1;
+        resizeMessage[MESSAGE_FIELDS_ENUM.SERVICE] =
+          SERVICE_ENUM.RESIZE_REQUEST;
+        resizeMessage[MESSAGE_FIELDS_ENUM.PAYLOAD] = JSON.stringify({
           'uid': 0.623462509818004,
           'resize_t': top,
           'resize_r': right,
@@ -1051,7 +1055,7 @@ describes.realWin(
             expect(safeframeMock.style.width).to.equal('290px');
             expect(sendResizeResponseSpy).to.be.calledWith(
               true,
-              SERVICE.RESIZE_RESPONSE
+              SERVICE_ENUM.RESIZE_RESPONSE
             );
             expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
           });

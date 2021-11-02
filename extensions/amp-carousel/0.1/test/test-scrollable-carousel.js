@@ -1,6 +1,6 @@
 import '../amp-carousel';
 import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {user} from '#utils/log';
@@ -427,7 +427,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ACTION_TRUST_ENUM.HIGH
       );
       expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
@@ -438,7 +438,7 @@ describes.realWin(
           method: 'goToSlide',
           node: element,
           source: 'source',
-          trust: ActionTrust.HIGH,
+          trust: ACTION_TRUST_ENUM.HIGH,
         })
       );
 
@@ -450,7 +450,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ACTION_TRUST_ENUM.HIGH
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(

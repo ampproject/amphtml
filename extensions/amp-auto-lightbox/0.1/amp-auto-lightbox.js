@@ -6,8 +6,8 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '#core/constants/amp-events';
-import {CommonSignals} from '#core/constants/common-signals';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {dispatchCustomEvent} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
@@ -20,7 +20,7 @@ import {Services} from '#service';
 import {loadPromise} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
-import {AutoLightboxEvents} from '../../../src/auto-lightbox';
+import {AUTO_LIGHTBOX_EVENTS_ENUM} from '../../../src/auto-lightbox';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -288,7 +288,7 @@ function whenLoaded(element) {
     return loadPromise(element);
   }
   return whenUpgradedToCustomElement(element).then((element) =>
-    element.signals().whenSignal(CommonSignals.LOAD_END)
+    element.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
   );
 }
 
@@ -424,7 +424,7 @@ export function apply(ampdoc, element) {
       REQUIRED_EXTENSION
     );
 
-    dispatchCustomEvent(element, AutoLightboxEvents.NEWLY_SET);
+    dispatchCustomEvent(element, AUTO_LIGHTBOX_EVENTS_ENUM.NEWLY_SET);
 
     return element;
   });
@@ -442,7 +442,7 @@ export function runCandidates(ampdoc, candidates) {
         ({boundingClientRect}) => {
           if (
             candidate.tagName !== 'IMG' &&
-            !candidate.signals().get(CommonSignals.LOAD_END)
+            !candidate.signals().get(COMMON_SIGNALS_ENUM.LOAD_END)
           ) {
             // <amp-img> will change the img's src inline data on unlayout and
             // remove it from DOM.
@@ -479,7 +479,7 @@ export function scan(ampdoc, opt_root) {
 AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, (e) => {
+    ampdoc.getRootNode().addEventListener(AMP_EVENTS_ENUM.DOM_UPDATE, (e) => {
       const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });

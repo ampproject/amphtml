@@ -1,5 +1,5 @@
-import {Action, getStoreService} from './amp-story-store-service';
-import {CommonSignals} from '#core/constants/common-signals';
+import {ACTION_ENUM, getStoreService} from './amp-story-store-service';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
@@ -56,7 +56,7 @@ export class LiveStoryManager {
 
     this.ampStory_.element
       .signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
       .then(() => {
         Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
           this.ampdoc_,
@@ -77,7 +77,7 @@ export class LiveStoryManager {
     const storyPages = this.storyEl_.querySelectorAll('amp-story-page');
     const pageIds = Array.prototype.map.call(storyPages, (el) => el.id);
 
-    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
-    this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastNewPageEl.id);
+    this.storeService_.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(ACTION_ENUM.ADD_NEW_PAGE_ID, lastNewPageEl.id);
   }
 }

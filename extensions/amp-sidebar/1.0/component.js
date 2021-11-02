@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
-import {Side} from './sidebar-config';
+import {KEYS_ENUM} from '#core/constants/key-codes';
+import {SIDE_ENUM} from './sidebar-config';
 import {forwardRef} from '#preact/compat';
 import {isRTL} from '#core/dom';
 import {
@@ -83,7 +83,9 @@ function BentoSidebarWithRef(
     if (!sidebarElement) {
       return;
     }
-    setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
+    setSide(
+      isRTL(sidebarElement.ownerDocument) ? SIDE_ENUM.RIGHT : SIDE_ENUM.LEFT
+    );
   }, [side, mounted]);
 
   useSidebarAnimation(
@@ -108,7 +110,7 @@ function BentoSidebarWithRef(
       return;
     }
     const keydownCallback = (event) => {
-      if (event.key === Keys.ESCAPE) {
+      if (event.key === KEYS_ENUM.ESCAPE) {
         event.stopImmediatePropagation();
         event.preventDefault();
         close();
@@ -132,8 +134,8 @@ function BentoSidebarWithRef(
         wrapperClassName={objstr({
           [classes.sidebar]: true,
           [classes.defaultSidebarStyles]: true,
-          [classes.left]: side === Side.LEFT,
-          [classes.right]: side !== Side.LEFT,
+          [classes.left]: side === SIDE_ENUM.LEFT,
+          [classes.right]: side !== SIDE_ENUM.LEFT,
         })}
         role="menu"
         tabIndex="-1"

@@ -27,7 +27,7 @@ const TAG = 'amp-access';
  * The type of access flow.
  * @enum {string}
  */
-export const AccessType = {
+export const ACCESS_TYPE_ENUM = {
   CLIENT: 'client',
   IFRAME: 'iframe',
   SERVER: 'server',
@@ -159,21 +159,21 @@ export class AccessSource {
     });
     const isJwt = this.isJwtEnabled_ && configJson['jwt'] === true;
     switch (this.type_) {
-      case AccessType.CLIENT:
+      case ACCESS_TYPE_ENUM.CLIENT:
         if (isJwt) {
           return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
         }
         return new AccessClientAdapter(this.ampdoc, configJson, context);
-      case AccessType.IFRAME:
+      case ACCESS_TYPE_ENUM.IFRAME:
         return new AccessIframeAdapter(this.ampdoc, configJson, context);
-      case AccessType.SERVER:
+      case ACCESS_TYPE_ENUM.SERVER:
         if (isJwt) {
           return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
         }
         return new AccessServerAdapter(this.ampdoc, configJson, context);
-      case AccessType.VENDOR:
+      case ACCESS_TYPE_ENUM.VENDOR:
         return new AccessVendorAdapter(this.ampdoc, configJson);
-      case AccessType.OTHER:
+      case ACCESS_TYPE_ENUM.OTHER:
         return new AccessOtherAdapter(this.ampdoc, configJson, context);
     }
     throw dev().createError('Unsupported access type: ', this.type_);
@@ -200,23 +200,23 @@ export class AccessSource {
   buildConfigType_(configJson) {
     let {'type': type} = configJson;
     userAssert(
-      !type || isEnumValue(AccessType, type),
+      !type || isEnumValue(ACCESS_TYPE_ENUM, type),
       `Unknown access type: ${type}`
     );
     if (!type) {
       if (configJson['vendor']) {
-        type = AccessType.VENDOR;
+        type = ACCESS_TYPE_ENUM.VENDOR;
       } else {
-        type = AccessType.CLIENT;
+        type = ACCESS_TYPE_ENUM.CLIENT;
       }
     }
-    if (type == AccessType.SERVER && !this.isServerEnabled_) {
+    if (type == ACCESS_TYPE_ENUM.SERVER && !this.isServerEnabled_) {
       user().warn(TAG, 'Experiment "amp-access-server" is not enabled.');
-      type = AccessType.CLIENT;
+      type = ACCESS_TYPE_ENUM.CLIENT;
     }
-    if (type == AccessType.CLIENT && this.isServerEnabled_) {
+    if (type == ACCESS_TYPE_ENUM.CLIENT && this.isServerEnabled_) {
       user().info(TAG, 'Forcing access type: SERVER');
-      type = AccessType.SERVER;
+      type = ACCESS_TYPE_ENUM.SERVER;
     }
     return type;
   }

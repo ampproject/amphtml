@@ -1,12 +1,15 @@
 import '../amp-next-page';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
-import {HostPage, PageState} from '../page';
-import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
+import {HostPage, PAGE_STATE_ENUM} from '../page';
+import {
+  SCROLL_DIRECTION_ENUM,
+  VIEWPORT_RELATIVE_POS_ENUM,
+} from '../visibility-observer';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
@@ -310,17 +313,17 @@ describes.realWin(
       it('should internally register the host page', async () => {
         expect(service.pages_[0].title).to.equal('Host page');
         expect(service.pages_[0].url).to.include('about:srcdoc');
-        expect(service.pages_[0].state_).to.equal(PageState.INSERTED);
+        expect(service.pages_[0].state_).to.equal(PAGE_STATE_ENUM.INSERTED);
         expect(service.pages_[0].visibilityState_).to.equal(
-          VisibilityState.VISIBLE
+          VISIBILITY_STATE_ENUM.VISIBLE
         );
       });
 
       it('should not fetch the next document before scrolling', async () => {
         [1, 2].forEach((i) => {
-          expect(service.pages_[i].state_).to.equal(PageState.QUEUED);
+          expect(service.pages_[i].state_).to.equal(PAGE_STATE_ENUM.QUEUED);
           expect(service.pages_[i].visibilityState_).to.equal(
-            VisibilityState.PRERENDER
+            VISIBILITY_STATE_ENUM.PRERENDER
           );
         });
       });
@@ -332,15 +335,15 @@ describes.realWin(
         await fetchDocuments(service);
 
         expect(firstPageFetchSpy).to.be.calledOnce;
-        expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
+        expect(service.pages_[1].state_).to.equal(PAGE_STATE_ENUM.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VISIBILITY_STATE_ENUM.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.not.be.called;
-        expect(service.pages_[2].state_).to.equal(PageState.QUEUED);
+        expect(service.pages_[2].state_).to.equal(PAGE_STATE_ENUM.QUEUED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VISIBILITY_STATE_ENUM.PRERENDER
         );
       });
 
@@ -351,15 +354,15 @@ describes.realWin(
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
         expect(firstPageFetchSpy).to.be.calledOnce;
-        expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
+        expect(service.pages_[1].state_).to.equal(PAGE_STATE_ENUM.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VISIBILITY_STATE_ENUM.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.be.calledOnce;
-        expect(service.pages_[2].state_).to.equal(PageState.INSERTED);
+        expect(service.pages_[2].state_).to.equal(PAGE_STATE_ENUM.INSERTED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VISIBILITY_STATE_ENUM.PRERENDER
         );
       });
 
@@ -376,9 +379,9 @@ describes.realWin(
 
         await service.maybeFetchNext();
 
-        expect(service.pages_[1].state_).to.equal(PageState.FAILED);
+        expect(service.pages_[1].state_).to.equal(PAGE_STATE_ENUM.FAILED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VISIBILITY_STATE_ENUM.PRERENDER
         );
       });
 
@@ -399,17 +402,20 @@ describes.realWin(
           `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`,
           '/document1'
         );
-        service.pages_[1].setVisibility(VisibilityState.VISIBLE);
+        service.pages_[1].setVisibility(VISIBILITY_STATE_ENUM.VISIBLE);
 
         await fetchDocuments(
           service,
           `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="2" />`,
           '/document2'
         );
-        service.pages_[1].relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
+        service.pages_[1].relativePos =
+          VIEWPORT_RELATIVE_POS_ENUM.INSIDE_VIEWPORT;
         service.updateVisibility();
-        service.pages_[1].relativePos = ViewportRelativePos.OUTSIDE_VIEWPORT;
-        service.pages_[2].relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
+        service.pages_[1].relativePos =
+          VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT;
+        service.pages_[2].relativePos =
+          VIEWPORT_RELATIVE_POS_ENUM.INSIDE_VIEWPORT;
         service.updateVisibility();
 
         expect(service.pages_[1].document.querySelector('[instance="1"]')).to.be
@@ -443,8 +449,8 @@ describes.realWin(
             title: 'test title',
             img: '/img.jpg',
           },
-          PageState.INSERTED /** initState */,
-          VisibilityState.VISIBLE /** initVisibility */,
+          PAGE_STATE_ENUM.INSERTED /** initState */,
+          VISIBILITY_STATE_ENUM.VISIBLE /** initVisibility */,
           {} /* Document */
         );
 
@@ -520,8 +526,8 @@ describes.realWin(
         expect(container.querySelector('.i-amphtml-next-page-shadow-root')).to
           .be.ok;
 
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
+        service.pages_[2].visibilityState_ = VISIBILITY_STATE_ENUM.VISIBLE;
+        service.visibilityObserver_.scrollDirection_ = SCROLL_DIRECTION_ENUM.UP;
 
         await service.hidePreviousPages_(
           0 /** index */,
@@ -530,9 +536,9 @@ describes.realWin(
 
         // Internally changes the state to paused
         expect(secondPagePauseSpy).to.be.calledOnce;
-        expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
+        expect(service.pages_[2].state_).to.equal(PAGE_STATE_ENUM.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VISIBILITY_STATE_ENUM.HIDDEN
         );
 
         // Replaces the inserted shadow doc with a placeholder of equal height
@@ -557,18 +563,19 @@ describes.realWin(
 
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
+        service.pages_[2].visibilityState_ = VISIBILITY_STATE_ENUM.VISIBLE;
+        service.visibilityObserver_.scrollDirection_ = SCROLL_DIRECTION_ENUM.UP;
         await service.hidePreviousPages_(
           0 /** index */,
           0 /** pausePageCountForTesting */
         );
-        expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
+        expect(service.pages_[2].state_).to.equal(PAGE_STATE_ENUM.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VISIBILITY_STATE_ENUM.HIDDEN
         );
 
-        service.visibilityObserver_.scrollDirection_ = ScrollDirection.DOWN;
+        service.visibilityObserver_.scrollDirection_ =
+          SCROLL_DIRECTION_ENUM.DOWN;
         await service.resumePausedPages_(
           1 /** index */,
           0 /** pausePageCountForTesting */

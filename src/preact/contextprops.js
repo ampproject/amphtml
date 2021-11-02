@@ -1,5 +1,5 @@
 import {
-  Loading,
+  LOADING_ENUM,
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
 import {contextProp} from '#core/context/prop';
@@ -50,15 +50,15 @@ const CanPlay = contextProp('CanPlay', {
  * @const {!ContextPropDef<!Loading, boolean>}
  */
 const LoadingProp = contextProp('Loading', {
-  defaultValue: Loading.AUTO,
+  defaultValue: LOADING_ENUM.AUTO,
   recursive: true,
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>
     loadingReducer(
-      canRender ? Loading.AUTO : Loading.LAZY,
+      canRender ? LOADING_ENUM.AUTO : LOADING_ENUM.LAZY,
       loadingReducer(
-        parentValue || Loading.AUTO,
-        inputs.reduce(loadingReducer, Loading.AUTO)
+        parentValue || LOADING_ENUM.AUTO,
+        inputs.reduce(loadingReducer, LOADING_ENUM.AUTO)
       )
     ),
 });

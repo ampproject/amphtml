@@ -1,8 +1,8 @@
-import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_SOURCE_ENUM} from '../../amp-base-carousel/0.1/action-source';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
+import {CAROUSEL_EVENTS_ENUM} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '#service';
 import {
@@ -21,7 +21,7 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 /**
  * @enum {string}
  */
-const CarouselType = {
+const CAROUSEL_TYPE_ENUM = {
   CAROUSEL: 'carousel',
   SLIDES: 'slides',
 };
@@ -51,7 +51,7 @@ class AmpCarousel extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'toggleAutoplay',
@@ -61,7 +61,7 @@ class AmpCarousel extends AMP.BaseElement {
         const toggle = args ? args['toggleOn'] : undefined;
         this.toggleAutoplay_(toggle);
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
   }
 
@@ -149,14 +149,17 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
-      this.onIndexChanged_(event);
-    });
-    this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
+    this.element.addEventListener(
+      CAROUSEL_EVENTS_ENUM.INDEX_CHANGE,
+      (event) => {
+        this.onIndexChanged_(event);
+      }
+    );
+    this.element.addEventListener(CAROUSEL_EVENTS_ENUM.SCROLL_START, () => {
       this.onScrollStarted_();
     });
     this.element.addEventListener(
-      CarouselEvents.SCROLL_POSITION_CHANGED,
+      CAROUSEL_EVENTS_ENUM.SCROLL_POSITION_CHANGED,
       () => {
         this.onScrollPositionChanged_();
       }
@@ -266,12 +269,12 @@ class AmpCarousel extends AMP.BaseElement {
    * of the component.
    */
   interactionNext() {
-    if (this.type_ == CarouselType.CAROUSEL) {
+    if (this.type_ == CAROUSEL_TYPE_ENUM.CAROUSEL) {
       this.moveScrollOneViewport_(true);
       return;
     }
 
-    this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
+    this.carousel_.next(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
   }
 
   /**
@@ -281,12 +284,12 @@ class AmpCarousel extends AMP.BaseElement {
    * directionality of the component.
    */
   interactionPrev() {
-    if (this.type_ == CarouselType.CAROUSEL) {
+    if (this.type_ == CAROUSEL_TYPE_ENUM.CAROUSEL) {
       this.moveScrollOneViewport_(false);
       return;
     }
 
-    this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
+    this.carousel_.prev(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
   }
 
   /**
@@ -334,9 +337,9 @@ class AmpCarousel extends AMP.BaseElement {
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust >= ActionTrust.DEFAULT
-      ? ActionSource.GENERIC_HIGH_TRUST
-      : ActionSource.GENERIC_LOW_TRUST;
+    return trust >= ACTION_TRUST_ENUM.DEFAULT
+      ? ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST
+      : ACTION_SOURCE_ENUM.GENERIC_LOW_TRUST;
   }
 
   /**
@@ -499,9 +502,11 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Array<!Element>} slides
    */
   updateType_(type, slides) {
-    const isSlides = type == CarouselType.SLIDES;
+    const isSlides = type == CAROUSEL_TYPE_ENUM.SLIDES;
 
-    this.type_ = isSlides ? CarouselType.SLIDES : CarouselType.CAROUSEL;
+    this.type_ = isSlides
+      ? CAROUSEL_TYPE_ENUM.SLIDES
+      : CAROUSEL_TYPE_ENUM.CAROUSEL;
     // Use center alignment for slides to make sure fractional widths
     // do not cause the wrong slide to be considered as active. For example,
     // a slide is positioned at 100.5px, but the updated scroll position is
@@ -557,7 +562,7 @@ class AmpCarousel extends AMP.BaseElement {
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ACTION_TRUST_ENUM.HIGH : ACTION_TRUST_ENUM.LOW;
     const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
@@ -615,9 +620,9 @@ class AmpCarousel extends AMP.BaseElement {
    */
   isHighTrustActionSource_(actionSource) {
     return (
-      actionSource == ActionSource.WHEEL ||
-      actionSource == ActionSource.TOUCH ||
-      actionSource == ActionSource.GENERIC_HIGH_TRUST
+      actionSource == ACTION_SOURCE_ENUM.WHEEL ||
+      actionSource == ACTION_SOURCE_ENUM.TOUCH ||
+      actionSource == ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST
     );
   }
 
@@ -674,11 +679,11 @@ class AmpCarousel extends AMP.BaseElement {
     const index = detail['index'];
     const actionSource = detail['actionSource'];
 
-    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
+    this.hadTouch_ = this.hadTouch_ || actionSource == ACTION_SOURCE_ENUM.TOUCH;
     this.updateUi_();
 
     // Do not fire events, analytics for type="carousel".
-    if (this.type_ == CarouselType.CAROUSEL) {
+    if (this.type_ == CAROUSEL_TYPE_ENUM.CAROUSEL) {
       return;
     }
 

@@ -1,5 +1,5 @@
-import {MessageType} from '#core/3p-frame-messaging';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
@@ -122,9 +122,13 @@ class AmpO2Player extends AMP.BaseElement {
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     applyFillContent(iframe);
 
-    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
-      this.sendConsentData_(source, origin);
-    });
+    listenFor(
+      iframe,
+      MESSAGE_TYPE_ENUM.SEND_CONSENT_DATA,
+      (data, source, origin) => {
+        this.sendConsentData_(source, origin);
+      }
+    );
 
     this.pauseHelper_.updatePlaying(true);
 
@@ -160,22 +164,22 @@ class AmpO2Player extends AMP.BaseElement {
       (consents) => {
         let consentData;
         switch (consents[0]) {
-          case CONSENT_POLICY_STATE.SUFFICIENT:
+          case CONSENT_POLICY_STATE_ENUM.SUFFICIENT:
             consentData = {
               'gdprApplies': true,
               'user_consent': 1,
               'gdprString': consents[1],
             };
             break;
-          case CONSENT_POLICY_STATE.INSUFFICIENT:
-          case CONSENT_POLICY_STATE.UNKNOWN:
+          case CONSENT_POLICY_STATE_ENUM.INSUFFICIENT:
+          case CONSENT_POLICY_STATE_ENUM.UNKNOWN:
             consentData = {
               'gdprApplies': true,
               'user_consent': 0,
               'gdprString': consents[1],
             };
             break;
-          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+          case CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED:
           default:
             consentData = {
               'gdprApplies': false,
@@ -187,7 +191,7 @@ class AmpO2Player extends AMP.BaseElement {
           origin,
           dict({
             'sentinel': 'amp',
-            'type': MessageType.CONSENT_DATA,
+            'type': MESSAGE_TYPE_ENUM.CONSENT_DATA,
             'consentData': consentData,
           })
         );

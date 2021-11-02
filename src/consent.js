@@ -1,5 +1,5 @@
 import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
+  CONSENT_POLICY_STATE_ENUM, // eslint-disable-line no-unused-vars
 } from '#core/constants/consent-state';
 import {dict} from '#core/types/object';
 

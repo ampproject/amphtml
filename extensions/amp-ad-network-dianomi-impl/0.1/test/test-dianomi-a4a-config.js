@@ -3,7 +3,7 @@ import '../../../amp-ad/0.1/amp-ad-ui';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {expect} from 'chai';
 
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 
 import {createElementWithAttributes} from 'src/core/dom';
 
@@ -77,7 +77,7 @@ describes.fakeWin('amp-ad-network-dianomi-impl', {amp: true}, (env) => {
 
     it('should return an empty string if unknown consentState', () => {
       expect(
-        impl.getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+        impl.getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN})
       ).to.equal('');
     });
 

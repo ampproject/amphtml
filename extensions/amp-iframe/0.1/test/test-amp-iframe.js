@@ -1,7 +1,7 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
-import {CommonSignals} from '#core/constants/common-signals';
-import {LayoutPriority} from '#core/dom/layout';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -101,7 +101,7 @@ describes.realWin(
       const viewport = Services.viewportForDoc(doc);
       viewport.setScrollTop(600);
       return whenUpgradedToCustomElement(ampIframe).then((element) => {
-        return element.signals().whenSignal(CommonSignals.LOAD_END);
+        return element.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_END);
       });
     }
 
@@ -193,7 +193,7 @@ describes.realWin(
       );
       expect(iframe.parentNode).to.equal(scrollWrapper);
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
-      expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+      expect(impl.getLayoutPriority()).to.equal(LAYOUT_PRIORITY_ENUM.CONTENT);
       await timer.promise(IFRAME_MESSAGE_TIMEOUT);
       expect(ranJs).to.equal(0);
     });
@@ -266,7 +266,7 @@ describes.realWin(
       });
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       const impl = await ampIframe.getImpl(false);
-      expect(impl.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+      expect(impl.getLayoutPriority()).to.equal(LAYOUT_PRIORITY_ENUM.ADS);
       expect(ampIframe.getAttribute('sandbox')).to.equal('allow-scripts');
       return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
@@ -289,7 +289,7 @@ describes.realWin(
         1000
       );
       await whenUpgradedToCustomElement(ampIframe);
-      await ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
+      await ampIframe.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_START);
     });
 
     it('should respect translations', function* () {
@@ -307,7 +307,7 @@ describes.realWin(
         -600
       );
       yield whenUpgradedToCustomElement(ampIframe);
-      yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
+      yield ampIframe.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_START);
     });
 
     it('should render if further than 75% vh away from top', function* () {
@@ -814,10 +814,10 @@ describes.realWin(
       expect(impl1.looksLikeTrackingIframe_()).to.be.true;
       // appended amp-iframe 10x10
       expect(impl2.looksLikeTrackingIframe_()).to.be.true;
-      expect(impl2.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+      expect(impl2.getLayoutPriority()).to.equal(LAYOUT_PRIORITY_ENUM.METADATA);
       // appended amp-iframe 100x100
       expect(impl3.looksLikeTrackingIframe_()).to.be.false;
-      expect(impl3.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+      expect(impl3.getLayoutPriority()).to.equal(LAYOUT_PRIORITY_ENUM.CONTENT);
       await Services.timerFor(env.win).promise(21);
       expect(doc.querySelectorAll('[amp-removed]')).to.have.length(1);
       expect(doc.querySelectorAll('iframe')).to.have.length(1);
@@ -886,7 +886,7 @@ describes.realWin(
         0
       );
       yield whenUpgradedToCustomElement(ampIframe);
-      yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
+      yield ampIframe.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_START);
     });
 
     it('should propagate `src` when container attribute is mutated', async () => {
@@ -1207,7 +1207,7 @@ describes.realWin(
           ampIframe,
           'message',
           eventMatcher,
-          ActionTrust.HIGH
+          ACTION_TRUST_ENUM.HIGH
         );
       });
 

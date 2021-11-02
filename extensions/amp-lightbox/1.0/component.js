@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {forwardRef} from '#preact/compat';
 import {setStyle} from '#core/dom/style';
 import {tryFocus} from '#core/dom';
@@ -145,7 +145,7 @@ function BentoLightboxWithRef(
         role="dialog"
         tabIndex="0"
         onKeyDown={(event) => {
-          if (event.key === Keys.ESCAPE) {
+          if (event.key === KEYS_ENUM.ESCAPE) {
             setVisible(false);
           }
         }}

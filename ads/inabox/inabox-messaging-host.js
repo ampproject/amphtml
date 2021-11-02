@@ -1,5 +1,5 @@
 import {
-  MessageType,
+  MESSAGE_TYPE_ENUM,
   deserializeMessage,
   serializeMessage,
 } from '#core/3p-frame-messaging';
@@ -14,7 +14,7 @@ import {getPositionObserver} from './position-observer';
 const TAG = 'InaboxMessagingHost';
 
 /** @const */
-const READ_ONLY_MESSAGES = [MessageType.SEND_POSITIONS];
+const READ_ONLY_MESSAGES = [MESSAGE_TYPE_ENUM.SEND_POSITIONS];
 
 /** Simple helper for named callbacks. */
 class NamedObservable {
@@ -83,17 +83,17 @@ export class InaboxMessagingHost {
     this.frameOverlayManager_ = getFrameOverlayManager(hostWin);
 
     this.msgObservable_.listen(
-      MessageType.SEND_POSITIONS,
+      MESSAGE_TYPE_ENUM.SEND_POSITIONS,
       this.handleSendPositions_
     );
 
     this.msgObservable_.listen(
-      MessageType.FULL_OVERLAY_FRAME,
+      MESSAGE_TYPE_ENUM.FULL_OVERLAY_FRAME,
       this.handleEnterFullOverlay_
     );
 
     this.msgObservable_.listen(
-      MessageType.CANCEL_FULL_OVERLAY_FRAME,
+      MESSAGE_TYPE_ENUM.CANCEL_FULL_OVERLAY_FRAME,
       this.handleCancelFullOverlay_
     );
   }
@@ -183,7 +183,7 @@ export class InaboxMessagingHost {
   sendPosition_(request, source, data) {
     dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/ postMessage(
-      serializeMessage(MessageType.POSITION, request.sentinel, data),
+      serializeMessage(MESSAGE_TYPE_ENUM.POSITION, request.sentinel, data),
       // We don't need to restrict what origin we send the data to because (a)
       // we've already verified that this iframe is allowed to learn its position,
       // and (b) we're post messaging back directly to the requesting frame.
@@ -207,7 +207,7 @@ export class InaboxMessagingHost {
     this.frameOverlayManager_.expandFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
-          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          MESSAGE_TYPE_ENUM.FULL_OVERLAY_FRAME_RESPONSE,
           request.sentinel,
           dict({
             'success': true,
@@ -232,7 +232,7 @@ export class InaboxMessagingHost {
     this.frameOverlayManager_.collapseFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
-          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          MESSAGE_TYPE_ENUM.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           request.sentinel,
           dict({
             'success': true,

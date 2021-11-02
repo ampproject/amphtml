@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {computeInMasterFrame, validateData, writeScript} from '#3p/3p';
 import {parseJson} from '#core/types/object/json';
 
@@ -311,8 +311,8 @@ export function adocean(global, data) {
    */
   const consent =
     ctx.initialConsentState === null /* tags without data-block-on-consent */ ||
-    ctx.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
-    ctx.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
+    ctx.initialConsentState === CONSENT_POLICY_STATE_ENUM.SUFFICIENT ||
+    ctx.initialConsentState === CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED;
 
   writeScript(global, adoUrl, () => {
     setupAdoConfig(mode, global, consent);

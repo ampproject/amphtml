@@ -1,12 +1,12 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
-  ELEMENT_TYPE,
+  ELEMENT_TYPE_ENUM,
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
@@ -877,8 +877,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
   async function toggleVisibility(perf, on) {
     viewerVisibilityState = on
-      ? VisibilityState.VISIBLE
-      : VisibilityState.HIDDEN;
+      ? VISIBILITY_STATE_ENUM.VISIBLE
+      : VISIBILITY_STATE_ENUM.HIDDEN;
     perf.onAmpDocVisibilityChange_();
   }
 
@@ -1118,15 +1118,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       );
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.image,
+        delta: ELEMENT_TYPE_ENUM.image,
       });
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.carousel,
+        delta: ELEMENT_TYPE_ENUM.carousel,
       });
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.text,
+        delta: ELEMENT_TYPE_ENUM.text,
       });
     });
   });
@@ -1248,7 +1248,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
       });
 
-      viewerVisibilityState = VisibilityState.INACTIVE;
+      viewerVisibilityState = VISIBILITY_STATE_ENUM.INACTIVE;
       perf.onAmpDocVisibilityChange_();
 
       const clsEvents = perf.events_.filter((evt) =>

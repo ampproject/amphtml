@@ -1,7 +1,7 @@
 import '../amp-delight-player';
 import {listenOncePromise} from '#utils/event-helper';
 
-import {VideoEvents} from '../../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-delight-player',
@@ -92,7 +92,7 @@ describes.realWin(
         }).then((player) => {
           return Promise.resolve()
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.LOAD);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.LOAD);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-ready',
                 payload: {},
@@ -100,7 +100,7 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.PLAYING);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.PLAYING);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-playing',
                 payload: {},
@@ -108,7 +108,7 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.PAUSE);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.PAUSE);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-paused',
                 payload: {},
@@ -116,7 +116,7 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.MUTED);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.MUTED);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-muted',
                 payload: {},
@@ -124,7 +124,7 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.UNMUTED);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.UNMUTED);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-unmuted',
                 payload: {},
@@ -132,7 +132,7 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.ENDED);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.ENDED);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-ended',
                 payload: {},
@@ -140,7 +140,7 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.AD_START);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.AD_START);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-amp-ad-start',
                 payload: {},
@@ -148,7 +148,7 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.AD_END);
+              const p = listenOncePromise(player, VIDEO_EVENTS_ENUM.AD_END);
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-amp-ad-end',
                 payload: {},
@@ -156,7 +156,10 @@ describes.realWin(
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(player, VideoEvents.CUSTOM_TICK);
+              const p = listenOncePromise(
+                player,
+                VIDEO_EVENTS_ENUM.CUSTOM_TICK
+              );
               await fakePostMessage(player, {
                 type: 'x-dl8-to-parent-amp-custom-tick',
                 payload: {

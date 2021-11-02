@@ -1,5 +1,5 @@
 /** @enum {string} */
-export const FormEvents = {
+export const FORM_EVENTS_ENUM = {
   INVALID: 'invalid',
   SERVICE_INIT: 'amp:form-service:initialize', // Dispatched by the window when AmpFormService initializes.
   SUBMIT_ERROR: 'submit-error',

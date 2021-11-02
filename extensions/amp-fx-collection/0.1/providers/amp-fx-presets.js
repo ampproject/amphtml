@@ -8,7 +8,7 @@ import {Services} from '#service';
 
 import {dev, devAssert, userAssert} from '#utils/log';
 
-import {FxType} from '../fx-type';
+import {FX_TYPE_ENUM} from '../fx-type';
 
 /**
  * These fully qualified names, my goodness.
@@ -122,7 +122,7 @@ function isInViewportConsideringMargins(entry, fxElement, opt_vh) {
 
 /** @const {!Object<!FxType, !FxPresetDef>} */
 export const Presets = {
-  [FxType.PARALLAX]: {
+  [FX_TYPE_ENUM.PARALLAX]: {
     userAsserts(element) {
       const factorValue = userAssert(
         element.getAttribute('data-parallax-factor'),
@@ -159,7 +159,7 @@ export const Presets = {
       });
     },
   },
-  [FxType.FLY_IN_BOTTOM]: {
+  [FX_TYPE_ENUM.FLY_IN_BOTTOM]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -170,7 +170,7 @@ export const Presets = {
       flyIn(fxElement, 'Y', /* coeff */ -1);
     },
   },
-  [FxType.FLY_IN_LEFT]: {
+  [FX_TYPE_ENUM.FLY_IN_LEFT]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -181,7 +181,7 @@ export const Presets = {
       flyIn(fxElement, 'X', /* coeff */ 1);
     },
   },
-  [FxType.FLY_IN_RIGHT]: {
+  [FX_TYPE_ENUM.FLY_IN_RIGHT]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -192,7 +192,7 @@ export const Presets = {
       flyIn(fxElement, 'X', /* coeff */ -1);
     },
   },
-  [FxType.FLY_IN_TOP]: {
+  [FX_TYPE_ENUM.FLY_IN_TOP]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -203,7 +203,7 @@ export const Presets = {
       flyIn(fxElement, 'Y', /* coeff */ 1);
     },
   },
-  [FxType.FADE_IN]: {
+  [FX_TYPE_ENUM.FADE_IN]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -221,7 +221,7 @@ export const Presets = {
       });
     },
   },
-  [FxType.FADE_IN_SCROLL]: {
+  [FX_TYPE_ENUM.FADE_IN_SCROLL]: {
     userAsserts(element) {
       const marginStart = marginStartAsserts(element);
       const marginEnd = parseFloat(element.getAttribute('data-margin-end'));

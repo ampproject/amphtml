@@ -1,5 +1,5 @@
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {isAmp4Email} from '#core/document/format';
@@ -18,10 +18,10 @@ import {Services} from '#service';
 import {createCustomEvent, getDetail} from '#utils/event-helper';
 import {dev, devAssert, user} from '#utils/log';
 
-import {BindEvents} from './bind-events';
+import {BIND_EVENTS_ENUM} from './bind-events';
 import {BindValidator} from './bind-validator';
 
-import {ChunkPriority, chunk} from '../../../src/chunk';
+import {CHUNK_PRIORITY_ENUM, chunk} from '../../../src/chunk';
 import {reportError} from '../../../src/error-reporting';
 import {getMode} from '../../../src/mode';
 import {rewriteAttributesForElement} from '../../../src/url-rewrite';
@@ -257,7 +257,7 @@ export class Bind {
 
     if (getMode().test) {
       promise.then(() => {
-        this.dispatchEventForTesting_(BindEvents.SET_STATE);
+        this.dispatchEventForTesting_(BIND_EVENTS_ENUM.SET_STATE);
       });
     }
 
@@ -601,7 +601,7 @@ export class Bind {
       })
       .then(() => {
         // Listen for DOM updates (e.g. template render) to rescan for bindings.
-        root.addEventListener(AmpEvents.DOM_UPDATE, (e) =>
+        root.addEventListener(AMP_EVENTS_ENUM.DOM_UPDATE, (e) =>
           this.onDomUpdate_(e)
         );
       })
@@ -621,7 +621,7 @@ export class Bind {
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
-        this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+        this.dispatchEventForTesting_(BIND_EVENTS_ENUM.INITIALIZE);
 
         // In dev mode, check default values against initial expression results.
         if (getMode().development) {
@@ -920,10 +920,10 @@ export class Bind {
         if (completed) {
           resolve({bindings, limitExceeded});
         } else {
-          chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+          chunk(this.ampdoc, chunktion, CHUNK_PRIORITY_ENUM.LOW);
         }
       };
-      chunk(this.ampdoc, chunktion, ChunkPriority.LOW);
+      chunk(this.ampdoc, chunktion, CHUNK_PRIORITY_ENUM.LOW);
     });
   }
 
@@ -1288,7 +1288,7 @@ export class Bind {
     if (dispatchAt) {
       const ampValueChangeEvent = createCustomEvent(
         this.localWin_,
-        AmpEvents.FORM_VALUE_CHANGE,
+        AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
         /* detail */ null,
         {bubbles: true}
       );
@@ -1562,7 +1562,7 @@ export class Bind {
     }
     dev().info(TAG, 'dom_update:', target);
     this.slowScan_([target], [target], 'dom_update.end').then(() => {
-      this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
+      this.dispatchEventForTesting_(BIND_EVENTS_ENUM.RESCAN_TEMPLATE);
     });
   }
 

@@ -1,5 +1,5 @@
 import {
-  Action,
+  ACTION_ENUM,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
@@ -9,7 +9,7 @@ import {
   processResultsCategory,
   processResultsPercentage,
 } from '../amp-story-interactive-results';
-import {InteractiveType} from '../amp-story-interactive-abstract';
+import {INTERACTIVE_TYPE_ENUM} from '../amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
@@ -86,10 +86,10 @@ describes.realWin(
       addConfigToInteractive(ampStoryResults, 3);
       await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {'resultscategory': 'results-category 2'},
-        'type': InteractiveType.POLL,
+        'type': INTERACTIVE_TYPE_ENUM.POLL,
       });
       expect(
         ampStoryResults.rootEl_.querySelector(
@@ -119,15 +119,15 @@ describes.realWin(
       const votes = {
         'a': {
           'option': {'resultscategory': 'results-category 1'},
-          'type': InteractiveType.POLL,
+          'type': INTERACTIVE_TYPE_ENUM.POLL,
         },
         'b': {
           'option': {'resultscategory': 'results-category 2'},
-          'type': InteractiveType.POLL,
+          'type': INTERACTIVE_TYPE_ENUM.POLL,
         },
         'c': {
           'option': {'resultscategory': 'results-category 2'},
-          'type': InteractiveType.POLL,
+          'type': INTERACTIVE_TYPE_ENUM.POLL,
         },
       };
       addConfigToInteractive(ampStoryResults, 3, null, ['results-category']);
@@ -140,11 +140,11 @@ describes.realWin(
       const votes = {
         'a': {
           'option': {'resultscategory': 'results-category 1'},
-          'type': InteractiveType.POLL,
+          'type': INTERACTIVE_TYPE_ENUM.POLL,
         },
         'b': {
           'option': {'resultscategory': 'results-category 2'},
-          'type': InteractiveType.POLL,
+          'type': INTERACTIVE_TYPE_ENUM.POLL,
         },
       };
       addConfigToInteractive(ampStoryResults, 3, null, ['results-category']);
@@ -157,11 +157,11 @@ describes.realWin(
       const votes = {
         'a': {
           'option': {'correct': 'correct'},
-          'type': InteractiveType.QUIZ,
+          'type': INTERACTIVE_TYPE_ENUM.QUIZ,
         },
         'b': {
           'option': {},
-          'type': InteractiveType.QUIZ,
+          'type': INTERACTIVE_TYPE_ENUM.QUIZ,
         },
       };
       addThresholdsToInteractive(ampStoryResults, [25, 80, 50]);
@@ -177,11 +177,11 @@ describes.realWin(
       const votes = {
         'a': {
           'option': {},
-          'type': InteractiveType.QUIZ,
+          'type': INTERACTIVE_TYPE_ENUM.QUIZ,
         },
         'b': {
           'option': {},
-          'type': InteractiveType.QUIZ,
+          'type': INTERACTIVE_TYPE_ENUM.QUIZ,
         },
       };
       addThresholdsToInteractive(ampStoryResults, [50, 20, 80]);
@@ -197,15 +197,15 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
       await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
-        'type': InteractiveType.QUIZ,
+        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
-        'type': InteractiveType.QUIZ,
+        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
       });
       expect(
         ampStoryResults.rootEl_.querySelector(
@@ -218,20 +218,20 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
       await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
-        'type': InteractiveType.QUIZ,
+        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
-        'type': InteractiveType.QUIZ,
+        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
-        'type': InteractiveType.QUIZ,
+        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
       });
       expect(
         ampStoryResults.rootEl_.querySelector(

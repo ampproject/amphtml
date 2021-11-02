@@ -17,7 +17,7 @@ const {NoSuchElementError} = error;
 const ELEMENT_WAIT_TIMEOUT = 5000;
 
 /** @enum {string} */
-const KeyToSeleniumMap = {
+const KEY_TO_SELENIUM_MAP_ENUM = {
   [Key.ArrowDown]: SeleniumKey.ARROW_DOWN,
   [Key.ArrowLeft]: SeleniumKey.ARROW_LEFT,
   [Key.ArrowRight]: SeleniumKey.ARROW_RIGHT,
@@ -281,7 +281,7 @@ class SeleniumWebDriverController {
       return this.pasteFromClipboard();
     }
 
-    const key = KeyToSeleniumMap[keys];
+    const key = KEY_TO_SELENIUM_MAP_ENUM[keys];
     if (key) {
       return targetElement.sendKeys(key);
     }

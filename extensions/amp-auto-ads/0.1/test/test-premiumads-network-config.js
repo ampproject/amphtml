@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -73,7 +73,7 @@ describes.realWin(
         expect(adNetwork.getAttributes()).to.deep.equal({
           'type': 'doubleclick',
           'data-ad': 'premiumads',
-          'layout': Layout.FIXED,
+          'layout': LAYOUT_ENUM.FIXED,
           'style':
             'margin: 15px auto; position: relative !important; display: block !important;',
         });

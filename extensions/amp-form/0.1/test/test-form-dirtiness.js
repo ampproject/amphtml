@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 
 import {Services} from '#service';
@@ -49,7 +49,7 @@ function dispatchInputEvent(element) {
 function dispatchFormValueChangeEvent(element, win) {
   const ampValueChangeEvent = createCustomEvent(
     win,
-    AmpEvents.FORM_VALUE_CHANGE,
+    AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
     /* detail */ null,
     {bubbles: true}
   );
@@ -405,7 +405,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
     it('dispatches an event when the form transitions from clean to dirty', () => {
       const changeToDirty = () => changeInput(input, 'changed');
       const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
+        AMP_EVENTS_ENUM.FORM_DIRTINESS_CHANGE,
         form,
         changeToDirty
       );
@@ -419,7 +419,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
 
       const changeToClean = () => changeInput(input, '');
       const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
+        AMP_EVENTS_ENUM.FORM_DIRTINESS_CHANGE,
         form,
         changeToClean
       );
@@ -433,7 +433,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
 
       const remainDirty = () => changeInput(input, 'still dirty');
       const eventDispatched = captureEventDispatched(
-        AmpEvents.FORM_DIRTINESS_CHANGE,
+        AMP_EVENTS_ENUM.FORM_DIRTINESS_CHANGE,
         form,
         remainDirty
       );

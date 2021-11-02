@@ -6,7 +6,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {toArray} from '#core/types/array';
 
@@ -15,7 +15,7 @@ import {Services} from '#service';
 import {dev, user} from '#utils/log';
 
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
-import {BindEvents} from '../../bind-events';
+import {BIND_EVENTS_ENUM} from '../../bind-events';
 import {Bind} from '../../bind-impl';
 
 /**
@@ -197,7 +197,7 @@ function waitForEvent(env, name) {
 }
 
 const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
-  type: AmpEvents.FORM_VALUE_CHANGE,
+  type: AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
   bubbles: true,
 };
 const chromed = describes.sandboxed.configure().ifChrome();
@@ -614,9 +614,9 @@ chromed.run('Bind', {}, function () {
               });
               dynamicTag.appendChild(element);
               dynamicTag.dispatchEvent(
-                new Event(AmpEvents.DOM_UPDATE, {bubbles: true})
+                new Event(AMP_EVENTS_ENUM.DOM_UPDATE, {bubbles: true})
               );
-              return waitForEvent(env, BindEvents.RESCAN_TEMPLATE);
+              return waitForEvent(env, BIND_EVENTS_ENUM.RESCAN_TEMPLATE);
             })
             .then(() => {
               expect(bind.numberOfBindings()).to.equal(1);
@@ -1579,7 +1579,7 @@ chromed.run('Bind', {}, function () {
               () => {
                 expect(spy).to.have.been.calledOnce;
                 expect(spy).calledWithMatch({
-                  type: AmpEvents.FORM_VALUE_CHANGE,
+                  type: AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
                   bubbles: true,
                 });
               }
@@ -1596,7 +1596,7 @@ chromed.run('Bind', {}, function () {
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AmpEvents.FORM_VALUE_CHANGE,
+                type: AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
                 bubbles: true,
               });
             });

@@ -1,5 +1,5 @@
 import '../amp-accordion';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {subscribe, unsubscribe} from '#core/context';
 import {htmlFor} from '#core/dom/static-template';
 
@@ -417,7 +417,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ACTION_TRUST_ENUM.DEFAULT;
         return new ActionInvocation(
           element,
           method,
@@ -634,7 +634,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ACTION_TRUST_ENUM.DEFAULT;
         return new ActionInvocation(
           element,
           method,

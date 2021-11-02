@@ -1,7 +1,7 @@
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {mapRange} from '#core/math';
 
-import {DirectionX, RectDef} from './def';
+import {DIRECTION_X_ENUM, RectDef} from './def';
 
 /**
  * @param {number} containerWidth
@@ -71,7 +71,8 @@ const mapStep = (step, min, max) => mapRange(step, 0, 1, min, max);
  *  - scale is the
  */
 export function interpolatedBoxesTransform(from, to, step = 1) {
-  const relativeX = to.x < from.x ? DirectionX.LEFT : DirectionX.RIGHT;
+  const relativeX =
+    to.x < from.x ? DIRECTION_X_ENUM.LEFT : DIRECTION_X_ENUM.RIGHT;
   const x = mapStep(step, from.x, to.x);
   const y = mapStep(step, from.y, to.y);
   const width = mapStep(step, from.width, to.width);
@@ -135,7 +136,7 @@ export function topCornerRect(
   const height = width / aspect;
 
   const x =
-    horizontalEdge == DirectionX.RIGHT
+    horizontalEdge == DIRECTION_X_ENUM.RIGHT
       ? container.right - margin - width
       : container.left + margin;
 

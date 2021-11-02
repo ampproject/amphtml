@@ -23,14 +23,14 @@ import {getWin} from '#core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
-export const MediaType = {
+export const MEDIA_TYPE_ENUM = {
   UNSUPPORTED: 'unsupported',
   AUDIO: 'audio',
   VIDEO: 'video',
 };
 
 /** @const @enum {string} */
-const MediaElementOrigin = {
+const MEDIA_ELEMENT_ORIGIN_ENUM = {
   PLACEHOLDER: 'placeholder',
   POOL: 'pool',
 };
@@ -182,7 +182,7 @@ export class MediaPool {
 
     /** @const {!Object<string, (function(): !PoolBoundElementDef)>} */
     this.mediaFactory_ = {
-      [MediaType.AUDIO]: () => {
+      [MEDIA_TYPE_ENUM.AUDIO]: () => {
         const audioEl = this.win_.document.createElement('audio');
         audioEl.setAttribute('muted', '');
         audioEl.muted = true;
@@ -190,7 +190,7 @@ export class MediaPool {
         audioEl.classList.add('i-amphtml-pool-audio');
         return audioEl;
       },
-      [MediaType.VIDEO]: () => {
+      [MEDIA_TYPE_ENUM.VIDEO]: () => {
         const videoEl = this.win_.document.createElement('video');
         videoEl.setAttribute('muted', '');
         videoEl.muted = true;
@@ -217,7 +217,7 @@ export class MediaPool {
     let poolIdCounter = 0;
 
     this.forEachMediaType_((key) => {
-      const type = MediaType[key];
+      const type = MEDIA_TYPE_ENUM[key];
       const count = maxCounts[type] || 0;
 
       if (count <= 0) {
@@ -249,7 +249,8 @@ export class MediaPool {
         // In Firefox, cloneNode() does not properly copy the muted property
         // that was set in the seed. We need to set it again here.
         mediaEl.muted = true;
-        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
+        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
+          MEDIA_ELEMENT_ORIGIN_ENUM.POOL;
         this.unallocated[type].push(mediaEl);
       }
     });
@@ -309,7 +310,7 @@ export class MediaPool {
   isPoolMediaElement_(mediaElement) {
     return (
       mediaElement[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] ===
-      MediaElementOrigin.POOL
+      MEDIA_ELEMENT_ORIGIN_ENUM.POOL
     );
   }
 
@@ -324,11 +325,11 @@ export class MediaPool {
     const tagName = mediaElement.tagName.toLowerCase();
     switch (tagName) {
       case 'audio':
-        return MediaType.AUDIO;
+        return MEDIA_TYPE_ENUM.AUDIO;
       case 'video':
-        return MediaType.VIDEO;
+        return MEDIA_TYPE_ENUM.VIDEO;
       default:
-        return MediaType.UNSUPPORTED;
+        return MEDIA_TYPE_ENUM.UNSUPPORTED;
     }
   }
 
@@ -589,7 +590,7 @@ export class MediaPool {
    * @private
    */
   forEachMediaType_(callbackFn) {
-    Object.keys(MediaType).forEach(callbackFn.bind(this));
+    Object.keys(MEDIA_TYPE_ENUM).forEach(callbackFn.bind(this));
   }
 
   /**
@@ -601,7 +602,7 @@ export class MediaPool {
   forEachMediaElement_(callbackFn) {
     [this.allocated, this.unallocated].forEach((mediaSet) => {
       this.forEachMediaType_((key) => {
-        const type = MediaType[key];
+        const type = MEDIA_TYPE_ENUM[key];
         const els = /** @type {!Array} */ (mediaSet[type]);
         if (!els) {
           return;
@@ -705,7 +706,7 @@ export class MediaPool {
     // it is a placeholder element.
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
     placeholderEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
-      MediaElementOrigin.PLACEHOLDER;
+      MEDIA_ELEMENT_ORIGIN_ENUM.PLACEHOLDER;
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {

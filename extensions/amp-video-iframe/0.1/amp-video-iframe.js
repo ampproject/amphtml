@@ -23,7 +23,7 @@ import {
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {
-  SandboxOptions,
+  SANDBOX_OPTIONS_ENUM,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
@@ -32,7 +32,7 @@ import {
 import {addParamsToUrl} from '../../../src/url';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoEvents,
+  VIDEO_EVENTS_ENUM,
 } from '../../../src/video-interface';
 import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
@@ -44,11 +44,11 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @private @const */
 const SANDBOX = [
-  SandboxOptions.ALLOW_SCRIPTS,
-  SandboxOptions.ALLOW_SAME_ORIGIN,
-  SandboxOptions.ALLOW_POPUPS,
-  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
-  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
+  SANDBOX_OPTIONS_ENUM.ALLOW_SCRIPTS,
+  SANDBOX_OPTIONS_ENUM.ALLOW_SAME_ORIGIN,
+  SANDBOX_OPTIONS_ENUM.ALLOW_POPUPS,
+  SANDBOX_OPTIONS_ENUM.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SANDBOX_OPTIONS_ENUM.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /**
@@ -174,7 +174,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
     Services.videoManagerForDoc(element).register(this);
-    dispatchCustomEvent(element, VideoEvents.LOAD);
+    dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOAD);
   }
 
   /** @override */
@@ -357,7 +357,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     dispatchCustomEvent(
       this.element,
-      VideoEvents.CUSTOM_TICK,
+      VIDEO_EVENTS_ENUM.CUSTOM_TICK,
       dict({
         'eventType': eventType,
         'vars': vars,

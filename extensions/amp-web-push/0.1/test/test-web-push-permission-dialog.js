@@ -1,5 +1,5 @@
 import {parseUrlDeprecated} from '../../../../src/url';
-import {WebPushConfigAttributes} from '../amp-web-push-config';
+import {WEB_PUSH_CONFIG_ATTRIBUTES_ENUM} from '../amp-web-push-config';
 import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
 import {WebPushService} from '../web-push-service';
 import {WindowMessenger} from '../window-messenger';
@@ -18,10 +18,11 @@ describes.realWin(
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
-      webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL] =
         FAKE_IFRAME_URL;
     }
 

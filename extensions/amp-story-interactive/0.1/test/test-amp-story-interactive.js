@@ -1,16 +1,16 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractive,
-  InteractiveType,
+  INTERACTIVE_TYPE_ENUM,
 } from '../amp-story-interactive-abstract';
 import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {
   AmpStoryStoreService,
-  StateProperty,
+  STATE_PROPERTY_ENUM,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
+  ANALYTICS_VARIABLE_ENUM,
   AmpStoryVariableService,
-  AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
@@ -30,7 +30,7 @@ import {toggleExperiment} from '#experiments/';
 
 class InteractiveTest extends AmpStoryInteractive {
   constructor(element) {
-    super(element, InteractiveType.QUIZ);
+    super(element, INTERACTIVE_TYPE_ENUM.QUIZ);
   }
 
   /** @override */
@@ -192,15 +192,15 @@ describes.realWin(
       await ampStoryInteractive.getOptionElements()[1].click();
       expect(trigger).to.have.been.calledWith('story-interactive');
       const variables = analyticsVars.get();
-      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_ID]).to.equal(
+      expect(variables[ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_ID]).to.equal(
         'TEST_interactiveId'
       );
-      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]).to.equal(
-        1
-      );
-      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_TYPE]).to.equal(
-        ampStoryInteractive.interactiveType_
-      );
+      expect(
+        variables[ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_RESPONSE]
+      ).to.equal(1);
+      expect(
+        variables[ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_TYPE]
+      ).to.equal(ampStoryInteractive.interactiveType_);
     });
 
     it('should update the quiz when the user has already reacted', async () => {
@@ -374,7 +374,7 @@ describes.realWin(
 
       expect(
         ampStoryInteractive.storeService_.get(
-          StateProperty.INTERACTIVE_REACT_STATE
+          STATE_PROPERTY_ENUM.INTERACTIVE_REACT_STATE
         )['id']
       ).to.be.deep.equals({
         option: {
@@ -382,7 +382,7 @@ describes.realWin(
           text: 'text 3',
         },
         interactiveId: 'id',
-        type: InteractiveType.QUIZ,
+        type: INTERACTIVE_TYPE_ENUM.QUIZ,
       });
     });
 

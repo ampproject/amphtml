@@ -1,7 +1,7 @@
 import {AmpImg} from '#builtins/amp-img/amp-img';
 
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
-import {Layout, LayoutPriority} from '#core/dom/layout';
+import {LAYOUT_ENUM, LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 
 import {testElementR1} from '#testing/element-v1';
 
@@ -64,7 +64,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
   });
 
   it('getBuildPriority', () => {
-    expect(AmpImg.getBuildPriority()).to.equal(LayoutPriority.CONTENT);
+    expect(AmpImg.getBuildPriority()).to.equal(LAYOUT_PRIORITY_ENUM.CONTENT);
   });
 
   it('should load an img', async () => {
@@ -593,7 +593,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout fixed', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FIXED,
+          layout: LAYOUT_ENUM.FIXED,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -610,7 +610,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout responsive', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.RESPONSIVE,
+          layout: LAYOUT_ENUM.RESPONSIVE,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -627,7 +627,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout fixed-height', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FIXED_HEIGHT,
+          layout: LAYOUT_ENUM.FIXED_HEIGHT,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -644,7 +644,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout fill', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FILL,
+          layout: LAYOUT_ENUM.FILL,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -661,7 +661,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout flex-item', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FLEX_ITEM,
+          layout: LAYOUT_ENUM.FLEX_ITEM,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,

@@ -1,9 +1,9 @@
 import {
-  Action,
+  ACTION_ENUM,
   AmpStoryStoreService,
-  StateProperty,
+  STATE_PROPERTY_ENUM,
 } from '../amp-story-store-service';
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
@@ -90,7 +90,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   it('should show the share menu on store property update', () => {
     shareMenu.build();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, true);
 
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
   });
@@ -98,17 +98,17 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   it('should hide the share menu on click on the overlay', () => {
     shareMenu.build();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, true);
     shareMenu.element_.dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
-    expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+    expect(storeService.get(STATE_PROPERTY_ENUM.SHARE_MENU_STATE)).to.be.false;
   });
 
   it('should not hide the share menu on click on the widget container', () => {
     shareMenu.build();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, true);
     shareMenu.innerContainerEl_.dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
@@ -120,10 +120,10 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     const clickCallbackSpy = env.sandbox.spy();
     win.addEventListener('keyup', clickCallbackSpy);
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, true);
     // Create escape keyup event.
     const keyupEvent = new Event('keyup');
-    keyupEvent.keyCode = Keys.ESCAPE;
+    keyupEvent.keyCode = KEYS_ENUM.ESCAPE;
     win.dispatchEvent(keyupEvent);
 
     expect(clickCallbackSpy).to.have.been.calledOnce;
@@ -164,7 +164,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     // Toggling the share menu dispatches a click event on the amp-social-share
     // button, which triggers the native sharing menu.
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, true);
 
     expect(clickCallbackSpy).to.have.been.calledOnce;
   });
@@ -175,8 +175,8 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     shareMenu.build();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, true);
 
-    expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+    expect(storeService.get(STATE_PROPERTY_ENUM.SHARE_MENU_STATE)).to.be.false;
   });
 });

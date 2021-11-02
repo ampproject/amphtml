@@ -17,7 +17,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {GEO_IN_GROUP_ENUM} from '../../amp-geo/0.1/amp-geo-in-group';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
@@ -206,7 +206,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       userAssert(geo, 'requires <amp-geo> to use promptIfUnknownForGeoGroup');
 
       const matchedGeos = geoGroup.split(/,\s*/).filter((group) => {
-        return geo.isInCountryGroup(group) == GEO_IN_GROUP.IN;
+        return geo.isInCountryGroup(group) == GEO_IN_GROUP_ENUM.IN;
       });
 
       // Invert if includeGeos is false

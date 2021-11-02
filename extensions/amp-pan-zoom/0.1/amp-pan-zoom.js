@@ -1,7 +1,7 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {bezierCurve} from '#core/data-structures/curve';
 import {dispatchCustomEvent} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
 import {
   observeContentSize,
@@ -241,10 +241,10 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return (
-      layout == Layout.FIXED ||
-      layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.FILL ||
-      layout == Layout.RESPONSIVE
+      layout == LAYOUT_ENUM.FIXED ||
+      layout == LAYOUT_ENUM.FIXED_HEIGHT ||
+      layout == LAYOUT_ENUM.FILL ||
+      layout == LAYOUT_ENUM.RESPONSIVE
     );
   }
 
@@ -762,7 +762,12 @@ export class AmpPanZoom extends AMP.BaseElement {
         'y': y,
       })
     );
-    this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
+    this.action_.trigger(
+      this.element,
+      'transformEnd',
+      event,
+      ACTION_TRUST_ENUM.HIGH
+    );
     dispatchCustomEvent(this.element, 'transformEnd');
   }
 

@@ -1,6 +1,6 @@
 import '../amp-mathml';
 
-import {MessageType, serializeMessage} from '#core/3p-frame-messaging';
+import {MESSAGE_TYPE_ENUM, serializeMessage} from '#core/3p-frame-messaging';
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
@@ -84,7 +84,7 @@ describes.realWin(
 
       const mockEvent = new CustomEvent('message');
       mockEvent.data = serializeMessage(
-        MessageType.EMBED_SIZE,
+        MESSAGE_TYPE_ENUM.EMBED_SIZE,
         JSON.parse(iframe.getAttribute('name')).attributes.sentinel,
         {
           height: 1001,
@@ -140,7 +140,7 @@ describes.realWin(
 
       const mockEvent = new CustomEvent('message');
       mockEvent.data = serializeMessage(
-        MessageType.EMBED_SIZE,
+        MESSAGE_TYPE_ENUM.EMBED_SIZE,
         JSON.parse(iframe.getAttribute('name')).attributes.sentinel,
         {
           height: 1001,

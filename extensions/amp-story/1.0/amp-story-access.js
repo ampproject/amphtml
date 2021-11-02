@@ -1,9 +1,9 @@
 import {
-  Action,
-  StateProperty,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
   getStoreService,
 } from './amp-story-store-service';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
 import {dev, user} from '#utils/log';
@@ -19,7 +19,7 @@ const TAG = 'amp-story-access';
 /**
  * @enum {string}
  */
-export const Type = {
+export const TYPE_ENUM = {
   BLOCKING: 'blocking',
   NOTIFICATION: 'notification',
 };
@@ -78,7 +78,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
   buildCallback() {
     // Defaults to blocking paywall.
     if (!this.element.hasAttribute('type')) {
-      this.element.setAttribute('type', Type.BLOCKING);
+      this.element.setAttribute('type', TYPE_ENUM.BLOCKING);
     }
 
     const drawerEl = this.renderDrawerEl_();
@@ -102,19 +102,22 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == LAYOUT_ENUM.CONTAINER;
   }
 
   /**
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.ACCESS_STATE, (isAccess) => {
-      this.onAccessStateChange_(isAccess);
-    });
+    this.storeService_.subscribe(
+      STATE_PROPERTY_ENUM.ACCESS_STATE,
+      (isAccess) => {
+        this.onAccessStateChange_(isAccess);
+      }
+    );
 
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
+      STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX,
       (currentPageIndex) => {
         this.onCurrentPageIndexChange_(currentPageIndex);
       },
@@ -130,7 +133,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   onAccessStateChange_(isAccess) {
-    if (this.getType_() === Type.BLOCKING) {
+    if (this.getType_() === TYPE_ENUM.BLOCKING) {
       this.toggle_(isAccess);
     }
   }
@@ -141,7 +144,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @param {number} currentPageIndex
    */
   onCurrentPageIndexChange_(currentPageIndex) {
-    if (this.getType_() === Type.NOTIFICATION) {
+    if (this.getType_() === TYPE_ENUM.NOTIFICATION) {
       // Only show the notification if on the first page of the story.
       // Note: this can be overriden by an amp-access attribute that might
       // show/hide the notification based on the user's authorizations.
@@ -164,7 +167,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     // Closes the menu if click happened outside of the main container.
     if (!closest(el, (el) => el === this.containerEl_, this.element)) {
-      this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
+      this.storeService_.dispatch(ACTION_ENUM.TOGGLE_ACCESS, false);
     }
   }
 
@@ -197,7 +200,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    */
   renderDrawerEl_() {
     switch (this.getType_()) {
-      case Type.BLOCKING:
+      case TYPE_ENUM.BLOCKING:
         const drawerEl = getBlockingTemplate(this.element);
 
         const logoSrc = getStoryAttributeSrc(
@@ -215,7 +218,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
         return drawerEl;
         break;
-      case Type.NOTIFICATION:
+      case TYPE_ENUM.NOTIFICATION:
         return getNotificationTemplate(this.element);
         break;
       default:
@@ -276,7 +279,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
       }
     });
 
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
+    this.storeService_.dispatch(ACTION_ENUM.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**

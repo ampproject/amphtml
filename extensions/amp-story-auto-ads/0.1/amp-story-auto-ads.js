@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {svgFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
@@ -21,8 +21,8 @@ import {dev, devAssert, userAssert} from '#utils/log';
 
 import {getPlacementAlgo} from './algorithm-utils';
 import {
-  AnalyticsEvents,
-  AnalyticsVars,
+  ANALYTICS_EVENTS_ENUM,
+  ANALYTICS_VARS_ENUM,
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
@@ -35,8 +35,8 @@ import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-b
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
-  StateProperty,
-  UIType,
+  STATE_PROPERTY_ENUM,
+  UI_TYPE_ENUM,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -65,7 +65,7 @@ const RELEVANT_PLAYER_EXPS = {
 };
 
 /** @enum {string} */
-export const Attributes = {
+export const ATTRIBUTES_ENUM = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_FULLBLEED: 'desktop-fullbleed',
   DESKTOP_ONE_PANEL: 'desktop-one-panel',
@@ -148,7 +148,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
     return this.ampStory_
       .signals()
-      .whenSignal(CommonSignals.INI_LOAD)
+      .whenSignal(COMMON_SIGNALS_ENUM.INI_LOAD)
       .then(() => this.handleConfig_())
       .then(() => {
         this.adPageManager_ = new StoryAdPageManager(
@@ -209,7 +209,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   forcePlaceAdAfterPage_(adPage) {
     const pageBeforeAdId = /** @type {string} */ (
-      this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
+      this.storeService_.get(STATE_PROPERTY_ENUM.CURRENT_PAGE_ID)
     );
     adPage.registerLoadCallback(() =>
       this.adPageManager_
@@ -268,7 +268,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   isAutomaticAdInsertionAllowed_() {
-    return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+    return !!this.storeService_.get(
+      STATE_PROPERTY_ENUM.CAN_INSERT_AUTOMATIC_AD
+    );
   }
 
   /**
@@ -276,12 +278,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
+    this.storeService_.subscribe(STATE_PROPERTY_ENUM.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      STATE_PROPERTY_ENUM.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -289,23 +291,26 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      STATE_PROPERTY_ENUM.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (pageId) => {
-      const pageIndex = this.storeService_.get(
-        StateProperty.CURRENT_PAGE_INDEX
-      );
+    this.storeService_.subscribe(
+      STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
+      (pageId) => {
+        const pageIndex = this.storeService_.get(
+          STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX
+        );
 
-      this.handleActivePageChange_(
-        dev().assertNumber(pageIndex),
-        dev().assertString(pageId)
-      );
-    });
+        this.handleActivePageChange_(
+          dev().assertNumber(pageIndex),
+          dev().assertString(pageId)
+        );
+      }
+    );
   }
 
   /**
@@ -316,15 +321,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   onAdStateUpdate_(isAd) {
     this.mutateElement(() => {
       if (isAd) {
-        this.adBadgeContainer_.setAttribute(Attributes.AD_SHOWING, '');
+        this.adBadgeContainer_.setAttribute(ATTRIBUTES_ENUM.AD_SHOWING, '');
         // TODO(#33969) can no longer be null when launched.
         this.progressBarBackground_ &&
-          this.progressBarBackground_.setAttribute(Attributes.AD_SHOWING, '');
+          this.progressBarBackground_.setAttribute(
+            ATTRIBUTES_ENUM.AD_SHOWING,
+            ''
+          );
       } else {
-        this.adBadgeContainer_.removeAttribute(Attributes.AD_SHOWING);
+        this.adBadgeContainer_.removeAttribute(ATTRIBUTES_ENUM.AD_SHOWING);
         // TODO(#33969) can no longer be null when launched.
         this.progressBarBackground_ &&
-          this.progressBarBackground_.removeAttribute(Attributes.AD_SHOWING);
+          this.progressBarBackground_.removeAttribute(
+            ATTRIBUTES_ENUM.AD_SHOWING
+          );
       }
     });
   }
@@ -337,8 +347,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   onRtlStateUpdate_(rtlState) {
     this.mutateElement(() => {
       rtlState
-        ? this.adBadgeContainer_.setAttribute(Attributes.DIR, 'rtl')
-        : this.adBadgeContainer_.removeAttribute(Attributes.DIR);
+        ? this.adBadgeContainer_.setAttribute(ATTRIBUTES_ENUM.DIR, 'rtl')
+        : this.adBadgeContainer_.removeAttribute(ATTRIBUTES_ENUM.DIR);
     });
   }
 
@@ -350,16 +360,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = Attributes;
+      const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = ATTRIBUTES_ENUM;
       this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType.DESKTOP_FULLBLEED) {
+      if (uiState === UI_TYPE_ENUM.DESKTOP_FULLBLEED) {
         this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
-      if (uiState === UIType.DESKTOP_ONE_PANEL) {
+      if (uiState === UI_TYPE_ENUM.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');
       }
@@ -486,9 +496,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.ampStory_.element.appendChild(host);
 
     // TODO(#33969) move this to init listeners when no longer conditional.
-    this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-      this.onPauseStateUpdate_(isPaused);
-    });
+    this.storeService_.subscribe(
+      STATE_PROPERTY_ENUM.PAUSED_STATE,
+      (isPaused) => {
+        this.onPauseStateUpdate_(isPaused);
+      }
+    );
   }
 
   /**
@@ -496,12 +509,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {boolean} isPaused
    */
   onPauseStateUpdate_(isPaused) {
-    const adShowing = this.storeService_.get(StateProperty.AD_STATE);
+    const adShowing = this.storeService_.get(STATE_PROPERTY_ENUM.AD_STATE);
     if (!adShowing) {
       return;
     }
 
-    toggleAttribute(this.progressBarBackground_, Attributes.PAUSED, isPaused);
+    toggleAttribute(
+      this.progressBarBackground_,
+      ATTRIBUTES_ENUM.PAUSED,
+      isPaused
+    );
   }
 
   /**
@@ -561,9 +578,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const adIndex = this.adPageManager_.getIndexById(adPageId);
     this.removeVisibleAttribute_();
     // Fire the exit event.
-    this.analyticsEvent_(AnalyticsEvents.AD_EXITED, {
-      [AnalyticsVars.AD_EXITED]: Date.now(),
-      [AnalyticsVars.AD_INDEX]: adIndex,
+    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_EXITED, {
+      [ANALYTICS_VARS_ENUM.AD_EXITED]: Date.now(),
+      [ANALYTICS_VARS_ENUM.AD_INDEX]: adIndex,
     });
   }
 
@@ -584,9 +601,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.setVisibleAttribute_(adPage);
 
     // Fire the view event on the corresponding Ad.
-    this.analyticsEvent_(AnalyticsEvents.AD_VIEWED, {
-      [AnalyticsVars.AD_VIEWED]: Date.now(),
-      [AnalyticsVars.AD_INDEX]: adIndex,
+    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_VIEWED, {
+      [ANALYTICS_VARS_ENUM.AD_VIEWED]: Date.now(),
+      [ANALYTICS_VARS_ENUM.AD_INDEX]: adIndex,
     });
   }
 

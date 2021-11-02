@@ -1,5 +1,5 @@
-import {AmpEvents} from '#core/constants/amp-events';
-import {CommonSignals} from '#core/constants/common-signals';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {iterateCursor} from '#core/dom';
 import {
   childElement,
@@ -22,7 +22,7 @@ import {
 } from './lightbox-placeholders';
 
 import {
-  AutoLightboxEvents,
+  AUTO_LIGHTBOX_EVENTS_ENUM,
   isActionableByTap,
 } from '../../../../src/auto-lightbox';
 
@@ -128,12 +128,12 @@ export class LightboxManager {
     const root = this.ampdoc_.getRootNode();
 
     // Rescan whenever DOM changes happen.
-    root.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    root.addEventListener(AMP_EVENTS_ENUM.DOM_UPDATE, () => {
       this.scanPromise_ = this.scanLightboxables_();
     });
 
     // Process elements where the `lightbox` attr is dynamically set.
-    root.addEventListener(AutoLightboxEvents.NEWLY_SET, (e) => {
+    root.addEventListener(AUTO_LIGHTBOX_EVENTS_ENUM.NEWLY_SET, (e) => {
       const {target} = e;
       this.processLightboxElement_(dev().assertElement(target));
     });
@@ -289,7 +289,7 @@ export class LightboxManager {
   getSlidesFromCarousel_(element) {
     return element
       .signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
       .then(() => {
         return toArray(element./*OK*/ querySelectorAll(SLIDE_SELECTOR));
       });

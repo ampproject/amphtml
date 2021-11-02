@@ -1,4 +1,4 @@
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {LAYOUT_ENUM, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -52,7 +52,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == Layout.CONTAINER;
+    return isLayoutSizeDefined(layout) || layout == LAYOUT_ENUM.CONTAINER;
   }
 
   /** @override */

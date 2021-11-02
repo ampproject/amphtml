@@ -6,8 +6,8 @@ import * as mode from '#core/mode';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {LayoutPriority} from '#core/dom/layout';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
@@ -140,7 +140,7 @@ describes.realWin(
         ad3p.element.setAttribute('data-block-on-consent', '');
         env.sandbox
           .stub(consent, 'getConsentPolicyState')
-          .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
+          .resolves(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
         env.sandbox
           .stub(consent, 'getConsentPolicySharedData')
           .resolves({a: 1, b: 2});
@@ -155,7 +155,7 @@ describes.realWin(
           expect(data).to.be.ok;
           expect(data._context).to.be.ok;
           expect(data._context.initialConsentState).to.equal(
-            CONSENT_POLICY_STATE.SUFFICIENT
+            CONSENT_POLICY_STATE_ENUM.SUFFICIENT
           );
           expect(data._context.consentSharedData).to.deep.equal({a: 1, b: 2});
           expect(data._context.initialConsentMetadata).to.deep.equal({
@@ -651,7 +651,9 @@ describes.sandboxed('#getLayoutPriority', {}, () => {
     (env) => {
       it('should return priority of 1', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+        expect(ad3p.getLayoutPriority()).to.equal(
+          LAYOUT_PRIORITY_ENUM.METADATA
+        );
       });
     }
   );
@@ -666,7 +668,7 @@ describes.sandboxed('#getLayoutPriority', {}, () => {
     (env) => {
       it('should return priority of 2', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+        expect(ad3p.getLayoutPriority()).to.equal(LAYOUT_PRIORITY_ENUM.ADS);
       });
     }
   );

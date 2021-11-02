@@ -1,5 +1,5 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {Layout} from '#core/dom/layout';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {realChildElements, realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 
@@ -50,7 +50,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout == LAYOUT_ENUM.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -165,7 +165,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
           }
           node
             .signals()
-            .whenSignal(CommonSignals.BUILT)
+            .whenSignal(COMMON_SIGNALS_ENUM.BUILT)
             .then(this.layoutBuiltChild_.bind(this, node));
         }
       }

@@ -27,7 +27,7 @@ export const DEFAULT_ACTION = 'activate';
  *
  * @enum {number}
  */
-export const ActionTrust = {
+export const ACTION_TRUST_ENUM = {
   /**
    * Events that are triggered without a user gesture, or triggered by a user
    * gesture with weak intent (e.g. scroll) are "low trust".
@@ -60,12 +60,12 @@ export const ActionTrust = {
  */
 export function actionTrustToString(actionTrust) {
   switch (actionTrust) {
-    case ActionTrust.LOW:
+    case ACTION_TRUST_ENUM.LOW:
       return 'low';
-    case ActionTrust.HIGH:
+    case ACTION_TRUST_ENUM.HIGH:
       return 'high';
     default:
-      devAssert(actionTrust === ActionTrust.DEFAULT);
+      devAssert(actionTrust === ACTION_TRUST_ENUM.DEFAULT);
       return 'default';
   }
 }

@@ -3,7 +3,7 @@ import {deepEquals} from '#core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 
-import {ENDPOINTS} from './constants';
+import {ENDPOINTS_ENUM} from './constants';
 
 import {TwoStepsResponse} from '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 
@@ -88,7 +88,7 @@ export class Linkmate {
       'links': linksPayload,
     });
 
-    const fetchUrl = ENDPOINTS.LINKMATE_ENDPOINT.replace(
+    const fetchUrl = ENDPOINTS_ENUM.LINKMATE_ENDPOINT.replace(
       '.pub_id.',
       this.publisherID_.toString()
     );

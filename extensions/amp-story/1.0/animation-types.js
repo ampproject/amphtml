@@ -1,7 +1,7 @@
 import {
+  WEB_ANIMATION_PLAY_STATE_ENUM,
   WebAnimationBuilderOptionsDef,
   WebAnimationDef,
-  WebAnimationPlayState,
   WebAnimationSelectorDef,
   WebAnimationTimingDef,
   WebKeyframesDef,
@@ -10,7 +10,7 @@ import {
 export {
   WebAnimationBuilderOptionsDef,
   WebAnimationDef,
-  WebAnimationPlayState,
+  WEB_ANIMATION_PLAY_STATE_ENUM,
   WebKeyframesDef,
   WebAnimationSelectorDef,
   WebAnimationTimingDef,

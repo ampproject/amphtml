@@ -5,7 +5,7 @@ import {afterRenderPromise} from '#testing/helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  Action,
+  ACTION_ENUM,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
@@ -60,7 +60,7 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
-      storeService.dispatch(Action.SET_PAGE_SIZE, {
+      storeService.dispatch(ACTION_ENUM.SET_PAGE_SIZE, {
         width: 700,
         height: 1000,
       });
@@ -92,7 +92,10 @@ describes.realWin(
         attributes
       );
       await panningMedia.layoutCallback();
-      await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
+      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+        id: 'page1',
+        index: 0,
+      });
       await afterRenderPromise(win);
       expect(panningMedia.element.firstChild.style.transform).to.equal(
         `translate3d(${attributes['data-x']}, ${attributes['data-y']}, ${
@@ -111,7 +114,10 @@ describes.realWin(
         '/examples/amp-story/img/conservatory-coords.jpg',
         attributes
       );
-      await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
+      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+        id: 'page1',
+        index: 0,
+      });
       await panningMedia.layoutCallback();
       await afterRenderPromise(win);
       expect(panningMedia.element.firstChild.style.transform).to.equal(

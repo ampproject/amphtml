@@ -2,7 +2,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import {Services} from '#service';
 
 import {AdTracker} from '../ad-tracker';
-import {PlacementState, getPlacementsFromConfigObj} from '../placement';
+import {PLACEMENT_STATE_ENUM, getPlacementsFromConfigObj} from '../placement';
 
 describes.realWin(
   'placement',
@@ -644,7 +644,7 @@ describes.realWin(
             expect(adElement.style.marginBottom).to.equal('');
             expect(adElement.style.marginLeft).to.equal('');
             expect(adElement.style.marginRight).to.equal('');
-            expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.RESIZE_FAILED);
           });
       });
 
@@ -699,7 +699,7 @@ describes.realWin(
             expect(adElement.style.marginBottom).to.equal('');
             expect(adElement.style.marginLeft).to.equal('');
             expect(adElement.style.marginRight).to.equal('');
-            expect(placementState).to.equal(PlacementState.PLACED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.PLACED);
           });
       });
 
@@ -745,7 +745,7 @@ describes.realWin(
               250,
               undefined
             );
-            expect(placementState).to.equal(PlacementState.PLACED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.PLACED);
           });
       });
 
@@ -791,7 +791,7 @@ describes.realWin(
               250,
               undefined
             );
-            expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.RESIZE_FAILED);
           });
       });
 
@@ -832,7 +832,7 @@ describes.realWin(
           .placeAd(attributes, sizing, adTracker)
           .then((placementState) => {
             expect(placementState).to.equal(
-              PlacementState.TOO_NEAR_EXISTING_AD
+              PLACEMENT_STATE_ENUM.TOO_NEAR_EXISTING_AD
             );
           });
       });
@@ -871,7 +871,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then((placementState) => {
-            expect(placementState).to.equal(PlacementState.PLACED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
             expect(container.childNodes[0].tagName).to.equal('AMP-AD');
           });
@@ -909,7 +909,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then((placementState) => {
-            expect(placementState).to.equal(PlacementState.PLACED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
             expect(container.childNodes[1].tagName).to.equal('AMP-AD');
           });
@@ -948,7 +948,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then((placementState) => {
-            expect(placementState).to.equal(PlacementState.PLACED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
             expect(anchor.childNodes[0].tagName).to.equal('AMP-AD');
           });
@@ -987,7 +987,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then((placementState) => {
-            expect(placementState).to.equal(PlacementState.PLACED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
             expect(anchor.childNodes[1].tagName).to.equal('AMP-AD');
           });
@@ -1030,7 +1030,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then((placementState) => {
-            expect(placementState).to.equal(PlacementState.PLACED);
+            expect(placementState).to.equal(PLACEMENT_STATE_ENUM.PLACED);
             expect(anchor1.childNodes).to.have.lengthOf(0);
             expect(anchor2.childNodes).to.have.lengthOf(1);
             expect(anchor2.childNodes[0].tagName).to.equal('AMP-AD');

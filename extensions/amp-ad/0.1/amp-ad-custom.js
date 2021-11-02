@@ -1,6 +1,6 @@
 import {AmpAdUIHandler} from './amp-ad-ui';
-import {CommonSignals} from '#core/constants/common-signals';
-import {LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {LAYOUT_PRIORITY_ENUM, isLayoutSizeDefined} from '#core/dom/layout';
 import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
 import {
@@ -42,7 +42,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Since this is AMPHTML we are trusting that it will load responsibly
-    return LayoutPriority.CONTENT;
+    return LAYOUT_PRIORITY_ENUM.CONTENT;
   }
 
   /** @override */
@@ -116,7 +116,7 @@ export class AmpAdCustom extends AMP.BaseElement {
             // maybe used by other ad component.
             removeChildren(this.element);
             this.element.appendChild(renderedElement);
-            this.signals().signal(CommonSignals.INI_LOAD);
+            this.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
           });
       } catch (e) {
         this.uiHandler.applyNoContentUI();

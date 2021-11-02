@@ -1,6 +1,6 @@
 import objStr from 'obj-str';
 
-import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
+import {MESSAGE_TYPE_ENUM, deserializeMessage} from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
@@ -47,7 +47,7 @@ function BentoMathmlWithRef(props, ref) {
   const messageHandler = useCallback(
     (e) => {
       const data = tryParseJson(e.data) ?? deserializeMessage(e.data);
-      if (data['type'] == MessageType.EMBED_SIZE) {
+      if (data['type'] == MESSAGE_TYPE_ENUM.EMBED_SIZE) {
         const {height, width: w} = data;
         const width = inline ? w : undefined;
         setDimensions({height, width});

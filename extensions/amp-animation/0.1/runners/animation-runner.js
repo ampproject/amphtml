@@ -1,5 +1,5 @@
 import {
-  WebAnimationPlayState, // eslint-disable-line no-unused-vars
+  WEB_ANIMATION_PLAY_STATE_ENUM, // eslint-disable-line no-unused-vars
 } from '../web-animation-types';
 
 /**
@@ -14,12 +14,12 @@ export class AnimationRunner {
   }
 
   /**
-   * @return {!WebAnimationPlayState}
+   * @return {!WEB_ANIMATION_PLAY_STATE_ENUM}
    */
   getPlayState() {}
 
   /**
-   * @param {function(!WebAnimationPlayState)} unusedHandler
+   * @param {function(!WEB_ANIMATION_PLAY_STATE_ENUM)} unusedHandler
    * @return {!UnlistenDef}
    */
   onPlayStateChanged(unusedHandler) {}

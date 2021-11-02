@@ -1,4 +1,4 @@
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {CONSENT_STRING_TYPE_ENUM} from '#core/constants/consent-state';
 import {deepEquals} from '#core/types/object/json';
 import {dev, user} from '#utils/log';
 import {hasOwn, map} from '#core/types/object';
@@ -18,7 +18,7 @@ const TAG = 'amp-consent';
  * granular consent. Only values ACCEPT and REJECT signals are stored.
  * @enum {string}
  */
-export const STORAGE_KEY = {
+export const STORAGE_KEY_ENUM = {
   STATE: 's',
   STRING: 'r',
   IS_DIRTY: 'd',
@@ -30,7 +30,7 @@ export const STORAGE_KEY = {
  * Key values for retriving/storing metadata values within consent info
  * @enum {string}
  */
-export const METADATA_STORAGE_KEY = {
+export const METADATA_STORAGE_KEY_ENUM = {
   CONSENT_STRING_TYPE: 'cst',
   ADDITIONAL_CONSENT: 'ac',
   GDPR_APPLIES: 'ga',
@@ -43,7 +43,7 @@ export const METADATA_STORAGE_KEY = {
  * In the future, we might consider more nuanced states.
  * @enum {number}
  */
-export const PURPOSE_CONSENT_STATE = {
+export const PURPOSE_CONSENT_STATE_ENUM = {
   ACCEPTED: 1,
   REJECTED: 2,
 };
@@ -51,7 +51,7 @@ export const PURPOSE_CONSENT_STATE = {
 /**
  * @enum {number}
  */
-export const CONSENT_ITEM_STATE = {
+export const CONSENT_ITEM_STATE_ENUM = {
   ACCEPTED: 1,
   REJECTED: 2,
   DISMISSED: 3,
@@ -66,7 +66,7 @@ export const CONSENT_ITEM_STATE = {
  * @enum {string}
  * @visibleForTesting
  */
-export const TCF_POST_MESSAGE_API_COMMANDS = {
+export const TCF_POST_MESSAGE_API_COMMANDS_ENUM = {
   GET_TC_DATA: 'getTCData',
   PING: 'ping',
   ADD_EVENT_LISTENER: 'addEventListener',
@@ -102,7 +102,7 @@ export let ConsentMetadataDef;
  */
 export function getStoredConsentInfo(value) {
   if (value === undefined) {
-    return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+    return constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
   }
   if (typeof value === 'boolean') {
     // legacy format
@@ -112,13 +112,13 @@ export function getStoredConsentInfo(value) {
     throw dev().createError('Invalid stored consent value');
   }
 
-  const consentState = convertValueToState(value[STORAGE_KEY.STATE]);
+  const consentState = convertValueToState(value[STORAGE_KEY_ENUM.STATE]);
   return constructConsentInfo(
     consentState,
-    value[STORAGE_KEY.STRING],
-    convertStorageMetadata(value[STORAGE_KEY.METADATA]),
-    value[STORAGE_KEY.PURPOSE_CONSENTS],
-    value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
+    value[STORAGE_KEY_ENUM.STRING],
+    convertStorageMetadata(value[STORAGE_KEY_ENUM.METADATA]),
+    value[STORAGE_KEY_ENUM.PURPOSE_CONSENTS],
+    value[STORAGE_KEY_ENUM.IS_DIRTY] && value[STORAGE_KEY_ENUM.IS_DIRTY] === 1
   );
 }
 
@@ -144,14 +144,14 @@ export function hasDirtyBit(consentInfo) {
  * @return {!CONSENT_ITEM_STATE}
  */
 export function recalculateConsentStateValue(newState, previousState) {
-  if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
-    newState = CONSENT_ITEM_STATE.UNKNOWN;
+  if (!isEnumValue(CONSENT_ITEM_STATE_ENUM, newState)) {
+    newState = CONSENT_ITEM_STATE_ENUM.UNKNOWN;
   }
-  if (newState == CONSENT_ITEM_STATE.DISMISSED) {
-    return previousState || CONSENT_ITEM_STATE.UNKNOWN;
+  if (newState == CONSENT_ITEM_STATE_ENUM.DISMISSED) {
+    return previousState || CONSENT_ITEM_STATE_ENUM.UNKNOWN;
   }
-  if (newState == CONSENT_ITEM_STATE.NOT_REQUIRED) {
-    if (previousState && previousState != CONSENT_ITEM_STATE.UNKNOWN) {
+  if (newState == CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED) {
+    if (previousState && previousState != CONSENT_ITEM_STATE_ENUM.UNKNOWN) {
       return previousState;
     }
   }
@@ -166,31 +166,31 @@ export function recalculateConsentStateValue(newState, previousState) {
 export function composeStoreValue(consentInfo) {
   const obj = map();
   const consentState = consentInfo['consentState'];
-  if (consentState == CONSENT_ITEM_STATE.ACCEPTED) {
-    obj[STORAGE_KEY.STATE] = 1;
-  } else if (consentState == CONSENT_ITEM_STATE.REJECTED) {
-    obj[STORAGE_KEY.STATE] = 0;
+  if (consentState == CONSENT_ITEM_STATE_ENUM.ACCEPTED) {
+    obj[STORAGE_KEY_ENUM.STATE] = 1;
+  } else if (consentState == CONSENT_ITEM_STATE_ENUM.REJECTED) {
+    obj[STORAGE_KEY_ENUM.STATE] = 0;
   } else {
     // Only store consentString and dirtyBit with reject/accept action
     return null;
   }
 
   if (consentInfo['consentString']) {
-    obj[STORAGE_KEY.STRING] = consentInfo['consentString'];
+    obj[STORAGE_KEY_ENUM.STRING] = consentInfo['consentString'];
   }
 
   if (consentInfo['isDirty'] === true) {
-    obj[STORAGE_KEY.IS_DIRTY] = 1;
+    obj[STORAGE_KEY_ENUM.IS_DIRTY] = 1;
   }
 
   if (consentInfo['consentMetadata']) {
-    obj[STORAGE_KEY.METADATA] = composeMetadataStoreValue(
+    obj[STORAGE_KEY_ENUM.METADATA] = composeMetadataStoreValue(
       consentInfo['consentMetadata']
     );
   }
 
   if (consentInfo['purposeConsents']) {
-    obj[STORAGE_KEY.PURPOSE_CONSENTS] = consentInfo['purposeConsents'];
+    obj[STORAGE_KEY_ENUM.PURPOSE_CONSENTS] = consentInfo['purposeConsents'];
   }
 
   if (Object.keys(obj) == 0) {
@@ -206,10 +206,10 @@ export function composeStoreValue(consentInfo) {
  * @return {?boolean}
  */
 export function calculateLegacyStateValue(consentState) {
-  if (consentState == CONSENT_ITEM_STATE.ACCEPTED) {
+  if (consentState == CONSENT_ITEM_STATE_ENUM.ACCEPTED) {
     return true;
   }
-  if (consentState == CONSENT_ITEM_STATE.REJECTED) {
+  if (consentState == CONSENT_ITEM_STATE_ENUM.REJECTED) {
     return false;
   }
   return null;
@@ -324,11 +324,11 @@ export function constructMetadata(
  */
 export function convertValueToState(value) {
   if (value === true || value === 1) {
-    return CONSENT_ITEM_STATE.ACCEPTED;
+    return CONSENT_ITEM_STATE_ENUM.ACCEPTED;
   } else if (value === false || value === 0) {
-    return CONSENT_ITEM_STATE.REJECTED;
+    return CONSENT_ITEM_STATE_ENUM.REJECTED;
   }
-  return CONSENT_ITEM_STATE.UNKNOWN;
+  return CONSENT_ITEM_STATE_ENUM.UNKNOWN;
 }
 
 /**
@@ -338,11 +338,11 @@ export function convertValueToState(value) {
  */
 export function convertEnumValueToState(value) {
   if (value === 'accepted') {
-    return CONSENT_ITEM_STATE.ACCEPTED;
+    return CONSENT_ITEM_STATE_ENUM.ACCEPTED;
   } else if (value === 'rejected') {
-    return CONSENT_ITEM_STATE.REJECTED;
+    return CONSENT_ITEM_STATE_ENUM.REJECTED;
   } else if (value === 'unknown') {
-    return CONSENT_ITEM_STATE.UNKNOWN;
+    return CONSENT_ITEM_STATE_ENUM.UNKNOWN;
   }
   return null;
 }
@@ -357,8 +357,8 @@ export function hasStoredValue(info) {
     return true;
   }
   return (
-    info['consentState'] === CONSENT_ITEM_STATE.ACCEPTED ||
-    info['consentState'] === CONSENT_ITEM_STATE.REJECTED
+    info['consentState'] === CONSENT_ITEM_STATE_ENUM.ACCEPTED ||
+    info['consentState'] === CONSENT_ITEM_STATE_ENUM.REJECTED
   );
 }
 
@@ -368,11 +368,11 @@ export function hasStoredValue(info) {
  * @return {string}
  */
 export function getConsentStateValue(enumState) {
-  if (enumState === CONSENT_ITEM_STATE.ACCEPTED) {
+  if (enumState === CONSENT_ITEM_STATE_ENUM.ACCEPTED) {
     return 'accepted';
   }
 
-  if (enumState === CONSENT_ITEM_STATE.REJECTED) {
+  if (enumState === CONSENT_ITEM_STATE_ENUM.REJECTED) {
     return 'rejected';
   }
 
@@ -390,19 +390,19 @@ export function getConsentStateValue(enumState) {
 export function composeMetadataStoreValue(consentInfoMetadata) {
   const storageMetadata = map();
   if (consentInfoMetadata['consentStringType']) {
-    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE] =
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE] =
       consentInfoMetadata['consentStringType'];
   }
   if (consentInfoMetadata['additionalConsent']) {
-    storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT] =
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT] =
       consentInfoMetadata['additionalConsent'];
   }
   if (consentInfoMetadata['gdprApplies'] != undefined) {
-    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES] =
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.GDPR_APPLIES] =
       consentInfoMetadata['gdprApplies'];
   }
   if (consentInfoMetadata['purposeOne'] != undefined) {
-    storageMetadata[METADATA_STORAGE_KEY.PURPOSE_ONE] =
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.PURPOSE_ONE] =
       consentInfoMetadata['purposeOne'];
   }
   return storageMetadata;
@@ -421,10 +421,10 @@ export function convertStorageMetadata(storageMetadata) {
     return constructMetadata();
   }
   return constructMetadata(
-    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE],
-    storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT],
-    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES],
-    storageMetadata[METADATA_STORAGE_KEY.PURPOSE_ONE]
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE],
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT],
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.GDPR_APPLIES],
+    storageMetadata[METADATA_STORAGE_KEY_ENUM.PURPOSE_ONE]
   );
 }
 
@@ -442,7 +442,7 @@ export function assertMetadataValues(metadata) {
 
   if (
     consentStringType &&
-    !isEnumValue(CONSENT_STRING_TYPE, consentStringType)
+    !isEnumValue(CONSENT_STRING_TYPE_ENUM, consentStringType)
   ) {
     delete metadata['consentStringType'];
     errorFields.push('consentStringType');

@@ -26,7 +26,10 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {
+  VIDEO_ATTRIBUTES_ENUM,
+  VIDEO_EVENTS_ENUM,
+} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-delight-player';
@@ -38,7 +41,7 @@ const TAG = 'amp-delight-player';
 const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @const @enum {string} */
-const DelightEvent = {
+const DELIGHT_EVENT_ENUM = {
   READY: 'x-dl8-to-parent-ready',
   PLAYING: 'x-dl8-to-parent-playing',
   PAUSED: 'x-dl8-to-parent-paused',
@@ -191,7 +194,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.element.hasAttribute(VideoAttributes.DOCK)) {
+    if (this.element.hasAttribute(VIDEO_ATTRIBUTES_ENUM.DOCK)) {
       return false; // do nothing, do not relayout
     }
 
@@ -281,23 +284,23 @@ class AmpDelightPlayer extends AMP.BaseElement {
     const {element} = this;
 
     switch (data['type']) {
-      case DelightEvent.PLAYING:
+      case DELIGHT_EVENT_ENUM.PLAYING:
         this.pauseHelper_.updatePlaying(true);
         break;
-      case DelightEvent.PAUSED:
-      case DelightEvent.ENDED:
+      case DELIGHT_EVENT_ENUM.PAUSED:
+      case DELIGHT_EVENT_ENUM.ENDED:
         this.pauseHelper_.updatePlaying(false);
         break;
     }
 
     const redispatched = redispatch(element, data['type'], {
-      [DelightEvent.PLAYING]: VideoEvents.PLAYING,
-      [DelightEvent.PAUSED]: VideoEvents.PAUSE,
-      [DelightEvent.ENDED]: VideoEvents.ENDED,
-      [DelightEvent.MUTED]: VideoEvents.MUTED,
-      [DelightEvent.UNMUTED]: VideoEvents.UNMUTED,
-      [DelightEvent.AD_START]: VideoEvents.AD_START,
-      [DelightEvent.AD_END]: VideoEvents.AD_END,
+      [DELIGHT_EVENT_ENUM.PLAYING]: VIDEO_EVENTS_ENUM.PLAYING,
+      [DELIGHT_EVENT_ENUM.PAUSED]: VIDEO_EVENTS_ENUM.PAUSE,
+      [DELIGHT_EVENT_ENUM.ENDED]: VIDEO_EVENTS_ENUM.ENDED,
+      [DELIGHT_EVENT_ENUM.MUTED]: VIDEO_EVENTS_ENUM.MUTED,
+      [DELIGHT_EVENT_ENUM.UNMUTED]: VIDEO_EVENTS_ENUM.UNMUTED,
+      [DELIGHT_EVENT_ENUM.AD_START]: VIDEO_EVENTS_ENUM.AD_START,
+      [DELIGHT_EVENT_ENUM.AD_END]: VIDEO_EVENTS_ENUM.AD_END,
     });
 
     if (redispatched) {
@@ -305,13 +308,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     switch (data['type']) {
-      case DelightEvent.PING: {
+      case DELIGHT_EVENT_ENUM.PING: {
         const guid = data['guid'];
         if (guid) {
           this.iframe_.contentWindow./*OK*/ postMessage(
             JSON.stringify(
               /** @type {JsonObject} */ ({
-                type: DelightEvent.PONG,
+                type: DELIGHT_EVENT_ENUM.PONG,
                 guid,
                 idx: 0,
               })
@@ -321,43 +324,43 @@ class AmpDelightPlayer extends AMP.BaseElement {
         }
         break;
       }
-      case DelightEvent.READY: {
-        dispatchCustomEvent(element, VideoEvents.LOAD);
+      case DELIGHT_EVENT_ENUM.READY: {
+        dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOAD);
         this.playerReadyResolver_(this.iframe_);
         break;
       }
-      case DelightEvent.PLAYER_READY: {
+      case DELIGHT_EVENT_ENUM.PLAYER_READY: {
         this.sendConsentData_();
         break;
       }
-      case DelightEvent.TIME_UPDATE: {
+      case DELIGHT_EVENT_ENUM.TIME_UPDATE: {
         const payload = data['payload'];
         this.currentTime_ = payload.currentTime;
         this.playedRanges_ = payload.playedRanges;
         break;
       }
-      case DelightEvent.DURATION: {
+      case DELIGHT_EVENT_ENUM.DURATION: {
         const payload = data['payload'];
         this.totalDuration_ = payload.duration;
         break;
       }
-      case DelightEvent.EXPANDED: {
+      case DELIGHT_EVENT_ENUM.EXPANDED: {
         this.setFullHeight_();
         break;
       }
-      case DelightEvent.MINIMIZED: {
+      case DELIGHT_EVENT_ENUM.MINIMIZED: {
         this.setInlineHeight_();
         break;
       }
-      case DelightEvent.ENTERED_FULLSCREEN: {
+      case DELIGHT_EVENT_ENUM.ENTERED_FULLSCREEN: {
         this.isFullscreen_ = true;
         break;
       }
-      case DelightEvent.EXITED_FULLSCREEN: {
+      case DELIGHT_EVENT_ENUM.EXITED_FULLSCREEN: {
         this.isFullscreen_ = false;
         break;
       }
-      case DelightEvent.CUSTOM_TICK: {
+      case DELIGHT_EVENT_ENUM.CUSTOM_TICK: {
         const payload = data['payload'];
         this.dispatchCustomAnalyticsEvent_(payload.type, payload);
         break;
@@ -372,7 +375,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   dispatchCustomAnalyticsEvent_(eventType, vars) {
     dispatchCustomEvent(
       this.element,
-      VideoEvents.CUSTOM_TICK,
+      VIDEO_EVENTS_ENUM.CUSTOM_TICK,
       dict({
         'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
         'vars': vars,
@@ -423,7 +426,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         window.screen.orientation ||
         window.screen.mozOrientation ||
         window.screen.msOrientation;
-      this.sendCommand_(DelightEvent.SCREEN_CHANGE, {
+      this.sendCommand_(DELIGHT_EVENT_ENUM.SCREEN_CHANGE, {
         orientation: {
           angle: orientation.angle,
           type: orientation.type,
@@ -432,12 +435,12 @@ class AmpDelightPlayer extends AMP.BaseElement {
     };
     const dispatchOrientationChangeEvents = () => {
       const {orientation} = window;
-      this.sendCommand_(DelightEvent.WINDOW_ORIENTATIONCHANGE, {
+      this.sendCommand_(DELIGHT_EVENT_ENUM.WINDOW_ORIENTATIONCHANGE, {
         orientation,
       });
     };
     const dispatchDeviceOrientationEvents = (event) => {
-      this.sendCommand_(DelightEvent.WINDOW_DEVICEORIENTATION, {
+      this.sendCommand_(DELIGHT_EVENT_ENUM.WINDOW_DEVICEORIENTATION, {
         alpha: event.alpha,
         beta: event.beta,
         gamma: event.gamma,
@@ -477,7 +480,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
           },
         });
       }
-      this.sendCommand_(DelightEvent.WINDOW_DEVICEMOTION, payload);
+      this.sendCommand_(DELIGHT_EVENT_ENUM.WINDOW_DEVICEMOTION, payload);
     };
     if (window.screen) {
       const screen =
@@ -562,7 +565,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
       consentPolicyStatePromise,
       consentPolicySharedDataPromise,
     ]).then((consents) => {
-      this.sendCommand_(DelightEvent.CONSENT_DATA, {
+      this.sendCommand_(DELIGHT_EVENT_ENUM.CONSENT_DATA, {
         'consentMetadata': consents[0],
         'consentString': consents[1],
         'consentPolicyState': consents[2],
@@ -585,46 +588,46 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.sendCommand_(DelightEvent.PLAY);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.PLAY);
   }
 
   /** @override */
   pause() {
-    this.sendCommand_(DelightEvent.PAUSE);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.PAUSE);
   }
 
   /** @override */
   mute() {
-    this.sendCommand_(DelightEvent.MUTE);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.MUTE);
   }
 
   /** @override */
   unmute() {
-    this.sendCommand_(DelightEvent.UNMUTE);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.UNMUTE);
   }
 
   /** @override */
   showControls() {
-    this.sendCommand_(DelightEvent.ENABLE_INTERFACE);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.ENABLE_INTERFACE);
   }
 
   /** @override */
   hideControls() {
-    this.sendCommand_(DelightEvent.DISABLE_INTERFACE);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.DISABLE_INTERFACE);
   }
 
   /**
    * @override
    */
   fullscreenEnter() {
-    this.sendCommand_(DelightEvent.ENTER_FULLSCREEN);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.ENTER_FULLSCREEN);
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    this.sendCommand_(DelightEvent.EXIT_FULLSCREEN);
+    this.sendCommand_(DELIGHT_EVENT_ENUM.EXIT_FULLSCREEN);
   }
 
   /** @override */
@@ -664,7 +667,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(time) {
-    this.sendCommand_(DelightEvent.SEEK, {time});
+    this.sendCommand_(DELIGHT_EVENT_ENUM.SEEK, {time});
   }
 }
 

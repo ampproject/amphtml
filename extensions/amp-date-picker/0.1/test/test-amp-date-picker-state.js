@@ -4,7 +4,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {createElementWithAttributes} from '#core/dom';
 
 import {requireExternal} from '../../../../src/module';
-import {AmpDatePicker, DatePickerState} from '../amp-date-picker';
+import {AmpDatePicker, DATE_PICKER_STATE_ENUM} from '../amp-date-picker';
 
 describes.realWin(
   'amp-date-picker',
@@ -106,7 +106,7 @@ describes.realWin(
 
             await layoutCallback();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.STATIC
+              DATE_PICKER_STATE_ENUM.STATIC
             );
           });
 
@@ -119,7 +119,7 @@ describes.realWin(
 
             await layoutCallback();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.STATIC
+              DATE_PICKER_STATE_ENUM.STATIC
             );
 
             const fakeEscEvent = {
@@ -129,12 +129,12 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeEscEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.STATIC
+              DATE_PICKER_STATE_ENUM.STATIC
             );
 
-            picker.transitionTo_(DatePickerState.OVERLAY_OPEN_PICKER);
+            picker.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.STATIC
+              DATE_PICKER_STATE_ENUM.STATIC
             );
           });
         });
@@ -148,7 +148,7 @@ describes.realWin(
 
             await layoutCallback();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
           });
 
@@ -162,7 +162,7 @@ describes.realWin(
             const fakeEvent = {target: input};
             picker.handleFocus_(fakeEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
           });
 
@@ -176,13 +176,13 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeBlurEvent = {target: document.body};
             picker.handleFocus_(fakeBlurEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
           });
 
@@ -196,7 +196,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeEscEvent = {
@@ -206,7 +206,7 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeEscEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
           });
 
@@ -220,7 +220,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeKeydownEvent = {
@@ -230,7 +230,7 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
           });
 
@@ -242,7 +242,7 @@ describes.realWin(
 
             await layoutCallback();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
 
             const fakeKeydownEvent = {
@@ -252,7 +252,7 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
           });
 
@@ -265,7 +265,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeKeydownEvent = {
@@ -275,7 +275,7 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
 
             const fakeEscEvent = {
@@ -285,7 +285,7 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeEscEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
           });
 
@@ -299,7 +299,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeKeydownEvent = {
@@ -309,7 +309,7 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
 
             const fakeClickEvent = {
@@ -317,7 +317,7 @@ describes.realWin(
             };
             picker.handleClick_(fakeClickEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
           });
 
@@ -331,7 +331,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeKeydownEvent = {
@@ -341,7 +341,7 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
 
             const fakeClickEvent = {
@@ -349,7 +349,7 @@ describes.realWin(
             };
             picker.handleClick_(fakeClickEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
           });
 
@@ -363,7 +363,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeKeydownEvent = {
@@ -373,12 +373,12 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
 
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
           });
 
@@ -392,7 +392,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeKeydownEvent = {
@@ -402,12 +402,12 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
 
             picker.handleClear_();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
           });
 
@@ -421,7 +421,7 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             const fakeKeydownEvent = {
@@ -431,12 +431,12 @@ describes.realWin(
             };
             picker.handleKeydown_(fakeKeydownEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
 
             picker.handleClear_();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_PICKER
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER
             );
           });
 
@@ -450,12 +450,12 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             picker.onDateChange(moment('2018-03-01'));
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
           });
 
@@ -470,12 +470,12 @@ describes.realWin(
             const fakeFocusEvent = {target: input};
             picker.handleFocus_(fakeFocusEvent);
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
 
             picker.onDateChange(moment('2018-03-01'));
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
           });
 
@@ -488,12 +488,12 @@ describes.realWin(
 
             await layoutCallback();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_CLOSED
+              DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
             );
 
             picker.handleClear_();
             expect(picker.stateMachine_.state_).to.equal(
-              DatePickerState.OVERLAY_OPEN_INPUT
+              DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT
             );
           });
         });

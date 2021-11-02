@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {
@@ -28,7 +28,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 
 const TAG = 'amp-brid-player';
 
@@ -292,22 +292,22 @@ class AmpBridPlayer extends AMP.BaseElement {
       (consents) => {
         let consentData;
         switch (consents[0]) {
-          case CONSENT_POLICY_STATE.SUFFICIENT:
+          case CONSENT_POLICY_STATE_ENUM.SUFFICIENT:
             consentData = {
               'gdprApplies': true,
               'userConsent': 1,
               'gdprString': consents[1],
             };
             break;
-          case CONSENT_POLICY_STATE.INSUFFICIENT:
-          case CONSENT_POLICY_STATE.UNKNOWN:
+          case CONSENT_POLICY_STATE_ENUM.INSUFFICIENT:
+          case CONSENT_POLICY_STATE_ENUM.UNKNOWN:
             consentData = {
               'gdprApplies': true,
               'userConsent': 0,
               'gdprString': consents[1],
             };
             break;
-          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+          case CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED:
           default:
             consentData = {
               'gdprApplies': false,
@@ -352,13 +352,13 @@ class AmpBridPlayer extends AMP.BaseElement {
           break;
       }
       redispatch(element, params[3], {
-        'ready': VideoEvents.LOAD,
-        'play': VideoEvents.PLAYING,
-        'pause': VideoEvents.PAUSE,
-        'ended': VideoEvents.ENDED,
-        'adStart': VideoEvents.AD_START,
-        'adEnd': VideoEvents.AD_END,
-        'loadedmetadata': VideoEvents.LOADEDMETADATA,
+        'ready': VIDEO_EVENTS_ENUM.LOAD,
+        'play': VIDEO_EVENTS_ENUM.PLAYING,
+        'pause': VIDEO_EVENTS_ENUM.PAUSE,
+        'ended': VIDEO_EVENTS_ENUM.ENDED,
+        'adStart': VIDEO_EVENTS_ENUM.AD_START,
+        'adEnd': VIDEO_EVENTS_ENUM.AD_END,
+        'loadedmetadata': VIDEO_EVENTS_ENUM.LOADEDMETADATA,
       });
     }
 

@@ -4,7 +4,7 @@ import {
   areFriendlyDomains,
   isWildCardMatch,
 } from '../linker-manager';
-import {Priority} from '#service/navigation';
+import {PRIORITY_ENUM} from '#service/navigation';
 import {Services} from '#service';
 import {
   installLinkerReaderService,
@@ -48,12 +48,12 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
     navigateToHandlers = [];
     env.sandbox.stub(Services, 'navigationForDoc').returns({
       registerAnchorMutator: (callback, priority) => {
-        if (priority === Priority.ANALYTICS_LINKER) {
+        if (priority === PRIORITY_ENUM.ANALYTICS_LINKER) {
           anchorClickHandlers.push(callback);
         }
       },
       registerNavigateToMutator: (callback, priority) => {
-        if (priority === Priority.ANALYTICS_LINKER) {
+        if (priority === PRIORITY_ENUM.ANALYTICS_LINKER) {
           navigateToHandlers.push(callback);
         }
       },

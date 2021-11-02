@@ -1,8 +1,8 @@
 import * as mode from '../../../../src/mode';
-import {WebPushConfigAttributes} from '../amp-web-push-config';
+import {WEB_PUSH_CONFIG_ATTRIBUTES_ENUM} from '../amp-web-push-config';
 import {AmpWebPushHelperFrame} from '../amp-web-push-helper-frame';
-import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
-import {NotificationPermission} from '../vars';
+import {WEB_PUSH_WIDGET_VISIBILITIES_ENUM} from '../amp-web-push-widget';
+import {NOTIFICATION_PERMISSION_ENUM} from '../vars';
 import {WebPushService} from '../web-push-service';
 import {WindowMessenger} from '../window-messenger';
 
@@ -175,12 +175,13 @@ describes.realWin(
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
-      webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE] =
         FAKE_IFRAME_URL;
     }
 
@@ -231,7 +232,7 @@ describes.realWin(
           return webPush.queryNotificationPermission();
         })
         .then((permission) => {
-          expect(permission).to.eq(NotificationPermission.DEFAULT);
+          expect(permission).to.eq(NOTIFICATION_PERMISSION_ENUM.DEFAULT);
         });
     });
   }
@@ -248,12 +249,13 @@ describes.realWin(
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
-      webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE] =
         FAKE_IFRAME_URL;
     }
 
@@ -302,7 +304,9 @@ describes.realWin(
 
           env.sandbox
             ./*OK*/ stub(webPush, 'getCanonicalFrameStorageValue_')
-            .callsFake(() => Promise.resolve(NotificationPermission.DENIED));
+            .callsFake(() =>
+              Promise.resolve(NOTIFICATION_PERMISSION_ENUM.DENIED)
+            );
 
           env.sandbox
             ./*OK*/ stub(webPush, 'doesWidgetCategoryMarkupExist_')
@@ -312,14 +316,16 @@ describes.realWin(
         })
         .then(() => {
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.UNSUBSCRIBED, false)
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.UNSUBSCRIBED, false)
               .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.SUBSCRIBED, false).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.SUBSCRIBED, false)
+              .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.BLOCKED, true).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED, true)
+              .calledOnce
           ).to.eq(true);
         });
     });
@@ -339,21 +345,25 @@ describes.realWin(
             .callsFake(() => Promise.resolve(true));
           env.sandbox
             ./*OK*/ stub(webPush, 'queryNotificationPermission')
-            .callsFake(() => Promise.resolve(NotificationPermission.DEFAULT));
+            .callsFake(() =>
+              Promise.resolve(NOTIFICATION_PERMISSION_ENUM.DEFAULT)
+            );
 
           // We've mocked default notification permissions
           return webPush.updateWidgetVisibilities();
         })
         .then(() => {
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.UNSUBSCRIBED, false)
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.UNSUBSCRIBED, false)
               .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.SUBSCRIBED, true).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.SUBSCRIBED, true)
+              .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.BLOCKED, false).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED, false)
+              .calledOnce
           ).to.eq(true);
         });
     });
@@ -370,21 +380,25 @@ describes.realWin(
             .callsFake(() => Promise.resolve(false));
           env.sandbox
             ./*OK*/ stub(webPush, 'queryNotificationPermission')
-            .callsFake(() => Promise.resolve(NotificationPermission.DEFAULT));
+            .callsFake(() =>
+              Promise.resolve(NOTIFICATION_PERMISSION_ENUM.DEFAULT)
+            );
 
           // We've mocked default notification permissions
           return webPush.updateWidgetVisibilities();
         })
         .then(() => {
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.UNSUBSCRIBED, true)
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.UNSUBSCRIBED, true)
               .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.SUBSCRIBED, false).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.SUBSCRIBED, false)
+              .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.BLOCKED, false).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED, false)
+              .calledOnce
           ).to.eq(true);
         });
     });
@@ -404,21 +418,25 @@ describes.realWin(
             .callsFake(() => Promise.resolve(true));
           env.sandbox
             ./*OK*/ stub(webPush, 'queryNotificationPermission')
-            .callsFake(() => Promise.resolve(NotificationPermission.DEFAULT));
+            .callsFake(() =>
+              Promise.resolve(NOTIFICATION_PERMISSION_ENUM.DEFAULT)
+            );
 
           // We've mocked default notification permissions
           return webPush.updateWidgetVisibilities();
         })
         .then(() => {
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.UNSUBSCRIBED, true)
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.UNSUBSCRIBED, true)
               .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.SUBSCRIBED, false).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.SUBSCRIBED, false)
+              .calledOnce
           ).to.eq(true);
           expect(
-            spy.withArgs(WebPushWidgetVisibilities.BLOCKED, false).calledOnce
+            spy.withArgs(WEB_PUSH_WIDGET_VISIBILITIES_ENUM.BLOCKED, false)
+              .calledOnce
           ).to.eq(true);
         });
     });
@@ -499,7 +517,7 @@ describes.realWin(
           ./*OK*/ stub(webPush, 'isServiceWorkerActivated')
           .callsFake(() => Promise.resolve(true));
         env.sandbox./*OK*/ stub(webPush, 'queryNotificationPermission', () =>
-          Promise.resolve(NotificationPermission.GRANTED)
+          Promise.resolve(NOTIFICATION_PERMISSION_ENUM.GRANTED)
         );
 
         iframeWindowControllerMock = env.sandbox./*OK*/ mock(
@@ -535,12 +553,13 @@ describes.realWin(
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
-      webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE] =
         FAKE_IFRAME_URL;
     }
 
@@ -579,9 +598,10 @@ describes.realWin(
 
     it('should register service worker', () => {
       let helperFrameSwMessageMock = null;
-      const swUrl = webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL];
+      const swUrl =
+        webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL];
       const swScope =
-        webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE];
+        webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE];
 
       return setupHelperIframe()
         .then(() => {
@@ -694,12 +714,13 @@ describes.realWin(
     let iframeWindow = null;
 
     function setDefaultConfigParams_() {
-      webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL] =
         FAKE_IFRAME_URL;
-      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE] =
         FAKE_IFRAME_URL;
     }
 

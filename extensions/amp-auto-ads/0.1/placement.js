@@ -14,7 +14,7 @@ import {Services} from '#service';
 
 import {dev, user} from '#utils/log';
 
-import {Attributes, getAttributesFromConfigObj} from './attributes';
+import {ATTRIBUTES_ENUM, getAttributesFromConfigObj} from './attributes';
 import {measurePageLayoutBox} from './measure-page-layout-box';
 
 /** @const */
@@ -38,7 +38,7 @@ const TARGET_AD_HEIGHT_PX = 250;
 /**
  * @enum {number}
  */
-export const PlacementState = {
+export const PLACEMENT_STATE_ENUM = {
   UNUSED: 0,
   RESIZE_FAILED: 1,
   PLACED: 2,
@@ -49,7 +49,7 @@ export const PlacementState = {
  * Indicates where a placement is relative to the anchor element in the DOM.
  * @enum {number}
  */
-const Position = {
+const POSITION_ENUM = {
   BEFORE: 1, // Placement should be the sibling before the anchor element.
   FIRST_CHILD: 2, // Placement should be the first child of the anchor element.
   LAST_CHILD: 3, // Placement should be the last child of the anchor element.
@@ -67,19 +67,19 @@ const DENYLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
  * @const {!Object<!Position, function(!Element, !Element)>}
  */
 const INJECTORS = {};
-INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {
+INJECTORS[POSITION_ENUM.BEFORE] = (anchorElement, elementToInject) => {
   anchorElement.parentNode.insertBefore(elementToInject, anchorElement);
 };
-INJECTORS[Position.AFTER] = (anchorElement, elementToInject) => {
+INJECTORS[POSITION_ENUM.AFTER] = (anchorElement, elementToInject) => {
   anchorElement.parentNode.insertBefore(
     elementToInject,
     anchorElement.nextSibling
   );
 };
-INJECTORS[Position.FIRST_CHILD] = (anchorElement, elementToInject) => {
+INJECTORS[POSITION_ENUM.FIRST_CHILD] = (anchorElement, elementToInject) => {
   anchorElement.insertBefore(elementToInject, anchorElement.firstChild);
 };
-INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
+INJECTORS[POSITION_ENUM.LAST_CHILD] = (anchorElement, elementToInject) => {
   anchorElement.appendChild(elementToInject);
 };
 
@@ -128,7 +128,7 @@ export class Placement {
     this.adElement_ = null;
 
     /** @private {!PlacementState} */
-    this.state_ = PlacementState.UNUSED;
+    this.state_ = PLACEMENT_STATE_ENUM.UNUSED;
   }
 
   /**
@@ -158,11 +158,11 @@ export class Placement {
   getEstimatedPositionFromAnchorLayout_(anchorLayout) {
     // TODO: This should really take account of margins and padding too.
     switch (this.position_) {
-      case Position.BEFORE:
-      case Position.FIRST_CHILD:
+      case POSITION_ENUM.BEFORE:
+      case POSITION_ENUM.FIRST_CHILD:
         return anchorLayout.top;
-      case Position.LAST_CHILD:
-      case Position.AFTER:
+      case POSITION_ENUM.LAST_CHILD:
+      case POSITION_ENUM.AFTER:
         return anchorLayout.bottom;
       default:
         throw new Error('Unknown position');
@@ -182,12 +182,12 @@ export class Placement {
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
     return this.getEstimatedPosition().then((yPosition) => {
       if (this.ampdoc.win./*OK*/ scrollY > yPosition) {
-        this.state_ = PlacementState.UNUSED;
+        this.state_ = PLACEMENT_STATE_ENUM.UNUSED;
         return this.state_;
       }
       return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
-          this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
+          this.state_ = PLACEMENT_STATE_ENUM.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
 
@@ -210,8 +210,8 @@ export class Placement {
                   'i-amphtml-layout-awaiting-size'
                 );
                 this.state_ = resized
-                  ? PlacementState.PLACED
-                  : PlacementState.RESIZE_FAILED;
+                  ? PLACEMENT_STATE_ENUM.PLACED
+                  : PLACEMENT_STATE_ENUM.RESIZE_FAILED;
                 return this.state_;
               })
           );
@@ -233,11 +233,11 @@ export class Placement {
             })
             .then(
               () => {
-                this.state_ = PlacementState.PLACED;
+                this.state_ = PLACEMENT_STATE_ENUM.PLACED;
                 return this.state_;
               },
               () => {
-                this.state_ = PlacementState.RESIZE_FAILED;
+                this.state_ = PLACEMENT_STATE_ENUM.RESIZE_FAILED;
                 return this.state_;
               }
             );
@@ -388,7 +388,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     }
     const attributes = getAttributesFromConfigObj(
       placementObj,
-      Attributes.BASE_ATTRIBUTES
+      ATTRIBUTES_ENUM.BASE_ATTRIBUTES
     );
     placements.push(
       new Placement(
@@ -453,7 +453,7 @@ function getAnchorElements(rootElement, anchorObj) {
  */
 function isPositionValid(anchorElement, position) {
   const elementToCheckOrNull =
-    position == Position.BEFORE || position == Position.AFTER
+    position == POSITION_ENUM.BEFORE || position == POSITION_ENUM.AFTER
       ? anchorElement.parentElement
       : anchorElement;
   if (!elementToCheckOrNull) {

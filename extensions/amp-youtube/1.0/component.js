@@ -7,7 +7,7 @@ import {forwardRef} from '#preact/compat';
 
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
 // Correct PlayerStates taken from
@@ -16,7 +16,7 @@ import {VideoIframe} from '../../amp-video/1.0/video-iframe';
  * @enum {string}
  * @private
  */
-const PlayerStates = {
+const PLAYER_STATES_ENUM = {
   '-1': 'unstarted',
   '0': 'ended',
   '1': 'playing',
@@ -29,7 +29,7 @@ const PlayerStates = {
  * @enum {string}
  * @private
  */
-const methods = {
+const METHODS_ENUM = {
   'play': 'playVideo',
   'pause': 'pauseVideo',
   'mute': 'mute',
@@ -40,7 +40,7 @@ const methods = {
  * @enum {number}
  * @private
  */
-const PlayerFlags = {
+const PLAYER_FLAGS_ENUM = {
   // Config to tell YouTube to hide annotations by default
   HIDE_ANNOTATION: 3,
 };
@@ -99,7 +99,7 @@ function BentoYoutubeWithRef(
 
   if (autoplay) {
     if (!('iv_load_policy' in params)) {
-      params['iv_load_policy'] = `${PlayerFlags.HIDE_ANNOTATION}`;
+      params['iv_load_policy'] = `${PLAYER_FLAGS_ENUM.HIDE_ANNOTATION}`;
     }
 
     // Inline play must be set for autoplay regardless of original value.
@@ -136,7 +136,7 @@ function BentoYoutubeWithRef(
     const {'event': event, 'info': parsedInfo} = parsedData;
 
     if (event == 'initialDelivery') {
-      dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      dispatchVideoEvent(currentTarget, VIDEO_EVENTS_ENUM.LOADEDMETADATA);
       onLoad?.();
       return;
     }
@@ -165,7 +165,10 @@ function BentoYoutubeWithRef(
       );
     }
     if (event == 'infoDelivery' && playerState != undefined) {
-      dispatchVideoEvent(currentTarget, PlayerStates[playerState.toString()]);
+      dispatchVideoEvent(
+        currentTarget,
+        PLAYER_STATES_ENUM[playerState.toString()]
+      );
     }
     if (event == 'infoDelivery' && parsedInfo['muted']) {
       dispatchVideoEvent(
@@ -242,7 +245,7 @@ function makeMethodMessage(method) {
   return JSON.stringify(
     dict({
       'event': 'command',
-      'func': methods[method],
+      'func': METHODS_ENUM[method],
     })
   );
 }

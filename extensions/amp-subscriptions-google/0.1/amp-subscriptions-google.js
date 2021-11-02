@@ -24,15 +24,15 @@ import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {
-  Action,
-  ActionStatus,
-  SubscriptionAnalyticsEvents,
+  ACTION_ENUM,
+  ACTION_STATUS_ENUM,
+  SUBSCRIPTION_ANALYTICS_EVENTS_ENUM,
 } from '../../amp-subscriptions/0.1/analytics';
-import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants';
+import {SUBSCRIPTIONS_SCORE_FACTOR_ENUM} from '../../amp-subscriptions/0.1/constants';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {
   Entitlement,
-  GrantReason,
+  GRANT_REASON_ENUM,
 } from '../../amp-subscriptions/0.1/entitlement';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 
@@ -41,7 +41,7 @@ const PLATFORM_KEY = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 /** @enum {number} */
-const ShowcaseStrategy = {
+const SHOWCASE_STRATEGY_ENUM = {
   NONE: 1,
   LEAD_ARTICLE: 2,
   EXTENDED_ACCESS: 3,
@@ -56,13 +56,13 @@ const SWG_EVENTS_TO_SUPPRESS = {
 };
 
 const AMP_EVENT_TO_SWG_EVENT = {
-  [SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED]:
+  [SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED]:
     AnalyticsEvent.IMPRESSION_PAYWALL,
 };
 
 const AMP_ACTION_TO_SWG_EVENT = {
-  [Action.SHOW_OFFERS]: {
-    [ActionStatus.STARTED]: null, //ex: AnalyticsEvent.IMPRESSION_OFFERS
+  [ACTION_ENUM.SHOW_OFFERS]: {
+    [ACTION_STATUS_ENUM.STARTED]: null, //ex: AnalyticsEvent.IMPRESSION_OFFERS
   },
 };
 
@@ -179,12 +179,12 @@ export class GoogleSubscriptionsPlatform {
       this.onLinkComplete_();
       this.subscriptionAnalytics_.actionEvent(
         this.getPlatformKey(),
-        Action.LINK,
-        ActionStatus.SUCCESS
+        ACTION_ENUM.LINK,
+        ACTION_STATUS_ENUM.SUCCESS
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.LINK_COMPLETE,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.LINK_COMPLETE,
         this.getPlatformKey()
       );
     });
@@ -193,27 +193,27 @@ export class GoogleSubscriptionsPlatform {
       const params = /** @type {!JsonObject} */ ({});
       const data = /** @type {!JsonObject} */ (getData(e) || {});
       switch (e.flow) {
-        case Action.SUBSCRIBE:
+        case ACTION_ENUM.SUBSCRIBE:
           params['product'] =
             data['skuId'] || data['product'] || 'unknown productId';
           params['active'] = true;
           break;
-        case Action.SHOW_OFFERS:
+        case ACTION_ENUM.SHOW_OFFERS:
           params['skus'] = data['skus'] || '*';
           params['source'] = data['source'] || 'unknown triggering source';
           params['active'] = data['active'] || null;
           break;
       }
       if (
-        e.flow == Action.SUBSCRIBE ||
-        e.flow == Action.CONTRIBUTE ||
-        e.flow == Action.SHOW_CONTRIBUTION_OPTIONS ||
-        e.flow == Action.SHOW_OFFERS
+        e.flow == ACTION_ENUM.SUBSCRIBE ||
+        e.flow == ACTION_ENUM.CONTRIBUTE ||
+        e.flow == ACTION_ENUM.SHOW_CONTRIBUTION_OPTIONS ||
+        e.flow == ACTION_ENUM.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
           this.getPlatformKey(),
           e.flow,
-          ActionStatus.STARTED,
+          ACTION_STATUS_ENUM.STARTED,
           params
         );
       }
@@ -223,24 +223,24 @@ export class GoogleSubscriptionsPlatform {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
           this.getPlatformKey(),
-          Action.LINK,
-          ActionStatus.REJECTED
+          ACTION_ENUM.LINK,
+          ACTION_STATUS_ENUM.REJECTED
         );
         // TODO(dvoytenko): deprecate separate "link" events.
         this.subscriptionAnalytics_.serviceEvent(
-          SubscriptionAnalyticsEvents.LINK_CANCELED,
+          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.LINK_CANCELED,
           this.getPlatformKey()
         );
       } else if (
-        e.flow == Action.SUBSCRIBE ||
-        e.flow == Action.CONTRIBUTE ||
-        e.flow == Action.SHOW_CONTRIBUTION_OPTIONS ||
-        e.flow == Action.SHOW_OFFERS
+        e.flow == ACTION_ENUM.SUBSCRIBE ||
+        e.flow == ACTION_ENUM.CONTRIBUTE ||
+        e.flow == ACTION_ENUM.SHOW_CONTRIBUTION_OPTIONS ||
+        e.flow == ACTION_ENUM.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
           this.getPlatformKey(),
           e.flow,
-          ActionStatus.REJECTED
+          ACTION_STATUS_ENUM.REJECTED
         );
       }
     });
@@ -252,8 +252,8 @@ export class GoogleSubscriptionsPlatform {
         this.onSubscribeResponse_(
           response,
           response.productType === 'CONTRIBUTION'
-            ? Action.CONTRIBUTE
-            : Action.SUBSCRIBE
+            ? ACTION_ENUM.CONTRIBUTE
+            : ACTION_ENUM.SUBSCRIBE
         );
       });
     });
@@ -356,12 +356,12 @@ export class GoogleSubscriptionsPlatform {
       this.loginWithAmpReaderId_();
       this.subscriptionAnalytics_.actionEvent(
         this.getPlatformKey(),
-        Action.LINK,
-        ActionStatus.STARTED
+        ACTION_ENUM.LINK,
+        ACTION_STATUS_ENUM.STARTED
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.LINK_REQUESTED,
+        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.LINK_REQUESTED,
         this.getPlatformKey()
       );
     } else {
@@ -391,7 +391,7 @@ export class GoogleSubscriptionsPlatform {
   /** @private */
   onNativeSubscribeRequest_() {
     this.maybeComplete_(
-      this.serviceAdapter_.delegateActionToLocal(Action.SUBSCRIBE, null)
+      this.serviceAdapter_.delegateActionToLocal(ACTION_ENUM.SUBSCRIBE, null)
     );
   }
 
@@ -485,7 +485,7 @@ export class GoogleSubscriptionsPlatform {
     this.subscriptionAnalytics_.actionEvent(
       this.getPlatformKey(),
       eventType,
-      ActionStatus.SUCCESS,
+      ACTION_STATUS_ENUM.SUCCESS,
       params
     );
   }
@@ -507,7 +507,7 @@ export class GoogleSubscriptionsPlatform {
   maybeGetLAAEntitlement_() {
     return this.getShowcaseStrategy_().then((strategy) => {
       // Verify Google's Showcase strategy for this article.
-      if (strategy !== ShowcaseStrategy.LEAD_ARTICLE) {
+      if (strategy !== SHOWCASE_STRATEGY_ENUM.LEAD_ARTICLE) {
         return null;
       }
 
@@ -517,7 +517,7 @@ export class GoogleSubscriptionsPlatform {
         raw: '',
         service: PLATFORM_KEY,
         granted: true,
-        grantReason: GrantReason.LAA,
+        grantReason: GRANT_REASON_ENUM.LAA,
         dataObject: {},
         decryptedDocumentKey: null,
       });
@@ -532,7 +532,7 @@ export class GoogleSubscriptionsPlatform {
   getShowcaseStrategy_() {
     // Verify the service config enables a Google Showcase strategy.
     if (!this.enableLAA_ && !this.enableMetering_) {
-      return Promise.resolve(ShowcaseStrategy.NONE);
+      return Promise.resolve(SHOWCASE_STRATEGY_ENUM.NONE);
     }
 
     return this.viewerPromise_.getReferrerUrl().then((referrer) => {
@@ -546,7 +546,7 @@ export class GoogleSubscriptionsPlatform {
         // construct LAA urls.
         !getMode(this.ampdoc_.win).localDev
       ) {
-        return ShowcaseStrategy.NONE;
+        return SHOWCASE_STRATEGY_ENUM.NONE;
       }
 
       // Parse URL params.
@@ -554,24 +554,24 @@ export class GoogleSubscriptionsPlatform {
 
       // Verify timestamp.
       if (parseInt(urlParams[`gaa_ts`], 16) < Date.now() / 1000) {
-        return ShowcaseStrategy.NONE;
+        return SHOWCASE_STRATEGY_ENUM.NONE;
       }
 
       // Verify a few params exist.
       if (!urlParams[`gaa_n`] || !urlParams[`gaa_sig`]) {
-        return ShowcaseStrategy.NONE;
+        return SHOWCASE_STRATEGY_ENUM.NONE;
       }
 
       // Determine Google's Showcase strategy.
       if (urlParams[`gaa_at`] === 'la' && this.enableLAA_) {
-        return ShowcaseStrategy.LEAD_ARTICLE;
+        return SHOWCASE_STRATEGY_ENUM.LEAD_ARTICLE;
       } else if (
         (urlParams[`gaa_at`] === 'la' || urlParams[`gaa_at`] === 'g') &&
         this.enableMetering_
       ) {
-        return ShowcaseStrategy.EXTENDED_ACCESS;
+        return SHOWCASE_STRATEGY_ENUM.EXTENDED_ACCESS;
       } else {
-        return ShowcaseStrategy.NONE;
+        return SHOWCASE_STRATEGY_ENUM.NONE;
       }
     });
   }
@@ -631,7 +631,7 @@ export class GoogleSubscriptionsPlatform {
 
         // Add metering param.
         if (
-          showcaseStrategy === ShowcaseStrategy.EXTENDED_ACCESS &&
+          showcaseStrategy === SHOWCASE_STRATEGY_ENUM.EXTENDED_ACCESS &&
           meteringState
         ) {
           // Make sure SwG sends a fresh request, instead of using cache.
@@ -688,9 +688,9 @@ export class GoogleSubscriptionsPlatform {
     let grantReason;
     if (granted) {
       if (swgEntitlement.source === 'google:metering') {
-        grantReason = GrantReason.METERING;
+        grantReason = GRANT_REASON_ENUM.METERING;
       } else {
-        grantReason = GrantReason.SUBSCRIBER;
+        grantReason = GRANT_REASON_ENUM.SUBSCRIBER;
       }
     } else {
       grantReason = null;
@@ -728,7 +728,7 @@ export class GoogleSubscriptionsPlatform {
       const showcaseStrategy = results[0];
       const meteringState = results[1];
 
-      if (showcaseStrategy === ShowcaseStrategy.EXTENDED_ACCESS) {
+      if (showcaseStrategy === SHOWCASE_STRATEGY_ENUM.EXTENDED_ACCESS) {
         // Show the Regwall, so the user can get
         // a metering state that leads to a
         // granting entitlement.
@@ -831,9 +831,9 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   getSupportedScoreFactor(factorName) {
     switch (factorName) {
-      case SubscriptionsScoreFactor.SUPPORTS_VIEWER:
+      case SUBSCRIPTIONS_SCORE_FACTOR_ENUM.SUPPORTS_VIEWER:
         return this.isGoogleViewer_ ? 1 : 0;
-      case SubscriptionsScoreFactor.IS_READY_TO_PAY:
+      case SUBSCRIPTIONS_SCORE_FACTOR_ENUM.IS_READY_TO_PAY:
         return this.isReadyToPay_ ? 1 : 0;
       default:
         return 0;
@@ -902,7 +902,7 @@ export class GoogleSubscriptionsPlatform {
         `${sourceId}.carouselOptions`
       );
     }
-    if (action == Action.SUBSCRIBE) {
+    if (action == ACTION_ENUM.SUBSCRIBE) {
       if (mappedSku) {
         // publisher provided single sku
         this.runtime_.subscribe(mappedSku);
@@ -920,7 +920,7 @@ export class GoogleSubscriptionsPlatform {
       return Promise.resolve(true);
     }
     // Same idea as above but it's contribute instead of subscribe
-    if (action == Action.CONTRIBUTE) {
+    if (action == ACTION_ENUM.CONTRIBUTE) {
       if (mappedSku) {
         // publisher provided single sku
         this.runtime_.contribute(mappedSku);
@@ -937,7 +937,7 @@ export class GoogleSubscriptionsPlatform {
       }
       return Promise.resolve(true);
     }
-    if (action == Action.LOGIN) {
+    if (action == ACTION_ENUM.LOGIN) {
       this.loginWithAmpReaderId_();
       return Promise.resolve(true);
     }
@@ -949,7 +949,7 @@ export class GoogleSubscriptionsPlatform {
     const opts = options ? options : {};
 
     switch (action) {
-      case Action.SUBSCRIBE:
+      case ACTION_ENUM.SUBSCRIBE:
         element.textContent = '';
         this.runtime_.attachButton(element, options, () => {});
         break;

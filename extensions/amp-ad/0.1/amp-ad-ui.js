@@ -20,7 +20,7 @@ const TOP_STICKY_AD_TRIGGER_THRESHOLD = 200;
  * Permissible sticky ad options.
  * @const @enum {string}
  */
-const StickyAdPositions = {
+const STICKY_AD_POSITIONS_ENUM = {
   TOP: 'top',
   BOTTOM: 'bottom',
   LEFT: 'left',
@@ -63,10 +63,14 @@ export class AmpAdUIHandler {
 
       this.stickyAdPosition_ =
         this.element_.getAttribute(STICKY_AD_PROP) ||
-        StickyAdPositions.BOTTOM_RIGHT;
+        STICKY_AD_POSITIONS_ENUM.BOTTOM_RIGHT;
       this.element_.setAttribute(STICKY_AD_PROP, this.stickyAdPosition_);
 
-      if (!Object.values(StickyAdPositions).includes(this.stickyAdPosition_)) {
+      if (
+        !Object.values(STICKY_AD_POSITIONS_ENUM).includes(
+          this.stickyAdPosition_
+        )
+      ) {
         user().error(TAG, `Invalid sticky ad type: ${this.stickyAdPosition_}`);
         this.stickyAdPosition_ = null;
       }
@@ -234,7 +238,7 @@ export class AmpAdUIHandler {
     if (this.isStickyAd()) {
       setStyle(this.element_, 'visibility', 'visible');
 
-      if (this.stickyAdPosition_ == StickyAdPositions.TOP) {
+      if (this.stickyAdPosition_ == STICKY_AD_POSITIONS_ENUM.TOP) {
         const doc = this.element_.getAmpDoc();
 
         // Let the top sticky ad be below the viewer top.
@@ -293,8 +297,8 @@ export class AmpAdUIHandler {
    */
   adjustPadding() {
     if (
-      this.stickyAdPosition_ == StickyAdPositions.BOTTOM ||
-      this.stickyAdPosition_ == StickyAdPositions.BOTTOM_RIGHT
+      this.stickyAdPosition_ == STICKY_AD_POSITIONS_ENUM.BOTTOM ||
+      this.stickyAdPosition_ == STICKY_AD_POSITIONS_ENUM.BOTTOM_RIGHT
     ) {
       const borderBottom = this.element_./*OK*/ offsetHeight;
       Services.viewportForDoc(this.element_.getAmpDoc()).updatePaddingBottom(

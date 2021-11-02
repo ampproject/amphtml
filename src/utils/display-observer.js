@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {containsNotSelf} from '#core/dom';
 import {rethrowAsync} from '#core/error';
 import {pushIfNotExist, removeItem} from '#core/types/array';
@@ -428,11 +428,11 @@ function computeDisplay(observations, isDocDisplay) {
  */
 function computeDocIsDisplayed(visibilityState) {
   return (
-    visibilityState == VisibilityState.VISIBLE ||
+    visibilityState == VISIBILITY_STATE_ENUM.VISIBLE ||
     // The document is still considered "displayed" or at least "displayable"
     // when it's hidden (tab is switched). Only prerender/paused/inactive
     // states require pause of resources.
-    visibilityState == VisibilityState.HIDDEN
+    visibilityState == VISIBILITY_STATE_ENUM.HIDDEN
   );
 }
 

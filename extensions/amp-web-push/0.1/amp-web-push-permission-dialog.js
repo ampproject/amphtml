@@ -17,7 +17,7 @@
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
 
-import {NotificationPermission, StorageKeys} from './vars';
+import {NOTIFICATION_PERMISSION_ENUM, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
 
 import {getMode} from '../../../src/mode';
@@ -104,7 +104,8 @@ export class AmpWebPushPermissionDialog {
     this.showTargetPermissionSection_();
     this.showPostloadSection_();
     if (
-      this.window_.Notification.permission !== NotificationPermission.DENIED
+      this.window_.Notification.permission !==
+      NOTIFICATION_PERMISSION_ENUM.DENIED
     ) {
       this.onPermissionDefaultOrGranted_();
     } else {
@@ -150,8 +151,8 @@ export class AmpWebPushPermissionDialog {
         permissionStatus.onchange = () => {
           this.storeNotificationPermission_();
           switch (this.window_.Notification.permission) {
-            case NotificationPermission.DEFAULT:
-            case NotificationPermission.GRANTED:
+            case NOTIFICATION_PERMISSION_ENUM.DEFAULT:
+            case NOTIFICATION_PERMISSION_ENUM.GRANTED:
               this.onPermissionDefaultOrGranted_();
               break;
           }

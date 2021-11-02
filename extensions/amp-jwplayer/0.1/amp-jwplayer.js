@@ -38,16 +38,16 @@ import {
 } from '../../../src/iframe-video';
 import {getMode} from '../../../src/mode';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 
 const JWPLAYER_EVENTS = {
-  'ready': VideoEvents.LOAD,
-  'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'complete': VideoEvents.ENDED,
-  'visible': VideoEvents.VISIBILITY,
-  'adImpression': VideoEvents.AD_START,
-  'adComplete': VideoEvents.AD_END,
+  'ready': VIDEO_EVENTS_ENUM.LOAD,
+  'play': VIDEO_EVENTS_ENUM.PLAYING,
+  'pause': VIDEO_EVENTS_ENUM.PAUSE,
+  'complete': VIDEO_EVENTS_ENUM.ENDED,
+  'visible': VIDEO_EVENTS_ENUM.VISIBILITY,
+  'adImpression': VIDEO_EVENTS_ENUM.AD_START,
+  'adComplete': VIDEO_EVENTS_ENUM.AD_END,
 };
 
 /**
@@ -440,10 +440,10 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     // Inform Video Manager that the video is pre-muted from persisted options.
     if (detail.muted) {
-      dispatchCustomEvent(element, VideoEvents.MUTED);
+      dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.MUTED);
     }
 
-    dispatchCustomEvent(element, VideoEvents.LOAD);
+    dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOAD);
   }
 
   /**

@@ -1,4 +1,4 @@
-import {MessageType} from '#core/3p-frame-messaging';
+import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
 import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -89,7 +89,7 @@ class AmpTwitter extends AMP.BaseElement {
     this.updateForLoadingState_();
     listenFor(
       iframe,
-      MessageType.EMBED_SIZE,
+      MESSAGE_TYPE_ENUM.EMBED_SIZE,
       (data) => {
         this.updateForSuccessState_(data['height']);
       },
@@ -97,7 +97,7 @@ class AmpTwitter extends AMP.BaseElement {
     );
     listenFor(
       iframe,
-      MessageType.NO_CONTENT,
+      MESSAGE_TYPE_ENUM.NO_CONTENT,
       () => {
         this.updateForFailureState_();
       },

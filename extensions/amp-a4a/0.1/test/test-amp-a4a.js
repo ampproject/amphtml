@@ -6,10 +6,10 @@ import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
 // The following namespaces are imported so that we can stub and spy on certain
 // methods in tests.
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
 import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
 
 import {toggleExperiment} from '#experiments';
@@ -40,7 +40,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {GEO_IN_GROUP_ENUM} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
@@ -53,7 +53,10 @@ import {
   protectFunctionWrapper,
 } from '../amp-a4a';
 import * as secureFrame from '../secure-frame';
-import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
+import {
+  AMP_SIGNATURE_HEADER,
+  VERIFICATION_STATUS_ENUM,
+} from '../signature-verifier';
 
 describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   let doc;
@@ -163,7 +166,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     expect(fie.contentDocument.body.textContent).to.contain.string(
       'Hello, world.'
     );
-    expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
+    expect(prioritySpy).to.be.calledWith(LAYOUT_PRIORITY_ENUM.CONTENT);
   });
 
   it('should not throw on polyfill scripts', async () => {
@@ -1652,7 +1655,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         .calledOnce;
       expect(updateLayoutPriorityStub).to.be.calledOnce;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LAYOUT_PRIORITY_ENUM.CONTENT
       );
     });
 
@@ -1789,7 +1792,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         'renderNonAmpCreative_ called exactly once'
       ).to.be.true;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LAYOUT_PRIORITY_ENUM.CONTENT
       );
       expect(is3pThrottled(a4a.win)).to.be.false;
     });
@@ -1994,7 +1997,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           .calledOnce;
         expect(updateLayoutPriorityStub).to.be.calledOnce;
         expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-          LayoutPriority.CONTENT
+          LAYOUT_PRIORITY_ENUM.CONTENT
         );
       } else {
         expect(iframe.getAttribute('srcdoc')).to.be.null;
@@ -2593,14 +2596,15 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
     it('should pass verification with story ad', async () => {
       a4a.isSinglePageStoryAd = true;
-      verifier.verify = () => Promise.resolve(VerificationStatus.OK);
+      verifier.verify = () => Promise.resolve(VERIFICATION_STATUS_ENUM.OK);
       const result = await a4a.maybeValidateAmpCreative(/* bytes */ 'foo');
       expect(result).to.equal('foo');
     });
 
     it('should throw due to invalid AMP creative with story ad', async () => {
       a4a.isSinglePageStoryAd = true;
-      verifier.verify = () => Promise.resolve(VerificationStatus.UNVERIFIED);
+      verifier.verify = () =>
+        Promise.resolve(VERIFICATION_STATUS_ENUM.UNVERIFIED);
       try {
         await a4a.maybeValidateAmpCreative();
       } catch (error) {
@@ -2702,7 +2706,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+          expect(a4a.getLayoutPriority()).to.equal(
+            LAYOUT_PRIORITY_ENUM.METADATA
+          );
         });
       }
     );
@@ -2719,7 +2725,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+          expect(a4a.getLayoutPriority()).to.equal(LAYOUT_PRIORITY_ENUM.ADS);
         });
       }
     );
@@ -2851,11 +2857,11 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         // allow ad promise to start execution, unfortunately timer is only way.
         await Services.timerFor(a4a.win).promise(50);
         expect(getAdUrlSpy).to.not.be.called;
-        inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
+        inResolver(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
         await a4a.layoutCallback();
         expect(
           getAdUrlSpy.withArgs({
-            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
             consentString,
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
@@ -2864,7 +2870,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
-            CONSENT_POLICY_STATE.SUFFICIENT,
+            CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
             consentString,
             consentMetadata
           )
@@ -2892,7 +2898,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             whenPolicyResolved: () =>
-              Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
+              Promise.resolve(CONSENT_POLICY_STATE_ENUM.SUFFICIENT),
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
           })
@@ -2909,7 +2915,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         await a4a.layoutCallback();
         expect(
           getAdUrlSpy.withArgs({
-            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
             consentString,
             gdprApplies,
             consentStringType: consentMetadata['consentStringType'],
@@ -2918,7 +2924,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
-            CONSENT_POLICY_STATE.SUFFICIENT,
+            CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
             consentString,
             consentMetadata
           )
@@ -2955,7 +2961,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         await a4a.layoutCallback();
         expect(
           getAdUrlSpy.withArgs({
-            consentState: CONSENT_POLICY_STATE.UNKNOWN,
+            consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN,
             consentString: null,
             consentStringType: null,
             gdprApplies: null,
@@ -2964,7 +2970,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
-            CONSENT_POLICY_STATE.UNKNOWN,
+            CONSENT_POLICY_STATE_ENUM.UNKNOWN,
             null,
             null
           )
@@ -3127,11 +3133,11 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           isInCountryGroup(country) {
             switch (country) {
               case 'usca':
-                return GEO_IN_GROUP.IN;
+                return GEO_IN_GROUP_ENUM.IN;
               case 'gdpr':
-                return GEO_IN_GROUP.NOT_IN;
+                return GEO_IN_GROUP_ENUM.NOT_IN;
               default:
-                return GEO_IN_GROUP.NOT_DEFINED;
+                return GEO_IN_GROUP_ENUM.NOT_DEFINED;
             }
           },
         };

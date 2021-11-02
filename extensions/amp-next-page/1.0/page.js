@@ -1,11 +1,11 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 
 import {devAssert} from '#utils/log';
 
-import {ViewportRelativePos} from './visibility-observer';
+import {VIEWPORT_RELATIVE_POS_ENUM} from './visibility-observer';
 
 /** @enum {number} */
-export const PageState = {
+export const PAGE_STATE_ENUM = {
   QUEUED: 1,
   FETCHING: 2,
   LOADED: 3,
@@ -50,11 +50,11 @@ export class Page {
     /** @private {?Document} */
     this.content_ = null;
     /** @private {!PageState} */
-    this.state_ = PageState.QUEUED;
+    this.state_ = PAGE_STATE_ENUM.QUEUED;
     /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.PRERENDER;
+    this.visibilityState_ = VISIBILITY_STATE_ENUM.PRERENDER;
     /** @private {!ViewportRelativePos} */
-    this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
+    this.relativePos_ = VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT;
   }
 
   /** @return {string} */
@@ -125,9 +125,9 @@ export class Page {
    */
   isLoaded() {
     return (
-      this.state_ === PageState.LOADED ||
-      this.state_ === PageState.INSERTED ||
-      this.state_ === PageState.PAUSED
+      this.state_ === PAGE_STATE_ENUM.LOADED ||
+      this.state_ === PAGE_STATE_ENUM.INSERTED ||
+      this.state_ === PAGE_STATE_ENUM.PAUSED
     );
   }
 
@@ -135,7 +135,9 @@ export class Page {
    * @return {boolean}
    */
   isVisible() {
-    return this.isLoaded() && this.visibilityState_ === VisibilityState.VISIBLE;
+    return (
+      this.isLoaded() && this.visibilityState_ === VISIBILITY_STATE_ENUM.VISIBLE
+    );
   }
 
   /**
@@ -148,8 +150,8 @@ export class Page {
 
     //Reload the page if necessary
     if (
-      this.is(PageState.PAUSED) &&
-      visibilityState === VisibilityState.VISIBLE
+      this.is(PAGE_STATE_ENUM.PAUSED) &&
+      visibilityState === VISIBILITY_STATE_ENUM.VISIBLE
     ) {
       this.resume();
     }
@@ -179,8 +181,8 @@ export class Page {
     return this.shadowDoc_.close().then(() => {
       return this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
-        this.visibilityState_ = VisibilityState.HIDDEN;
-        this.state_ = PageState.PAUSED;
+        this.visibilityState_ = VISIBILITY_STATE_ENUM.HIDDEN;
+        this.state_ = PAGE_STATE_ENUM.PAUSED;
       });
     });
   }
@@ -203,20 +205,20 @@ export class Page {
     // TOOD(wassgha): Should we re-fetch on failure? or show a failed state?
     // or skip to the next available document? (currently breaks silently)
     if (
-      this.state_ === PageState.INSERTED ||
-      this.state_ === PageState.FETCHING ||
-      this.state_ === PageState.LOADED ||
-      this.state_ === PageState.FAILED
+      this.state_ === PAGE_STATE_ENUM.INSERTED ||
+      this.state_ === PAGE_STATE_ENUM.FETCHING ||
+      this.state_ === PAGE_STATE_ENUM.LOADED ||
+      this.state_ === PAGE_STATE_ENUM.FAILED
     ) {
       return Promise.resolve();
     }
 
-    this.state_ = PageState.FETCHING;
+    this.state_ = PAGE_STATE_ENUM.FETCHING;
 
     return this.manager_
       .fetchPageDocument(this)
       .then((content) => {
-        this.state_ = PageState.LOADED;
+        this.state_ = PAGE_STATE_ENUM.LOADED;
         this.content_ = content;
         this.container_ = this.manager_.createDocumentContainerForPage(
           this /** page */
@@ -226,7 +228,7 @@ export class Page {
         return this.attach_();
       })
       .catch(() => {
-        this.state_ = PageState.FAILED;
+        this.state_ = PAGE_STATE_ENUM.FAILED;
       });
   }
 
@@ -239,16 +241,16 @@ export class Page {
       .attachDocumentToPage(
         this /** page */,
         /** @type {!Document} */ (devAssert(this.content_)),
-        this.is(PageState.PAUSED) /** force */
+        this.is(PAGE_STATE_ENUM.PAUSED) /** force */
       )
       .then((shadowDoc) => {
         if (!shadowDoc) {
-          this.state_ = PageState.FAILED;
+          this.state_ = PAGE_STATE_ENUM.FAILED;
           return;
         }
-        this.state_ = PageState.INSERTED;
+        this.state_ = PAGE_STATE_ENUM.INSERTED;
         this.shadowDoc_ = shadowDoc;
-        if (!this.is(PageState.PAUSED)) {
+        if (!this.is(PAGE_STATE_ENUM.PAUSED)) {
           this.manager_.setLastFetchedPage(this);
         }
       });

@@ -1,5 +1,5 @@
-import {CONSTANTS, MessageType} from '#core/3p-frame-messaging';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CONSTANTS, MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '#service';
@@ -125,7 +125,7 @@ export class AmpAdXOriginIframeHandler {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
         this.iframe,
-        MessageType.SEND_POSITIONS,
+        MESSAGE_TYPE_ENUM.SEND_POSITIONS,
         true,
         () => {
           // TODO(@zhouyx): Make sendPosition_ only send to
@@ -141,7 +141,7 @@ export class AmpAdXOriginIframeHandler {
       this.element_.creativeId = info.data['id'];
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_HTML, (payload) => {
+    this.handleOneTimeRequest_(MESSAGE_TYPE_ENUM.GET_HTML, (payload) => {
       const selector = payload['selector'];
       const attributes = payload['attributes'];
       let content = '';
@@ -151,7 +151,7 @@ export class AmpAdXOriginIframeHandler {
       return Promise.resolve(content);
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
+    this.handleOneTimeRequest_(MESSAGE_TYPE_ENUM.GET_CONSENT_STATE, () => {
       return this.baseInstance_.getConsentState().then((consentState) => {
         return {consentState};
       });
@@ -204,7 +204,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       listenFor(
         this.iframe,
-        MessageType.USER_ERROR_IN_IFRAME,
+        MESSAGE_TYPE_ENUM.USER_ERROR_IN_IFRAME,
         (data) => {
           this.userErrorForAnalytics_(
             data['message'],
@@ -273,11 +273,13 @@ export class AmpAdXOriginIframeHandler {
     // Wait for initial load signal. Notice that this signal is not
     // used to resolve the final layout promise because iframe may still be
     // consuming significant network and CPU resources.
-    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
-      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
-      // received here as well.
-      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
-    });
+    listenForOncePromise(this.iframe, COMMON_SIGNALS_ENUM.INI_LOAD, true).then(
+      () => {
+        // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
+        // received here as well.
+        this.baseInstance_.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      }
+    );
 
     this.element_.appendChild(this.iframe);
     if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
@@ -555,7 +557,7 @@ export class AmpAdXOriginIframeHandler {
     this.sendPositionPending_ = true;
     this.getIframePositionPromise_().then((position) => {
       this.sendPositionPending_ = false;
-      this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      this.inaboxPositionApi_.send(MESSAGE_TYPE_ENUM.POSITION, position);
     });
   }
 
@@ -574,7 +576,10 @@ export class AmpAdXOriginIframeHandler {
           this.win_,
           () => {
             this.getIframePositionPromise_().then((position) => {
-              this.inaboxPositionApi_.send(MessageType.POSITION, position);
+              this.inaboxPositionApi_.send(
+                MESSAGE_TYPE_ENUM.POSITION,
+                position
+              );
             });
           },
           MIN_INABOX_POSITION_EVENT_INTERVAL
@@ -584,7 +589,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       this.viewport_.onResize(() => {
         this.getIframePositionPromise_().then((position) => {
-          this.inaboxPositionApi_.send(MessageType.POSITION, position);
+          this.inaboxPositionApi_.send(MESSAGE_TYPE_ENUM.POSITION, position);
         });
       })
     );

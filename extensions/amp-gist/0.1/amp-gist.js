@@ -12,7 +12,7 @@
  */
 
 import {removeElement} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {LAYOUT_ENUM, applyFillContent} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -42,7 +42,7 @@ export class AmpGist extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout == LAYOUT_ENUM.FIXED_HEIGHT;
   }
 
   /** @override */

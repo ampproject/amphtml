@@ -1,14 +1,14 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '#core/constants/key-codes';
-import {Layout} from '#core/dom/layout';
+import {KEYS_ENUM} from '#core/constants/key-codes';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
-  UrlReplacementPolicy,
+  URL_REPLACEMENT_POLICY_ENUM,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
@@ -49,7 +49,7 @@ const TAG = 'amp-autocomplete';
  * Different filtering options.
  * @enum {string}
  */
-export const FilterType = {
+export const FILTER_TYPE_ENUM = {
   SUBSTRING: 'substring',
   PREFIX: 'prefix',
   TOKEN_PREFIX: 'token-prefix',
@@ -294,9 +294,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `${TAG} does not support client-side filter when server-side render is required.`
       );
     }
-    this.filter_ = this.element.getAttribute('filter') || FilterType.NONE;
+    this.filter_ = this.element.getAttribute('filter') || FILTER_TYPE_ENUM.NONE;
     userAssert(
-      isEnumValue(FilterType, this.filter_),
+      isEnumValue(FILTER_TYPE_ENUM, this.filter_),
       'Unexpected filter: %s. %s',
       this.filter_,
       this.element
@@ -423,7 +423,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = URL_REPLACEMENT_POLICY_ENUM.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
     this.maybeSetSrcFromInput_();
     if (this.isSsr_) {
@@ -779,7 +779,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   filterData_(data, input) {
     // Server-side filtering.
-    if (this.filter_ === FilterType.NONE) {
+    if (this.filter_ === FILTER_TYPE_ENUM.NONE) {
       return this.truncateToMaxItems_(data);
     }
 
@@ -799,15 +799,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
       item = item.toLocaleLowerCase();
       switch (this.filter_) {
-        case FilterType.SUBSTRING:
+        case FILTER_TYPE_ENUM.SUBSTRING:
           return includes(item, input);
-        case FilterType.PREFIX:
+        case FILTER_TYPE_ENUM.PREFIX:
           return item.startsWith(input);
-        case FilterType.TOKEN_PREFIX:
+        case FILTER_TYPE_ENUM.TOKEN_PREFIX:
           return this.tokenPrefixMatch_(item, input);
-        case FilterType.FUZZY:
+        case FILTER_TYPE_ENUM.FUZZY:
           return fuzzysearch(input, item);
-        case FilterType.CUSTOM:
+        case FILTER_TYPE_ENUM.CUSTOM:
           throw new Error(
             'Filter not yet supported: %s',
             this.filter_,
@@ -1149,7 +1149,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.element,
       selectName,
       selectEvent,
-      ActionTrust.HIGH
+      ACTION_TRUST_ENUM.HIGH
     );
 
     // Ensure native change listeners are triggered
@@ -1295,7 +1295,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     switch (event.key) {
-      case Keys.DOWN_ARROW:
+      case KEYS_ENUM.DOWN_ARROW:
         event.preventDefault();
         if (this.areResultsDisplayed_()) {
           // Disrupt loop around to display user input.
@@ -1309,7 +1309,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.autocomplete_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
         });
-      case Keys.UP_ARROW:
+      case KEYS_ENUM.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
         if (this.activeIndex_ === 0) {
@@ -1317,7 +1317,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           return Promise.resolve();
         }
         return this.updateActiveItem_(-1);
-      case Keys.ENTER:
+      case KEYS_ENUM.ENTER:
         const shouldPreventDefault = this.binding_.shouldPreventDefaultOnEnter(
           !!this.activeElement_
         );
@@ -1336,7 +1336,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return this.mutateElement(() => {
           this.toggleResults_(false);
         });
-      case Keys.ESCAPE:
+      case KEYS_ENUM.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
           if (!this.fallbackDisplayed_) {
@@ -1345,7 +1345,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.toggleResults_(false);
           }
         });
-      case Keys.TAB:
+      case KEYS_ENUM.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
           const {selectedObject, selectedText} =
@@ -1355,7 +1355,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           });
         }
         return Promise.resolve();
-      case Keys.BACKSPACE:
+      case KEYS_ENUM.BACKSPACE:
         this.detectBackspace_ = this.shouldSuggestFirst_;
         return Promise.resolve();
       default:
@@ -1386,7 +1386,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == LAYOUT_ENUM.CONTAINER;
   }
 }
 

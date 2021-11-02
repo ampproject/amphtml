@@ -6,7 +6,7 @@ const APP = '__AMPHTML__';
 /**
  * @enum {string}
  */
-const MessageType = {
+const MESSAGE_TYPE_ENUM = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -299,9 +299,9 @@ export class Messaging {
       this.logError_(TAG + ': handleMessage_ error: ', 'invalid token');
       return;
     }
-    if (message.type === MessageType.REQUEST) {
+    if (message.type === MESSAGE_TYPE_ENUM.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.type === MessageType.RESPONSE) {
+    } else if (message.type === MESSAGE_TYPE_ENUM.RESPONSE) {
       this.handleResponse_(message);
     }
   }
@@ -325,7 +325,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.REQUEST,
+        type: MESSAGE_TYPE_ENUM.REQUEST,
         name: messageName,
         data: messageData,
         rsvp: awaitResponse,
@@ -346,7 +346,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MESSAGE_TYPE_ENUM.RESPONSE,
         name: messageName,
         data: messageData,
       })
@@ -369,7 +369,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MESSAGE_TYPE_ENUM.RESPONSE,
         name: messageName,
         data: null,
         error: errString,

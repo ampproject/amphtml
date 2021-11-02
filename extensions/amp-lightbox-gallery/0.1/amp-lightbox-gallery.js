@@ -1,7 +1,7 @@
 import {prepareImageAnimation} from '@ampproject/animations';
 
-import {CommonSignals} from '#core/constants/common-signals';
-import {Keys} from '#core/constants/key-codes';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
@@ -24,8 +24,11 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {getData, getDetail, isLoaded, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
-import {LightboxCaption, OverflowState} from './lightbox-caption';
-import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
+import {LightboxCaption, OVERFLOW_STATE_ENUM} from './lightbox-caption';
+import {
+  LIGHTBOX_CONTROLS_ACTION_ENUM,
+  LightboxControls,
+} from './lightbox-controls';
 import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
@@ -57,7 +60,7 @@ const SLIDE_ITEM_SELECTOR =
  *
  * @enum {number}
  */
-const LightboxControlsModes = {
+const LIGHTBOX_CONTROLS_MODES_ENUM = {
   CONTROLS_DISPLAYED: 1,
   CONTROLS_HIDDEN: 0,
 };
@@ -158,7 +161,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.topBar_ = null;
 
     /** @private {!LightboxControlsModes} */
-    this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
+    this.controlsMode_ = LIGHTBOX_CONTROLS_MODES_ENUM.CONTROLS_DISPLAYED;
 
     /** @private {?UnlistenDef} */
     this.unlistenClick_ = null;
@@ -463,19 +466,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const el = this.lightboxControls_.getElement();
     el.addEventListener('action', (event) => {
       switch (getDetail(event)['action']) {
-        case LightboxControlsAction.CLOSE:
+        case LIGHTBOX_CONTROLS_ACTION_ENUM.CLOSE:
           this.close_();
           break;
-        case LightboxControlsAction.GALLERY:
+        case LIGHTBOX_CONTROLS_ACTION_ENUM.GALLERY:
           this.openGallery_();
           break;
-        case LightboxControlsAction.SLIDES:
+        case LIGHTBOX_CONTROLS_ACTION_ENUM.SLIDES:
           this.closeGallery_();
           break;
-        case LightboxControlsAction.NEXT:
+        case LIGHTBOX_CONTROLS_ACTION_ENUM.NEXT:
           this.nextSlide_();
           break;
-        case LightboxControlsAction.PREV:
+        case LIGHTBOX_CONTROLS_ACTION_ENUM.PREV:
           this.prevSlide_();
           break;
         default:
@@ -498,7 +501,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.lightboxCaption_.setContent(descText);
       // Set the caption to clip immediately, this is less jarring when the
       // caption overflows initiially.
-      this.lightboxCaption_.setOverflowState(OverflowState.CLIP);
+      this.lightboxCaption_.setOverflowState(OVERFLOW_STATE_ENUM.CLIP);
       this.lightboxCaption_.toggleOverflow(expandDescription);
     });
   }
@@ -562,7 +565,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   onToggleOverlay_(e) {
     if (this.shouldHandleClick_(e)) {
-      if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
+      if (this.controlsMode_ == LIGHTBOX_CONTROLS_MODES_ENUM.CONTROLS_HIDDEN) {
         this.showOverlay_();
       } else if (!this.container_.hasAttribute('gallery-view')) {
         this.hideControls_();
@@ -577,7 +580,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   showOverlay_() {
     this.overlay_.setAttribute('i-amphtml-lbg-fade', 'in');
-    this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
+    this.controlsMode_ = LIGHTBOX_CONTROLS_MODES_ENUM.CONTROLS_DISPLAYED;
   }
 
   /**
@@ -586,7 +589,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   hideControls_() {
     this.overlay_.setAttribute('i-amphtml-lbg-fade', 'out');
-    this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
+    this.controlsMode_ = LIGHTBOX_CONTROLS_MODES_ENUM.CONTROLS_HIDDEN;
   }
 
   /**
@@ -761,7 +764,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.setupGestures_();
         this.setupEventListeners_();
 
-        return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
+        return this.carousel_
+          .signals()
+          .whenSignal(COMMON_SIGNALS_ENUM.LOAD_END);
       })
       .then(() => this.openLightboxForElement_(element, expandDescription))
       .then(() => {
@@ -1026,7 +1031,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.getCurrentElement_()
       .imageViewer.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
       .then(() => this.transitionImgIn_(sourceElement));
   }
 
@@ -1179,13 +1184,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.ESCAPE:
+      case KEYS_ENUM.ESCAPE:
         this.close_();
         break;
-      case Keys.LEFT_ARROW:
+      case KEYS_ENUM.LEFT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ -1);
         break;
-      case Keys.RIGHT_ARROW:
+      case KEYS_ENUM.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:

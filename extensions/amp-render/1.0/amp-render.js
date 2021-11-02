@@ -1,10 +1,10 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
-  UrlReplacementPolicy,
+  URL_REPLACEMENT_POLICY_ENUM,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {Services} from '#service';
 import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '#utils/log';
@@ -19,7 +19,7 @@ const TAG = 'amp-render';
 const AMP_STATE_URI_SCHEME = 'amp-state:';
 
 /** @enum {string}  */
-const Binding = {
+const BINDING_ENUM = {
   ALWAYS: 'always',
   REFRESH: 'refresh',
   NEVER: 'never',
@@ -70,11 +70,11 @@ function getAmpStateJson(element, src) {
  * @return {boolean} Whether bind should evaluate and apply changes.
  */
 function getUpdateValue(bindingValue, isFirstMutation) {
-  if (!bindingValue || bindingValue === Binding.REFRESH) {
+  if (!bindingValue || bindingValue === BINDING_ENUM.REFRESH) {
     // default is 'refresh', so check that its not the first mutation
     return !isFirstMutation;
   }
-  if (bindingValue === Binding.ALWAYS) {
+  if (bindingValue === BINDING_ENUM.ALWAYS) {
     // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
     user().warn(TAG, 'binding="always" has performance implications.');
     return true;
@@ -141,12 +141,12 @@ export class AmpRender extends BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
     // and add a `Substitution` sections in this component's markdown file.
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = URL_REPLACEMENT_POLICY_ENUM.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = URL_REPLACEMENT_POLICY_ENUM.ALL;
     }
     return policy;
   }
@@ -198,7 +198,7 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER) {
+    if (layout === LAYOUT_ENUM.CONTAINER) {
       userAssert(
         this.getPlaceholder(),
         'placeholder required with layout="container"'
@@ -281,7 +281,7 @@ export class AmpRender extends BaseElement {
   /** @override */
   handleOnLoad() {
     this.toggleLoading(false);
-    if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+    if (this.element.getAttribute('layout') !== LAYOUT_ENUM.CONTAINER) {
       this.togglePlaceholder(false);
       return;
     }
@@ -364,7 +364,10 @@ export class AmpRender extends BaseElement {
         dict({
           'render': (data) => {
             const bindingValue = this.element.getAttribute('binding');
-            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+            if (
+              bindingValue === BINDING_ENUM.NEVER ||
+              bindingValue === BINDING_ENUM.NO
+            ) {
               return this.renderTemplateAsString_(data);
             }
             return Services.bindForDocOrNull(this.element).then((bind) => {

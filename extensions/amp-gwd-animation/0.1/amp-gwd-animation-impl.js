@@ -23,7 +23,7 @@ export const GWD_PAGE_WRAPPER_CLASS = 'gwd-page-wrapper';
  * GWD playback control CSS classes.
  * @enum {string}
  */
-export const PlaybackCssClass = {
+export const PLAYBACK_CSS_CLASS_ENUM = {
   PAUSE: 'gwd-pause-animation',
   PLAY: 'gwd-play-animation',
 };
@@ -223,7 +223,7 @@ export class AmpGwdRuntimeService {
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
     const activePageSelector = `.${escapeCssSelectorIdent(
       GWD_PAGE_WRAPPER_CLASS
-    )}.${escapeCssSelectorIdent(PlaybackCssClass.PLAY)}`;
+    )}.${escapeCssSelectorIdent(PLAYBACK_CSS_CLASS_ENUM.PLAY)}`;
     const currentPageEl = scopedQuerySelector(
       this.doc_.body,
       activePageSelector
@@ -250,7 +250,7 @@ export class AmpGwdRuntimeService {
    * @private
    */
   activatePage_(pageEl) {
-    pageEl.classList.add(PlaybackCssClass.PLAY);
+    pageEl.classList.add(PLAYBACK_CSS_CLASS_ENUM.PLAY);
   }
 
   /**
@@ -261,7 +261,7 @@ export class AmpGwdRuntimeService {
    */
   deactivatePage_(pageEl) {
     // Cancel and disable all animations on the page.
-    pageEl.classList.remove(PlaybackCssClass.PLAY);
+    pageEl.classList.remove(PLAYBACK_CSS_CLASS_ENUM.PLAY);
 
     // Reset other animation state on the page and all descendants.
     [pageEl]
@@ -280,7 +280,7 @@ export class AmpGwdRuntimeService {
    */
   resetAnimatedElement_(element) {
     // Reset animation-play-state for animations which have been paused.
-    element.classList.remove(PlaybackCssClass.PAUSE);
+    element.classList.remove(PLAYBACK_CSS_CLASS_ENUM.PAUSE);
 
     // Cancel any active label animations in the page. The main non-label
     // animations will be automatically cancelled when the play class is
@@ -309,7 +309,7 @@ export class AmpGwdRuntimeService {
       return;
     }
 
-    receiver.classList.remove(PlaybackCssClass.PAUSE);
+    receiver.classList.remove(PLAYBACK_CSS_CLASS_ENUM.PAUSE);
   }
 
   /**
@@ -323,7 +323,7 @@ export class AmpGwdRuntimeService {
       return;
     }
 
-    receiver.classList.add(PlaybackCssClass.PAUSE);
+    receiver.classList.add(PLAYBACK_CSS_CLASS_ENUM.PAUSE);
   }
 
   /**
@@ -337,7 +337,7 @@ export class AmpGwdRuntimeService {
       return;
     }
 
-    receiver.classList.toggle(PlaybackCssClass.PAUSE);
+    receiver.classList.toggle(PLAYBACK_CSS_CLASS_ENUM.PAUSE);
   }
 
   /**
@@ -448,7 +448,7 @@ export class AmpGwdRuntimeService {
    */
   playLabelAnimation_(receiver, label) {
     // Unpause playback.
-    receiver.classList.remove(PlaybackCssClass.PAUSE);
+    receiver.classList.remove(PLAYBACK_CSS_CLASS_ENUM.PAUSE);
 
     // If another goto animation is currently active on this element, stop it.
     const currentLabel = receiver.getAttribute(CURRENT_LABEL_ANIMATION_ATTR);

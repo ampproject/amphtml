@@ -1,8 +1,8 @@
 import {trimEnd} from '#core/types/string';
 
 import {
-  BinarySearchPreference,
-  BinarySearchStop,
+  BINARY_SEARCH_PREFERENCE_ENUM,
+  BINARY_SEARCH_STOP_ENUM,
   binarySearch,
 } from './binary-search';
 
@@ -300,8 +300,8 @@ function maybeEllipsizeNode(node, container, containerRect) {
 
       return underflowAtPosition(container, node, text, offset);
     },
-    BinarySearchStop.RIGHT,
-    BinarySearchPreference.NEXT
+    BINARY_SEARCH_STOP_ENUM.RIGHT,
+    BINARY_SEARCH_PREFERENCE_ENUM.NEXT
   );
 
   // When positive, seachIndex is the last underflowing index, so add one to

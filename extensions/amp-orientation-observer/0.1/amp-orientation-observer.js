@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {clamp, sum} from '#core/math';
 import {dict} from '#core/types/object';
 
@@ -220,7 +220,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
         'percent': percentValue / (eventRange[1] - eventRange[0]),
       })
     );
-    this.action_.trigger(this.element, eventName, event, ActionTrust.LOW);
+    this.action_.trigger(this.element, eventName, event, ACTION_TRUST_ENUM.LOW);
   }
 }
 AMP.extension(TAG, '0.1', (AMP) => {

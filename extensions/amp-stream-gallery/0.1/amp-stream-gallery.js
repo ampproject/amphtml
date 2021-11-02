@@ -1,8 +1,8 @@
-import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_SOURCE_ENUM} from '../../amp-base-carousel/0.1/action-source';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
+import {CAROUSEL_EVENTS_ENUM} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {
   ResponsiveAttributes,
@@ -25,7 +25,7 @@ import {setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
 /** @enum {number} */
-const InsetArrowVisibility = {
+const INSET_ARROW_VISIBILITY_ENUM = {
   NEVER: 0,
   AUTO: 1,
   ALWAYS: 2,
@@ -33,9 +33,9 @@ const InsetArrowVisibility = {
 
 /** Maps attribute values to enum values. */
 const insetArrowVisibilityMapping = dict({
-  'never': InsetArrowVisibility.NEVER,
-  'auto': InsetArrowVisibility.AUTO,
-  'always': InsetArrowVisibility.ALWAYS,
+  'never': INSET_ARROW_VISIBILITY_ENUM.NEVER,
+  'auto': INSET_ARROW_VISIBILITY_ENUM.AUTO,
+  'always': INSET_ARROW_VISIBILITY_ENUM.ALWAYS,
 });
 
 /**
@@ -101,7 +101,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     this.slidesContainer_ = null;
 
     /** @private {!InsetArrowVisibility} */
-    this.insetArrowVisibility_ = InsetArrowVisibility.AUTO;
+    this.insetArrowVisibility_ = INSET_ARROW_VISIBILITY_ENUM.AUTO;
 
     /** @private {number} */
     this.maxItemWidth_ = Number.MAX_VALUE;
@@ -195,7 +195,7 @@ class AmpStreamGallery extends AMP.BaseElement {
         const {trust} = invocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'next',
@@ -203,7 +203,7 @@ class AmpStreamGallery extends AMP.BaseElement {
         const {trust} = invocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'goToSlide',
@@ -213,7 +213,7 @@ class AmpStreamGallery extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
   }
 
@@ -221,14 +221,17 @@ class AmpStreamGallery extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
-      this.onIndexChanged_(event);
-    });
-    this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
+    this.element.addEventListener(
+      CAROUSEL_EVENTS_ENUM.INDEX_CHANGE,
+      (event) => {
+        this.onIndexChanged_(event);
+      }
+    );
+    this.element.addEventListener(CAROUSEL_EVENTS_ENUM.SCROLL_START, () => {
       this.onScrollStarted_();
     });
     this.element.addEventListener(
-      CarouselEvents.SCROLL_POSITION_CHANGED,
+      CAROUSEL_EVENTS_ENUM.SCROLL_POSITION_CHANGED,
       () => {
         this.onScrollPositionChanged_();
       }
@@ -237,14 +240,14 @@ class AmpStreamGallery extends AMP.BaseElement {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
-        this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
+        this.carousel_.prev(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
       }
     });
     this.nextArrowSlot_.addEventListener('click', (event) => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
-        this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
+        this.carousel_.next(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
       }
     });
   }
@@ -440,9 +443,9 @@ class AmpStreamGallery extends AMP.BaseElement {
    * @private
    */
   getActionSource_(trust) {
-    return trust == ActionTrust.HIGH
-      ? ActionSource.GENERIC_HIGH_TRUST
-      : ActionSource.GENERIC_LOW_TRUST;
+    return trust == ACTION_TRUST_ENUM.HIGH
+      ? ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST
+      : ACTION_SOURCE_ENUM.GENERIC_LOW_TRUST;
   }
 
   /**
@@ -493,9 +496,9 @@ class AmpStreamGallery extends AMP.BaseElement {
    */
   isHighTrustActionSource_(actionSource) {
     return (
-      actionSource == ActionSource.WHEEL ||
-      actionSource == ActionSource.TOUCH ||
-      actionSource == ActionSource.GENERIC_HIGH_TRUST
+      actionSource == ACTION_SOURCE_ENUM.WHEEL ||
+      actionSource == ACTION_SOURCE_ENUM.TOUCH ||
+      actionSource == ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST
     );
   }
 
@@ -506,11 +509,11 @@ class AmpStreamGallery extends AMP.BaseElement {
    * @private
    */
   shouldHideInsetButtons_() {
-    if (this.insetArrowVisibility_ == InsetArrowVisibility.ALWAYS) {
+    if (this.insetArrowVisibility_ == INSET_ARROW_VISIBILITY_ENUM.ALWAYS) {
       return false;
     }
 
-    if (this.insetArrowVisibility_ == InsetArrowVisibility.NEVER) {
+    if (this.insetArrowVisibility_ == INSET_ARROW_VISIBILITY_ENUM.NEVER) {
       return true;
     }
 
@@ -635,7 +638,7 @@ class AmpStreamGallery extends AMP.BaseElement {
   updateInsetArrowVisibility_(insetArrowVisibility) {
     this.insetArrowVisibility_ =
       insetArrowVisibilityMapping[insetArrowVisibility] ||
-      InsetArrowVisibility.AUTO;
+      INSET_ARROW_VISIBILITY_ENUM.AUTO;
     this.updateUi_();
   }
 
@@ -752,7 +755,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ACTION_TRUST_ENUM.HIGH : ACTION_TRUST_ENUM.LOW;
 
     const action = createCustomEvent(this.win, `streamGallery.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
@@ -768,7 +771,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     const index = detail['index'];
     const actionSource = detail['actionSource'];
 
-    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
+    this.hadTouch_ = this.hadTouch_ || actionSource == ACTION_SOURCE_ENUM.TOUCH;
     this.updateCurrentIndex_(index, actionSource);
     this.updateUi_();
   }

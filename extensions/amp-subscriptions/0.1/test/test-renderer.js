@@ -1,4 +1,4 @@
-import {Action} from '../analytics';
+import {ACTION_ENUM} from '../analytics';
 import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {Renderer} from '../renderer';
 import {Services} from '#service';
@@ -132,15 +132,15 @@ describes.realWin(
 
       actionLogin = createElementWithAttributes(doc, 'div', {
         id: 'actionLogin',
-        'subscriptions-action': Action.LOGIN,
+        'subscriptions-action': ACTION_ENUM.LOGIN,
       });
       actionLogout = createElementWithAttributes(doc, 'div', {
         id: 'actionLogout',
-        'subscriptions-action': Action.LOGOUT,
+        'subscriptions-action': ACTION_ENUM.LOGOUT,
       });
       actionSubscribe = createElementWithAttributes(doc, 'div', {
         id: 'actionSubscribe',
-        'subscriptions-action': Action.SUBSCRIBE,
+        'subscriptions-action': ACTION_ENUM.SUBSCRIBE,
       });
 
       doc.body.appendChild(unrelated);

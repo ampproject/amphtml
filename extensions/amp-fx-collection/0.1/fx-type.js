@@ -26,7 +26,7 @@ export const validFxTypes = [
  * Naming is enforced via tests.
  * @enum {string}
  */
-export const FxType = {
+export const FX_TYPE_ENUM = {
   // Intentional awkward usage of arrays here. It's to make sure we have no
   // duplication and that the type keys (which are only for reference)
   // get DCE'd.
@@ -53,7 +53,7 @@ export const FxType = {
  * APIs. See AmpFxCollection.install_().
  * @enum {number}
  */
-export const FxObservesSignal = {
+export const FX_OBSERVES_SIGNAL_ENUM = {
   POSITION: 0,
   SCROLL_TOGGLE: 1,
 };
@@ -84,40 +84,40 @@ let FxBindingDef;
  * @package @const {!Object<!FxType, !FxBindingDef>}
  */
 export const FxBindings = {
-  [FxType.FADE_IN]: {
-    observes: FxObservesSignal.POSITION,
+  [FX_TYPE_ENUM.FADE_IN]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.POSITION,
     opacity: true,
   },
-  [FxType.FADE_IN_SCROLL]: {
-    observes: FxObservesSignal.POSITION,
+  [FX_TYPE_ENUM.FADE_IN_SCROLL]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.POSITION,
     opacity: true,
   },
-  [FxType.FLOAT_IN_BOTTOM]: {
-    observes: FxObservesSignal.SCROLL_TOGGLE,
+  [FX_TYPE_ENUM.FLOAT_IN_BOTTOM]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.SCROLL_TOGGLE,
     translates: {y: true},
   },
-  [FxType.FLOAT_IN_TOP]: {
-    observes: FxObservesSignal.SCROLL_TOGGLE,
+  [FX_TYPE_ENUM.FLOAT_IN_TOP]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.SCROLL_TOGGLE,
     translates: {y: true},
   },
-  [FxType.FLY_IN_BOTTOM]: {
-    observes: FxObservesSignal.POSITION,
+  [FX_TYPE_ENUM.FLY_IN_BOTTOM]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.POSITION,
     translates: {y: true},
   },
-  [FxType.FLY_IN_LEFT]: {
-    observes: FxObservesSignal.POSITION,
+  [FX_TYPE_ENUM.FLY_IN_LEFT]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.POSITION,
     translates: {x: true},
   },
-  [FxType.FLY_IN_RIGHT]: {
-    observes: FxObservesSignal.POSITION,
+  [FX_TYPE_ENUM.FLY_IN_RIGHT]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.POSITION,
     translates: {x: true},
   },
-  [FxType.FLY_IN_TOP]: {
-    observes: FxObservesSignal.POSITION,
+  [FX_TYPE_ENUM.FLY_IN_TOP]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.POSITION,
     translates: {y: true},
   },
-  [FxType.PARALLAX]: {
-    observes: FxObservesSignal.POSITION,
+  [FX_TYPE_ENUM.PARALLAX]: {
+    observes: FX_OBSERVES_SIGNAL_ENUM.POSITION,
     translates: {y: true},
   },
 };

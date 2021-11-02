@@ -1,9 +1,9 @@
 import {
-  Action,
-  StateProperty,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
   getStoreService,
 } from './amp-story-store-service';
-import {AnalyticsVariable, getVariableService} from './variable-service';
+import {ANALYTICS_VARIABLE_ENUM, getVariableService} from './variable-service';
 import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';
 
@@ -11,7 +11,7 @@ import {dict} from '#core/types/object';
 const TAG = 'amp-story-viewer-messaging-handler';
 
 /** @enum {number} */
-const DataSources = {
+const DATA_SOURCES_ENUM = {
   STORE_SERVICE: 0,
   VARIABLE_SERVICE: 2,
 };
@@ -25,30 +25,30 @@ const DataSources = {
 let GetStateConfigurationDef;
 
 /** @enum {!GetStateConfigurationDef} */
-const GET_STATE_CONFIGURATIONS = {
+const GET_STATE_CONFIGURATIONS_ENUM = {
   'CURRENT_PAGE_ID': {
-    dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.CURRENT_PAGE_ID,
+    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
+    property: STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
   },
   'EDUCATION_STATE': {
-    dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.EDUCATION_STATE,
+    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
+    property: STATE_PROPERTY_ENUM.EDUCATION_STATE,
   },
   'MUTED_STATE': {
-    dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.MUTED_STATE,
+    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
+    property: STATE_PROPERTY_ENUM.MUTED_STATE,
   },
   'PAGE_ATTACHMENT_STATE': {
-    dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.PAGE_ATTACHMENT_STATE,
+    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
+    property: STATE_PROPERTY_ENUM.PAGE_ATTACHMENT_STATE,
   },
   'UI_STATE': {
-    dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.UI_STATE,
+    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
+    property: STATE_PROPERTY_ENUM.UI_STATE,
   },
   'STORY_PROGRESS': {
-    dataSource: DataSources.VARIABLE_SERVICE,
-    property: AnalyticsVariable.STORY_PROGRESS,
+    dataSource: DATA_SOURCES_ENUM.VARIABLE_SERVICE,
+    property: ANALYTICS_VARIABLE_ENUM.STORY_PROGRESS,
   },
 };
 
@@ -56,9 +56,9 @@ const GET_STATE_CONFIGURATIONS = {
 let SetStateConfigurationDef;
 
 /** @enum {!SetStateConfigurationDef} */
-const SET_STATE_CONFIGURATIONS = {
+const SET_STATE_CONFIGURATIONS_ENUM = {
   'MUTED_STATE': {
-    action: Action.TOGGLE_MUTED,
+    action: ACTION_ENUM.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
   },
 };
@@ -117,7 +117,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onGetDocumentState_(data = {}) {
     const {state} = data;
-    const config = GET_STATE_CONFIGURATIONS[state];
+    const config = GET_STATE_CONFIGURATIONS_ENUM[state];
 
     if (!config) {
       return Promise.reject(`Invalid 'state' parameter`);
@@ -126,10 +126,10 @@ export class AmpStoryViewerMessagingHandler {
     let value;
 
     switch (config.dataSource) {
-      case DataSources.STORE_SERVICE:
+      case DATA_SOURCES_ENUM.STORE_SERVICE:
         value = this.storeService_.get(config.property);
         break;
-      case DataSources.VARIABLE_SERVICE:
+      case DATA_SOURCES_ENUM.VARIABLE_SERVICE:
         value = this.variableService_.get()[config.property];
         break;
       default:
@@ -147,7 +147,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onOnDocumentState_(data = {}) {
     const {state} = data;
-    const config = GET_STATE_CONFIGURATIONS[state];
+    const config = GET_STATE_CONFIGURATIONS_ENUM[state];
 
     if (!config) {
       user().error(TAG, `Invalid 'state' parameter`);
@@ -170,7 +170,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onSetDocumentState_(data = {}) {
     const {state, value} = data;
-    const config = SET_STATE_CONFIGURATIONS[state];
+    const config = SET_STATE_CONFIGURATIONS_ENUM[state];
 
     if (!config) {
       return Promise.reject(`Invalid 'state' parameter`);
@@ -192,7 +192,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onCustomDocumentUI_(data) {
     this.storeService_.dispatch(
-      Action.SET_VIEWER_CUSTOM_CONTROLS,
+      ACTION_ENUM.SET_VIEWER_CUSTOM_CONTROLS,
       data.controls
     );
   }

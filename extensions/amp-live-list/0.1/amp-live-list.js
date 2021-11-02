@@ -1,5 +1,5 @@
-import {AmpEvents} from '#core/constants/amp-events';
-import {Layout} from '#core/dom/layout';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {childElementByAttr} from '#core/dom/query';
 
 import {user, userAssert} from '#utils/log';
@@ -15,7 +15,7 @@ import {CSS} from '../../../build/amp-live-list-0.1.css';
 /**
  * @enum {string}
  */
-const classes = {
+const CLASSES_ENUM = {
   ITEM: 'amp-live-list-item',
   NEW_ITEM: 'amp-live-list-item-new',
 };
@@ -172,7 +172,9 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || layout == Layout.FIXED_HEIGHT;
+    return (
+      layout == LAYOUT_ENUM.CONTAINER || layout == LAYOUT_ENUM.FIXED_HEIGHT
+    );
   }
 
   /** @override */
@@ -231,7 +233,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // Make sure we hide the button
     this.toggleUpdateButton_(false);
     this.eachChildElement_(this.itemsSlot_, (item) => {
-      item.classList.add(classes.ITEM);
+      item.classList.add(CLASSES_ENUM.ITEM);
     });
 
     this.curNumOfLiveItems_ = this.countAndCacheValidItems_(
@@ -323,7 +325,7 @@ export class AmpLiveList extends AMP.BaseElement {
         // Remove the new class from the previously inserted items if
         // we are inserting new items.
         this.eachChildElement_(itemsSlot, (child) => {
-          child.classList.remove(classes.NEW_ITEM);
+          child.classList.remove(CLASSES_ENUM.NEW_ITEM);
         });
         this.curNumOfLiveItems_ += this.insert_(
           itemsSlot,
@@ -626,8 +628,8 @@ export class AmpLiveList extends AMP.BaseElement {
     // to insert new items between old items.
     // Order matters as this is how it will be appended into the DOM.
     items.sort(this.comparator_).forEach((elem) => {
-      elem.classList.add(classes.ITEM);
-      elem.classList.add(classes.NEW_ITEM);
+      elem.classList.add(CLASSES_ENUM.ITEM);
+      elem.classList.add(CLASSES_ENUM.NEW_ITEM);
     });
     this.pendingItemsInsert_.push.apply(this.pendingItemsInsert_, items);
   }
@@ -1013,7 +1015,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
-    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
+    event.initEvent(AMP_EVENTS_ENUM.DOM_UPDATE, true, true);
     this.itemsSlot_.dispatchEvent(event);
   }
 }

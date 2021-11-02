@@ -1,5 +1,5 @@
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
-import {InlineGalleryEvents} from './inline-gallery-events';
+import {CAROUSEL_EVENTS_ENUM} from '../../amp-base-carousel/0.1/carousel-events';
+import {INLINE_GALLERY_EVENTS_ENUM} from './inline-gallery-events';
 import {createCustomEvent} from '#utils/event-helper';
 import {dict} from '#core/types/object';
 import {htmlFor} from '#core/dom/static-template';
@@ -58,12 +58,18 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
     // carousel and not the carousel from the thumbnail strip. We stop
     // propagation since the gallery is not interested in slide changes from
     // our carousel.
-    this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, (event) => {
-      event.stopPropagation();
-    });
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
-      event.stopPropagation();
-    });
+    this.element.addEventListener(
+      CAROUSEL_EVENTS_ENUM.OFFSET_CHANGE,
+      (event) => {
+        event.stopPropagation();
+      }
+    );
+    this.element.addEventListener(
+      CAROUSEL_EVENTS_ENUM.INDEX_CHANGE,
+      (event) => {
+        event.stopPropagation();
+      }
+    );
   }
 
   /**
@@ -121,7 +127,7 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       this.element.dispatchEvent(
         createCustomEvent(
           this.win,
-          InlineGalleryEvents.GO_TO_SLIDE,
+          INLINE_GALLERY_EVENTS_ENUM.GO_TO_SLIDE,
           dict({
             'index': index,
           }),

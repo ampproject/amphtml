@@ -1,6 +1,6 @@
 import {userAssert} from '#utils/log';
 
-import {Filter, FilterType} from './filter';
+import {FILTER_TYPE_ENUM, Filter} from './filter';
 
 export class ClickLocationFilter extends Filter {
   /**
@@ -108,7 +108,7 @@ export class ClickLocationFilter extends Filter {
  */
 function isValidClickLocationSpec(spec) {
   return (
-    spec.type == FilterType.CLICK_LOCATION &&
+    spec.type == FILTER_TYPE_ENUM.CLICK_LOCATION &&
     (typeof spec.left === 'undefined' || typeof spec.left === 'number') &&
     (typeof spec.right === 'undefined' || typeof spec.right === 'number') &&
     (typeof spec.top === 'undefined' || typeof spec.top === 'number') &&

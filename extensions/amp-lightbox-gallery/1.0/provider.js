@@ -25,7 +25,7 @@ const DEFAULT_GROUP = 'default';
 const EXPOSED_CAPTION_CLASS = 'amp-lightbox-gallery-caption';
 
 /** @enum {string}  */
-const CaptionState = {
+const CAPTION_STATE_ENUM = {
   AUTO: 'auto',
   CLIP: 'clip',
   EXPAND: 'expanded',
@@ -141,7 +141,7 @@ export function BentoLightboxGalleryProviderWithRef(
 
   const captionRef = useRef(undefined);
   const [caption, setCaption] = useState(null);
-  const [captionState, setCaptionState] = useState(CaptionState.AUTO);
+  const [captionState, setCaptionState] = useState(CAPTION_STATE_ENUM.AUTO);
   useLayoutEffect(() => {
     carouselRef.current?.goToSlide(index);
     if (group) {
@@ -157,14 +157,14 @@ export function BentoLightboxGalleryProviderWithRef(
         // Normalized carousel index.
         mod(index, count.current[group]);
       setCaption(captions.current[group][inflatedIndex]);
-      setCaptionState(CaptionState.AUTO);
+      setCaptionState(CAPTION_STATE_ENUM.AUTO);
     }
   }, [group, index]);
 
   useLayoutEffect(() => {
     const {offsetHeight, scrollHeight} = captionRef.current ?? {};
     if (scrollHeight > offsetHeight + PADDING_ALLOWANCE) {
-      setCaptionState(CaptionState.CLIP);
+      setCaptionState(CAPTION_STATE_ENUM.CLIP);
     }
   }, [caption]);
 
@@ -225,15 +225,15 @@ export function BentoLightboxGalleryProviderWithRef(
             [classes[captionState]]: true,
           })}
           ref={captionRef}
-          {...(captionState === CaptionState.AUTO
+          {...(captionState === CAPTION_STATE_ENUM.AUTO
             ? null
             : {
                 onClick: () => {
                   onToggleCaption?.();
-                  if (captionState === CaptionState.CLIP) {
-                    setCaptionState(CaptionState.EXPAND);
+                  if (captionState === CAPTION_STATE_ENUM.CLIP) {
+                    setCaptionState(CAPTION_STATE_ENUM.EXPAND);
                   } else {
-                    setCaptionState(CaptionState.CLIP);
+                    setCaptionState(CAPTION_STATE_ENUM.CLIP);
                   }
                 },
                 ...CAPTION_PROPS,

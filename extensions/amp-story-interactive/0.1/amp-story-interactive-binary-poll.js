@@ -1,6 +1,6 @@
 import {
   AmpStoryInteractive,
-  InteractiveType,
+  INTERACTIVE_TYPE_ENUM,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-binary-poll-0.1.css';
 import {computedStyle, setStyle} from '#core/dom/style';
@@ -9,7 +9,7 @@ import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
 
 /** @const @enum {number} */
-export const FontSize = {
+export const FONT_SIZE_ENUM = {
   EMOJI: 28,
   SINGLE_LINE: 16,
   DOUBLE_LINE: 14,
@@ -83,7 +83,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractiveType.POLL, /* bounds */ [2, 2]);
+    super(element, INTERACTIVE_TYPE_ENUM.POLL, /* bounds */ [2, 2]);
   }
 
   /** @override */
@@ -139,7 +139,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
    * @return {!Promise}
    */
   adaptFontSize_(root) {
-    let largestFontSize = FontSize.EMOJI;
+    let largestFontSize = FONT_SIZE_ENUM.EMOJI;
     const allTitles = toArray(
       root.querySelectorAll('.i-amphtml-story-interactive-option-title-text')
     );
@@ -152,12 +152,18 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
                 computedStyle(this.win, e)['line-height'].replace('px', '')
               )
           );
-          if (e.textContent.length <= 3 && largestFontSize >= FontSize.EMOJI) {
-            largestFontSize = FontSize.EMOJI;
-          } else if (lines == 1 && largestFontSize >= FontSize.SINGLE_LINE) {
-            largestFontSize = FontSize.SINGLE_LINE;
+          if (
+            e.textContent.length <= 3 &&
+            largestFontSize >= FONT_SIZE_ENUM.EMOJI
+          ) {
+            largestFontSize = FONT_SIZE_ENUM.EMOJI;
+          } else if (
+            lines == 1 &&
+            largestFontSize >= FONT_SIZE_ENUM.SINGLE_LINE
+          ) {
+            largestFontSize = FONT_SIZE_ENUM.SINGLE_LINE;
           } else if (lines == 2) {
-            largestFontSize = FontSize.DOUBLE_LINE;
+            largestFontSize = FONT_SIZE_ENUM.DOUBLE_LINE;
           }
         });
       },
@@ -165,7 +171,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
         setStyle(
           root,
           '--post-select-scale-variable',
-          `${(largestFontSize / FontSize.DOUBLE_LINE).toFixed(2)}`
+          `${(largestFontSize / FONT_SIZE_ENUM.DOUBLE_LINE).toFixed(2)}`
         );
       },
       root

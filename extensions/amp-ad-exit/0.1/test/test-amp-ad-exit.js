@@ -6,7 +6,7 @@ import {installTimerService} from '#service/timer-impl';
 import {setParentWindow} from '../../../../src/service-helpers';
 import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
 import {AmpAdExit, getAttributionReportingStatus} from '../amp-ad-exit';
-import {FilterType} from '../filters/filter';
+import {FILTER_TYPE_ENUM} from '../filters/filter';
 
 const TEST_3P_VENDOR = '3p-vendor';
 
@@ -278,11 +278,11 @@ describes.realWin(
       const impl = await el.getImpl();
       expect(impl.defaultFilters_.length).to.equal(2);
       let clickFilter = impl.defaultFilters_[0];
-      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.type).to.equal(FILTER_TYPE_ENUM.CLICK_DELAY);
       expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
       clickFilter = impl.userFilters_['twoSecond'];
       expect(clickFilter).to.be.ok;
-      expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
+      expect(clickFilter.spec.type).to.equal(FILTER_TYPE_ENUM.CLICK_DELAY);
       expect(clickFilter.spec.startTimingEvent).to.equal('navigationStart');
     });
 

@@ -68,7 +68,7 @@ export let LayoutMarginsChangeDef;
  * first is inside the second, on top of the second or on the bottom
  * @enum {string}
  */
-export const RelativePositions = {
+export const RELATIVE_POSITIONS_ENUM = {
   INSIDE: 'inside',
   TOP: 'top',
   BOTTOM: 'bottom',
@@ -163,11 +163,11 @@ export function rectIntersection(var_args) {
  */
 export function layoutRectsRelativePos(r1, r2) {
   if (r1.top < r2.top) {
-    return RelativePositions.TOP;
+    return RELATIVE_POSITIONS_ENUM.TOP;
   } else if (r1.bottom > r2.bottom) {
-    return RelativePositions.BOTTOM;
+    return RELATIVE_POSITIONS_ENUM.BOTTOM;
   } else {
-    return RelativePositions.INSIDE;
+    return RELATIVE_POSITIONS_ENUM.INSIDE;
   }
 }
 
@@ -193,7 +193,7 @@ export function layoutPositionRelativeToScrolledViewport(
     })
   );
   if (rectsOverlap(layoutBox, scrollLayoutBox)) {
-    return RelativePositions.INSIDE;
+    return RELATIVE_POSITIONS_ENUM.INSIDE;
   } else {
     return layoutRectsRelativePos(layoutBox, scrollLayoutBox);
   }

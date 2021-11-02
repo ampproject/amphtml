@@ -1,5 +1,8 @@
 import {AmpStoryConsent} from '../amp-story-consent';
-import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
+import {
+  AmpStoryStoreService,
+  STATE_PROPERTY_ENUM,
+} from '../amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -243,7 +246,7 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     storyConsent.buildCallback();
 
     const actions = storyConsent.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'AMP-CONSENT',
@@ -288,9 +291,9 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
   it('should set the consent ID in the store', () => {
     storyConsent.buildCallback();
 
-    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
-      CONSENT_ID
-    );
+    expect(
+      storyConsent.storeService_.get(STATE_PROPERTY_ENUM.CONSENT_ID)
+    ).to.equal(CONSENT_ID);
   });
 
   it('should set the consent ID in the store if right amp-geo group', async () => {
@@ -304,9 +307,9 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     storyConsent.buildCallback();
 
     await Promise.resolve();
-    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
-      CONSENT_ID
-    );
+    expect(
+      storyConsent.storeService_.get(STATE_PROPERTY_ENUM.CONSENT_ID)
+    ).to.equal(CONSENT_ID);
   });
 
   it('should not set consent ID in the store if wrong amp-geo group', async () => {
@@ -320,7 +323,8 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     storyConsent.buildCallback();
 
     await Promise.resolve();
-    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.be.null;
+    expect(storyConsent.storeService_.get(STATE_PROPERTY_ENUM.CONSENT_ID)).to.be
+      .null;
   });
 
   it('should set the font color to black if background is white', () => {

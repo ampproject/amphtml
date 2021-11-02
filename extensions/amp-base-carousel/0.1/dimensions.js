@@ -4,7 +4,7 @@ import {setImportantStyles, setStyle} from '#core/dom/style';
 /**
  * @enum {number}
  */
-export const Axis = {
+export const AXIS_ENUM = {
   X: 0,
   Y: 1,
 };
@@ -12,7 +12,7 @@ export const Axis = {
 /**
  * @enum {string}
  */
-export const Alignment = {
+export const ALIGNMENT_ENUM = {
   START: 'start',
   CENTER: 'center',
 };
@@ -36,9 +36,9 @@ export function getDimension(axis, el) {
     el./*OK*/ getBoundingClientRect();
 
   return {
-    start: axis == Axis.X ? left : top,
-    end: axis == Axis.X ? right : bottom,
-    length: axis == Axis.X ? width : height,
+    start: axis == AXIS_ENUM.X ? left : top,
+    end: axis == AXIS_ENUM.X ? right : bottom,
+    length: axis == AXIS_ENUM.X ? width : height,
   };
 }
 
@@ -70,7 +70,7 @@ export function getStart(axis, el) {
  *    the given alignment.
  */
 export function getPosition(axis, alignment, el) {
-  return alignment == Alignment.START
+  return alignment == ALIGNMENT_ENUM.START
     ? getStart(axis, el)
     : getCenter(axis, el);
 }
@@ -81,7 +81,7 @@ export function getPosition(axis, alignment, el) {
  * @param {number} length The length value, in pixels, to set.
  */
 export function updateLengthStyle(axis, el, length) {
-  if (axis == Axis.X) {
+  if (axis == AXIS_ENUM.X) {
     setStyle(el, 'width', `${length}px`);
   } else {
     setStyle(el, 'height', `${length}px`);
@@ -95,8 +95,8 @@ export function updateLengthStyle(axis, el, length) {
  * @param {number} delta How much to move the Element.
  */
 export function setTransformTranslateStyle(axis, el, delta) {
-  const deltaX = axis == Axis.X ? delta : 0;
-  const deltaY = axis == Axis.X ? 0 : delta;
+  const deltaX = axis == AXIS_ENUM.X ? delta : 0;
+  const deltaY = axis == AXIS_ENUM.X ? 0 : delta;
   setStyle(el, 'transform', `translate(${deltaX}px, ${deltaY}px)`);
   // Set a custom property so that the slide itself can determine how to
   // translate the content if it so chooses.
@@ -184,7 +184,7 @@ export function findOverlappingIndex(
  * @return {number} The scroll position.
  */
 export function getScrollPosition(axis, el) {
-  if (axis == Axis.X) {
+  if (axis == AXIS_ENUM.X) {
     return el./*OK*/ scrollLeft;
   }
 
@@ -198,7 +198,7 @@ export function getScrollPosition(axis, el) {
  * @param {number} position The scroll position.
  */
 export function setScrollPosition(axis, el, position) {
-  if (axis == Axis.X) {
+  if (axis == AXIS_ENUM.X) {
     el./*OK*/ scrollLeft = position;
   } else {
     el./*OK*/ scrollTop = position;
@@ -232,7 +232,7 @@ export function scrollContainerToElement(
   el,
   offset = 0
 ) {
-  const startAligned = alignment == Alignment.START;
+  const startAligned = alignment == ALIGNMENT_ENUM.START;
   const {length} = getDimension(axis, el);
   const snapOffset = startAligned ? getStart(axis, el) : getCenter(axis, el);
   const scrollOffset = startAligned

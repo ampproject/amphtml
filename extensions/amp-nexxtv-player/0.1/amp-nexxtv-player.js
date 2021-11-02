@@ -22,7 +22,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 
 const TAG = 'amp-nexxtv-player';
 
@@ -229,11 +229,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     redispatch(this.element, eventType, {
-      'ready': VideoEvents.LOAD,
-      'play': VideoEvents.PLAYING,
-      'pause': VideoEvents.PAUSE,
-      'mute': VideoEvents.MUTED,
-      'unmute': VideoEvents.UNMUTED,
+      'ready': VIDEO_EVENTS_ENUM.LOAD,
+      'play': VIDEO_EVENTS_ENUM.PLAYING,
+      'pause': VIDEO_EVENTS_ENUM.PAUSE,
+      'mute': VIDEO_EVENTS_ENUM.MUTED,
+      'unmute': VIDEO_EVENTS_ENUM.UNMUTED,
     });
   }
 

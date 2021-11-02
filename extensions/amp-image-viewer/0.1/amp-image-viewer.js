@@ -1,6 +1,6 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {bezierCurve} from '#core/data-structures/curve';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
@@ -172,7 +172,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       ? Promise.resolve()
       : img.tagName === 'IMG'
       ? loadPromise(img)
-      : img.signals().whenSignal(CommonSignals.LOAD_END);
+      : img.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_END);
 
     if (!haveImg) {
       Services.ownersForDoc(this.element).scheduleLayout(this.element, img);
@@ -217,7 +217,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FILL;
+    return layout == LAYOUT_ENUM.FILL;
   }
 
   /**

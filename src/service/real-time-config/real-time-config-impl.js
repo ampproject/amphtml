@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
@@ -216,10 +216,12 @@ export class RealTimeConfigManager {
       for (let i = 0; i < sendRegardlessOfConsentState.length; i++) {
         if (
           this.consentState_ ==
-          CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]
+          CONSENT_POLICY_STATE_ENUM[sendRegardlessOfConsentState[i]]
         ) {
           return true;
-        } else if (!CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]) {
+        } else if (
+          !CONSENT_POLICY_STATE_ENUM[sendRegardlessOfConsentState[i]]
+        ) {
           dev().warn(
             TAG,
             'Invalid RTC consent state given: ' +
@@ -254,8 +256,8 @@ export class RealTimeConfigManager {
   modifyRtcConfigForConsentStateSettings() {
     if (
       this.consentState_ == undefined ||
-      this.consentState_ == CONSENT_POLICY_STATE.SUFFICIENT ||
-      this.consentState_ == CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
+      this.consentState_ == CONSENT_POLICY_STATE_ENUM.SUFFICIENT ||
+      this.consentState_ == CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
     ) {
       return;
     }

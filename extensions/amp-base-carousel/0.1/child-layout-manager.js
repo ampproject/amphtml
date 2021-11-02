@@ -47,7 +47,7 @@ const DEFAULT_INTERSECTION_THRESHOLD = 0.01;
 /**
  * @enum {number}
  */
-const ViewportChangeState = {
+const VIEWPORT_CHANGE_STATE_ENUM = {
   ENTER: 0,
   LEAVE: 1,
 };
@@ -246,7 +246,7 @@ export class ChildLayoutManager {
       })
       .forEach((entry) => {
         const {target} = entry;
-        target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
+        target[NEAR_VIEWPORT_FLAG] = VIEWPORT_CHANGE_STATE_ENUM.ENTER;
       });
 
     if (!this.queueChanges_) {
@@ -267,7 +267,7 @@ export class ChildLayoutManager {
       })
       .forEach((entry) => {
         const {target} = entry;
-        target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
+        target[NEAR_VIEWPORT_FLAG] = VIEWPORT_CHANGE_STATE_ENUM.LEAVE;
       });
 
     if (!this.queueChanges_) {
@@ -284,8 +284,8 @@ export class ChildLayoutManager {
     entries.forEach((entry) => {
       const {isIntersecting, target} = entry;
       target[IN_VIEWPORT_FLAG] = isIntersecting
-        ? ViewportChangeState.ENTER
-        : ViewportChangeState.LEAVE;
+        ? VIEWPORT_CHANGE_STATE_ENUM.ENTER
+        : VIEWPORT_CHANGE_STATE_ENUM.LEAVE;
     });
 
     if (!this.queueChanges_) {
@@ -309,7 +309,7 @@ export class ChildLayoutManager {
     for (let i = 0; i < this.children_.length; i++) {
       const child = this.children_[i];
 
-      if (child[NEAR_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
+      if (child[NEAR_VIEWPORT_FLAG] == VIEWPORT_CHANGE_STATE_ENUM.ENTER) {
         this.triggerLayout_(child, true);
         child[NEAR_VIEWPORT_FLAG] = null;
       }
@@ -323,7 +323,7 @@ export class ChildLayoutManager {
     for (let i = 0; i < this.children_.length; i++) {
       const child = this.children_[i];
 
-      if (child[NEAR_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
+      if (child[NEAR_VIEWPORT_FLAG] == VIEWPORT_CHANGE_STATE_ENUM.LEAVE) {
         this.triggerLayout_(child, false);
         child[NEAR_VIEWPORT_FLAG] = null;
       }
@@ -337,10 +337,10 @@ export class ChildLayoutManager {
     for (let i = 0; i < this.children_.length; i++) {
       const child = this.children_[i];
 
-      if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
+      if (child[IN_VIEWPORT_FLAG] == VIEWPORT_CHANGE_STATE_ENUM.ENTER) {
         this.triggerLayout_(child, true);
         this.triggerVisibility_(child, true);
-      } else if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
+      } else if (child[IN_VIEWPORT_FLAG] == VIEWPORT_CHANGE_STATE_ENUM.LEAVE) {
         this.triggerVisibility_(child, false);
       }
 

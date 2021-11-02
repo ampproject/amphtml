@@ -1,6 +1,6 @@
 import '../amp-carousel';
 import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
@@ -1235,7 +1235,7 @@ describes.realWin(
           ampSlideScroll,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 4}),
-          ActionTrust.HIGH
+          ACTION_TRUST_ENUM.HIGH
         );
 
         impl.go(1, /* animate */ false);
@@ -1243,7 +1243,7 @@ describes.realWin(
           ampSlideScroll,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 0}),
-          ActionTrust.HIGH
+          ACTION_TRUST_ENUM.HIGH
         );
       });
 
@@ -1257,12 +1257,12 @@ describes.realWin(
         impl.go(-1, /* animate */ false);
         expect(win.document.eventListeners.count('slideChange')).to.equal(1);
         expect(event.data.index).to.equal(4);
-        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        expect(event.data.actionTrust).to.equal(ACTION_TRUST_ENUM.HIGH);
 
         impl.go(1, /* animate */ false);
         expect(win.document.eventListeners.count('slideChange')).to.equal(1);
         expect(event.data.index).to.equal(0);
-        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        expect(event.data.actionTrust).to.equal(ACTION_TRUST_ENUM.HIGH);
       });
 
       it('should goToSlide on action', async () => {
@@ -1508,7 +1508,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ACTION_TRUST_ENUM.HIGH
       );
       expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
@@ -1519,7 +1519,7 @@ describes.realWin(
           method: 'goToSlide',
           node: element,
           source: 'source',
-          trust: ActionTrust.HIGH,
+          trust: ACTION_TRUST_ENUM.HIGH,
         })
       );
 
@@ -1531,7 +1531,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ACTION_TRUST_ENUM.HIGH
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(

@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {once} from '#core/types/function';
 
 import {Services} from '#service';
@@ -181,7 +181,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     // Normally CommonSignals.LOAD_START is sent from layoutCallback but since
     // we are using layout = 'nodisplay', 'layoutCallback' is never called.
     // We need to call it manually to have CustomEventReporterBuilder working.
-    this.signals().signal(CommonSignals.LOAD_START);
+    this.signals().signal(COMMON_SIGNALS_ENUM.LOAD_START);
     return new Tracking(
       this.element,
       this.skimOptions_,

@@ -1,10 +1,10 @@
 import {
-  ActionTrust,
+  ACTION_TRUST_ENUM,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
 } from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {isAmp4Email} from '#core/document/format';
 import {isEnabled} from '#core/dom';
 import {isFiniteNumber} from '#core/types';
@@ -294,13 +294,13 @@ export class ActionService {
       this.root_.addEventListener('click', (event) => {
         if (!event.defaultPrevented) {
           const element = dev().assertElement(event.target);
-          this.trigger(element, name, event, ActionTrust.HIGH);
+          this.trigger(element, name, event, ACTION_TRUST_ENUM.HIGH);
         }
       });
       this.root_.addEventListener('keydown', (event) => {
         const {key, target} = event;
         const element = dev().assertElement(target);
-        if (key == Keys.ENTER || key == Keys.SPACE) {
+        if (key == KEYS_ENUM.ENTER || key == KEYS_ENUM.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
             role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase());
@@ -309,7 +309,7 @@ export class ActionService {
               element,
               name,
               event,
-              ActionTrust.HIGH
+              ACTION_TRUST_ENUM.HIGH
             );
             // Only if the element has an action do we prevent the default.
             // In the absence of an action, e.g. on="[event].method", we do not
@@ -325,13 +325,13 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         // For get requests, the delegating to the viewer needs to happen
         // before this.
-        this.trigger(element, name, event, ActionTrust.HIGH);
+        this.trigger(element, name, event, ACTION_TRUST_ENUM.HIGH);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, (event) => {
         const element = dev().assertElement(event.target);
         this.addTargetPropertiesAsDetail_(event);
-        this.trigger(element, name, event, ActionTrust.HIGH);
+        this.trigger(element, name, event, ACTION_TRUST_ENUM.HIGH);
       });
     } else if (name == 'input-debounced') {
       const debouncedInput = debounce(
@@ -342,7 +342,7 @@ export class ActionService {
             target,
             name,
             /** @type {!ActionEventDef} */ (event),
-            ActionTrust.HIGH
+            ACTION_TRUST_ENUM.HIGH
           );
         },
         DEFAULT_DEBOUNCE_WAIT
@@ -364,7 +364,7 @@ export class ActionService {
             target,
             name,
             /** @type {!ActionEventDef} */ (event),
-            ActionTrust.HIGH
+            ACTION_TRUST_ENUM.HIGH
           );
         },
         DEFAULT_THROTTLE_INTERVAL
@@ -378,7 +378,7 @@ export class ActionService {
     } else if (name == 'valid' || name == 'invalid') {
       this.root_.addEventListener(name, (event) => {
         const element = dev().assertElement(event.target);
-        this.trigger(element, name, event, ActionTrust.HIGH);
+        this.trigger(element, name, event, ACTION_TRUST_ENUM.HIGH);
       });
     }
   }
@@ -398,7 +398,7 @@ export class ActionService {
    * @param {ActionHandlerDef} handler
    * @param {ActionTrust} minTrust
    */
-  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.DEFAULT) {
+  addGlobalMethodHandler(name, handler, minTrust = ACTION_TRUST_ENUM.DEFAULT) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
@@ -958,26 +958,29 @@ export function parseActionMap(action, context) {
   do {
     tok = toks.next();
     if (
-      tok.type == TokenType.EOF ||
-      (tok.type == TokenType.SEPARATOR && tok.value == ';')
+      tok.type == TOKEN_TYPE_ENUM.EOF ||
+      (tok.type == TOKEN_TYPE_ENUM.SEPARATOR && tok.value == ';')
     ) {
       // Expected, ignore.
-    } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
+    } else if (
+      tok.type == TOKEN_TYPE_ENUM.LITERAL ||
+      tok.type == TOKEN_TYPE_ENUM.ID
+    ) {
       // Format: event:target.method
 
       // Event: "event:"
       const event = tok.value;
 
       // Target: ":target." separator
-      assertToken(toks.next(), [TokenType.SEPARATOR], ':');
+      assertToken(toks.next(), [TOKEN_TYPE_ENUM.SEPARATOR], ':');
 
       const actions = [];
 
       // Handlers for event.
       do {
         const target = assertToken(toks.next(), [
-          TokenType.LITERAL,
-          TokenType.ID,
+          TOKEN_TYPE_ENUM.LITERAL,
+          TOKEN_TYPE_ENUM.ID,
         ]).value;
 
         // Method: ".method". Method is optional.
@@ -985,15 +988,17 @@ export function parseActionMap(action, context) {
         let args = null;
 
         peek = toks.peek();
-        if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
+        if (peek.type == TOKEN_TYPE_ENUM.SEPARATOR && peek.value == '.') {
           toks.next(); // Skip '.'
           method =
-            assertToken(toks.next(), [TokenType.LITERAL, TokenType.ID]).value ||
-            method;
+            assertToken(toks.next(), [
+              TOKEN_TYPE_ENUM.LITERAL,
+              TOKEN_TYPE_ENUM.ID,
+            ]).value || method;
 
           // Optionally, there may be arguments: "(key = value, key = value)".
           peek = toks.peek();
-          if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+          if (peek.type == TOKEN_TYPE_ENUM.SEPARATOR && peek.value == '(') {
             toks.next(); // Skip '('
             args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }
@@ -1012,7 +1017,7 @@ export function parseActionMap(action, context) {
 
         peek = toks.peek();
       } while (
-        peek.type == TokenType.SEPARATOR &&
+        peek.type == TOKEN_TYPE_ENUM.SEPARATOR &&
         peek.value == ',' &&
         toks.next()
       ); // skip "," when found
@@ -1026,7 +1031,7 @@ export function parseActionMap(action, context) {
       // Unexpected token.
       assertAction(false, `; unexpected token [${tok.value || ''}]`);
     }
-  } while (tok.type != TokenType.EOF);
+  } while (tok.type != TOKEN_TYPE_ENUM.EOF);
 
   return actionMap;
 }
@@ -1044,38 +1049,41 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
   let tok;
   let args = null;
   // Object literal. Format: {...}
-  if (peek.type == TokenType.OBJECT) {
+  if (peek.type == TOKEN_TYPE_ENUM.OBJECT) {
     // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
     const {value} = toks.next();
     args[RAW_OBJECT_ARGS_KEY] = value;
-    assertToken(toks.next(), [TokenType.SEPARATOR], ')');
+    assertToken(toks.next(), [TOKEN_TYPE_ENUM.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
     do {
       tok = toks.next();
       const {type, value} = tok;
-      if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
+      if (type == TOKEN_TYPE_ENUM.SEPARATOR && (value == ',' || value == ')')) {
         // Expected: ignore.
-      } else if (type == TokenType.LITERAL || type == TokenType.ID) {
+      } else if (
+        type == TOKEN_TYPE_ENUM.LITERAL ||
+        type == TOKEN_TYPE_ENUM.ID
+      ) {
         // Key: "key = "
-        assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+        assertToken(toks.next(), [TOKEN_TYPE_ENUM.SEPARATOR], '=');
         // Value is either a literal or an expression: "foo.bar.baz"
         tok = assertToken(toks.next(/* convertValue */ true), [
-          TokenType.LITERAL,
-          TokenType.ID,
+          TOKEN_TYPE_ENUM.LITERAL,
+          TOKEN_TYPE_ENUM.ID,
         ]);
         const argValueTokens = [tok];
         // Expressions have one or more dereferences: ".identifier"
-        if (tok.type == TokenType.ID) {
+        if (tok.type == TOKEN_TYPE_ENUM.ID) {
           for (
             peek = toks.peek();
-            peek.type == TokenType.SEPARATOR && peek.value == '.';
+            peek.type == TOKEN_TYPE_ENUM.SEPARATOR && peek.value == '.';
             peek = toks.peek()
           ) {
             toks.next(); // Skip '.'.
-            tok = assertToken(toks.next(false), [TokenType.ID]);
+            tok = assertToken(toks.next(false), [TOKEN_TYPE_ENUM.ID]);
             argValueTokens.push(tok);
           }
         }
@@ -1086,7 +1094,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         args[value] = argValue;
         peek = toks.peek();
         assertAction(
-          peek.type == TokenType.SEPARATOR &&
+          peek.type == TOKEN_TYPE_ENUM.SEPARATOR &&
             (peek.value == ',' || peek.value == ')'),
           'Expected either [,] or [)]'
         );
@@ -1094,7 +1102,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         // Unexpected token.
         assertAction(false, `; unexpected token [${tok.value || ''}]`);
       }
-    } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+    } while (!(tok.type == TOKEN_TYPE_ENUM.SEPARATOR && tok.value == ')'));
   }
   return args;
 }
@@ -1202,7 +1210,7 @@ function assertTokenForParser(s, context, tok, types, opt_value) {
 /**
  * @enum {number}
  */
-const TokenType = {
+const TOKEN_TYPE_ENUM = {
   INVALID: 0,
   EOF: 1,
   SEPARATOR: 2,
@@ -1271,7 +1279,7 @@ class ParserTokenizer {
   next_(convertValues) {
     let newIndex = this.index_ + 1;
     if (newIndex >= this.str_.length) {
-      return {type: TokenType.EOF, index: this.index_};
+      return {type: TOKEN_TYPE_ENUM.EOF, index: this.index_};
     }
 
     let c = this.str_.charAt(newIndex);
@@ -1285,7 +1293,7 @@ class ParserTokenizer {
         }
       }
       if (newIndex >= this.str_.length) {
-        return {type: TokenType.EOF, index: newIndex};
+        return {type: TOKEN_TYPE_ENUM.EOF, index: newIndex};
       }
       c = this.str_.charAt(newIndex);
     }
@@ -1313,12 +1321,12 @@ class ParserTokenizer {
       const s = this.str_.substring(newIndex, end);
       const value = hasFraction ? parseFloat(s) : parseInt(s, 10);
       newIndex = end - 1;
-      return {type: TokenType.LITERAL, value, index: newIndex};
+      return {type: TOKEN_TYPE_ENUM.LITERAL, value, index: newIndex};
     }
 
     // Different separators.
     if (SEPARATOR_SET.indexOf(c) != -1) {
-      return {type: TokenType.SEPARATOR, value: c, index: newIndex};
+      return {type: TOKEN_TYPE_ENUM.SEPARATOR, value: c, index: newIndex};
     }
 
     // String literal.
@@ -1331,11 +1339,11 @@ class ParserTokenizer {
         }
       }
       if (end == -1) {
-        return {type: TokenType.INVALID, index: newIndex};
+        return {type: TOKEN_TYPE_ENUM.INVALID, index: newIndex};
       }
       const value = this.str_.substring(newIndex + 1, end);
       newIndex = end;
-      return {type: TokenType.LITERAL, value, index: newIndex};
+      return {type: TOKEN_TYPE_ENUM.LITERAL, value, index: newIndex};
     }
 
     // Object literal.
@@ -1355,11 +1363,11 @@ class ParserTokenizer {
         }
       }
       if (end == -1) {
-        return {type: TokenType.INVALID, index: newIndex};
+        return {type: TOKEN_TYPE_ENUM.INVALID, index: newIndex};
       }
       const value = this.str_.substring(newIndex, end + 1);
       newIndex = end;
-      return {type: TokenType.OBJECT, value, index: newIndex};
+      return {type: TOKEN_TYPE_ENUM.OBJECT, value, index: newIndex};
     }
 
     // Advance until next special character.
@@ -1375,16 +1383,16 @@ class ParserTokenizer {
     // Boolean literal.
     if (convertValues && (s == 'true' || s == 'false')) {
       const value = s == 'true';
-      return {type: TokenType.LITERAL, value, index: newIndex};
+      return {type: TOKEN_TYPE_ENUM.LITERAL, value, index: newIndex};
     }
 
     // Identifier.
     if (!isNum(s.charAt(0))) {
-      return {type: TokenType.ID, value: s, index: newIndex};
+      return {type: TOKEN_TYPE_ENUM.ID, value: s, index: newIndex};
     }
 
     // Key.
-    return {type: TokenType.LITERAL, value: s, index: newIndex};
+    return {type: TOKEN_TYPE_ENUM.LITERAL, value: s, index: newIndex};
   }
 }
 

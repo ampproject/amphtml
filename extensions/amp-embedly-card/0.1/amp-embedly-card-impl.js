@@ -1,5 +1,5 @@
 import {removeElement} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {LAYOUT_ENUM, applyFillContent} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -97,7 +97,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return layout == LAYOUT_ENUM.RESPONSIVE;
   }
 
   /**

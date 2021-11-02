@@ -27,19 +27,19 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 
 /** @private @const {string} */
 const TAG = 'amp-powr-player';
 
 /** @private @const {!Object.<string,string>} */
 const PLAYER_EVENT_MAP = {
-  'ready': VideoEvents.LOAD,
-  'playing': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
-  'ads-ad-started': VideoEvents.AD_START,
-  'ads-ad-ended': VideoEvents.AD_END,
+  'ready': VIDEO_EVENTS_ENUM.LOAD,
+  'playing': VIDEO_EVENTS_ENUM.PLAYING,
+  'pause': VIDEO_EVENTS_ENUM.PAUSE,
+  'ended': VIDEO_EVENTS_ENUM.ENDED,
+  'ads-ad-started': VIDEO_EVENTS_ENUM.AD_START,
+  'ads-ad-ended': VIDEO_EVENTS_ENUM.AD_END,
 };
 
 /** @implements {../../../src/video-interface.VideoInterface} */

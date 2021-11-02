@@ -10,7 +10,7 @@ import {Services} from '#service';
 import {devAssert} from '#utils/log';
 
 /** @enum {number} */
-export const PositionObserverFidelity = {
+export const POSITION_OBSERVER_FIDELITY_ENUM = {
   HIGH: 1,
   LOW: 0,
 };
@@ -50,7 +50,7 @@ export class PositionObserverWorker {
 
     /** @type {number} */
     this.turn =
-      fidelity == PositionObserverFidelity.LOW
+      fidelity == POSITION_OBSERVER_FIDELITY_ENUM.LOW
         ? Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT)
         : 0;
 
@@ -116,7 +116,7 @@ export class PositionObserverWorker {
         return;
       }
 
-      if (this.fidelity == PositionObserverFidelity.LOW) {
+      if (this.fidelity == POSITION_OBSERVER_FIDELITY_ENUM.LOW) {
         this.turn = LOW_FIDELITY_FRAME_COUNT;
       }
     }

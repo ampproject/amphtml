@@ -2,7 +2,7 @@ import '../amp-powr-player';
 import {listenOncePromise} from '#utils/event-helper';
 
 import {parseUrlDeprecated} from '../../../../src/url';
-import {VideoEvents} from '../../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-powr-player',
@@ -189,7 +189,7 @@ describes.realWin(
       }).then((bc) => {
         return Promise.resolve()
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.LOAD);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.LOAD);
             await fakePostMessage(bc, {
               event: 'ready',
               muted: false,
@@ -198,7 +198,7 @@ describes.realWin(
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.AD_START);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.AD_START);
             await fakePostMessage(bc, {
               event: 'ads-ad-started',
               muted: false,
@@ -207,7 +207,7 @@ describes.realWin(
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.AD_END);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.AD_END);
             await fakePostMessage(bc, {
               event: 'ads-ad-ended',
               muted: false,
@@ -216,7 +216,7 @@ describes.realWin(
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.PLAYING);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.PLAYING);
             await fakePostMessage(bc, {
               event: 'playing',
               muted: false,
@@ -225,7 +225,7 @@ describes.realWin(
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.MUTED);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.MUTED);
             await fakePostMessage(bc, {
               event: 'volumechange',
               muted: true,
@@ -234,7 +234,7 @@ describes.realWin(
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.UNMUTED);
             await fakePostMessage(bc, {
               event: 'volumechange',
               muted: false,
@@ -243,7 +243,7 @@ describes.realWin(
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.PAUSE);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.PAUSE);
             await fakePostMessage(bc, {
               event: 'pause',
               muted: false,
@@ -252,7 +252,7 @@ describes.realWin(
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(bc, VideoEvents.ENDED);
+            const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.ENDED);
             await fakePostMessage(bc, {
               event: 'ended',
               muted: false,

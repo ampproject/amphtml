@@ -1,4 +1,4 @@
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {bezierCurve} from '#core/data-structures/curve';
 import * as dom from '#core/dom';
 import {
@@ -915,7 +915,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.key == Keys.ESCAPE) {
+    if (event.key == KEYS_ENUM.ESCAPE) {
       event.preventDefault();
       this.close();
     }

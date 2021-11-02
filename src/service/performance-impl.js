@@ -1,5 +1,5 @@
-import {TickLabel} from '#core/constants/enums';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {TICK_LABEL_ENUM} from '#core/constants/enums';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
 import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
@@ -45,7 +45,7 @@ let TickEventDef;
 /**
  * @enum {number}
  */
-export const ELEMENT_TYPE = {
+export const ELEMENT_TYPE_ENUM = {
   other: 0,
   image: 1 << 0,
   video: 1 << 1,
@@ -61,29 +61,29 @@ export const ELEMENT_TYPE = {
  */
 function getElementType(node) {
   if (node == null) {
-    return ELEMENT_TYPE.other;
+    return ELEMENT_TYPE_ENUM.other;
   }
   const outer = getOutermostAmpElement(node);
   const {nodeName} = outer;
   if (nodeName === 'IMG' || nodeName === 'AMP-IMG') {
-    return ELEMENT_TYPE.image;
+    return ELEMENT_TYPE_ENUM.image;
   }
   if (nodeName === 'VIDEO' || nodeName === 'AMP-VIDEO') {
-    return ELEMENT_TYPE.video;
+    return ELEMENT_TYPE_ENUM.video;
   }
   if (nodeName === 'AMP-CAROUSEL') {
-    return ELEMENT_TYPE.carousel;
+    return ELEMENT_TYPE_ENUM.carousel;
   }
   if (nodeName === 'AMP-BASE-CAROUSEL') {
-    return ELEMENT_TYPE.bcarousel;
+    return ELEMENT_TYPE_ENUM.bcarousel;
   }
   if (nodeName === 'AMP-AD') {
-    return ELEMENT_TYPE.ad;
+    return ELEMENT_TYPE_ENUM.ad;
   }
   if (!nodeName.startsWith('AMP-') && outer.textContent) {
-    return ELEMENT_TYPE.text;
+    return ELEMENT_TYPE_ENUM.text;
   }
-  return ELEMENT_TYPE.other;
+  return ELEMENT_TYPE_ENUM.other;
 }
 
 /**
@@ -169,7 +169,7 @@ export class Performance {
     // If Paint Timing API is not supported, cannot determine first contentful paint
     if (!supportedEntryTypes.includes('paint')) {
       this.metrics_.rejectSignal(
-        TickLabel.FIRST_CONTENTFUL_PAINT,
+        TICK_LABEL_ENUM.FIRST_CONTENTFUL_PAINT,
         dev().createExpectedError('First Contentful Paint not supported')
       );
     }
@@ -186,8 +186,8 @@ export class Performance {
       const e = dev().createExpectedError(
         'Cumulative Layout Shift not supported'
       );
-      this.metrics_.rejectSignal(TickLabel.CUMULATIVE_LAYOUT_SHIFT, e);
-      this.metrics_.rejectSignal(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, e);
+      this.metrics_.rejectSignal(TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT, e);
+      this.metrics_.rejectSignal(TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT_1, e);
     }
 
     /**
@@ -200,7 +200,7 @@ export class Performance {
 
     if (!this.supportsEventTiming_) {
       this.metrics_.rejectSignal(
-        TickLabel.FIRST_INPUT_DELAY,
+        TICK_LABEL_ENUM.FIRST_INPUT_DELAY,
         dev().createExpectedError('First Input Delay not supported')
       );
     }
@@ -216,7 +216,7 @@ export class Performance {
 
     if (!this.supportsLargestContentfulPaint_) {
       this.metrics_.rejectSignal(
-        TickLabel.LARGEST_CONTENTFUL_PAINT,
+        TICK_LABEL_ENUM.LARGEST_CONTENTFUL_PAINT,
         dev().createExpectedError('Largest Contentful Paint not supported')
       );
     }
@@ -252,7 +252,7 @@ export class Performance {
 
     // Tick document ready event.
     whenDocumentReady(win.document).then(() => {
-      this.tick(TickLabel.DOCUMENT_READY);
+      this.tick(TICK_LABEL_ENUM.DOCUMENT_READY);
       this.flush();
     });
 
@@ -307,7 +307,7 @@ export class Performance {
     const channelPromise = this.viewer_.whenMessagingReady();
 
     this.ampdoc_.whenFirstVisible().then(() => {
-      this.tick(TickLabel.ON_FIRST_VISIBLE);
+      this.tick(TICK_LABEL_ENUM.ON_FIRST_VISIBLE);
       this.flush();
     });
 
@@ -330,10 +330,13 @@ export class Performance {
     return channelPromise
       .then(() => {
         // Tick the "messaging ready" signal.
-        this.tickDelta(TickLabel.MESSAGING_READY, this.win.performance.now());
+        this.tickDelta(
+          TICK_LABEL_ENUM.MESSAGING_READY,
+          this.win.performance.now()
+        );
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
-        this.tick(TickLabel.TIME_ORIGIN, undefined, this.timeOrigin_);
+        this.tick(TICK_LABEL_ENUM.TIME_ORIGIN, undefined, this.timeOrigin_);
 
         const usqp = this.ampdoc_.getMetaByName('amp-usqp');
         if (usqp) {
@@ -374,7 +377,7 @@ export class Performance {
    * Callback for onload.
    */
   onload_() {
-    this.tick(TickLabel.ON_LOAD);
+    this.tick(TICK_LABEL_ENUM.ON_LOAD);
     this.flush();
   }
 
@@ -400,22 +403,28 @@ export class Performance {
     let recordedNavigation = false;
     const processEntry = (entry) => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
-        this.tickDelta(TickLabel.FIRST_PAINT, entry.startTime + entry.duration);
+        this.tickDelta(
+          TICK_LABEL_ENUM.FIRST_PAINT,
+          entry.startTime + entry.duration
+        );
         recordedFirstPaint = true;
       } else if (
         entry.name == 'first-contentful-paint' &&
         !recordedFirstContentfulPaint
       ) {
         const value = entry.startTime + entry.duration;
-        this.tickDelta(TickLabel.FIRST_CONTENTFUL_PAINT, value);
-        this.tickSinceVisible(TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE, value);
+        this.tickDelta(TICK_LABEL_ENUM.FIRST_CONTENTFUL_PAINT, value);
+        this.tickSinceVisible(
+          TICK_LABEL_ENUM.FIRST_CONTENTFUL_PAINT_VISIBLE,
+          value
+        );
         recordedFirstContentfulPaint = true;
       } else if (
         entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
       ) {
         const value = entry.processingStart - entry.startTime;
-        this.tickDelta(TickLabel.FIRST_INPUT_DELAY, value);
+        this.tickDelta(TICK_LABEL_ENUM.FIRST_INPUT_DELAY, value);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
@@ -514,7 +523,8 @@ export class Performance {
   isVisibilityHidden_() {
     const state = this.ampdoc_.getVisibilityState();
     return (
-      state === VisibilityState.INACTIVE || state === VisibilityState.HIDDEN
+      state === VISIBILITY_STATE_ENUM.INACTIVE ||
+      state === VISIBILITY_STATE_ENUM.HIDDEN
     );
   }
 
@@ -605,7 +615,7 @@ export class Performance {
    */
   flushLayoutShiftScore_() {
     const entries = this.layoutShiftEntries_;
-    const old = this.metrics_.get(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
+    const old = this.metrics_.get(TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT);
     let union = 0;
     let sum = 0;
     for (const entry of entries) {
@@ -620,10 +630,10 @@ export class Performance {
     this.recordGoogleFontExp_();
     if (old == null || sum > old) {
       // We'll record the largest windowed CLS.
-      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
-      this.metrics_.reset(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION);
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT, sum);
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
+      this.metrics_.reset(TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT);
+      this.metrics_.reset(TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION);
+      this.tickDelta(TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT, sum);
+      this.tickDelta(TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT_TYPE_UNION, union);
       this.flush();
     }
   }
@@ -642,11 +652,17 @@ export class Performance {
    */
   tickCumulativeLayoutShiftScore_() {
     if (this.shiftScoresTicked_ === 0) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_1, this.layoutShiftSum_);
+      this.tickDelta(
+        TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT_1,
+        this.layoutShiftSum_
+      );
       this.flush();
       this.shiftScoresTicked_ = 1;
     } else if (this.shiftScoresTicked_ === 1) {
-      this.tickDelta(TickLabel.CUMULATIVE_LAYOUT_SHIFT_2, this.layoutShiftSum_);
+      this.tickDelta(
+        TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT_2,
+        this.layoutShiftSum_
+      );
       this.flush();
       this.shiftScoresTicked_ = 2;
     }
@@ -661,15 +677,15 @@ export class Performance {
     }
 
     this.tickDelta(
-      TickLabel.LARGEST_CONTENTFUL_PAINT_TYPE,
+      TICK_LABEL_ENUM.LARGEST_CONTENTFUL_PAINT_TYPE,
       this.largestContentfulPaintType_
     );
     this.tickDelta(
-      TickLabel.LARGEST_CONTENTFUL_PAINT,
+      TICK_LABEL_ENUM.LARGEST_CONTENTFUL_PAINT,
       this.largestContentfulPaint_
     );
     this.tickSinceVisible(
-      TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
+      TICK_LABEL_ENUM.LARGEST_CONTENTFUL_PAINT_VISIBLE,
       this.largestContentfulPaint_
     );
     this.flush();
@@ -703,18 +719,18 @@ export class Performance {
           // 0 case, since pre-renders that are never used are highly
           // likely to fully load before they are never used :)
           this.tickDelta(
-            TickLabel.FIRST_VIEWPORT_READY,
+            TICK_LABEL_ENUM.FIRST_VIEWPORT_READY,
             userPerceivedVisualCompletenesssTime
           );
         });
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
         // Mark this instance in the browser timeline.
-        this.mark(TickLabel.FIRST_VIEWPORT_READY);
+        this.mark(TICK_LABEL_ENUM.FIRST_VIEWPORT_READY);
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
-        this.tick(TickLabel.FIRST_VIEWPORT_READY);
+        this.tick(TICK_LABEL_ENUM.FIRST_VIEWPORT_READY);
         this.prerenderComplete_(this.win.performance.now() - docVisibleTime);
       }
       this.flush();

@@ -35,7 +35,7 @@ const A4A_VARS_META_PREFIX = 'amp4ads-vars-';
 export const START_CTA_ANIMATION_ATTR = 'cta-active';
 
 /** @enum {string} */
-export const A4AVarNames = {
+export const A_4_A_VAR_NAMES_ENUM = {
   ATTRIBUTION_ICON: 'attribution-icon',
   ATTRIBUTION_URL: 'attribution-url',
   CTA_TYPE: 'cta-type',
@@ -51,7 +51,7 @@ const PageOutlinkLayerVarNames = [
 ];
 
 /** @enum {string} */
-const DataAttrs = {
+const DATA_ATTRS_ENUM = {
   CTA_TYPE: 'data-vars-ctatype',
   CTA_URL: 'data-vars-ctaurl',
 };
@@ -94,11 +94,11 @@ export function getStoryAdMetadataFromDoc(doc) {
  * @return {!Object}
  */
 export function getStoryAdMetadataFromElement(adElement) {
-  const ctaUrl = adElement.getAttribute(DataAttrs.CTA_URL);
-  const ctaType = adElement.getAttribute(DataAttrs.CTA_TYPE);
+  const ctaUrl = adElement.getAttribute(DATA_ATTRS_ENUM.CTA_URL);
+  const ctaType = adElement.getAttribute(DATA_ATTRS_ENUM.CTA_TYPE);
   return {
-    [A4AVarNames.CTA_TYPE]: ctaType,
-    [A4AVarNames.CTA_URL]: ctaUrl,
+    [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]: ctaType,
+    [A_4_A_VAR_NAMES_ENUM.CTA_URL]: ctaUrl,
   };
 }
 
@@ -110,7 +110,10 @@ export function getStoryAdMetadataFromElement(adElement) {
  */
 export function validateCtaMetadata(metadata, opt_inabox) {
   // If making a CTA layer we need a button name & outlink url.
-  if (!metadata[A4AVarNames.CTA_TYPE] || !metadata[A4AVarNames.CTA_URL]) {
+  if (
+    !metadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE] ||
+    !metadata[A_4_A_VAR_NAMES_ENUM.CTA_URL]
+  ) {
     // Don't polute inabox logs, as we don't know when this is intended to
     // be a story ad.
     !opt_inabox &&
@@ -132,8 +135,8 @@ export function maybeCreateAttribution(win, metadata, container) {
   const doc = win.document;
 
   try {
-    const href = metadata[A4AVarNames.ATTRIBUTION_URL];
-    const src = metadata[A4AVarNames.ATTRIBUTION_ICON];
+    const href = metadata[A_4_A_VAR_NAMES_ENUM.ATTRIBUTION_URL];
+    const src = metadata[A_4_A_VAR_NAMES_ENUM.ATTRIBUTION_ICON];
 
     // Ad attribution is optional, but need both to render.
     if (!href || !src) {
@@ -211,10 +214,10 @@ function createPageOutlink_(doc, uiMetadata, container) {
     dict({
       'class': 'i-amphtml-story-ad-link',
       'target': '_top',
-      'href': uiMetadata[A4AVarNames.CTA_URL],
+      'href': uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_URL],
     })
   );
-  pageAnchorTag.textContent = uiMetadata[A4AVarNames.CTA_TYPE];
+  pageAnchorTag.textContent = uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE];
 
   pageOutlink.appendChild(pageAnchorTag);
 
@@ -268,8 +271,8 @@ function createCtaLayer_(a, doc, container) {
  * @return {!Promise<?Element>} If anchor was successfully created.
  */
 export function createCta(doc, buttonFitter, container, uiMetadata) {
-  const ctaUrl = uiMetadata[A4AVarNames.CTA_URL];
-  const ctaText = uiMetadata[A4AVarNames.CTA_TYPE];
+  const ctaUrl = uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_URL];
+  const ctaText = uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE];
 
   // TODO(#36035): we should be using this element in createPageOutlink_
   // instead of creating it and dropping.

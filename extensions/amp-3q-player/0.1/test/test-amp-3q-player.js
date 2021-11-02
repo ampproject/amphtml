@@ -8,7 +8,7 @@ import {listenOncePromise} from '#utils/event-helper';
 
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
-import {VideoEvents} from '../../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-3q-player',
@@ -116,16 +116,16 @@ describes.realWin(
         const impl = await player.getImpl();
         const iframe = player.querySelector('iframe');
         await Promise.resolve();
-        const p1 = listenOncePromise(player, VideoEvents.MUTED);
+        const p1 = listenOncePromise(player, VIDEO_EVENTS_ENUM.MUTED);
         sendFakeMessage(impl, iframe, 'muted');
         await p1;
-        const p2 = listenOncePromise(player, VideoEvents.PLAYING);
+        const p2 = listenOncePromise(player, VIDEO_EVENTS_ENUM.PLAYING);
         sendFakeMessage(impl, iframe, 'playing');
         await p2;
-        const p3 = listenOncePromise(player, VideoEvents.PAUSE);
+        const p3 = listenOncePromise(player, VIDEO_EVENTS_ENUM.PAUSE);
         sendFakeMessage(impl, iframe, 'paused');
         await p3;
-        const p4 = listenOncePromise(player, VideoEvents.UNMUTED);
+        const p4 = listenOncePromise(player, VIDEO_EVENTS_ENUM.UNMUTED);
         sendFakeMessage(impl, iframe, 'unmuted');
         const successTimeout = timer.promise(10);
         return Promise.race([p4, successTimeout]);

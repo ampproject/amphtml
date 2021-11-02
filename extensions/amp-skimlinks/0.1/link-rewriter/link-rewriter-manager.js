@@ -1,7 +1,7 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 
 import {Services} from '#service';
-import {Priority} from '#service/navigation';
+import {PRIORITY_ENUM} from '#service/navigation';
 
 import {EVENTS, PRIORITY_META_TAG_NAME} from './constants';
 import {LinkRewriter} from './link-rewriter';
@@ -66,7 +66,7 @@ export class LinkRewriterManager {
     const navigation = Services.navigationForDoc(ampdoc);
     navigation.registerAnchorMutator(
       this.maybeRewriteLink.bind(this),
-      Priority.LINK_REWRITER_MANAGER
+      PRIORITY_ENUM.LINK_REWRITER_MANAGER
     );
   }
 
@@ -181,7 +181,7 @@ export class LinkRewriterManager {
    */
   installGlobalEventListener_(rootNode) {
     rootNode.addEventListener(
-      AmpEvents.DOM_UPDATE,
+      AMP_EVENTS_ENUM.DOM_UPDATE,
       this.onDomChanged_.bind(this)
     );
   }

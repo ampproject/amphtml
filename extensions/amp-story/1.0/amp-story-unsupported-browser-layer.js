@@ -1,6 +1,6 @@
-import {Action, getStoreService} from './amp-story-store-service';
+import {ACTION_ENUM, getStoreService} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '#core/types/object';
 import {removeElement} from '#core/dom';
@@ -33,7 +33,7 @@ const renderTemplate = (element) => ({
           children: [
             localize(
               element,
-              LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
+              LOCALIZED_STRING_ID_ENUM.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
             ),
           ],
         },
@@ -46,7 +46,7 @@ const renderTemplate = (element) => ({
           children: [
             localize(
               element,
-              LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
+              LOCALIZED_STRING_ID_ENUM.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
             ),
           ],
         },
@@ -97,7 +97,7 @@ export class UnsupportedBrowserLayer {
       `.${CONTINUE_ANYWAY_BUTTON_CLASS}`
     );
     this.continueButton_.addEventListener('click', () => {
-      this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, true);
+      this.storeService_.dispatch(ACTION_ENUM.TOGGLE_SUPPORTED_BROWSER, true);
     });
     return this.root_;
   }

@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {STATE_PROPERTY_ENUM, getStoreService} from './amp-story-store-service';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {getVariableService} from './variable-service';
 import {map} from '#core/types/object';
@@ -10,7 +10,7 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */
-export const StoryAnalyticsEvent = {
+export const STORY_ANALYTICS_EVENT_ENUM = {
   CLICK_THROUGH: 'story-click-through',
   FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
@@ -29,7 +29,7 @@ export const StoryAnalyticsEvent = {
  * @enum {string}
  * Note: auto advance advancements should always be prefixed with "autoAdvance".
  */
-export const AdvancementMode = {
+export const ADVANCEMENT_MODE_ENUM = {
   GO_TO_PAGE: 'goToPageAction',
   AUTO_ADVANCE_TIME: 'autoAdvanceTime',
   AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
@@ -95,21 +95,21 @@ export class StoryAnalyticsService {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
+      STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
       (pageId) => {
-        const isAd = this.storeService_.get(StateProperty.AD_STATE);
+        const isAd = this.storeService_.get(STATE_PROPERTY_ENUM.AD_STATE);
         if (!pageId || isAd) {
           return;
         }
 
-        this.triggerEvent(StoryAnalyticsEvent.PAGE_VISIBLE);
+        this.triggerEvent(STORY_ANALYTICS_EVENT_ENUM.PAGE_VISIBLE);
 
-        const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
+        const pageIds = this.storeService_.get(STATE_PROPERTY_ENUM.PAGE_IDS);
         const pageIndex = this.storeService_.get(
-          StateProperty.CURRENT_PAGE_INDEX
+          STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX
         );
         if (pageIndex === pageIds.length - 1) {
-          this.triggerEvent(StoryAnalyticsEvent.LAST_PAGE_VISIBLE);
+          this.triggerEvent(STORY_ANALYTICS_EVENT_ENUM.LAST_PAGE_VISIBLE);
         }
       },
       true /* callToInitialize */

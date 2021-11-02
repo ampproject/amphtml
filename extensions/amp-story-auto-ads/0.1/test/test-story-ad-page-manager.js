@@ -2,7 +2,10 @@ import {macroTask} from '#testing/helpers';
 
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {StoryAdPage} from '../story-ad-page';
-import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
+import {
+  INSERTION_STATE_ENUM,
+  StoryAdPageManager,
+} from '../story-ad-page-manager';
 
 // TODO(ccordry): add tests for analytics events.
 describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
@@ -143,7 +146,7 @@ describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
       pageManager.createAdPage();
       const nextAdPage = pageManager.getUnusedAdPage();
       const result = await pageManager.maybeInsertPageAfter('one', nextAdPage);
-      expect(result).to.equal(InsertionState.DELAYED);
+      expect(result).to.equal(INSERTION_STATE_ENUM.DELAYED);
     });
 
     it('returns delayed status if next-page-no-ad attr', async () => {
@@ -160,7 +163,7 @@ describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
       pageManager.createAdPage();
       const nextAdPage = pageManager.getUnusedAdPage();
       const result = await pageManager.maybeInsertPageAfter('one', nextAdPage);
-      expect(result).to.equal(InsertionState.DELAYED);
+      expect(result).to.equal(INSERTION_STATE_ENUM.DELAYED);
     });
 
     it('fails if cta is not created', async () => {
@@ -176,7 +179,7 @@ describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
       const nextAdPage = pageManager.getUnusedAdPage();
       env.sandbox.stub(nextAdPage, 'maybeCreateCta').resolves(false);
       const result = await pageManager.maybeInsertPageAfter('one', nextAdPage);
-      expect(result).to.equal(InsertionState.FAILURE);
+      expect(result).to.equal(INSERTION_STATE_ENUM.FAILURE);
     });
 
     it('successfully inserts and marks as used', async () => {
@@ -196,7 +199,7 @@ describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
       const result = await pageManager.maybeInsertPageAfter('one', nextAdPage);
       expect(insertStub).to.be.calledWith('one', 'i-amphtml-ad-page-1');
       expect(pageManager.hasUnusedAdPage()).to.be.false;
-      expect(result).to.equal(InsertionState.SUCCESS);
+      expect(result).to.equal(INSERTION_STATE_ENUM.SUCCESS);
     });
   });
 });

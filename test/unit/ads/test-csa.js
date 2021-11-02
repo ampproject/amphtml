@@ -1,7 +1,7 @@
 import * as _3p from '#3p/3p';
 
 import {
-  AD_TYPE,
+  AD_TYPE_ENUM,
   callbackWithBackfill,
   callbackWithNoBackfill,
   csa,
@@ -21,11 +21,11 @@ function getAds(type) {
     afshAdblockOptions: '{"width": "auto", "height": 300}',
   };
   switch (type) {
-    case AD_TYPE.AFS:
+    case AD_TYPE_ENUM.AFS:
       return Object.assign(generic, afsObj);
-    case AD_TYPE.AFSH:
+    case AD_TYPE_ENUM.AFSH:
       return Object.assign(generic, afshObj);
-    case AD_TYPE.AFSH_BACKFILL:
+    case AD_TYPE_ENUM.AFSH_BACKFILL:
       return Object.assign(generic, afsObj, afshObj);
     default:
       return {};
@@ -60,7 +60,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, (env) => {
 
   describe('inputs', () => {
     it('should create a csa container', () => {
-      csa(win, getAds(AD_TYPE.AFS));
+      csa(win, getAds(AD_TYPE_ENUM.AFS));
       const container = win.document.getElementById('csacontainer');
       expect(container).not.to.be.null;
     });
@@ -79,17 +79,17 @@ describes.fakeWin('amp-ad-csa-impl', {}, (env) => {
     });
 
     it('should request AFS', () => {
-      csa(win, getAds(AD_TYPE.AFS));
+      csa(win, getAds(AD_TYPE_ENUM.AFS));
       expect(googCsaSpy.args[0][0]).to.equal('ads');
     });
 
     it('should request AFSh', () => {
-      csa(win, getAds(AD_TYPE.AFSH));
+      csa(win, getAds(AD_TYPE_ENUM.AFSH));
       expect(googCsaSpy.args[0][0]).to.equal('plas');
     });
 
     it('should request AFSh (backfill)', () => {
-      csa(win, getAds(AD_TYPE.AFSH_BACKFILL));
+      csa(win, getAds(AD_TYPE_ENUM.AFSH_BACKFILL));
       expect(googCsaSpy.args[0][0]).to.equal('plas');
     });
   });

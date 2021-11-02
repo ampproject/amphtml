@@ -4,7 +4,7 @@ import {
   MediaBasedAdvancement,
   TimeBasedAdvancement,
 } from '../page-advancement';
-import {StateProperty} from '../amp-story-store-service';
+import {STATE_PROPERTY_ENUM} from '../amp-story-store-service';
 import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin('page-advancement', {amp: true}, (env) => {
@@ -41,15 +41,15 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
 
         advancement.onTouchstart_({target: pageEl});
 
-        expect(advancement.storeService_.get(StateProperty.PAUSED_STATE)).to.be
-          .true;
+        expect(advancement.storeService_.get(STATE_PROPERTY_ENUM.PAUSED_STATE))
+          .to.be.true;
 
         // Update visibility to visible.
         env.sandbox.stub(advancement.ampdoc_, 'isVisible').returns(true);
         advancement.ampdoc_.visibilityStateHandlers_.fire();
 
-        expect(advancement.storeService_.get(StateProperty.PAUSED_STATE)).to.be
-          .false;
+        expect(advancement.storeService_.get(STATE_PROPERTY_ENUM.PAUSED_STATE))
+          .to.be.false;
       });
 
       it('should not hide system UI on visibilitychange', async () => {
@@ -70,7 +70,7 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         // Check system UI is not visible and timeout was cancelled.
         expect(
           advancement.storeService_.get(
-            StateProperty.SYSTEM_UI_IS_VISIBLE_STATE
+            STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE
           )
         ).to.be.true;
         expect(!!advancement.timeoutId_).to.be.false;

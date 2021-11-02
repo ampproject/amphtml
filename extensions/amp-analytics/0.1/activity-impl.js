@@ -17,7 +17,7 @@ const DEFAULT_ENGAGED_SECONDS = 5;
 /**
  * @enum {string}
  */
-const ActivityEventType = {
+const ACTIVITY_EVENT_TYPE_ENUM = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
 };
@@ -40,7 +40,7 @@ let ActivityEventDef;
 function findEngagedTimeBetween(activityEvent, time) {
   let engagementBonus = 0;
 
-  if (activityEvent.type === ActivityEventType.ACTIVE) {
+  if (activityEvent.type === ACTIVITY_EVENT_TYPE_ENUM.ACTIVE) {
     engagementBonus = DEFAULT_ENGAGED_SECONDS;
   }
 
@@ -263,7 +263,7 @@ export class Activity {
     this.ignoreActivity_ = true;
     this.ignoreInactive_ = false;
 
-    this.handleActivityEvent_(ActivityEventType.ACTIVE);
+    this.handleActivityEvent_(ACTIVITY_EVENT_TYPE_ENUM.ACTIVE);
   }
 
   /** @private */
@@ -274,7 +274,7 @@ export class Activity {
     this.ignoreInactive_ = true;
     this.ignoreActivity_ = false;
 
-    this.handleActivityEvent_(ActivityEventType.INACTIVE);
+    this.handleActivityEvent_(ACTIVITY_EVENT_TYPE_ENUM.INACTIVE);
   }
 
   /**

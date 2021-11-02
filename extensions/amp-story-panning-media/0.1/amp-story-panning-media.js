@@ -1,6 +1,6 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {closest} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
@@ -12,8 +12,8 @@ import {dev, user} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {
-  Action,
-  StateProperty,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -116,7 +116,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.initializeListeners_();
 
     return whenUpgradedToCustomElement(this.ampImgEl_)
-      .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() =>
+        this.ampImgEl_.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
+      )
       .then(() => {
         const imgEl = dev().assertElement(this.element_.querySelector('img'));
         // Remove layout="fill" classes so image is not clipped.
@@ -129,7 +131,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
+      STATE_PROPERTY_ENUM.PAGE_SIZE,
       () => {
         this.elementSize_ = {
           width: this.element_./*OK*/ offsetWidth,
@@ -142,7 +144,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
+      STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
       (currPageId) => {
         this.isOnActivePage_ = currPageId === this.getPageId_();
         this.animate_();
@@ -150,7 +152,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
-      StateProperty.PANNING_MEDIA_STATE,
+      STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE,
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
@@ -228,13 +230,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (!this.isOnActivePage_) {
       return;
     }
-    const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
-      this.groupId_
-    ];
+    const startPos = this.storeService_.get(
+      STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE
+    )[this.groupId_];
 
     // Don't animate if first instance of group or prefers-reduced-motion.
     if (!startPos || prefersReducedMotion(this.win)) {
-      this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+      this.storeService_.dispatch(ACTION_ENUM.ADD_PANNING_MEDIA_STATE, {
         [this.groupId_]: this.animateTo_,
       });
       return;
@@ -252,7 +254,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       if (elapsedTime < DURATION_MS) {
         const {x, y, zoom} = this.animateTo_;
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
-        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(ACTION_ENUM.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: {
             x: startPos.x + (x - startPos.x) * easing,
             y: startPos.y + (y - startPos.y) * easing,
@@ -264,7 +266,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           requestAnimationFrame(nextFrame);
         }
       } else {
-        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(ACTION_ENUM.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: this.animateTo_,
         });
       }
@@ -384,7 +386,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FILL;
+    return layout == LAYOUT_ENUM.FILL;
   }
 }
 

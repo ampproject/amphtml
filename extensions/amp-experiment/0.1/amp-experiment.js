@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {parseJson} from '#core/types/object/json';
 
 import {dev, devAssert, userAssert} from '#utils/log';
@@ -24,7 +24,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+    return layout == LAYOUT_ENUM.NODISPLAY || layout == LAYOUT_ENUM.CONTAINER;
   }
 
   /** @override */

@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
@@ -31,7 +31,7 @@ class AmpEmbedlyCard extends BaseElement {
         isExperimentOn(this.win, 'bento-embedly-card'),
       'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
     );
-    return layout == Layout.RESPONSIVE;
+    return layout == LAYOUT_ENUM.RESPONSIVE;
   }
 }
 

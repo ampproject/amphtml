@@ -1,16 +1,16 @@
-import {ACTION_TYPE, AmpConsent} from '../amp-consent';
+import {ACTION_TYPE_ENUM, AmpConsent} from '../amp-consent';
 import {
-  CONSENT_ITEM_STATE,
-  METADATA_STORAGE_KEY,
-  PURPOSE_CONSENT_STATE,
-  STORAGE_KEY,
+  CONSENT_ITEM_STATE_ENUM,
+  METADATA_STORAGE_KEY_ENUM,
+  PURPOSE_CONSENT_STATE_ENUM,
+  STORAGE_KEY_ENUM,
   constructConsentInfo,
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {CONSENT_STRING_TYPE_ENUM} from '#core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {GEO_IN_GROUP_ENUM} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';
 import {macroTask} from '#testing/helpers';
@@ -100,8 +100,8 @@ describes.realWin(
         return Promise.resolve({
           isInCountryGroup: (group) =>
             ISOCountryGroups.indexOf(group) >= 0
-              ? GEO_IN_GROUP.IN
-              : GEO_IN_GROUP.NOT_IN,
+              ? GEO_IN_GROUP_ENUM.IN
+              : GEO_IN_GROUP_ENUM.NOT_IN,
         });
       });
 
@@ -258,7 +258,9 @@ describes.realWin(
           .getConsentStateManagerForTesting()
           .getConsentInstanceInfo();
 
-        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        expect(instanceInfo.consentState).to.equal(
+          CONSENT_ITEM_STATE_ENUM.UNKNOWN
+        );
         expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
           .true;
       });
@@ -279,7 +281,9 @@ describes.realWin(
         const instanceInfo = await ampConsent
           .getConsentStateManagerForTesting()
           .getConsentInstanceInfo();
-        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.REJECTED);
+        expect(instanceInfo.consentState).to.equal(
+          CONSENT_ITEM_STATE_ENUM.REJECTED
+        );
       });
 
       it('sends post request to server when consentRequired is remote', async () => {
@@ -414,7 +418,7 @@ describes.realWin(
           // 3 is dismissed, 4 is not requried, and 5 is unknown.
           // All 3 turn into 'unknown'.
           expect(stateManagerInfo).to.jsonEqual(
-            constructConsentInfo(CONSENT_ITEM_STATE.NOT_REQUIRED)
+            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED)
           );
         });
 
@@ -436,7 +440,7 @@ describes.realWin(
 
           expect(stateValue).to.equal('unknown');
           expect(stateManagerInfo).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
+            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN)
           );
           expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
             .true;
@@ -460,18 +464,18 @@ describes.realWin(
 
           expect(stateValue).to.equal('rejected');
           expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.REJECTED,
+            'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
             'consentString': 'mystring',
             'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
               '1~1.35.41.101',
               false,
               true
             ),
             'isDirty': undefined,
             'purposeConsents': {
-              'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
-              'xyz': PURPOSE_CONSENT_STATE.REJECTED,
+              'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
+              'xyz': PURPOSE_CONSENT_STATE_ENUM.REJECTED,
             },
           });
         });
@@ -494,7 +498,7 @@ describes.realWin(
 
           expect(stateValue).to.equal('unknown');
           expect(stateManagerInfo).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
+            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN)
           );
         });
       });
@@ -523,8 +527,8 @@ describes.realWin(
           // 0 represents 'rejected' in storage
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'oldstring',
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'oldstring',
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -539,7 +543,7 @@ describes.realWin(
 
           expect(stateValue).to.equal('accepted');
           expect(stateManagerInfo).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'newstring')
+            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'newstring')
           );
         });
 
@@ -551,15 +555,15 @@ describes.realWin(
           };
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'oldstring',
-              [STORAGE_KEY.METADATA]: {
-                [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
-                [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '3~3.33.303',
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'oldstring',
+              [STORAGE_KEY_ENUM.METADATA]: {
+                [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
+                [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '3~3.33.303',
               },
-              [STORAGE_KEY.PURPOSE_CONSENTS]: {
-                'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
+              [STORAGE_KEY_ENUM.PURPOSE_CONSENTS]: {
+                'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
               },
             },
           };
@@ -575,7 +579,7 @@ describes.realWin(
 
           expect(stateValue).to.equal('accepted');
           expect(stateManagerInfo).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'newstring')
+            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'newstring')
           );
         });
 
@@ -588,10 +592,10 @@ describes.realWin(
           // 0 represents 'rejected' in storage
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'oldstring',
-              [STORAGE_KEY.PURPOSE_CONSENTS]: {
-                'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'oldstring',
+              [STORAGE_KEY_ENUM.PURPOSE_CONSENTS]: {
+                'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
               },
             },
           };
@@ -608,10 +612,10 @@ describes.realWin(
           expect(stateValue).to.equal('accepted');
           expect(stateManagerInfo).to.deep.equal(
             constructConsentInfo(
-              CONSENT_ITEM_STATE.ACCEPTED,
+              CONSENT_ITEM_STATE_ENUM.ACCEPTED,
               'newstring',
               undefined,
-              {'xyz': PURPOSE_CONSENT_STATE.REJECTED}
+              {'xyz': PURPOSE_CONSENT_STATE_ENUM.REJECTED}
             )
           );
         });
@@ -625,12 +629,12 @@ describes.realWin(
           // 0 represents 'rejected' in storage
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'oldstring',
-              [STORAGE_KEY.METADATA]: {
-                [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
-                [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '3~3.33.303',
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'oldstring',
+              [STORAGE_KEY_ENUM.METADATA]: {
+                [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
+                [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '3~3.33.303',
               },
             },
           };
@@ -646,11 +650,11 @@ describes.realWin(
 
           expect(stateValue).to.equal('accepted');
           expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.ACCEPTED,
+            'consentState': CONSENT_ITEM_STATE_ENUM.ACCEPTED,
             'consentString': 'newstring',
             'isDirty': undefined,
             'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
               '1~1.35.41.101',
               true,
               true
@@ -668,8 +672,8 @@ describes.realWin(
           // 0 represents 'rejected' in storage
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'oldstring',
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'oldstring',
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -684,7 +688,7 @@ describes.realWin(
 
           expect(stateValue).to.equal('accepted');
           expect(stateManagerInfo).to.deep.equal(
-            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'newstring')
+            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'newstring')
           );
         });
 
@@ -714,11 +718,11 @@ describes.realWin(
           // 0 represents 'rejected' in storage
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'mystring',
-              [STORAGE_KEY.METADATA]: {
-                [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'mystring',
+              [STORAGE_KEY_ENUM.METADATA]: {
+                [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
               },
             },
           };
@@ -734,10 +738,12 @@ describes.realWin(
 
           expect(stateValue).to.equal('rejected');
           expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.REJECTED,
+            'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
             'consentString': 'mystring',
             'isDirty': undefined,
-            'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE_ENUM.TCF_V2
+            ),
             'purposeConsents': undefined,
           });
         });
@@ -762,13 +768,13 @@ describes.realWin(
           // 0 represents 'rejected' in storage
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'mystring',
-              [STORAGE_KEY.METADATA]: {
-                [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'mystring',
+              [STORAGE_KEY_ENUM.METADATA]: {
+                [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
               },
-              [STORAGE_KEY.PURPOSE_CONSENTS]: {'abc': 1},
+              [STORAGE_KEY_ENUM.PURPOSE_CONSENTS]: {'abc': 1},
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -783,11 +789,13 @@ describes.realWin(
 
           expect(stateValue).to.equal('rejected');
           expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.REJECTED,
+            'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
             'consentString': 'mystring',
             'isDirty': true,
-            'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
-            'purposeConsents': {'abc': PURPOSE_CONSENT_STATE.ACCEPTED},
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE_ENUM.TCF_V2
+            ),
+            'purposeConsents': {'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED},
           });
         });
 
@@ -800,11 +808,11 @@ describes.realWin(
           // 0 represents 'rejected' in storage
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'mystring',
-              [STORAGE_KEY.METADATA]: {
-                [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+              [STORAGE_KEY_ENUM.STATE]: 0,
+              [STORAGE_KEY_ENUM.STRING]: 'mystring',
+              [STORAGE_KEY_ENUM.METADATA]: {
+                [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
               },
             },
           };
@@ -820,10 +828,12 @@ describes.realWin(
 
           expect(stateValue).to.equal('rejected');
           expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.REJECTED,
+            'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
             'consentString': 'mystring',
             'isDirty': true,
-            'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE_ENUM.TCF_V2
+            ),
             'purposeConsents': undefined,
           });
         });
@@ -874,7 +884,7 @@ describes.realWin(
           /Consent metadata value "%s" is invalid./
         );
         expect(spy.args[0][2]).to.match(/consentStringType/);
-        responseMetadata['consentStringType'] = CONSENT_STRING_TYPE.TCF_V2;
+        responseMetadata['consentStringType'] = CONSENT_STRING_TYPE_ENUM.TCF_V2;
         expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
           constructMetadata(2)
         );
@@ -1100,7 +1110,7 @@ describes.realWin(
           'action': 'accept',
           'info': 'accept-string',
           'consentMetadata': {
-            'consentStringType': CONSENT_STRING_TYPE.TCF_V1,
+            'consentStringType': CONSENT_STRING_TYPE_ENUM.TCF_V1,
             'additionalConsent': '1~1.35.41.101',
             'gdprApplies': true,
             'purposeOne': true,
@@ -1109,10 +1119,10 @@ describes.realWin(
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
         expect(actionSpy).to.be.calledWith(
-          ACTION_TYPE.ACCEPT,
+          ACTION_TYPE_ENUM.ACCEPT,
           'accept-string',
           constructMetadata(
-            CONSENT_STRING_TYPE.TCF_V1,
+            CONSENT_STRING_TYPE_ENUM.TCF_V1,
             '1~1.35.41.101',
             true,
             true
@@ -1147,7 +1157,7 @@ describes.realWin(
 
           expect(managerSpy).to.be.calledWith(event.data.purposeConsents);
           expect(actionSpy).to.be.calledWith(
-            ACTION_TYPE.ACCEPT,
+            ACTION_TYPE_ENUM.ACCEPT,
             'accept-string'
           );
         });
@@ -1159,7 +1169,7 @@ describes.realWin(
           win.dispatchEvent(event);
 
           expect(managerSpy).to.be.calledWith(event.data.purposeConsents);
-          expect(actionSpy).to.be.calledWith(ACTION_TYPE.REJECT);
+          expect(actionSpy).to.be.calledWith(ACTION_TYPE_ENUM.REJECT);
         });
 
         it('does not set purposeConsentMap with dismiss', () => {
@@ -1168,7 +1178,7 @@ describes.realWin(
           win.dispatchEvent(event);
 
           expect(managerSpy).to.not.be.called;
-          expect(actionSpy).to.be.calledWith(ACTION_TYPE.DISMISS);
+          expect(actionSpy).to.be.calledWith(ACTION_TYPE_ENUM.DISMISS);
         });
 
         it('does not set purposeConsentMap with empty consent map', () => {
@@ -1178,7 +1188,7 @@ describes.realWin(
 
           expect(managerSpy).to.not.be.called;
           expect(actionSpy).to.be.calledWith(
-            ACTION_TYPE.ACCEPT,
+            ACTION_TYPE_ENUM.ACCEPT,
             'accept-string'
           );
         });
@@ -1190,7 +1200,9 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'accept',
           'info': 'accept-string',
-          'consentMetadata': {'consentStringType': CONSENT_STRING_TYPE.TCF_V1},
+          'consentMetadata': {
+            'consentStringType': CONSENT_STRING_TYPE_ENUM.TCF_V1,
+          },
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
@@ -1217,11 +1229,13 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'dismiss',
           'info': 'test',
-          'consentMetadata': {'consentStringType': CONSENT_STRING_TYPE.TCF_V1},
+          'consentMetadata': {
+            'consentStringType': CONSENT_STRING_TYPE_ENUM.TCF_V1,
+          },
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
-        expect(actionSpy).to.be.calledWith(ACTION_TYPE.DISMISS);
+        expect(actionSpy).to.be.calledWith(ACTION_TYPE_ENUM.DISMISS);
       });
     });
 
@@ -1278,7 +1292,9 @@ describes.realWin(
           .getConsentStateManagerForTesting()
           .getConsentInstanceInfo();
 
-        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
+        expect(instanceInfo.consentState).to.equal(
+          CONSENT_ITEM_STATE_ENUM.ACCEPTED
+        );
         expect(ampConsent.isPromptUiOn_).to.be.false;
       });
 
@@ -1292,10 +1308,10 @@ describes.realWin(
         await macroTask();
         expect(ampConsent.isPromptUiOn_).to.be.true;
         await macroTask();
-        ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
+        ampConsent.handleAction_(ACTION_TYPE_ENUM.ACCEPT);
         await macroTask();
         expect(updateConsentInstanceStateSpy).to.be.calledWith(
-          CONSENT_ITEM_STATE.ACCEPTED
+          CONSENT_ITEM_STATE_ENUM.ACCEPTED
         );
         await macroTask();
         expect(ampConsent.isPromptUiOn_).to.be.false;
@@ -1309,13 +1325,13 @@ describes.realWin(
           'updateConsentInstanceState'
         );
         // Hide gets called
-        ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+        ampConsent.handleAction_(ACTION_TYPE_ENUM.DISMISS);
         await macroTask();
         expect(updateConsentInstanceStateSpy).to.be.calledOnce;
         updateConsentInstanceStateSpy.resetHistory();
         expect(ampConsent.isPromptUiOn_).to.be.false;
         // isReadyToHandleAction_() should return false
-        ampConsent.handleClosingUiAction_(ACTION_TYPE.DISMISS);
+        ampConsent.handleClosingUiAction_(ACTION_TYPE_ENUM.DISMISS);
         await macroTask();
         expect(updateConsentInstanceStateSpy).to.not.be.called;
       });
@@ -1423,7 +1439,7 @@ describes.realWin(
               .getConsentInstanceInfo();
 
             expect(instanceInfo.consentState).to.equal(
-              CONSENT_ITEM_STATE.ACCEPTED
+              CONSENT_ITEM_STATE_ENUM.ACCEPTED
             );
             expect(scheduleDisplaySpy).to.not.be.called;
             expect(postPromptUI).to.not.be.null;
@@ -1600,7 +1616,10 @@ describes.realWin(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'
           );
-          ampConsent.handleClosingUiAction_(ACTION_TYPE.ACCEPT, mockInvocation);
+          ampConsent.handleClosingUiAction_(
+            ACTION_TYPE_ENUM.ACCEPT,
+            mockInvocation
+          );
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.be.calledWith(
             {
@@ -1623,12 +1642,18 @@ describes.realWin(
             'updateConsentInstancePurposes'
           );
 
-          ampConsent.handleClosingUiAction_(ACTION_TYPE.ACCEPT, mockInvocation);
+          ampConsent.handleClosingUiAction_(
+            ACTION_TYPE_ENUM.ACCEPT,
+            mockInvocation
+          );
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.not.be.called;
           // reset
           ampConsent.purposeConsentRequired_ = Promise.resolve([]);
-          ampConsent.handleClosingUiAction_(ACTION_TYPE.REJECT, mockInvocation);
+          ampConsent.handleClosingUiAction_(
+            ACTION_TYPE_ENUM.REJECT,
+            mockInvocation
+          );
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.not.be.called;
         });
@@ -1703,8 +1728,8 @@ describes.realWin(
         it('returns true if all purpose consents are stored', async () => {
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 1,
-              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+              [STORAGE_KEY_ENUM.STATE]: 1,
+              [STORAGE_KEY_ENUM.PURPOSE_CONSENTS]: {
                 'abc': 1,
                 'hij': 1,
                 'xyz': 0,
@@ -1726,8 +1751,8 @@ describes.realWin(
         it('returns false if not all purpose consents are stored', async () => {
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 1,
-              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+              [STORAGE_KEY_ENUM.STATE]: 1,
+              [STORAGE_KEY_ENUM.PURPOSE_CONSENTS]: {
                 'abc': 1,
                 'hij': 1,
                 'zzz': 0,
@@ -1749,8 +1774,8 @@ describes.realWin(
         it('informs consent state manager if all purpose consents are collected', async () => {
           storageValue = {
             'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 1,
-              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+              [STORAGE_KEY_ENUM.STATE]: 1,
+              [STORAGE_KEY_ENUM.PURPOSE_CONSENTS]: {
                 'abc': 1,
                 'hij': 1,
                 'xyz': 0,
@@ -1776,8 +1801,8 @@ describes.realWin(
           async () => {
             storageValue = {
               'amp-consent:abc': {
-                [STORAGE_KEY.STATE]: 1,
-                [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                [STORAGE_KEY_ENUM.STATE]: 1,
+                [STORAGE_KEY_ENUM.PURPOSE_CONSENTS]: {
                   'abc': 1,
                   'hij': 1,
                 },

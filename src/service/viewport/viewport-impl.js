@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {tryResolve} from '#core/data-structures/promise';
 import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
@@ -328,8 +328,8 @@ export class ViewportImpl {
       // Only report when the visibility is "visible" or "prerender".
       const visibilityState = this.ampdoc.getVisibilityState();
       if (
-        visibilityState == VisibilityState.PRERENDER ||
-        visibilityState == VisibilityState.VISIBLE
+        visibilityState == VISIBILITY_STATE_ENUM.PRERENDER ||
+        visibilityState == VISIBILITY_STATE_ENUM.VISIBLE
       ) {
         if (Math.random() < 0.01) {
           dev().error(TAG_, 'viewport has zero dimensions');
@@ -1208,7 +1208,7 @@ function createViewport(ampdoc) {
   let binding;
   if (
     ampdoc.isSingleDoc() &&
-    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED &&
+    getViewportType(win, viewer) == VIEWPORT_TYPE_ENUM.NATURAL_IOS_EMBED &&
     !IS_SXG
   ) {
     binding = new ViewportBindingIosEmbedWrapper_(win);
@@ -1222,7 +1222,7 @@ function createViewport(ampdoc) {
  * The type of the viewport.
  * @enum {string}
  */
-const ViewportType = {
+const VIEWPORT_TYPE_ENUM = {
   /**
    * Viewer leaves sizing and scrolling up to the AMP document's window.
    */
@@ -1248,7 +1248,7 @@ function getViewportType(win, viewer) {
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
   if (getMode(win).test && isIframedIos) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return VIEWPORT_TYPE_ENUM.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
@@ -1257,9 +1257,9 @@ function getViewportType(win, viewer) {
     viewer.isEmbedded() &&
     !viewer.hasCapability('iframeScroll')
   ) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return VIEWPORT_TYPE_ENUM.NATURAL_IOS_EMBED;
   }
-  return ViewportType.NATURAL;
+  return VIEWPORT_TYPE_ENUM.NATURAL;
 }
 
 /**

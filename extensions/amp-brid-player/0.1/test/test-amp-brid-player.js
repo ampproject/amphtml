@@ -3,7 +3,7 @@ import {Services} from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 
-import {VideoEvents} from '../../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-brid-player',
@@ -166,22 +166,22 @@ describes.realWin(
       const iframe = bc.querySelector('iframe');
       return Promise.resolve()
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.PLAYING);
+          const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.PLAYING);
           sendFakeMessage(impl, iframe, 'trigger|play');
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.MUTED);
+          const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.MUTED);
           sendFakeMessage(impl, iframe, 'volume|0');
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.PAUSE);
+          const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.PAUSE);
           sendFakeMessage(impl, iframe, 'trigger|pause');
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+          const p = listenOncePromise(bc, VIDEO_EVENTS_ENUM.UNMUTED);
           sendFakeMessage(impl, iframe, 'volume|1');
           return p;
         });

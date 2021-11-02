@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
 import {getChildJsonConfig} from '#core/dom';
 import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
 import {clamp} from '#core/math';
@@ -11,7 +11,7 @@ import {dev, userAssert} from '#utils/log';
 
 import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {WebAnimationService} from './web-animation-service';
-import {WebAnimationPlayState} from './web-animation-types';
+import {WEB_ANIMATION_PLAY_STATE_ENUM} from './web-animation-types';
 import {Builder} from './web-animations';
 
 import {Pass} from '../../../src/pass';
@@ -122,43 +122,47 @@ export class AmpAnimation extends AMP.BaseElement {
     this.registerDefaultAction(
       this.startAction_.bind(this),
       'start',
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'restart',
       this.restartAction_.bind(this),
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
-    this.registerAction('pause', this.pauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction(
+      'pause',
+      this.pauseAction_.bind(this),
+      ACTION_TRUST_ENUM.LOW
+    );
     this.registerAction(
       'resume',
       this.resumeAction_.bind(this),
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'togglePause',
       this.togglePauseAction_.bind(this),
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'seekTo',
       this.seekToAction_.bind(this),
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'reverse',
       this.reverseAction_.bind(this),
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'finish',
       this.finishAction_.bind(this),
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
     this.registerAction(
       'cancel',
       this.cancelAction_.bind(this),
-      ActionTrust.LOW
+      ACTION_TRUST_ENUM.LOW
     );
   }
 
@@ -261,7 +265,9 @@ export class AmpAnimation extends AMP.BaseElement {
     }
     return this.createRunnerIfNeeded_().then(() => {
       if (this.visible_) {
-        if (this.runner_.getPlayState() == WebAnimationPlayState.PAUSED) {
+        if (
+          this.runner_.getPlayState() == WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
+        ) {
           return this.startOrResume_();
         } else {
           this.pause_();
@@ -494,11 +500,11 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 
   /**
-   * @param {!WebAnimationPlayState} playState
+   * @param {!WEB_ANIMATION_PLAY_STATE_ENUM} playState
    * @private
    */
   playStateChanged_(playState) {
-    if (playState == WebAnimationPlayState.FINISHED) {
+    if (playState == WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED) {
       this.finish_();
     }
   }

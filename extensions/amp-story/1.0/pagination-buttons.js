@@ -1,11 +1,11 @@
 import {
-  Action,
-  StateProperty,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
+import {ADVANCEMENT_MODE_ENUM} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
 
@@ -21,7 +21,7 @@ const BackButtonStates = {
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
-    label: LocalizedStringId.AMP_STORY_PREVIOUS_PAGE,
+    label: LOCALIZED_STRING_ID_ENUM.AMP_STORY_PREVIOUS_PAGE,
   },
 };
 
@@ -31,17 +31,17 @@ const ForwardButtonStates = {
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_PAGE,
+    label: LOCALIZED_STRING_ID_ENUM.AMP_STORY_NEXT_PAGE,
   },
   NEXT_STORY: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_STORY,
+    label: LOCALIZED_STRING_ID_ENUM.AMP_STORY_NEXT_STORY,
   },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
-    label: LocalizedStringId.AMP_STORY_REPLAY,
+    label: LOCALIZED_STRING_ID_ENUM.AMP_STORY_REPLAY,
   },
 };
 
@@ -125,8 +125,8 @@ class PaginationButton {
     e.preventDefault();
 
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
-      AdvancementMode.MANUAL_ADVANCE
+      ACTION_ENUM.SET_ADVANCEMENT_MODE,
+      ADVANCEMENT_MODE_ENUM.MANUAL_ADVANCE
     );
 
     if (this.state_.triggers) {
@@ -193,17 +193,17 @@ export class PaginationButtons {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
+      STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX,
       (pageIndex) => {
         this.onCurrentPageIndexUpdate_(pageIndex);
       }
     );
 
     this.storeService_.subscribe(
-      StateProperty.PAGE_IDS,
+      STATE_PROPERTY_ENUM.PAGE_IDS,
       () => {
         const currentPageIndex = Number(
-          this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+          this.storeService_.get(STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX)
         );
         this.onCurrentPageIndexUpdate_(currentPageIndex);
       },
@@ -211,7 +211,7 @@ export class PaginationButtons {
     );
 
     this.storeService_.subscribe(
-      StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+      STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
@@ -223,7 +223,9 @@ export class PaginationButtons {
    * @private
    */
   onCurrentPageIndexUpdate_(pageIndex) {
-    const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    const totalPages = this.storeService_.get(
+      STATE_PROPERTY_ENUM.PAGE_IDS
+    ).length;
 
     if (pageIndex === 0) {
       this.backButton_.updateState(BackButtonStates.HIDDEN);

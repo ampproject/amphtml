@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {LAYOUT_ENUM} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 
@@ -17,6 +17,6 @@ export class AmpEmbedlyKey extends PreactBaseElement {
         isExperimentOn(this.win, 'bento-embedly-card'),
       'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
     );
-    return layout === Layout.NODISPLAY;
+    return layout === LAYOUT_ENUM.NODISPLAY;
   }
 }

@@ -22,7 +22,7 @@ const NON_DATA_ATTRIBUTE_ALLOWLIST = {
  * Indicates attributes from config object for different ad formats.
  * @enum {string}
  */
-export const Attributes = {
+export const ATTRIBUTES_ENUM = {
   // Attributes from config object which should be added on any ads.
   BASE_ATTRIBUTES: 'attributes',
   // Attributes from config object which should be added on anchor ads.

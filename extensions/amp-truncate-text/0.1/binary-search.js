@@ -5,7 +5,7 @@ import {devAssert} from '#utils/log';
  * adjacent index.
  * @enum {number}
  */
-export const BinarySearchPreference = {
+export const BINARY_SEARCH_PREFERENCE_ENUM = {
   NEXT: 1,
   PREV: 2,
 };
@@ -15,7 +15,7 @@ export const BinarySearchPreference = {
  * immediately or find the rightmost or leftmost match.
  * @enum {number}
  */
-export const BinarySearchStop = {
+export const BINARY_SEARCH_STOP_ENUM = {
   IMMEDIATE: 0,
   RIGHT: 1,
   LEFT: 2,
@@ -45,8 +45,8 @@ export function binarySearch(
   start,
   end,
   condition,
-  stop = BinarySearchStop.IMMEDIATE,
-  preference = BinarySearchPreference.NEXT
+  stop = BINARY_SEARCH_STOP_ENUM.IMMEDIATE,
+  preference = BINARY_SEARCH_PREFERENCE_ENUM.NEXT
 ) {
   devAssert(start <= end);
 
@@ -59,12 +59,14 @@ export function binarySearch(
     const mid = low + Math.floor((high - low) / 2);
     const res = condition(mid);
 
-    if (res > 0 || (res == 0 && stop == BinarySearchStop.RIGHT)) {
-      prefIndex = preference == BinarySearchPreference.PREV ? mid : prefIndex;
+    if (res > 0 || (res == 0 && stop == BINARY_SEARCH_STOP_ENUM.RIGHT)) {
+      prefIndex =
+        preference == BINARY_SEARCH_PREFERENCE_ENUM.PREV ? mid : prefIndex;
       match = res == 0 ? mid : match;
       low = mid + 1;
-    } else if (res < 0 || (res == 0 && stop == BinarySearchStop.LEFT)) {
-      prefIndex = preference == BinarySearchPreference.NEXT ? mid : prefIndex;
+    } else if (res < 0 || (res == 0 && stop == BINARY_SEARCH_STOP_ENUM.LEFT)) {
+      prefIndex =
+        preference == BINARY_SEARCH_PREFERENCE_ENUM.NEXT ? mid : prefIndex;
       match = res == 0 ? mid : match;
       high = mid - 1;
     } else {
@@ -84,7 +86,7 @@ export function binarySearch(
     ? prefIndex
     : // If we stopped, high is either less than or equal to low. So if we have
     // a high preference, actually return the current value of low.
-    preference == BinarySearchPreference.NEXT
+    preference == BINARY_SEARCH_PREFERENCE_ENUM.NEXT
     ? low
     : high;
   return -(index + 1);

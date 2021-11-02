@@ -1,11 +1,11 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
 import {getData} from '#utils/event-helper';
 
-import {ENDPOINTS} from './constants';
+import {ENDPOINTS_ENUM} from './constants';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
 
@@ -115,7 +115,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   getLinkmateOptions_() {
-    const fetchUrl = ENDPOINTS.NRTV_CONFIG_ENDPOINT.replace(
+    const fetchUrl = ENDPOINTS_ENUM.NRTV_CONFIG_ENDPOINT.replace(
       '.nrtv_slug.',
       this.linkmateOptions_.nrtvSlug
     );
@@ -141,12 +141,12 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   postPageImpression_() {
     // When using layout='nodisplay' manually trigger CustomEventReporterBuilder
-    this.signals().signal(CommonSignals.LOAD_START);
+    this.signals().signal(COMMON_SIGNALS_ENUM.LOAD_START);
     const payload = this.buildPageImpressionPayload_();
 
     const builder = new CustomEventReporterBuilder(this.element);
 
-    builder.track('page-impression', ENDPOINTS.PAGE_IMPRESSION_ENDPOINT);
+    builder.track('page-impression', ENDPOINTS_ENUM.PAGE_IMPRESSION_ENDPOINT);
 
     builder.setTransportConfig(
       dict({

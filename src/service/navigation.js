@@ -38,7 +38,7 @@ const AMP_CUSTOM_LINKER_TARGET = '__AMP_CUSTOM_LINKER_TARGET__';
  * @enum {number} Priority reserved for extensions in anchor mutations.
  * The higher the priority, the sooner it's invoked.
  */
-export const Priority = {
+export const PRIORITY_ENUM = {
   LINK_REWRITER_MANAGER: 0,
   ANALYTICS_LINKER: 2,
 };

@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
@@ -41,7 +41,7 @@ export let AmpDocOptions;
  * Private ampdoc signals.
  * @enum {string}
  */
-const AmpDocSignals = {
+const AMP_DOC_SIGNALS_ENUM = {
   // A complete preinstalled list of extensions is known.
   EXTENSIONS_KNOWN: '-ampdoc-ext-known',
   // Signals the document has become visible for the first time.
@@ -258,7 +258,7 @@ export class AmpDoc {
     const paramsVisibilityState = this.params_['visibilityState'];
     devAssert(
       !paramsVisibilityState ||
-        isEnumValue(VisibilityState, paramsVisibilityState)
+        isEnumValue(VISIBILITY_STATE_ENUM, paramsVisibilityState)
     );
 
     /** @private {?VisibilityState} */
@@ -443,7 +443,7 @@ export class AmpDoc {
    * @restricted
    */
   setExtensionsKnown() {
-    this.signals_.signal(AmpDocSignals.EXTENSIONS_KNOWN);
+    this.signals_.signal(AMP_DOC_SIGNALS_ENUM.EXTENSIONS_KNOWN);
   }
 
   /**
@@ -451,7 +451,7 @@ export class AmpDoc {
    * @return {!Promise}
    */
   whenExtensionsKnown() {
-    return this.signals_.whenSignal(AmpDocSignals.EXTENSIONS_KNOWN);
+    return this.signals_.whenSignal(AMP_DOC_SIGNALS_ENUM.EXTENSIONS_KNOWN);
   }
 
   /**
@@ -569,9 +569,9 @@ export class AmpDoc {
     );
 
     // Parent visibility: pick the first non-visible state.
-    let parentVisibilityState = VisibilityState.VISIBLE;
+    let parentVisibilityState = VISIBILITY_STATE_ENUM.VISIBLE;
     for (let p = this.parent_; p; p = p.getParent()) {
-      if (p.getVisibilityState() != VisibilityState.VISIBLE) {
+      if (p.getVisibilityState() != VISIBILITY_STATE_ENUM.VISIBLE) {
         parentVisibilityState = p.getVisibilityState();
         break;
       }
@@ -580,47 +580,47 @@ export class AmpDoc {
     // Pick the most restricted visibility state.
     let visibilityState;
     const visibilityStateOverride =
-      this.visibilityStateOverride_ || VisibilityState.VISIBLE;
+      this.visibilityStateOverride_ || VISIBILITY_STATE_ENUM.VISIBLE;
     if (
-      visibilityStateOverride == VisibilityState.VISIBLE &&
-      parentVisibilityState == VisibilityState.VISIBLE &&
-      naturalVisibilityState == VisibilityState.VISIBLE
+      visibilityStateOverride == VISIBILITY_STATE_ENUM.VISIBLE &&
+      parentVisibilityState == VISIBILITY_STATE_ENUM.VISIBLE &&
+      naturalVisibilityState == VISIBILITY_STATE_ENUM.VISIBLE
     ) {
-      visibilityState = VisibilityState.VISIBLE;
+      visibilityState = VISIBILITY_STATE_ENUM.VISIBLE;
     } else if (
-      naturalVisibilityState == VisibilityState.HIDDEN &&
-      visibilityStateOverride == VisibilityState.PAUSED
+      naturalVisibilityState == VISIBILITY_STATE_ENUM.HIDDEN &&
+      visibilityStateOverride == VISIBILITY_STATE_ENUM.PAUSED
     ) {
       // Hidden document state overrides "paused".
       visibilityState = naturalVisibilityState;
     } else if (
-      visibilityStateOverride == VisibilityState.PAUSED ||
-      visibilityStateOverride == VisibilityState.INACTIVE
+      visibilityStateOverride == VISIBILITY_STATE_ENUM.PAUSED ||
+      visibilityStateOverride == VISIBILITY_STATE_ENUM.INACTIVE
     ) {
       visibilityState = visibilityStateOverride;
     } else if (
-      parentVisibilityState == VisibilityState.PAUSED ||
-      parentVisibilityState == VisibilityState.INACTIVE
+      parentVisibilityState == VISIBILITY_STATE_ENUM.PAUSED ||
+      parentVisibilityState == VISIBILITY_STATE_ENUM.INACTIVE
     ) {
       visibilityState = parentVisibilityState;
     } else if (
-      visibilityStateOverride == VisibilityState.PRERENDER ||
-      naturalVisibilityState == VisibilityState.PRERENDER ||
-      parentVisibilityState == VisibilityState.PRERENDER
+      visibilityStateOverride == VISIBILITY_STATE_ENUM.PRERENDER ||
+      naturalVisibilityState == VISIBILITY_STATE_ENUM.PRERENDER ||
+      parentVisibilityState == VISIBILITY_STATE_ENUM.PRERENDER
     ) {
-      visibilityState = VisibilityState.PRERENDER;
+      visibilityState = VISIBILITY_STATE_ENUM.PRERENDER;
     } else {
-      visibilityState = VisibilityState.HIDDEN;
+      visibilityState = VISIBILITY_STATE_ENUM.HIDDEN;
     }
 
     if (this.visibilityState_ != visibilityState) {
       this.visibilityState_ = visibilityState;
-      if (visibilityState == VisibilityState.VISIBLE) {
+      if (visibilityState == VISIBILITY_STATE_ENUM.VISIBLE) {
         this.lastVisibleTime_ = Date.now();
-        this.signals_.signal(AmpDocSignals.FIRST_VISIBLE);
-        this.signals_.signal(AmpDocSignals.NEXT_VISIBLE);
+        this.signals_.signal(AMP_DOC_SIGNALS_ENUM.FIRST_VISIBLE);
+        this.signals_.signal(AMP_DOC_SIGNALS_ENUM.NEXT_VISIBLE);
       } else {
-        this.signals_.reset(AmpDocSignals.NEXT_VISIBLE);
+        this.signals_.reset(AMP_DOC_SIGNALS_ENUM.NEXT_VISIBLE);
       }
       this.visibilityStateHandlers_.fire();
     }
@@ -633,7 +633,7 @@ export class AmpDoc {
    */
   whenFirstVisible() {
     return this.signals_
-      .whenSignal(AmpDocSignals.FIRST_VISIBLE)
+      .whenSignal(AMP_DOC_SIGNALS_ENUM.FIRST_VISIBLE)
       .then(() => undefined);
   }
 
@@ -644,7 +644,7 @@ export class AmpDoc {
    */
   whenNextVisible() {
     return this.signals_
-      .whenSignal(AmpDocSignals.NEXT_VISIBLE)
+      .whenSignal(AMP_DOC_SIGNALS_ENUM.NEXT_VISIBLE)
       .then(() => undefined);
   }
 
@@ -655,7 +655,7 @@ export class AmpDoc {
    */
   getFirstVisibleTime() {
     return /** @type {?number} */ (
-      this.signals_.get(AmpDocSignals.FIRST_VISIBLE)
+      this.signals_.get(AMP_DOC_SIGNALS_ENUM.FIRST_VISIBLE)
     );
   }
 
@@ -685,7 +685,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VisibilityState.VISIBLE;
+    return this.visibilityState_ == VISIBILITY_STATE_ENUM.VISIBLE;
   }
 
   /**

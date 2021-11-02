@@ -1,4 +1,4 @@
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
@@ -166,7 +166,7 @@ class AmpSocialShare extends AMP.BaseElement {
    */
   handleKeyPress_(event) {
     const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
+    if (key == KEYS_ENUM.SPACE || key == KEYS_ENUM.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }

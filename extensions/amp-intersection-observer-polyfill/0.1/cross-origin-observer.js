@@ -1,4 +1,4 @@
-import {MessageType} from '#core/3p-frame-messaging';
+import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {WindowInterface} from '#core/window/interface';
 
@@ -27,8 +27,8 @@ export function maybeSetupCrossOriginObserver(win) {
 
   const updater = setupPolyfillUpdater();
   iframeClient.makeRequest(
-    MessageType.SEND_POSITIONS,
-    MessageType.POSITION,
+    MESSAGE_TYPE_ENUM.SEND_POSITIONS,
+    MESSAGE_TYPE_ENUM.POSITION,
     (data) => {
       const boundingClientRect =
         /** @type {!../../../src/layout-rect.LayoutRectDef} */ (

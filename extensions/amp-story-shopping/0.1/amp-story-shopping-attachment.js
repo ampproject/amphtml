@@ -1,4 +1,4 @@
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {LAYOUT_ENUM, applyFillContent} from '#core/dom/layout';
 
 import {AmpStoryPageAttachment} from 'extensions/amp-story/1.0/amp-story-page-attachment';
 
@@ -27,6 +27,6 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == LAYOUT_ENUM.NODISPLAY;
   }
 }

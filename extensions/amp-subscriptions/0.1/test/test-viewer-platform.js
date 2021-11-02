@@ -1,7 +1,7 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
+import {ACTION_ENUM, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
-import {Entitlement, GrantReason} from '../entitlement';
+import {Entitlement, GRANT_REASON_ENUM} from '../entitlement';
 import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '#service';
@@ -39,8 +39,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const actionMap = {
-    [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
-    [Action.LOGIN]: 'https://lipsum.com/login',
+    [ACTION_ENUM.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+    [ACTION_ENUM.LOGIN]: 'https://lipsum.com/login',
   };
   const serviceConfig = {
     'serviceId': 'local',
@@ -228,7 +228,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         entitlementData.products.indexOf(currentProductId) !== -1
       );
       expect(resolvedEntitlement.grantReason).to.be.equal(
-        GrantReason.SUBSCRIBER
+        GRANT_REASON_ENUM.SUBSCRIBER
       );
       // raw should be the data which was resolved via
       // sendMessageAwaitResponse.
@@ -253,7 +253,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         entitlementData.products.indexOf(currentProductId) !== -1
       );
       expect(resolvedEntitlement.grantReason).to.be.equal(
-        GrantReason.SUBSCRIBER
+        GRANT_REASON_ENUM.SUBSCRIBER
       );
       // raw should be the data which was resolved via
       // sendMessageAwaitResponse.
@@ -296,7 +296,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         expect(resolvedEntitlement.service).to.equal('local');
         expect(resolvedEntitlement.granted).to.be.equal(true);
         expect(resolvedEntitlement.grantReason).to.be.equal(
-          GrantReason.METERING
+          GRANT_REASON_ENUM.METERING
         );
         // raw should be the data which was resolved via
         // sendMessageAwaitResponse.
@@ -326,7 +326,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
         expect(resolvedEntitlement.service).to.equal('local');
         expect(resolvedEntitlement.granted).to.be.equal(true);
         expect(resolvedEntitlement.grantReason).to.be.equal(
-          GrantReason.METERING
+          GRANT_REASON_ENUM.METERING
         );
         // raw should be the data which was resolved via
         // sendMessageAwaitResponse.

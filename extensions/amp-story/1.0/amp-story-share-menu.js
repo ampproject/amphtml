@@ -1,17 +1,17 @@
 import {
   ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
+  STORY_ANALYTICS_EVENT_ENUM,
   getAnalyticsService,
 } from './story-analytics';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  ACTION_ENUM,
+  STATE_PROPERTY_ENUM,
+  UI_TYPE_ENUM,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {Keys} from '#core/constants/key-codes';
-import {LocalizedStringId} from '#service/localization/strings';
+import {KEYS_ENUM} from '#core/constants/key-codes';
+import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {Services} from '#service';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '#core/dom/query';
@@ -159,7 +159,10 @@ export class ShareMenu {
     );
     this.closeButton_.setAttribute(
       'aria-label',
-      localize(this.parentEl_, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
+      localize(
+        this.parentEl_,
+        LOCALIZED_STRING_ID_ENUM.AMP_STORY_CLOSE_BUTTON_LABEL
+      )
     );
 
     this.initializeListeners_();
@@ -184,16 +187,19 @@ export class ShareMenu {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      STATE_PROPERTY_ENUM.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
-      this.onShareMenuStateUpdate_(isOpen);
-    });
+    this.storeService_.subscribe(
+      STATE_PROPERTY_ENUM.SHARE_MENU_STATE,
+      (isOpen) => {
+        this.onShareMenuStateUpdate_(isOpen);
+      }
+    );
 
     // Don't listen to click events if the system share is supported, since the
     // native layer handles all the UI interactions.
@@ -203,7 +209,7 @@ export class ShareMenu {
       );
 
       this.win_.addEventListener('keyup', (event) => {
-        if (event.key == Keys.ESCAPE) {
+        if (event.key == KEYS_ENUM.ESCAPE) {
           event.preventDefault();
           this.close_();
         }
@@ -237,7 +243,9 @@ export class ShareMenu {
     }
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
     this.analyticsService_.triggerEvent(
-      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      isOpen
+        ? STORY_ANALYTICS_EVENT_ENUM.OPEN
+        : STORY_ANALYTICS_EVENT_ENUM.CLOSE,
       this.element_
     );
   }
@@ -266,7 +274,7 @@ export class ShareMenu {
    */
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
-      uiState !== UIType.MOBILE
+      uiState !== UI_TYPE_ENUM.MOBILE
         ? this.element_.setAttribute('desktop', '')
         : this.element_.removeAttribute('desktop');
     });
@@ -277,6 +285,6 @@ export class ShareMenu {
    * @private
    */
   close_() {
-    this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
+    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, false);
   }
 }

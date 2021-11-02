@@ -1,6 +1,6 @@
 import {CMP_CONFIG} from './cmps';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {GEO_IN_GROUP_ENUM} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {childElementByTag} from '#core/dom/query';
 import {deepMerge, hasOwn, map} from '#core/types/object';
@@ -186,7 +186,9 @@ export class ConsentConfig {
       const geoGroups = Object.keys(config['geoOverride']);
       // Stop at the first group that the geoService says we're in and then merge configs.
       for (let i = 0; i < geoGroups.length; i++) {
-        if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+        if (
+          geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP_ENUM.IN
+        ) {
           const geoConfig = config['geoOverride'][geoGroups[i]];
           if (hasOwn(geoConfig, 'consentInstanceId')) {
             user().error(
@@ -354,10 +356,10 @@ export function expandPolicyConfig(policyConfig, consentId) {
 
   // TODO(@zhouyx): unblockOn is internal now.
   const unblockOnAll = [
-    CONSENT_POLICY_STATE.UNKNOWN,
-    CONSENT_POLICY_STATE.SUFFICIENT,
-    CONSENT_POLICY_STATE.INSUFFICIENT,
-    CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED,
+    CONSENT_POLICY_STATE_ENUM.UNKNOWN,
+    CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
+    CONSENT_POLICY_STATE_ENUM.INSUFFICIENT,
+    CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
   ];
 
   const predefinedNone = {

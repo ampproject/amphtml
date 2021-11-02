@@ -1,8 +1,8 @@
 import {
-  CONSENT_ITEM_STATE,
+  CONSENT_ITEM_STATE_ENUM,
   ConsentInfoDef,
   ConsentMetadataDef,
-  PURPOSE_CONSENT_STATE,
+  PURPOSE_CONSENT_STATE_ENUM,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
@@ -151,8 +151,8 @@ export class ConsentStateManager {
         return;
       }
       const value = !!purposeMap[purpose]
-        ? PURPOSE_CONSENT_STATE.ACCEPTED
-        : PURPOSE_CONSENT_STATE.REJECTED;
+        ? PURPOSE_CONSENT_STATE_ENUM.ACCEPTED
+        : PURPOSE_CONSENT_STATE_ENUM.REJECTED;
       this.purposeConsents_[purpose] = value;
     });
   }
@@ -174,7 +174,7 @@ export class ConsentStateManager {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
     return this.instance_.get().then((info) => {
       if (hasDirtyBit(info)) {
-        return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+        return constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
       }
       return info;
     });
@@ -361,7 +361,7 @@ export class ConsentInstance {
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const calculatedState = recalculateConsentStateValue(state, localState);
 
-    if (state === CONSENT_ITEM_STATE.DISMISSED) {
+    if (state === CONSENT_ITEM_STATE_ENUM.DISMISSED) {
       // If state is dismissed, use the old consent string, metadata,
       // and puporse consents.
       this.localConsentInfo_ = constructConsentInfo(
@@ -430,7 +430,7 @@ export class ConsentInstance {
         return;
       }
 
-      if (consentInfo['consentState'] === CONSENT_ITEM_STATE.UNKNOWN) {
+      if (consentInfo['consentState'] === CONSENT_ITEM_STATE_ENUM.UNKNOWN) {
         // Remove stored value if the consentState is unknown
         // Do not consilidate with the value == null check below,
         // because UNKNOWN and DISMISS are different
@@ -479,7 +479,7 @@ export class ConsentInstance {
         if (hasDirtyBit(consentInfo)) {
           // clear stored value.
           this.sendUpdateHrefRequest_(
-            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
+            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN)
           );
           storage.remove(this.storageKey_);
           this.savedConsentInfo_ = null;
@@ -492,7 +492,7 @@ export class ConsentInstance {
       })
       .catch((e) => {
         dev().error(TAG, 'Failed to read storage', e);
-        return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+        return constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
       });
   }
 

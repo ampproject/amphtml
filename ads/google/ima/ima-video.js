@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
 import {getData} from '#utils/event-helper';
@@ -15,7 +15,7 @@ import {cssText} from '../../../build/amp-ima-video-iframe.css';
  * @enum {number}
  * @private
  */
-const PlayerStates = {
+const PLAYER_STATES_ENUM = {
   PLAYING: 1,
   PAUSED: 2,
 };
@@ -622,11 +622,11 @@ function onOverlayButtonTouchMove() {
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
-  if (consentState == CONSENT_POLICY_STATE.UNKNOWN) {
+  if (consentState == CONSENT_POLICY_STATE_ENUM.UNKNOWN) {
     // We're unaware of the user's consent state - do not request ads.
     imaLoadAllowed = false;
     return;
-  } else if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
+  } else if (consentState == CONSENT_POLICY_STATE_ENUM.INSUFFICIENT) {
     // User has provided consent state but has not consented to personalized
     // ads.
     adsRequest.adTagUrl += '&npa=1';
@@ -823,7 +823,7 @@ export function onContentPauseRequested(global) {
     adsManagerHeightOnLoad = null;
   }
   adsActive = true;
-  playerState = PlayerStates.PLAYING;
+  playerState = PLAYER_STATES_ENUM.PLAYING;
   postMessage({event: VideoEvents.AD_START});
   toggle(elements['adContainer'], true);
   showAdControls();
@@ -871,7 +871,7 @@ export function onContentResumeRequested() {
  */
 export function onAdPaused() {
   toggleRootDataAttribute('playing', false);
-  playerState = PlayerStates.PAUSE;
+  playerState = PLAYER_STATES_ENUM.PAUSE;
 }
 
 /**
@@ -883,7 +883,7 @@ export function onAdPaused() {
  */
 export function onAdResumed() {
   toggleRootDataAttribute('playing', true);
-  playerState = PlayerStates.PLAYING;
+  playerState = PLAYER_STATES_ENUM.PLAYING;
 }
 
 /**
@@ -1073,7 +1073,7 @@ function getPagePosition(el) {
  * @visibleForTesting
  */
 export function onPlayPauseClick() {
-  if (playerState == PlayerStates.PLAYING) {
+  if (playerState == PLAYER_STATES_ENUM.PLAYING) {
     pauseVideo();
   } else {
     playVideo();
@@ -1095,7 +1095,7 @@ export function playVideo() {
     showControls();
     video.play();
   }
-  playerState = PlayerStates.PLAYING;
+  playerState = PLAYER_STATES_ENUM.PLAYING;
   postMessage({event: VideoEvents.PLAYING});
   toggleRootDataAttribute('playing', true);
 }
@@ -1120,7 +1120,7 @@ export function pauseVideo(event = null) {
       fullscreen = false;
     }
   }
-  playerState = PlayerStates.PAUSED;
+  playerState = PLAYER_STATES_ENUM.PAUSED;
   postMessage({event: VideoEvents.PAUSE});
   toggleRootDataAttribute('playing', false);
 }
@@ -1308,7 +1308,7 @@ export function showControls(opt_adsForce) {
   }
 
   // Hide controls after 3 seconds
-  if (playerState == PlayerStates.PLAYING) {
+  if (playerState == PLAYER_STATES_ENUM.PLAYING) {
     // Reset hide controls timer.
     // Be sure to keep the timer greater than showControlsThrottled.
     clearTimeout(hideControlsTimeout);
@@ -1442,7 +1442,7 @@ export function getPropertiesForTesting() {
     interactEvent,
     playbackStarted,
     playerState,
-    PlayerStates,
+    PLAYER_STATES_ENUM,
     uiTicker,
     hideControlsQueued,
     icons,

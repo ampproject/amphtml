@@ -1,4 +1,4 @@
-import {Keys} from '#core/constants/key-codes';
+import {KEYS_ENUM} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {isAmp4Email} from '#core/document/format';
 import {toggleAttribute} from '#core/dom';
@@ -102,7 +102,7 @@ export class CarouselControls {
     button.classList.add(className);
     button.setAttribute('role', this.ariaRole_);
     button.onkeydown = (event) => {
-      if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
+      if (event.key == KEYS_ENUM.ENTER || event.key == KEYS_ENUM.SPACE) {
         if (!event.defaultPrevented) {
           event.preventDefault();
           onInteraction();

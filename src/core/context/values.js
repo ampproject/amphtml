@@ -10,7 +10,7 @@ const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
 
 /** @enum {number} */
-const Pending = {
+const PENDING_ENUM = {
   NOT_PENDING: 0,
   PENDING: 1,
   PENDING_REFRESH_PARENT: 2,
@@ -381,7 +381,7 @@ export class Values {
         prop,
         subscribers: [],
         value: undefined,
-        pending: Pending.NOT_PENDING,
+        pending: PENDING_ENUM.NOT_PENDING,
         counter: 0,
         depValues: deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY,
         parentValue: undefined,
@@ -391,8 +391,8 @@ export class Values {
         ping: (refreshParent) => {
           if (this.isConnected_()) {
             const pending = refreshParent
-              ? Pending.PENDING_REFRESH_PARENT
-              : Pending.PENDING;
+              ? PENDING_ENUM.PENDING_REFRESH_PARENT
+              : PENDING_ENUM.PENDING;
             used.pending = Math.max(used.pending, pending);
             this.checkUpdates_();
           }
@@ -476,13 +476,13 @@ export class Values {
     do {
       updated = 0;
       usedByKey.forEach((used) => {
-        if (used.pending != Pending.NOT_PENDING) {
+        if (used.pending != PENDING_ENUM.NOT_PENDING) {
           const {key} = used.prop;
           used.counter++;
           if (used.counter > 5) {
             // A simple protection from infinte loops.
             rethrowAsync(`cyclical prop: ${key}`);
-            used.pending = Pending.NOT_PENDING;
+            used.pending = PENDING_ENUM.NOT_PENDING;
             return;
           }
           updated++;
@@ -499,7 +499,7 @@ export class Values {
   tryUpdate_(used) {
     // The value is not pending anymore. If any of the dependencies will remain
     // unresolved, we will simply need to recomputed it.
-    const refreshParent = used.pending == Pending.PENDING_REFRESH_PARENT;
+    const refreshParent = used.pending == PENDING_ENUM.PENDING_REFRESH_PARENT;
 
     let newValue;
     try {
@@ -513,7 +513,7 @@ export class Values {
 
     // Reset pending flag. It's good to reset it after the calculation to
     // ensure that deps are automatically covered.
-    used.pending = Pending.NOT_PENDING;
+    used.pending = PENDING_ENUM.NOT_PENDING;
 
     // Check if the value has been updated.
     this.maybeUpdated_(used, newValue);

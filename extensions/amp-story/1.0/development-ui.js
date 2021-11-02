@@ -1,4 +1,4 @@
-import {LogLevel, dev} from '#utils/log';
+import {LOG_LEVEL_ENUM, dev} from '#utils/log';
 import {Services} from '#service';
 import {isArray} from '#core/types';
 import {removeChildren} from '#core/dom';
@@ -114,9 +114,9 @@ export class DevelopmentModeLogButtonSet {
     }
 
     switch (logEntry.level) {
-      case LogLevel.ERROR:
+      case LOG_LEVEL_ENUM.ERROR:
         return this.errorButton_;
-      case LogLevel.WARN:
+      case LOG_LEVEL_ENUM.WARN:
         return this.warningButton_;
       default:
         return null;
@@ -221,9 +221,9 @@ export class DevelopmentModeLog {
    */
   getCssLogLevelClass_(logLevel) {
     switch (logLevel) {
-      case LogLevel.WARN:
+      case LOG_LEVEL_ENUM.WARN:
         return 'i-amphtml-story-developer-log-entry-warning';
-      case LogLevel.ERROR:
+      case LOG_LEVEL_ENUM.ERROR:
         return 'i-amphtml-story-developer-log-entry-error';
       default:
         return null;

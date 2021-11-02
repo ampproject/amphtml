@@ -6,7 +6,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {GEO_IN_GROUP_ENUM} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {
   AmpUserNotification,
   UserNotificationManager,
@@ -42,8 +42,8 @@ describes.realWin(
         return Promise.resolve({
           isInCountryGroup: (group) =>
             ISOCountryGroups.indexOf(group) >= 0
-              ? GEO_IN_GROUP.IN
-              : GEO_IN_GROUP.NOT_IN,
+              ? GEO_IN_GROUP_ENUM.IN
+              : GEO_IN_GROUP_ENUM.NOT_IN,
         });
       });
 

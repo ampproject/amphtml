@@ -1,6 +1,6 @@
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY, listen} from '#utils/event-helper';
 import {Services} from '#service';
-import {TickLabel} from '#core/constants/enums';
+import {TICK_LABEL_ENUM} from '#core/constants/enums';
 import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
 import {registerServiceBuilder} from '../../../src/service-helpers';
@@ -10,7 +10,7 @@ import {toArray} from '#core/types/array';
  * Media status.
  * @enum
  */
-const Status = {
+const STATUS_ENUM = {
   ERRORED: 0,
   PAUSED: 1,
   PLAYING: 2,
@@ -21,7 +21,7 @@ const Status = {
  * Cache serving status.
  * @enum
  */
-const CacheState = {
+const CACHE_STATE_ENUM = {
   ORIGIN: 0, // Served from origin.
   ORIGIN_CACHE_MISS: 1, // Served from origin even though cache URL was present.
   CACHE: 2, // Served from cache.
@@ -31,7 +31,7 @@ const CacheState = {
  * Video is first page status.
  * @enum
  */
-const FirstPageState = {
+const FIRST_PAGE_STATE_ENUM = {
   NOT_ON_FIRST_PAGE: 0, // Video is not on the first page.
   ON_FIRST_PAGE: 1, // Video is on the first page.
 };
@@ -147,7 +147,7 @@ export class MediaPerformanceMetricsService {
       media[MEDIA_LOAD_FAILURE_SRC_PROPERTY] === media.currentSrc
     ) {
       mediaEntry.metrics.error = media.error ? media.error.code : 0;
-      mediaEntry.status = Status.ERRORED;
+      mediaEntry.status = STATUS_ENUM.ERRORED;
     }
   }
 
@@ -168,10 +168,10 @@ export class MediaPerformanceMetricsService {
     this.mediaMap_.delete(media);
 
     switch (mediaEntry.status) {
-      case Status.PLAYING:
+      case STATUS_ENUM.PLAYING:
         this.addWatchTime_(mediaEntry);
         break;
-      case Status.WAITING:
+      case STATUS_ENUM.WAITING:
         this.addRebuffer_(mediaEntry);
         break;
     }
@@ -189,20 +189,20 @@ export class MediaPerformanceMetricsService {
     const {media, metrics} = mediaEntry;
 
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_CACHE_STATE,
+      TICK_LABEL_ENUM.VIDEO_CACHE_STATE,
       this.getVideoCacheState_(media)
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_ON_FIRST_PAGE,
+      TICK_LABEL_ENUM.VIDEO_ON_FIRST_PAGE,
       matches(media, `amp-story-page:first-of-type ${media.tagName}`)
-        ? FirstPageState.ON_FIRST_PAGE
-        : FirstPageState.NOT_ON_FIRST_PAGE
+        ? FIRST_PAGE_STATE_ENUM.ON_FIRST_PAGE
+        : FIRST_PAGE_STATE_ENUM.NOT_ON_FIRST_PAGE
     );
 
     // If the media errored.
     if (metrics.error !== null) {
       this.performanceService_.tickDelta(
-        TickLabel.VIDEO_ERROR,
+        TICK_LABEL_ENUM.VIDEO_ERROR,
         metrics.error || 0
       );
       this.performanceService_.flush();
@@ -221,7 +221,7 @@ export class MediaPerformanceMetricsService {
     // If the playback did not start.
     if (!metrics.jointLatency) {
       this.performanceService_.tickDelta(
-        TickLabel.VIDEO_ERROR,
+        TICK_LABEL_ENUM.VIDEO_ERROR,
         5 /* Custom error code */
       );
       this.performanceService_.flush();
@@ -233,24 +233,24 @@ export class MediaPerformanceMetricsService {
     );
 
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_JOINT_LATENCY,
+      TICK_LABEL_ENUM.VIDEO_JOINT_LATENCY,
       metrics.jointLatency
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_WATCH_TIME,
+      TICK_LABEL_ENUM.VIDEO_WATCH_TIME,
       metrics.watchTime
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_REBUFFERS,
+      TICK_LABEL_ENUM.VIDEO_REBUFFERS,
       metrics.rebuffers
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_REBUFFER_RATE,
+      TICK_LABEL_ENUM.VIDEO_REBUFFER_RATE,
       rebufferRate
     );
     if (metrics.rebuffers) {
       this.performanceService_.tickDelta(
-        TickLabel.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
+        TICK_LABEL_ENUM.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }
@@ -266,7 +266,7 @@ export class MediaPerformanceMetricsService {
   getNewMediaEntry_(media, unlisteners) {
     return {
       media,
-      status: Status.PAUSED,
+      status: STATUS_ENUM.PAUSED,
       unlisteners,
       timeStamps: {
         start: Date.now(),
@@ -348,7 +348,7 @@ export class MediaPerformanceMetricsService {
     const mediaEntry = this.mediaMap_.get(media);
 
     mediaEntry.metrics.error = media.error ? media.error.code : 0;
-    mediaEntry.status = Status.ERRORED;
+    mediaEntry.status = STATUS_ENUM.ERRORED;
   }
 
   /**
@@ -358,10 +358,10 @@ export class MediaPerformanceMetricsService {
   onPauseOrEnded_(event) {
     const mediaEntry = this.mediaMap_.get(event.target);
 
-    if (mediaEntry.status === Status.PLAYING) {
+    if (mediaEntry.status === STATUS_ENUM.PLAYING) {
       this.addWatchTime_(mediaEntry);
     }
-    mediaEntry.status = Status.PAUSED;
+    mediaEntry.status = STATUS_ENUM.PAUSED;
   }
 
   /**
@@ -376,12 +376,12 @@ export class MediaPerformanceMetricsService {
       metrics.jointLatency = Date.now() - timeStamps.start;
     }
 
-    if (mediaEntry.status === Status.WAITING) {
+    if (mediaEntry.status === STATUS_ENUM.WAITING) {
       this.addRebuffer_(mediaEntry);
     }
 
     timeStamps.playing = Date.now();
-    mediaEntry.status = Status.PLAYING;
+    mediaEntry.status = STATUS_ENUM.PLAYING;
   }
 
   /**
@@ -392,12 +392,12 @@ export class MediaPerformanceMetricsService {
     const mediaEntry = this.mediaMap_.get(event.target);
     const {timeStamps} = mediaEntry;
 
-    if (mediaEntry.status === Status.PLAYING) {
+    if (mediaEntry.status === STATUS_ENUM.PLAYING) {
       this.addWatchTime_(mediaEntry);
     }
 
     timeStamps.waiting = Date.now();
-    mediaEntry.status = Status.WAITING;
+    mediaEntry.status = STATUS_ENUM.WAITING;
   }
 
   /**
@@ -416,7 +416,7 @@ export class MediaPerformanceMetricsService {
       );
       // Playing source is cached.
       if (isCachedSource && media.currentSrc === source.src) {
-        return CacheState.CACHE;
+        return CACHE_STATE_ENUM.CACHE;
       }
       // Non playing source but is cached. Used to differentiate a cache miss
       // (e.g. cache returned a 40x) vs no cached source at all.
@@ -424,6 +424,8 @@ export class MediaPerformanceMetricsService {
         hasCachedSource = true;
       }
     }
-    return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
+    return hasCachedSource
+      ? CACHE_STATE_ENUM.ORIGIN_CACHE_MISS
+      : CACHE_STATE_ENUM.ORIGIN;
   }
 }

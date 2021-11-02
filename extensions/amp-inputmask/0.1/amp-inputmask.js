@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 
 import {listen} from '#utils/event-helper';
@@ -21,7 +21,7 @@ export class AmpInputmaskService {
     /** @const */
     this.domUpdateUnlistener_ = listen(
       this.ampdoc.getRootNode(),
-      AmpEvents.DOM_UPDATE,
+      AMP_EVENTS_ENUM.DOM_UPDATE,
       () => this.install()
     );
   }

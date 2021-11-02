@@ -1,5 +1,5 @@
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
-import {Entitlement, GrantReason} from './entitlement';
+import {Entitlement, GRANT_REASON_ENUM} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
 import {Services} from '#service';
@@ -178,7 +178,7 @@ export class ViewerSubscriptionPlatform {
             raw: token,
             granted: true,
             grantReason: entitlementObject.subscriptionToken
-              ? GrantReason.SUBSCRIBER
+              ? GRANT_REASON_ENUM.SUBSCRIBER
               : '',
             dataObject: entitlementObject,
             decryptedDocumentKey,
@@ -192,7 +192,7 @@ export class ViewerSubscriptionPlatform {
           source: decodedData['iss'] || '',
           raw: token,
           granted: true,
-          grantReason: GrantReason.METERING,
+          grantReason: GRANT_REASON_ENUM.METERING,
           dataObject: decodedData['metering'],
           decryptedDocumentKey,
         });

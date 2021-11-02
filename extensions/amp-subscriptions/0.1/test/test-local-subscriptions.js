@@ -1,6 +1,6 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
+import {ACTION_ENUM, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
-import {Entitlement, GrantReason} from '../entitlement';
+import {Entitlement, GRANT_REASON_ENUM} from '../entitlement';
 import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
@@ -12,8 +12,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
   let getEncryptedDocumentKeyStub;
 
   const actionMap = {
-    [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
-    [Action.LOGIN]: 'https://lipsum.com/login',
+    [ACTION_ENUM.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+    [ACTION_ENUM.LOGIN]: 'https://lipsum.com/login',
   };
   const service = 'sample-service';
   const source = 'sample-source';
@@ -21,7 +21,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
     service,
     source,
     granted: true,
-    grantReason: GrantReason.SUBSCRIBER,
+    grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
   };
   const readerId = 'reader1';
   const entitlement = Entitlement.parseFromJson(json);
@@ -232,21 +232,21 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
     let actionMap;
     beforeEach(() => {
       actionMap = {
-        [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
-        [Action.LOGIN]: 'https://lipsum.com/login',
+        [ACTION_ENUM.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+        [ACTION_ENUM.LOGIN]: 'https://lipsum.com/login',
         'other': 'https://lipsum.com/other',
       };
     });
 
     it('should check that login action is present', () => {
-      delete actionMap[Action.LOGIN];
+      delete actionMap[ACTION_ENUM.LOGIN];
       expect(() =>
         localSubscriptionPlatform.validateActionMap(actionMap)
       ).to.throw();
     });
 
     it('should check that subscribe action is present', () => {
-      delete actionMap[Action.SUBSCRIBE];
+      delete actionMap[ACTION_ENUM.SUBSCRIBE];
       expect(() =>
         localSubscriptionPlatform.validateActionMap(actionMap)
       ).to.throw();
@@ -269,7 +269,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
     let element;
     beforeEach(() => {
       element = document.createElement('div');
-      element.setAttribute('subscriptions-action', Action.SUBSCRIBE);
+      element.setAttribute('subscriptions-action', ACTION_ENUM.SUBSCRIBE);
       element.setAttribute('subscriptions-service', 'local');
     });
 
@@ -320,7 +320,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
       'should delegate service selection to scoreBasedLogin if no service ' +
         'name is specified for login',
       () => {
-        element.setAttribute('subscriptions-action', Action.LOGIN);
+        element.setAttribute('subscriptions-action', ACTION_ENUM.LOGIN);
         element.removeAttribute('subscriptions-service');
         const platform = {};
         const platformKey = 'platformKey';
@@ -339,7 +339,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
         );
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
+        expect(delegateStub).to.be.calledWith(ACTION_ENUM.LOGIN, platformKey);
       }
     );
 
@@ -347,7 +347,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
       'should delegate service selection to scoreBasedLogin ' +
         'service specified is auto for login',
       () => {
-        element.setAttribute('subscriptions-action', Action.LOGIN);
+        element.setAttribute('subscriptions-action', ACTION_ENUM.LOGIN);
         element.setAttribute('subscriptions-service', 'auto');
         const loginStub = env.sandbox
           .stub(
@@ -366,12 +366,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
           .callsFake(() => platformKey);
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
+        expect(delegateStub).to.be.calledWith(ACTION_ENUM.LOGIN, platformKey);
       }
     );
 
     it('should NOT delegate for scoreBasedLogin for non-login action', () => {
-      element.setAttribute('subscriptions-action', Action.SUBSCRIBE);
+      element.setAttribute('subscriptions-action', ACTION_ENUM.SUBSCRIBE);
       element.setAttribute('subscriptions-service', 'auto');
       const loginStub = env.sandbox.stub(
         localSubscriptionPlatform.serviceAdapter_,
@@ -391,7 +391,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.not.be.called;
       expect(delegateStub).to.not.be.called;
-      expect(executeStub).to.be.calledOnce.calledWith(Action.SUBSCRIBE);
+      expect(executeStub).to.be.calledOnce.calledWith(ACTION_ENUM.SUBSCRIBE);
     });
   });
 

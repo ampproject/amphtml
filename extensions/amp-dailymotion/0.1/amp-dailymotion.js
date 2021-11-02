@@ -1,7 +1,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
+import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
@@ -16,7 +16,7 @@ import {
   isFullscreenElement,
 } from '#core/dom/fullscreen';
 import {
-  DailymotionEvents,
+  DAILYMOTION_EVENTS_ENUM,
   getDailymotionIframeSrc,
   makeDailymotionMessage,
 } from '../dailymotion-api';
@@ -35,7 +35,7 @@ class AmpDailymotion extends AMP.BaseElement {
   constructor(element) {
     super(element);
     /** @private {string} */
-    this.playerState_ = DailymotionEvents.UNSTARTED;
+    this.playerState_ = DAILYMOTION_EVENTS_ENUM.UNSTARTED;
 
     /** @private {?string}  */
     this.videoid_ = null;
@@ -162,36 +162,39 @@ class AmpDailymotion extends AMP.BaseElement {
     }
 
     redispatch(this.element, data['event'], {
-      [DailymotionEvents.API_READY]: VideoEvents.LOAD,
-      [DailymotionEvents.END]: [VideoEvents.ENDED, VideoEvents.PAUSE],
-      [DailymotionEvents.PAUSE]: VideoEvents.PAUSE,
-      [DailymotionEvents.PLAY]: VideoEvents.PLAYING,
+      [DAILYMOTION_EVENTS_ENUM.API_READY]: VIDEO_EVENTS_ENUM.LOAD,
+      [DAILYMOTION_EVENTS_ENUM.END]: [
+        VIDEO_EVENTS_ENUM.ENDED,
+        VIDEO_EVENTS_ENUM.PAUSE,
+      ],
+      [DAILYMOTION_EVENTS_ENUM.PAUSE]: VIDEO_EVENTS_ENUM.PAUSE,
+      [DAILYMOTION_EVENTS_ENUM.PLAY]: VIDEO_EVENTS_ENUM.PLAYING,
     });
 
     switch (data['event']) {
-      case DailymotionEvents.API_READY:
+      case DAILYMOTION_EVENTS_ENUM.API_READY:
         this.playerReadyResolver_(true);
         break;
 
-      case DailymotionEvents.PLAY:
+      case DAILYMOTION_EVENTS_ENUM.PLAY:
         this.playerState_ = data['event'];
         this.pauseHelper_.updatePlaying(true);
         break;
 
-      case DailymotionEvents.PAUSE:
+      case DAILYMOTION_EVENTS_ENUM.PAUSE:
         this.playerState_ = data['event'];
         this.pauseHelper_.updatePlaying(false);
         break;
 
-      case DailymotionEvents.END:
-        this.playerState_ = DailymotionEvents.PAUSE;
+      case DAILYMOTION_EVENTS_ENUM.END:
+        this.playerState_ = DAILYMOTION_EVENTS_ENUM.PAUSE;
         this.pauseHelper_.updatePlaying(false);
         break;
 
-      case DailymotionEvents.VOLUMECHANGE:
+      case DAILYMOTION_EVENTS_ENUM.VOLUMECHANGE:
         const isMuted = data['volume'] == 0 || data['muted'] == 'true';
         if (
-          this.playerState_ == DailymotionEvents.UNSTARTED ||
+          this.playerState_ == DAILYMOTION_EVENTS_ENUM.UNSTARTED ||
           this.muted_ != isMuted
         ) {
           this.muted_ = isMuted;
@@ -199,11 +202,11 @@ class AmpDailymotion extends AMP.BaseElement {
         }
         break;
 
-      case DailymotionEvents.STARTED_BUFFERING:
+      case DAILYMOTION_EVENTS_ENUM.STARTED_BUFFERING:
         this.startedBufferingResolver_(true);
         break;
 
-      case DailymotionEvents.FULLSCREEN_CHANGE:
+      case DAILYMOTION_EVENTS_ENUM.FULLSCREEN_CHANGE:
         this.isFullscreen_ = data['fullscreen'] == 'true';
         break;
 
@@ -268,7 +271,7 @@ class AmpDailymotion extends AMP.BaseElement {
     this.sendCommand_('play');
     // Hack to solve autoplay problem on Chrome Android
     // (first play always fails)
-    if (isAutoplay && this.playerState_ != DailymotionEvents.PAUSE) {
+    if (isAutoplay && this.playerState_ != DAILYMOTION_EVENTS_ENUM.PAUSE) {
       this.startedBufferingPromise_.then(() => {
         this.sendCommand_('play');
       });
@@ -290,7 +293,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.MUTED);
+      dispatchCustomEvent(this.element, VIDEO_EVENTS_ENUM.MUTED);
       this.muted_ = true;
     });
   }
@@ -303,7 +306,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
+      dispatchCustomEvent(this.element, VIDEO_EVENTS_ENUM.UNMUTED);
       this.muted_ = false;
     });
   }
