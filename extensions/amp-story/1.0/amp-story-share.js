@@ -225,7 +225,11 @@ export class ShareWidget {
 
     this.ampdoc_ = ampdoc;
 
-    this.root = renderAsElementForStory(this.win.document, TEMPLATE, this.storyEl);
+    this.root = renderAsElementForStory(
+      this.win.document,
+      TEMPLATE,
+      this.storyEl
+    );
 
     this.loadProviders();
     this.maybeAddLinkShareButton_();
@@ -286,7 +290,10 @@ export class ShareWidget {
       return;
     }
 
-    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url, this.storyEl));
+    Toast.show(
+      this.storyEl,
+      buildCopySuccessfulToast(this.win.document, url, this.storyEl)
+    );
   }
 
   /** @private */
@@ -391,7 +398,11 @@ export class ShareWidget {
    */
   add_(node) {
     const list = devAssert(this.root).lastElementChild;
-    const item = renderAsElementForStory(this.win.document, SHARE_ITEM_TEMPLATE, this.storyEl);
+    const item = renderAsElementForStory(
+      this.win.document,
+      SHARE_ITEM_TEMPLATE,
+      this.storyEl
+    );
 
     item.appendChild(node);
 

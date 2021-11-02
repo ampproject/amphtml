@@ -110,11 +110,19 @@ function renderSingle(doc, elementDef) {
  * @param {!Element} storyEl
  * @return {!Node}
  */
- export function renderSimpleTemplateForStory(doc, elementsDef, storyEl) {
+export function renderSimpleTemplateForStory(doc, elementsDef, storyEl) {
   if (isArray(elementsDef)) {
-    return renderMultiForStory(doc, /** @type {!Array<!ElementDef>} */ (elementsDef), storyEl);
+    return renderMultiForStory(
+      doc,
+      /** @type {!Array<!ElementDef>} */ (elementsDef),
+      storyEl
+    );
   }
-  return renderSingleForStory(doc, /** @type {!ElementDef} */ (elementsDef), storyEl);
+  return renderSingleForStory(
+    doc,
+    /** @type {!ElementDef} */ (elementsDef),
+    storyEl
+  );
 }
 
 /**
@@ -184,7 +192,11 @@ function renderSingleForStory(doc, elementDef, storyEl) {
 
   if (hasOwn(elementDef, 'children')) {
     el.appendChild(
-      renderMultiForStory(doc, /** @type {!Array<!ElementDef>} */ (elementDef.children), storyEl)
+      renderMultiForStory(
+        doc,
+        /** @type {!Array<!ElementDef>} */ (elementDef.children),
+        storyEl
+      )
     );
   }
 
