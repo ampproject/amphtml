@@ -135,15 +135,13 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     element.setAttribute('src', 'https://bar.example/bar.js')
     element.setAttribute('sandboxed', '')
 
-    script.buildCallback()
-
     stubFetch(
       'https://bar.example/bar.js',
       { 'Content-Type': 'application/javascript; charset=UTF-8' },
       'alert(1)'
     )
 
-    service.checkSha384.withArgs('alert(1)').resolves()
+    await script.buildCallback()
     await script.layoutCallback()
     expect(service.checkSha384).not.to.be.called
   });
