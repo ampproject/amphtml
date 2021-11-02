@@ -299,7 +299,7 @@ export class AmpStory extends AMP.BaseElement {
     this.uiState_ = null;
 
     /** @private {boolean} whether the styles were rewritten */
-    this.rewroteStyles_ = false;
+    this.didRewriteStyles_ = false;
   }
 
   /** @override */
@@ -547,10 +547,10 @@ export class AmpStory extends AMP.BaseElement {
   rewriteStyles_() {
     // TODO(#15955): Update this to use CssContext from
     // ../../../extensions/amp-animation/0.1/web-animations.js
-    if (this.rewroteStyles_) {
+    if (this.didRewriteStyles_) {
       return;
     }
-    this.rewroteStyles_ = true;
+    this.didRewriteStyles_ = true;
     const styleEl = this.win.document.querySelector('style[amp-custom]');
     if (styleEl) {
       styleEl.textContent = styleEl.textContent.replace(
