@@ -223,7 +223,7 @@ async function getGraphqlIssueId(token, repo, number) {
 }
 
 /** @enum {string} */
-const PinUnpinOpDef = {pin: 'pin', unpin: 'unpin'};
+const PinUnpinOpDef = {pin: 'pin', unpin: 'unpin'}; // eslint-disable-line local/enums
 
 /**
  * @param {string} token
