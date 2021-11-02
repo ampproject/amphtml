@@ -13,7 +13,6 @@ import {createCustomEvent, listen} from '#utils/event-helper';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {getStyle, setStyle} from '#core/dom/style';
-import {isExperimentOn} from '#experiments';
 import {isFiniteNumber} from '#core/types';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {numeric} from '#core/dom/transition';
@@ -143,20 +142,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    // Keep CSS Scroll Snap points turned on for the following:
-    // - All iOS devices except for 10.3
-    // - All places where the experiment flag is deliberately set.
-    // Conversely turn CSS Scroll Snap points off for the following:
-    // - iOS devices on version 10.3
-    // - Non iOS devices with the flag turned off.
+    // Turn CSS Scroll Snap points off for iOS 10.3, and retains for all other iOS.
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = Services.platformFor(this.win)
-      .getIosVersionString()
-      .startsWith('10.3')
-      ? true
-      : this.isIos_
-      ? false
-      : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
+    this.shouldDisableCssSnap_ =
+      !this.isIos_ || platform.getIosVersionString().startsWith('10.3');
 
     /** @private {boolean} */
     this.hasFirstResizedOccured_ = false;

@@ -104,11 +104,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'amp-carousel-chrome-scroll-snap',
-    name: 'Enables scroll snap on carousel on Chrome browsers',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
-  },
-  {
     id: 'chrome-animation-worklet',
     name: 'Opts-in users into using AnimationWorklet',
     cleanupIssue: 'X',
