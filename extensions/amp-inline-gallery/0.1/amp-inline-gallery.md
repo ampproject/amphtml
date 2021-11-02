@@ -6,22 +6,6 @@ teaser:
   text: Displays multiple similar pieces of content along a horizontal axis, with optional pagination dots and thumbnails.
 ---
 
-<!---
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-inline-gallery
 
 ## Usage
@@ -38,7 +22,7 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
     width="3.6"
     height="2"
     snap-align="center"
-    loop="true"
+    loop
     visible-count="1.2"
     lightbox
   >
@@ -76,7 +60,7 @@ The `<amp-inline-gallery-pagination>` component determines how a pagination idic
 
 The pagination indicator renders as dots when there are eight or fewer slides in the `amp-base-carousel`. For nine or more slides, the pagination indicator renders the current slide number and total number of slides, aligned to the right.
 
-The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the [media attribute](./../../../spec/amp-html-responsive-attributes.md):
+The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the [media attribute](./../../../docs/spec/amp-html-responsive-attributes.md):
 
 ```html
 <amp-inline-gallery layout="container">
@@ -133,7 +117,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
       width="3"
       height="2"
       snap-align="center"
-      loop="true"
+      loop
     >
       <amp-img
         class="slide"
@@ -240,7 +224,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
 ##### Media Queries
 
 The attributes for `<amp-inline-gallery-thumbnails>` can be configured to use different
-options based on a [media query](./../../../spec/amp-html-responsive-attributes.md).
+options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
 ##### `aspect-ratio-height` (optional)
 
@@ -266,4 +250,4 @@ This element includes <a href="https://amp.dev/documentation/guides-and-tutorial
 
 ## Validation
 
-See [amp-inline-gallery rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-inline-gallery/validator-amp-inline-gallery.protoascii) in the AMP validator specification.
+See [amp-inline-gallery rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-inline-gallery/validator-amp-inline-gallery.protoascii) in the AMP validator specification.

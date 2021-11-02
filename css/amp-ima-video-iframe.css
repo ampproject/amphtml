@@ -1,0 +1,201 @@
+
+
+/*
+ * Styles inserted in iframes rendered by <amp-ima-video>.
+ *
+ * .selectorsInThisFile reject naming convention by using camelCase rather than
+ * dash-case, because they're uniform with Javascript references that are more
+ * useful when destructured as such (imaVideo.js).
+ *
+ * We insert this CSS in a standalone document whose namespace is shared only
+ * with the IMA SDK. This unconventional naming is not worth converting to
+ * dash-case during build or runtime, so we keep it.
+ */
+
+[hidden] {
+  display: none !important;
+}
+
+body,
+.video {
+  background: black;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+}
+
+.fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+button {
+  cursor: pointer;
+  appearance: none;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: block;
+}
+
+.controls {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: rgba(7, 20, 30, 0.7);
+  background: linear-gradient(
+    0,
+    rgba(7, 20, 30, 0.7) 0%,
+    rgba(7, 20, 30, 0) 100%
+  );
+  box-sizing: border-box;
+  padding: 10px;
+  padding-top: 60px;
+  color: white;
+  display: flex;
+  font-family: Helvetica, Arial, Sans-serif;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  z-index: 1;
+}
+
+.controls > *:not(:last-child) {
+  margin-right: 20px;
+}
+
+button > svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 14px rgba(0, 0, 0, 0.4));
+  fill: #ffffff;
+}
+
+.countdownWrapper {
+  align-items: center;
+  box-sizing: border-box;
+  display: none;
+  flex-grow: 1;
+  font-size: 12px;
+  height: 20px;
+  overflow: hidden;
+  padding: 5px;
+  text-shadow: 0 0 10px black;
+  white-space: nowrap;
+}
+
+.time {
+  text-align: center;
+  font-size: 14px;
+  text-shadow: 0 0 10px black;
+}
+
+.progress {
+  height: 30px;
+  flex-grow: 1;
+  position: relative;
+  margin: 0 20px;
+}
+
+/* Push the next item as if `.progress` was present */
+.progress[hidden] + * {
+  margin-left: auto;
+}
+
+.progress::after {
+  display: block;
+  content: '';
+  background-color: rgba(255, 255, 255, 0.45);
+  height: 2px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.progressLine {
+  background-color: rgb(255, 255, 255);
+  height: 2px;
+  margin-top: 14px;
+  width: 0%;
+  float: left;
+}
+
+.progressMarker {
+  height: 14px;
+  width: 14px;
+  position: absolute;
+  left: 0%;
+  top: 50%;
+  margin-top: -7px;
+  cursor: pointer;
+  border-radius: 14px;
+  background: white;
+}
+
+.controls > button {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.overlayButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlayButton > svg {
+  max-width: 120px;
+  max-height: 120px;
+}
+
+/* Swap button's icons based on root state. */
+
+/* play/pause  */
+.root:not([data-playing]) .playButton > svg:last-child,
+.root[data-playing] .playButton > svg:first-child,
+/* mute/unmute */
+.root:not([data-muted]) .muteButton > svg:last-child,
+.root[data-muted] .muteButton > svg:first-child {
+  display: none;
+}
+
+/* Ad controls */
+
+.root[data-ad] > .controls {
+  height: 30px;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.root[data-ad] > .controls > button {
+  height: 22px;
+}
+
+.root[data-ad] > .controls .muteButton {
+  margin-right: 10px;
+}
+
+@media screen and (max-width: 400) {
+  .root[data-skippable] > .controls {
+    height: 20px;
+  }
+  .root[data-skippable] > .controls > button {
+    height: 18px;
+  }
+}
+
+/* Show ad controls */
+.root[data-ad] > .controls > .countdownWrapper {
+  display: flex;
+}
+
+/* Hide non-ad controls */
+.root[data-ad] > .controls > .time,
+.root[data-ad] > .controls > .progress {
+  display: none;
+}

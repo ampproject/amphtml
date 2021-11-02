@@ -1,0 +1,76 @@
+PASS
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <title>Instagram examples</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-1.0.js"></script>
+|    <style amp-custom>
+|      body {
+|        background-color: white;
+|        padding: 20px;
+|      }
+|
+|      amp-instagram [overflow] {
+|        position: absolute;
+|        bottom: 0;
+|        text-align: center;
+|        background: #444;
+|        color: white;
+|        padding: 5px;
+|      }
+|    </style>
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|
+|
+|
+|    <h2>Instagram</h2>
+|
+|    <amp-instagram
+|        data-shortcode="fBwFP"
+|        width="381"
+|        height="381"
+|        layout="responsive">
+|    </amp-instagram>
+|
+|    <h2>Instagram with Frame</h2>
+|    <amp-instagram
+|        data-shortcode="BR3g5NDBvBu"
+|        data-default-framing
+|        width="500"
+|        height="500"
+|        layout="responsive">
+|    </amp-instagram>
+|
+|    <h2>Instagram with Frame, Caption and Overflow Element</h2>
+|    <amp-instagram
+|        data-shortcode="BR3g5NDBvBu"
+|        data-captioned
+|        data-default-framing
+|        width="500"
+|        height="500"
+|        layout="responsive">
+|        <div overflow>Show Caption</div>
+|    </amp-instagram>
+|
+|    <h2>Instagram Default Layout</h2>
+|    <amp-instagram
+|        data-shortcode="fBwFP"
+|        width="381"
+|        height="381">
+|    </amp-instagram>
+|
+|    <h3>Instagram Video</h3>
+|    <amp-instagram data-shortcode="ftMW4rmDM_"
+|                   width="300"
+|                   height="300"
+|                   layout="responsive">
+|    </amp-instagram>
+|
+|  </body>
+|  </html>

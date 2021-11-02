@@ -79,4 +79,4 @@ Example:
 
 ## Validation
 
-See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/validator-amp-kaltura-player.protoascii) in the AMP validator specification.
+See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-kaltura-player/validator-amp-kaltura-player.protoascii) in the AMP validator specification.

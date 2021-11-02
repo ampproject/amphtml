@@ -1,26 +1,12 @@
 ---
 $category@: media
+bento: true
+experimental: true
 formats:
   - websites
 teaser:
   text: Displays an Embedly card.
 ---
-
-<!--
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-embedly-card
 
@@ -64,6 +50,15 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
 >
 </amp-embedly-card>
 ```
+
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-embedly-card`, see [**`bento-embedly-card`**](./1.0/README.md).
 
 ## Attributes
 
@@ -129,4 +124,4 @@ extended to AMP components.
 
 ## Validation
 
-See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.
+See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.

@@ -1,41 +1,12 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const {dotWrappingWidth} = require('../common/logging');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
-const COMMON_CHROME_FLAGS = [
-  // Dramatically speeds up iframe creation time.
-  '--disable-extensions',
-  // Allows simulating user actions (e.g unmute) which otherwise will be denied.
-  '--autoplay-policy=no-user-gesture-required',
-];
-// Makes debugging easy by auto-opening devtools.
-if (argv.debug) {
-  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
-}
 
-/**
- * @param {!Object} config
- */
 module.exports = {
-  frameworks: ['fixture', 'mocha', 'sinon-chai', 'chai', 'source-map-support'],
+  frameworks: ['fixture', 'mocha', 'source-map-support'],
 
   preprocessors: {}, // Dynamically populated based on tests being run.
 
@@ -100,29 +71,6 @@ module.exports = {
 
   autoWatch: true,
 
-  customLaunchers: {
-    /* eslint "google-camelcase/google-camelcase": 0*/
-    Chrome_ci: {
-      base: 'Chrome',
-      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
-    },
-    Chrome_no_extensions: {
-      base: 'Chrome',
-      flags: COMMON_CHROME_FLAGS,
-    },
-    Chrome_no_extensions_headless: {
-      base: 'ChromeHeadless',
-      flags: [
-        // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
-        '--no-sandbox',
-        '--remote-debugging-port=9222',
-        // https://github.com/karma-runner/karma-chrome-launcher/issues/175
-        "--proxy-server='direct://'",
-        '--proxy-bypass-list=*',
-      ].concat(COMMON_CHROME_FLAGS),
-    },
-  },
-
   client: {
     mocha: {
       reporter: 'html',
@@ -154,18 +102,16 @@ module.exports = {
 
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
-    'karma-chai',
     'karma-chrome-launcher',
     'karma-esbuild',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
-    'karma-ie-launcher',
     'karma-structured-json-reporter',
+    'karma-junit-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safarinative-launcher',
-    'karma-sinon-chai',
     'karma-source-map-support',
     'karma-spec-reporter',
     'karma-super-dots-reporter',

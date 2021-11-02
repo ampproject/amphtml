@@ -1,46 +1,32 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen, listenOncePromise} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {
-  createFrameFor,
-  objOrParseJson,
-  originMatches,
-  redispatch,
-} from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
-import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '../../../src/viewport-observer';
-import {setStyle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+  createFrameFor,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-delight-player';
@@ -141,6 +127,12 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     /** @private {HTMLElement} */
     this.placeholderEl_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -177,9 +169,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(
+    this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (isInViewport) => (this.isInViewport_ = isInViewport)
+      ({isIntersecting}) => (this.isInViewport_ = isIntersecting)
     );
     const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);
@@ -216,7 +208,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     this.unregisterEventHandlers_();
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }
@@ -230,12 +224,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const html = htmlFor(this.element);
     const placeholder = html`
-      <div placeholder><amp-img layout="fill"></amp-img></div>
+      <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    applyFillContent(placeholder);
 
-    placeholder.firstElementChild.setAttribute('src', src);
+    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    placeholder.setAttribute('src', src);
 
     this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
 
@@ -284,6 +279,16 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     const {element} = this;
+
+    switch (data['type']) {
+      case DelightEvent.PLAYING:
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case DelightEvent.PAUSED:
+      case DelightEvent.ENDED:
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
 
     const redispatched = redispatch(element, data['type'], {
       [DelightEvent.PLAYING]: VideoEvents.PLAYING,

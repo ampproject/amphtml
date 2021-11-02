@@ -1,0 +1,58 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests amp-selector.
+|  -->
+|  <!doctype html>
+|  <html ⚡ lang="en">
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-1.0.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <form action="/" method="get" target="_blank" id="form1">
+|      <!-- <amp-selector> with the options as list elements -->
+|      <amp-selector layout="container" name="single_image_select">
+|        <ul>
+|          <li><amp-img src="/img1.png" width=50 height=50 option="1"></amp-img></li>
+|          <li><amp-img src="/img2.png" width=50 height=50 option="2"></amp-img></li>
+|          <li option="na" selected>None of the Above</li>
+|        </ul>
+|      </amp-selector>
+|      <!-- <amp-selector> with the options as images -->
+|      <amp-selector layout="container" name="multi_image_select" multiple>
+|        <amp-img src="/img1.png" width=50 height=50 option="1"></amp-img>
+|        <amp-img src="/img2.png" width=50 height=50 option="2"></amp-img>
+|        <amp-img src="/img3.png" width=50 height=50 option="3"></amp-img>
+|      </amp-selector>
+|      <!-- <amp-selector> with the options as carousel images -->
+|      <amp-selector layout="container" name="multi_image_select_1" multiple>
+|        <amp-carousel id="carousel-1" width=200 height=60 controls>
+|          <amp-img src="/img1.png" width=80 height=60 option="a"></amp-img>
+|          <amp-img src="/img2.png" width=80 height=60 option="b" selected></amp-img>
+|          <amp-img src="/img3.png" width=80 height=60 option="c"></amp-img>
+|          <amp-img src="/img4.png" width=80 height=60 option="d" disabled></amp-img>
+|        </amp-carousel>
+|      </amp-selector>
+|      <!-- <amp-selector> with bindable attributes -->
+|      <amp-selector layout="container" name="with_binding" [selected]="foo" [disabled]="bar">
+|      </amp-selector>
+|    </form>
+|
+|    <!-- <amp-selector> with the options as carousel images, outside a form -->
+|    <amp-selector layout="container" name="multi_image_select_2" multiple form="form1">
+|      <amp-carousel id="carousel-1" width=400 height=300 type=slides controls>
+|        <amp-img src="/img1.png" width=80 height=60 option="a"></amp-img>
+|        <amp-img src="/img2.png" width=80 height=60 option="b" selected></amp-img>
+|        <amp-img src="/img3.png" width=80 height=60 option="c"></amp-img>
+|        <amp-img src="/img4.png" width=80 height=60 option="d"></amp-img>
+|      </amp-carousel>
+|    </amp-selector>
+|  </body>

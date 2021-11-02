@@ -1,27 +1,15 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {dispatchCustomEvent} from '#core/dom';
+import {Layout, LayoutPriority} from '#core/dom/layout';
+import {isArray} from '#core/types';
+import {getWin} from '#core/window';
 
-import {ActionTrust, DEFAULT_ACTION} from './action-constants';
-import {Layout, LayoutPriority} from './layout';
-import {Services} from './services';
-import {devAssert, user, userAssert} from './log';
-import {dispatchCustomEvent} from './dom';
-import {getData, listen, loadPromise} from './event-helper';
+import {Services} from '#service';
+
+import {getData, listen, loadPromise} from '#utils/event-helper';
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {getMode} from './mode';
-import {isArray, toWin} from './types';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -105,11 +93,11 @@ import {isArray, toWin} from './types';
  */
 export class BaseElement {
   /**
-   * Whether this element supports V1 protocol, which includes:
+   * Whether this element supports R1 protocol, which includes:
    * 1. Layout/unlayout are not managed by the runtime, but instead are
    *    implemented by the element as needed.
-   * 2. The element can defer its build until later. See `deferredBuild`.
-   * 3. The construction of the element is delayed until build.
+   * 2. The element can defer its build until later. See `deferredMount`.
+   * 3. The construction of the element is delayed until mount.
    *
    * Notice, in this mode `layoutCallback`, `pauseCallback`, `onLayoutMeasure`,
    * `getLayoutSize`, and other methods are deprecated. The element must
@@ -118,7 +106,7 @@ export class BaseElement {
    * @return {boolean}
    * @nocollapse
    */
-  static V1() {
+  static R1() {
     return false;
   }
 
@@ -127,13 +115,13 @@ export class BaseElement {
    * element's build will be deferred roughly based on the
    * `content-visibility: auto` rules.
    *
-   * Only used for V1 elements.
+   * Only used for R1 elements.
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
    * @nocollapse
    */
-  static deferredBuild(unusedElement) {
+  static deferredMount(unusedElement) {
     return true;
   }
 
@@ -228,6 +216,10 @@ export class BaseElement {
   constructor(element) {
     /** @public @const {!Element} */
     this.element = element;
+
+    /** @public @const {!Window} */
+    this.win = getWin(element);
+
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
      \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
@@ -235,15 +227,11 @@ export class BaseElement {
        \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
-    Any private property for BaseElement should be declared in
-    build-system/externs/amp.multipass.extern.js. This is so closure compiler
-    doesn't reuse the same symbol it would use in the core compilation unit for
-    the private property in the extensions compilation unit's private
-    properties.
+    Any private property for BaseElement MUST be wrapped with quotes. We cannot
+    allow Closure Compiler to mangle privates in this class, because it can
+    reuse the same mangled name for a different property in, i.e., amp-youtube's
+    BaseElement subclass (which lives in a different binary).
     */
-
-    /** @public @const {!Window} */
-    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
@@ -252,10 +240,10 @@ export class BaseElement {
      *   handler: function(!./service/action-impl.ActionInvocation),
      *   minTrust: ActionTrust,
      * }>} */
-    this.actionMap_ = null;
+    this['actionMap_'] = null;
 
     /** @private {?string} */
-    this.defaultActionAlias_ = null;
+    this['defaultActionAlias_'] = null;
   }
 
   /**
@@ -271,7 +259,7 @@ export class BaseElement {
    * @return {?string}
    */
   getDefaultActionAlias() {
-    return this.defaultActionAlias_;
+    return this['defaultActionAlias_'];
   }
 
   /**
@@ -283,7 +271,7 @@ export class BaseElement {
    *
    * The default priority for base elements is LayoutPriority.CONTENT.
    * @return {number}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutPriority() {
     return LayoutPriority.CONTENT;
@@ -316,7 +304,7 @@ export class BaseElement {
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
@@ -325,19 +313,10 @@ export class BaseElement {
   /**
    * Returns a previously measured layout size.
    * @return {!./layout-rect.LayoutSizeDef}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutSize() {
     return this.element.getLayoutSize();
-  }
-
-  /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @public
-   * @return {!Window}
-   */
-  getWin() {
-    return this.win;
   }
 
   /**
@@ -436,7 +415,7 @@ export class BaseElement {
    * hosts and prefetch resources it is likely to need. May be called
    * multiple times because connections can time out.
    * @param {boolean=} opt_onLayout
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   preconnectCallback(opt_onLayout) {
     // Subclasses may override.
@@ -462,7 +441,7 @@ export class BaseElement {
 
   /**
    * Set itself as a container element that can be monitored by the scheduler
-   * for auto-mounting. Scheduler is used for V1 elements. A container is
+   * for auto-mounting. Scheduler is used for R1 elements. A container is
    * usually a top-level scrollable overlay such as a lightbox or a sidebar.
    * The main scheduler (`IntersectionObserver`) cannot properly handle elements
    * inside a non-document scroller and this method instructs the scheduler
@@ -532,14 +511,14 @@ export class BaseElement {
   /**
    * Ensure that the element is being eagerly loaded.
    *
-   * Only used for V1 elements.
+   * Only used for R1 elements.
    */
   ensureLoaded() {}
 
   /**
    * Update the current `readyState`.
    *
-   * Only used for V1 elements.
+   * Only used for R1 elements.
    *
    * @param {!./ready-state.ReadyState} state
    * @param {*=} opt_failure
@@ -589,7 +568,7 @@ export class BaseElement {
    * {@link isRelayoutNeeded} method.
    *
    * @return {!Promise}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   layoutCallback() {
     return Promise.resolve();
@@ -612,7 +591,7 @@ export class BaseElement {
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   pauseCallback() {}
 
@@ -620,7 +599,7 @@ export class BaseElement {
    * Requests the element to resume its activity when the document returns from
    * an inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content may be resumed.
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   resumeCallback() {}
 
@@ -631,7 +610,7 @@ export class BaseElement {
    * {@link layoutCallback} in case document becomes active again.
    *
    * @return {boolean}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   unlayoutCallback() {
     return false;
@@ -641,7 +620,7 @@ export class BaseElement {
    * Subclasses can override this method to opt-in into calling
    * {@link unlayoutCallback} when paused.
    * @return {boolean}
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   unlayoutOnPause() {
     return false;
@@ -677,13 +656,6 @@ export class BaseElement {
     return loadPromise(element);
   }
 
-  /** @private */
-  initActionMap_() {
-    if (!this.actionMap_) {
-      this.actionMap_ = this.win.Object.create(null);
-    }
-  }
-
   /**
    * Registers the action handler for the method with the specified name.
    *
@@ -696,8 +668,8 @@ export class BaseElement {
    * @public
    */
   registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
-    this.initActionMap_();
-    this.actionMap_[alias] = {handler, minTrust};
+    initActionMap(this);
+    this['actionMap_'][alias] = {handler, minTrust};
   }
 
   /**
@@ -713,12 +685,12 @@ export class BaseElement {
     minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
-      !this.defaultActionAlias_,
+      !this['defaultActionAlias_'],
       'Default action "%s" already registered.',
-      this.defaultActionAlias_
+      this['defaultActionAlias_']
     );
     this.registerAction(alias, handler, minTrust);
-    this.defaultActionAlias_ = alias;
+    this['defaultActionAlias_'] = alias;
   }
 
   /**
@@ -736,38 +708,15 @@ export class BaseElement {
     let {method} = invocation;
     // If the default action has an alias, the handler will be stored under it.
     if (method === DEFAULT_ACTION) {
-      method = this.defaultActionAlias_ || method;
+      method = this['defaultActionAlias_'] || method;
     }
-    this.initActionMap_();
-    const holder = this.actionMap_[method];
+    initActionMap(this);
+    const holder = this['actionMap_'][method];
     const {tagName} = this.element;
     userAssert(holder, `Method not found: ${method} in ${tagName}`);
     const {handler, minTrust} = holder;
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
-    }
-  }
-
-  /**
-   * Utility method that propagates attributes from this element
-   * to the given element.
-   * If `opt_removeMissingAttrs` is true, then also removes any specified
-   * attributes that are missing on this element from the target element.
-   * @param {string|!Array<string>} attributes
-   * @param {!Element} element
-   * @param {boolean=} opt_removeMissingAttrs
-   * @public @final
-   */
-  propagateAttributes(attributes, element, opt_removeMissingAttrs) {
-    attributes = isArray(attributes) ? attributes : [attributes];
-    for (let i = 0; i < attributes.length; i++) {
-      const attr = attributes[i];
-      const val = this.element.getAttribute(attr);
-      if (null !== val) {
-        element.setAttribute(attr, val);
-      } else if (opt_removeMissingAttrs) {
-        element.removeAttribute(attr);
-      }
     }
   }
 
@@ -851,46 +800,6 @@ export class BaseElement {
    */
   renderStarted() {
     this.element.renderStarted();
-  }
-
-  /**
-   * Returns the original nodes of the custom element without any service nodes
-   * that could have been added for markup. These nodes can include Text,
-   * Comment and other child nodes.
-   * @return {!Array<!Node>}
-   * @public @final
-   */
-  getRealChildNodes() {
-    return this.element.getRealChildNodes();
-  }
-
-  /**
-   * Returns the original children of the custom element without any service
-   * nodes that could have been added for markup.
-   * @return {!Array<!Element>}
-   * @public @final
-   */
-  getRealChildren() {
-    return this.element.getRealChildren();
-  }
-
-  /**
-   * Configures the supplied element to have a "fill content" layout. The
-   * exact interpretation of "fill content" depends on the element's layout.
-   *
-   * If `opt_replacedContent` is specified, it indicates whether the "replaced
-   * content" styling should be applied. Replaced content is not allowed to
-   * have its own paddings or border.
-   *
-   * @param {!Element} element
-   * @param {boolean=} opt_replacedContent
-   * @public @final
-   */
-  applyFillContent(element, opt_replacedContent) {
-    element.classList.add('i-amphtml-fill-content');
-    if (opt_replacedContent) {
-      element.classList.add('i-amphtml-replaced-content');
-    }
   }
 
   /**
@@ -1098,7 +1007,7 @@ export class BaseElement {
    * This may currently not work with extended elements. Please file
    * an issue if that is required.
    * @public
-   * TODO(#31915): remove once V1 migration is complete.
+   * TODO(#31915): remove once R1 migration is complete.
    */
   onLayoutMeasure() {}
 
@@ -1118,5 +1027,17 @@ export class BaseElement {
    */
   getApi() {
     return this;
+  }
+}
+
+/**
+ * This would usually be a private method on BaseElement class, but we cannot
+ * use privates here. So, it's manually devirtualized into a regular function.
+ *
+ * @param {typeof BaseElement} baseElement
+ */
+function initActionMap(baseElement) {
+  if (!baseElement['actionMap_']) {
+    baseElement['actionMap_'] = baseElement.win.Object.create(null);
   }
 }

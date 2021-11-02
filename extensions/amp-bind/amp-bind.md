@@ -8,22 +8,6 @@ teaser:
   text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
 ---
 
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-bind
 
 ## Usage
@@ -91,6 +75,9 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
     .redBorder {
       border: 5px solid red;
     }
+    .defaultBorder {
+      border: 5px solid transparent;
+    }
   </style>
 </head>
 <body>
@@ -108,7 +95,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
       }
     </script>
   </amp-state>
-  <div class="greenBorder" [class]="theFood[currentMeal].style">
+  <div class="defaultBorder" [class]="theFood[currentMeal].style || 'defaultBorder'">
     <p>Each food has a different border color.</p>
     <p [text]="'I want to eat ' + currentMeal + '.'">I want to eat cupcakes.</p>
     <amp-img
@@ -263,7 +250,7 @@ An `amp-state` element must contain a child `<script>` element.
 
 ### `src` (optional)
 
-The URL of the remote endpoint that must return JSON, which is used to this `amp-state`. This must be a HTTP service with a proper CORS configuration for the page. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+The URL of the remote endpoint that must return JSON, which is used to this `amp-state`. This must be a HTTP service with a proper CORS configuration for the page. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../docs/spec/amp-var-substitutions.md) for more info.
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
 
@@ -343,7 +330,7 @@ An `<amp-state>` element can also specify a CORS URL instead of a child JSON scr
 
 ### Updating state variables with `AMP.setState()`
 
-The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. This means you can update the value of a defined state variable.
+The [`AMP.setState()`](../../docs/spec/amp-actions-and-events.md#amp) action merges an object literal into the state. This means you can update the value of a defined state variable.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -545,7 +532,7 @@ Using `AMP.pushState()` sets the current state to the most recent pushed state.
 -   Only `amp-bind` [allowlisted functions](#allowlisted-functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
     -   Custom functions, classes and loops are disallowed.
 -   Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
--   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+-   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new/choose) if this is insufficient for your use case.
 
 The following are all valid expressions:
 
@@ -1048,7 +1035,7 @@ Some AMP components and HTML elements have specific bindable attributes. They ar
 -   `[src]`
 -   `[srcset]`
 
-Bind to `[srcset]` instead of `[src]` to support responsive images. See corresponding [`amp-img` attributes](../../builtins/amp-img.md#attributes).
+Bind to `[srcset]` instead of `[src]` to support responsive images. See corresponding [`amp-img` attributes](../../src/builtins/amp-img/amp-img.md#attributes).
 [/filter] <!-- formats="websites, ads" -->
 [filter formats="email"]
 

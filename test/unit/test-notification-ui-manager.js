@@ -1,22 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {NotificationUiManager} from '../../src/service/notification-ui-manager';
-import {macroTask} from '../../testing/yield';
+import {NotificationUiManager} from '#service/notification-ui-manager';
 
-describes.realWin('NotificationUiManager', {amp: 1}, () => {
+import {macroTask} from '#testing/helpers';
+
+describes.realWin('NotificationUiManager', {amp: 1}, (env) => {
   describe('Notification UI Manager', () => {
     let manager;
     let show1, show2, show3;
@@ -25,9 +11,9 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
     let p1, p2, p3;
     beforeEach(() => {
       manager = new NotificationUiManager();
-      showSpy1 = window.sandbox.spy();
-      showSpy2 = window.sandbox.spy();
-      showSpy3 = window.sandbox.spy();
+      showSpy1 = env.sandbox.spy();
+      showSpy2 = env.sandbox.spy();
+      showSpy3 = env.sandbox.spy();
 
       p1 = new Promise((resolve) => {
         resolve1 = resolve;
@@ -81,7 +67,7 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
     });
 
     it('queue empty handler', function* () {
-      const handler = window.sandbox.spy();
+      const handler = env.sandbox.spy();
       manager.registerUI(show1);
       manager.registerUI(show2);
       manager.onQueueEmpty(handler);
@@ -93,7 +79,7 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
     });
 
     it('queue not empty handler', function* () {
-      const handler = window.sandbox.spy();
+      const handler = env.sandbox.spy();
       manager.onQueueNotEmpty(handler);
       manager.registerUI(show1);
       manager.registerUI(show2);

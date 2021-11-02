@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   AmpStoryEventTracker,
@@ -29,10 +13,9 @@ import {
   trackerTypeForTesting,
 } from '../events';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {Deferred} from '../../../../src/utils/promise';
-import {Signals} from '../../../../src/utils/signals';
-import {macroTask} from '../../../../testing/yield';
-import {toggleExperiment} from '../../../../src/experiments';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('Events', {amp: 1}, (env) => {
   let win;
@@ -2001,7 +1984,6 @@ describes.realWin('Events', {amp: 1}, (env) => {
         let target2;
 
         beforeEach(() => {
-          toggleExperiment(win, 'visibility-trigger-improvements', true);
           readyPromise = Promise.resolve();
           unlisten = env.sandbox.spy();
           unlisten2 = env.sandbox.spy();
@@ -2044,8 +2026,6 @@ describes.realWin('Events', {amp: 1}, (env) => {
               }
             });
           }
-
-          toggleExperiment(win, 'visibility-trigger-improvements', false);
         });
 
         it('should fire event per selector', async () => {

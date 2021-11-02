@@ -1,27 +1,18 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssert, devAssertElement} from '#core/assert';
+import {Deferred} from '#core/data-structures/promise';
 
-import {Deferred} from './promise';
-import {dev, devAssert} from '../log';
 import {removeNoScriptElements} from './dom-writer';
+
+/**
+ * @param {!Function} cb
+ * @return {!Promise}
+ */
+const DEFAULT_TRANSFER_THROTTLE_FUNC = (cb) => Promise.resolve(cb());
 
 export class DomTransformStream {
   /**
    * @param {!Window} win
-   * @param {function=} opt_transferThrottleFunc
+   * @param {(function(!Function):!Promise)=} opt_transferThrottleFunc
    */
   constructor(win, opt_transferThrottleFunc) {
     const headDefer = new Deferred();
@@ -64,13 +55,9 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    /**
-     * @param {!function} cb
-     * @const @private {!function}
-     * @return {!Promise}
-     */
+    /** @private @const */
     this.transferThrottle_ =
-      opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
+      opt_transferThrottleFunc || DEFAULT_TRANSFER_THROTTLE_FUNC;
   }
 
   /**
@@ -84,7 +71,7 @@ export class DomTransformStream {
     // <body> is newly formed.
     if (!this.detachedBody_ && detachedDoc.body) {
       this.detachedBody_ = detachedDoc.body;
-      this.headResolver_(dev().assertElement(detachedDoc.head));
+      this.headResolver_(devAssertElement(detachedDoc.head));
     }
 
     // If bodyTransfer has already been called, keep transferring on new chunks.
@@ -117,7 +104,7 @@ export class DomTransformStream {
    * @return {!Promise} resolves when doc has been fully transferred.
    */
   transferBody(targetBody) {
-    dev().assertElement(
+    devAssertElement(
       targetBody,
       'No target body given to DomTransformStream.transferBody'
     );
@@ -156,11 +143,11 @@ export class DomTransformStream {
       this.targetBodyPromise_,
       this.headPromise_,
     ]).then((resolvedElements) => {
-      const tranferThrottle = this.transferThrottle_;
-      return tranferThrottle(() => {
+      const transferThrottle = this.transferThrottle_;
+      return transferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
-        removeNoScriptElements(dev().assertElement(this.detachedBody_));
+        removeNoScriptElements(devAssertElement(this.detachedBody_));
         while (this.detachedBody_.firstChild) {
           targetBody.appendChild(this.detachedBody_.firstChild);
         }

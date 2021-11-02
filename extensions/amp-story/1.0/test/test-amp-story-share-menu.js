@@ -1,30 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {Keys} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
+import {Keys} from '#core/constants/key-codes';
+import {Services} from '#service';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
-import {getStyle} from '../../../../src/style';
-import {registerServiceBuilder} from '../../../../src/service';
+import {getStyle} from '#core/dom/style';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let isSystemShareSupported;

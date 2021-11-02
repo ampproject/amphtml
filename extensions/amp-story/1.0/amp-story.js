@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Embeds a story
  *
  * Example:
@@ -35,16 +19,15 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust} from '#core/constants/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {AmpEvents} from '../../../src/amp-events';
+import {AmpEvents} from '#core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryBookend} from './bookend/amp-story-bookend';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
@@ -55,68 +38,61 @@ import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
+import {BackgroundBlur} from './background-blur';
 import {CSS} from '../../../build/amp-story-1.0.css';
-import {CommonSignals} from '../../../src/common-signals';
+import {CommonSignals} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
-import {Keys} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
+import {Keys} from '#core/constants/key-codes';
+import {Layout} from '#core/dom/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
 import {ShareMenu} from './amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
-import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
-import {VisibilityState} from '../../../src/visibility-state';
+import {VisibilityState} from '#core/constants/visibility-state';
 import {
   childElement,
   childElementByTag,
   childElements,
   childNodes,
   closest,
-  createElementWithAttributes,
-  isRTL,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
-import {
-  computedStyle,
-  resetStyles,
-  setImportantStyles,
-  toggle,
-} from '../../../src/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce} from '../../../src/utils/rate-limit';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex, lastItem} from '../../../src/utils/array';
+} from '#core/dom/query';
+import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
+import {createPseudoLocale} from '#service/localization/strings';
+import {debounce} from '#core/types/function';
+import {dev, devAssert, user} from '#utils/log';
+import {dict, map} from '#core/types/object';
+import {endsWith} from '#core/types/string';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '../../../src/event-helper';
+import {getDetail} from '#utils/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
-import {getMode} from '../../../src/mode';
-import {getState} from '../../../src/history';
-import {isExperimentOn} from '../../../src/experiments';
-import {parseQueryString} from '../../../src/url';
+import {getMode, isModeDevelopment} from '../../../src/mode';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
+import {isExperimentOn} from '#experiments';
+import {isRTL} from '#core/dom';
+import {parseQueryString} from '#core/types/string/url';
 import {
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -143,6 +119,12 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
 
+/**
+ * NOTE: If udpated here, update in amp-story-player-impl.js
+ * @private @const {string}
+ */
+const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = '3 / 4';
+
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
@@ -152,7 +134,6 @@ const Attributes = {
   ADVANCE_TO: 'i-amphtml-advance-to',
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   AUTO_ADVANCE_TO: 'auto-advance-to',
-  DESKTOP_POSITION: 'i-amphtml-desktop-position',
   MUTED: 'muted',
   ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
@@ -185,19 +166,6 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
-/**
- * CSS class for the opacity layer that separates the amp-sidebar and the rest
- * of the story when the amp-sidebar is entering the screen.
- * @const {string}
- */
-const OPACITY_MASK_CLASS_NAME = 'i-amphtml-story-opacity-mask';
-
-/**
- * CSS class for sidebars in stories.
- * @const {string}
- */
-const SIDEBAR_CLASS_NAME = 'i-amphtml-story-sidebar';
-
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -208,26 +176,10 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 const TAG = 'amp-story';
 
 /**
- * Selector for elements that should be hidden when the bookend is open on
- * desktop view.
- * @private @const {string}
- */
-const HIDE_ON_BOOKEND_SELECTOR =
-  'amp-story-page, .i-amphtml-story-system-layer';
-
-/**
  * The default dark gray for chrome supported theme color.
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#202125';
-
-/**
- * MutationObserverInit options to listen for changes to the `open` attribute.
- */
-const SIDEBAR_OBSERVER_OPTIONS = {
-  attributes: true,
-  attributeFilter: ['open'],
-};
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -260,9 +212,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private {?AmpStoryBookend} */
-    this.bookend_ = null;
-
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
 
@@ -274,14 +223,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
-
-    /** Instantiates the viewport warning layer. */
-    new ViewportWarningLayer(
-      this.win,
-      this.element,
-      DESKTOP_WIDTH_THRESHOLD,
-      DESKTOP_HEIGHT_THRESHOLD
-    );
 
     /** @private {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
@@ -296,9 +237,8 @@ export class AmpStory extends AMP.BaseElement {
     this.activePage_ = null;
 
     /** @private @const */
-    this.desktopMedia_ = this.win.matchMedia(
-      `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
-        `(min-height: ${DESKTOP_HEIGHT_THRESHOLD}px)`
+    this.desktopOnePanelMedia_ = this.win.matchMedia(
+      `(min-aspect-ratio: ${DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD})`
     );
 
     /** @private @const */
@@ -339,9 +279,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?AmpStoryViewerMessagingHandler} */
     this.viewerMessagingHandler_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
-
     /**
      * Store the current paused state, to make sure the story does not play on
      * resume if it was previously paused. null when nothing to restore.
@@ -349,17 +286,14 @@ export class AmpStory extends AMP.BaseElement {
      */
     this.pausedStateToRestore_ = null;
 
-    /** @private {?Element} */
-    this.sidebar_ = null;
-
-    /** @private {?MutationObserver} */
-    this.sidebarObserver_ = null;
-
-    /** @private {?Element} */
-    this.maskElement_ = null;
-
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+
+    /** @private {?BackgroundBlur} */
+    this.backgroundBlur_ = null;
+
+    /** @private {?UIType} */
+    this.uiState_ = null;
   }
 
   /** @override */
@@ -370,10 +304,8 @@ export class AmpStory extends AMP.BaseElement {
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
 
-    this.localizationService_ = getLocalizationService(this.element);
-
-    this.localizationService_
-      .registerLocalizedStringBundle('default', LocalizedStringsDefault)
+    getLocalizationService(this.element)
+      .registerLocalizedStringBundle('default', LocalizedStringsEn)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
       .registerLocalizedStringBundle('de', LocalizedStringsDe)
       .registerLocalizedStringBundle('en', LocalizedStringsEn)
@@ -394,16 +326,11 @@ export class AmpStory extends AMP.BaseElement {
       .registerLocalizedStringBundle('tr', LocalizedStringsTr)
       .registerLocalizedStringBundle('vi', LocalizedStringsVi)
       .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
-      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
-
-    const enXaPseudoLocaleBundle = createPseudoLocale(
-      LocalizedStringsEn,
-      (s) => `[${s} one two]`
-    );
-    this.localizationService_.registerLocalizedStringBundle(
-      'en-xa',
-      enXaPseudoLocaleBundle
-    );
+      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
+      .registerLocalizedStringBundle(
+        'en-xa',
+        createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
+      );
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -430,11 +357,13 @@ export class AmpStory extends AMP.BaseElement {
     this.initializePageIds_();
     this.initializeStoryPlayer_();
 
-    this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
-
-    // Disables the bookend entirely if the story is within a group of stories.
-    if (this.viewer_.hasCapability('swipe')) {
-      this.storeService_.dispatch(Action.TOGGLE_CAN_SHOW_BOOKEND, false);
+    this.uiState_ = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
+    if (this.isLandscapeSupported_()) {
+      this.win.document.documentElement.setAttribute(
+        'data-story-supports-landscape',
+        ''
+      );
     }
 
     // Removes title in order to prevent incorrect titles appearing on link
@@ -462,14 +391,29 @@ export class AmpStory extends AMP.BaseElement {
           Action.SET_ADVANCEMENT_MODE,
           AdvancementMode.GO_TO_PAGE
         );
-        // If open, closes the sidebar before navigating.
-        const promise = this.storeService_.get(StateProperty.SIDEBAR_STATE)
-          ? Services.historyForDoc(this.getAmpDoc()).goBack()
-          : Promise.resolve();
-        promise.then(() =>
-          this.switchTo_(args['id'], NavigationDirection.NEXT)
-        );
+        this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
+    }
+    if (isExperimentOn(this.win, 'story-load-first-page-only')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-load-first-page-only'
+      );
+    }
+    if (
+      isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      prefersReducedMotion(this.win)
+    ) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-disable-animations-first-page'
+      );
+    }
+    if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-load-inactive-outside-viewport'
+      );
+      this.element.classList.add(
+        'i-amphtml-experiment-story-load-inactive-outside-viewport'
+      );
     }
 
     if (this.maybeLoadStoryDevTools_()) {
@@ -522,8 +466,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeStandaloneStory_() {
-    const html = this.win.document.documentElement;
-    html.classList.add('i-amphtml-story-standalone');
     // Lock body to prevent overflow.
     this.lockBody_();
     // Standalone CSS affects sizing of the entire page.
@@ -703,11 +645,6 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
-      if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
-        // Disallow switching pages while the bookend is active.
-        return;
-      }
-
       this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
@@ -768,20 +705,9 @@ export class AmpStory extends AMP.BaseElement {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
-      this.onBookendStateUpdate_(isActive);
-    });
-
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
       this.onPausedStateUpdate_(isPaused);
     });
-
-    this.storeService_.subscribe(
-      StateProperty.SIDEBAR_STATE,
-      (sidebarState) => {
-        this.onSidebarStateUpdate_(sidebarState);
-      }
-    );
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
@@ -826,7 +752,8 @@ export class AmpStory extends AMP.BaseElement {
         href = href.slice(0, -1);
       }
       this.win.history.replaceState(
-        (this.win.history && getState(this.win.history)) || {} /** data */,
+        (this.win.history && getWindowHistoryState(this.win.history)) ||
+          {} /** data */,
         this.win.document.title /** title */,
         href /** URL */
       );
@@ -884,15 +811,13 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, (gesture) => {
       const {deltaX, deltaY} = gesture.data;
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      ));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      );
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (
-        this.storeService_.get(StateProperty.BOOKEND_STATE) ||
         embedComponent.state !== EmbeddedComponentState.HIDDEN ||
         this.storeService_.get(StateProperty.ACCESS_STATE) ||
-        this.storeService_.get(StateProperty.SIDEBAR_STATE) ||
         !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
         !this.storeService_.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)
       ) {
@@ -959,6 +884,17 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    const orientationWarning = (e) =>
+      dev().warn(TAG, 'Failed to lock screen orientation:', e.message);
+
+    // Returns a promise.
+    const lockOrientationPromise = screen.orientation?.lock;
+    if (lockOrientationPromise) {
+      lockOrientationPromise('portrait').catch(orientationWarning);
+      return;
+    }
+
+    // Returns boolean or undefined.
     const lockOrientation =
       screen.lockOrientation ||
       screen.mozLockOrientation ||
@@ -968,7 +904,7 @@ export class AmpStory extends AMP.BaseElement {
     try {
       lockOrientation('portrait');
     } catch (e) {
-      dev().warn(TAG, 'Failed to lock screen orientation:', e.message);
+      orientationWarning(e);
     }
   }
 
@@ -991,7 +927,6 @@ export class AmpStory extends AMP.BaseElement {
     const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
-    this.initializeSidebar_();
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
@@ -1013,20 +948,6 @@ export class AmpStory extends AMP.BaseElement {
           new PaginationButtons(this);
         }
       })
-      .then(() => this.initializeBookend_())
-      .then(() => {
-        const bookendInHistory = !!getHistoryState(
-          this.win,
-          HistoryState.BOOKEND_ACTIVE
-        );
-        if (bookendInHistory) {
-          return this.hasBookend().then((hasBookend) => {
-            if (hasBookend) {
-              return this.showBookend_();
-            }
-          });
-        }
-      })
       .then(() =>
         // We need to call this.getInitialPageId_() again because the initial
         // page could've changed between the start of layoutStory_ and here.
@@ -1045,7 +966,10 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(devAssert(this.viewer_))
+        const infoDialog = shouldShowStoryUrlInfo(
+          devAssert(this.viewer_),
+          this.storeService_
+        )
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
@@ -1055,14 +979,10 @@ export class AmpStory extends AMP.BaseElement {
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
-    storyLayoutPromise
-      .then(() =>
-        this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS)
-      )
-      .then(() => {
-        this.markStoryAsLoaded_();
-        this.initializeLiveStory_();
-      });
+    this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
+      this.markStoryAsLoaded_();
+      this.initializeLiveStory_();
+    });
 
     this.maybeLoadStoryEducation_();
 
@@ -1097,15 +1017,7 @@ export class AmpStory extends AMP.BaseElement {
 
       this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
         this.liveStoryManager_.update();
-        this.initializePages_().then(() => {
-          this.preloadPagesByDistance_();
-          if (
-            this.storeService_.get(StateProperty.UI_STATE) ===
-            UIType.DESKTOP_PANELS
-          ) {
-            this.setDesktopPositionAttributes_(this.activePage_);
-          }
-        });
+        this.initializePages_().then(() => this.preloadPagesByDistance_());
       });
     }
   }
@@ -1123,10 +1035,9 @@ export class AmpStory extends AMP.BaseElement {
       return maybePageId;
     }
 
-    const pages = /**  @type {!Array} */ (getHistoryState(
-      this.win,
-      HistoryState.NAVIGATION_PATH
-    ) || []);
+    const pages = /**  @type {!Array} */ (
+      getHistoryState(this.win, HistoryState.NAVIGATION_PATH) || []
+    );
     const historyPage = lastItem(pages);
     if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
@@ -1158,17 +1069,13 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   whenInitialContentLoaded_(timeoutMs = 0) {
-    const pagesToWaitFor =
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
-        ? [this.pages_[0], this.pages_[1]]
-        : [this.pages_[0]];
-
-    const storyLoadPromise = Promise.all(
-      pagesToWaitFor
-        .filter(Boolean)
-        .map((page) =>
-          page.element.signals().whenSignal(CommonSignals.LOAD_END)
-        )
+    const initialPageEl = this.element.querySelector(
+      `amp-story-page#${escapeCssSelectorIdent(this.getInitialPageId_())}`
+    );
+    const storyLoadPromise = whenUpgradedToCustomElement(initialPageEl).then(
+      () => {
+        return initialPageEl.signals().whenSignal(CommonSignals.LOAD_END);
+      }
     );
 
     return this.timer_
@@ -1187,6 +1094,9 @@ export class AmpStory extends AMP.BaseElement {
     );
     this.viewerMessagingHandler_ &&
       this.viewerMessagingHandler_.send('storyContentLoaded', dict({}));
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.STORY_CONTENT_LOADED
+    );
     this.signals().signal(CommonSignals.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
@@ -1258,7 +1168,8 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.areAccessAuthorizationsCompleted_ = accessService.areFirstAuthorizationsCompleted();
+      this.areAccessAuthorizationsCompleted_ =
+        accessService.areFirstAuthorizationsCompleted();
       accessService.onApplyAuthorizations(() =>
         this.onAccessApplyAuthorizations_()
       );
@@ -1371,12 +1282,6 @@ export class AmpStory extends AMP.BaseElement {
       );
       return;
     }
-
-    this.hasBookend().then((hasBookend) => {
-      if (hasBookend) {
-        this.showBookend_();
-      }
-    });
   }
 
   /**
@@ -1421,13 +1326,6 @@ export class AmpStory extends AMP.BaseElement {
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
-
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
-    ) {
-      this.next_();
-      return;
-    }
 
     if (direction === TapNavigationDirection.NEXT) {
       this.next_();
@@ -1477,6 +1375,8 @@ export class AmpStory extends AMP.BaseElement {
       this.updateNavigationPath_(targetPageId, direction);
     }
 
+    this.backgroundBlur_?.update(targetPage.element);
+
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.
     const steps = [
@@ -1484,13 +1384,6 @@ export class AmpStory extends AMP.BaseElement {
       // target page as fast as possible.
       () => {
         oldPage && oldPage.element.removeAttribute('active');
-
-        if (
-          this.storeService_.get(StateProperty.UI_STATE) ===
-          UIType.DESKTOP_PANELS
-        ) {
-          this.setDesktopPositionAttributes_(targetPage);
-        }
 
         // Starts playing the page, if the story is not paused.
         // Note: navigation is prevented when the story is paused, this test
@@ -1563,9 +1456,7 @@ export class AmpStory extends AMP.BaseElement {
       // the navigation happened, like preloading the following pages, or
       // sending analytics events.
       () => {
-        this.preloadPagesByDistance_();
-        this.maybePreloadBookend_();
-
+        this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
 
         this.systemLayer_.resetDeveloperLogs();
@@ -1599,9 +1490,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateNavigationPath_(targetPageId, direction) {
-    const navigationPath = /** @type {!Array<string>} */ (this.storeService_.get(
-      StateProperty.NAVIGATION_PATH
-    ));
+    const navigationPath = /** @type {!Array<string>} */ (
+      this.storeService_.get(StateProperty.NAVIGATION_PATH)
+    );
 
     if (direction === NavigationDirection.PREVIOUS) {
       navigationPath.pop();
@@ -1618,66 +1509,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
     setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
-  }
-
-  /**
-   * Clear existing preview attributes, Check to see if there is a next or
-   * previous page, set new attributes.
-   * @param {?./amp-story-page.AmpStoryPage} targetPage
-   * @private
-   */
-  setDesktopPositionAttributes_(targetPage) {
-    if (!targetPage) {
-      return;
-    }
-
-    const list = [{page: targetPage, position: 0}];
-
-    const minusOneId = targetPage.getPreviousPageId();
-    if (minusOneId) {
-      const minusOnePage = this.getPageById(minusOneId);
-      list.push({page: minusOnePage, position: -1});
-
-      const minusTwoId = minusOnePage.getPreviousPageId();
-      if (minusTwoId) {
-        list.push({page: this.getPageById(minusTwoId), position: -2});
-      }
-    }
-
-    const plusOneId = targetPage.getNextPageId();
-    if (plusOneId) {
-      const plusOnePage = this.getPageById(plusOneId);
-      list.push({page: plusOnePage, position: 1});
-
-      const plusTwoId = plusOnePage.getNextPageId();
-      if (plusTwoId) {
-        list.push({page: this.getPageById(plusTwoId), position: 2});
-      }
-    }
-
-    let desktopPositionsToReset;
-
-    this.measureMutateElement(
-      /** measurer */
-      () => {
-        desktopPositionsToReset = scopedQuerySelectorAll(
-          this.element,
-          `amp-story-page[
-                      ${escapeCssSelectorIdent(Attributes.DESKTOP_POSITION)}]`
-        );
-      },
-      /** mutator */
-      () => {
-        Array.prototype.forEach.call(desktopPositionsToReset, (el) => {
-          el.removeAttribute(Attributes.DESKTOP_POSITION);
-        });
-
-        list.forEach((entry) => {
-          const {page, position} = entry;
-          page.element.setAttribute(Attributes.DESKTOP_POSITION, position);
-        });
-      }
-    );
   }
 
   /** @private */
@@ -1703,13 +1534,6 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.platform_.isSafari() && !this.platform_.isIos()) {
       return;
     }
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
-    ) {
-      // Force repaint is only needed when transitioning from invisible to
-      // visible
-      return;
-    }
 
     this.mutateElement(() => {
       toggle(this.element, false);
@@ -1731,10 +1555,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
-    if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
-      return;
-    }
-
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
@@ -1757,23 +1577,12 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    const uiState = this.getUIType_();
-    this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
+    this.uiState_ = this.getUIType_();
+    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
-
     this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
-
-    if (uiState !== UIType.MOBILE || isLandscapeSupported) {
-      // Hides the UI that prevents users from using the LANDSCAPE orientation.
-      this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
-      return;
-    }
-
-    // Only called when the desktop media query is not matched and the landscape
-    // mode is not enabled.
-    this.maybeTriggerViewportWarning_(isLandscape);
   }
 
   /**
@@ -1792,37 +1601,6 @@ export class AmpStory extends AMP.BaseElement {
         Attributes.ORIENTATION,
         isLandscapeSupported && isLandscape ? 'landscape' : 'portrait'
       );
-    });
-  }
-
-  /**
-   * Maybe triggers the viewport warning overlay.
-   * @param {boolean} isLandscape
-   * @private
-   */
-  maybeTriggerViewportWarning_(isLandscape) {
-    if (
-      isLandscape ===
-      this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)
-    ) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      if (isLandscape) {
-        this.pausedStateToRestore_ = !!this.storeService_.get(
-          StateProperty.PAUSED_STATE
-        );
-        this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
-      } else {
-        this.storeService_.dispatch(
-          Action.TOGGLE_PAUSED,
-          this.pausedStateToRestore_
-        );
-        this.pausedStateToRestore_ = null;
-        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
-      }
     });
   }
 
@@ -1854,27 +1632,45 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
+    this.backgroundBlur_?.detach();
+    this.backgroundBlur_ = null;
     switch (uiState) {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
+          this.win.document.documentElement.setAttribute(
+            'i-amphtml-story-mobile',
+            ''
+          );
           this.element.removeAttribute('desktop');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
-      case UIType.DESKTOP_PANELS:
-        this.setDesktopPositionAttributes_(this.activePage_);
+      case UIType.DESKTOP_ONE_PANEL:
+        if (!this.backgroundBlur_) {
+          this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
+          this.backgroundBlur_.attach();
+          if (this.activePage_) {
+            this.backgroundBlur_.update(this.activePage_.element);
+          }
+        }
         this.vsync_.mutate(() => {
-          this.element.setAttribute('desktop', '');
-          this.element.classList.add('i-amphtml-story-desktop-panels');
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
+          this.element.removeAttribute('desktop');
+          this.element.classList.add('i-amphtml-story-desktop-one-panel');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
         this.vsync_.mutate(() => {
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
       // Because of the DOM mutations, switching from this mode to another is
@@ -1885,14 +1681,17 @@ export class AmpStory extends AMP.BaseElement {
           'amp-story-page amp-story-page-attachment'
         );
 
-        this.initializeBookend_().then(() => this.showBookend_());
-
         this.vsync_.mutate(() => {
           this.element.setAttribute('i-amphtml-vertical', '');
+          this.win.document.documentElement.classList.add(
+            'i-amphtml-story-vertical'
+          );
           setImportantStyles(this.win.document.body, {height: 'auto'});
+          this.win.document.documentElement.removeAttribute(
+            'i-amphtml-story-mobile'
+          );
           this.element.removeAttribute('desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
           for (let i = 0; i < pageAttachments.length; i++) {
             this.element.insertBefore(
               pageAttachments[i],
@@ -1925,6 +1724,18 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getUIType_() {
+    if (
+      this.uiState_ === UIType.MOBILE &&
+      this.androidSoftKeyboardIsProbablyOpen_()
+    ) {
+      // The opening of the Android soft keyboard triggers a viewport resize
+      // that can cause the story's dimensions to appear to be those of a
+      // desktop. Here, we assume that the soft keyboard is open if the latest
+      // UI state is mobile while an input element has focus, and we then
+      // ensure that the UI type does not unintentionally alter.
+      return UIType.MOBILE;
+    }
+
     if (this.platform_.isBot()) {
       return UIType.VERTICAL;
     }
@@ -1937,8 +1748,25 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.DESKTOP_FULLBLEED;
     }
 
-    // Three panels desktop UI (default).
-    return UIType.DESKTOP_PANELS;
+    // Desktop one panel UI (default).
+    return UIType.DESKTOP_ONE_PANEL;
+  }
+
+  /**
+   * Returns whether the Android soft keyboard is most likely open, as
+   * calculated using multiple factors. Note that this calculation will
+   * incorrectly return true in cases where the user has manually dismissed the
+   * keyboard while retaining focus on a text field.
+   * @return {boolean}
+   * @private
+   */
+  androidSoftKeyboardIsProbablyOpen_() {
+    const platformIsAndroid = this.platform_.isAndroid();
+    const tagNamesThatTriggerKeyboard = ['INPUT', 'TEXTAREA'];
+    const textFieldHasFocus = tagNamesThatTriggerKeyboard.includes(
+      this.win.document.activeElement?.tagName
+    );
+    return platformIsAndroid && textFieldHasFocus;
   }
 
   /**
@@ -1946,7 +1774,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isDesktop_() {
-    return this.desktopMedia_.matches && !this.platform_.isBot();
+    return this.desktopOnePanelMedia_.matches && !this.platform_.isBot();
   }
 
   /**
@@ -1992,108 +1820,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to sidebar state updates.
-   * @param {boolean} sidebarState
-   * @private
-   */
-  onSidebarStateUpdate_(sidebarState) {
-    this.analyticsService_.triggerEvent(
-      sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-      this.sidebar_
-    );
-
-    const actions = Services.actionServiceForDoc(this.element);
-    if (this.win.MutationObserver) {
-      if (!this.sidebarObserver_) {
-        this.sidebarObserver_ = new this.win.MutationObserver(() => {
-          this.storeService_.dispatch(
-            Action.TOGGLE_SIDEBAR,
-            this.sidebar_.hasAttribute('open')
-          );
-        });
-      }
-      if (this.sidebar_ && sidebarState) {
-        this.sidebarObserver_.observe(this.sidebar_, SIDEBAR_OBSERVER_OPTIONS);
-        this.openOpacityMask_();
-        actions.execute(
-          this.sidebar_,
-          'open',
-          /* args */ null,
-          /* source */ null,
-          /* caller */ null,
-          /* event */ null,
-          ActionTrust.HIGH
-        );
-      } else {
-        this.closeOpacityMask_();
-        this.sidebarObserver_.disconnect();
-      }
-    } else if (this.sidebar_ && sidebarState) {
-      this.openOpacityMask_();
-      actions.execute(
-        this.sidebar_,
-        'open',
-        /* args */ null,
-        /* source */ null,
-        /* caller */ null,
-        /* event */ null,
-        ActionTrust.HIGH
-      );
-      this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, false);
-    }
-  }
-
-  /**
-   * @private
-   */
-  initializeOpacityMask_() {
-    if (!this.maskElement_) {
-      const maskEl = this.win.document.createElement('div');
-      maskEl.classList.add(OPACITY_MASK_CLASS_NAME);
-      maskEl.addEventListener('click', () => {
-        const actions = Services.actionServiceForDoc(this.element);
-        if (this.sidebar_) {
-          this.closeOpacityMask_();
-          actions.execute(
-            this.sidebar_,
-            'close',
-            /* args */ null,
-            /* source */ null,
-            /* caller */ null,
-            /* event */ null,
-            ActionTrust.HIGH
-          );
-        }
-      });
-      this.maskElement_ = maskEl;
-      this.mutateElement(() => {
-        this.element.appendChild(this.maskElement_);
-        toggle(dev().assertElement(this.maskElement_), /* display */ false);
-      });
-    }
-  }
-
-  /**
-   * @private
-   */
-  openOpacityMask_() {
-    this.mutateElement(() => {
-      toggle(dev().assertElement(this.maskElement_), /* display */ true);
-    });
-  }
-
-  /**
-   * @private
-   */
-  closeOpacityMask_() {
-    if (this.maskElement_) {
-      this.mutateElement(() => {
-        toggle(dev().assertElement(this.maskElement_), /* display */ false);
-      });
-    }
-  }
-
-  /**
    * If browser is supported, displays the story. Otherwise, shows either the
    * default unsupported browser layer or the publisher fallback (if provided).
    * @param {boolean} isBrowserSupported
@@ -2103,7 +1829,7 @@ export class AmpStory extends AMP.BaseElement {
     const fallbackEl = this.getFallback();
     if (isBrowserSupported) {
       // Removes the default unsupported browser layer or throws an error
-      // if the publisher has provided their own fallback
+      // if the publisher has provided their own fallback.
       if (fallbackEl) {
         dev().error(
           TAG,
@@ -2138,62 +1864,6 @@ export class AmpStory extends AMP.BaseElement {
         });
       }
     }
-  }
-
-  /**
-   * Shows the bookend overlay.
-   * @private
-   */
-  showBookend_() {
-    this.buildAndPreloadBookend_().then(() => {
-      this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-    });
-  }
-
-  /**
-   * Hides the bookend overlay.
-   * @private
-   */
-  hideBookend_() {
-    this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
-  }
-
-  /**
-   * @param {boolean} isActive
-   * @private
-   */
-  onBookendStateUpdate_(isActive) {
-    this.toggleElementsOnBookend_(/* display */ isActive);
-    this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
-  }
-
-  /**
-   * Toggles content when bookend is opened/closed.
-   * @param {boolean} isActive
-   * @private
-   */
-  toggleElementsOnBookend_(isActive) {
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) !== UIType.DESKTOP_PANELS
-    ) {
-      return;
-    }
-
-    const elements = scopedQuerySelectorAll(
-      this.element,
-      HIDE_ON_BOOKEND_SELECTOR
-    );
-
-    Array.prototype.forEach.call(elements, (el) => {
-      if (isActive) {
-        setImportantStyles(el, {
-          opacity: 0,
-          transition: 'opacity 0.1s',
-        });
-      } else {
-        resetStyles(el, ['opacity', 'transition']);
-      }
-    });
   }
 
   /**
@@ -2288,8 +1958,11 @@ export class AmpStory extends AMP.BaseElement {
     return map;
   }
 
-  /** @private */
-  preloadPagesByDistance_() {
+  /**
+   * @param {boolean=} prioritizeActivePage
+   * @private
+   */
+  preloadPagesByDistance_(prioritizeActivePage = false) {
     if (this.platform_.isBot()) {
       this.pages_.forEach((page) => {
         page.setDistance(0);
@@ -2299,13 +1972,34 @@ export class AmpStory extends AMP.BaseElement {
 
     const pagesByDistance = this.getPagesByDistance_();
 
-    this.mutateElement(() => {
+    const preloadAllPages = () => {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
           page.setDistance(distance);
         });
       });
+    };
+
+    this.mutateElement(() => {
+      if (
+        !isExperimentOn(this.win, 'story-load-first-page-only') ||
+        !prioritizeActivePage
+      ) {
+        return preloadAllPages();
+      }
+
+      const activePageId = devAssert(pagesByDistance[0][0]);
+      new Promise((res, rej) => {
+        const page = this.getPageById(activePageId);
+        page.setDistance(0);
+        page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
+        // Don't call preload if user navigates before page loads, since the navigation will call preload properly.
+        this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
+      }).then(
+        () => preloadAllPages(),
+        () => {}
+      );
     });
   }
 
@@ -2327,17 +2021,18 @@ export class AmpStory extends AMP.BaseElement {
       .signals()
       .whenSignal(CommonSignals.LOAD_END)
       .then(() => {
-        backgroundAudioEl = /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
+        backgroundAudioEl = /** @type {!HTMLMediaElement} */ (
+          backgroundAudioEl
+        );
         this.mediaPool_.register(backgroundAudioEl);
         return this.mediaPool_.preload(backgroundAudioEl);
       })
       .then(() => {
-        this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (childElement(
-          this.element,
-          (el) => {
+        this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (
+          childElement(this.element, (el) => {
             return el.tagName.toLowerCase() === 'audio';
-          }
-        ));
+          })
+        );
       });
   }
 
@@ -2360,81 +2055,6 @@ export class AmpStory extends AMP.BaseElement {
       this.getAmpDoc(),
       'amp-story-education'
     );
-  }
-
-  /**
-   * Initializes bookend.
-   * @return {!Promise}
-   * @private
-   */
-  initializeBookend_() {
-    let bookendEl = this.element.querySelector('amp-story-bookend');
-    if (!bookendEl) {
-      bookendEl = createElementWithAttributes(
-        this.win.document,
-        'amp-story-bookend',
-        dict({'layout': 'nodisplay'})
-      );
-      this.element.appendChild(bookendEl);
-    }
-
-    return whenUpgradedToCustomElement(bookendEl).then(() => {
-      return bookendEl.getImpl().then((bookendImpl) => {
-        this.bookend_ = bookendImpl;
-      });
-    });
-  }
-
-  /**
-   * Preloads the bookend config if on the last page.
-   * @private
-   */
-  maybePreloadBookend_() {
-    if (
-      !this.activePage_ ||
-      !this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)
-    ) {
-      return;
-    }
-
-    const pageIndex = this.getPageIndex(this.activePage_);
-
-    if (pageIndex + 1 >= this.getPageCount()) {
-      this.buildAndPreloadBookend_();
-    }
-  }
-
-  /**
-   * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<?./bookend/bookend-component.BookendDataDef>}
-   * @private
-   */
-  buildAndPreloadBookend_() {
-    this.bookend_.build();
-    return this.bookend_.loadConfigAndMaybeRenderBookend();
-  }
-
-  /**
-   * @return {!Promise<boolean>}
-   */
-  hasBookend() {
-    if (!this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)) {
-      return Promise.resolve(false);
-    }
-
-    // TODO(newmuis): Change this comment.
-    // On mobile there is always a bookend. On desktop, the bookend will only
-    // be shown if related articles have been configured.
-    if (this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE) {
-      return Promise.resolve(true);
-    }
-
-    return this.bookend_
-      .loadConfigAndMaybeRenderBookend(false /** renderBookend */)
-      .then(
-        (config) =>
-          !!(config && config.components && config.components.length > 0)
-      );
   }
 
   /**
@@ -2529,8 +2149,8 @@ export class AmpStory extends AMP.BaseElement {
     let audioMediaElementsCount = this.element.querySelectorAll(
       'amp-audio, [background-audio]'
     ).length;
-    const videoMediaElementsCount = this.element.querySelectorAll('amp-video')
-      .length;
+    const videoMediaElementsCount =
+      this.element.querySelectorAll('amp-video').length;
 
     // The root element (amp-story) might have a background-audio as well.
     if (this.element.hasAttribute('background-audio')) {
@@ -2624,9 +2244,8 @@ export class AmpStory extends AMP.BaseElement {
     const containsMediaElementWithAudio = !!this.element.querySelector(
       'amp-audio, amp-video:not([noaudio]), [background-audio]'
     );
-    const storyHasBackgroundAudio = this.element.hasAttribute(
-      'background-audio'
-    );
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_AUDIO,
@@ -2648,9 +2267,8 @@ export class AmpStory extends AMP.BaseElement {
       'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
     );
 
-    const storyHasBackgroundAudio = this.element.hasAttribute(
-      'background-audio'
-    );
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(
       Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
@@ -2732,32 +2350,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Checks for the presence of a sidebar. If a sidebar does exist, then an icon
-   * permitting for the opening/closing of the sidebar is shown.
-   * @private
-   */
-  initializeSidebar_() {
-    this.sidebar_ = this.element.querySelector('amp-sidebar');
-    if (!this.sidebar_) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
-    });
-
-    this.initializeOpacityMask_();
-    this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR, !!this.sidebar_);
-
-    const actions = [
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'open'},
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
-      {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
-    ];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
-  }
-
-  /**
    * Checks for the the storyNavigationPath stack in the history.
    * @private
    */
@@ -2777,9 +2369,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   replay_() {
-    if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
-      this.hideBookend_();
-    }
     this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, []);
     const switchPromise = this.switchTo_(
       dev().assertElement(this.pages_[0].element).id,
@@ -2917,7 +2506,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   maybeLoadStoryDevTools_() {
     if (
-      !getMode().development ||
+      !isModeDevelopment(this.win) ||
       this.element.getAttribute('mode') === 'inspect'
     ) {
       return false;
@@ -2955,11 +2544,11 @@ export class AmpStory extends AMP.BaseElement {
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-access', AmpStoryAccess);
-  AMP.registerElement('amp-story-bookend', AmpStoryBookend);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment); // Shares codepath with amp-story-page-attachment.
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

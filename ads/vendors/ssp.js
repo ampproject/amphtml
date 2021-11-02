@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
-import {parseJson} from '../../src/json';
-import {setStyles} from '../../src/style';
+import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
+import {parseJson} from '#core/types/object/json';
+import {setStyle, setStyles} from '#core/dom/style';
 
 /*
  * How to develop:
- * https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md
+ * https://github.com/ampproject/amphtml/blob/main/docs/getting-started-e2e.md
  */
 
 /**
@@ -72,6 +72,23 @@ export function handlePosition(element, center, dimensions) {
 }
 
 /**
+ * @param {!MessageEvent} e
+ * @param {!Element} element
+ */
+export function handlePositionResponsive(e, element) {
+  try {
+    const {height} = JSON.parse(e.data);
+    if (height) {
+      handlePosition(element, true, {
+        height: `${height}px`,
+      });
+    }
+  } catch (e) {
+    // no-op
+  }
+}
+
+/**
  * @param {number} availableWidth
  * @param {!Object} data
  * @return {?Object}
@@ -85,12 +102,22 @@ export function sizeAgainstWindow(availableWidth, data) {
 }
 
 /**
+ * @param {!Element} element
+ */
+export function forceElementReflow(element) {
+  // force reflow
+  setStyle(element, 'display', 'none');
+  element./*OK*/ offsetHeight;
+  setStyle(element, 'display', 'block');
+}
+
+/**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function ssp(global, data) {
   // validate AMP input data- attributes
-  validateData(data, ['position'], ['site']);
+  validateData(data, ['position'], ['site', 'said']);
 
   let position = {id: -1};
 
@@ -100,11 +127,13 @@ export function ssp(global, data) {
     if (position['id'] === undefined) {
       position = {id: -1};
     }
-  } catch (error) {}
+  } catch (error) {
+    global.context.noContentAvailable();
+    return;
+  }
 
   if (position['id'] === -1) {
     global.context.noContentAvailable();
-
     return;
   }
 
@@ -116,13 +145,13 @@ export function ssp(global, data) {
 
   parentElement.id = position['id'];
 
-  // https://github.com/ampproject/amphtml/tree/master/ads#the-iframe-sandbox
+  // https://github.com/ampproject/amphtml/tree/main/ads#the-iframe-sandbox
   global.document.getElementById('c').appendChild(parentElement);
 
   // validate dimensions against available space (window)
   const sizing = sizeAgainstWindow(parentElement./*OK*/ clientWidth, data);
 
-  // https://github.com/ampproject/amphtml/blob/master/3p/3p.js#L186
+  // https://github.com/ampproject/amphtml/blob/main/3p/3p.js#L186
   computeInMasterFrame(
     global,
     'ssp-load',
@@ -132,7 +161,6 @@ export function ssp(global, data) {
         // Script will inject "sssp" object on Window
         if (!global['sssp']) {
           done(false);
-
           return;
         }
 
@@ -141,9 +169,10 @@ export function ssp(global, data) {
 
         sssp.config({
           site: data.site || global.context.canonicalUrl,
+          said: data.said || null,
         });
 
-        // propagate SSP and running XHR across all ad units
+        // propagate relevant data across all ad units
         mW.sssp = sssp;
         mW.fetchingSSPs = {};
 
@@ -153,7 +182,6 @@ export function ssp(global, data) {
     (loaded) => {
       if (!loaded) {
         global.context.noContentAvailable();
-
         return;
       }
 
@@ -181,16 +209,14 @@ export function ssp(global, data) {
             // listen to message with "height" property -> for responsive ads (111x111) -> set new height / center
             if (ad.responsive) {
               global.addEventListener('message', (e) => {
-                try {
-                  const {height} = JSON.parse(e.data);
-                  if (height) {
-                    handlePosition(parentElement, true, {
-                      height: `${height}px`,
-                    });
-                  }
-                } catch (e) {
-                  // no-op
-                }
+                handlePositionResponsive(e, parentElement);
+              });
+            }
+
+            // listen to intersections and force element reflow (external DSPs)
+            if (['APPNEXUS', 'PUBMATIC', 'PUBMATIC2'].includes(ad.dsp)) {
+              global.context.observeIntersection(() => {
+                forceElementReflow(parentElement);
               });
             }
 

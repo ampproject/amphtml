@@ -1,24 +1,10 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
+import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
   Action,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
   PredeterminedPositionAlgorithm,
   getAdPositions,
@@ -45,7 +31,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         expect(algo.isStoryEligible()).to.be.false;
       });
@@ -55,7 +42,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         storeService.dispatch(Action.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         expect(algo.isStoryEligible()).to.be.true;
       });
@@ -75,7 +63,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         const pages = algo.initializePages();
         expect(pages[0]).to.equal(mockPage);
@@ -97,7 +86,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         const pages = algo.initializePages();
         expect(pages[0]).not.to.exist;
@@ -121,7 +111,8 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
         );
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
-          pageManager
+          pageManager,
+          StoryAdPlacements.PREDETERMINED_EIGHT
         );
         algo.initializePages();
         algo.onNewAdView();

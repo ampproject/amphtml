@@ -1,25 +1,12 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {LayoutPriority} from '../../src/layout';
-import {READY_SCAN_SIGNAL} from '../../src/service/resources-interface';
-import {Scheduler} from '../../src/service/scheduler';
-import {createElementWithAttributes} from '../../src/dom';
-import {installIntersectionObserverStub} from '../../testing/intersection-observer-stub';
+
+import {createElementWithAttributes} from '#core/dom';
+import {LayoutPriority} from '#core/dom/layout';
+
+import {READY_SCAN_SIGNAL} from '#service/resources-interface';
+import {Scheduler} from '#service/scheduler';
+
+import {installIntersectionObserverStub} from '#testing/intersection-observer-stub';
 
 describes.realWin('Scheduler', {amp: true}, (env) => {
   let win, doc, ampdoc;
@@ -68,7 +55,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     const element = createElementWithAttributes(doc, 'amp-el', {
       id: options.id || '',
     });
-    element.deferredBuild = () => options.deferredBuild || false;
+    element.deferredMount = () => options.deferredMount || false;
     element.prerenderAllowed = () => options.prerenderAllowed || false;
     element.getBuildPriority = () =>
       options.buildPriority || LayoutPriority.CONTENT;
@@ -77,8 +64,8 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
   }
 
   describe('schedule', () => {
-    it('should schedule a deferredBuild element', () => {
-      const element = createAmpElement({deferredBuild: true});
+    it('should schedule a deferredMount element', () => {
+      const element = createAmpElement({deferredMount: true});
       scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.true;
 
@@ -87,7 +74,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
 
     it('should use the correct observer parameters', () => {
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       scheduler.schedule(element);
 
       expect(
@@ -99,14 +86,14 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
       ).to.be.true;
     });
 
-    it('should schedule a non-deferredBuild element', () => {
-      const element = createAmpElement({deferredBuild: false});
+    it('should schedule a non-deferredMount element', () => {
+      const element = createAmpElement({deferredMount: false});
       scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
     });
 
     it('should unschedule when built', async () => {
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.true;
 
@@ -120,7 +107,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should NOT signal READY_SCAN_SIGNAL until document is ready', async () => {
       ampdoc.signals().reset(READY_SCAN_SIGNAL);
-      const element = createAmpElement({deferredBuild: false});
+      const element = createAmpElement({deferredMount: false});
       scheduler.schedule(element);
       expect(ampdoc.signals().get(READY_SCAN_SIGNAL)).to.be.null;
 
@@ -139,14 +126,14 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
   describe('wait for parsing', () => {
     it('should build when document ready', async () => {
       await setAmpdocReady();
-      const element = createAmpElement({deferredBuild: false});
+      const element = createAmpElement({deferredMount: false});
       scheduler.schedule(element);
       clock.tick(1);
       expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build when document becomes ready', async () => {
-      const element = createAmpElement({deferredBuild: false});
+      const element = createAmpElement({deferredMount: false});
       scheduler.schedule(element);
       clock.tick(1);
       expect(element.mountInternal).to.be.not.called;
@@ -158,14 +145,14 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should build asap when document ready', async () => {
       await setAmpdocReady();
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       scheduler.scheduleAsap(element);
       clock.tick(1);
       expect(element.mountInternal).to.be.calledOnce;
     });
 
     it('should build asap when document becomes ready', async () => {
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       scheduler.scheduleAsap(element);
       clock.tick(1);
       expect(element.mountInternal).to.be.not.called;
@@ -176,13 +163,13 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
 
     it('should build when has next siblings', async () => {
-      const element = createAmpElement({deferredBuild: false});
+      const element = createAmpElement({deferredMount: false});
       doc.body.appendChild(element);
       scheduler.schedule(element);
       clock.tick(1);
       expect(element.mountInternal).to.not.be.called;
 
-      const element2 = createAmpElement({deferredBuild: false});
+      const element2 = createAmpElement({deferredMount: false});
       doc.body.appendChild(element2);
       scheduler.schedule(element2);
       clock.tick(1);
@@ -191,13 +178,13 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
 
     it('should build asap when has next siblings', async () => {
-      const element = createAmpElement({deferredBuild: false});
+      const element = createAmpElement({deferredMount: false});
       doc.body.appendChild(element);
       scheduler.scheduleAsap(element);
       clock.tick(1);
       expect(element.mountInternal).to.not.be.called;
 
-      const element2 = createAmpElement({deferredBuild: false});
+      const element2 = createAmpElement({deferredMount: false});
       doc.body.appendChild(element2);
       scheduler.scheduleAsap(element2);
       clock.tick(1);
@@ -207,7 +194,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should wait the deferred even when parsed', async () => {
       await setAmpdocReady();
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       doc.body.appendChild(element);
       scheduler.schedule(element);
       clock.tick(1);
@@ -223,7 +210,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should build if prerenderAllowed', () => {
       const element = createAmpElement({
-        deferredBuild: false,
+        deferredMount: false,
         prerenderAllowed: true,
       });
       scheduler.schedule(element);
@@ -233,7 +220,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should build asap if prerenderAllowed', () => {
       const element = createAmpElement({
-        deferredBuild: true,
+        deferredMount: true,
         prerenderAllowed: true,
       });
       scheduler.scheduleAsap(element);
@@ -243,7 +230,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should NOT build if not prerenderAllowed', () => {
       const element = createAmpElement({
-        deferredBuild: false,
+        deferredMount: false,
         prerenderAllowed: false,
       });
       scheduler.schedule(element);
@@ -253,7 +240,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should NOT build asap if not prerenderAllowed', () => {
       const element = createAmpElement({
-        deferredBuild: true,
+        deferredMount: true,
         prerenderAllowed: false,
       });
       scheduler.scheduleAsap(element);
@@ -331,7 +318,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
 
     it('should wait for intersection when deferred', () => {
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.true;
       clock.tick(1);
@@ -353,7 +340,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
 
     it('should not wait for intersection when not deferred', () => {
-      const element = createAmpElement({deferredBuild: false});
+      const element = createAmpElement({deferredMount: false});
       scheduler.schedule(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
       clock.tick(1);
@@ -361,7 +348,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
 
     it('should not wait for intersection when asap', () => {
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       scheduler.scheduleAsap(element);
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
       clock.tick(1);
@@ -375,7 +362,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     });
 
     it('should run deferred CONTENT at high priority', () => {
-      const element = createAmpElement({deferredBuild: true});
+      const element = createAmpElement({deferredMount: true});
       scheduler.schedule(element);
       intersectionObserverStub.notifySync({
         target: element,
@@ -387,7 +374,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should run deferred METADATA at low priority', () => {
       const element = createAmpElement({
-        deferredBuild: true,
+        deferredMount: true,
         buildPriority: LayoutPriority.METADATA,
       });
       scheduler.schedule(element);
@@ -404,7 +391,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should run non-deferred METADATA at low priority', () => {
       const element = createAmpElement({
-        deferredBuild: false,
+        deferredMount: false,
         buildPriority: LayoutPriority.METADATA,
       });
       scheduler.schedule(element);
@@ -417,7 +404,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
 
     it('should run asap METADATA at high priority', () => {
       const element = createAmpElement({
-        deferredBuild: false,
+        deferredMount: false,
         buildPriority: LayoutPriority.METADATA,
       });
       scheduler.scheduleAsap(element);
@@ -433,19 +420,19 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     let containerElement, containerElementChild;
 
     beforeEach(() => {
-      container = createAmpElement({id: 'container', deferredBuild: true});
+      container = createAmpElement({id: 'container', deferredMount: true});
       containerScroller = createElementWithAttributes(doc, 'div', {
         id: 'scroller',
       });
 
-      topElement = createAmpElement({id: 'topElement', deferredBuild: true});
+      topElement = createAmpElement({id: 'topElement', deferredMount: true});
       containerElement = createAmpElement({
         id: 'containerElement',
-        deferredBuild: true,
+        deferredMount: true,
       });
       containerElementChild = createAmpElement({
         id: 'containerElementChild',
-        deferredBuild: true,
+        deferredMount: true,
       });
 
       doc.body.appendChild(container);

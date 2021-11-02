@@ -8,22 +8,6 @@ experimental: true
 bento: true
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-video
 
 ## Usage
@@ -61,51 +45,12 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 #### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
-[example preview="top-frame" playground="false"]
-
-```html
-<head>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-video-1.0.css">
-  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-1.0.js"></script>
-</head>
-<body>
-  <amp-video
-    style="aspect-ratio: 16/9"
-    id="my-video"
-  >
-    <source src="my-video.webm" type="video/webm" />
-    <source src="my-video.mp4" type="video/mp4" />
-  </amp-video>
-  <script>
-    (async () => {
-      const video = document.querySelector('#my-video');
-      await customElements.whenDefined('amp-video');
-      const videoHandle = await video.getApi();
-
-      // programatically call playback actions
-      videoHandle.play();
-      videoHandle.pause();
-      videoHandle.requestFullscreen();
-      videoHandle.mute();
-      videoHandle.unmute();
-
-      // get video state
-      console.log({
-        autoplay: videoHandle.autoplay,
-        controls: videoHandle.controls,
-        duration: videoHandle.duration,
-        currentTime: videoHandle.currentTime,
-        loop: videoHandle.loop,
-      })
-    })();
-  </script>
-</body>
-```
-
-[/example]
+To find the standalone version of `amp-video`, see [**`bento-video`**](./1.0/README.md).
 
 #### Interactivity and API usage
 
@@ -223,7 +168,7 @@ Alternatively, you can present a click-to-play overlay.
 
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, [which are outlined in the Video in AMP spec](../../spec/amp-video-interface.md#autoplay).
+to be played, [which are outlined in the Video in AMP spec](../../docs/spec/amp-video-interface.md#autoplay).
 
 ### controls
 
@@ -259,9 +204,9 @@ Annotates the video as having no audio. This has the following effects:
 
 ### rotate-to-fullscreen
 
-If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../spec/amp-video-interface.md#rotate-to-fullscreen).
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../docs/spec/amp-video-interface.md#rotate-to-fullscreen).
 
-This attribute can be configured to based on a [media query](./../../spec/amp-html-responsive-attributes.md).
+This attribute can be configured to based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### common attributes
 

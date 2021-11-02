@@ -1,0 +1,127 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="lcp.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>LCP test</title>
+
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    * {
+      box-sizing: border-box;
+    }
+    amp-story-page {
+      font-family: 'Source Sans Pro', sans-serif;
+      color: white;
+      background: gray;
+    }
+    p {
+      line-height: 1.5;
+      font-weight: bold;
+      position: absolute;
+      bottom: 0;
+      padding: 1em;
+    }
+    amp-img {
+      margin: 1em;
+      margin-bottom: 50%;
+    }
+    amp-img.larger {
+      margin-bottom: 10%;
+    }
+    p.up {
+      bottom: 2em;
+    }
+    p.small {
+      font-size: .7em;
+    }
+  </style>
+</head>
+  <body>
+    <script>
+      if (window.location.hash.includes("load")) {
+        const loadOutside = location.hash.includes('load=outside');
+        (self.AMP = self.AMP || []).push(function(AMP) {
+          AMP.toggleExperiment('story-load-inactive-outside-viewport', loadOutside);
+        });
+      }
+    </script>
+    <amp-story standalone id="cats"
+        title="LCP test" publisher="The AMP team"
+        publisher-logo-src="./img/amplogo.png"
+        poster-portrait-src="./img/overview.jpg">
+
+      <amp-story-page id="page-1" title="Lorem ipsum dolor sit amet">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=1750&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p class="up">Larger images on other pages should not trigger LCP</p>
+          <p class="small">Add <code>load=outside</code> to not count inactive pages for LCP</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img2"
+            class="larger"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1502318217862-aa4e294ba657?w=1080&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p>Page 2</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img2"
+            class="larger"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1540206395-68808572332f?w=1080&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p>Page 3</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img2"
+            class="larger"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1439853949127-fa647821eba0?w=1080&q=100&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom">
+          <p>Page 4</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

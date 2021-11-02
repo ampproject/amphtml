@@ -1,0 +1,168 @@
+<!--
+  Test Description:
+  Tests for the amp-date-display tag.
+-->
+<!DOCTYPE html>
+<html amp lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript>
+    <style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style>
+  </noscript>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-element="amp-date-display" src="https://cdn.ampproject.org/v0/amp-date-display-1.0.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+
+  <!-- valid -->
+  <amp-date-display datetime="2017-08-02T15:05:05.000Z" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="2017-08-02T15:05:05.000" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="2017-08-02T15:05:05.000+04:00" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="2017-08-02T15:05:05.00+04:00" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="2017-08-02T15:05:05.0+04:00" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="2017-08-02T15:05+04:00" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="2017-08-02T15:05" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="now" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display timestamp-seconds="1501686305" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display timestamp-ms="1501686305000" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid -->
+  <amp-date-display datetime="now" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid, with display-in -->
+  <amp-date-display datetime="now" display-in="utc" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid, with referenced template -->
+  <amp-date-display datetime="now" display-in="utc" layout="fixed" width="360" height="20" template="myTemplate">
+  </amp-date-display>
+  <template type="amp-mustache" id="myTemplate">{{iso}}</template>
+
+  <!-- invalid, with dangling reference to template -->
+  <amp-date-display datetime="now" display-in="utc" layout="fixed" width="360" height="20" template="notMyTemplate">
+  </amp-date-display>
+
+  <!-- valid, within amp-list with script mustache -->
+  <amp-list src="https://cors-test.appspot.com/test"
+            single-item
+            items="."
+            layout="fixed-height"
+            height="50">
+
+    <script type="text/plain" template="amp-mustache">
+      This should be a proper formatted date:
+      <amp-date-display datetime="2006-02-14T15:27:33+01:00" layout="fixed-height" height="20" template="date-template"> </amp-date-display>
+    </script>
+  </amp-list>
+
+  <template type="amp-mustache" id="date-template">
+    <small>{{ day }}.{{ month }}.{{ year }} {{ hourTwoDigit }}:{{ minuteTwoDigit }}</small>
+  </template>
+
+  <!-- valid, within amp-list with template mustache -->
+  <amp-list src="https://cors-test.appspot.com/test"
+            single-item
+            items="."
+            layout="fixed-height"
+            height="50">
+
+    <template type="amp-mustache">
+      This should be a proper formatted date:
+      <amp-date-display datetime="2006-02-14T15:27:33+01:00" layout="fixed-height" height="20" template="date-template"> </amp-date-display>
+    </template>
+  </amp-list>
+
+  <!-- invalid, no date provided -->
+  <amp-date-display layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- invalid, wrong date format -->
+  <amp-date-display datetime="20170802" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- invalid, date with time zone -->
+  <amp-date-display datetime="2017-08-02+04:00" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- invalid, no minutes in time zone -->
+  <amp-date-display datetime="2017-08-02T15:05:05+04" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- invalid, no date -->
+  <amp-date-display datetime="T15:05:05.000Z" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- invalid, missing hour (hour > 23) -->
+  <amp-date-display datetime="2017-08-02T59:05.000Z" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- invalid, sub milliseconds -->
+  <amp-date-display datetime="2017-08-02T15:05:05.0001+04:00" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- invalid, missing fractions-->
+  <amp-date-display datetime="2017-08-02T15:05:05.+04:00" layout="fixed" width="360" height="20">
+    <template type="amp-mustache">{{iso}}</template>
+  </amp-date-display>
+
+  <!-- valid, with data-options-time-style -->
+  <amp-date-display datetime="now" layout="fixed" width="360" height="20" data-options-time-style="short">
+    <template type="amp-mustache">{{localeString}}</template>
+  </amp-date-display>
+</body>
+
+</html>

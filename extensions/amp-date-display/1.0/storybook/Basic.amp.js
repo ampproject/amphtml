@@ -1,30 +1,14 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../../src/preact';
-import {date, select, withKnobs} from '@storybook/addon-knobs';
-import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
+import {date, select, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 const DISPLAY_IN_OPTIONS = ['utc', 'local'];
 const LOCALES = ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'];
 
 export default {
   title: 'amp-date-display-1_0',
-  decorators: [withKnobs, withA11y, withAmp],
+  decorators: [withKnobs, withAmp],
 
   parameters: {
     extensions: [
@@ -63,9 +47,7 @@ export const Default = () => {
   );
 };
 
-Default.story = {
-  name: 'default',
-};
+Default.storyName = 'default';
 
 export const DefaultRenderer = () => {
   const datetime = new Date(date('Date/Time', new Date())).toISOString();
@@ -87,9 +69,7 @@ export const DefaultRenderer = () => {
   );
 };
 
-DefaultRenderer.story = {
-  name: 'default renderer',
-};
+DefaultRenderer.storyName = 'default renderer';
 
 export const ExternalTemplate = () => {
   const datetime = new Date(date('Date/Time', new Date())).toISOString();
@@ -121,6 +101,4 @@ export const ExternalTemplate = () => {
   );
 };
 
-ExternalTemplate.story = {
-  name: 'external template',
-};
+ExternalTemplate.storyName = 'external template';

@@ -1,25 +1,7 @@
-/**
- * @license
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the license.
- */
-
 'use strict';
 
 const amphtmlValidator = require('amphtml-validator');
 const colors = require('kleur/colors');
-const log = require('fancy-log');
 const through = require('through2');
 
 const PLUGIN_NAME = 'gulp-amphtml-validator';
@@ -62,7 +44,7 @@ module.exports.validate = function(validator) {
           // build, but map the exception to an validation error instead. This
           // makes it possible to configure via failAfterError whether this
           // should fail the build or not.
-            log(colors.red(err.message));
+            console.log(colors.red(err.message));
             file.ampValidationResult = {
               status: STATUS_UNKNOWN,
             };
@@ -83,7 +65,7 @@ module.exports.format = function(logger) {
 
   const results = [];
   if (!logger) {
-    logger = log;
+    logger = console.log;
   }
 
   function collectResults(file, encoding, callback) {

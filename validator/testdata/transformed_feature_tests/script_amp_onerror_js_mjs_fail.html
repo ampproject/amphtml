@@ -1,0 +1,23 @@
+<!--
+  Test Description:
+  This tests the validity of the script tag for early styling on fast failure
+  to load v0.js or v0.mjs. See GitHub #22543.
+-->
+<!doctype html>
+<html ⚡ transformed="google;v=1">
+<head>
+  <meta charset="utf-8">
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name="viewport" content="width=device-width">
+  <script async crossorigin=anonymous src=https://cdn.ampproject.org/v0.mjs type=module></script>
+  <script async nomodule src=https://cdn.ampproject.org/v0.js></script>
+
+  <!-- Invalid: cdata does not match exactly -->
+  <script amp-onerror>[].slice.call(document.querySelectorAll("script[src*='/v0.js'],script[src*='/v0.mjs']")).forEach(function(s){s.onerror=function(){document.querySelector('style[amp-boilerplate]').textContent=' '}})</script>
+
+  <link rel="canonical" href="./regular-html-version.html">
+</head>
+<body>
+Hello, world.
+</body>
+</html>

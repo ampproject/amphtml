@@ -1,23 +1,12 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Deferred} from '../../../src/utils/promise';
-import {InaboxResources} from '../../../src/inabox/inabox-resources';
-import {ResourceState} from '../../../src/service/resource';
-import {macroTask} from '../../../testing/yield';
-import {toggleExperiment} from '../../../src/experiments';
+import {Deferred} from '#core/data-structures/promise';
+
+import {toggleExperiment} from '#experiments';
+
+import {InaboxResources} from '#inabox/inabox-resources';
+
+import {ResourceState} from '#service/resource';
+
+import {macroTask} from '#testing/helpers';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
@@ -149,10 +138,10 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     expect(resource2.unload).to.be.calledOnce;
   });
 
-  it('should ignore V1 resources for layout pass', async () => {
+  it('should ignore R1 resources for layout pass', async () => {
     const element1 = env.createAmpElement('amp-foo');
     const element2 = env.createAmpElement('amp-bar');
-    env.sandbox.stub(element2, 'V1').returns(true);
+    env.sandbox.stub(element2, 'R1').returns(true);
 
     win.document.body.appendChild(element1);
     win.document.body.appendChild(element2);

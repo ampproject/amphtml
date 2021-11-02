@@ -1,23 +1,8 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
-import {Wrapper, useRenderer} from '../../../src/preact/component';
-import {useEffect, useState} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import * as Preact from '#preact';
+import {Wrapper, useRenderer, useValueRef} from '#preact/component';
+import {forwardRef} from '#preact/compat';
+import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';
+import {useResourcesNotify} from '#preact/utils';
 
 /**
  * @param {!JsonObject} data
@@ -29,23 +14,34 @@ const DEFAULT_RENDER = (data) => JSON.stringify(data);
  * @param {string} url
  * @return {!Promise<!JsonObject>}
  */
-const DEFAULT_FETCH = (url) => {
+const DEFAULT_GET_JSON = (url) => {
   return fetch(url).then((res) => res.json());
 };
 
 /**
  * @param {!RenderDef.Props} props
+ * @param {{current: ?RenderDef.RenderApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function Render({
-  src = '',
-  getJson = DEFAULT_FETCH,
-  render = DEFAULT_RENDER,
-  ...rest
-}) {
+export function RenderWithRef(
+  {
+    src = '',
+    getJson = DEFAULT_GET_JSON,
+    render = DEFAULT_RENDER,
+    ariaLiveValue = 'polite',
+    onLoading,
+    onLoad,
+    onRefresh,
+    onError,
+    ...rest
+  },
+  ref
+) {
   useResourcesNotify();
 
   const [data, setData] = useState({});
+  const onLoadRef = useValueRef(onLoad);
+  const onErrorRef = useValueRef(onError);
 
   useEffect(() => {
     // TODO(dmanek): Add additional validation for src
@@ -53,19 +49,69 @@ export function Render({
     if (!src) {
       return;
     }
+    let cancelled = false;
+    onLoading?.();
+    getJson(src)
+      .then((data) => {
+        if (!cancelled) {
+          setData(data);
+        }
+      })
+      .catch((e) => {
+        onErrorRef.current?.(e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [getJson, src, onErrorRef, onLoading]);
 
-    getJson(src).then((data) => {
-      setData(data);
-    });
-  }, [src, getJson]);
+  const refresh = useCallback(() => {
+    onRefresh?.();
+    getJson(src, /* shouldRefresh */ true)
+      .then((data) => {
+        setData(data);
+        onLoadRef.current?.();
+      })
+      .catch((e) => {
+        onErrorRef.current?.(e);
+      });
+  }, [getJson, src, onLoadRef, onRefresh, onErrorRef]);
+
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!RenderDef.RenderApi} */ ({
+        refresh,
+      }),
+    [refresh]
+  );
 
   const rendered = useRenderer(render, data);
   const isHtml =
     rendered && typeof rendered == 'object' && '__html' in rendered;
 
+  const refFn = useCallback(
+    (node) => {
+      if (!node?.firstElementChild || !rendered) {
+        return;
+      }
+      onLoadRef.current?.();
+    },
+    [rendered, onLoadRef]
+  );
+
   return (
-    <Wrapper {...rest} dangerouslySetInnerHTML={isHtml ? rendered : null}>
+    <Wrapper
+      ref={refFn}
+      {...rest}
+      dangerouslySetInnerHTML={isHtml ? rendered : null}
+      aria-live={ariaLiveValue}
+    >
       {isHtml ? null : rendered}
     </Wrapper>
   );
 }
+
+const Render = forwardRef(RenderWithRef);
+Render.displayName = 'Render';
+export {Render};

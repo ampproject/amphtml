@@ -1,29 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
+import {setStyle} from '#core/dom/style';
+import * as mode from '#core/mode';
+import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
-import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, devAssert, user, userAssert} from './log';
-import {dict} from './utils/object';
-import {getContextMetadata} from '../src/iframe-attributes';
-import {getMode} from './mode';
-import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn} from './experiments';
-import {setStyle} from './style';
-import {tryParseJson} from './json';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {urls} from './config';
+import {getContextMetadata} from './iframe-attributes';
+import {assertHttpsUrl, parseUrlDeprecated} from './url';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -97,9 +82,9 @@ export function getIframe(
     attributes['_context']['initialIntersection'] = initialIntersection;
   }
 
-  const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
-    'iframe'
-  ));
+  const iframe = /** @type {!HTMLIFrameElement} */ (
+    parentWindow.document.createElement('iframe')
+  );
 
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;
@@ -112,11 +97,11 @@ export function getIframe(
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
-  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
+  // @see https://github.com/ampproject/amphtml/blob/main/3p/integration.js
   const name = JSON.stringify(
     dict({
       'host': host,
-      'bootstrap': getBootstrapUrl(attributes['type'], parentWindow),
+      'bootstrap': getBootstrapUrl(attributes['type']),
       'type': attributes['type'],
       // https://github.com/ampproject/amphtml/pull/2955
       'count': count[attributes['type']],
@@ -175,7 +160,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
   const {dataset} = element;
   for (const name in dataset) {
     // data-vars- is reserved for amp-analytics
-    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    // see https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
     if (!name.startsWith('vars')) {
       attributes[name] = dataset[name];
     }
@@ -198,22 +183,17 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Get the bootstrap script URL for iframe.
  * @param {string} type
- * @param {!Window} win
  * @return {string}
  */
-export function getBootstrapUrl(type, win) {
-  if (getMode().localDev || getMode().test) {
-    const filename = getMode().minified
-      ? `./vendor/${type}.`
-      : `./vendor/${type}.max.`;
-    return IS_ESM ? filename + 'mjs' : filename + 'js';
+export function getBootstrapUrl(type) {
+  const extension = mode.isEsm() ? '.mjs' : '.js';
+  if (mode.isProd()) {
+    return `${urls.thirdParty}/${mode.version()}/vendor/${type}${extension}`;
   }
-  if (isExperimentOn(win, '3p-vendor-split')) {
-    return IS_ESM
-      ? `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.mjs`
-      : `${urls.thirdParty}/${internalRuntimeVersion()}/vendor/${type}.js`;
-  }
-  return `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
+  const filename = mode.isMinified()
+    ? `./vendor/${type}`
+    : `./vendor/${type}.max`;
+  return filename + extension;
 }
 
 /**
@@ -229,7 +209,7 @@ export function preloadBootstrap(win, type, ampdoc, preconnect) {
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.preload(ampdoc, getBootstrapUrl(type, win), 'script');
+  preconnect.preload(ampdoc, getBootstrapUrl(type), 'script');
 }
 
 /**
@@ -273,7 +253,7 @@ export function resetBootstrapBaseUrlForTesting(win) {
  */
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
-  if (getMode().localDev || getMode().test) {
+  if (!mode.isProd()) {
     return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.
@@ -283,7 +263,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   return (
     'https://' +
     parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN +
-    `.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+    `.${urls.thirdPartyFrameHost}/${mode.version()}/` +
     `${srcFileBasename}.html`
   );
 }
@@ -299,8 +279,8 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
     overrideBootstrapBaseUrl ||
     getAdsLocalhost(parentWindow) +
       '/dist.3p/' +
-      (getMode().minified
-        ? `${internalRuntimeVersion()}/${srcFileBasename}`
+      (mode.isMinified()
+        ? `${mode.version()}/${srcFileBasename}`
         : `current/${srcFileBasename}.max`) +
       '.html'
   );
@@ -315,7 +295,13 @@ function getAdsLocalhost(win) {
   if (adsUrl == 'https://3p.ampproject.net') {
     adsUrl = 'http://ads.localhost'; // local dev with a localhost server
   }
-  return adsUrl + ':' + (win.location.port || win.parent.location.port);
+  return (
+    adsUrl +
+    ':' +
+    (new URL(win.document.baseURI)?.port ||
+      win.location.port ||
+      win.parent.location.port)
+  );
 }
 
 /**
@@ -382,12 +368,12 @@ function getCustomBootstrapBaseUrl(
       parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
     '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
-      '/blob/master/spec/amp-iframe-origin-policy.md for details.',
+      '/blob/main/docs/spec/amp-iframe-origin-policy.md for details.',
     url,
     parsed.origin,
     meta
   );
-  return `${url}?${internalRuntimeVersion()}`;
+  return `${url}?${mode.version()}`;
 }
 
 /**
@@ -401,35 +387,7 @@ export function applySandbox(iframe) {
   }
   // If these flags are not supported by the UA we don't apply any
   // sandbox.
-  const requiredFlags = [
-    // This only allows navigation when user interacts and thus prevents
-    // ads from auto navigating the user.
-    'allow-top-navigation-by-user-activation',
-    // Crucial because otherwise even target=_blank opened links are
-    // still sandboxed which they may not expect.
-    'allow-popups-to-escape-sandbox',
-  ];
-  // These flags are not feature detected. Put stuff here where either
-  // they have always been supported or support is not crucial.
-  const otherFlags = [
-    'allow-forms',
-    // We should consider turning this off! But since the top navigation
-    // issue is the big one, we'll leave this allowed for now.
-    'allow-modals',
-    // Give access to raw mouse movements.
-    'allow-pointer-lock',
-    // This remains subject to popup blocking, it just makes it supported
-    // at all.
-    'allow-popups',
-    // This applies inside the iframe and is crucial to not break the web.
-    'allow-same-origin',
-    'allow-scripts',
-  ];
-  // Not allowed
-  // - allow-top-navigation
-  // - allow-orientation-lock
-  // - allow-pointer-lock
-  // - allow-presentation
+  const requiredFlags = getRequiredSandboxFlags();
   for (let i = 0; i < requiredFlags.length; i++) {
     const flag = requiredFlags[i];
     if (!iframe.sandbox.supports(flag)) {
@@ -437,7 +395,8 @@ export function applySandbox(iframe) {
       return;
     }
   }
-  iframe.sandbox = requiredFlags.join(' ') + ' ' + otherFlags.join(' ');
+  iframe.sandbox =
+    requiredFlags.join(' ') + ' ' + getOptionalSandboxFlags().join(' ');
 }
 
 /**

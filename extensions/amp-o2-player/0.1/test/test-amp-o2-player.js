@@ -1,23 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-o2-player';
+import {MessageType} from '#core/3p-frame-messaging';
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+
 import * as iframeHelper from '../../../../src/iframe-helper';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {MessageType} from '../../../../src/3p-frame-messaging';
 
 describes.realWin(
   'amp-o2-player',
@@ -151,6 +136,22 @@ describes.realWin(
       expect(iframe.src).to.equal(
         'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html'
       );
+    });
+
+    it('unlayout and relayout', async () => {
+      const o2 = await getO2player({
+        'data-pid': '123',
+        'data-bcid': '456',
+        'data-env': 'stage',
+      });
+      expect(o2.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = o2.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(o2.querySelector('iframe')).to.not.exist;
+
+      await o2.layoutCallback();
+      expect(o2.querySelector('iframe')).to.exist;
     });
 
     describe('sends a consent-data', () => {

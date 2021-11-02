@@ -1,28 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import objstr from 'obj-str';
 
-import * as Preact from '../../../src/preact';
-import {WithAmpContext} from '../../../src/preact/context';
-import {animateCollapse, animateExpand} from './animations';
-import {forwardRef} from '../../../src/preact/compat';
-import {omit} from '../../../src/utils/object';
 import {
   randomIdGenerator,
   sequentialIdGenerator,
-} from '../../../src/utils/id-generator';
+} from '#core/data-structures/id-generator';
+import {omit} from '#core/types/object';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useContext,
@@ -32,15 +16,19 @@ import {
   useMemo,
   useRef,
   useState,
-} from '../../../src/preact';
+} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {WithAmpContext} from '#preact/context';
+
+import {animateCollapse, animateExpand} from './animations';
 import {useStyles} from './component.jss';
 
 const AccordionContext = Preact.createContext(
-  /** @type {AccordionDef.AccordionContext} */ ({})
+  /** @type {BentoAccordionDef.AccordionContext} */ ({})
 );
 
 const SectionContext = Preact.createContext(
-  /** @type {AccordionDef.SectionContext} */ ({})
+  /** @type {BentoAccordionDef.SectionContext} */ ({})
 );
 
 /** @type {!Object<string, boolean>} */
@@ -53,17 +41,16 @@ const generateSectionId = sequentialIdGenerator();
 const generateRandomId = randomIdGenerator(100000);
 
 /**
- * @param {!AccordionDef.AccordionProps} props
- * @param {{current: (!AccordionDef.AccordionApi|null)}} ref
+ * @param {!BentoAccordionDef.BentoAccordionProps} props
+ * @param {{current: ?BentoAccordionDef.AccordionApi}} ref
  * @return {PreactDef.Renderable}
  */
-function AccordionWithRef(
+function BentoAccordionWithRef(
   {
-    as: Comp = 'section',
-    expandSingleSection = false,
     animate = false,
-    experimentDisplayLocking = false,
+    as: Comp = 'section',
     children,
+    expandSingleSection = false,
     id,
     ...rest
   },
@@ -200,7 +187,7 @@ function AccordionWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!AccordionDef.AccordionApi} */ ({
+      /** @type {!BentoAccordionDef.AccordionApi} */ ({
         toggle,
         expand,
         collapse,
@@ -210,22 +197,14 @@ function AccordionWithRef(
 
   const context = useMemo(
     () =>
-      /** @type {!AccordionDef.AccordionContext} */ ({
+      /** @type {!BentoAccordionDef.AccordionContext} */ ({
         registerSection,
         toggleExpanded,
         isExpanded,
         animate,
         prefix,
-        experimentDisplayLocking,
       }),
-    [
-      registerSection,
-      toggleExpanded,
-      isExpanded,
-      animate,
-      prefix,
-      experimentDisplayLocking,
-    ]
+    [registerSection, toggleExpanded, isExpanded, animate, prefix]
   );
 
   return (
@@ -237,9 +216,9 @@ function AccordionWithRef(
   );
 }
 
-const Accordion = forwardRef(AccordionWithRef);
-Accordion.displayName = 'Accordion'; // Make findable for tests.
-export {Accordion};
+const BentoAccordion = forwardRef(BentoAccordionWithRef);
+BentoAccordion.displayName = 'Accordion'; // Make findable for tests.
+export {BentoAccordion};
 
 /**
  * @param {string} id
@@ -264,15 +243,15 @@ function setExpanded(id, value, expandedMap, expandSingleSection) {
 }
 
 /**
- * @param {!AccordionDef.AccordionSectionProps} props
+ * @param {!BentoAccordionDef.BentoAccordionSectionProps} props
  * @return {PreactDef.Renderable}
  */
-export function AccordionSection({
-  as: Comp = 'section',
-  expanded: defaultExpanded = false,
+export function BentoAccordionSection({
   animate: defaultAnimate = false,
-  id: propId,
+  as: Comp = 'section',
   children,
+  expanded: defaultExpanded = false,
+  id: propId,
   onExpandStateChange,
   ...rest
 }) {
@@ -284,12 +263,11 @@ export function AccordionSection({
   const [headerIdState, setHeaderIdState] = useState(null);
 
   const {
-    registerSection,
     animate: contextAnimate,
     isExpanded,
-    toggleExpanded,
     prefix,
-    experimentDisplayLocking,
+    registerSection,
+    toggleExpanded,
   } = useContext(AccordionContext);
 
   const expanded = isExpanded ? isExpanded(id, defaultExpanded) : expandedState;
@@ -333,7 +311,7 @@ export function AccordionSection({
 
   const context = useMemo(
     () =>
-      /** @type {AccordionDef.SectionContext} */ ({
+      /** @type {BentoAccordionDef.SectionContext} */ ({
         animate,
         contentId,
         headerId,
@@ -341,20 +319,12 @@ export function AccordionSection({
         toggleHandler,
         setContentId: setContentIdState,
         setHeaderId: setHeaderIdState,
-        experimentDisplayLocking,
       }),
-    [
-      animate,
-      contentId,
-      headerId,
-      expanded,
-      toggleHandler,
-      experimentDisplayLocking,
-    ]
+    [animate, contentId, headerId, expanded, toggleHandler]
   );
 
   return (
-    <Comp {...rest} expanded={expanded}>
+    <Comp {...rest}>
       <SectionContext.Provider value={context}>
         {children}
       </SectionContext.Provider>
@@ -363,25 +333,20 @@ export function AccordionSection({
 }
 
 /**
- * @param {!AccordionDef.AccordionHeaderProps} props
+ * @param {!BentoAccordionDef.BentoAccordionHeaderProps} props
  * @return {PreactDef.Renderable}
  */
-export function AccordionHeader({
+export function BentoAccordionHeader({
   as: Comp = 'div',
-  role = 'button',
-  className = '',
-  tabIndex = 0,
-  id,
   children,
+  'class': className = '',
+  id,
+  role = 'button',
+  tabIndex = 0,
   ...rest
 }) {
-  const {
-    contentId,
-    headerId,
-    expanded,
-    toggleHandler,
-    setHeaderId,
-  } = useContext(SectionContext);
+  const {contentId, expanded, headerId, setHeaderId, toggleHandler} =
+    useContext(SectionContext);
   const classes = useStyles();
 
   useLayoutEffect(() => {
@@ -395,7 +360,7 @@ export function AccordionHeader({
       {...rest}
       id={headerId}
       role={role}
-      className={`${className} ${classes.sectionChild} ${classes.header}`}
+      class={`${className} ${classes.sectionChild} ${classes.header}`}
       tabIndex={tabIndex}
       aria-controls={contentId}
       onClick={() => toggleHandler()}
@@ -407,73 +372,27 @@ export function AccordionHeader({
 }
 
 /**
- * @param {!AccordionDef.AccordionContentProps} props
+ * @param {!BentoAccordionDef.BentoAccordionContentProps} props
  * @return {PreactDef.Renderable}
  */
-export function AccordionContent({
+export function BentoAccordionContent({
   as: Comp = 'div',
-  role = 'region',
-  className = '',
-  id,
   children,
+  'class': className = '',
+  id,
+  role = 'region',
   ...rest
 }) {
   const ref = useRef(null);
   const hasMountedRef = useRef(false);
-  const {
-    contentId,
-    headerId,
-    expanded,
-    animate,
-    setContentId,
-    toggleHandler,
-    experimentDisplayLocking,
-  } = useContext(SectionContext);
+  const {animate, contentId, expanded, headerId, setContentId} =
+    useContext(SectionContext);
   const classes = useStyles();
-  const [supportsContentVisibility, setSupportsContentVisibility] = useState(
-    false
-  );
-  const enableDisplayLocking =
-    supportsContentVisibility && experimentDisplayLocking;
-  const hiddenClass = enableDisplayLocking
-    ? classes.contentHiddenMatchable
-    : classes.contentHidden;
 
   useEffect(() => {
     hasMountedRef.current = true;
     return () => (hasMountedRef.current = false);
   }, []);
-
-  useEffect(() => {
-    if (!experimentDisplayLocking) {
-      return;
-    }
-
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
-
-    const win = element.ownerDocument.defaultView;
-    if (!win) {
-      return;
-    }
-
-    const newSupportsContentVisibility = win.CSS.supports(
-      'content-visibility',
-      'hidden-matchable'
-    );
-    setSupportsContentVisibility(newSupportsContentVisibility);
-    if (!newSupportsContentVisibility) {
-      return;
-    }
-
-    const beforeMatchHandler = () => {
-      toggleHandler(/* force expand */ true);
-    };
-    element.addEventListener('beforematch', beforeMatchHandler);
-    return () => element.removeEventListener('beforematch', beforeMatchHandler);
-  }, [toggleHandler, experimentDisplayLocking]);
 
   useLayoutEffect(() => {
     if (setContentId) {
@@ -495,9 +414,11 @@ export function AccordionContent({
       <Comp
         {...rest}
         ref={ref}
-        className={`${className} ${classes.sectionChild} ${
-          expanded ? '' : hiddenClass
-        }`}
+        class={objstr({
+          [className]: true,
+          [classes.sectionChild]: true,
+          [classes.contentHidden]: !expanded,
+        })}
         id={contentId}
         aria-labelledby={headerId}
         role={role}

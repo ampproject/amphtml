@@ -4,7 +4,7 @@ This package is published and available at
 https://www.npmjs.com/package/amphtml-validator.
 
 The source code is available at
-https://github.com/ampproject/amphtml/tree/master/validator/js/nodejs.
+https://github.com/ampproject/amphtml/tree/main/validator/js/nodejs.
 
 ## Command Line Tool
 
@@ -66,6 +66,12 @@ would allow applying the validator rules for `AMP4ADS` or `AMP4EMAIL` as well. `
 ```
 
 ## Release Notes
+
+### 1.0.35
+
+-   Set default engine to the WebAssembly version validator, which is
+    `https://cdn.ampproject.org/v0/validator_wasm.js`.
+    [ampproject/amphtml #34213](https://github.com/ampproject/amphtml/pull/34213)
 
 ### 1.0.34
 

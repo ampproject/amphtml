@@ -1,45 +1,33 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {WindowInterface} from '#core/window/interface';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {PageConfig} from '#third_party/subscriptions-project/config';
+import {
+  ConfiguredRuntime,
+  Entitlements,
+  SubscribeResponse,
+  Entitlement as SwgEntitlement,
+} from '#third_party/subscriptions-project/swg';
+import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 
 import {
   Action,
   ActionStatus,
   SubscriptionAnalytics,
 } from '../../../amp-subscriptions/0.1/analytics';
-import {
-  AmpFetcher,
-  GoogleSubscriptionsPlatform,
-} from '../amp-subscriptions-google';
-import {
-  ConfiguredRuntime,
-  Entitlements,
-  SubscribeResponse,
-  Entitlement as SwgEntitlement,
-} from '../../../../third_party/subscriptions-project/swg';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {GaaMeteringRegwall} from '../../../../third_party/subscriptions-project/swg-gaa';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
-import {Services} from '../../../../src/services';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
-import {WindowInterface} from '../../../../src/window-interface';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  AmpFetcher,
+  GoogleSubscriptionsPlatform,
+} from '../amp-subscriptions-google';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
@@ -421,7 +409,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(fetchStub).to.not.be.called;
   });
 
-  it('should request metering entitlements if URL params are present and timestamp is valid', async () => {
+  it('requests entitlements with metering params if URL params are present and timestamp is valid', async () => {
     env.sandbox
       .stub(viewer, 'getReferrerUrl')
       .callsFake(() => Promise.resolve('http://localhost'));
@@ -431,36 +419,37 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       serviceAdapter
     );
     env.sandbox.stub(platform, 'getUrlParams_').returns({
-      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_ts': (Date.now() / 1000 + 3600).toString(16),
       'gaa_at': 'g',
       'gaa_sig': 'signature',
       'gaa_n': 123456,
     });
     env.sandbox
       .stub(serviceAdapter, 'loadMeteringState')
-      .resolves({key: 'value'});
-    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
-      Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            entitlements: [
-              {
-                source: 'google:metering',
-                products: ['example.org:basic'],
-                subscriptionToken: 'tok1',
-              },
-            ],
-          }),
-      })
-    );
+      .resolves({id: 'abc123'});
+    const getEntitlementsStub = env.sandbox
+      .stub(platform.runtime_, 'getEntitlements')
+      .resolves(
+        new Entitlements(
+          'platformKey',
+          'rawEntitlement',
+          [
+            new SwgEntitlement(
+              'google:metering',
+              ['example.org:basic'],
+              'tok1'
+            ),
+          ],
+          'example.org:basic'
+        )
+      );
+
     const ents = await platform.getEntitlements();
     expect(ents.service).to.not.be.null;
     expect(ents.source).to.equal('google:metering');
 
-    const fetchUrl = fetchStub.getCall(0).args[0];
-    expect(fetchUrl).to.equal(
-      'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?encodedParams=eyJtZXRlcmluZyI6eyJjbGllbnRUeXBlcyI6WzFdLCJvd25lciI6ImV4YW1wbGUub3JnIiwicmVzb3VyY2UiOnsiaGFzaGVkQ2Fub25pY2FsVXJsIjoiMjcwM2YyYjZlZjBlYWFhODEzNzZhMThmYWE3N2E1OTAwOTc1Zjc3MDVkNWQ4YjZlMWEzNzJkNWY2YzJiOTdiYjU5ZjI4M2Q3MzdiNmQ5YWI3N2M1YTNkODQ4YzZlY2UyMDdjZDYwMzU4M2NjMzIyZGQ4MGFiMGI5MzA5MmM2NTAifSwic3RhdGUiOnsiYXR0cmlidXRlcyI6W119fX0'
-    );
+    const requestParams = getEntitlementsStub.getCall(0).args[0];
+    expect(requestParams.metering).to.eql({state: {id: 'abc123'}});
   });
 
   it('should proxy fetch via AMP fetcher', async () => {

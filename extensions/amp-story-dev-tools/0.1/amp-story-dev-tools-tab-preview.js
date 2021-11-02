@@ -1,30 +1,16 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {observeContentSize} from '#core/dom/layout/size-observer';
+import {closest} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyles} from '#core/dom/style';
 
-import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   addAttributeAfterTimeout,
   removeAfterTimeout,
   updateHash,
 } from './utils';
-import {closest} from '../../../src/dom';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {htmlFor} from '../../../src/static-template';
-import {observeContentSize} from '../../../src/utils/size-observer';
-import {setStyles} from '../../../src/style';
+
+import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 
 /**
  * Creates a tab content, will be deleted when the tabs get implemented.
@@ -229,18 +215,18 @@ const MAX_DEVICE_SPACES = 4;
 /**
  * @typedef {{
  *  element: !Element,
- *  player: !Element
+ *  player: !Element,
  *  chip: !Element,
  *  width: number,
  *  height: number,
  *  deviceHeight: ?number,
  *  deviceSpaces: number,
- * }}
+ * }} DeviceInfo
+ *
  * Contains the data related to the device.
  * Width and height refer to the story viewport, while deviceHeight is the device screen height.
  * The deviceSpaces refers to the MAX_DEVICE_SPACES, ensuring the devices on screen don't go over the max space set.
  */
-export let DeviceInfo;
 
 const DEFAULT_DEVICES = 'iphone11native;oneplus5t;pixel2';
 
@@ -363,7 +349,7 @@ function simplifyDeviceName(name) {
  * Eg: `devices="ipad;iphone"` will find the ipad and also the first device in ALL_DEVICES
  * that starts with "iphone" (ignoring case and symbols).
  * @param {string} queryHash
- * @return {any[]}
+ * @return {Array<*>}
  */
 function parseDevices(queryHash) {
   const screenSizes = [];
@@ -596,9 +582,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   onPlayerNavigation_(event, deviceSpecs) {
     const {pageId} = event.detail;
-    const pageIndexInExpectedList = this.expectedNavigationEvents_[
-      deviceSpecs.name
-    ].lastIndexOf(pageId);
+    const pageIndexInExpectedList =
+      this.expectedNavigationEvents_[deviceSpecs.name].lastIndexOf(pageId);
     if (pageIndexInExpectedList > -1) {
       // Remove the expected events up to the most recently received event if it was in the list.
       this.expectedNavigationEvents_[deviceSpecs.name].splice(
@@ -696,12 +681,10 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {
-      offsetWidth: width,
-      offsetHeight: height,
-    } = this.element.querySelector(
-      '.i-amphtml-story-dev-tools-devices-container'
-    );
+    const {offsetHeight: height, offsetWidth: width} =
+      this.element.querySelector(
+        '.i-amphtml-story-dev-tools-devices-container'
+      );
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.

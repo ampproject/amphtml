@@ -1,25 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {Services} from '../services';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
   rejectServicePromiseForDoc,
-} from '../service';
+} from '../service-helpers';
 
 const ServiceNames = {
   VISIBILITY: 'host-visibility',
@@ -69,10 +54,9 @@ export class HostServices {
    * @return {!Promise<!VisibilityInterface>}
    */
   static visibilityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!VisibilityInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.VISIBILITY
-    ));
+    return /** @type {!Promise<!VisibilityInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY)
+    );
   }
 
   /**
@@ -101,10 +85,9 @@ export class HostServices {
    * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!FullscreenInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.FULLSCREEN
-    ));
+    return /** @type {!Promise<!FullscreenInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN)
+    );
   }
 
   /**
@@ -133,10 +116,9 @@ export class HostServices {
    * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!ExitInterface>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      ServiceNames.EXIT
-    ));
+    return /** @type {!Promise<!ExitInterface>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT)
+    );
   }
 
   /**

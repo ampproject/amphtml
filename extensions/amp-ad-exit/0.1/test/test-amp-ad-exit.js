@@ -1,26 +1,12 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggleExperiment} from '#experiments';
 
-import {AmpAdExit} from '../amp-ad-exit';
-import {FilterType} from '../filters/filter';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+
+import {setParentWindow} from '../../../../src/service-helpers';
 import {IFRAME_TRANSPORTS} from '../../../amp-analytics/0.1/iframe-transport-vendors';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
-import {setParentWindow} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {AmpAdExit, getAttributionReportingStatus} from '../amp-ad-exit';
+import {FilterType} from '../filters/filter';
 
 const TEST_3P_VENDOR = '3p-vendor';
 
@@ -359,6 +345,42 @@ describes.realWin(
       expect(open).to.have.been.calledWith(
         EXIT_CONFIG.targets.clickTargetTest.finalUrl,
         '_top'
+      );
+    });
+
+    it('should enable attribution tracking when given `browserAdConversion`', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const openStub = env.sandbox.stub(win, 'open').returns(win);
+      const config = {
+        targets: {
+          landingPage: {
+            finalUrl: 'https://example.com',
+            behaviors: {
+              browserAdConversion: {
+                attributiondestination: 'https://example.com',
+                attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+                attributionreportto: 'https://google.com',
+              },
+            },
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'landingPage'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(openStub).calledWithExactly(
+        'https://example.com',
+        '_blank',
+        'noopener,attributiondestination=https://example.com,attributionsourceeventid=EFnZ8GunL1xrwNTIHbXrvQ==,attributionreportto=https://google.com'
       );
     });
 
@@ -785,9 +807,8 @@ describes.realWin(
       doc.body.appendChild(ampAd);
       const adFrame = doc.createElement('iframe');
       ampAd.appendChild(adFrame);
-      const ampAdExitElement = adFrame.contentDocument.createElement(
-        'amp-ad-exit'
-      );
+      const ampAdExitElement =
+        adFrame.contentDocument.createElement('amp-ad-exit');
       adFrame.contentDocument.body.appendChild(ampAdExitElement);
       installTimerService(frame.contentWindow);
       installPlatformService(frame.contentWindow);
@@ -945,6 +966,56 @@ describes.realWin(
         'http://localhost:8000/tracking?numVar=0&boolVar=false',
         ''
       );
+    });
+
+    describe('ATTRIBUTION_REPORTING_STATUS macro', () => {
+      it('should return ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED if browserAdConfig is present and browser supported', () => {
+        const target = {
+          behaviors: {
+            browserAdConversion: {
+              attributiondestination: 'https://example.com',
+              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+              attributionreportto: 'https://google.com',
+            },
+          },
+        };
+        expect(
+          getAttributionReportingStatus(
+            true /* isAttributionReportingSupported*/,
+            target
+          )
+        ).to.equal(3);
+      });
+
+      it('should return ATTRIBUTION_DATA_PRESENT if browserAdConfig is present and no browser support', () => {
+        const target = {
+          behaviors: {
+            browserAdConversion: {
+              attributiondestination: 'https://example.com',
+              attributionsourceeventid: 'EFnZ8GunL1xrwNTIHbXrvQ==',
+              attributionreportto: 'https://google.com',
+            },
+          },
+        };
+        expect(
+          getAttributionReportingStatus(
+            false /* isAttributionReportingSupported*/,
+            target
+          )
+        ).to.equal(2);
+      });
+
+      it('should return ATTRIBUTION_MACRO_PRESENT if browserAdConfig not present', () => {
+        const target = {
+          behaviors: {},
+        };
+        expect(
+          getAttributionReportingStatus(
+            false /* isAttributionReportingSupported*/,
+            target
+          )
+        ).to.equal(1);
+      });
     });
   }
 );

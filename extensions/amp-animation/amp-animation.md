@@ -7,22 +7,6 @@ teaser:
   text: Defines and displays an animation.
 ---
 
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-animation
 
 ## Usage
@@ -234,6 +218,38 @@ with the following nuances:
 
 -   CSS extensions such as `width()`, `height()`, `x()`, `y()`, `num()`,
     `rand()`, `index()`, and `length()` are not available to `@keyframes`.
+
+##### On `prefers-reduced-motion`
+
+Oftentimes, a running animation will finalize by putting an element in a visible state, and initial CSS will hide the element to depend on the animation finalizing later.
+
+Users may configure their devices to [use reduced animation](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion). With this option, animations will not run at all. In this case, you need to disable CSS properties that depend on an animation runnning later.
+
+You can use a media query for this purpose. In the following example, an `<amp-animation>` would later animate the element into visibility by setting `opacity: 1`. When animations are disabled, the element is always visible:
+
+```html
+<style amp-custom>
+  .my-hidden-element {
+    opacity: 1;
+  }
+  @media not (prefers-reduced-motion) {
+    .my-hidden-element {
+      opacity: 0;
+    }
+  }
+</style>
+<amp-animation layout="nodisplay">
+  <script type="application/json">
+    [
+      {
+        "selector": ".my-hidden-element",
+        "duration": "1s",
+        "keyframes": {"opacity": 1}
+      }
+    ]
+  </script>
+</amp-animation>
+```
 
 ##### Allowed properties for keyframes
 
@@ -836,7 +852,11 @@ Finishes the animation.
 
 Cancels the animation.
 
+## amp-story usage
+
+If you want to use `<amp-animation>` with `<amp-story>`, please note that you should use `<amp-story-animation>` instead. More information on how to use it at the [Advanced animations](https://github.com/ampproject/amphtml/blob/main/extensions/amp-story/amp-story.md#Advanced-animations) section of the documentation.
+
 ## Validation
 
-See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-animation/validator-amp-animation.protoascii)
+See [`amp-animation` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-animation/validator-amp-animation.protoascii)
 in the AMP validator specification.

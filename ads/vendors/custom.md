@@ -1,26 +1,10 @@
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # Custom (experimental)
 
 Custom does not represent a specific network. Rather, it provides a way for
 a site to display simple ads on a self-service basis. You must provide
 your own ad server to deliver the ads in json format as shown below.
 
-Each ad must contain a [mustache](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md)
+Each ad must contain a [mustache](https://github.com/ampproject/amphtml/blob/main/extensions/amp-mustache/amp-mustache.md)
 template.
 
 Each ad must contain the URL that will be used to fetch data from the server.
@@ -222,7 +206,7 @@ If no slot was specified, the server returns a single template rather than an ar
 }
 ```
 
-The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-cors-requests.md#cors-security-in-amp).
 Here is an example set of the relevant response headers:
 
 ```html
@@ -231,7 +215,7 @@ Access-Control-Allow-Origin:https://my--ad--server-com.cdn.ampproject.org
 
 ## Analytics
 
-To get analytics of how your ads are performing, use the [amp-analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
+To get analytics of how your ads are performing, use the [amp-analytics](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-analytics.md) tag.
 
 Here is an example of how to make it work with Google Analytics events. Note that the variables can be set either by the code
 that displays the page (as in `eventAction`) or in variables passed back by the ad server (as in `eventCategory` and `eventLabel`).

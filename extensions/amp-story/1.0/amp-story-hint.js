@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {
   EmbeddedComponentState,
@@ -21,14 +5,18 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
+import {LocalizedStringId} from '#service/localization/strings';
+import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {dict} from '../../../src/utils/object';
+import {dict} from '#core/types/object';
 import {renderAsElement} from './simple-template';
+import {localize} from './amp-story-localization-service';
 
-/** @private @const {!./simple-template.ElementDef} */
-const TEMPLATE = {
+/**
+ * @param {!Element} element
+ * @return {!./simple-template.ElementDef}
+ */
+const getTemplate = (element) => ({
   tag: 'aside',
   attrs: dict({
     'class':
@@ -67,8 +55,12 @@ const TEMPLATE = {
                   attrs: dict({
                     'class': 'i-amphtml-story-hint-tap-button-text',
                   }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL,
+                  children: [
+                    localize(
+                      element,
+                      LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL
+                    ),
+                  ],
                 },
               ],
             },
@@ -101,8 +93,12 @@ const TEMPLATE = {
                   attrs: dict({
                     'class': 'i-amphtml-story-hint-tap-button-text',
                   }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL,
+                  children: [
+                    localize(
+                      element,
+                      LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL
+                    ),
+                  ],
                 },
               ],
             },
@@ -111,7 +107,7 @@ const TEMPLATE = {
       ],
     },
   ],
-};
+});
 
 /** @type {string} */
 const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
@@ -173,7 +169,10 @@ export class AmpStoryHint {
     this.isBuilt_ = true;
 
     const root = this.document_.createElement('div');
-    this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
+    this.hintContainer_ = renderAsElement(
+      this.document_,
+      getTemplate(this.parentEl_)
+    );
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(
@@ -190,10 +189,6 @@ export class AmpStoryHint {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
-
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isOpen) => {
-      this.onBookendStateUpdate_(isOpen);
-    });
 
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_COMPONENT_STATE,
@@ -320,17 +315,6 @@ export class AmpStoryHint {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (!isVisible) {
-      this.hideAllNavigationHint();
-    }
-  }
-
-  /**
-   * Reacts to bookend state updates.
-   * @param {boolean} isOpen
-   * @private
-   */
-  onBookendStateUpdate_(isOpen) {
-    if (isOpen) {
       this.hideAllNavigationHint();
     }
   }

@@ -1,38 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-story-panning-media';
+import {createElementWithAttributes} from '#core/dom';
+
+import {afterRenderPromise} from '#testing/helpers';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {registerServiceBuilder} from '../../../../src/service';
-
-/**
- * @return {!Promise<undefined>} A Promise that resolves after the browser has
- *    rendered.
- */
-function afterRenderPromise() {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      setTimeout(resolve);
-    });
-  });
-}
 
 describes.realWin(
   'amp-story-panning-media',
@@ -108,9 +83,9 @@ describes.realWin(
     it('sets transform of amp-img on page change', async () => {
       const attributes = {
         'group-id': 'group-1',
-        'x': '50%',
-        'y': '50%',
-        'zoom': '2',
+        'data-x': '50%',
+        'data-y': '50%',
+        'data-zoom': 2,
       };
       await createAmpStoryPanningMedia(
         '/examples/amp-story/img/conservatory-coords.jpg',
@@ -118,19 +93,18 @@ describes.realWin(
       );
       await panningMedia.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
-      await afterRenderPromise();
+      await afterRenderPromise(win);
       expect(panningMedia.element.firstChild.style.transform).to.equal(
-        `translate3d(${attributes.x}, ${attributes.y}, ${
-          (attributes.zoom - 1) / attributes.zoom
+        `translate3d(${attributes['data-x']}, ${attributes['data-y']}, ${
+          (attributes['data-zoom'] - 1) / attributes['data-zoom']
         }px)`
       );
     });
 
-    it('calculates transform with lock-bounds', async () => {
+    it('calculates zoom with lock-bounds', async () => {
       const attributes = {
         'group-id': 'group-1',
-        'y': '50%',
-        'zoom': 0.2,
+        'data-zoom': 0.2,
         'lock-bounds': '',
       };
       await createAmpStoryPanningMedia(
@@ -139,7 +113,7 @@ describes.realWin(
       );
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await panningMedia.layoutCallback();
-      await afterRenderPromise();
+      await afterRenderPromise(win);
       expect(panningMedia.element.firstChild.style.transform).to.equal(
         `translate3d(0%, 0%, 0px)`
       );
