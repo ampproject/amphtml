@@ -19,7 +19,7 @@ This document provides details for testing and building your AMP code.
     -   [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
     -   [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
     -   [Chrome extension](#chrome-extension)
--   [Visual Diff Tests](#visual-diff-tests)
+-   [Visual Diff Tests](#-visual-diff-tests)
     -   [Failing Tests](#failing-tests)
     -   [Flaky Tests](#flaky-tests)
     -   [How Are Tests Executed](#how-are-tests-executed)
