@@ -238,7 +238,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Calculates whether the scene is visible considering ratios and margins.
    * @param {!../../../src/layout-rect.LayoutRectDef} positionRect position rect as returned by position observer
    * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
-   * @param {!RelativePositions} relativePos Relative position of rect to viewportRect
+   * @param {!RELATIVE_POSITIONS_ENUM} relativePos Relative position of rect to viewportRect
    * @private
    */
   updateVisibility_(positionRect, adjustedViewportRect, relativePos) {

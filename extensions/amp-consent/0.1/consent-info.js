@@ -87,7 +87,7 @@ export let ConsentInfoDef;
 /**
  * Used in ConsentInfoDef
  * @typedef {{
- *  consentStringType: (CONSENT_STRING_TYPE|undefined),
+ *  consentStringType: (CONSENT_STRING_TYPE_ENUM|undefined),
  *  additionalConsent: (string|undefined),
  *  gdprApplies: (boolean|undefined),
  *  purposeOne: (boolean|undefined),
@@ -297,7 +297,7 @@ export function constructConsentInfo(
 /**
  * Construct the consentMetadataDef object from values
  *
- * @param {CONSENT_STRING_TYPE=} opt_consentStringType
+ * @param {CONSENT_STRING_TYPE_ENUM=} opt_consentStringType
  * @param {string=} opt_additionalConsent
  * @param {boolean=} opt_gdprApplies
  * @param {boolean=} opt_purposeOne

@@ -51,9 +51,9 @@ export class Page {
     this.content_ = null;
     /** @private {!PageState} */
     this.state_ = PAGE_STATE_ENUM.QUEUED;
-    /** @private {!VisibilityState} */
+    /** @private {!VISIBILITY_STATE_ENUM} */
     this.visibilityState_ = VISIBILITY_STATE_ENUM.PRERENDER;
-    /** @private {!ViewportRelativePos} */
+    /** @private {!VIEWPORT_RELATIVE_POS_ENUM} */
     this.relativePos_ = VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT;
   }
 
@@ -84,7 +84,7 @@ export class Page {
     return this.title_;
   }
 
-  /** @return {!ViewportRelativePos} */
+  /** @return {!VIEWPORT_RELATIVE_POS_ENUM} */
   get relativePos() {
     return this.relativePos_;
   }
@@ -107,7 +107,7 @@ export class Page {
     return this.shadowDoc_;
   }
 
-  /** @param {!ViewportRelativePos} position */
+  /** @param {!VIEWPORT_RELATIVE_POS_ENUM} position */
   set relativePos(position) {
     this.relativePos_ = position;
   }
@@ -141,7 +141,7 @@ export class Page {
   }
 
   /**
-   * @param {VisibilityState} visibilityState
+   * @param {VISIBILITY_STATE_ENUM} visibilityState
    */
   setVisibility(visibilityState) {
     if (!this.isLoaded() || visibilityState == this.visibilityState_) {
@@ -262,7 +262,7 @@ export class HostPage extends Page {
    * @param {!./service.NextPageService} manager
    * @param {{ url: string, title: string, image: string }} meta
    * @param {!PageState} initState
-   * @param {!VisibilityState} initVisibility
+   * @param {!VISIBILITY_STATE_ENUM} initVisibility
    * @param {!Document} doc
    */
   constructor(manager, meta, initState, initVisibility, doc) {

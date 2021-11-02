@@ -11,8 +11,8 @@ describes.sandboxed('binarySearch', {}, () => {
   /**
    * @param {!Array<number>} arr
    * @param {number} target
-   * @param {BinarySearchStop=} stop
-   * @param {BinarySearchPreference=} preference
+   * @param {BINARY_SEARCH_STOP_ENUM=} stop
+   * @param {BINARY_SEARCH_PREFERENCE_ENUM=} preference
    */
   function arrayBinarySearch(arr, target, stop, preference) {
     return binarySearch(

@@ -505,7 +505,7 @@ export class StoryAdPage {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed attribution icon.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {

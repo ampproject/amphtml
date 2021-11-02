@@ -90,7 +90,7 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/constants/loading-instructions.Loading} */ (
+      /** @type {!./core/constants/loading-instructions.LOADING_ENUM} */ (
         context.loading
       )
     );

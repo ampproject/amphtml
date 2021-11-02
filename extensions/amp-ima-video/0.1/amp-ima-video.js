@@ -263,7 +263,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /**
    * Sends a command to the player through postMessage. NOTE: All commands sent
-   * before imaVideo fires VideoEvents.LOAD will be queued until that event
+   * before imaVideo fires VIDEO_EVENTS_ENUM.LOAD will be queued until that event
    * fires.
    * @param {string} command
    * @param {Object=} opt_args

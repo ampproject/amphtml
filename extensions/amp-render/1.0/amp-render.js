@@ -132,7 +132,7 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!URL_REPLACEMENT_POLICY_ENUM}
    * @private
    */
   getPolicy_() {

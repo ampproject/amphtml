@@ -1267,7 +1267,7 @@ export class Bind {
   }
 
   /**
-   * Dispatches an `AmpEvents.FORM_VALUE_CHANGE` if the element's changed
+   * Dispatches an `AMP_EVENTS_ENUM.FORM_VALUE_CHANGE` if the element's changed
    * property represents the value of a form field.
    * @param {!Element} element
    * @param {string} property

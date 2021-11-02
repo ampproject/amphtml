@@ -91,7 +91,7 @@ export function getNaturalDimensions(element) {
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
  * @param {!AmpElement} element
- * @return {!Layout}
+ * @return {!LAYOUT_ENUM}
  */
 export function applyStaticLayout(element) {
   // Check if the layout has already been done by server-side rendering or
@@ -100,7 +100,7 @@ export function applyStaticLayout(element) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout} */ (
+    const layout = /** @type {!LAYOUT_ENUM} */ (
       devAssert(parseLayout(completedLayoutAttr))
     );
     if (
@@ -195,7 +195,7 @@ export function applyStaticLayout(element) {
  * Gets the effective layout for an element.
  *
  * @param {!Element} element
- * @return {!Layout}
+ * @return {!LAYOUT_ENUM}
  */
 export function getEffectiveLayout(element) {
   // Return the pre-existing value if layout has already been applied.
@@ -209,7 +209,7 @@ export function getEffectiveLayout(element) {
 
 /**
  * @typedef {{
- *  layout: !Layout,
+ *  layout: !LAYOUT_ENUM,
  *  height: (string|number|null),
  *  width: (string|number|null)
  * }}

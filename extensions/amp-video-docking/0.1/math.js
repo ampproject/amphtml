@@ -65,7 +65,7 @@ const mapStep = (step, min, max) => mapRange(step, 0, 1, min, max);
  * @param {!RectDef} from
  * @param {!RectDef} to
  * @param {number=} step  in [0..1]
- * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
+ * @return {{x: number, y: number, scale: number, relativeX: !DIRECTION_X_ENUM}}
  *  - x is offset from the original box in pixels.
  *  - y is offset from the original box in pixels.
  *  - scale is the
@@ -111,7 +111,7 @@ export function letterboxRect(original, container) {
 /**
  * @param {!RectDef} original
  * @param {!RectDef} container
- * @param {DirectionX} horizontalEdge
+ * @param {DIRECTION_X_ENUM} horizontalEdge
  * @param {number} widthRatio
  * @param {number} widthMin
  * @param {number} marginRatio

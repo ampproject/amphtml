@@ -169,6 +169,10 @@ module.exports = function (context) {
               end: sourceCode.getLocFromIndex(match.index + imp.local.length),
             },
             message: `latent enum ${imp.local} should be ${imp.imported}`,
+
+            fix(fixer) {
+              return fixer.replaceTextRange([match.index, match.index + imp.local.length], imp.imported)
+            }
           });
         }
       }

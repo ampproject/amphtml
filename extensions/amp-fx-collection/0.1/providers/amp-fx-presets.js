@@ -120,7 +120,7 @@ function isInViewportConsideringMargins(entry, fxElement, opt_vh) {
   return !!top && top <= (1 - fxElement.marginStart) * vh;
 }
 
-/** @const {!Object<!FxType, !FxPresetDef>} */
+/** @const {!Object<!FX_TYPE_ENUM, !FxPresetDef>} */
 export const Presets = {
   [FX_TYPE_ENUM.PARALLAX]: {
     userAsserts(element) {

@@ -77,7 +77,7 @@ export function useAmpContext() {
 /**
  * Whether the calling component should currently be in the loaded state.
  *
- * @param {!Loading|string} loadingProp
+ * @param {!LOADING_ENUM|string} loadingProp
  * @return {boolean}
  */
 export function useLoading(loadingProp) {

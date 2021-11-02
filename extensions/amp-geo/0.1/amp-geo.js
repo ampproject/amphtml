@@ -80,7 +80,7 @@ const MODE_ENUM = {
  *   ISOCountry: string,
  *   matchedISOCountryGroups: !Array<string>,
  *   allISOCountryGroups: !Array<string>,
- *   isInCountryGroup: (function(string):GEO_IN_GROUP),
+ *   isInCountryGroup: (function(string):GEO_IN_GROUP_ENUM),
  * }}
  */
 export let GeoDef;
@@ -541,7 +541,7 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * isInCountryGroup API
    * @param {string} targetGroup group or comma delimited list of groups
-   * @return {GEO_IN_GROUP}
+   * @return {GEO_IN_GROUP_ENUM}
    * @public
    */
   isInCountryGroup(targetGroup) {

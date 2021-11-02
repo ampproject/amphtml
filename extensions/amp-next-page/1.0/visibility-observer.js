@@ -38,23 +38,23 @@ export class VisibilityObserverEntry {
   constructor(observer, callback) {
     /** @private {!VisibilityObserver} */
     this.observer_ = observer;
-    /** @private {?RelativePositions} */
+    /** @private {?RELATIVE_POSITIONS_ENUM} */
     this.topSentinelPosition_ = null;
-    /** @private {?RelativePositions} */
+    /** @private {?RELATIVE_POSITIONS_ENUM} */
     this.bottomSentinelPosition_ = null;
     /** @const {function(!ViewportRelativePos)} */
     this.callback = callback;
   }
 
   /**
-   * @return {?RelativePositions}
+   * @return {?RELATIVE_POSITIONS_ENUM}
    */
   get top() {
     return this.topSentinelPosition_;
   }
 
   /**
-   * @return {?RelativePositions}
+   * @return {?RELATIVE_POSITIONS_ENUM}
    */
   get bottom() {
     return this.bottomSentinelPosition_;

@@ -144,7 +144,7 @@ export class WebPushService {
     /** @private {./iframehost.IFrameHost} */
     this.iframe_ = null;
 
-    /** @private {?NotificationPermission}} */
+    /** @private {?NOTIFICATION_PERMISSION_ENUM}} */
     this.lastKnownPermission_ = null;
 
     /**
@@ -325,7 +325,7 @@ export class WebPushService {
    * Queries the helper iframe for the notification permission on the canonical
    * origin.
    *
-   * @return {Promise<NotificationPermission>}
+   * @return {Promise<NOTIFICATION_PERMISSION_ENUM>}
    */
   queryNotificationPermission() {
     return this.queryHelperFrame_(
@@ -793,7 +793,7 @@ export class WebPushService {
       entire page was redirected and our code will resume with our page is
       redirected back.
     */
-    /** @type {NotificationPermission} */
+    /** @type {NOTIFICATION_PERMISSION_ENUM} */
     const permission = result[0];
     /** @type {function ({closeFrame: boolean})} */
     const reply = result[1];
@@ -865,7 +865,7 @@ export class WebPushService {
    *
    * @param {string} storageKey The LocalStorage item key name in the canonical
    * helper frame.
-   * @return {Promise<NotificationPermission>}
+   * @return {Promise<NOTIFICATION_PERMISSION_ENUM>}
    * @private
    */
   getCanonicalFrameStorageValue_(storageKey) {
@@ -878,7 +878,7 @@ export class WebPushService {
    * Returns a Promise that resolves when the user dismisses, grants, or denies
    * notification permissions when subscribing.
    *
-   * @return {Promise<Array<(NotificationPermission|function({closeFrame: boolean}))>>}
+   * @return {Promise<Array<(NOTIFICATION_PERMISSION_ENUM|function({closeFrame: boolean}))>>}
    */
   onPermissionDialogInteracted() {
     return new Promise((resolve) => {

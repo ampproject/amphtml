@@ -6,9 +6,9 @@ import {listen} from '#utils/event-helper';
 import {devAssert} from '#utils/log';
 
 import {
-  FxBindings,
   FX_OBSERVES_SIGNAL_ENUM,
   FX_TYPE_ENUM, // eslint-disable-line no-unused-vars
+  FxBindings,
   getFxTypes,
 } from './fx-type';
 import {

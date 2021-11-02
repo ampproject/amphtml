@@ -760,7 +760,7 @@ export class Performance {
   /**
    * Ticks a timing event.
    *
-   * @param {TickLabel} label The variable name as it will be reported.
+   * @param {TICK_LABEL_ENUM} label The variable name as it will be reported.
    *     See TICKEVENTS.md for available metrics, and edit this file
    *     when adding a new metric.
    * @param {number=} opt_delta The delta. Call tickDelta instead of setting
@@ -824,7 +824,7 @@ export class Performance {
   /**
    * Tick a very specific value for the label. Use this method if you
    * measure the time it took to do something yourself.
-   * @param {TickLabel} label The variable name as it will be reported.
+   * @param {TICK_LABEL_ENUM} label The variable name as it will be reported.
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
@@ -833,7 +833,7 @@ export class Performance {
 
   /**
    * Tick time delta since the document has become visible.
-   * @param {TickLabel} label The variable name as it will be reported.
+   * @param {TICK_LABEL_ENUM} label The variable name as it will be reported.
    * @param {number=} opt_delta The optional delta value in milliseconds.
    */
   tickSinceVisible(label, opt_delta) {
@@ -942,7 +942,7 @@ export class Performance {
   /**
    * Retrieve a promise for tick label, resolved with metric. Used by amp-analytics
    *
-   * @param {TickLabel} label
+   * @param {TICK_LABEL_ENUM} label
    * @return {!Promise<time>}
    */
   getMetric(label) {

@@ -172,7 +172,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?AbortController} */
       this.mountAbortController_ = null;
 
-      /** @private {!ReadyState} */
+      /** @private {!READY_STATE_ENUM} */
       this.readyState_ = READY_STATE_ENUM.UPGRADING;
 
       /** @type {boolean} */
@@ -190,7 +190,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
        */
       this.resources_ = null;
 
-      /** @private {!Layout} */
+      /** @private {!LAYOUT_ENUM} */
       this.layout_ = LAYOUT_ENUM.NODISPLAY;
 
       /** @private {number} */
@@ -297,7 +297,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       }
     }
 
-    /** @return {!ReadyState} */
+    /** @return {!READY_STATE_ENUM} */
     get readyState() {
       return this.readyState_;
     }
@@ -850,7 +850,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     /**
      * Update the internal ready state.
      *
-     * @param {!ReadyState} state
+     * @param {!READY_STATE_ENUM} state
      * @param {*=} opt_failure
      * @protected
      * @final
@@ -1589,7 +1589,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Returns the layout of the element.
-     * @return {!Layout}
+     * @return {!LAYOUT_ENUM}
      */
     getLayout() {
       return this.layout_;

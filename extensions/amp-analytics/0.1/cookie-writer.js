@@ -112,7 +112,7 @@ export class CookieWriter {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
       const sameSite = this.getSameSiteType_(
-        // individual cookie sameSite/SameSite overrides config sameSite/SameSite
+        // individual cookie sameSite/SAME_SITE_ENUM overrides config sameSite/SAME_SITE_ENUM
         cookieObj['sameSite'] ||
           cookieObj['SameSite'] ||
           inputConfig['sameSite'] ||
@@ -216,7 +216,7 @@ export class CookieWriter {
         // provide a way to overwrite or erase existing cookie
         if (value) {
           const expireDate = Date.now() + cookieExpireDateMs;
-          // SameSite=None must be secure as per
+          // SAME_SITE_ENUM=None must be secure as per
           // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
           const secure = sameSite === SAME_SITE_ENUM.NONE;
           setCookie(this.win_, cookieName, value, expireDate, {
@@ -232,7 +232,7 @@ export class CookieWriter {
   }
 
   /**
-   * Converts SameSite string to SameSite type.
+   * Converts SAME_SITE_ENUM string to SAME_SITE_ENUM type.
    * @param {string=} sameSite
    * @return {SAME_SITE_ENUM|undefined}
    */

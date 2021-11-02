@@ -351,7 +351,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // NOTE: Layout.CONTAINER is only valid for mode="overlay",
+    // NOTE: LAYOUT_ENUM.CONTAINER is only valid for mode="overlay",
     // but since element attributes are not guaranteed to be present until
     // buildCallback is called, we cannot check the mode here.
     return isLayoutSizeDefined(layout) || layout == LAYOUT_ENUM.CONTAINER;

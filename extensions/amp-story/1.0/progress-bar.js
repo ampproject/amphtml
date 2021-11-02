@@ -398,7 +398,7 @@ export class ProgressBar {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {

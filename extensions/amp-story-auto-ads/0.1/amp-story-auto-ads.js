@@ -355,7 +355,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed ad badge.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {

@@ -267,14 +267,14 @@ export class Carousel {
      * Tracks the source of what cause the carousel to change index. This can
      * be provided when moving the carousel programmatically, and the value
      * will be propagated.
-     * @private {!ActionSource|undefined}
+     * @private {!ACTION_SOURCE_ENUM|undefined}
      */
     this.actionSource_ = undefined;
 
-    /** @private {!Alignment} */
+    /** @private {!ALIGNMENT_ENUM} */
     this.alignment_ = ALIGNMENT_ENUM.START;
 
-    /** @private {!Axis} */
+    /** @private {!AXIS_ENUM} */
     this.axis_ = AXIS_ENUM.X;
 
     /**
@@ -339,7 +339,7 @@ export class Carousel {
 
   /**
    * Moves forward by the current advance count.
-   * @param {!ActionSource=} actionSource
+   * @param {!ACTION_SOURCE_ENUM=} actionSource
    */
   next(actionSource) {
     this.advance(this.advanceCount_, {actionSource});
@@ -347,7 +347,7 @@ export class Carousel {
 
   /**
    * Moves backwards by the current advance count.
-   * @param {!ActionSource=} actionSource
+   * @param {!ACTION_SOURCE_ENUM=} actionSource
    */
   prev(actionSource) {
     this.advance(-this.advanceCount_, {actionSource});
@@ -374,7 +374,7 @@ export class Carousel {
    * TODO(sparhami) How can we make this work well for accessibility?
    * @param {number} delta
    * @param {{
-   *   actionSource: (!ActionSource|undefined),
+   *   actionSource: (!ACTION_SOURCE_ENUM|undefined),
    *   allowWrap: (boolean|undefined),
    * }=} options
    */
@@ -466,7 +466,7 @@ export class Carousel {
    * @param {number} index
    * @param {{
    *   smoothScroll: (boolean|undefined),
-   *   actionSource: (!ActionSource|undefined),
+   *   actionSource: (!ACTION_SOURCE_ENUM|undefined),
    * }=} options
    */
   goToSlide(index, options = {}) {
@@ -698,7 +698,7 @@ export class Carousel {
    * Updates the resting index as well as firing an event, if it actually
    * changed.
    * @param {number} restingIndex The new resting index.
-   * @param {ActionSource=} actionSource The actionSource associated with this
+   * @param {ACTION_SOURCE_ENUM=} actionSource The actionSource associated with this
    *    change.
    * @private
    */

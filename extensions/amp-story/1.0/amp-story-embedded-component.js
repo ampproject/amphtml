@@ -33,7 +33,7 @@ import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
 /**
- * Action icons to be placed in tooltip.
+ * ACTION_ENUM icons to be placed in tooltip.
  * @enum {string}
  * @private
  */
@@ -508,7 +508,7 @@ export class AmpStoryEmbeddedComponent {
       getAmpdoc(this.win_.document)
     );
 
-    /** @private {EmbeddedComponentState} */
+    /** @private {EMBEDDED_COMPONENT_STATE_ENUM} */
     this.state_ = EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN;
 
     /** @private {?Element} */
@@ -568,7 +568,7 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Sets new state for the embedded component.
-   * @param {EmbeddedComponentState} state
+   * @param {EMBEDDED_COMPONENT_STATE_ENUM} state
    * @param {?InteractiveComponentDef} component
    * @private
    */
@@ -864,7 +864,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Reacts to desktop state updates and hides navigation buttons since we
    * already have in the desktop UI.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {

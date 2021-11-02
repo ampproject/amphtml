@@ -157,7 +157,7 @@ export class ActionInvocation {
    * @param {?Element} source Element that generated the `event`.
    * @param {?Element} caller Element containing the on="..." action handler.
    * @param {?ActionEventDef} event The event object that triggered this action.
-   * @param {!ActionTrust} trust The trust level of this invocation's trigger.
+   * @param {!ACTION_TRUST_ENUM} trust The trust level of this invocation's trigger.
    * @param {?string} actionEventType The AMP event name that triggered this.
    * @param {?string} tagOrTarget The global target name or the element tagName.
    * @param {number} sequenceId An identifier for this action's sequence (all
@@ -187,7 +187,7 @@ export class ActionInvocation {
     this.caller = caller;
     /** @const {?ActionEventDef} */
     this.event = event;
-    /** @const {!ActionTrust} */
+    /** @const {!ACTION_TRUST_ENUM} */
     this.trust = trust;
     /** @const {?string} */
     this.actionEventType = actionEventType;
@@ -200,7 +200,7 @@ export class ActionInvocation {
   /**
    * Returns true if the trigger event has a trust equal to or greater than
    * `minimumTrust`. Otherwise, logs a user error and returns false.
-   * @param {ActionTrust} minimumTrust
+   * @param {ACTION_TRUST_ENUM} minimumTrust
    * @return {boolean}
    */
   satisfiesTrust(minimumTrust) {
@@ -268,7 +268,7 @@ export class ActionService {
     this.globalTargets_ = map();
 
     /**
-     * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
+     * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ACTION_TRUST_ENUM}>}
      */
     this.globalMethodHandlers_ = map();
 
@@ -396,7 +396,7 @@ export class ActionService {
    * Registers the action handler for a common method.
    * @param {string} name
    * @param {ActionHandlerDef} handler
-   * @param {ActionTrust} minTrust
+   * @param {ACTION_TRUST_ENUM} minTrust
    */
   addGlobalMethodHandler(name, handler, minTrust = ACTION_TRUST_ENUM.DEFAULT) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
@@ -407,7 +407,7 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} eventType
    * @param {?ActionEventDef} event
-   * @param {!ActionTrust} trust
+   * @param {!ACTION_TRUST_ENUM} trust
    * @param {?JsonObject=} opt_args
    * @return {boolean} true if the target has an action.
    */
@@ -423,7 +423,7 @@ export class ActionService {
    * @param {?Element} source
    * @param {?Element} caller
    * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
+   * @param {ACTION_TRUST_ENUM} trust
    */
   execute(target, method, args, source, caller, event, trust) {
     const invocation = new ActionInvocation(
@@ -598,7 +598,7 @@ export class ActionService {
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
-   * @param {!ActionTrust} trust
+   * @param {!ACTION_TRUST_ENUM} trust
    * @param {?JsonObject=} opt_args
    * @return {boolean} True if the element has an action.
    * @private

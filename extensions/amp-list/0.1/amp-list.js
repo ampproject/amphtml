@@ -1625,7 +1625,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!URL_REPLACEMENT_POLICY_ENUM}
    */
   getPolicy_() {
     const src = this.element.getAttribute('src');

@@ -80,7 +80,7 @@ export class RealTimeConfigService {
    * @param {!Element} element
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    *   substitutions available to use.
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?CONSENT_POLICY_STATE_ENUM} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @param {!Function} checkStillCurrent
@@ -129,7 +129,7 @@ export class RealTimeConfigManager {
     /** @private {?RtcConfigDef} */
     this.rtcConfig_ = null;
 
-    /** @private {?CONSENT_POLICY_STATE} */
+    /** @private {?CONSENT_POLICY_STATE_ENUM} */
     this.consentState_ = null;
 
     /** @private {?string} */
@@ -249,7 +249,7 @@ export class RealTimeConfigManager {
    *            {url: 'https://www.rtcSite2.example/example',
    *             sendRegardlessOfConsentState: ['UNKNOWN']}]
    *    }
-   * and the consentState is CONSENT_POLICY_STATE.UNKNOWN,
+   * and the consentState is CONSENT_POLICY_STATE_ENUM.UNKNOWN,
    * then this method call would clear the callouts to vendorB, and to the first
    * custom URL.
    */
@@ -588,7 +588,7 @@ export class RealTimeConfigManager {
    * @param {!Element} element
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    *   substitutions available to use.
-   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?CONSENT_POLICY_STATE_ENUM} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @param {!Function} checkStillCurrent

@@ -226,7 +226,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @protected
    */
   onUIStateUpdate_(uiState) {

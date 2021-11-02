@@ -319,7 +319,7 @@ export class Controls {
   }
 
   /**
-   * @param {VideoDockingEvents} event
+   * @param {VIDEO_DOCKING_EVENTS_ENUM} event
    * @private
    */
   dispatch_(event) {

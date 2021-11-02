@@ -29,7 +29,7 @@ let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-cam
  *
  * @typedef {{
  *   message: string,
- *   level: !LogLevel,
+ *   level: !LOG_LEVEL_ENUM,
  *   moreInfo: (string|undefined),
  *   selector: (string|undefined),
  *   precondition: (!ElementPredicate_1_0_Def|undefined),
@@ -47,7 +47,7 @@ let AmpStoryLogType_1_0_Def; // eslint-disable-line google-camelcase/google-came
  *   element: !Element,
  *   rootElement: !Element,
  *   message: string,
- *   level: !LogLevel,
+ *   level: !LOG_LEVEL_ENUM,
  *   conforms: boolean,
  *   moreInfo: (string|undefined),
  * }}

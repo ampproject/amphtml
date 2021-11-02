@@ -543,7 +543,7 @@ export class NextPageService {
    * Manually overrides the document's visible state to the given state
    *
    * @param {!DocumentRef} ref Reference to the document to change
-   * @param {!../../../src/core/constants/visibility-state.VisibilityState} visibilityState
+   * @param {!../../../src/core/constants/visibility-state.VISIBILITY_STATE_ENUM} visibilityState
    * @private
    */
   setDocumentVisibility_(ref, visibilityState) {

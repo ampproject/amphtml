@@ -437,9 +437,9 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
-   * @return {!ActionSource}
+   * Gets the ACTION_SOURCE_ENUM to use for a given ACTION_TRUST_ENUM.
+   * @param {!ACTION_TRUST_ENUM} trust
+   * @return {!ACTION_SOURCE_ENUM}
    * @private
    */
   getActionSource_(trust) {
@@ -490,7 +490,7 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ActionSource|undefined} actionSource
+   * @param {!ACTION_SOURCE_ENUM|undefined} actionSource
    * @return {boolean} Whether or not the action is a high trust action.
    * @private
    */
@@ -741,7 +741,7 @@ class AmpStreamGallery extends AMP.BaseElement {
   /**
    * Updates the current index, triggering actions and analytics events.
    * @param {number} index
-   * @param {!ActionSource} actionSource
+   * @param {!ACTION_SOURCE_ENUM} actionSource
    */
   updateCurrentIndex_(index, actionSource) {
     const prevIndex = this.currentIndex_;

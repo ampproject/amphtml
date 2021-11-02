@@ -269,7 +269,7 @@ export class ShareMenu {
 
   /**
    * Reacts to UI state updates and triggers the right UI.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {

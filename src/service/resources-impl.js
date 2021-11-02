@@ -172,7 +172,7 @@ export class ResourcesImpl {
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
-    /** @private @const {!FiniteStateMachine<!VisibilityState>} */
+    /** @private @const {!FiniteStateMachine<!VISIBILITY_STATE_ENUM>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.ampdoc.getVisibilityState()
     );
@@ -1623,7 +1623,7 @@ export class ResourcesImpl {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {!FiniteStateMachine<!VisibilityState>} vsm
+   * @param {!FiniteStateMachine<!VISIBILITY_STATE_ENUM>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
     const {

@@ -60,7 +60,7 @@ export class ConsentPolicyManager {
     /** @private {?string} */
     this.consentInstanceIdDepr_ = null;
 
-    /** @private {?CONSENT_ITEM_STATE} */
+    /** @private {?CONSENT_ITEM_STATE_ENUM} */
     this.consentState_ = null;
 
     /** @private {?string} */
@@ -233,7 +233,7 @@ export class ConsentPolicyManager {
   /**
    * Used to wait for policy to resolve;
    * @param {string} policyId
-   * @return {!Promise<CONSENT_POLICY_STATE>}
+   * @return {!Promise<CONSENT_POLICY_STATE_ENUM>}
    */
   whenPolicyResolved(policyId) {
     // If customized policy is not supported
@@ -374,10 +374,10 @@ export class ConsentPolicyInstance {
     /** @private {?function()} */
     this.readyResolver_ = readyDeferred.resolve;
 
-    /** @private {CONSENT_POLICY_STATE} */
+    /** @private {CONSENT_POLICY_STATE_ENUM} */
     this.status_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
 
-    /** @private {!Array<CONSENT_POLICY_STATE>} */
+    /** @private {!Array<CONSENT_POLICY_STATE_ENUM>} */
     this.unblockStateLists_ = config['unblockOn'] || [
       CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
       CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
@@ -440,7 +440,7 @@ export class ConsentPolicyInstance {
   /**
    * Evaluate the incoming consent state and determine if the policy instance
    * should be resolved and what the policy state should be.
-   * @param {CONSENT_ITEM_STATE} state
+   * @param {CONSENT_ITEM_STATE_ENUM} state
    * @param {boolean} isFallback
    */
   evaluate(state, isFallback = false) {
@@ -481,7 +481,7 @@ export class ConsentPolicyInstance {
 
   /**
    * Returns the current consent policy state
-   * @return {CONSENT_POLICY_STATE}
+   * @return {CONSENT_POLICY_STATE_ENUM}
    */
   getCurrentPolicyStatus() {
     return this.status_;

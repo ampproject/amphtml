@@ -90,7 +90,7 @@ export class StoryAdLocalization {
   }
 
   /**
-   * @param {!../../../src/service/localization/strings.LocalizedStringId} id
+   * @param {!../../../src/service/localization/strings.LOCALIZED_STRING_ID_ENUM} id
    * @return {?string}
    */
   getLocalizedString(id) {

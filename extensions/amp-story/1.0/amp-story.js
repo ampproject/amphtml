@@ -299,7 +299,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?BackgroundBlur} */
     this.backgroundBlur_ = null;
 
-    /** @private {?UIType} */
+    /** @private {?UI_TYPE_ENUM} */
     this.uiState_ = null;
   }
 
@@ -1362,7 +1362,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Switches to a particular page.
    * @param {string} targetPageId
-   * @param {!NavigationDirection} direction
+   * @param {!NAVIGATION_DIRECTION_ENUM} direction
    * @return {!Promise}
    * @private
    */
@@ -1511,7 +1511,7 @@ export class AmpStory extends AMP.BaseElement {
    * Updates the story navigation stack and checks for navigation adherence to
    * the path a user takes.
    * @param {string} targetPageId
-   * @param {!NavigationDirection} direction
+   * @param {!NAVIGATION_DIRECTION_ENUM} direction
    * @private
    */
   updateNavigationPath_(targetPageId, direction) {
@@ -1660,7 +1660,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -1752,7 +1752,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Retrieves the UI type that should be used to view the story.
-   * @return {!UIType}
+   * @return {!UI_TYPE_ENUM}
    * @private
    */
   getUIType_() {

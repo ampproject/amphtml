@@ -9,8 +9,8 @@ import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
+  WEB_ANIMATION_PLAY_STATE_ENUM,
   WebAnimationDef,
-  WebAnimationPlayState,
   WebAnimationSelectorDef,
   WebAnimationTimingDef,
   WebKeyframesCreateFnDef,
@@ -362,7 +362,8 @@ export class AnimationRunner {
     return (
       this.isActivityScheduled_(PLAYBACK_ACTIVITY_ENUM.START) ||
       (!!this.runner_ &&
-        devAssert(this.runner_).getPlayState() == WebAnimationPlayState.RUNNING)
+        devAssert(this.runner_).getPlayState() ==
+          WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING)
     );
   }
 
@@ -490,7 +491,7 @@ export class AnimationRunner {
     this.runner_ = runner;
 
     runner.onPlayStateChanged((state) => {
-      if (state == WebAnimationPlayState.FINISHED) {
+      if (state == WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED) {
         this.notifyFinish_();
       }
     });

@@ -144,7 +144,7 @@ export class AmpState extends AMP.BaseElement {
   /**
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!UrlReplacementPolicy} policy
+   * @param {!URL_REPLACEMENT_POLICY_ENUM} policy
    * @param {boolean=} opt_refresh
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private

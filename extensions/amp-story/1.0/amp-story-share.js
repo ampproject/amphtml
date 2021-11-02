@@ -17,7 +17,7 @@ import {renderAsElement} from './simple-template';
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!Object<string, !LocalizedStringId>}
+ * @const {!Object<string, !LOCALIZED_STRING_ID_ENUM>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
   'system': LOCALIZED_STRING_ID_ENUM.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,

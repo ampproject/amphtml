@@ -255,7 +255,7 @@ export class VideoDocking {
 
     /**
      * Overriden when user drags the video to a different corner.
-     * @private {?DirectionX}
+     * @private {?DIRECTION_X_ENUM}
      */
     this.cornerDirectionX_ = null;
 
@@ -289,7 +289,7 @@ export class VideoDocking {
     /** @private {?{width: number, height: number}} */
     this.sizedAt_ = null;
 
-    /** @private {?DirectionY} */
+    /** @private {?DIRECTION_Y_ENUM} */
     this.scrollDirection_ = null;
 
     /** @private {number} */
@@ -901,7 +901,7 @@ export class VideoDocking {
    * @param {number} scale
    * @param {number} step in [0..1]
    * @param {number} transitionDurationMs
-   * @param {DirectionX=} opt_relativeX
+   * @param {DIRECTION_X_ENUM=} opt_relativeX
    * @param {!RectDef=} opt_inlineRect
    * @param {string=} position
    * @return {!Promise}
@@ -1310,7 +1310,7 @@ export class VideoDocking {
 
   /**
    * @param {!MouseEvent|!TouchEvent} e
-   * @param {!DirectionX} directionX
+   * @param {!DIRECTION_X_ENUM} directionX
    * @param {number} startX
    * @private
    */
@@ -1527,7 +1527,7 @@ export class VideoDocking {
 
   /**
    * @param {number} offsetX
-   * @return {!DirectionX}
+   * @return {!DIRECTION_X_ENUM}
    * @private
    */
   calculateDirectionX_(offsetX) {
@@ -1541,7 +1541,7 @@ export class VideoDocking {
    * @param {!DockTargetDef} target
    * @param {number} step in [0..1]
    * @param {!RectDef} opt_inlineRect
-   * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
+   * @return {{x: number, y: number, scale: number, relativeX: !DIRECTION_X_ENUM}}
    */
   getDims_(video, target, step, opt_inlineRect) {
     return interpolatedBoxesTransform(

@@ -247,7 +247,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    // Listening for VideoEvents.LOAD in AutoFullscreenManager.register may
+    // Listening for VIDEO_EVENTS_ENUM.LOAD in AutoFullscreenManager.register may
     // introduce race conditions which may break elements e.g. amp-ima-video
     Services.videoManagerForDoc(this.element).register(this);
 

@@ -61,7 +61,7 @@ export class PositionObserver {
 
   /**
    * @param {!Element} element
-   * @param {!PositionObserverFidelity} fidelity
+   * @param {!POSITION_OBSERVER_FIDELITY_ENUM} fidelity
    * @param {function(?./position-observer-worker.PositionInViewportEntryDef)} handler
    * @return {!UnlistenDef}
    */

@@ -320,7 +320,7 @@ export class GoogleSubscriptionsPlatform {
   /**
    * Listens for events from analytics and transmits them to the SwG event
    * manager if appropriate.
-   * @param {!SubscriptionAnalyticsEvents|string} event
+   * @param {!SUBSCRIPTION_ANALYTICS_EVENTS_ENUM|string} event
    * @param {!JsonObject} optVarsUnused
    * @param {!JsonObject} internalVars
    */

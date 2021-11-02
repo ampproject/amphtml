@@ -246,7 +246,7 @@ export class VideoManager {
    * @private
    */
   registerCommonActions_(video) {
-    // Only require ActionTrust.LOW for video actions to defer to platform
+    // Only require ACTION_TRUST_ENUM.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ACTION_TRUST_ENUM.LOW;
 
@@ -1608,7 +1608,7 @@ export class AnalyticsPercentageTracker {
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents} eventType
+ * @param {!VIDEO_ANALYTICS_EVENTS_ENUM} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */

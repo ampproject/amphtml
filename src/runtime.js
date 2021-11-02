@@ -149,7 +149,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!LogLevel} level
+   * @param {!LOG_LEVEL_ENUM} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 

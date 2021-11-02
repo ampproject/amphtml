@@ -875,7 +875,7 @@ export class SystemLayer {
 
   /**
    * Reacts to UI state updates and triggers the expected UI.
-   * @param {!UIType} uiState
+   * @param {!UI_TYPE_ENUM} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {

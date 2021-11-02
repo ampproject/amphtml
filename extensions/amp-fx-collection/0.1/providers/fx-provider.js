@@ -27,8 +27,8 @@ import {
 } from '../../../../src/service-helpers';
 import {FX_TYPE_ENUM} from '../fx-type'; // eslint-disable-line no-unused-vars
 import {
-  ScrollToggleDispatch,
   SCROLL_TOGGLE_POSITION_ENUM, // eslint-disable-line no-unused-vars
+  ScrollToggleDispatch,
   assertValidScrollToggleElement,
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
@@ -39,7 +39,7 @@ import {
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {!FxType} type
+ * @param {!FX_TYPE_ENUM} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
   // TODO(alanorozco): Surface FixedLayer APIs to make this work.
@@ -111,7 +111,7 @@ function scrollToggle(element, isShown, position) {
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {!FxType} type
+ * @param {!FX_TYPE_ENUM} type
  */
 export function installPositionBoundFx(ampdoc, element, type) {
   installPositionObserverServiceForDoc(ampdoc);
@@ -126,7 +126,7 @@ export class FxElement {
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element The element to give a preset effect.
-   * @param {!FxType} fxType
+   * @param {!FX_TYPE_ENUM} fxType
    */
   constructor(ampdoc, element, fxType) {
     /** @public @const  {!Window} */
@@ -153,7 +153,7 @@ export class FxElement {
     /** @public {number} */
     this.offset = 0;
 
-    /** @private @const {!FxType} */
+    /** @private @const {!FX_TYPE_ENUM} */
     this.fxType_ = fxType;
 
     Presets[fxType].userAsserts(element);

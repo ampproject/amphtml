@@ -19,7 +19,7 @@ const DATA_SOURCES_ENUM = {
 /**
  * @typedef {{
  *   dataSource: !DataSources,
- *   property: (!StateProperty|!AnalyticsVariable)
+ *   property: (!STATE_PROPERTY_ENUM|!ANALYTICS_VARIABLE_ENUM)
  * }}
  */
 let GetStateConfigurationDef;
@@ -52,7 +52,7 @@ const GET_STATE_CONFIGURATIONS_ENUM = {
   },
 };
 
-/** @typedef {{action: !Action, isValueValid: function(*):boolean}} */
+/** @typedef {{action: !ACTION_ENUM, isValueValid: function(*):boolean}} */
 let SetStateConfigurationDef;
 
 /** @enum {!SetStateConfigurationDef} */

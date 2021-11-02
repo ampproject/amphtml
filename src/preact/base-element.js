@@ -422,7 +422,7 @@ export class PreactBaseElement extends BaseElement {
    * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
    * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ActionTrust} minTrust
+   * @param {../action-constants.ACTION_TRUST_ENUM} minTrust
    * @protected
    */
   registerApiAction(alias, handler, minTrust = ACTION_TRUST_ENUM.DEFAULT) {
@@ -502,7 +502,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {!ReadyState} state
+   * @param {!READY_STATE_ENUM} state
    * @param {*=} opt_failure
    * @private
    */

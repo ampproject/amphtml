@@ -41,13 +41,13 @@ const CanPlay = contextProp('CanPlay', {
 });
 
 /**
- * The default `Loading` instruction for a subtree. See `Loading` for the set
+ * The default `LOADING_ENUM` instruction for a subtree. See `LOADING_ENUM` for the set
  * of possible values. Non-renderable subtrees automatically get a value of
  * "lazy".
  *
  * Default is "auto".
  *
- * @const {!ContextPropDef<!Loading, boolean>}
+ * @const {!ContextPropDef<!LOADING_ENUM, boolean>}
  */
 const LoadingProp = contextProp('Loading', {
   defaultValue: LOADING_ENUM.AUTO,
