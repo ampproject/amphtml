@@ -81,10 +81,7 @@ function getComponentsToBuild(preBuild = false) {
     !argv.extensions_from &&
     !argv.core_runtime_only
   ) {
-    const allComponents = [];
-    for (const component in components) {
-      allComponents.push(components[component].name);
-    }
+    const allComponents = Object.values(components).map(c => c.name);
     componentsToBuild = dedupe(componentsToBuild.concat(allComponents));
   }
   return componentsToBuild;
