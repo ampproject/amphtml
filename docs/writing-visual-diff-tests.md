@@ -38,14 +38,15 @@ Follow the development mode instructions and iterate on the test until you are s
 
 ### Validate the test
 
-Finally, verify that your test display as expected by executing it on Percy:
+Finally, verify that your test displays as expected by executing it on Percy:
 
 ```sh
 amp visual-diff --grep="<regular expression>"
 ```
 
 -   When the test finishes executing it will print a URL to Percy where you can inspect the results. It should take about a minute to finish processing.
--   Inspect the build on Percy. If you are not happy with the results, fix your page or code, and repeat. If all is well, approve it. This creates a new baseline on Percy, against which all following builds will be compared.
+-   Inspect the build on Percy. If you are not happy with the results, fix your page or code, and repeat.
+-   If all is well, approve it. This creates a new baseline on Percy, against which all following builds will be compared.
 
 After approving your test, repeat the `amp visual-diff` command at least 5 more times. If any of the subsequent runs fails with a visual changes, this means that your test is flaky.
 
