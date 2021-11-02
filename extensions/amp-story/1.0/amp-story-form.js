@@ -129,13 +129,14 @@ function createFormResultEl_(formEl, isSuccess) {
  * @private
  */
 function createResponseAttributeEl_(responseAttribute, child) {
-  const statusEl = (
+  return (
     <div>
-      <div class="i-amphtml-story-page-attachment-form-submission-status">
+      <div
+        class="i-amphtml-story-page-attachment-form-submission-status"
+        {...{[responseAttribute]: true}}
+      >
         {child}
       </div>
     </div>
   );
-  statusEl.setAttribute(responseAttribute, '');
-  return statusEl;
 }
