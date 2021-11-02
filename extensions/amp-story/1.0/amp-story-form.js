@@ -25,7 +25,7 @@ let FormElementChildrenDef;
 /**
  * @const {Object<string, function(Element):!FormElementChildrenDef)|function():!FormElementChildrenDef>}
  */
-const createFormChildrenByAttribute = {
+const createStatusChildrenByAttribute = {
   'submitting': () => {
     const loadingSpinner = new LoadingSpinner();
     const element = loadingSpinner.build();
@@ -60,16 +60,18 @@ function selectByAttr(parent, attr) {
  * @private
  */
 export function setupResponseAttributeElements(formEl) {
-  for (const attribute in createFormChildrenByAttribute) {
+  for (const attribute in createStatusChildrenByAttribute) {
     const el = selectByAttr(formEl, attribute);
     if (!el) {
-      formEl.appendChild(
+      const children = createStatusChildrenByAttribute[attribute](formEl);
+      const element = (
         <div {...{[attribute]: true}}>
           <div class="i-amphtml-story-page-attachment-form-submission-status">
-            {createFormChildrenByAttribute[attribute](formEl)}
+            {children}
           </div>
         </div>
       );
+      formEl.appendChild(element);
     }
   }
 }
@@ -81,7 +83,7 @@ export function setupResponseAttributeElements(formEl) {
  * @private
  */
 export function getResponseAttributeElements(formEl) {
-  return Object.keys(createFormChildrenByAttribute).map((attr) =>
+  return Object.keys(createStatusChildrenByAttribute).map((attr) =>
     selectByAttr(formEl, attr)
   );
 }
