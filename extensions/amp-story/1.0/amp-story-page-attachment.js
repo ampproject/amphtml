@@ -509,7 +509,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   getPublisherOrigin_() {
-    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
-    return publisherOrigin.replace(/https?:\/\//, '');
+    let publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    publisherOrigin = publisherOrigin.replace(/https?:\/\//, '');
+    return publisherOrigin.replace(/^www./, '');
   }
 }
