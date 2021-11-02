@@ -82,7 +82,15 @@ export function createElement(tag, props, ...children) {
   if (typeof tag !== 'string') {
     return tag({...props, children});
   }
-  const element = self.document.createElement(tag);
+  // We expect the __svg magic prop to be set during compilation time.
+  // See babel-plugin-dom-jsx-svg-namespace
+  const isSvg = props?.__svg;
+  if (isSvg) {
+    delete props['__svg'];
+  }
+  const element = isSvg
+    ? self.document.createElementNS('http://www.w3.org/2000/svg', tag)
+    : self.document.createElement(tag);
   appendChild(element, children);
   if (props) {
     Object.keys(props).forEach((name) => {
