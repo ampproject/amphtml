@@ -1,8 +1,6 @@
 import {TickLabel} from '#core/constants/enums';
 import {VisibilityState} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
-import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
@@ -15,7 +13,6 @@ import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 import {isStoryDocument} from '#utils/story';
 
-import {whenContentIniLoad} from '../ini-load';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
 
@@ -116,9 +113,6 @@ export class Performance {
 
     /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
-
-    /** @private {?./resources-interface.ResourcesInterface} */
-    this.resources_ = null;
 
     /** @private {?./document-info-impl.DocumentInfoDef} */
     this.documentInfo_ = null;
@@ -222,13 +216,6 @@ export class Performance {
     }
 
     /**
-     * Whether the user agent supports the navigation timing API
-     *
-     * @private {boolean}
-     */
-    this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
-
-    /**
      * The latest reported largest contentful paint time. Uses entry.startTime,
      * which equates to: renderTime ?? loadTime. We can't always use one or the other
      * because:
@@ -249,15 +236,6 @@ export class Performance {
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
-
-    // Tick document ready event.
-    whenDocumentReady(win.document).then(() => {
-      this.tick(TickLabel.DOCUMENT_READY);
-      this.flush();
-    });
-
-    // Tick window.onload event.
-    whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
 
     /**
@@ -289,7 +267,6 @@ export class Performance {
     const {documentElement} = this.win.document;
     this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
-    this.resources_ = Services.resourcesForDoc(documentElement);
     this.documentInfo_ = Services.documentInfoForDoc(this.ampdoc_);
 
     this.isPerformanceTrackingOn_ =
@@ -305,11 +282,6 @@ export class Performance {
     // Can be null which would mean this AMP page is not embedded
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
-
-    this.ampdoc_.whenFirstVisible().then(() => {
-      this.tick(TickLabel.ON_FIRST_VISIBLE);
-      this.flush();
-    });
 
     const registerVisibilityChangeListener =
       this.supportsLargestContentfulPaint_ || this.supportsLayoutShift_;
@@ -371,14 +343,6 @@ export class Performance {
   }
 
   /**
-   * Callback for onload.
-   */
-  onload_() {
-    this.tick(TickLabel.ON_LOAD);
-    this.flush();
-  }
-
-  /**
    * Reports performance metrics first paint, first contentful paint,
    * and first input delay.
    * See https://github.com/WICG/paint-timing
@@ -394,15 +358,10 @@ export class Performance {
 
     // These state vars ensure that we only report a given value once, because
     // the backend doesn't support updates.
-    let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
-    let recordedNavigation = false;
     const processEntry = (entry) => {
-      if (entry.name == 'first-paint' && !recordedFirstPaint) {
-        this.tickDelta(TickLabel.FIRST_PAINT, entry.startTime + entry.duration);
-        recordedFirstPaint = true;
-      } else if (
+      if (
         entry.name == 'first-contentful-paint' &&
         !recordedFirstContentfulPaint
       ) {
@@ -427,18 +386,6 @@ export class Performance {
       } else if (entry.entryType === 'largest-contentful-paint') {
         this.largestContentfulPaint_ = entry.startTime;
         this.largestContentfulPaintType_ = getElementType(entry.element);
-      } else if (entry.entryType == 'navigation' && !recordedNavigation) {
-        [
-          'domComplete',
-          'domContentLoadedEventEnd',
-          'domContentLoadedEventStart',
-          'domInteractive',
-          'loadEventEnd',
-          'loadEventStart',
-          'requestStart',
-          'responseStart',
-        ].forEach((label) => this.tick(label, entry[label]));
-        recordedNavigation = true;
       }
     };
 
@@ -469,15 +416,6 @@ export class Performance {
       // lcpObserver
       this.createPerformanceObserver_(processEntry, {
         type: 'largest-contentful-paint',
-        buffered: true,
-      });
-    }
-
-    if (this.supportsNavigation_) {
-      // Wrap in a try statement as there are some browsers (ex. chrome 73)
-      // that will say it supports navigation but throws.
-      this.createPerformanceObserver_(processEntry, {
-        type: 'navigation',
         buffered: true,
       });
     }
@@ -676,72 +614,6 @@ export class Performance {
   }
 
   /**
-   * Measure the delay the user perceives of how long it takes
-   * to load the initial viewport.
-   * @private
-   */
-  measureUserPerceivedVisualCompletenessTime_() {
-    const didStartInPrerender = !this.ampdoc_.hasBeenVisible();
-
-    let docVisibleTime = -1;
-    this.ampdoc_.whenFirstVisible().then(() => {
-      docVisibleTime = this.win.performance.now();
-      // Mark this first visible instance in the browser timeline.
-      this.mark('visible');
-    });
-
-    this.whenViewportLayoutComplete_().then(() => {
-      if (didStartInPrerender) {
-        const userPerceivedVisualCompletenesssTime =
-          docVisibleTime > -1
-            ? this.win.performance.now() - docVisibleTime
-            : //  Prerender was complete before visibility.
-              0;
-        this.ampdoc_.whenFirstVisible().then(() => {
-          // We only tick this if the page eventually becomes visible,
-          // since otherwise we heavily skew the metric towards the
-          // 0 case, since pre-renders that are never used are highly
-          // likely to fully load before they are never used :)
-          this.tickDelta(
-            TickLabel.FIRST_VIEWPORT_READY,
-            userPerceivedVisualCompletenesssTime
-          );
-        });
-        this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
-        // Mark this instance in the browser timeline.
-        this.mark(TickLabel.FIRST_VIEWPORT_READY);
-      } else {
-        // If it didnt start in prerender, no need to calculate anything
-        // and we just need to tick `pc`. (it will give us the relative
-        // time since the viewer initialized the timer)
-        this.tick(TickLabel.FIRST_VIEWPORT_READY);
-        this.prerenderComplete_(this.win.performance.now() - docVisibleTime);
-      }
-      this.flush();
-    });
-  }
-
-  /**
-   * Returns a promise that is resolved when resources in viewport
-   * have been finished being laid out.
-   * @return {!Promise}
-   * @private
-   */
-  whenViewportLayoutComplete_() {
-    return this.resources_.whenFirstPass().then(() => {
-      const {documentElement} = this.win.document;
-      const size = Services.viewportForDoc(documentElement).getSize();
-      const rect = layoutRectLtwh(0, 0, size.width, size.height);
-      return whenContentIniLoad(
-        documentElement,
-        this.win,
-        rect,
-        /* isInPrerender */ true
-      );
-    });
-  }
-
-  /**
    * Ticks a timing event.
    *
    * @param {TickLabel} label The variable name as it will be reported.
@@ -897,20 +769,6 @@ export class Performance {
       this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
-  }
-
-  /**
-   * @private
-   * @param {number} value
-   */
-  prerenderComplete_(value) {
-    if (this.viewer_) {
-      this.viewer_.sendMessage(
-        'prerenderComplete',
-        dict({'value': value}),
-        /* cancelUnsent */ true
-      );
-    }
   }
 
   /**
