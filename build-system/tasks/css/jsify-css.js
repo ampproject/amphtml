@@ -118,7 +118,12 @@ async function transformCss(contents, hash, opt_filename) {
   }
   const cached = transformCache.get(hash);
   if (cached) {
-    return JSON.parse((await cached).toString());
+    try {
+      return JSON.parse((await cached).toString());
+    } catch (e) {
+      e.message = `Error transforming ${opt_filename}`;
+      throw e;
+    }
   }
 
   const transformed = transform(contents, opt_filename);

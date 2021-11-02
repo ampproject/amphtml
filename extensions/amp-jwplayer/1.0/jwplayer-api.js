@@ -1,4 +1,4 @@
-import {addParamsToUrl} from '../../../../url';
+import {addParamsToUrl} from '../../../src/url';
 
 /**
  * Makes iframe src url

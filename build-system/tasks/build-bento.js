@@ -1,11 +1,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const {
-  bentoBundles,
-  jsBundles,
-  verifyBentoBundles,
-} = require('../compile/bundles.config');
-const {
   INABOX_EXTENSION_SET,
   buildBinaries,
   buildExtensionCss,
@@ -17,8 +12,8 @@ const {
   getBentoBuildFilename,
   getExtensionsFromArg,
 } = require('./extension-helpers');
-const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
-const {doBuildJs, endBuildStep, watchDebounceDelay} = require('./helpers');
+const {bentoBundles, verifyBentoBundles} = require('../compile/bundles.config');
+const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {existsSync, mkdirSync} = require('fs');
 const {getBentoName} = require('./bento-helpers');
 const {log} = require('../common/logging');
@@ -193,9 +188,6 @@ async function buildComponent(
       return;
     }
   }
-  if (name === 'amp-bind') {
-    await doBuildJs(jsBundles, 'ww.max.js', options);
-  }
   if (options.npm) {
     await buildNpmBinaries(componentsDir, name, options);
     await buildNpmCss(componentsDir, options);
@@ -203,10 +195,6 @@ async function buildComponent(
   if (options.binaries) {
     await buildBinaries(componentsDir, options.binaries, options);
   }
-  if (name === 'amp-analytics') {
-    await analyticsVendorConfigs(options);
-  }
-
   if (options.isRebuild) {
     return;
   }

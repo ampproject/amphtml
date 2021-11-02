@@ -1,8 +1,8 @@
+import {BaseElement} from '#bento/components/amp-jwplayer/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-jwplayer';

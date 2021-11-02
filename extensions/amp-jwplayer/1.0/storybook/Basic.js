@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 
-import {BentoJwplayer} from '../../../../../../extensions/amp-jwplayer/1.0/component';
+import {BentoJwplayer} from '../component';
 
 export default {
   title: 'Jwplayer',

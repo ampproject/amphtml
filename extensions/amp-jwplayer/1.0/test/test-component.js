@@ -1,8 +1,8 @@
 import {mount} from 'enzyme';
 
-import {BentoJwplayer} from '#bento/components/amp-jwplayer/1.0/component';
-
 import * as Preact from '#preact';
+
+import {BentoJwplayer} from '../component';
 
 function mountComp(props) {
   return mount(<BentoJwplayer {...props}></BentoJwplayer>);
