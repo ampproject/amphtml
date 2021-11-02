@@ -3,32 +3,49 @@ import {isServerRendered} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {realChildElements} from '#core/dom/query';
 
-export const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
-
 /**
  * @enum {string}
  */
-const ClassNames = {
+export const ClassNames = {
+  // Carousel Controls
+  BUTTON: 'amp-carousel-button',
   PREV_BUTTON: 'amp-carousel-button-prev',
   NEXT_BUTTON: 'amp-carousel-button-next',
-  SLIDES_CONTAINER: 'i-amphtml-slides-container',
-  SCROLLABLE_CONTAINER: 'i-amphtml-scrollable-carousel-container',
+  HAS_CONTROL: 'i-amphtml-carousel-has-controls',
+  CONTROL_HIDE_ATTRIBUTE: 'i-amphtml-carousel-hide-buttons',
+
+  // Generic
   SLIDE: 'amp-carousel-slide',
+
+  // Slide Scroll
+  SLIDESCROLL_CAROUSEL: 'i-amphtml-slidescroll',
   SLIDE_WRAPPER: 'i-amphtml-slide-item',
+  SLIDES_CONTAINER: 'i-amphtml-slides-container',
+
+  // Scrollable Carousel
+  SCROLLABLE_CONTAINER: 'i-amphtml-scrollable-carousel-container',
+  SCROLLABLE_SLIDE: 'amp-scrollable-carousel-slide',
 };
+
+/**
+ * Throws if any provided param is not truthy.
+ * @param  {...any} elements
+ */
+function assertDomQueryResults(...elements) {
+  for (let i = 0; i < elements.length; i++) {
+    if (!elements[i]) {
+      throw new Error('Invalid server render');
+    }
+  }
+}
 
 /**
  * Builds a carousel button for next/prev.
  * @param {!Element} element
- * @param {'prev' | 'next'} type
+ * @param {{className: string, title: string}} options
  * @return {?HTMLDivElement}
  */
-function buildButton(element, type) {
-  const className =
-    type === 'prev' ? ClassNames.PREV_BUTTON : ClassNames.NEXT_BUTTON;
-  const title =
-    type === 'prev' ? getPrevButtonTitle(element) : getNextButtonTitle(element);
-
+function buildButton(element, {className, title}) {
   /**
    * In scrollable carousel, the next/previous buttons add no functionality
    * for screen readers as scrollable carousel is just a horizontally
@@ -36,16 +53,14 @@ function buildButton(element, type) {
    * To avoid confusion, we therefore set the role to presentation for the
    * controls in this case.
    */
-  const ariaRole = getType(element) === 'slides' ? 'button' : 'presentation';
+  const ariaRole = getType(element) === 'scroll' ? 'presentation' : 'button';
 
   const button = element.ownerDocument.createElement('div');
+  button.classList.add(ClassNames.BUTTON, className);
   button.setAttribute('tabindex', '0');
-  button.classList.add('amp-carousel-button');
-  button.classList.add(className);
   button.setAttribute('role', ariaRole);
   button.setAttribute('title', title);
   element.appendChild(button);
-
   return button;
 }
 
@@ -64,12 +79,36 @@ export function buildCarouselControls(element) {
 
   const doc = element.ownerDocument;
   if (isAmp4Email(doc) || element.hasAttribute('controls')) {
-    element.classList.add(_HAS_CONTROL_CLASS);
+    element.classList.add(ClassNames.HAS_CONTROL);
   }
 
-  const prevButton = buildButton(element, 'prev');
-  const nextButton = buildButton(element, 'next');
+  const prevButton = buildButton(element, {
+    className: ClassNames.PREV_BUTTON,
+    title: getPrevButtonTitle(element),
+  });
+  const nextButton = buildButton(element, {
+    className: ClassNames.NEXT_BUTTON,
+    title: getNextButtonTitle(element),
+  });
+  return {prevButton, nextButton};
+}
 
+/**
+ * Queries for all of the necessary DOM Elements to assign to ivars
+ * @param {!Element} element
+ * @return {{
+ *   prevButton: !HTMLDivElement,
+ *   nextButton: !HTMLDivElement
+ * }}
+ */
+export function queryCarouselControlsDom(element) {
+  const prevButton = /** @type {!HTMLDivElement} */ (
+    element.querySelector(`./${escapeCssSelectorIdent(ClassNames.PREV_BUTTON)}`)
+  );
+  const nextButton = /** @type {!HTMLDivElement} */ (
+    element.querySelector(`./${escapeCssSelectorIdent(ClassNames.NEXT_BUTTON)}`)
+  );
+  assertDomQueryResults(prevButton, nextButton);
   return {prevButton, nextButton};
 }
 
@@ -95,8 +134,7 @@ function buildScrollableCarousel(element) {
   container.setAttribute('tabindex', '-1');
   element.appendChild(container);
   cells.forEach((cell) => {
-    cell.classList.add(ClassNames.SLIDE);
-    cell.classList.add('amp-scrollable-carousel-slide');
+    cell.classList.add(ClassNames.SLIDE, ClassNames.SCROLLABLE_SLIDE);
     container.appendChild(cell);
   });
 
@@ -122,6 +160,7 @@ function queryScrollableCarousel(element) {
       element.querySelectorAll(`./${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
     )
   );
+  assertDomQueryResults(container, cells);
   return {container, cells};
 }
 
@@ -140,7 +179,7 @@ function buildSlideScroll(element) {
   }
   const doc = element.ownerDocument;
   const slides = realChildElements(element);
-  element.classList.add('i-amphtml-slidescroll');
+  element.classList.add(ClassNames.SLIDESCROLL_CAROUSEL);
 
   const slidesContainer = doc.createElement('div');
   // Focusable container makes it possible to fully consume Arrow key events.
@@ -193,6 +232,7 @@ function querySlideScrollCarousel(element) {
       element.querySelectorAll(`./${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
     )
   );
+  assertDomQueryResults(slidesContainer, slideWrappers, slides);
   return {slides, slidesContainer, slideWrappers};
 }
 
@@ -218,25 +258,6 @@ export function buildDom(element) {
   const controlsDom = buildCarouselControls(element);
 
   return {...controlsDom, ...specificDom};
-}
-
-/**
- * Queries for all of the necessary DOM Elements to assign to ivars
- * @param {!Element} element
- * @return {{
- *   prevButton: !HTMLDivElement,
- *   nextButton: !HTMLDivElement
- * }}
- */
-export function queryCarouselControlsDom(element) {
-  const prevButton = /** @type {!HTMLDivElement} */ (
-    element.querySelector(`./${escapeCssSelectorIdent(ClassNames.PREV_BUTTON)}`)
-  );
-  const nextButton = /** @type {!HTMLDivElement} */ (
-    element.querySelector(`./${escapeCssSelectorIdent(ClassNames.NEXT_BUTTON)}`)
-  );
-
-  return {prevButton, nextButton};
 }
 
 /**

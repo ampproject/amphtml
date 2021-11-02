@@ -2,9 +2,7 @@ import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {toggleAttribute} from '#core/dom';
 import {getWin} from '#core/window';
-
-const _CONTROL_HIDE_ATTRIBUTE = 'i-amphtml-carousel-hide-buttons';
-const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
+import {ClassNames} from './build-dom';
 
 /**
  * @type {(dir:-1|1, animate: boolean, opt_autoplay?:boolean) => void}
@@ -70,10 +68,10 @@ export class CarouselControls {
         this.showControls_ = true;
         toggleAttribute(
           this.element_,
-          _CONTROL_HIDE_ATTRIBUTE,
+          ClassNames.CONTROL_HIDE_ATTRIBUTE,
           !this.showControls_
         );
-        this.element_.classList.add(_HAS_CONTROL_CLASS);
+        this.element_.classList.add(ClassNames.HAS_CONTROL);
       }
     }, true);
   }
