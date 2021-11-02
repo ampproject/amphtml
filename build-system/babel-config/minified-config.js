@@ -49,6 +49,7 @@ function getMinifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-jss',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
+    './build-system/babel-plugins/babel-plugin-mangle-string-pattern',
     // TODO(erwinm, #28698): fix this in fixit week
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
