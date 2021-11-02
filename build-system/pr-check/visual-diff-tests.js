@@ -14,7 +14,7 @@ const jobName = 'visual-diff-tests.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp visual-diff --nobuild --main');
+  timedExecOrDie('amp visual-diff --main');
 }
 
 /**
@@ -22,7 +22,7 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    timedExecOrDie('amp visual-diff --nobuild');
+    timedExecOrDie('amp visual-diff');
   } else {
     timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(

@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
@@ -8,9 +9,7 @@ import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
-
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {localize} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
@@ -46,14 +45,13 @@ const ForwardButtonStates = {
 };
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildPaginationButton = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-button-container">
-        <button class="i-amphtml-story-button-move"></button>
-      </div>`;
+const renderPaginationButton = () => (
+  <div class="i-amphtml-story-button-container">
+    <button class="i-amphtml-story-button-move"></button>
+  </div>
+);
 
 /**
  * Desktop navigation buttons.
@@ -70,22 +68,20 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = buildPaginationButton(doc);
+    this.element = renderPaginationButton();
 
     /** @private @const {!Element} */
     this.buttonElement_ = dev().assertElement(
       this.element.querySelector('button')
     );
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(doc);
-
     this.element.classList.add(initialState.className);
-    initialState.label &&
+    if (initialState.label) {
       this.buttonElement_.setAttribute(
         'aria-label',
-        this.localizationService_.getLocalizedString(initialState.label)
+        localize(doc, initialState.label)
       );
+    }
     this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -105,7 +101,7 @@ class PaginationButton {
     state.label
       ? this.buttonElement_.setAttribute(
           'aria-label',
-          this.localizationService_.getLocalizedString(state.label)
+          localize(this.win_.document, state.label)
         )
       : this.buttonElement_.removeAttribute('aria-label');
 

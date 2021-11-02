@@ -27,9 +27,9 @@ const {
   gitCommitterEmail,
   shortSha,
 } = require('../../common/git');
-const {buildRuntime} = require('../../common/utils');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
+const {isPercyEnabled} = require('@percy/sdk-utils');
 const {startServer, stopServer} = require('../serve');
 
 // CSS injected in every page tested.
@@ -63,6 +63,7 @@ const HOST = 'localhost';
 const PORT = 8000;
 const PERCY_AGENT_PORT = 5338;
 const WAIT_FOR_TABS_MS = 1000;
+const WAIT_FOR_AGENT_MS = 5000;
 
 // Multiple tabs speed up the performance of the visual diff tests.
 const MAX_PARALLEL_TABS = os.cpus().length;
@@ -197,7 +198,29 @@ async function launchPercyAgent(browserFetcher) {
     },
   });
 
-  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
+  await new Promise((resolve, reject) => {
+    const percyIsEnabledTimeout = setTimeout(() => {
+      log('fatal', 'Percy agent is unreachable after', WAIT_FOR_AGENT_MS, 'ms');
+      reject(false);
+    }, WAIT_FOR_AGENT_MS);
+
+    while (true) {
+      try {
+        if (isPercyEnabled()) {
+          clearTimeout(percyIsEnabledTimeout);
+          log(
+            'info',
+            'Percy agent is enabled and reachable on port',
+            PERCY_AGENT_PORT
+          );
+          return resolve(true);
+        }
+      } catch {
+        // Ignore transient errors. Promise will reject after WAIT_FOR_AGENT_MS.
+      }
+    }
+  });
+
   if (process.env['PERCY_TARGET_COMMIT']) {
     log(
       'info',
@@ -826,22 +849,18 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
     return;
   }
 
-  if (argv.nobuild) {
-    const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
+  const isBuiltInTestMode =
+    fs.existsSync('dist/v0.js') &&
+    /AMP_CONFIG=\{(?:.+,)?"test":(!0|true)\b/.test(
       fs.readFileSync('dist/v0.js', 'utf8')
     );
-    if (!isInTestMode) {
-      log(
-        'fatal',
-        'The AMP runtime was not built in test mode. Run',
-        cyan('amp dist --fortesting'),
-        'or remove the',
-        cyan('--nobuild'),
-        'option from this command'
-      );
-    }
-  } else {
-    await buildRuntime(/* opt_compiled */ true);
+  if (!isBuiltInTestMode) {
+    log(
+      'fatal',
+      'The AMP runtime was not built or not build in test mode. Run',
+      cyan('amp dist --fortesting'),
+      'before executing visual diff tests.'
+    );
   }
 }
 
@@ -897,5 +916,4 @@ visualDiff.flags = {
   'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
     'Disable Percy integration (for testing local changes only)',
-  'nobuild': 'Skip build',
 };
