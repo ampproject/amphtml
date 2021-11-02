@@ -5,6 +5,10 @@ import * as Preact from 'preact';
 
 () => Preact.createElement("svg", null);
 
+() => Preact.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg"
+});
+
 () => Preact.createElement("path", {
   foo: "bar"
 });

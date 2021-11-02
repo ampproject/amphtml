@@ -5,6 +5,10 @@ import * as jsx from '../ANYWHERE_THAT_LEADS_TO/core/dom/jsx';
   __svg: true
 });
 
+() => jsx.createElement("svg", {
+  __svg: true
+});
+
 () => jsx.createElement("path", {
   foo: "bar",
   __svg: true
