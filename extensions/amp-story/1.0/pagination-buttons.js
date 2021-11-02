@@ -10,6 +10,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {devAssert} from '#utils/log';
 import {localize} from './amp-story-localization-service';
+import objStr from 'obj-str';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let PaginationButtonStateDef;
@@ -51,7 +52,12 @@ const ForwardButtonStates = {
  * @return {!Element}
  */
 const renderPaginationButton = (context, initialState, onClick) => (
-  <div class="i-amphtml-story-button-container" class={initialState.className}>
+  <div
+    class={objStr({
+      'i-amphtml-story-button-container': true,
+      [initialState.className]: true,
+    })}
+  >
     <button
       class="i-amphtml-story-button-move"
       aria-label={initialState.label && localize(context, initialState.label)}

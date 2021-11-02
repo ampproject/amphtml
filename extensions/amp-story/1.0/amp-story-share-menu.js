@@ -60,7 +60,7 @@ const renderForFallbackSharing = (element, shareWidgetElement, onClick) => {
  * System amp-social-share button template.
  * @return {!Element}
  */
-const getAmpSocialSystemShareTemplate = () => {
+const renderAmpSocialShareSystemElement = () => {
   return (
     <amp-social-share
       type="system"
@@ -149,7 +149,7 @@ export class ShareMenu {
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
+    this.element_ = renderAmpSocialShareSystemElement();
     return this.element_;
   }
 
