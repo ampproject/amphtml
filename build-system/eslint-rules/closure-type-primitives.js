@@ -93,7 +93,7 @@ function checkClosureComments(context, closureComment) {
   });
 }
 
-/** @enum {string} */
+/** @const {!Array<string>} */
 const PRIMITIVE_WRAPPER_NAMES = ['Boolean', 'Number', 'String', 'Symbol'];
 
 /**
@@ -158,7 +158,7 @@ function checkNonNullableNodes(context, node, astNode) {
  * Technically `undefined` and `function()` are primitives in Closure,
  * but doctrine gives their expression nodes a different type than the others,
  * so we don't add them to this list.
- * @enum {string}
+ * @const {!Array<string>}
  */
 const NON_NULLABLE_PRIMITIVE_NAMES = ['boolean', 'number', 'string', 'symbol'];
 
