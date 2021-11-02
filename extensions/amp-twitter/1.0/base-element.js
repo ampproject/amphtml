@@ -1,5 +1,6 @@
 import {PreactBaseElement} from '#preact/base-element';
 import {BentoTwitter} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -17,3 +18,5 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
+
+BaseElement['shadowCss'] = COMPONENT_CSS;

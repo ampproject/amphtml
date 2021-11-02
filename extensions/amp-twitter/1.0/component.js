@@ -6,6 +6,7 @@ import {useCallback, useMemo, useRef, useState} from '#preact';
 import {useIntersectionObserver, useValueRef} from '#preact/component';
 import {useMergeRefs} from '#preact/utils';
 import {setStyle} from '#core/dom/style';
+import {useStyles} from './component.jss';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -40,9 +41,11 @@ function BentoTwitterWithRef(
 ) {
   const [height, setHeight] = useState(null);
   const [inView, setinView] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const onLoadRef = useValueRef(onLoad);
   const onErrorRef = useValueRef(onError);
   const bentoTwitterRef = useRef(null);
+  const classes = useStyles();
 
   const setComponentHeight = useCallback(
     (height) => {
@@ -60,6 +63,7 @@ function BentoTwitterWithRef(
           requestResize(height);
           setHeight(FULL_HEIGHT);
         } else {
+          setIsLoading(false);
           setHeight(height);
           setComponentHeight(height);
         }
@@ -122,6 +126,11 @@ function BentoTwitterWithRef(
 
   return (
     <div ref={containerRef}>
+      {isLoading && (
+        <div class={classes.loaderWrapper}>
+          <div class={classes.loader}></div>
+        </div>
+      )}
       {inView && (
         <ProxyIframeEmbed
           allowfullscreen
