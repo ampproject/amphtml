@@ -1,8 +1,8 @@
 # Bento Timeago
 
-## Usage
+The Bento Timeago component can count up to, or away from, a specified date and time. It replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`.
 
-The Bento Timeago component can count up to, or away from, a specified date and time. It replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`. It can be used as a web component [`<bento-timeago>`](#web-component), or as a Preact/React functional component [`<BentoTimeago>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -12,28 +12,27 @@ The examples below demonstrate use of the `<bento-timeago>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-timeago
+npm install @bentoproject/timeago
 ```
 
 ```javascript
-import '@ampproject/bento-timeago';
+import {defineElement as defineBentoTimeago} from '@bentoproject/timeago';
+defineBentoTimeago();
 ```
-
-[/example]
 
 #### Example: Import via `<script>`
 
-[example preview="top-frame" playground="false"]
-
 ```html
 <head>
-  <script async custom-element="bento-timeago" src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"></script>
-  <style data-bento-boilerplate>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
+  ></script>
+  <style>
     bento-timeago {
       display: block;
       overflow: hidden;
@@ -41,13 +40,17 @@ import '@ampproject/bento-timeago';
     }
   </style>
 </head>
-<bento-timeago id="my-timeago" datetime="2017-04-11T00:37:33.809Z" locale="en">
-  Saturday 11 April 2017 00.37
+<bento-timeago
+  id="my-timeago"
+  datetime="2017-04-11T00:37:33.809Z"
+  locale="en"
+  style="height: 30px">
+    Saturday 11 April 2017 00.37
 </bento-timeago>
-<div class="buttons" style="margin-top: 8px;">
-  <button id='ar-button'>Change locale to Arabic</button>
-  <button id='en-button'>Change locale to English</button>
-  <button id='now-button'>Change time to now</button>
+<div class="buttons" style="margin-top: 8px">
+  <button id="ar-button">Change locale to Arabic</button>
+  <button id="en-button">Change locale to English</button>
+  <button id="now-button">Change time to now</button>
 </div>
 
 <script>
@@ -56,9 +59,12 @@ import '@ampproject/bento-timeago';
     await customElements.whenDefined('bento-timeago');
 
     // set up button actions
-    document.querySelector('#ar-button').onclick = () => timeago.setAttribute('locale', 'ar');
-    document.querySelector('#en-button').onclick = () => timeago.setAttribute('locale', 'en');
-    document.querySelector('#now-button').onclick = () => timeago.setAttribute('datetime', 'now');
+    document.querySelector('#ar-button').onclick = () =>
+      timeago.setAttribute('locale', 'ar');
+    document.querySelector('#en-button').onclick = () =>
+      timeago.setAttribute('locale', 'en');
+    document.querySelector('#now-button').onclick = () =>
+      timeago.setAttribute('datetime', 'now');
   })();
 </script>
 ```
@@ -68,13 +74,17 @@ import '@ampproject/bento-timeago';
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-timeago {
     display: block;
     overflow: hidden;
@@ -151,18 +161,16 @@ The examples below demonstrates use of the `<BentoTimeago>` as a functional comp
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-display
+npm install @bentoproject/timeago
 ```
 
 ```javascript
 import React from 'react';
-import { BentoTimeago } from '@ampproject/bento-timeago/react';
-import '@ampproject/bento-timeago/styles.css';
+import {BentoTimeago} from '@bentoproject/timeago/react';
+import '@bentoproject/timeago/styles.css';
 
 function App() {
   return (
@@ -175,8 +183,6 @@ function App() {
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 

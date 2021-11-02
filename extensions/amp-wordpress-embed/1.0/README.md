@@ -1,8 +1,8 @@
 # Bento WordPress Embed
 
-## Usage
+An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post or page.
 
-An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post or page. Use Bento WordPress Embed as a web component [`<bento-wordpress-embed>`](#web-component), or a Preact/React functional component [`<BentoWordPressEmbed>`](#preactreact-component).
+## Usage
 
 ### Web Component
 
@@ -12,41 +12,40 @@ The examples below demonstrate use of the `<bento-wordpress-embed>` web componen
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-wordpress-embed
+npm install @bentoproject/wordpress-embed
 ```
 
 ```javascript
-import '@ampproject/bento-wordpress-embed';
+import {defineElement as defineBentoWordpressEmbed} from '@bentoproject/wordpress-embed';
+defineBentoWordpressEmbed();
 ```
-
-[/example]
 
 #### Example: Include via `<script>`
 
-[example preview="top-frame" playground="false"]
-
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
   <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style data-bento-boilerplate>
+  <style>
     bento-wordpress-embed {
       display: block;
       overflow: hidden;
       position: relative;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"
+  ></script>
 </head>
-<bento-wordpress-embed id="my-embed"
+<bento-wordpress-embed
+  id="my-embed"
   data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
 ></bento-wordpress-embed>
-<div class="buttons" style="margin-top: 8px;">
+<div class="buttons" style="margin-top: 8px">
   <button id="switch-button">Switch embed</button>
 </div>
 
@@ -56,25 +55,31 @@ import '@ampproject/bento-wordpress-embed';
     await customElements.whenDefined('bento-wordpress-embed');
 
     // set up button actions
-    document.querySelector('#switch-button').onclick = () => embed.setAttribute('data-url', 'https://make.wordpress.org/core/2021/09/09/core-editor-improvement-cascading-impact-of-improvements-to-featured-images/');
+    document.querySelector('#switch-button').onclick = () =>
+      embed.setAttribute(
+        'data-url',
+        'https://make.wordpress.org/core/2021/09/09/core-editor-improvement-cascading-impact-of-improvements-to-featured-images/'
+      );
   })();
 </script>
 ```
-
-[/example]
 
 #### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-wordpress-embed-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
+<style>
   bento-wordpress-embed {
     display: block;
     overflow: hidden;
@@ -106,28 +111,22 @@ The examples below demonstrate use of the `<BentoWordPressEmbed>` as a functiona
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-wordpress-embed
+npm install @bentoproject/wordpress-embed
 ```
 
 ```jsx
 import React from 'react';
-import {BentoWordPressEmbed} from '@ampproject/bento-wordpress-embed/react';
+import {BentoWordPressEmbed} from '@bentoproject/wordpress-embed/react';
 
 function App() {
   return (
-    <BentoWordPressEmbed
-      url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
-    ></BentoWordPressEmbed>
+    <BentoWordPressEmbed url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"></BentoWordPressEmbed>
   );
 }
 ```
-
-[/example]
 
 #### Layout and style
 
@@ -136,7 +135,8 @@ function App() {
 The `BentoWordPressEmbed` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoWordPressEmbed style={{width: '100%', height: '100px'}}
+<BentoWordPressEmbed
+  style={{width: '100%', height: '100px'}}
   url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
 ></BentoWordPressEmbed>
 ```
@@ -144,7 +144,8 @@ The `BentoWordPressEmbed` component has a defined layout size type. To ensure th
 Or via `className`:
 
 ```jsx
-<BentoWordPressEmbed className="custom-styles"
+<BentoWordPressEmbed
+  className="custom-styles"
   url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
 ></BentoWordPressEmbed>
 ```

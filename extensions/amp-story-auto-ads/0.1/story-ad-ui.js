@@ -2,7 +2,7 @@ import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {dict, map} from '#core/types/object';
 
 import {getExperimentBranch} from '#experiments';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {dev, user} from '#utils/log';
 
@@ -303,12 +303,15 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    const autoAdvanceExpBranch = getExperimentBranch(
+    const storyAdSegmentBranch = getExperimentBranch(
       doc.defaultView,
-      StoryAdPageOutlink.ID
+      StoryAdSegmentExp.ID
     );
 
-    if (autoAdvanceExpBranch === StoryAdPageOutlink.EXPERIMENT) {
+    if (
+      storyAdSegmentBranch &&
+      storyAdSegmentBranch !== StoryAdSegmentExp.CONTROL
+    ) {
       return createPageOutlink_(doc, uiMetadata, container);
     } else {
       return createCtaLayer_(a, doc, container);

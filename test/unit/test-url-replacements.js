@@ -987,8 +987,14 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
       });
 
-      it('should replace UACH', () => {
+      it('should replace UACH platform', () => {
         return expandUrlAsync('?sh=UACH(platform)').then((res) => {
+          expect(res).to.match(/sh=\w?/);
+        });
+      });
+
+      it('should replace UACH brands', () => {
+        return expandUrlAsync('?sh=UACH(brands)').then((res) => {
           expect(res).to.match(/sh=\w?/);
         });
       });

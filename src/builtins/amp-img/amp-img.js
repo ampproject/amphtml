@@ -1,5 +1,5 @@
 import {ReadyState} from '#core/constants/ready-state';
-import {removeElement} from '#core/dom';
+import {isServerRendered, removeElement} from '#core/dom';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
@@ -184,7 +184,7 @@ export class AmpImg extends BaseElement {
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
 
     // For SSR, image will have been written directly to DOM so no need to recreate.
-    const serverRendered = this.element.hasAttribute('i-amphtml-ssr');
+    const serverRendered = isServerRendered(this.element);
     if (serverRendered) {
       this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
     }
