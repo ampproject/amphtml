@@ -95,7 +95,7 @@ export function getResponseAttributeElements(formEl) {
  */
 function createFormResultChildren(label) {
   return [
-    <div clas="i-amphtml-story-page-attachment-form-submission-status-icon"></div>,
+    <div class="i-amphtml-story-page-attachment-form-submission-status-icon"></div>,
     <div>{label}</div>,
   ];
 }
