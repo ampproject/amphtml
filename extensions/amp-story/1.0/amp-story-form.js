@@ -23,7 +23,7 @@ export function allowlistFormActions(win) {
 let FormElementChildrenDef;
 
 /**
- * @const {Object<string, function(Element):!FormElementChildrenDef)|function():!FormElementChildrenDef>}
+ * @const {Object<string, (function(Element):!FormElementChildrenDef|function():!FormElementChildrenDef)>}
  */
 const createStatusChildrenByAttribute = {
   'submitting': () => {

@@ -18,6 +18,7 @@ import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
+import {devAssert} from '#core/assert';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -87,7 +88,7 @@ export class InfoDialog {
         <div class="i-amphtml-story-info-dialog-container">
           <h1 class="i-amphtml-story-info-heading">
             {localize(
-              this.element_,
+              this.parentEl_,
               LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
             )}
           </h1>
@@ -100,7 +101,7 @@ export class InfoDialog {
           </a>
           <a class="i-amphtml-story-info-moreinfo" target="_blank">
             {localize(
-              this.element_,
+              this.parentEl_,
               LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
             )}
           </a>
@@ -112,16 +113,18 @@ export class InfoDialog {
     createShadowRootWithStyle(root, this.element_, CSS);
     this.initializeListeners_();
 
-    const appendPromise = this.mutator_.mutateElement(this.parentEl_, () => {
-      this.parentEl_.appendChild(root);
-    });
-
-    return Promise.all([
-      appendPromise,
-      this.requestMoreInfoLink_().then((moreInfoUrl) =>
-        this.setMoreInfoLinkUrl_(moreInfoUrl)
-      ),
-    ]);
+    return this.requestMoreInfoLink_().then((moreInfoUrl) =>
+      this.mutator_.mutateElement(this.parentEl_, () => {
+        if (moreInfoUrl) {
+          const linkElement = devAssert(
+            this.element_.querySelector('.i-amphtml-story-info-moreinfo')
+          );
+          linkElement.classList.add(MOREINFO_VISIBLE_CLASS);
+          linkElement.setAttribute('href', moreInfoUrl);
+        }
+        this.parentEl_.appendChild(root);
+      })
+    );
   }
 
   /**
@@ -202,25 +205,5 @@ export class InfoDialog {
         }
         return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
       });
-  }
-
-  /**
-   * @param {?string} moreInfoUrl The URL to the "more info" page, if there is
-   * one.
-   * @return {*} TODO(#23582): Specify return type
-   */
-  setMoreInfoLinkUrl_(moreInfoUrl) {
-    if (!moreInfoUrl) {
-      return Promise.resolve();
-    }
-
-    const linkElement = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-moreinfo')
-    );
-
-    return this.mutator_.mutateElement(linkElement, () => {
-      linkElement.classList.add(MOREINFO_VISIBLE_CLASS);
-      linkElement.setAttribute('href', dev().assertString(moreInfoUrl));
-    });
   }
 }
