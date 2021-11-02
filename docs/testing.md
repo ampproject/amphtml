@@ -24,8 +24,6 @@ This document provides details for testing and building your AMP code.
     -   [Flaky Tests](#flaky-tests)
     -   [How Are Tests Executed](#how-are-tests-executed)
     -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
-        -   [One-time Setup](#one-time-setup)
-        -   [Writing the Test](#writing-the-test)
 -   [Isolated Component Testing](#isolated-component-testing)
     -   [Launching Storybook](#launching-storybook)
     -   [Writing test scenarios](#writing-test-scenarios)
