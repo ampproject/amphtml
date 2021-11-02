@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<head>
   <!-- Imports required for all components, shared by all components -->
   <script src="https://cdn.ampproject.org/bento.js"></script>
   <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
@@ -52,6 +51,11 @@
   ></script>
   <script
     async
+    custom-element="bento-jwplayer"
+    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+  ></script>
+  <script
+    async
     custom-element="bento-lightbox"
     src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
   ></script>
@@ -67,7 +71,7 @@
   ></script>
   <script
     async
-    custom-element="bento-fit-lightbox"
+    custom-element="bento-lightbox"
     src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
   ></script>
   <script
@@ -130,12 +134,201 @@
     custom-element="bento-youtube"
     src="https://cdn.ampproject.org/v0/bento-youtube-1.0.js"
   ></script>
-  <script
-    async
-    custom-element="bento-jwplayer"
-    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
-  ></script>
 </head>
 <body>
+    <div>
+    <h1>Bento Accordion</h1>
+  <bento-accordion id="my-accordion" disable-session-states>
+    <section>
+      <h2>Section 1</h2>
+      <p>Content in section 1.</p>
+    </section>
+    <section>
+      <h2>Section 2</h2>
+      <div>Content in section 2.</div>
+    </section>
+    <section expanded>
+      <h2>Section 3</h2>
+      <div>Content in section 3.</div>
+    </section>
+  </bento-accordion>
+    </div>
 
+  <div>
+  <h1>Bento Brightcove</h1>
+<bento-brightcove
+  data-account="12345"
+  data-player="default"
+  data-embed="default"
+  data-video-id="1234"
+  layout="responsive"
+  width="480"
+  height="270"
+>
+</bento-brightcove>
+
+  </div>
+
+  <div>
+  <h1>Bento Base Carousel</h1>
+  <style>
+    bento-base-carousel,
+    bento-base-carousel > div {
+      aspect-ratio: 4/1;
+    }
+    .red-gradient {
+      background: brown;
+      background: linear-gradient(
+        90deg,
+        brown 50%,
+        lightsalmon 90%,
+        wheat 100%
+      );
+    }
+    .blue-gradient {
+      background: steelblue;
+      background: linear-gradient(
+        90deg,
+        steelblue 50%,
+        plum 90%,
+        lavender 100%
+      );
+    }
+    .green-gradient {
+      background: seagreen;
+      background: linear-gradient(
+        90deg,
+        seagreen 50%,
+        mediumturquoise 90%,
+        turquoise 100%
+      );
+    }
+  </style>
+</head>
+<bento-base-carousel id="my-carousel">
+  <div class="red-gradient"></div>
+  <div class="blue-gradient"></div>
+  <div class="green-gradient"></div>
+</bento-base-carousel>
+  </div>
+
+  <div>
+  <h1>Bento Embedly Card</h1>
+  <bento-embedly-card
+    id="my-url"
+    data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+  >
+  </bento-embedly-card>
+
+  </div>
+  
+  <div>
+  <h1>Bento Facebook</h1>
+<bento-facebook
+  id="facebook-post"
+  data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373"
+>
+</bento-facebook>
+
+  </div>
+
+  <div>
+  <h1>Bento Fit Text</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Iframe</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Inline Gallery</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Instagram</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento JWPlayer</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Lightbox</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Lightbox Gallery</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento MathML</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Lightbox</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Selector</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Sidebar</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Social Share</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Soundcloud</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Stream Gallery</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Timeago</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Twitter</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Video Iframe</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Vimeo</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Wordpress Embed</h1>
+
+  </div>
+
+  <div>
+  <h1>Bento Youtube</h1>
+
+  </div>
 </body>
