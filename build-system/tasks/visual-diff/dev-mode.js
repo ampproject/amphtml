@@ -143,10 +143,12 @@ async function inquireForWebpage_(webpages) {
             ' (use ' +
             cyan('--grep') +
             ' to filter this list):',
-          choices: webpages.map((webpage) => ({
-            name: webpage.name,
-            value: webpage,
-          })),
+          choices: webpages
+            .map((webpage) => ({
+              name: webpage.name,
+              value: webpage,
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name)),
         },
       ])
     ).webpage;
