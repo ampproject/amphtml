@@ -4,25 +4,6 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {localize} from './amp-story-localization-service';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
-
-/**
- * @enum {string}
- */
-const FormResponseAttribute = {
-  SUBMITTING: 'submitting',
-  SUCCESS: 'submit-success',
-  ERROR: 'submit-error',
-};
-
-/**
- * @enum {string}
- */
-const AttributeElementSelector = {
-  SUBMITTING: `[${escapeCssSelectorIdent(FormResponseAttribute.SUBMITTING)}]`,
-  SUCCESS: `[${escapeCssSelectorIdent(FormResponseAttribute.SUCCESS)}]`,
-  ERROR: `[${escapeCssSelectorIdent(FormResponseAttribute.ERROR)}]`,
-};
 
 /**
  * Adds AMP form actions to the action allow list.
@@ -37,31 +18,62 @@ export function allowlistFormActions(win) {
 }
 
 /**
+ * @typedef {!Element|Array<!Element>}
+ */
+let FormElementChildrenDef;
+
+/**
+ * @const {Object<string, function(Element):!FormElementChildrenDef)|function():!FormElementChildrenDef>}
+ */
+const createFormChildrenByAttribute = {
+  'submitting': () => {
+    const loadingSpinner = new LoadingSpinner();
+    const element = loadingSpinner.build();
+    loadingSpinner.toggle(true /* isActive */);
+    return element;
+  },
+
+  'submit-success': (formEl) =>
+    createFormResultChildren(
+      localize(formEl, LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_SUCCESS)
+    ),
+
+  'submit-error': (formEl) =>
+    createFormResultChildren(
+      localize(formEl, LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_ERROR)
+    ),
+};
+
+/**
+ * @param {Element} parent
+ * @param {string} attr
+ * @return {?Element}
+ */
+function selectByAttr(parent, attr) {
+  return parent.querySelector(`[${escapeCssSelectorIdent(attr)}]`);
+}
+
+/**
  * Add a default form attribute element for each absent response attribute.
  * @param {!Element} formEl The form to which the attribute elements will be
  *     added.
  * @private
  */
 export function setupResponseAttributeElements(formEl) {
-  const submittingEl = scopedQuerySelector(
-    formEl,
-    AttributeElementSelector.SUBMITTING
-  );
-  const successEl = scopedQuerySelector(
-    formEl,
-    AttributeElementSelector.SUCCESS
-  );
-  const errorEl = scopedQuerySelector(formEl, AttributeElementSelector.ERROR);
-
-  // Create and append fallback form attribute elements, if necessary.
-  if (!submittingEl) {
-    formEl.appendChild(createFormSubmittingEl_());
-  }
-  if (!successEl) {
-    formEl.appendChild(createFormResultEl_(formEl, true));
-  }
-  if (!errorEl) {
-    formEl.appendChild(createFormResultEl_(formEl, false));
+  for (const attribute in createFormChildrenByAttribute) {
+    const el = selectByAttr(formEl, attribute);
+    if (!el) {
+      formEl.appendChild(
+        <div>
+          <div
+            class="i-amphtml-story-page-attachment-form-submission-status"
+            {...{[attribute]: true}}
+          >
+            {createFormChildrenByAttribute[attribute](formEl)}
+          </div>
+        </div>
+      );
+    }
   }
 }
 
@@ -72,71 +84,19 @@ export function setupResponseAttributeElements(formEl) {
  * @private
  */
 export function getResponseAttributeElements(formEl) {
-  const selector =
-    `${AttributeElementSelector.SUBMITTING},` +
-    `${AttributeElementSelector.SUCCESS},` +
-    `${AttributeElementSelector.ERROR}`;
-  return Array.from(scopedQuerySelectorAll(formEl, selector));
-}
-
-/**
- * Create an element that is used to display the in-progress state of a form
- * submission attempt.
- * @return {!Element}
- * @private
- */
-function createFormSubmittingEl_() {
-  const loadingSpinner = new LoadingSpinner();
-  const submittingEl = createResponseAttributeEl_(
-    FormResponseAttribute.SUBMITTING,
-    loadingSpinner.build()
-  );
-  loadingSpinner.toggle(true /* isActive */);
-  return submittingEl;
-}
-
-/**
- * Create an element that is used to display the result of a form submission
- * attempt.
- * @param {!Element} formEl
- * @param {boolean} isSuccess Whether the form submission was successful.
- * @return {!Element}
- * @private
- */
-function createFormResultEl_(formEl, isSuccess) {
-  return createResponseAttributeEl_(
-    isSuccess ? FormResponseAttribute.SUCCESS : FormResponseAttribute.ERROR,
-    [
-      <div clas="i-amphtml-story-page-attachment-form-submission-status-icon"></div>,
-      <div>
-        {localize(
-          formEl,
-          isSuccess
-            ? LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_SUCCESS
-            : LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_ERROR
-        )}
-      </div>,
-    ]
+  return Object.keys(createFormChildrenByAttribute).map((attr) =>
+    selectByAttr(formEl, attr)
   );
 }
 
 /**
- * Create an element that is used to display the form status corresponding to
- * the given response attribute.
- * @param {!FormResponseAttribute} responseAttribute
- * @param {Array<Element>|?Element=} child
+ * @param {string|Node} label
  * @return {!Element}
  * @private
  */
-function createResponseAttributeEl_(responseAttribute, child) {
-  return (
-    <div>
-      <div
-        class="i-amphtml-story-page-attachment-form-submission-status"
-        {...{[responseAttribute]: true}}
-      >
-        {child}
-      </div>
-    </div>
-  );
+function createFormResultChildren(label) {
+  return [
+    <div clas="i-amphtml-story-page-attachment-form-submission-status-icon"></div>,
+    <div>{label}</div>,
+  ];
 }
