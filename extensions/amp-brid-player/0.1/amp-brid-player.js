@@ -225,12 +225,19 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     if (
       !element.hasAttribute('data-video') &&
-      !element.hasAttribute('data-playlist')
+      !element.hasAttribute('data-playlist') &&
+      !element.hasAttribute('data-placeholder-image')
     ) {
       return;
     }
 
     const {partnerID_: partnerID, feedID_: feedID} = this;
+
+    const url = element.hasAttribute('data-placeholder-image')
+      ? element.getAttribute('data-placeholder-image')
+      : `https://cdn.brid.tv/live/partners/${encodeURIComponent(
+          partnerID
+        )}/snapshot/${encodeURIComponent(feedID)}.jpg`;
 
     const placeholder = htmlFor(element)`
       <amp-img referrerpolicy=origin layout=fill placeholder>
@@ -242,11 +249,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
 
-    placeholder.setAttribute(
-      'src',
-      `https://cdn.brid.tv/live/partners/${encodeURIComponent(partnerID)}` +
-        `/snapshot/${encodeURIComponent(feedID)}.jpg`
-    );
+    placeholder.setAttribute('src', url);
 
     const altText = placeholder.hasAttribute('aria-label')
       ? 'Loading video - ' + placeholder.getAttribute('aria-label')

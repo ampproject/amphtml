@@ -61,6 +61,10 @@ tags: {  # <amp-brid-player>
     value_regex: "[0-9]+"
   }
   attrs: {
+    name: "data-placeholder-image"
+    value_regex: "(https:)?//.+"
+  }
+  attrs: {
     name: "dock"
     requires_extension: "amp-video-docking"
   }
