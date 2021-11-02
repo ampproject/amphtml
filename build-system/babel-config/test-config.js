@@ -52,7 +52,6 @@ function getTestConfig() {
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-react-constant-elements',
     '@babel/plugin-transform-classes',
     reactJsxPlugin,
   ].filter(Boolean);

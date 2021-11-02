@@ -32,7 +32,6 @@ function getMinifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     './build-system/babel-plugins/babel-plugin-transform-rename-privates',
-    '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
     (argv.esm || argv.sxg) &&
       './build-system/babel-plugins/babel-plugin-transform-dev-methods',
@@ -41,10 +40,7 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
     ],
-    [
-      './build-system/babel-plugins/babel-plugin-transform-json-import',
-      {freeze: false},
-    ],
+    './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',

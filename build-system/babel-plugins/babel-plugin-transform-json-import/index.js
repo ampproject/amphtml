@@ -15,12 +15,10 @@ const {readFileSync} = require('fs');
  * ```
  *
  * @param {babel} babel
- * @param {any} options
  * @return {babel.PluginObj}
  */
-module.exports = function (babel, options) {
+module.exports = function (babel) {
   const {template, types: t} = babel;
-  const {freeze = true} = options;
 
   /**
    * JSON reviver that converts {"string": "foo", ...} to just "foo".
@@ -97,19 +95,6 @@ module.exports = function (babel, options) {
           throw path.buildCodeFrameError(
             `could not load JSON file at '${jsonPath}'`
           );
-        }
-
-        if (freeze) {
-          path.replaceWith(
-            template.statement
-              .ast`const ${specifier} = JSON.parse('${JSON.stringify(
-              json
-            )}', function(key, val) {
-                if (typeof val === 'object') Object.freeze(val);
-                return val;
-              });`
-          );
-          return;
         }
 
         path.replaceWith(
