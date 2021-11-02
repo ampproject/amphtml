@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<head>
   <!-- Imports required for all components, shared by all components -->
   <script src="https://cdn.ampproject.org/bento.js"></script>
   <script src="https://cdn.ampproject.org/custom-elements-polyfill.js"></script>
@@ -68,11 +69,6 @@
     async
     custom-element="bento-mathml"
     src="https://cdn.ampproject.org/v0/bento-mathml-1.0.js"
-  ></script>
-  <script
-    async
-    custom-element="bento-lightbox"
-    src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
   ></script>
   <script
     async
@@ -153,7 +149,7 @@
     </section>
   </bento-accordion>
     </div>
-
+<!--
   <div>
   <h1>Bento Brightcove</h1>
 <bento-brightcove
@@ -168,6 +164,7 @@
 </bento-brightcove>
 
   </div>
+-->
 
   <div>
   <h1>Bento Base Carousel</h1>
@@ -204,131 +201,272 @@
       );
     }
   </style>
-</head>
 <bento-base-carousel id="my-carousel">
   <div class="red-gradient"></div>
   <div class="blue-gradient"></div>
   <div class="green-gradient"></div>
 </bento-base-carousel>
   </div>
-
+  <!--
   <div>
   <h1>Bento Embedly Card</h1>
   <bento-embedly-card
-    id="my-url"
-    data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+    data-url="https://twitter.com/AMPhtml/status/986750295077040128"
+    data-card-theme="dark"
+    data-card-controls="0"
   >
   </bento-embedly-card>
 
   </div>
-  
   <div>
   <h1>Bento Facebook</h1>
 <bento-facebook
-  id="facebook-post"
   data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373"
 >
 </bento-facebook>
+-->
 
   </div>
 
   <div>
   <h1>Bento Fit Text</h1>
+  <bento-fit-text style="width: 300px; height: 300px" id="my-fit-text">
+    Liquorice lemon drops toffee chupa chups cookie carrot cake croissant tiramisu sugar plum. Marshmallow tart caramels wafer cupcake wafer dragée pastry tiramisu. Wafer ice cream tart donut caramels lemon drops dragée pastry.
+  </bento-fit-text>
 
   </div>
 
   <div>
   <h1>Bento Iframe</h1>
+<bento-iframe
+  id="my-iframe"
+  src="https://en.wikipedia.org/wiki/Bento"
+  style="width: 600px; height: 300px"
+>
+</bento-iframe>
 
   </div>
 
   <div>
   <h1>Bento Inline Gallery</h1>
+  <bento-inline-gallery id="inline-gallery">
+    <bento-inline-gallery-thumbnails
+      aspect-ratio="1.5"
+      loop
+    ></bento-inline-gallery-thumbnails>
+    <bento-base-carousel snap-align="center" visible-count="1.2" loop>
+      <img
+        src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+        data-thumbnail-src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=120&q=80"
+      />
+      <img
+        src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+        data-thumbnail-src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+      />
+      <img
+        src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+        data-thumbnail-src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+      />
+    </bento-base-carousel>
+    <bento-inline-gallery-pagination inset></bento-inline-gallery-pagination>
+  </bento-inline-gallery>
 
   </div>
 
+ <!-- 
   <div>
   <h1>Bento Instagram</h1>
+  <bento-instagram
+    id="my-instagram"
+    data-shortcode="CKXYAzuj7TE"
+    data-captioned
+  >
+  </bento-instagram>
 
   </div>
 
   <div>
   <h1>Bento JWPlayer</h1>
+  <bento-jwplayer
+    id="jwplayer"
+    data-player-id="BjcwyK37"
+    data-media-id="CtaIzmFs"
+    style="width: 480px; height: 270px"
+  ></bento-jwplayer>
 
   </div>
 
   <div>
   <h1>Bento Lightbox</h1>
+<bento-lightbox id="my-lightbox">
+  Lightboxed content
+  <button id="close-button">Close lightbox</button>
+</bento-lightbox>
 
   </div>
+-->
 
   <div>
   <h1>Bento Lightbox Gallery</h1>
+<figure>
+  <img
+    id="my-img"
+    width="360"
+    height="240"
+    src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+    lightbox
+  />
+  <figcaption>dog wearing yellow shirt.</figcaption>
+</figure>
 
   </div>
 
   <div>
   <h1>Bento MathML</h1>
-
-  </div>
-
-  <div>
-  <h1>Bento Lightbox</h1>
+    <bento-mathml
+      style="height: 40px; width: 147px"
+      inline
+      data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+    ></bento-mathml>
 
   </div>
 
   <div>
   <h1>Bento Selector</h1>
+<bento-selector style="display:block;" class="sample-selector">
+  <ul>
+    <li option="1">Option 1</li>
+    <li option="2">Option 2</li>
+    <li option="3">Option 3</li>
+    <li option="4">Option 4</li>
+  </ul>
+</bento-selector>
 
   </div>
 
+ <!-- 
   <div>
   <h1>Bento Sidebar</h1>
+  <bento-sidebar id="sidebar1" side="right">
+    <ul>
+      <li>Nav item 1</li>
+      <li>Nav item 2</li>
+      <li>Nav item 3</li>
+      <li>Nav item 4</li>
+      <li>Nav item 5</li>
+      <li>Nav item 6</li>
+    </ul>
+  </bento-sidebar>
 
   </div>
+-->
 
   <div>
   <h1>Bento Social Share</h1>
+<bento-social-share
+  id="my-share"
+  type="twitter"
+  aria-label="Share on Twitter"
+></bento-social-share>
 
   </div>
 
+ <!-- 
   <div>
   <h1>Bento Soundcloud</h1>
+<bento-soundcloud
+  id="my-track"
+  data-trackid="243169232"
+  data-visual="true"
+></bento-soundcloud>
 
   </div>
 
   <div>
   <h1>Bento Stream Gallery</h1>
+  <bento-stream-gallery>
+      <img
+        src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+        data-thumbnail-src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=120&q=80"
+      />
+      <img
+        src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+        data-thumbnail-src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
+      />
+      <img
+        src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+        data-thumbnail-src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
+      />
+  </bento-stream-gallery>
 
   </div>
 
   <div>
   <h1>Bento Timeago</h1>
+<bento-timeago id="my-timeago" datetime="2017-04-11T00:37:33.809Z" locale="en">
+  Saturday 11 April 2017 00.37
+</bento-timeago>
 
   </div>
+-->
 
   <div>
   <h1>Bento Twitter</h1>
+<bento-twitter id="my-tweet" data-tweetid="885634330868850689"> </bento-twitter>
 
   </div>
+ <!-- 
 
   <div>
   <h1>Bento Video Iframe</h1>
+  <bento-video-iframe
+      id="myVideo"
+      src="./amp-video-iframe/frame.html"
+      width="720"
+      height="405"
+      layout="responsive"
+      autoplay>
+    <div placeholder>
+      This is a placeholder
+    </div>
+    <div fallback>
+      This is a fallback
+    </div>
+  </bento-video-iframe>
 
   </div>
 
   <div>
   <h1>Bento Vimeo</h1>
+    <bento-vimeo
+      id="myVideo"
+      data-videoid="27246366"
+      width="500"
+      height="281"
+      layout="responsive"
+    >
+    </bento-vimeo>
 
   </div>
 
   <div>
   <h1>Bento Wordpress Embed</h1>
+<bento-wordpress-embed
+  id="my-embed"
+  data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+></bento-wordpress-embed>
 
   </div>
 
   <div>
   <h1>Bento Youtube</h1>
+    <bento-youtube
+            data-videoid="mGENRKrdoGY"
+            layout="responsive"
+            data-param-controls=1
+            width="480" height="270">
+    </bento-youtube>
 
   </div>
+-->
 </body>
