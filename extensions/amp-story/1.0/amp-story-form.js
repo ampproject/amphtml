@@ -64,11 +64,8 @@ export function setupResponseAttributeElements(formEl) {
     const el = selectByAttr(formEl, attribute);
     if (!el) {
       formEl.appendChild(
-        <div>
-          <div
-            class="i-amphtml-story-page-attachment-form-submission-status"
-            {...{[attribute]: true}}
-          >
+        <div {...{[attribute]: true}}>
+          <div class="i-amphtml-story-page-attachment-form-submission-status">
             {createFormChildrenByAttribute[attribute](formEl)}
           </div>
         </div>
