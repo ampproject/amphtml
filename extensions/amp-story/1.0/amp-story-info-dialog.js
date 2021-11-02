@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -17,7 +18,6 @@ import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -79,8 +79,7 @@ export class InfoDialog {
 
     this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
-    const html = htmlFor(this.parentEl_);
-    this.element_ = html`
+    this.element_ = (
       <div class="i-amphtml-story-info-dialog i-amphtml-story-system-reset">
         <div class="i-amphtml-story-info-dialog-container">
           <h1 class="i-amphtml-story-info-heading"></h1>
@@ -88,7 +87,7 @@ export class InfoDialog {
           <a class="i-amphtml-story-info-moreinfo"></a>
         </div>
       </div>
-    `;
+    );
 
     createShadowRootWithStyle(root, this.element_, CSS);
     this.initializeListeners_();

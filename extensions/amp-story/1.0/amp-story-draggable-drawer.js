@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
@@ -12,7 +13,6 @@ import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '#utils/log';
 import {localize} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {listen} from '#utils/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
@@ -32,26 +32,24 @@ export const DrawerState = {
 
 /**
  * Drawer's template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getTemplateEl = (element) => {
-  return htmlFor(element)`
+const renderDrawerElement = () => {
+  return (
     <div class="i-amphtml-story-draggable-drawer">
       <div class="i-amphtml-story-draggable-drawer-container">
         <div class="i-amphtml-story-draggable-drawer-content"></div>
       </div>
-    </div>`;
+    </div>
+  );
 };
 
 /**
  * Drawer's header template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getHeaderEl = (element) => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-draggable-drawer-header"></div>`;
+const renderHeaderElement = () => {
+  return <div class="i-amphtml-story-draggable-drawer-header"></div>;
 };
 
 /**
@@ -123,9 +121,9 @@ export class DraggableDrawer extends AMP.BaseElement {
   buildCallback() {
     this.element.classList.add('amp-story-draggable-drawer-root');
 
-    const templateEl = getTemplateEl(this.element);
+    const templateEl = renderDrawerElement();
     const headerShadowRootEl = this.win.document.createElement('div');
-    this.headerEl = getHeaderEl(this.element);
+    this.headerEl = renderHeaderElement();
 
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl, CSS);
 

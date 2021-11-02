@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 /**
  * @fileoverview Embeds a single page in a story
  *
@@ -38,7 +39,7 @@ import {MediaPool} from './media-pool';
 import {Services} from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
-import {addAttributesToElement, iterateCursor} from '#core/dom';
+import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
@@ -53,7 +54,6 @@ import {localize} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
@@ -129,26 +129,27 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildPlayMessageElement = (element) =>
-  htmlFor(element)`
-      <button role="button" class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-play-label"></span>
-        <span class='i-amphtml-story-page-play-icon'></span>
-      </button>`;
+const renderPlayMessageElement = () => (
+  <button
+    role="button"
+    class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
+  >
+    <span class="i-amphtml-story-page-play-label"></span>
+    <span class="i-amphtml-story-page-play-icon"></span>
+  </button>
+);
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildErrorMessageElement = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
-        <span class="i-amphtml-story-page-error-label"></span>
-        <span class='i-amphtml-story-page-error-icon'></span>
-      </div>`;
+const renderErrorMessageElement = () => (
+  <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
+    <span class="i-amphtml-story-page-error-label"></span>
+    <span class="i-amphtml-story-page-error-icon"></span>
+  </div>
+);
 
 /**
  * amp-story-page states.
@@ -339,12 +340,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
           : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
 
-      addAttributesToElement(
-        this.element,
-        dict({
-          'auto-advance-after': autoAdvanceAttr,
-        })
-      );
+      this.element.setAttribute('auto-advance-after', autoAdvanceAttr);
     }
   }
 
@@ -370,12 +366,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     ) {
       return;
     }
-    addAttributesToElement(
-      this.element,
-      dict({
-        'auto-advance-after': storyNextUpParam,
-      })
-    );
+    this.element.setAttribute('auto-advance-after', storyNextUpParam);
     this.listenAndUpdateAutoAdvanceDuration_();
   }
 
@@ -421,10 +412,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.updateTimeDelay(duration + 's');
     // 'auto-advance-after' is only read during buildCallback(), but we update it
     // here to keep the DOM consistent with the AdvancementConfig.
-    addAttributesToElement(
-      this.element,
-      dict({'auto-advance-after': duration + 's'})
-    );
+    this.element.setAttribute('auto-advance-after', duration + 's');
   }
 
   /**
@@ -1599,7 +1587,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendVideoLoadingSpinner_() {
-    this.loadingSpinner_ = new LoadingSpinner(this.win.document);
+    this.loadingSpinner_ = new LoadingSpinner();
     const loadingSpinnerEl = this.loadingSpinner_.build();
     loadingSpinnerEl.setAttribute('aria-label', 'Loading video');
     this.element.appendChild(loadingSpinnerEl);
@@ -1630,7 +1618,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
-    this.playMessageEl_ = buildPlayMessageElement(this.element);
+    this.playMessageEl_ = renderPlayMessageElement();
     const labelEl = this.playMessageEl_.querySelector(
       '.i-amphtml-story-page-play-label'
     );
@@ -1678,7 +1666,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendErrorMessage_() {
-    this.errorMessageEl_ = buildErrorMessageElement(this.element);
+    this.errorMessageEl_ = renderErrorMessageElement();
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );
