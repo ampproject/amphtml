@@ -131,19 +131,19 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   });
 
   it('should skip the check for sha384(author_js) for cross-origin src in sandboxed mode', async () => {
-    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/')
-    element.setAttribute('src', 'https://bar.example/bar.js')
-    element.setAttribute('sandboxed', '')
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://bar.example/bar.js');
+    element.setAttribute('sandboxed', '');
 
     stubFetch(
       'https://bar.example/bar.js',
-      { 'Content-Type': 'application/javascript; charset=UTF-8' },
+      {'Content-Type': 'application/javascript; charset=UTF-8'},
       'alert(1)'
-    )
+    );
 
-    await script.buildCallback()
-    await script.layoutCallback()
-    expect(service.checkSha384).not.to.be.called
+    await script.buildCallback();
+    await script.layoutCallback();
+    expect(service.checkSha384).not.to.be.called;
   });
 
   it('callFunction waits for initialization to complete before returning', async () => {
