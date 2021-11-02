@@ -6,6 +6,7 @@ import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
+import {CSS} from '../../../build/amp-gpt-1.0.css';
 /** @const {string} */
 const TAG = 'amp-gpt';
 
@@ -35,5 +36,5 @@ class AmpGpt extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpGpt);
+  AMP.registerElement(TAG, AmpGpt, CSS);
 });

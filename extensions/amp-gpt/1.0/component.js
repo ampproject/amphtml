@@ -6,6 +6,8 @@ import {forwardRef} from '#preact/compat';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {useMergeRefs} from '#preact/utils';
 
+import {useStyles} from './component.jss';
+
 /**
  * Displays given component with supplied props.
  * @param {*} props
@@ -42,8 +44,12 @@ export function BentoGpt({
   width,
   ...rest
 }) {
+  /** Styles */
+  const classes = useStyles();
+
   /** States */
   const [errorOnScriptLoad, setErrorOnScriptLoad] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   /** References */
   const gptAdDivRef = useRef(null);
@@ -135,6 +141,7 @@ export function BentoGpt({
 
       global.googletag.pubads().addEventListener('slotRequested', function () {
         fallbackTimerRef.current = setTimeout(() => {
+          setIsLoading(false);
           setErrorOnScriptLoad(true);
         }, 2500);
       });
@@ -144,6 +151,7 @@ export function BentoGpt({
         .addEventListener('slotResponseReceived', function () {
           clearTimeout(fallbackTimerRef.current);
           setErrorOnScriptLoad(false);
+          setIsLoading(false);
         });
 
       /** Enable Services */
@@ -164,6 +172,8 @@ export function BentoGpt({
   ]);
 
   useEffect(() => {
+    /** Show loader */
+    setIsLoading(true);
     /**
      * Load `gpt.js` only once by checking `global.bentogpt` flag.
      */
@@ -180,6 +190,9 @@ export function BentoGpt({
           initialiseGpt(global);
         },
         () => {
+          /** Hide loader */
+          setIsLoading(false);
+
           /** Error while loading `gpt.js` script, show fallback */
           setErrorOnScriptLoad(true);
         }
@@ -189,7 +202,6 @@ export function BentoGpt({
       initialiseGpt(global);
     }
   }, [initialiseGpt]);
-
   return (
     <ContainWrapper
       layout
@@ -198,7 +210,13 @@ export function BentoGpt({
       paint
       {...rest}
       ref={useMergeRefs([containerRef, inObRef])}
+      style={{position: 'absolute'}}
     >
+      {isLoading && (
+        <div class={classes.loaderWrapper}>
+          <div class={classes.loader}></div>
+        </div>
+      )}
       {!errorOnScriptLoad && (
         <div id={optDiv} ref={gptAdDivRef} style={{height, width}}></div>
       )}

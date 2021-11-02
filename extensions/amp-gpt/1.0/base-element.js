@@ -1,7 +1,7 @@
 import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoGpt} from './component';
-_;
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -36,4 +36,4 @@ BaseElement['usesShadowDom'] = true;
 // Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
 // Once addressed, remove this set of comments.
 /** @override */
-BaseElement['shadowCss'] = null;
+BaseElement['shadowCss'] = COMPONENT_CSS;
