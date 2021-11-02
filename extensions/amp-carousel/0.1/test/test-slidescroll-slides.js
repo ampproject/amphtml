@@ -339,4 +339,12 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     });
     expect(carousel.shouldAutoplay_).to.be.true;
   });
+
+  describe('buildDom', () => {
+    it('buildDom and buildCallback should result in the same outerHTML', async () => {});
+    it('buildCallback should assign ivars even when server rendered', async () => {});
+
+    it('buildDom should throw if invalid server rendered dom', async () => {});
+    it('buildDom should not modify dom for server rendered element', async () => {});
+  });
 });
