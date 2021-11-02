@@ -174,12 +174,7 @@ async function buildComponent(
   }
 
   if (hasCss) {
-    if (!existsSync('build')) {
-      mkdirSync('build');
-    }
-    if (!existsSync('build/css')) {
-      mkdirSync('build/css');
-    }
+    mkdirSync('build/css', {recursive: true});
     await buildExtensionCss(componentsDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
