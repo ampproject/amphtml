@@ -17,7 +17,7 @@ export const ClassNames = {
   // Generic
   SLIDE: 'amp-carousel-slide',
 
-  // Slide Scroll
+  // SlideScroll Carousel
   SLIDESCROLL_CAROUSEL: 'i-amphtml-slidescroll',
   SLIDE_WRAPPER: 'i-amphtml-slide-item',
   SLIDES_CONTAINER: 'i-amphtml-slides-container',
@@ -88,7 +88,7 @@ export function setButtonState(button, enabled) {
  */
 export function buildCarouselControls(element, slideCount) {
   if (isServerRendered(element)) {
-    return queryCarouselControlsDom(element);
+    return queryCarouselControls(element);
   }
 
   const doc = element.ownerDocument;
@@ -126,7 +126,7 @@ export function buildCarouselControls(element, slideCount) {
  *   nextButton: !HTMLDivElement
  * }}
  */
-export function queryCarouselControlsDom(element) {
+export function queryCarouselControls(element) {
   const prevButton = /** @type {!HTMLDivElement} */ (
     element.querySelector(`.${escapeCssSelectorIdent(ClassNames.PREV_BUTTON)}`)
   );
@@ -198,7 +198,7 @@ function queryScrollableCarousel(element) {
  *   slideWrappers: !HTMLDivElement[]
  * }}
  */
-function buildSlideScroll(element) {
+function buildSlideScrollCarousel(element) {
   if (isServerRendered(element)) {
     return querySlideScrollCarousel(element);
   }
@@ -282,7 +282,7 @@ export function buildDom(element) {
   const slideCount = realChildElements(element).length;
   const slidesDom =
     type == 'slides'
-      ? buildSlideScroll(element)
+      ? buildSlideScrollCarousel(element)
       : buildScrollableCarousel(element);
   const controlsDom = buildCarouselControls(element, slideCount);
 
