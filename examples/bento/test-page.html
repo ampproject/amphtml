@@ -27,6 +27,10 @@
   ></script>
   <script
     async
+    src="https://cdn.ampproject.org/v0/embedly-context-1.0.js"
+  ></script>
+  <script
+    async
     custom-element="bento-facebook"
     src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"
   ></script>
@@ -207,7 +211,7 @@
   <div class="green-gradient"></div>
 </bento-base-carousel>
   </div>
-  <!--
+
   <div>
   <h1>Bento Embedly Card</h1>
   <bento-embedly-card
@@ -218,6 +222,7 @@
   </bento-embedly-card>
 
   </div>
+  <!--
   <div>
   <h1>Bento Facebook</h1>
 <bento-facebook
@@ -308,6 +313,7 @@
 
   <div>
   <h1>Bento Lightbox Gallery</h1>
+<bento-lightbox-gallery></bento-lightbox-gallery>
 <figure>
   <img
     id="my-img"
@@ -408,23 +414,19 @@
 </bento-timeago>
 
   </div>
--->
 
   <div>
   <h1>Bento Twitter</h1>
 <bento-twitter id="my-tweet" data-tweetid="885634330868850689"> </bento-twitter>
 
   </div>
- <!-- 
-
   <div>
   <h1>Bento Video Iframe</h1>
   <bento-video-iframe
       id="myVideo"
       src="./amp-video-iframe/frame.html"
-      width="720"
-      height="405"
       layout="responsive"
+      style="width: 600px; height: 300px"
       autoplay>
     <div placeholder>
       This is a placeholder
@@ -433,7 +435,6 @@
       This is a fallback
     </div>
   </bento-video-iframe>
-
   </div>
 
   <div>
