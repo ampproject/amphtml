@@ -1,0 +1,42 @@
+tags: {  # amp-story-shopping
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-shopping"
+    version: "0.1"
+    version: "latest"
+    requires_usage: EXEMPTED
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-shopping-tag>
+html_format: AMP
+  tag_name: "AMP-STORY-SHOPPING-TAG"
+  requires_extension: "amp-story-shopping"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+tags: {  # <amp-story-shopping-config>
+  html_format: AMP
+  tag_name: "AMP-STORY-SHOPPING-CONFIG"
+  requires_extension: "amp-story-shopping"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # <amp-story-shopping-attachment>
+  html_format: AMP
+  tag_name: "AMP-STORY-SHOPPING-ATTACHMENT"
+  requires_extension: "amp-story-shopping"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

@@ -9,8 +9,13 @@
  * 5. time (in UTC, Y-%m-%d %H:%M:%S)
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const dedent = require('dedent');
+const {action, base, channel, head, sha, time} = require('minimist')(
+  process.argv.slice(2),
+  {
+    string: ['head', 'base'],
+  }
+);
 const {addLabels, removeLabels} = require('./label-pull-requests');
 const {createOrUpdateTracker} = require('./update-issue-tracker');
 const {cyan, magenta} = require('kleur/colors');
@@ -18,8 +23,6 @@ const {getRelease} = require('./utils');
 const {log} = require('../common/logging');
 const {makeRelease} = require('./make-release');
 const {publishRelease, rollbackRelease} = require('./update-release');
-
-const {action, base, channel, head, sha, time} = argv;
 
 /**
  * Promote actions

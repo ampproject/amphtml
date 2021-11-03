@@ -68,7 +68,6 @@ import {
   randomlySelectUnsetExperiments,
 } from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -499,14 +498,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
     }
 
-    const storyAdPageOutlinkExpId = getExperimentBranch(
-      this.win,
-      StoryAdPageOutlink.ID
-    );
-    if (storyAdPageOutlinkExpId) {
-      addExperimentIdToElement(storyAdPageOutlinkExpId, this.element);
-    }
-
     const autoAdvanceExpBranch = getExperimentBranch(
       this.win,
       StoryAdAutoAdvance.ID
@@ -693,8 +684,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
     // If slotWidth is -1, that means its width must be determined by its
     // parent container, and so should have the same value as parentWidth.
-    msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-    psz = `${parentWidth}x-1`;
+
+    // For amp-sticky-ad, it returns 0, so we follow them for amp-ad sticky ads here.
+    if (this.uiHandler.isStickyAd()) {
+      msz = '0x-1';
+      psz = '0x-1';
+    } else {
+      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+      psz = `${parentWidth}x-1`;
+    }
     fws = fwSignal ? fwSignal : '0';
     return {
       'iu': this.element.getAttribute('data-slot'),

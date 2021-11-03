@@ -12,32 +12,34 @@ The examples below demonstrate use of the `<bento-jwplayer>` web component.
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-jwplayer
+npm install @bentoproject/jwplayer
 ```
 
 ```javascript
-import '@ampproject/bento-jwplayer';
+import {defineElement as defineBentoJwplayer} from '@bentoproject/jwplayer';
+defineBentoJwplayer();
 ```
-
-[/example]
 
 #### Example: Include via `<script>`
 
 The example below contains an `bento-jwplayer` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
-[example preview="top-frame" playground="false"]
-
 ```html
 <head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css">
+  <script src="https://cdn.ampproject.org/bento.js"></script>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+  />
 </head>
 <body>
   <bento-jwplayer
@@ -52,19 +54,16 @@ The example below contains an `bento-jwplayer` with three sections. The
       const twitter = document.querySelector('#jwplayer');
       await customElements.whenDefined('bento-twitter');
 
-      const api = player.getApi()
+      const api = player.getApi();
       api.play();
       api.pause();
       api.mute();
       api.unmute();
       api.requestFullscreen();
-    })()
+    })();
   </script>
-
 </body>
 ```
-
-[/example]
 
 #### Interactivity and API usage
 
@@ -80,21 +79,25 @@ const api = await document.querySelector('bento-accordion').getApi();
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
 ```html
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+/>
 ```
 
 Alternatively, you may also make the light-weight pre-upgrade styles available inline:
 
 ```html
-<style data-bento-boilerplate>
-  amp-jwplayer {
+<style>
+  bento-jwplayer {
     display: block;
     overflow: hidden;
     position: relative;
   }
 
   /* Pre-upgrade: size-defining element - hide children. */
-  amp-jwplayer:not(.i-amphtml-built)
+  bento-jwplayer:not(.i-amphtml-built)
     > :not([placeholder]):not([slot='i-amphtml-svc']) {
     display: none;
     content-visibility: hidden;
@@ -216,18 +219,16 @@ The examples below demonstrates use of the `<BentoMathml>` as a functional compo
 
 #### Example: Import via npm
 
-[example preview="top-frame" playground="false"]
-
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-jwplayer
+npm install @bentoproject/jwplayer
 ```
 
 ```javascript
 import React from 'react';
-import { BentoMathml } from '@ampproject/bento-jwplayer/react';
-import '@ampproject/bento-jwplayer/styles.css';
+import {BentoMathml} from '@bentoproject/jwplayer/react';
+import '@bentoproject/jwplayer/styles.css';
 
 function App() {
   return (
@@ -241,8 +242,6 @@ function App() {
 }
 ```
 
-[/example]
-
 #### Layout and style
 
 **Container type**
@@ -250,17 +249,13 @@ function App() {
 The `BentoMathml` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
 ```jsx
-<BentoMathml style={{width: '300px', height: '100px'}}>
-  ...
-</BentoMathml>
+<BentoMathml style={{width: 300, height: 100}}>...</BentoMathml>
 ```
 
 Or via `className`:
 
 ```jsx
-<BentoMathml className='custom-styles'>
-  ...
-</BentoMathml>
+<BentoMathml className="custom-styles">...</BentoMathml>
 ```
 
 ```css
@@ -330,24 +325,25 @@ Or via `className`:
     Accepts A <code>skinUrl</code> string used to pass external CSS skins to the player. See JW Player's <a href="https://developer.jwplayer.com/jwplayer/docs/jw8-css-skin-reference">CSS Skin Reference</a> for more information.
     Accepts a <code>pluginUrl</code> string used to pass external JS plugins to the player.
     Accepts a json property with a JSON string of a player config. This can be used to set specific configuration properties on the player. Advertising configurations can also be specified using this.
-    <pre><code>config={{
-      skinUrl: 'https://playertest.longtailvideo.com/skins/ethan.css',
-      pluginUrl: 'https://playertest.longtailvideo.com/plugins/newsticker.js',
-      json: {
-        playbackRateControls: true,
-        displaytitle: false,
-        advertising: {
-          client: "vast",
-          schedule: [
-            {
-              tag: "http://adserver.com/vastTag.xml",
-              offset: "pre"
-            }
-          ]
-        }
-      }
+     ```javascript
+     config={{
+       skinUrl: 'https://playertest.longtailvideo.com/skins/ethan.css',
+       pluginUrl: 'https://playertest.longtailvideo.com/plugins/newsticker.js',
+       json: {
+         playbackRateControls: true,
+         displaytitle: false,
+         advertising: {
+           client: "vast",
+           schedule: [
+             {
+               tag: "http://adserver.com/vastTag.xml",
+               offset: "pre"
+             }
+           ]
+         }
+       }
     }}
-    </code></pre>
+    ```
     <strong>Media and Float on Scroll properties cannot be configured with this attribute</strong>. Update media properties in your JW Player Dashboard. See JW Player's <a href="https://developer.jwplayer.com/jwplayer/docs/jw8-player-configuration-reference">Player Configuration Reference</a> for more information.</td>
   </tr>
   <tr>

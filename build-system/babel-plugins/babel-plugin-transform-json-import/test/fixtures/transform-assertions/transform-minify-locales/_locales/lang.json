@@ -1,0 +1,9 @@
+{
+  "2": {
+    "string": "foo"
+  },
+  "15": {
+    "string": "bar",
+    "description": "This field is stripped out in the output. The object is replaced with the value of the `string` key."
+  }
+}

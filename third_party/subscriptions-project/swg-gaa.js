@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.190 */
+/** Version: 0.1.22.192 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -228,6 +228,8 @@ const AnalyticsEvent = {
   ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
   ACTION_SHOWCASE_REGWALL_GSI_CLICK: 1035,
   ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
+  ACTION_SUBSCRIPTION_OFFERS_CLOSED: 1037,
+  ACTION_CONTRIBUTION_OFFERS_CLOSED: 1038,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -917,123 +919,123 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--iframe,
   .gaa-metering-regwall--casl,
   .gaa-metering-regwall--publisher-no-thanks-button {
-    all: initial;
-    box-sizing: border-box;
-    font-family: Roboto, arial, sans-serif;
+    all: initial !important;
+    box-sizing: border-box !important;
+    font-family: Roboto, arial, sans-serif !important;
   }
 
   .gaa-metering-regwall--dialog-spacer {
-    background: linear-gradient(0, #808080, transparent);
-    bottom: 0;
-    display: block;
-    position: fixed;
-    width: 100%;
+    background: linear-gradient(0, #808080, transparent) !important;
+    bottom: 0 !important;
+    display: block !important;
+    position: fixed !important;
+    width: 100% !important;
   }
 
   @keyframes slideUp {
-    from {transform: translate(0, 200px);}
-    to {transform: translate(0, 0);}
+    from {transform: translate(0, 200px) !important;}
+    to {transform: translate(0, 0) !important;}
   }
 
   .gaa-metering-regwall--dialog {
-    animation: slideUp 0.5s;
-    background: white;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3);
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    padding: 24px 20px;
-    pointer-events: auto;
-    width: 410px;
+    animation: slideUp 0.5s !important;
+    background: white !important;
+    border-radius: 12px 12px 0 0 !important;
+    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3) !important;
+    display: block !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    padding: 24px 20px !important;
+    pointer-events: auto !important;
+    width: 410px !important;
   }
 
   .gaa-metering-regwall--logo {
-    display: block;
-    margin: 0 auto 24px;
+    display: block !important;
+    margin: 0 auto 24px !important;
   }
 
   .gaa-metering-regwall--title {
-    color: #000;
-    display: block;
-    font-size: 16px;
-    margin: 0 0 8px;
-    outline: none !important;
+    color: #000 !important;
+    display: block !important;
+    font-size: 16px !important;
+    margin: 0 0 8px !important;
+    outline: none !important !important;
   }
 
   .gaa-metering-regwall--description {
-    color: #646464;
-    display: block;
-    font-size: 14px;
-    line-height: 19px;
-    margin: 0 0 30px;
+    color: #646464 !important;
+    display: block !important;
+    font-size: 14px !important;
+    line-height: 19px !important;
+    margin: 0 0 30px !important;
   }
 
   .gaa-metering-regwall--description strong {
-    color: #646464;
-    font-size: 14px;
-    line-height: 19px;
-    font-weight: bold;
+    color: #646464 !important;
+    font-size: 14px !important;
+    line-height: 19px !important;
+    font-weight: bold !important;
   }
 
   .gaa-metering-regwall--iframe {
-    border: none;
-    display: block;
-    height: 36px;
-    margin: 0 0 30px;
-    width: 100%;
+    border: none !important;
+    display: block !important;
+    height: 36px !important;
+    margin: 0 0 30px !important;
+    width: 100% !important;
   }
 
   .gaa-metering-regwall--casl {
-    color: #646464;
-    display: block;
-    font-size: 12px;
-    text-align: center;
-    margin: -16px auto 32px;
+    color: #646464 !important;
+    display: block !important;
+    font-size: 12px !important;
+    text-align: center !important;
+    margin: -16px auto 32px !important;
   }
 
   .gaa-metering-regwall--casl a {
-    color: #1967d2;
+    color: #1967d2 !important;
   }
 
   .gaa-metering-regwall--line {
-    background-color: #ddd;
-    display: block;
-    height: 1px;
-    margin: 0 0 24px;
+    background-color: #ddd !important;
+    display: block !important;
+    height: 1px !important;
+    margin: 0 0 24px !important;
   }
 
   .gaa-metering-regwall--publisher-sign-in-button,
   .gaa-metering-regwall--publisher-no-thanks-button {
-    color: #1967d2;
-    display: block;
-    cursor: pointer;
-    font-size: 12px;
+    color: #1967d2 !important;
+    display: block !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
   }
 
   .gaa-metering-regwall--publisher-sign-in-button {
   }
 
   .gaa-metering-regwall--publisher-no-thanks-button {
-    display: none;
-    float: right;
+    display: none !important;
+    float: right !important;
   }
 
   .gaa-metering-regwall--google-sign-in-button {
-    height: 36px;
-    margin: 0 auto 30px;
+    height: 36px !important;
+    margin: 0 auto 30px !important;
   }
 
   .gaa-metering-regwall--google-sign-in-button > div {
-    animation: swgGoogleSignInButtonfadeIn 0.32s;
+    animation: swgGoogleSignInButtonfadeIn 0.32s !important;
   }
 
   @keyframes swgGoogleSignInButtonfadeIn {
     from {
-      opacity: 0;
+      opacity: 0 !important;
     }
     to {
-      opacity: 1;
+      opacity: 1 !important;
     }
   }
 </style>
@@ -1299,6 +1301,7 @@ class GaaMeteringRegwall {
     iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
 
     // Create and style container element.
+    // TODO: Consider using a FriendlyIframe here, to avoid CSS conflicts.
     const containerEl = /** @type {!HTMLDivElement} */ (
       self.document.createElement('div')
     );

@@ -85,7 +85,6 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/messaging.js->src/utils/event-helper.js',
       '3p/bodymovinanimation.js->src/utils/event-helper.js',
       '3p/iframe-messaging-client.js->src/utils/event-helper.js',
@@ -264,6 +263,9 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
+      // Story Shopping
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-page-attachment.js',
+
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
@@ -426,7 +428,6 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/amp.js->src/polyfills/index.js',
       'src/polyfills/index.js->src/polyfills/abort-controller.js',
@@ -436,7 +437,6 @@ exports.rules = [
       'src/polyfills/index.js->src/polyfills/math-sign.js',
       'src/polyfills/index.js->src/polyfills/object-assign.js',
       'src/polyfills/index.js->src/polyfills/object-values.js',
-      'src/polyfills/index.js->src/polyfills/promise.js',
       'src/polyfills/index.js->src/polyfills/array-includes.js',
       'src/polyfills/index.js->src/polyfills/string-starts-with.js',
       'src/polyfills/index.js->src/polyfills/custom-elements.js',
