@@ -1,0 +1,43 @@
+{
+  "items" : [
+     {
+      "product-tag-id": "hat",
+      "brand-label": "...",
+      "brand-favicon": "...",
+      "product-title": "Hootenanny Hat",
+      "product-price": "...",
+      "product-images": "...",
+      "product-details": "...",
+      "reviews-page": "...",
+      "reviews-data": "...",
+      "cta-text": 1,
+      "shipping-text": 1
+     },
+     {
+      "product-tag-id": "sunglasses",
+      "brand-label": "...",
+      "brand-favicon": "...",
+      "product-title": "Spectacular Spectacles",
+      "product-price": "...",
+      "product-images": "...",
+      "product-details": "...",
+      "reviews-page": "...",
+      "reviews-data": "...",
+      "cta-text": 1,
+      "shipping-text": 1
+     },
+     {
+      "product-tag-id": "backpack",
+      "brand-label": "...",
+      "brand-favicon": "...",
+      "product-title": "Beastly Backpack",
+      "product-price": "...",
+      "product-images": "...",
+      "product-details": "...",
+      "reviews-page": "...",
+      "reviews-data": "...",
+      "cta-text": 1,
+      "shipping-text": 1
+     }
+  ]
+}

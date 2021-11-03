@@ -2,6 +2,8 @@ import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 import '../amp-story-shopping';
 
+import {Services} from '#service';
+
 describes.realWin(
   'amp-story-shopping-config-v0.1',
   {
