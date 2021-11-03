@@ -96,11 +96,6 @@ module.exports = function (babel) {
           );
         }
         if (svgTags.has(name)) {
-          path.node.attributes = path.node.attributes.filter(
-            // We can remove this for bundle size since the renderer will
-            // create the element with a given namespace anyway.
-            (attr) => attr.name.name !== 'xmlns'
-          );
           path.node.attributes.push(t.jsxAttribute(t.jsxIdentifier('__svg')));
         }
       },
