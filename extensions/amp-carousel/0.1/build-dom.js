@@ -87,10 +87,6 @@ export function setButtonState(button, enabled) {
  * }}
  */
 export function buildCarouselControls(element, slideCount) {
-  if (isServerRendered(element)) {
-    return queryCarouselControls(element);
-  }
-
   const doc = element.ownerDocument;
   if (isAmp4Email(doc) || element.hasAttribute('controls')) {
     element.classList.add(ClassNames.HAS_CONTROL);
@@ -119,25 +115,6 @@ export function buildCarouselControls(element, slideCount) {
 }
 
 /**
- * Queries for all of the necessary DOM Elements to assign to ivars
- * @param {!Element} element
- * @return {{
- *   prevButton: !HTMLDivElement,
- *   nextButton: !HTMLDivElement
- * }}
- */
-export function queryCarouselControls(element) {
-  const prevButton = /** @type {!HTMLDivElement} */ (
-    element.querySelector(`.${escapeCssSelectorIdent(ClassNames.PREV_BUTTON)}`)
-  );
-  const nextButton = /** @type {!HTMLDivElement} */ (
-    element.querySelector(`.${escapeCssSelectorIdent(ClassNames.NEXT_BUTTON)}`)
-  );
-  assertDomQueryResults(prevButton, nextButton);
-  return {prevButton, nextButton};
-}
-
-/**
  * Builds the DOM necessary for scrollable carousel.
  * @param {!Element} element
  * @return {{
@@ -146,10 +123,6 @@ export function queryCarouselControls(element) {
  * }}
  */
 function buildScrollableCarousel(element) {
-  if (isServerRendered(element)) {
-    return queryScrollableCarousel(element);
-  }
-
   const doc = element.ownerDocument;
   const cells = realChildElements(element);
   const container = doc.createElement('div');
@@ -167,29 +140,6 @@ function buildScrollableCarousel(element) {
 }
 
 /**
- * Queries for ivars for scrollable carousel.
- * @param {!Element} element
- * @return {{
- *   container: !HTMLDivElement
- *   cells: !HTMLDivElement[]
- * }}
- */
-function queryScrollableCarousel(element) {
-  const container = /** @type {!HTMLDivElement} */ (
-    element.querySelector(
-      `.${escapeCssSelectorIdent(ClassNames.SCROLLABLE_CONTAINER)}`
-    )
-  );
-  const cells = /** @type {!HTMLDivElement[]} */ (
-    Array.from(
-      element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
-    )
-  );
-  assertDomQueryResults(container, cells);
-  return {container, cells};
-}
-
-/**
  * Builds the DOM necessary for slidescroll carousel.
  * @param {!Element} element
  * @return {{
@@ -199,9 +149,6 @@ function queryScrollableCarousel(element) {
  * }}
  */
 function buildSlideScrollCarousel(element) {
-  if (isServerRendered(element)) {
-    return querySlideScrollCarousel(element);
-  }
   const doc = element.ownerDocument;
   const slides = realChildElements(element);
   element.classList.add(ClassNames.SLIDESCROLL_CAROUSEL);
@@ -231,37 +178,6 @@ function buildSlideScrollCarousel(element) {
   });
 
   return {slidesContainer, slides, slideWrappers};
-}
-
-/**
- * Queries for ivars for slidescroll.
- * @param {!Element} element
- * @return {{
- *   slides: !HTMLDivElement[]
- *   slidesContainer: !HTMLDivElement
- *   slideWrappers: !HTMLDivElement[]
- * }}
- */
-function querySlideScrollCarousel(element) {
-  const slidesContainer = /** @type {!HTMLDivElement} */ (
-    element.querySelector(
-      `.${escapeCssSelectorIdent(ClassNames.SLIDES_CONTAINER)}`
-    )
-  );
-  const slideWrappers = /** @type {!HTMLDivElement[]} */ (
-    Array.from(
-      element.querySelectorAll(
-        `.${escapeCssSelectorIdent(ClassNames.SLIDE_WRAPPER)}`
-      )
-    )
-  );
-  const slides = /** @type {!HTMLDivElement[]} */ (
-    Array.from(
-      element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
-    )
-  );
-  assertDomQueryResults(slidesContainer, slideWrappers, slides);
-  return {slides, slidesContainer, slideWrappers};
 }
 
 /**
