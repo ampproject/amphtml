@@ -26,6 +26,63 @@ export const _default = (args) => {
   );
 };
 
+export const slotTargeting = (args) => {
+  const targetingAtf = {color: 'red', position: 'atf'};
+  const targetingBtf = {position: 'btf'};
+  return (
+    <>
+      <amp-gpt
+        ad-unit-path="/6355419/Travel/Asia"
+        opt-div="div9_atf"
+        height="90"
+        width="728"
+        {...args}
+        targeting={JSON.stringify(targetingAtf)}
+      >
+        <div slot="fallback">Error while loading script.</div>
+      </amp-gpt>
+      <amp-gpt
+        ad-unit-path="/6355419/Travel/Asia"
+        opt-div="div9_btf"
+        height="90"
+        width="728"
+        {...args}
+        targeting={JSON.stringify(targetingBtf)}
+      >
+        <div slot="fallback">Error while loading script.</div>
+      </amp-gpt>
+    </>
+  );
+};
+
+export const disableInitialLoad = (args) => {
+  const disableInitialLoad = boolean('disable-initial-load', true);
+  return (
+    <div style="background: lightblue;">
+      <amp-gpt
+        ad-unit-path="/21730346048/test-skyscraper"
+        opt-div="div3"
+        height="250"
+        width="300"
+        disable-initial-load={disableInitialLoad}
+        {...args}
+      >
+        <div slot="fallback">Error while loading script.</div>
+      </amp-gpt>
+      <button
+        onclick="
+        googletag.cmd.push(
+          function() {
+            googletag.pubads().refresh();
+          }
+        );"
+      >
+        Show/Refresh Ad
+      </button>
+    </div>
+  );
+};
+
 export const intersectionObserverInAction = (args) => {
   return (
     <>
@@ -54,76 +111,39 @@ export const intersectionObserverInAction = (args) => {
   );
 };
 
-export const targeting = (args) => {
-  const targetingAtf = {color: 'red', position: 'btf'};
-  const targetingBtf = {position: 'btf'};
+export const loaderAnimation = (args) => {
   return (
     <>
       <amp-gpt
-        ad-unit-path="/6355419/Travel/Asia"
-        opt-div="div2_atf"
-        height="90"
-        width="728"
+        ad-unit-path="/21730346048/test-skyscraper"
+        opt-div="div7"
+        height="250"
+        width="300"
+        style="margin:10px"
         {...args}
-        targeting={JSON.stringify(targetingAtf)}
       >
         <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
       <amp-gpt
-        ad-unit-path="/6355419/Travel/Asia"
-        opt-div="div2_btf"
-        height="90"
-        width="728"
+        ad-unit-path="/21730346048/test-skyscraper"
+        opt-div="div8"
+        height="250"
+        width="300"
+        style="margin:10px"
         {...args}
-        targeting={JSON.stringify(targetingBtf)}
+      >
+        <div slot="fallback">Error while loading script.</div>
+      </amp-gpt>
+      <amp-gpt
+        ad-unit-path="/21730346048/test-skyscraper"
+        opt-div="div9"
+        height="250"
+        width="300"
+        style="margin:10px"
+        {...args}
       >
         <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
     </>
-  );
-};
-
-export const disableInitialLoad = (args) => {
-  const disableInitialLoad = boolean('disable-initial-load', true);
-  return (
-    <div style="background: lightblue;">
-      <div style="padding: 10px;">
-        <amp-gpt
-          ad-unit-path="/21730346048/test-skyscraper"
-          opt-div="div3"
-          height="250"
-          width="300"
-          disable-initial-load={disableInitialLoad}
-          {...args}
-        >
-          <div slot="fallback">Error while loading script.</div>
-        </amp-gpt>
-      </div>
-      <div style="padding: 0 10px 10px 10px;">
-        <button onclick="googletag.cmd.push(function() { googletag.pubads().refresh(); });">
-          Show/Refresh Ad
-        </button>
-      </div>
-      <amp-gpt
-        ad-unit-path="/21730346048/test-skyscraper"
-        opt-div="div3"
-        height="250"
-        width="300"
-        disable-initial-load={disableInitialLoad}
-        {...args}
-      >
-        <div slot="fallback">Error while loading script.</div>
-      </amp-gpt>
-      <button
-        onclick="
-        googletag.cmd.push(
-          function() {
-            googletag.pubads().refresh();
-          }
-        );"
-      >
-        Show/Refresh Ad
-      </button>
-    </div>
   );
 };

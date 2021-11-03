@@ -49,7 +49,7 @@ export function BentoGpt({
 
   /** States */
   const [errorOnScriptLoad, setErrorOnScriptLoad] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   /** References */
   const gptAdDivRef = useRef(null);
@@ -57,6 +57,14 @@ export function BentoGpt({
   const containerRef = useRef(null);
   const fallbackDivRef = useRef(null);
   const fallbackTimerRef = useRef(null);
+  const gptAdResponcereceivedRef = useRef(false);
+
+  const showFallback = useCallback(
+    (show) => {
+      setErrorOnScriptLoad(show);
+    },
+    [setErrorOnScriptLoad]
+  );
 
   /**
    * This callback will be executed when ContainerWrapper is in view.
@@ -80,8 +88,9 @@ export function BentoGpt({
           global.googletag?.pubads().refresh([gptAdSlotRef.current]);
         }, 250);
       }
+      inObRef(null);
     },
-    [disableInitialLoad]
+    [disableInitialLoad, inObRef]
   );
   const inObRef = useIntersectionObserver(ioCallback);
 
@@ -123,6 +132,8 @@ export function BentoGpt({
 
     /** Adds element to the execution queue */
     global.googletag.cmd.push(function () {
+      global.bentoids.push(optDiv);
+
       /** Define slot and related parameters */
       gptAdSlotRef.current = global.googletag
         .defineSlot(adUnitPath, parsedSize, optDiv)
@@ -140,18 +151,23 @@ export function BentoGpt({
       //   .addService(scope.googletag.pubads());
 
       global.googletag.pubads().addEventListener('slotRequested', function () {
+        setIsLoading(true);
         fallbackTimerRef.current = setTimeout(() => {
+          if (gptAdResponcereceivedRef.current === true) {
+            return;
+          }
           setIsLoading(false);
-          setErrorOnScriptLoad(true);
+          showFallback(true);
         }, 2500);
       });
 
       global.googletag
         .pubads()
         .addEventListener('slotResponseReceived', function () {
+          gptAdResponcereceivedRef.current = true;
           clearTimeout(fallbackTimerRef.current);
-          setErrorOnScriptLoad(false);
           setIsLoading(false);
+          showFallback(false);
         });
 
       /** Enable Services */
@@ -169,11 +185,20 @@ export function BentoGpt({
     initializeTargets,
     optDiv,
     parsedSize,
+    showFallback,
   ]);
 
   useEffect(() => {
-    /** Show loader */
-    setIsLoading(true);
+    global.bentoids = global.bentoids || [];
+    if (global.bentoids.indexOf(optDiv) > -1) {
+      return;
+    }
+
+    /** Show loader, only if `disableInitialLoad` is `false */
+    if (disableInitialLoad === false) {
+      setIsLoading(true);
+    }
+
     /**
      * Load `gpt.js` only once by checking `global.bentogpt` flag.
      */
@@ -194,14 +219,14 @@ export function BentoGpt({
           setIsLoading(false);
 
           /** Error while loading `gpt.js` script, show fallback */
-          setErrorOnScriptLoad(true);
+          showFallback(true);
         }
       );
     } else {
       /** `gpt.js` is already loaded, now Initialize GPT Library for this component */
       initialiseGpt(global);
     }
-  }, [initialiseGpt]);
+  }, [disableInitialLoad, initialiseGpt, optDiv, showFallback]);
   return (
     <ContainWrapper
       layout
