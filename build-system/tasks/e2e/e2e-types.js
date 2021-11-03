@@ -31,7 +31,7 @@ class ElementHandle {
  * Key codes used to trigger actions.
  * @enum {string}
  */
-const Key_Enum = {
+const Key = {
   'ArrowDown': 'ArrowDown',
   'ArrowLeft': 'ArrowLeft',
   'ArrowRight': 'ArrowRight',
@@ -77,7 +77,7 @@ let ScrollToOptionsDef;
 
 module.exports = {
   ElementHandle,
-  Key_Enum,
+  Key,
   WindowRectDef,
   DOMRectDef,
   ScrollToOptionsDef,

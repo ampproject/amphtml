@@ -1,5 +1,5 @@
 /** @enum {string} */
-const AmpdocEnvironment_Enum = {
+const AmpdocEnvironment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
   EMAIL_DEMO: 'email-demo',
@@ -16,7 +16,7 @@ const AmpdocEnvironment_Enum = {
 const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
-  [AmpdocEnvironment_Enum.SINGLE]: {
+  [AmpdocEnvironment.SINGLE]: {
     ready() {
       return Promise.resolve();
     },
@@ -26,7 +26,7 @@ const EnvironmentBehaviorMap = {
     },
   },
 
-  [AmpdocEnvironment_Enum.VIEWER_DEMO]: {
+  [AmpdocEnvironment.VIEWER_DEMO]: {
     ready(controller) {
       return controller
         .findElement('#viewer[data-loaded]')
@@ -38,7 +38,7 @@ const EnvironmentBehaviorMap = {
     },
   },
 
-  [AmpdocEnvironment_Enum.EMAIL_DEMO]: {
+  [AmpdocEnvironment.EMAIL_DEMO]: {
     ready(controller) {
       return controller
         .findElement('#viewer[data-loaded]')
@@ -49,7 +49,7 @@ const EnvironmentBehaviorMap = {
     },
   },
 
-  [AmpdocEnvironment_Enum.SHADOW_DEMO]: {
+  [AmpdocEnvironment.SHADOW_DEMO]: {
     async ready(controller) {
       // TODO(cvializ): this is a HACK
       // There should be a better way to detect that the shadowdoc is ready.
@@ -68,7 +68,7 @@ const EnvironmentBehaviorMap = {
     },
   },
 
-  [AmpdocEnvironment_Enum.A4A_FIE]: {
+  [AmpdocEnvironment.A4A_FIE]: {
     async ready(controller) {
       return controller
         .findElement('amp-ad > iframe')
@@ -80,7 +80,7 @@ const EnvironmentBehaviorMap = {
     },
   },
 
-  [AmpdocEnvironment_Enum.A4A_INABOX]: {
+  [AmpdocEnvironment.A4A_INABOX]: {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
@@ -92,7 +92,7 @@ const EnvironmentBehaviorMap = {
     },
   },
 
-  [AmpdocEnvironment_Enum.A4A_INABOX_FRIENDLY]: {
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
@@ -104,7 +104,7 @@ const EnvironmentBehaviorMap = {
     },
   },
 
-  [AmpdocEnvironment_Enum.A4A_INABOX_SAFEFRAME]: {
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
@@ -198,5 +198,5 @@ class AmpDriver {
 
 module.exports = {
   AmpDriver,
-  AmpdocEnvironment_Enum,
+  AmpdocEnvironment,
 };

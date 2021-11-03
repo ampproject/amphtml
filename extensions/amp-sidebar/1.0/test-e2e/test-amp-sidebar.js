@@ -1,5 +1,5 @@
 //
-import {Key_Enum} from '#testing/helpers/types';
+import {Key} from '#testing/helpers/types';
 
 describes.endtoend(
   'amp-sidebar',
@@ -93,7 +93,7 @@ describes.endtoend(
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be
         .false;
 
-      await controller.type(null, Key_Enum.Escape);
+      await controller.type(null, Key.Escape);
 
       await expect(controller.getElementProperty(sidebar, 'hidden')).to.be.true;
     });

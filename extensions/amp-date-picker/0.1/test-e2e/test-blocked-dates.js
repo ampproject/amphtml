@@ -1,4 +1,4 @@
-import {Key_Enum} from '#testing/helpers/types';
+import {Key} from '#testing/helpers/types';
 
 describes.endtoend(
   'amp-date-picker',
@@ -36,7 +36,7 @@ describes.endtoend(
 
         // This command selects the date one day after the start since the
         // initial focused cell is the date after the start date.
-        await controller.type(null, Key_Enum.Enter);
+        await controller.type(null, Key.Enter);
 
         const endCell = await controller.findElement(
           '.CalendarDay__selected_end'
@@ -59,9 +59,9 @@ describes.endtoend(
 
         // This sequence of commands selects the date one week after the start
         // date since the initial focused cell is the date after the start date.
-        await controller.type(null, Key_Enum.ArrowLeft);
-        await controller.type(null, Key_Enum.ArrowDown);
-        await controller.type(null, Key_Enum.Enter);
+        await controller.type(null, Key.ArrowLeft);
+        await controller.type(null, Key.ArrowDown);
+        await controller.type(null, Key.Enter);
 
         await expect(
           controller.getElementAttribute(nextWeekCell, 'class')
@@ -88,9 +88,9 @@ describes.endtoend(
 
         // This sequence of commands selects a date one week after the start date
         // since the initial focused cell is the date after the start date.
-        await controller.type(null, Key_Enum.ArrowLeft);
-        await controller.type(null, Key_Enum.ArrowDown);
-        await controller.type(null, Key_Enum.Enter);
+        await controller.type(null, Key.ArrowLeft);
+        await controller.type(null, Key.ArrowDown);
+        await controller.type(null, Key.Enter);
 
         await expect(
           controller.getElementAttribute(nextWeekCell, 'class')
