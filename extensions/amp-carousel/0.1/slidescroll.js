@@ -188,11 +188,6 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @private
    */
   setupBehavior_() {
-    this.hasLoop_ = this.element.hasAttribute('loop');
-    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
-    this.shouldLoop_ = this.hasLoop_ && this.isLoopingEligible();
-    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
-
     const autoplayVal = this.element.getAttribute('autoplay');
     if (autoplayVal) {
       this.autoplayLoops_ = parseInt(autoplayVal, 10);
@@ -417,6 +412,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
     this.slidesContainer_ = slidesContainer;
     this.slideWrappers_ = slideWrappers;
     this.noOfSlides_ = this.slides_.length;
+    this.hasLoop_ = this.element.hasAttribute('loop');
+    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+    this.shouldLoop_ = this.hasLoop_ && this.isLoopingEligible();
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
     this.controls_ = new CarouselControls({
       element: this.element,
@@ -487,13 +486,19 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return true;
   }
 
-  /** @return  {boolean} */
-  hasPrev() {
+  /**
+   * @return  {boolean}
+   * @private
+   */
+  hasPrev_() {
     return this.shouldLoop_ || this.slideIndex_ > 0;
   }
 
-  /** @return {boolean} */
-  hasNext() {
+  /**
+   * @return  {boolean}
+   * @private
+   */
+  hasNext_() {
     return this.shouldLoop_ || this.slideIndex_ < this.slides_.length - 1;
   }
 
@@ -505,8 +510,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
    */
   moveSlide(dir, animate, trust) {
     if (this.slideIndex_ !== null) {
-      const hasNext = this.hasNext();
-      const hasPrev = this.hasPrev();
+      const hasNext = this.hasNext_();
+      const hasPrev = this.hasPrev_();
       if ((dir == 1 && hasNext) || (dir == -1 && hasPrev)) {
         let newIndex = dev().assertNumber(this.slideIndex_) + dir;
         if (newIndex == -1) {
@@ -607,7 +612,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     // Default behavior should be stays on current slide
     let diff = newIndex - this.slideIndex_;
-    const hasPrev = this.hasPrev();
+    const hasPrev = this.hasPrev_();
     let toScrollLeft = hasPrev ? this.slideWidth_ : 0;
 
     if (diff == 0 && (opt_forceDir == 1 || opt_forceDir == -1)) {
@@ -645,8 +650,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     // shown slide.
     let updateValue = 0;
 
-    const hasPrev = this.hasPrev();
-    const hasNext = this.hasNext();
+    const hasPrev = this.hasPrev_();
+    const hasNext = this.hasNext_();
 
     if (hasPrev && hasNext) {
       updateValue = scrolledSlideIndex - 1;
@@ -840,8 +845,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     }
     this.hideRestOfTheSlides_(showIndexArr);
     this.controls_?.setControlsState({
-      prev: this.hasPrev(),
-      next: this.hasNext(),
+      prev: this.hasPrev_(),
+      next: this.hasNext_(),
     });
     this.controls_?.updateButtonTitles(
       this.getPrevButtonTitle(),

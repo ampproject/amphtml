@@ -367,20 +367,14 @@ describes.realWin(
       const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
       impl.showSlide_(1);
-      expect(controls.hasNext_()).to.be.true;
-      expect(controls.hasPrev_()).to.be.true;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
       impl.showSlide_(0);
-      expect(controls.hasNext_()).to.be.true;
-      expect(controls.hasPrev_()).to.be.false;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
 
       impl.showSlide_(4);
-      expect(controls.hasNext_()).to.be.false;
-      expect(controls.hasPrev_()).to.be.true;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
@@ -1063,20 +1057,14 @@ describes.realWin(
         const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
         impl.showSlide_(1);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(0);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(4);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
       });
@@ -1482,25 +1470,63 @@ describes.realWin(
     });
 
     describe('buildDom', () => {
-      it.only('buildDom and buildCallback should result in the same outerHTML', async () => {
+      it('buildDom and buildCallback should result in the same outerHTML', async () => {
         const el1 = await getAmpSlideScroll(
           /* hasLooping */ true,
           /* slideCount */ undefined,
           /* attachToDom */ false
         );
         const el2 = el1.cloneNode(/* deep */ true);
-        // doc.body.appendChild(el1);
         const impl = new AmpSlideScroll(el1);
-        impl.setupSlideBehavior_ = () => {}
+        impl.setupSlideBehavior_ = () => {};
         await impl.buildCallback();
         buildDom(el2);
 
-        const oldHTML = `<amp-carousel type="slides" width="400" height="300" controls="" loop="" class="i-amphtml-carousel-has-controls i-amphtml-slidescroll" style="position: relative;"><div tabindex="-1" class="i-amphtml-slides-container i-amphtml-slidescroll-no-snap" aria-live="polite"><div class="i-amphtml-slide-item"><amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width="400" height="300" data-slide-id="slide-id" class="amp-carousel-slide" style="display: inline;"></amp-img></div><div class="i-amphtml-slide-item"><amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width="400" height="300" class="amp-carousel-slide" style="display: inline;"></amp-img></div><div class="i-amphtml-slide-item"><amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width="400" height="300" class="amp-carousel-slide" style="display: inline;"></amp-img></div><div class="i-amphtml-slide-item"><amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width="400" height="300" class="amp-carousel-slide" style="display: inline;"></amp-img></div><div class="i-amphtml-slide-item"><amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width="400" height="300" class="amp-carousel-slide" style="display: inline;"></amp-img></div></div><div tabindex="0" class="amp-carousel-button amp-carousel-button-prev" role="button" title="Previous item in carousel (5 of 5)" aria-disabled="false"></div><div tabindex="0" class="amp-carousel-button amp-carousel-button-next" role="button" title="Next item in carousel (2 of 5)" aria-disabled="false"></div></amp-carousel>`
-        expect(el2.outerHTML).equal(oldHTML);
+        expect(el2.outerHTML).equal(el1.outerHTML);
       });
-      it('buildCallback should assign ivars even when server rendered', async () => {});
-      it('buildDom should throw if invalid server rendered dom', async () => {});
-      it('buildDom should not modify dom for server rendered element', async () => {});
+
+      it('buildCallback should assign ivars even when server rendered', async () => {
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(el1);
+        el1.setAttribute('i-amphtml-ssr', '');
+        const impl = new AmpSlideScroll(el1);
+        impl.setupSlideBehavior_ = () => {};
+        await impl.buildCallback();
+
+        expect(impl.slides_).length(5);
+        expect(impl.slideWrappers_).length(5);
+        expect(impl.slidesContainer_).ok;
+      });
+
+      it('buildDom should throw if invalid server rendered dom', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        carousel.setAttribute('i-amphtml-ssr', '');
+        expect(() => buildDom(carousel)).throws(/Invalid server render/);
+      });
+
+      it('buildDom should not modify dom for server rendered element', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(carousel);
+        carousel.setAttribute('i-amphtml-ssr', '');
+
+        const before = carousel.outerHTML;
+        buildDom(carousel);
+        const after = carousel.outerHTML;
+
+        expect(before).equal(after);
+      });
     });
   }
 );

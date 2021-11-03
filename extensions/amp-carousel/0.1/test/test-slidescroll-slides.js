@@ -8,7 +8,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
   let hasNextSpy;
 
   let setupAutoplaySpy;
-  let setControlsStateSpy;
   let hintControlsSpy;
   let autoplaySpy;
   let clearAutoplaySpy;
@@ -22,10 +21,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     setupAutoplaySpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
       'setupAutoplay_'
-    );
-    setControlsStateSpy = env.sandbox.spy(
-      CarouselControls.prototype,
-      'setControlsState'
     );
     hintControlsSpy = env.sandbox.spy(
       CarouselControls.prototype,
@@ -90,10 +85,8 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     );
 
     carouselLoopOnly.buildCallback();
-
     expect(carouselLoopOnly.shouldLoop_).to.be.true;
     expect(carouselLoopOnly.shouldAutoplay_).to.be.false;
-    expect(setControlsStateSpy).to.be.calledOnce;
 
     const carouselAutoplayOnly = new TestCarousel(
       getElement({
@@ -106,7 +99,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselAutoplayOnly.shouldLoop_).to.be.true;
     expect(carouselAutoplayOnly.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.been.called;
-    expect(setControlsStateSpy).to.have.callCount(2);
 
     const carouselAutoplayWithLoop = new TestCarousel(
       getElement({
@@ -120,7 +112,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselAutoplayWithLoop.shouldLoop_).to.be.true;
     expect(carouselAutoplayWithLoop.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.callCount(2);
-    expect(setControlsStateSpy).to.have.callCount(3);
   });
 
   it('should handle viewportCallback when in viewport', () => {
@@ -338,13 +329,5 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
       satisfiesTrust: () => true,
     });
     expect(carousel.shouldAutoplay_).to.be.true;
-  });
-
-  describe('buildDom', () => {
-    it('buildDom and buildCallback should result in the same outerHTML', async () => {});
-    it('buildCallback should assign ivars even when server rendered', async () => {});
-
-    it('buildDom should throw if invalid server rendered dom', async () => {});
-    it('buildDom should not modify dom for server rendered element', async () => {});
   });
 });
