@@ -254,7 +254,6 @@ describes.fakeWin(
     let configElement, elementOn, elementOff, elementError;
     let cidMock;
     let adapterMock;
-    let performanceMock;
     let service;
 
     beforeEach(() => {
@@ -335,8 +334,6 @@ describes.fakeWin(
 
       service.analyticsEvent_ = env.sandbox.spy();
       service.sources_[0].analyticsEvent_ = env.sandbox.spy();
-      performanceMock = env.sandbox.mock(service.performance_);
-      performanceMock.expects('onload_').atLeast(0);
     });
 
     afterEach(() => {
@@ -353,7 +350,6 @@ describes.fakeWin(
         elementError.parentElement.removeChild(elementError);
       }
       adapterMock.verify();
-      performanceMock.verify();
     });
 
     function expectGetReaderId(result) {
@@ -1742,7 +1738,6 @@ describes.fakeWin(
     let configElement, elementOnBeer, elementOnBeerOrDonuts, elementError;
     let cidMock;
     let adapterBeerMock, adapterDonutsMock;
-    let performanceMock;
     let service;
     let sourceBeer, sourceDonuts;
 
@@ -1844,8 +1839,6 @@ describes.fakeWin(
       service.analyticsEvent_ = env.sandbox.spy();
       sourceBeer.analyticsEvent_ = env.sandbox.spy();
       sourceDonuts.analyticsEvent_ = env.sandbox.spy();
-      performanceMock = env.sandbox.mock(service.performance_);
-      performanceMock.expects('onload_').atLeast(0);
     });
 
     afterEach(() => {
@@ -1863,7 +1856,6 @@ describes.fakeWin(
       }
       adapterBeerMock.verify();
       adapterDonutsMock.verify();
-      performanceMock.verify();
     });
 
     function expectGetReaderId(result) {

@@ -275,10 +275,6 @@ export class Performance {
     // This is for redundancy. Call flush on any visibility change.
     this.ampdoc_.onVisibilityChanged(this.flush.bind(this));
 
-    // Does not need to wait for messaging ready since it will be queued
-    // if it isn't ready.
-    this.measureUserPerceivedVisualCompletenessTime_();
-
     // Can be null which would mean this AMP page is not embedded
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
