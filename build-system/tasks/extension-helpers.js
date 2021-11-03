@@ -498,10 +498,14 @@ async function buildExtension(
     return;
   }
 
-  if (options.bento) {
-    await buildBentoExtensionJs(extDir, name, options);
+  try {
+    if (options.bento) {
+      await buildBentoExtensionJs(extDir, name, options);
+    }
+    await buildExtensionJs(extDir, name, options);
+  } catch (e) {
+    console.error(e);
   }
-  await buildExtensionJs(extDir, name, options);
 }
 
 /**

@@ -139,8 +139,10 @@ async function compileCss(options = {}) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }
   const buildOptions = {compileOnlyCss: true};
-  await buildExtensions(buildOptions);
-  await buildBentoComponents(buildOptions);
+  await Promise.all([
+    buildExtensions(buildOptions),
+    buildBentoComponents(buildOptions),
+  ]);
   endBuildStep('Recompiled all CSS files into', 'build/', startTime);
 }
 

@@ -81,7 +81,7 @@ function getComponentsToBuild(preBuild = false) {
     !argv.extensions_from &&
     !argv.core_runtime_only
   ) {
-    const allComponents = Object.values(components).map(c => c.name);
+    const allComponents = Object.values(components).map((c) => c.name);
     componentsToBuild = dedupe(componentsToBuild.concat(allComponents));
   }
   return componentsToBuild;
@@ -91,7 +91,7 @@ function getComponentsToBuild(preBuild = false) {
  * Watches for non-JS changes within an extensions directory to trigger
  * recompilation.
  *
- * @param {string} compoentsDir
+ * @param {string} componentsDir
  * @param {string} name
  * @param {string} version
  * @param {string} latestVersion
@@ -100,7 +100,7 @@ function getComponentsToBuild(preBuild = false) {
  * @return {Promise<void>}
  */
 async function watchComponent(
-  compoentsDir,
+  componentsDir,
   name,
   version,
   latestVersion,
@@ -119,8 +119,8 @@ async function watchComponent(
     });
   }
 
-  const cssDeps = `${compoentsDir}/**/*.css`;
-  const jisonDeps = `${compoentsDir}/**/*.jison`;
+  const cssDeps = `${componentsDir}/**/*.css`;
+  const jisonDeps = `${componentsDir}/**/*.jison`;
   const ignored = /dist/; //should not watch npm dist folders.
   watch([cssDeps, jisonDeps], {ignored}).on(
     'change',
@@ -174,7 +174,9 @@ async function buildComponent(
   }
 
   if (hasCss) {
-    mkdirSync('build/css', {recursive: true});
+    if (!existsSync('build/css')) {
+      mkdirSync('build/css', {recursive: true});
+    }
     await buildExtensionCss(componentsDir, name, version, options);
     if (options.compileOnlyCss) {
       return;

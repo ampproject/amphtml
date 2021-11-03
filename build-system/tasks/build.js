@@ -50,8 +50,7 @@ async function build() {
   } else {
     await compileAllJs(options);
   }
-  await buildExtensions(options);
-  await buildBentoComponents(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
   if (!argv.core_runtime_only) {
     await buildVendorConfigs(options);

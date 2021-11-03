@@ -460,7 +460,7 @@ module.exports = {
       'files': [
         'src/preact/**',
         'extensions/**/1.0/**',
-        'src/bento/components/**',
+        'src/bento/**',
         '**/storybook/**',
       ],
       'rules': {'local/preact-preferred-props': 2},

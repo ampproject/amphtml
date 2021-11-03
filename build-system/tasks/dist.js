@@ -132,8 +132,7 @@ async function dist() {
   }
 
   // This step internally parses the various extension* flags.
-  await buildExtensions(options);
-  await buildBentoComponents(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
   // This step is to be run only during a full `amp dist`.
   if (

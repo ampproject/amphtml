@@ -1,3 +1,5 @@
+import {JwplayerToDom, makeJwplayerIframeSrc} from '#bento/apis/jwplayer-api';
+
 import {dispatchCustomEvent} from '#core/dom';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
@@ -6,10 +8,6 @@ import * as Preact from '#preact';
 import {useCallback, useMemo, useRef} from '#preact';
 import {forwardRef} from '#preact/compat';
 
-import {
-  JwplayerToDom,
-  makeJwplayerIframeSrc,
-} from '../../../../../extensions/amp-jwplayer/1.0/jwplayer-api';
 import {VideoIframe} from '../../../../../extensions/amp-video/1.0/video-iframe';
 import {isJsonOrObj, objOrParseJson} from '../../../../iframe-video';
 

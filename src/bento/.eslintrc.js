@@ -7,7 +7,7 @@ module.exports = {
   'overrides': [
     {
       'files': EXCLUDED_EXTENSIONS.map((ext) => `./${ext}/**/*.js`),
-      'rules': {'import/order': 0},
+      'rules': {'import/order': 2},
     },
   ],
 };
