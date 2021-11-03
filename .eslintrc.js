@@ -356,6 +356,7 @@ module.exports = {
       'rules': {
         'require-jsdoc': 0,
         'local/always-call-chai-methods': 2,
+        'local/enums': 0,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
         'local/no-function-async': 0,
