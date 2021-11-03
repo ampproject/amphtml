@@ -551,6 +551,7 @@ async function minify(code, map) {
       keep_quoted_props: true,
     },
     sourceMap: {content: map},
+    toplevel: true,
     module: !!argv.esm,
     nameCache,
   };
