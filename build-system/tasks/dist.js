@@ -14,6 +14,9 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {
+  collectMangleableSubstrings,
+} = require('../compile/mangleable-substrings');
+const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -93,6 +96,7 @@ async function runPreDistSteps(options) {
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
+  await collectMangleableSubstrings();
   displayLifecycleDebugging();
 }
 
