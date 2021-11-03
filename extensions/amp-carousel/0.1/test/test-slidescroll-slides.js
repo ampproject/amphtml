@@ -4,9 +4,6 @@ import {CarouselControls} from '../carousel-controls';
 describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
   let win, doc;
   let viewportCallbackSpy;
-  let hasPrevSpy;
-  let hasNextSpy;
-
   let setupAutoplaySpy;
   let hintControlsSpy;
   let autoplaySpy;
@@ -16,8 +13,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     win = env.win;
     doc = win.document;
     viewportCallbackSpy = env.sandbox.spy();
-    hasPrevSpy = env.sandbox.spy();
-    hasNextSpy = env.sandbox.spy();
     setupAutoplaySpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
       'setupAutoplay_'
@@ -64,16 +59,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     /** @override */
     isLoopingEligible() {
       return true;
-    }
-
-    /** @override */
-    hasPrev() {
-      hasPrevSpy();
-    }
-
-    /** @override */
-    hasNext() {
-      hasNextSpy();
     }
   }
 
