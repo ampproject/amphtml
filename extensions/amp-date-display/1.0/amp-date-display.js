@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/amp-date-display/1.0/base-element';
+
 import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
@@ -5,8 +7,6 @@ import {isExperimentOn} from '#experiments';
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
