@@ -294,13 +294,15 @@ export function buildDom(element) {
  * @return {string} The default title to use for the next button.
  * @param {{index?: string, total?: string}} options - The default title to use for the pevious button.
  */
-export function getNextButtonTitle(element, {index, total} = {}) {
+export function getNextButtonTitle(element, options = {}) {
   const prefix =
     element.getAttribute('data-next-button-aria-label') ||
     'Next item in carousel';
   if (getType(element) === 'scroll') {
     return prefix;
   }
+
+  const {index, total} = options;
   return getVerboseButtonTitle(element, {prefix, index, total});
 }
 
@@ -309,13 +311,15 @@ export function getNextButtonTitle(element, {index, total} = {}) {
  * @param {{index?: string, total?: string}} options - The default title to use for the pevious button.
  * @return {string} The default title to use for the pevious button.
  */
-export function getPrevButtonTitle(element, {index, total} = {}) {
+export function getPrevButtonTitle(element, options) {
   const prefix =
     element.getAttribute('data-prev-button-aria-label') ||
     'Previous item in carousel';
   if (getType(element) === 'scroll') {
     return prefix;
   }
+
+  const {index, total} = options;
   return getVerboseButtonTitle(element, {prefix, index, total});
 }
 
