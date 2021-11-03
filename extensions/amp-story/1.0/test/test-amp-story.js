@@ -787,6 +787,19 @@ describes.realWin(
             true
           );
         });
+
+        it('should add previous visited attribute', async () => {
+          env.sandbox
+            .stub(utils, 'setAttributeInMutate')
+            .callsFake((el, attr) => el.element.setAttribute(attr, ''));
+
+          await createStoryWithPages(2, ['page-0', 'page-1']);
+          const pages = story.element.querySelectorAll('amp-story-page');
+          const page0 = pages[0];
+          await story.layoutCallback();
+          await story.switchTo_('page-1');
+          expect(page0.hasAttribute('i-amphtml-visited')).to.be.true;
+        });
       });
 
       describe('amp-story audio', () => {
@@ -1601,6 +1614,19 @@ describes.realWin(
 
         await story.layoutCallback();
         expect(story.activePage_.element.id).to.equal('cover');
+      });
+
+      it('should mark the first active page as initial', async () => {
+        win.location.hash = 'page=page-1';
+        const pages = await createStoryWithPages(4, [
+          'cover',
+          'page-1',
+          'page-2',
+          'page-3',
+        ]);
+
+        await story.layoutCallback();
+        expect(pages[1]).to.have.attribute('i-amphtml-initial');
       });
 
       it('should update browser history with the story navigation path', async () => {
