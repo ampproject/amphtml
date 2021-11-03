@@ -462,10 +462,7 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
-        if (
-          tagName === 'amp-story-page-attachment' ||
-          tagName === 'amp-story-page-outlink'
-        ) {
+        if (el.classList.contains('amp-story-draggable-drawer-root')) {
           shouldHandleEvent = false;
           return true;
         }

@@ -3,7 +3,7 @@
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
+} = require('../../../build-system/tasks/visual-diff/verifiers');
 
 module.exports = {
   'tapping on a clickable anchor should show the tooltip': async (
