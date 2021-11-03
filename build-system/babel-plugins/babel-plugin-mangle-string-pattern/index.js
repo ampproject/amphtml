@@ -3,7 +3,7 @@ const {basename, dirname} = require('path');
 const {outputJsonSync, readJsonSync} = require('fs-extra');
 
 // Use our own charset instead of base62 since HTML classnames are case insensitive
-const CHARSET = '0123456789abcdefghijklmnopqrstuvwxyz_'.split('');
+const CHARSET = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
 
 /**
  * @param {number} int
@@ -23,7 +23,7 @@ function encode(int) {
 }
 
 const pattern = /i-amphtml-story-[a-zA-Z0-9-]*[a-zA-Z0-9]/g;
-const prefix = 'i-amphtml-_';
+const prefix = 'i-amphtml--';
 
 // TODO(alanorozco): These should be prefixed on source. They're a ~250 B delta.
 const specificPattern = new RegExp(
