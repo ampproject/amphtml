@@ -17,8 +17,6 @@ export const SANDBOX_AVAILABLE_VARS = {
   'CANONICAL_URL': true,
   'DOCUMENT_CHARSET': true,
   'FIRST_CONTENTFUL_PAINT': true,
-  'FIRST_VIEWPORT_READY': true,
-  'MAKE_BODY_VISIBLE': true,
   'RANDOM': true,
   'SCREEN_COLOR_DEPTH': true,
   'SCREEN_HEIGHT': true,

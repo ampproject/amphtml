@@ -5,7 +5,6 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {TickLabel} from '#core/constants/enums';
 import {whenDocumentComplete} from '#core/document/ready';
 import * as mode from '#core/mode';
 
@@ -82,7 +81,6 @@ function bootstrap(ampdoc, perf) {
     /* makes the body visible */ true
   );
   startupChunk(self.document, function finalTick() {
-    perf.tick(TickLabel.END_INSTALL_STYLES);
     Services.resourcesForDoc(ampdoc).ampInitComplete();
     // TODO(erwinm): move invocation of the `flush` method when we have the
     // new ticks in place to batch the ticks properly.
@@ -125,7 +123,6 @@ startupChunk(self.document, function initial() {
     perf.addEnabledExperiment('esm');
   }
   fontStylesheetTimeout(self);
-  perf.tick(TickLabel.INSTALL_STYLES);
   if (mode.isEsm()) {
     bootstrap(ampdoc, perf);
     return;

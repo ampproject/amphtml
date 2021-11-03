@@ -1,5 +1,4 @@
 import {CommonSignals} from '#core/constants/common-signals';
-import {TickLabel} from '#core/constants/enums';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
@@ -214,11 +213,6 @@ export function makeBodyVisible(doc) {
         const resources = Services.resourcesForDoc(doc.documentElement);
         resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
       }
-      try {
-        const perf = Services.performanceFor(win);
-        perf.tick(TickLabel.MAKE_BODY_VISIBLE);
-        perf.flush();
-      } catch (e) {}
     });
 }
 

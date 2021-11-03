@@ -328,14 +328,6 @@ export class VariableService {
             Services.performanceFor(this.ampdoc_.win).getMetric(
               TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
             ),
-          'FIRST_VIEWPORT_READY': () =>
-            Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_VIEWPORT_READY
-            ),
-          'MAKE_BODY_VISIBLE': () =>
-            Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.MAKE_BODY_VISIBLE
-            ),
           'LARGEST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
               TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE

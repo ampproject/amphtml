@@ -530,14 +530,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       return check('FIRST_CONTENTFUL_PAINT', '1');
     });
 
-    it('should replace FIRST_VIEWPORT_READY', () => {
-      return check('FIRST_VIEWPORT_READY', '1');
-    });
-
-    it('should replace MAKE_BODY_VISIBLE', () => {
-      return check('MAKE_BODY_VISIBLE', '1');
-    });
-
     it('should replace LARGEST_CONTENTFUL_PAINT', () => {
       return check('LARGEST_CONTENTFUL_PAINT', '1');
     });

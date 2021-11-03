@@ -41,9 +41,6 @@ describes.sandboxed
             "cid": "\${clientId(_cid)}",
             "loadend": "\${navTiming(loadEventEnd)}",
             "default": "\$DEFAULT( , test)",
-            "fcp": "FIRST_CONTENTFUL_PAINT",
-            "fvr": "FIRST_VIEWPORT_READY",
-            "mbv": "MAKE_BODY_VISIBLE",
             "cookie": "\${cookie(test-cookie)}"
           }
         }
@@ -73,8 +70,6 @@ describes.sandboxed
             if (window.PerformancePaintTiming) {
               expect(q['fcp']).to.not.be.null;
             }
-            expect(q['fvr']).to.not.be.null;
-            expect(q['mbv']).to.not.be.null;
             expect(
               req.headers.referer,
               'should keep referrer if no referrerpolicy specified'
@@ -118,8 +113,6 @@ describes.sandboxed
             "loadend": "\${navTiming(loadEventEnd)}",
             "default": "\$DEFAULT( , test)",
             "fcp": "FIRST_CONTENTFUL_PAINT",
-            "fvr": "FIRST_VIEWPORT_READY",
-            "mbv": "MAKE_BODY_VISIBLE",
             "cookie": "\${cookie(test-cookie)}"
           }
         }
@@ -150,8 +143,6 @@ describes.sandboxed
             if (window.PerformancePaintTiming) {
               expect(q['fcp']).to.not.be.null;
             }
-            expect(q['fvr']).to.not.be.null;
-            expect(q['mbv']).to.not.be.null;
             expect(
               req.headers.referer,
               'should keep referrer if no referrerpolicy specified'
