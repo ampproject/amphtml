@@ -24,11 +24,6 @@
  * 🚫 No dangerouslySetInnerHTML
  *   - You should not do this anyway.
  *
- * 🚫 No SVG <foreignObject>
- *   - This tag is rather obscure. You should be able to restructure your tree.
- *     If you absolutely need it, get in touch with `@alanorozco` to consider
- *     enabling support.
- *
  * TODO(https://go.amp.dev/issue/36679): Lint these unsupported features.
  */
 import {devAssert} from '#core/assert';
@@ -87,14 +82,14 @@ export function createElement(tag, props, ...children) {
   if (typeof tag !== 'string') {
     return tag({...props, children});
   }
-  // We expect the __svg magic prop to be set during compilation time.
+  // We expect all SVG-related tags to have `xmlns` set during build time.
   // See babel-plugin-dom-jsx-svg-namespace
-  const isSvg = props?.__svg;
-  if (isSvg) {
-    delete props['__svg'];
+  const xmlns = props?.['xmlns'];
+  if (xmlns) {
+    delete props['xmlns'];
   }
-  const element = isSvg
-    ? self.document.createElementNS('http://www.w3.org/2000/svg', tag)
+  const element = xmlns
+    ? self.document.createElementNS(xmlns, tag)
     : self.document.createElement(tag);
   appendChild(element, children);
   if (props) {

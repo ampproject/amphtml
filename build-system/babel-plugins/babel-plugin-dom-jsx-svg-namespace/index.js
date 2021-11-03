@@ -2,8 +2,8 @@
  * @fileoverview
  * SVG Elements must be especially created with createElementNS.
  *
- * This transforms JSX elements with SVG namespaces so that they include an
- * '__svg' magic prop in order to create the DOM nodes correctly.
+ * This transforms SVG-related JSX elements in order to always include an
+ * 'xmlns' prop that's used to create the DOM nodes correctly.
  *
  * This prop is consumed by core/dom/jsx. We ignore files that do not import
  * this module.
@@ -90,14 +90,18 @@ module.exports = function (babel) {
           return;
         }
         const {name} = path.node.name;
-        if (name === 'foreignObject') {
-          throw path.buildCodeFrameError(
-            '<foreignObject> is not supported. See src/core/dom/jsx.js'
-          );
+        if (!svgTags.has(name)) {
+          return;
         }
-        if (svgTags.has(name)) {
-          path.node.attributes.push(t.jsxAttribute(t.jsxIdentifier('__svg')));
+        if (path.node.attributes.find((attr) => attr.name.name === 'xmlns')) {
+          return;
         }
+        path.node.attributes.push(
+          t.jsxAttribute(
+            t.jsxIdentifier('xmlns'),
+            t.stringLiteral('http://www.w3.org/2000/svg')
+          )
+        );
       },
     },
   };
