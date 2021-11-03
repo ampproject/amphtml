@@ -89,8 +89,7 @@ module.exports = function (babel) {
         if (!isCoreDomJsx) {
           return;
         }
-        const {name} = path.node.name;
-        if (!svgTags.has(name)) {
+        if (!svgTags.has(path.node.name.name)) {
           return;
         }
         if (path.node.attributes.find((attr) => attr.name.name === 'xmlns')) {
