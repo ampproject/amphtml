@@ -2,7 +2,7 @@ import {Keys} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {toggleAttribute} from '#core/dom';
 import {getWin} from '#core/window';
-import {ClassNames} from './build-dom';
+import {ClassNames, setButtonState} from './build-dom';
 
 /**
  * @type {(dir:-1|1, animate: boolean, opt_autoplay?:boolean) => void}
@@ -14,13 +14,11 @@ export class CarouselControls {
    * @param {{
    *  element: !AmpElement,
    *  go: !GoFunctionDef,
-   *  hasPrev: () => boolean,
-   *  hasNext: () => boolean,
    *  prevButton: !HTMLDivElement,
    *  nextButton: !HTMLDivElement,
    * }} param0
    */
-  constructor({element, go, hasNext, hasPrev, nextButton, prevButton}) {
+  constructor({element, go, nextButton, prevButton}) {
     /** @private @type {!AmpElement} */
     this.element_ = element;
 
@@ -39,21 +37,14 @@ export class CarouselControls {
     /** @private {boolean} */
     this.showControls_ = false;
 
-    /** @private {() => boolean} */
-    this.hasNext_ = hasNext;
-
-    /** @private {() => boolean} */
-    this.hasPrev_ = hasPrev;
-
-    this.initialize_();
+    this.setupBehaviors_();
   }
 
   /**
    * Runs side effects to initialize controls.
    * Meant to be called during carousel's buildCallback().
    */
-  initialize_() {
-    this.setControlsState();
+  setupBehaviors_() {
     this.setupButtonInteraction(this.prevButton_, () => this.handlePrev());
     this.setupButtonInteraction(this.nextButton_, () => this.handleNext());
 
@@ -94,14 +85,11 @@ export class CarouselControls {
 
   /**
    * Sets the previous and next button visual states.
+   * @param {{prev: boolean, next: boolean}} param0
    */
-  setControlsState() {
-    this.prevButton_.classList.toggle('amp-disabled', !this.hasPrev_());
-    this.prevButton_.setAttribute('aria-disabled', String(!this.hasPrev_()));
-    this.nextButton_.classList.toggle('amp-disabled', !this.hasNext_());
-    this.nextButton_.setAttribute('aria-disabled', String(!this.hasNext_()));
-    this.prevButton_.tabIndex = this.hasPrev_() ? 0 : -1;
-    this.nextButton_.tabIndex = this.hasNext_() ? 0 : -1;
+  setControlsState({next, prev}) {
+    setButtonState(this.prevButton_, prev);
+    setButtonState(this.nextButton_, next);
   }
 
   /**

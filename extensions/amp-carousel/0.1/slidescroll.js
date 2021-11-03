@@ -20,7 +20,12 @@ import {
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {triggerAnalyticsEvent} from '#utils/analytics';
-import {buildDom, getNextButtonTitle, getPrevButtonTitle} from './build-dom';
+import {
+  ClassNames,
+  buildDom,
+  getNextButtonTitle,
+  getPrevButtonTitle,
+} from './build-dom';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
@@ -185,7 +190,6 @@ export class AmpSlideScroll extends AMP.BaseElement {
   setupBehavior_() {
     this.hasLoop_ = this.element.hasAttribute('loop');
     this.hasAutoplay_ = this.element.hasAttribute('autoplay');
-    this.noOfSlides_ = this.slides_.length;
     this.shouldLoop_ = this.hasLoop_ && this.isLoopingEligible();
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
@@ -231,9 +235,11 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     // https://bugs.webkit.org/show_bug.cgi?id=169800
-    if (this.shouldDisableCssSnap_) {
-      this.slidesContainer_.classList.add('i-amphtml-slidescroll-no-snap');
-    }
+    this.slidesContainer_.classList.toggle(
+      ClassNames.SLIDES_CONTAINER_NOSNAP,
+      this.shouldDisableCssSnap_
+    );
+
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
       const start = this.win.document.createElement('div');
@@ -410,12 +416,11 @@ export class AmpSlideScroll extends AMP.BaseElement {
     this.slides_ = slides;
     this.slidesContainer_ = slidesContainer;
     this.slideWrappers_ = slideWrappers;
+    this.noOfSlides_ = this.slides_.length;
 
     this.controls_ = new CarouselControls({
       element: this.element,
       go: this.go.bind(this),
-      hasPrev: () => this.hasPrev(),
-      hasNext: () => this.hasNext(),
       nextButton,
       prevButton,
     });
@@ -673,44 +678,24 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return newIndex;
   }
 
-  /**
-   * A format string for the button label. Should be a string, containing two
-   * placeholders of "%s", where the index and total count will go.
-   * @return {string}
-   * @private
-   */
-  getButtonSuffixFormat_() {
-    return (
-      this.element.getAttribute('data-button-count-format') || '(%s of %s)'
-    );
-  }
-
-  /**
-   * @param {number} buttonIndex The index that the button will take the user
-   *    to.
-   * @return {string} The formatted suffix for the button title.
-   */
-  getButtonTitleSuffix_(buttonIndex) {
-    const index = String(buttonIndex + 1);
-    const count = String(this.noOfSlides_);
-    return (
-      ' ' +
-      this.getButtonSuffixFormat_().replace('%s', index).replace('%s', count)
-    );
-  }
-
   /** @return {string} */
   getPrevButtonTitle() {
     const prevIndex = this.getPrevIndex_(this.slideIndex_);
-    const index = prevIndex == null ? 0 : prevIndex;
-    return getPrevButtonTitle(this.element) + this.getButtonTitleSuffix_(index);
+    const index = (prevIndex == null ? 0 : prevIndex) + 1;
+    return getPrevButtonTitle(this.element, {
+      index: String(index),
+      total: String(this.noOfSlides_),
+    });
   }
 
   /** @return {string} */
   getNextButtonTitle() {
     const nextIndex = this.getNextIndex_(this.slideIndex_);
-    const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
-    return getNextButtonTitle(this.element) + this.getButtonTitleSuffix_(index);
+    const index = (nextIndex == null ? this.noOfSlides_ - 1 : nextIndex) + 1;
+    return getNextButtonTitle(this.element, {
+      index: String(index),
+      total: String(this.noOfSlides_),
+    });
   }
 
   /**
@@ -854,7 +839,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
       }
     }
     this.hideRestOfTheSlides_(showIndexArr);
-    this.controls_?.setControlsState();
+    this.controls_?.setControlsState({
+      prev: this.hasPrev(),
+      next: this.hasNext(),
+    });
     this.controls_?.updateButtonTitles(
       this.getPrevButtonTitle(),
       this.getNextButtonTitle()

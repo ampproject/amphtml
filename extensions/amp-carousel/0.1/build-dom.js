@@ -21,6 +21,7 @@ export const ClassNames = {
   SLIDESCROLL_CAROUSEL: 'i-amphtml-slidescroll',
   SLIDE_WRAPPER: 'i-amphtml-slide-item',
   SLIDES_CONTAINER: 'i-amphtml-slides-container',
+  SLIDES_CONTAINER_NOSNAP: 'i-amphtml-slidescroll-no-snap',
 
   // Scrollable Carousel
   SCROLLABLE_CONTAINER: 'i-amphtml-scrollable-carousel-container',
@@ -42,10 +43,10 @@ function assertDomQueryResults(...elements) {
 /**
  * Builds a carousel button for next/prev.
  * @param {!Element} element
- * @param {{className: string, title: string}} options
+ * @param {{className: string, title: string, enabled: boolean}} options
  * @return {?HTMLDivElement}
  */
-function buildButton(element, {className, title}) {
+function buildButton(element, {className, enabled, title}) {
   /**
    * In scrollable carousel, the next/previous buttons add no functionality
    * for screen readers as scrollable carousel is just a horizontally
@@ -56,23 +57,36 @@ function buildButton(element, {className, title}) {
   const ariaRole = getType(element) === 'scroll' ? 'presentation' : 'button';
 
   const button = element.ownerDocument.createElement('div');
-  button.classList.add(ClassNames.BUTTON, className);
   button.setAttribute('tabindex', '0');
+  button.classList.add(ClassNames.BUTTON, className);
   button.setAttribute('role', ariaRole);
   button.setAttribute('title', title);
+  setButtonState(button, enabled);
   element.appendChild(button);
   return button;
 }
 
 /**
+ *
+ * @param {!HTMLDivElement} button
+ * @param {boolean} enabled
+ */
+export function setButtonState(button, enabled) {
+  button.classList.toggle('amp-disabled', !enabled);
+  button.setAttribute('aria-disabled', String(!enabled));
+  button.setAttribute('tabindex', String(enabled ? 0 : -1));
+}
+
+/**
  * Builds the DOM necessary for amp-carousel.
  * @param {!Element} element
+ * @param {number} slideCount
  * @return {{
  *   prevButton: !HTMLDivElement,
  *   nextButton: !HTMLDivElement
  * }}
  */
-export function buildCarouselControls(element) {
+export function buildCarouselControls(element, slideCount) {
   if (isServerRendered(element)) {
     return queryCarouselControlsDom(element);
   }
@@ -82,13 +96,24 @@ export function buildCarouselControls(element) {
     element.classList.add(ClassNames.HAS_CONTROL);
   }
 
+  const hasLoop = element.hasAttribute('loop');
+  const prevIndex = hasLoop ? slideCount : 0;
+  const nextIndex = slideCount > 1 ? 2 : hasLoop ? 0 : 1;
   const prevButton = buildButton(element, {
     className: ClassNames.PREV_BUTTON,
-    title: getPrevButtonTitle(element),
+    title: getPrevButtonTitle(element, {
+      index: String(prevIndex),
+      total: String(slideCount),
+    }),
+    enabled: element.hasAttribute('loop'),
   });
   const nextButton = buildButton(element, {
     className: ClassNames.NEXT_BUTTON,
-    title: getNextButtonTitle(element),
+    title: getNextButtonTitle(element, {
+      index: String(nextIndex),
+      total: String(slideCount),
+    }),
+    enabled: slideCount > 1,
   });
   return {prevButton, nextButton};
 }
@@ -184,7 +209,10 @@ function buildSlideScroll(element) {
   const slidesContainer = doc.createElement('div');
   // Focusable container makes it possible to fully consume Arrow key events.
   slidesContainer.setAttribute('tabindex', '-1');
-  slidesContainer.classList.add(ClassNames.SLIDES_CONTAINER);
+  slidesContainer.classList.add(
+    ClassNames.SLIDES_CONTAINER,
+    ClassNames.SLIDES_CONTAINER_NOSNAP
+  );
   // Let screen reader know that this is a live area and changes
   // to it (such after pressing next) should be announced to the
   // user.
@@ -251,35 +279,65 @@ function querySlideScrollCarousel(element) {
  */
 export function buildDom(element) {
   const type = getType(element);
-  const specificDom =
+  const slideCount = realChildElements(element).length;
+  const slidesDom =
     type == 'slides'
       ? buildSlideScroll(element)
       : buildScrollableCarousel(element);
-  const controlsDom = buildCarouselControls(element);
+  const controlsDom = buildCarouselControls(element, slideCount);
 
-  return {...controlsDom, ...specificDom};
+  return {...controlsDom, ...slidesDom};
 }
 
 /**
  * @param {!Element} element
  * @return {string} The default title to use for the next button.
+ * @param {{index?: string, total?: string}} options - The default title to use for the pevious button.
  */
-export function getNextButtonTitle(element) {
-  return (
+export function getNextButtonTitle(element, {index, total} = {}) {
+  const prefix =
     element.getAttribute('data-next-button-aria-label') ||
-    'Next item in carousel'
-  );
+    'Next item in carousel';
+  if (getType(element) === 'scroll') {
+    return prefix;
+  }
+  return getVerboseButtonTitle(element, {prefix, index, total});
 }
 
 /**
  * @param {!Element} element
+ * @param {{index?: string, total?: string}} options - The default title to use for the pevious button.
  * @return {string} The default title to use for the pevious button.
  */
-export function getPrevButtonTitle(element) {
-  return (
+export function getPrevButtonTitle(element, {index, total} = {}) {
+  const prefix =
     element.getAttribute('data-prev-button-aria-label') ||
-    'Previous item in carousel'
-  );
+    'Previous item in carousel';
+  if (getType(element) === 'scroll') {
+    return prefix;
+  }
+  return getVerboseButtonTitle(element, {prefix, index, total});
+}
+
+/**
+ * Returns the title for a next or prev button.
+ * Format: "Next item in carousel (X of Y)".
+ *
+ * @param {*} element
+ * @param {{prefix: string, index: string, total:string}} param1
+ * @return {string}
+ */
+function getVerboseButtonTitle(element, {index, prefix, total}) {
+  /**
+   * A format string for the button label. Should be a string, containing two
+   * placeholders of "%s", where the index and total count will go.
+   * @type {string}
+   */
+  const suffixFormat =
+    element.getAttribute('data-button-count-format') || '(%s of %s)';
+  const suffix = suffixFormat.replace('%s', index).replace('%s', total);
+
+  return `${prefix} ${suffix}`;
 }
 
 /**
