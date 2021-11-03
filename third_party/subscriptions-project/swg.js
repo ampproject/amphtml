@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.191 */
+/** Version: 0.1.22.192 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -193,6 +193,59 @@ class AccountCreationRequest {
    */
   label() {
     return 'AccountCreationRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class ActionRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?ActionType} */
+    this.action_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?ActionType}
+   */
+  getAction() {
+    return this.action_;
+  }
+
+  /**
+   * @param {!ActionType} value
+   */
+  setAction(value) {
+    this.action_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.action_, // field 1 - action
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'ActionRequest';
   }
 }
 
@@ -1854,6 +1907,7 @@ class ViewSubscriptionsResponse {
 
 const PROTO_MAP = {
   'AccountCreationRequest': AccountCreationRequest,
+  'ActionRequest': ActionRequest,
   'AlreadySubscribedResponse': AlreadySubscribedResponse,
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
@@ -4757,7 +4811,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.191',
+    '_client': 'SwG 0.1.22.192',
   });
 }
 
@@ -6061,7 +6115,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.191',
+        '_client': 'SwG 0.1.22.192',
         'supportsEventManager': true,
       },
       args || {}
@@ -6940,7 +6994,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.191');
+    context.setClientVersion('SwG 0.1.22.192');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -10898,6 +10952,9 @@ class EntitlementsManager {
     /** @private {boolean} */
     this.blockNextNotification_ = false;
 
+    /** @private {boolean} */
+    this.blockNextToast_ = false;
+
     /**
      * String containing encoded metering parameters currently.
      * We may expand this to contain more information in the future.
@@ -11238,6 +11295,12 @@ class EntitlementsManager {
 
   /**
    */
+  blockNextToast() {
+    this.blockNextToast_ = true;
+  }
+
+  /**
+   */
   unblockNextNotification() {
     this.blockNextNotification_ = false;
   }
@@ -11369,6 +11432,9 @@ class EntitlementsManager {
     // TODO(dvoytenko): what's the right action when pay flow was canceled?
     const blockNotification = this.blockNextNotification_;
     this.blockNextNotification_ = false;
+    // Let people specifically block toasts too, without blocking notifications.
+    const blockToast = this.blockNextToast_;
+    this.blockNextToast_ = false;
     if (blockNotification) {
       return;
     }
@@ -11383,6 +11449,10 @@ class EntitlementsManager {
       this.deps_
         .eventManager()
         .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
+      return;
+    }
+
+    if (blockToast) {
       return;
     }
     this.maybeShowToast_(entitlement);
@@ -16918,7 +16988,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgb(0 0 0/20%),0 2px 2px 0 rgb(0 0 0/14%),0 1px 5px 0 rgb(0 0 0/12%)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.

@@ -47,7 +47,7 @@ jobs:
         with:
           check-latest: true
           registry-url: https://registry.npmjs.org
-          node-version: '16'
+          node-version: lts/*
       - name: Install dependencies
         run: bash ./.github/workflows/install_dependencies.sh
       - name: Get latest scripts

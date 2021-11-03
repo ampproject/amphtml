@@ -12,7 +12,8 @@ jobs:
     steps:
       - uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          check-latest: true
+          node-version: lts/*
       - uses: actions/checkout@v2
       - name: Add progress comment to cherry-pick issue for Stable and LTS
         if: github.event_name == 'issues' && github.event.action == 'opened'
