@@ -41,6 +41,7 @@ const svgTags = new Set([
   'feTile',
   'feTurbulence',
   'filter',
+  'foreignObject',
   'g',
   'image',
   'line',
