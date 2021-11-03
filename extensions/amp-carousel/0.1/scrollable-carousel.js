@@ -111,8 +111,8 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
     this.controls_.setControlsState({
-      prev: this.hasPrev(),
-      next: this.hasNext(),
+      prev: this.hasPrev_(),
+      next: this.hasNext_(),
     });
     return Promise.resolve();
   }
@@ -296,8 +296,8 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.oldPos_ = pos;
     this.pos_ = pos;
     this.controls_.setControlsState({
-      prev: this.hasPrev(),
-      next: this.hasNext(),
+      prev: this.hasPrev_(),
+      next: this.hasNext_(),
     });
   }
 
@@ -382,13 +382,19 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     }
   }
 
-  /** @return  {boolean} */
-  hasPrev() {
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasPrev_() {
     return this.pos_ != 0;
   }
 
-  /** @return  {boolean} */
-  hasNext() {
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasNext_() {
     const containerWidth = this.element./*OK*/ offsetWidth;
     const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);

@@ -128,10 +128,10 @@ export function buildCarouselControls(element, slideCount) {
  */
 export function queryCarouselControlsDom(element) {
   const prevButton = /** @type {!HTMLDivElement} */ (
-    element.querySelector(`./${escapeCssSelectorIdent(ClassNames.PREV_BUTTON)}`)
+    element.querySelector(`.${escapeCssSelectorIdent(ClassNames.PREV_BUTTON)}`)
   );
   const nextButton = /** @type {!HTMLDivElement} */ (
-    element.querySelector(`./${escapeCssSelectorIdent(ClassNames.NEXT_BUTTON)}`)
+    element.querySelector(`.${escapeCssSelectorIdent(ClassNames.NEXT_BUTTON)}`)
   );
   assertDomQueryResults(prevButton, nextButton);
   return {prevButton, nextButton};
@@ -177,12 +177,12 @@ function buildScrollableCarousel(element) {
 function queryScrollableCarousel(element) {
   const container = /** @type {!HTMLDivElement} */ (
     element.querySelector(
-      `./${escapeCssSelectorIdent(ClassNames.SCROLLABLE_CONTAINER)}`
+      `.${escapeCssSelectorIdent(ClassNames.SCROLLABLE_CONTAINER)}`
     )
   );
   const cells = /** @type {!HTMLDivElement[]} */ (
     Array.from(
-      element.querySelectorAll(`./${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
+      element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
     )
   );
   assertDomQueryResults(container, cells);
@@ -245,19 +245,19 @@ function buildSlideScroll(element) {
 function querySlideScrollCarousel(element) {
   const slidesContainer = /** @type {!HTMLDivElement} */ (
     element.querySelector(
-      `./${escapeCssSelectorIdent(ClassNames.SLIDES_CONTAINER)}`
+      `.${escapeCssSelectorIdent(ClassNames.SLIDES_CONTAINER)}`
     )
   );
   const slideWrappers = /** @type {!HTMLDivElement[]} */ (
     Array.from(
       element.querySelectorAll(
-        `./${escapeCssSelectorIdent(ClassNames.SLIDE_WRAPPER)}`
+        `.${escapeCssSelectorIdent(ClassNames.SLIDE_WRAPPER)}`
       )
     )
   );
   const slides = /** @type {!HTMLDivElement[]} */ (
     Array.from(
-      element.querySelectorAll(`./${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
+      element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
     )
   );
   assertDomQueryResults(slidesContainer, slideWrappers, slides);
