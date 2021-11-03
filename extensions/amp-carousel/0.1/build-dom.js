@@ -30,11 +30,10 @@ export const ClassNames = {
 
 /**
  * Throws if any provided param is not truthy.
- * @param  {...any} elements
  */
-function assertDomQueryResults(...elements) {
-  for (let i = 0; i < elements.length; i++) {
-    if (!elements[i]) {
+function assertDomQueryResults() {
+  for (let i = 0; i < arguments.length; i++) {
+    if (!arguments[i]) {
       throw new Error('Invalid server render');
     }
   }
@@ -47,14 +46,14 @@ function assertDomQueryResults(...elements) {
  * @return {?HTMLDivElement}
  */
 function buildButton(element, {className, enabled, title}) {
-  /**
+  /*
    * In scrollable carousel, the next/previous buttons add no functionality
    * for screen readers as scrollable carousel is just a horizontally
    * scrollable div which ATs navigate just like any other content.
    * To avoid confusion, we therefore set the role to presentation for the
    * controls in this case.
    */
-  const ariaRole = getType(element) === 'scroll' ? 'presentation' : 'button';
+  const ariaRole = isScrollable(element) ? 'presentation' : 'button';
 
   const button = element.ownerDocument.createElement('div');
   button.setAttribute('tabindex', '0');
@@ -278,12 +277,10 @@ function querySlideScrollCarousel(element) {
  * }}
  */
 export function buildDom(element) {
-  const type = getType(element);
   const slideCount = realChildElements(element).length;
-  const slidesDom =
-    type == 'slides'
-      ? buildSlideScrollCarousel(element)
-      : buildScrollableCarousel(element);
+  const slidesDom = isScrollable(element)
+    ? buildScrollableCarousel(element)
+    : buildSlideScrollCarousel(element);
   const controlsDom = buildCarouselControls(element, slideCount);
 
   return {...controlsDom, ...slidesDom};
@@ -298,7 +295,7 @@ export function getNextButtonTitle(element, options = {}) {
   const prefix =
     element.getAttribute('data-next-button-aria-label') ||
     'Next item in carousel';
-  if (getType(element) === 'scroll') {
+  if (isScrollable(element)) {
     return prefix;
   }
 
@@ -315,7 +312,7 @@ export function getPrevButtonTitle(element, options) {
   const prefix =
     element.getAttribute('data-prev-button-aria-label') ||
     'Previous item in carousel';
-  if (getType(element) === 'scroll') {
+  if (isScrollable(element)) {
     return prefix;
   }
 
@@ -345,12 +342,10 @@ function getVerboseButtonTitle(element, {index, prefix, total}) {
 }
 
 /**
+ * Returns true if the carousel is a Scrollable.  *
  * @param {!Element} element
- * @return {'slides' | 'scroll'}
+ * @return {boolean}
  */
-export function getType(element) {
-  if (element.getAttribute('type') == 'slides') {
-    return 'slides';
-  }
-  return 'scroll';
+export function isScrollable(element) {
+  return element.getAttribute('type') !== 'slides';
 }
