@@ -4,15 +4,12 @@ import {user} from '#utils/log';
 
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 
-import {
-  AD_RESPONSE_TYPE_ENUM,
-  VALIDATOR_RESULT_ENUM,
-} from '../amp-ad-type-defs';
+import {AdResponseType_Enum, ValidatorResult_Enum} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,
   SIGNATURE_VERIFIER_PROPERTY_NAME,
 } from '../cryptographic-validator';
-import {VERIFICATION_STATUS_ENUM} from '../signature-verifier';
+import {VerificationStatus_Enum} from '../signature-verifier';
 
 const realWinConfig = {
   amp: {},
@@ -38,7 +35,7 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
     // We are mocking out the actual verifier for simplicity, but that's okay
     // since its logic is well tested in test-signature-verifier.js.
     env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
-      verify: () => Promise.resolve(VERIFICATION_STATUS_ENUM.OK),
+      verify: () => Promise.resolve(VerificationStatus_Enum.OK),
     };
     return validator
       .validate(
@@ -49,9 +46,9 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
       )
       .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
-        expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.AMP);
+        expect(validatorOutput.type).to.equal(ValidatorResult_Enum.AMP);
         expect(validatorOutput.adResponseType).to.equal(
-          AD_RESPONSE_TYPE_ENUM.CRYPTO
+          AdResponseType_Enum.CRYPTO
         );
         expect(validatorOutput.creativeData).to.be.ok;
 
@@ -64,7 +61,7 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
 
   it('should have non-AMP validator result', () => {
     env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
-      verify: () => Promise.resolve(VERIFICATION_STATUS_ENUM.UNVERIFIED),
+      verify: () => Promise.resolve(VerificationStatus_Enum.UNVERIFIED),
     };
     return validator
       .validate(
@@ -75,9 +72,9 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
       )
       .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
-        expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.NON_AMP);
+        expect(validatorOutput.type).to.equal(ValidatorResult_Enum.NON_AMP);
         expect(validatorOutput.adResponseType).to.equal(
-          AD_RESPONSE_TYPE_ENUM.CRYPTO
+          AdResponseType_Enum.CRYPTO
         );
         expect(validatorOutput.creativeData).to.be.ok;
 
@@ -91,7 +88,7 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
 
   it('should have non-AMP validator result due to bad metadata', () => {
     env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
-      verify: () => Promise.resolve(VERIFICATION_STATUS_ENUM.UNVERIFIED),
+      verify: () => Promise.resolve(VerificationStatus_Enum.UNVERIFIED),
     };
     return validator
       .validate(
@@ -102,9 +99,9 @@ describes.realWin('CryptographicValidator', realWinConfig, (env) => {
       )
       .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
-        expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.NON_AMP);
+        expect(validatorOutput.type).to.equal(ValidatorResult_Enum.NON_AMP);
         expect(validatorOutput.adResponseType).to.equal(
-          AD_RESPONSE_TYPE_ENUM.CRYPTO
+          AdResponseType_Enum.CRYPTO
         );
         expect(validatorOutput.creativeData).to.be.ok;
         expect(validatorOutput.creativeData.creativeMetadata).to.not.be.ok;

@@ -1,4 +1,4 @@
-import {ACTION_ENUM} from './analytics';
+import {Action_Enum} from './analytics';
 import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
@@ -83,11 +83,11 @@ export class LocalSubscriptionBasePlatform {
    */
   validateActionMap(actionMap) {
     userAssert(
-      actionMap[ACTION_ENUM.LOGIN],
+      actionMap[Action_Enum.LOGIN],
       'Action "login" is not present in action map'
     );
     userAssert(
-      actionMap[ACTION_ENUM.SUBSCRIBE],
+      actionMap[Action_Enum.SUBSCRIBE],
       'Action "subscribe" is not present in action map'
     );
     return actionMap;
@@ -131,7 +131,7 @@ export class LocalSubscriptionBasePlatform {
       if (serviceAttr == 'local') {
         this.executeAction(action, element.id);
       } else if ((serviceAttr || 'auto') == 'auto') {
-        if (action == ACTION_ENUM.LOGIN) {
+        if (action == Action_Enum.LOGIN) {
           // The "login" action is somewhat special b/c viewers can
           // enhance this action, e.g. to provide save/link feature.
           const platform = this.serviceAdapter_.selectPlatformForLogin();

@@ -1,14 +1,14 @@
 import {
-  ACTION_STATUS_ENUM,
-  SUBSCRIPTION_ANALYTICS_EVENTS_ENUM,
+  ActionStatus_Enum,
   SubscriptionAnalytics,
+  SubscriptionAnalyticsEvents_Enum,
 } from './analytics';
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
-import {Entitlement, GRANT_REASON_ENUM} from './entitlement';
+import {Entitlement, GrantReason_Enum} from './entitlement';
 import {Metering} from './metering';
 import {
   PageConfig as PageConfigInterface,
@@ -127,7 +127,7 @@ export class SubscriptionService {
   start() {
     this.initialize_().then(() => {
       this.subscriptionAnalytics_.event(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.STARTED
+        SubscriptionAnalyticsEvents_Enum.STARTED
       );
       this.renderer_.toggleLoading(true);
 
@@ -282,12 +282,12 @@ export class SubscriptionService {
         subscriptionPlatform
       );
       this.subscriptionAnalytics_.serviceEvent(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REGISTERED,
+        SubscriptionAnalyticsEvents_Enum.PLATFORM_REGISTERED,
         subscriptionPlatform.getPlatformKey()
       );
       // Deprecated event fired for backward compatibility
       this.subscriptionAnalytics_.serviceEvent(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REGISTERED_DEPRECATED,
+        SubscriptionAnalyticsEvents_Enum.PLATFORM_REGISTERED_DEPRECATED,
         subscriptionPlatform.getPlatformKey()
       );
       this.fetchEntitlements_(subscriptionPlatform);
@@ -396,7 +396,7 @@ export class SubscriptionService {
       );
     }
     this.subscriptionAnalytics_.serviceEvent(
-      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ENTITLEMENT_RESOLVED,
+      SubscriptionAnalyticsEvents_Enum.ENTITLEMENT_RESOLVED,
       platformKey
     );
   }
@@ -569,7 +569,7 @@ export class SubscriptionService {
       if (granted) {
         const grantCameFromAmpMetering =
           entitlement &&
-          entitlement.grantReason === GRANT_REASON_ENUM.METERING &&
+          entitlement.grantReason === GrantReason_Enum.METERING &&
           entitlement.service === this.metering_.platformKey;
 
         if (!grantCameFromAmpMetering) {
@@ -658,26 +658,26 @@ export class SubscriptionService {
       selectedPlatform.activate(selectedEntitlement, grantEntitlement);
 
       this.subscriptionAnalytics_.serviceEvent(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
+        SubscriptionAnalyticsEvents_Enum.PLATFORM_ACTIVATED,
         selectedPlatform.getPlatformKey()
       );
       // Deprecated events are fire for backwards compatibility
       this.subscriptionAnalytics_.serviceEvent(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED_DEPRECATED,
+        SubscriptionAnalyticsEvents_Enum.PLATFORM_ACTIVATED_DEPRECATED,
         selectedPlatform.getPlatformKey()
       );
       if (bestEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
-          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACCESS_GRANTED,
+          SubscriptionAnalyticsEvents_Enum.ACCESS_GRANTED,
           bestEntitlement.service
         );
       } else {
         this.subscriptionAnalytics_.serviceEvent(
-          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED,
+          SubscriptionAnalyticsEvents_Enum.PAYWALL_ACTIVATED,
           selectedPlatform.getPlatformKey()
         );
         this.subscriptionAnalytics_.serviceEvent(
-          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACCESS_DENIED,
+          SubscriptionAnalyticsEvents_Enum.ACCESS_DENIED,
           selectedPlatform.getPlatformKey()
         );
       }
@@ -739,12 +739,12 @@ export class SubscriptionService {
         this.fetchEntitlements_(subscriptionPlatform);
       });
     this.subscriptionAnalytics_.serviceEvent(
-      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REAUTHORIZED,
+      SubscriptionAnalyticsEvents_Enum.PLATFORM_REAUTHORIZED,
       ''
     );
     // deprecated event fired for backward compatibility
     this.subscriptionAnalytics_.serviceEvent(
-      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REAUTHORIZED_DEPRECATED,
+      SubscriptionAnalyticsEvents_Enum.PLATFORM_REAUTHORIZED_DEPRECATED,
       ''
     );
     this.startAuthorizationFlow_();
@@ -789,14 +789,14 @@ export class SubscriptionService {
       this.platformStore_.onPlatformResolves(platformKey, (platform) => {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
-          SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACTION_DELEGATED,
+          SubscriptionAnalyticsEvents_Enum.ACTION_DELEGATED,
           dict({
             'action': action,
             'serviceId': platformKey,
           }),
           dict({
             'action': action,
-            'status': ACTION_STATUS_ENUM.STARTED,
+            'status': ActionStatus_Enum.STARTED,
           })
         );
         resolve(platform.executeAction(action, sourceId));
@@ -834,7 +834,7 @@ export class SubscriptionService {
         source: '',
         raw: '',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.FREE,
+        grantReason: GrantReason_Enum.FREE,
         dataObject: {},
       })
     );

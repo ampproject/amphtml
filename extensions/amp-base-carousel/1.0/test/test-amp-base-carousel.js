@@ -1,6 +1,6 @@
 import '../amp-base-carousel';
 import {ActionInvocation} from '#service/action-impl';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
 import {mod} from '#core/math';
 import {setStyles} from '#core/dom/style';
@@ -268,7 +268,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ACTION_TRUST_ENUM.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,
@@ -344,7 +344,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ACTION_TRUST_ENUM.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,

@@ -1,6 +1,6 @@
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
-  ANALYTICS_EVENT_TYPE_ENUM,
+  AnalyticsEventType_Enum,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
@@ -68,7 +68,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {
 
   it('should add "scroll" trigger', async () => {
     const tracker = root.getTracker(
-      ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+      AnalyticsEventType_Enum.SCROLL,
       ScrollEventTracker
     );
     const unlisten = function () {};
@@ -80,7 +80,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(
       analyticsElement,
-      ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+      AnalyticsEventType_Enum.SCROLL,
       config,
       handler
     );
@@ -90,7 +90,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {
 
   it('should add "custom" trigger', async () => {
     const tracker = root.getTracker(
-      ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
+      AnalyticsEventType_Enum.CUSTOM,
       CustomEventTracker
     );
     const unlisten = function () {};
@@ -156,7 +156,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {
       .callsFake(() => unlisten);
     const config = {on: 'timer'};
     await group.addTrigger(config, handler);
-    const tracker = root.getTrackerOptional(ANALYTICS_EVENT_TYPE_ENUM.TIMER);
+    const tracker = root.getTrackerOptional(AnalyticsEventType_Enum.TIMER);
     expect(tracker).to.be.instanceOf(TimerEventTracker);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(analyticsElement, 'timer', config, handler);

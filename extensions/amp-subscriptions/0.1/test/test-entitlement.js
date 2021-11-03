@@ -1,10 +1,10 @@
-import {Entitlement, GRANT_REASON_ENUM} from '../entitlement';
+import {Entitlement, GrantReason_Enum} from '../entitlement';
 
 describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
   const granted = true;
-  const grantReason = GRANT_REASON_ENUM.SUBSCRIBER;
+  const grantReason = GrantReason_Enum.SUBSCRIBER;
   const dataObject = {
     metering: {
       left: 1,
@@ -100,7 +100,7 @@ describes.realWin('EntitlementClass', {}, () => {
   it('should identify subscriber entitlements', () => {
     const raw = 'raw';
     const granted = true;
-    const grantReason = GRANT_REASON_ENUM.SUBSCRIBER;
+    const grantReason = GrantReason_Enum.SUBSCRIBER;
     const entitlement = new Entitlement({
       source,
       raw,
@@ -116,7 +116,7 @@ describes.realWin('EntitlementClass', {}, () => {
   it('should identify free entitlements', () => {
     const raw = 'raw';
     const granted = true;
-    const grantReason = GRANT_REASON_ENUM.FREE;
+    const grantReason = GrantReason_Enum.FREE;
     const entitlement = new Entitlement({
       source,
       raw,

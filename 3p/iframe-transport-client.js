@@ -1,6 +1,6 @@
 import {
   IframeTransportEventDef,
-  MESSAGE_TYPE_ENUM,
+  MessageType_Enum,
 } from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
 
@@ -49,8 +49,8 @@ export class IframeTransportClient {
       )
     );
     this.iframeMessagingClient_.makeRequest(
-      MESSAGE_TYPE_ENUM.SEND_IFRAME_TRANSPORT_EVENTS,
-      MESSAGE_TYPE_ENUM.IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.SEND_IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
       (eventData) => {
         const events = /** @type {!Array<IframeTransportEventDef>} */ (
           eventData['events']
@@ -166,7 +166,7 @@ export class IframeTransportContext {
    */
   sendResponseToCreative(data) {
     this.iframeMessagingClient_./*OK*/ sendMessage(
-      MESSAGE_TYPE_ENUM.IFRAME_TRANSPORT_RESPONSE,
+      MessageType_Enum.IFRAME_TRANSPORT_RESPONSE,
       /** @type {!JsonObject} */
       ({message: data, ...this.baseMessage_})
     );

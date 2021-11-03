@@ -1,9 +1,9 @@
 import {
-  SESSION_VALUES_ENUM,
+  SessionValues_Enum,
   sessionServicePromiseForDoc,
 } from './session-manager';
 import {Services} from '#service';
-import {TICK_LABEL_ENUM} from '#core/constants/enums';
+import {TickLabel_Enum} from '#core/constants/enums';
 import {asyncStringReplace} from '#core/types/string';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
 import {cookieReader} from './cookie-reader';
@@ -315,42 +315,42 @@ export class VariableService {
           userAssert(key, 'CONSENT_METADATA macro must contain a key')
         ),
       'SESSION_ID': () =>
-        this.getSessionValue_(type, SESSION_VALUES_ENUM.SESSION_ID),
+        this.getSessionValue_(type, SessionValues_Enum.SESSION_ID),
       'SESSION_TIMESTAMP': () =>
-        this.getSessionValue_(type, SESSION_VALUES_ENUM.CREATION_TIMESTAMP),
+        this.getSessionValue_(type, SessionValues_Enum.CREATION_TIMESTAMP),
       'SESSION_COUNT': () =>
-        this.getSessionValue_(type, SESSION_VALUES_ENUM.COUNT),
+        this.getSessionValue_(type, SessionValues_Enum.COUNT),
       'SESSION_EVENT_TIMESTAMP': () =>
-        this.getSessionValue_(type, SESSION_VALUES_ENUM.EVENT_TIMESTAMP),
+        this.getSessionValue_(type, SessionValues_Enum.EVENT_TIMESTAMP),
       'SESSION_ENGAGED': () =>
-        this.getSessionValue_(type, SESSION_VALUES_ENUM.ENGAGED),
+        this.getSessionValue_(type, SessionValues_Enum.ENGAGED),
     };
     const perfMacros = isInFie(element)
       ? {}
       : {
           'FIRST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TICK_LABEL_ENUM.FIRST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.FIRST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_VIEWPORT_READY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TICK_LABEL_ENUM.FIRST_VIEWPORT_READY
+              TickLabel_Enum.FIRST_VIEWPORT_READY
             ),
           'MAKE_BODY_VISIBLE': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TICK_LABEL_ENUM.MAKE_BODY_VISIBLE
+              TickLabel_Enum.MAKE_BODY_VISIBLE
             ),
           'LARGEST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TICK_LABEL_ENUM.LARGEST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TICK_LABEL_ENUM.FIRST_INPUT_DELAY
+              TickLabel_Enum.FIRST_INPUT_DELAY
             ),
           'CUMULATIVE_LAYOUT_SHIFT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TICK_LABEL_ENUM.CUMULATIVE_LAYOUT_SHIFT
+              TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT
             ),
         };
     const merged = {
@@ -364,7 +364,7 @@ export class VariableService {
   /**
    *
    * @param {string} vendorType
-   * @param {!SESSION_VALUES_ENUM} key
+   * @param {!SessionValues_Enum} key
    * @return {!Promise<number>}
    */
   getSessionValue_(vendorType, key) {

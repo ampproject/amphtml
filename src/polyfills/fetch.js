@@ -7,7 +7,7 @@ import {utf8Encode} from '#core/types/string/bytes';
 import {dev, user} from '#utils/log';
 
 /** @enum {number} Allowed fetch responses. */
-const ALLOWED_FETCH_TYPES_ENUM = {
+const AllowedFetchTypes_Enum = {
   document: 1,
   text: 2,
 };
@@ -49,7 +49,7 @@ export function fetchPolyfill(input, init = {}) {
       xhr.withCredentials = true;
     }
 
-    if (init.responseType in ALLOWED_FETCH_TYPES_ENUM) {
+    if (init.responseType in AllowedFetchTypes_Enum) {
       xhr.responseType = init.responseType;
     }
 

@@ -1,5 +1,5 @@
 import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
-import {TCF_POST_MESSAGE_API_COMMANDS_ENUM} from './consent-info';
+import {TcfPostMessageApiCommands_Enum} from './consent-info';
 import {hasOwn, map} from '#core/types/object';
 import {isEnumValue, isObject} from '#core/types';
 
@@ -72,16 +72,16 @@ export class TcfApiCommandManager {
     const payload = data['__tcfapiCall'];
     const {command} = payload;
     switch (command) {
-      case TCF_POST_MESSAGE_API_COMMANDS_ENUM.PING:
+      case TcfPostMessageApiCommands_Enum.PING:
         this.handlePingEvent_(payload, win);
         break;
-      case TCF_POST_MESSAGE_API_COMMANDS_ENUM.GET_TC_DATA:
+      case TcfPostMessageApiCommands_Enum.GET_TC_DATA:
         this.handleGetTcData_(payload, win);
         break;
-      case TCF_POST_MESSAGE_API_COMMANDS_ENUM.ADD_EVENT_LISTENER:
+      case TcfPostMessageApiCommands_Enum.ADD_EVENT_LISTENER:
         this.handleAddEventListner_(payload, win);
         break;
-      case TCF_POST_MESSAGE_API_COMMANDS_ENUM.REMOVE_EVENT_LISTENER:
+      case TcfPostMessageApiCommands_Enum.REMOVE_EVENT_LISTENER:
         this.handleRemoveEventListner_(payload, win);
         break;
       default:
@@ -284,7 +284,7 @@ export class TcfApiCommandManager {
       return false;
     }
     const {command, parameter, version} = payload;
-    if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS_ENUM, command)) {
+    if (!isEnumValue(TcfPostMessageApiCommands_Enum, command)) {
       user().error(
         TAG,
         `Unsupported command found in "tcfapiCall": ${command}`
@@ -293,7 +293,7 @@ export class TcfApiCommandManager {
     }
     if (
       parameter &&
-      command != TCF_POST_MESSAGE_API_COMMANDS_ENUM.REMOVE_EVENT_LISTENER
+      command != TcfPostMessageApiCommands_Enum.REMOVE_EVENT_LISTENER
     ) {
       user().error(
         TAG,

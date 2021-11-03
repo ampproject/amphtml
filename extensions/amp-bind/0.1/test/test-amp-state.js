@@ -1,9 +1,9 @@
 import '../amp-bind';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 
-import {URL_REPLACEMENT_POLICY_ENUM} from '../../../../src/batched-json';
+import {UrlReplacementPolicy_Enum} from '../../../../src/batched-json';
 
 describes.realWin(
   'AmpState',
@@ -82,7 +82,7 @@ describes.realWin(
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
         /* ampdoc */ env.sandbox.match.any,
-        URL_REPLACEMENT_POLICY_ENUM.ALL,
+        UrlReplacementPolicy_Enum.ALL,
         /* refresh */ env.sandbox.match.falsy
       );
 
@@ -113,7 +113,7 @@ describes.realWin(
         element,
         'fetch-error',
         /* event */ null,
-        ACTION_TRUST_ENUM.LOW
+        ActionTrust_Enum.LOW
       );
     });
 

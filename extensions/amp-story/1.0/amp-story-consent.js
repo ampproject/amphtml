@@ -1,13 +1,13 @@
 import * as Preact from '#core/dom/jsx';
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
-import {LAYOUT_ENUM} from '#core/dom/layout';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {Layout_Enum} from '#core/dom/layout';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
@@ -98,7 +98,7 @@ const renderElement = (element, config, consentId, logoSrc) => (
         >
           {localize(
             element,
-            LOCALIZED_STRING_ID_ENUM.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
           )}
         </button>
         <button
@@ -110,7 +110,7 @@ const renderElement = (element, config, consentId, logoSrc) => (
         >
           {localize(
             element,
-            LOCALIZED_STRING_ID_ENUM.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
           )}
         </button>
       </div>
@@ -187,7 +187,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
       ];
       this.storeService_.dispatch(
-        ACTION_ENUM.ADD_TO_ACTIONS_ALLOWLIST,
+        Action_Enum.ADD_TO_ACTIONS_ALLOWLIST,
         actions
       );
 
@@ -199,7 +199,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == LAYOUT_ENUM.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /**
@@ -213,7 +213,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -235,7 +235,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     }
     if (event.target.hasAttribute('on')) {
       const targetEl = dev().assertElement(event.target);
-      this.actions_.trigger(targetEl, 'tap', event, ACTION_TRUST_ENUM.HIGH);
+      this.actions_.trigger(targetEl, 'tap', event, ActionTrust_Enum.HIGH);
     }
     const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
     if (anchorClicked) {
@@ -352,7 +352,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   storeConsentId_(consentId) {
     // checkConsentHref response overrides the amp-geo config, if provided.
     if (this.consentConfig_.checkConsentHref) {
-      this.storeService_.dispatch(ACTION_ENUM.SET_CONSENT_ID, consentId);
+      this.storeService_.dispatch(Action_Enum.SET_CONSENT_ID, consentId);
       return;
     }
 
@@ -367,7 +367,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }
-        this.storeService_.dispatch(ACTION_ENUM.SET_CONSENT_ID, consentId);
+        this.storeService_.dispatch(Action_Enum.SET_CONSENT_ID, consentId);
       });
     }
   }

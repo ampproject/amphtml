@@ -6,8 +6,8 @@ import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '#service';
 import {
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  StateProperty_Enum,
+  UiType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {debounce} from '#core/types/function';
@@ -147,7 +147,7 @@ export class ProgressBar {
     });
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.PAGE_IDS,
+      StateProperty_Enum.PAGE_IDS,
       (pageIds) => {
         if (this.isBuilt_) {
           this.clear_();
@@ -176,7 +176,7 @@ export class ProgressBar {
     );
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -184,14 +184,14 @@ export class ProgressBar {
     );
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(STATE_PROPERTY_ENUM.AD_STATE, (adState) => {
+    this.storeService_.subscribe(StateProperty_Enum.AD_STATE, (adState) => {
       this.onAdStateUpdate_(adState);
     });
 
@@ -266,7 +266,7 @@ export class ProgressBar {
    * @private
    */
   transform_(segment, translateX, width) {
-    if (this.storeService_.get(STATE_PROPERTY_ENUM.RTL_STATE)) {
+    if (this.storeService_.get(StateProperty_Enum.RTL_STATE)) {
       translateX *= -1;
     }
 
@@ -398,16 +398,16 @@ export class ProgressBar {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UI_TYPE_ENUM} uiState
+   * @param {!UiType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     switch (uiState) {
-      case UI_TYPE_ENUM.DESKTOP_FULLBLEED:
+      case UiType_Enum.DESKTOP_FULLBLEED:
         MAX_SEGMENTS = 70;
         ELLIPSE_WIDTH_PX = 3;
         break;
-      case UI_TYPE_ENUM.MOBILE:
+      case UiType_Enum.MOBILE:
         MAX_SEGMENTS = 20;
         ELLIPSE_WIDTH_PX = 2;
         break;
@@ -449,9 +449,7 @@ export class ProgressBar {
    * @param {string} animationDuration
    */
   createAdSegment_(animationDuration) {
-    const index = this.storeService_.get(
-      STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX
-    );
+    const index = this.storeService_.get(StateProperty_Enum.CURRENT_PAGE_INDEX);
     // Fill in segment before ad segment.
     this.updateProgressByIndex_(index, 1, false);
     const progressEl = this.getRoot()?.querySelector(

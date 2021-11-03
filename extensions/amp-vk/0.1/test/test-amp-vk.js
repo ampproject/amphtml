@@ -1,5 +1,5 @@
 import '../amp-vk';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 
 import {Resource} from '#service/resource';
 
@@ -116,7 +116,7 @@ describes.realWin(
     it('post::renders responsively', async () => {
       const vkPost = await createAmpVkElement(
         POST_PARAMS,
-        LAYOUT_ENUM.RESPONSIVE
+        Layout_Enum.RESPONSIVE
       );
       const iframe = vkPost.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -126,7 +126,7 @@ describes.realWin(
     it('post::sets correct src url to the vk iFrame', async () => {
       const vkPost = await createAmpVkElement(
         POST_PARAMS,
-        LAYOUT_ENUM.RESPONSIVE
+        Layout_Enum.RESPONSIVE
       );
       const impl = await vkPost.getImpl(false);
       const iframe = vkPost.querySelector('iframe');
@@ -174,7 +174,7 @@ describes.realWin(
     it('poll::renders responsively', async () => {
       const vkPoll = await createAmpVkElement(
         POLL_PARAMS,
-        LAYOUT_ENUM.RESPONSIVE
+        Layout_Enum.RESPONSIVE
       );
       const iframe = vkPoll.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -184,7 +184,7 @@ describes.realWin(
     it('poll::sets correct src url to the vk iFrame', async () => {
       const vkPoll = await createAmpVkElement(
         POLL_PARAMS,
-        LAYOUT_ENUM.RESPONSIVE
+        Layout_Enum.RESPONSIVE
       );
       const iframe = vkPoll.querySelector('iframe');
       const referrer = encodeURIComponent(vkPoll.ownerDocument.referrer);

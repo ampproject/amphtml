@@ -1,21 +1,21 @@
 import {removeChildren} from '#core/dom';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
+  UiType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -43,13 +43,13 @@ const buildNavigationEl = (element) => {
 };
 
 /** @enum {string} */
-const SCREEN_ENUM = {
+const Screen_Enum = {
   ONBOARDING_NAVIGATION_TAP: 'ont', // Sent on page load if no "swipe" capability.
   ONBOARDING_NAVIGATION_TAP_AND_SWIPE: 'ontas', // Sent on page load if "swipe" capability.
 };
 
 /** @enum */
-export const STATE_ENUM = {
+export const State_Enum = {
   HIDDEN: 0,
   NAVIGATION_TAP: 1,
   NAVIGATION_SWIPE: 2,
@@ -70,7 +70,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.storyPausedStateToRestore_ = null;
 
     /** @private {!State} */
-    this.state_ = STATE_ENUM.HIDDEN;
+    this.state_ = State_Enum.HIDDEN;
 
     /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ =
@@ -97,19 +97,19 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.viewer_ = Services.viewerForDoc(this.element);
     const isMobileUI =
-      this.storeService_.get(STATE_PROPERTY_ENUM.UI_STATE) ===
-      UI_TYPE_ENUM.MOBILE;
+      this.storeService_.get(StateProperty_Enum.UI_STATE) ===
+      UiType_Enum.MOBILE;
     if (this.viewer_.isEmbedded() && isMobileUI) {
       const screen = this.viewer_.hasCapability('swipe')
-        ? SCREEN_ENUM.ONBOARDING_NAVIGATION_TAP_AND_SWIPE
-        : SCREEN_ENUM.ONBOARDING_NAVIGATION_TAP;
-      this.maybeShowScreen_(screen, STATE_ENUM.NAVIGATION_TAP);
+        ? Screen_Enum.ONBOARDING_NAVIGATION_TAP_AND_SWIPE
+        : Screen_Enum.ONBOARDING_NAVIGATION_TAP;
+      this.maybeShowScreen_(screen, State_Enum.NAVIGATION_TAP);
     }
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === LAYOUT_ENUM.CONTAINER;
+    return layout === Layout_Enum.CONTAINER;
   }
 
   /**
@@ -140,7 +140,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => this.onRtlStateUpdate_(rtlState),
       true /** callToInitialize */
     );
@@ -152,14 +152,14 @@ export class AmpStoryEducation extends AMP.BaseElement {
    */
   onClick_() {
     if (
-      this.state_ === STATE_ENUM.NAVIGATION_TAP &&
+      this.state_ === State_Enum.NAVIGATION_TAP &&
       this.viewer_.hasCapability('swipe')
     ) {
-      this.setState_(STATE_ENUM.NAVIGATION_SWIPE);
+      this.setState_(State_Enum.NAVIGATION_SWIPE);
       return;
     }
 
-    this.setState_(STATE_ENUM.HIDDEN);
+    this.setState_(State_Enum.HIDDEN);
   }
 
   /**
@@ -187,26 +187,26 @@ export class AmpStoryEducation extends AMP.BaseElement {
     let el;
 
     switch (state) {
-      case STATE_ENUM.HIDDEN:
-        this.storeService_.dispatch(ACTION_ENUM.TOGGLE_EDUCATION, false);
+      case State_Enum.HIDDEN:
+        this.storeService_.dispatch(Action_Enum.TOGGLE_EDUCATION, false);
         this.mutateElement(() => {
           removeChildren(this.containerEl_);
           toggle(this.element, false);
           toggle(this.containerEl_, false);
           this.storeService_.dispatch(
-            ACTION_ENUM.TOGGLE_PAUSED,
+            Action_Enum.TOGGLE_PAUSED,
             this.storyPausedStateToRestore_
           );
           setModalAsClosed(this.element);
           this.element.removeAttribute('aria-modal');
         });
         break;
-      case STATE_ENUM.NAVIGATION_TAP:
+      case State_Enum.NAVIGATION_TAP:
         el = buildNavigationEl(this.element);
         el.setAttribute('step', 'tap');
         const progressStringId = this.viewer_.hasCapability('swipe')
-          ? LOCALIZED_STRING_ID_ENUM.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
-          : LOCALIZED_STRING_ID_ENUM.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
+          ? LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          : LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
         ).textContent =
@@ -214,32 +214,32 @@ export class AmpStoryEducation extends AMP.BaseElement {
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
         ).textContent = this.localizationService_.getLocalizedString(
-          LOCALIZED_STRING_ID_ENUM.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-button'
         ).textContent = this.localizationService_.getLocalizedString(
-          LOCALIZED_STRING_ID_ENUM.AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS
         );
         this.showTemplate_(el);
         break;
-      case STATE_ENUM.NAVIGATION_SWIPE:
+      case State_Enum.NAVIGATION_SWIPE:
         el = buildNavigationEl(this.element);
         el.setAttribute('step', 'swipe');
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
         ).textContent = this.localizationService_.getLocalizedString(
-          LOCALIZED_STRING_ID_ENUM.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
         ).textContent = this.localizationService_.getLocalizedString(
-          LOCALIZED_STRING_ID_ENUM.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-button'
         ).textContent = this.localizationService_.getLocalizedString(
-          LOCALIZED_STRING_ID_ENUM.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_DISMISS
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_DISMISS
         );
         this.showTemplate_(el);
         break;
@@ -256,12 +256,12 @@ export class AmpStoryEducation extends AMP.BaseElement {
   showTemplate_(template) {
     if (this.storyPausedStateToRestore_ === null) {
       this.storyPausedStateToRestore_ = !!this.storeService_.get(
-        STATE_PROPERTY_ENUM.PAUSED_STATE
+        StateProperty_Enum.PAUSED_STATE
       );
     }
 
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_PAUSED, true);
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_EDUCATION, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_EDUCATION, true);
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);

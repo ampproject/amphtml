@@ -1,6 +1,6 @@
-import {ACTION_ENUM, getStoreService} from '../amp-story-store-service';
-import {ADVANCEMENT_MODE_ENUM} from '../story-analytics';
-import {ANALYTICS_VARIABLE_ENUM, getVariableService} from '../variable-service';
+import {Action_Enum, getStoreService} from '../amp-story-store-service';
+import {AdvancementMode_Enum} from '../story-analytics';
+import {AnalyticsVariable_Enum, getVariableService} from '../variable-service';
 
 describes.fakeWin('amp-story variable service', {}, (env) => {
   let variableService;
@@ -12,7 +12,7 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
   });
 
   it('should update pageIndex and pageId on change', () => {
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'my-page-id',
       index: 123,
     });
@@ -24,8 +24,8 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
 
   it('should update storyAdvancementMode on change', () => {
     variableService.onVariableUpdate(
-      ANALYTICS_VARIABLE_ENUM.STORY_ADVANCEMENT_MODE,
-      ADVANCEMENT_MODE_ENUM.MANUAL_ADVANCE
+      AnalyticsVariable_Enum.STORY_ADVANCEMENT_MODE,
+      AdvancementMode_Enum.MANUAL_ADVANCE
     );
 
     const variables = variableService.get();
@@ -33,8 +33,8 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
   });
 
   it('should calculate storyProgress correctly on change', () => {
-    storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, ['a', 'b', 'c', 'd', 'e']);
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.SET_PAGE_IDS, ['a', 'b', 'c', 'd', 'e']);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'd',
       index: 3,
     });
@@ -44,8 +44,8 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
   });
 
   it('should calculate storyProgress when a story only has 1 page', () => {
-    storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, ['a']);
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.SET_PAGE_IDS, ['a']);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'a',
       index: 0,
     });

@@ -1,16 +1,16 @@
 import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
-  STORY_ANALYTICS_EVENT_ENUM,
+  StoryAnalyticsEvent_Enum,
   getAnalyticsService,
 } from './story-analytics';
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
@@ -127,7 +127,7 @@ export class InfoDialog {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.INFO_DIALOG_STATE,
+      StateProperty_Enum.INFO_DIALOG_STATE,
       (isOpen) => {
         this.onInfoDialogStateUpdated_(isOpen);
       }
@@ -151,9 +151,7 @@ export class InfoDialog {
 
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-info-dialog';
     this.analyticsService_.triggerEvent(
-      isOpen
-        ? STORY_ANALYTICS_EVENT_ENUM.OPEN
-        : STORY_ANALYTICS_EVENT_ENUM.CLOSE,
+      isOpen ? StoryAnalyticsEvent_Enum.OPEN : StoryAnalyticsEvent_Enum.CLOSE,
       this.element_
     );
   }
@@ -180,7 +178,7 @@ export class InfoDialog {
    * @private
    */
   close_() {
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_INFO_DIALOG, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, false);
   }
 
   /**
@@ -209,7 +207,7 @@ export class InfoDialog {
   setHeading_() {
     const label = localize(
       this.parentEl_,
-      LOCALIZED_STRING_ID_ENUM.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
+      LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
     );
     const headingEl = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-info-heading')
@@ -256,7 +254,7 @@ export class InfoDialog {
     return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {
       const label = localize(
         this.parentEl_,
-        LOCALIZED_STRING_ID_ENUM.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
+        LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
       );
       this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
       this.moreInfoLinkEl_.setAttribute(

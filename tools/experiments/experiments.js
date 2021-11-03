@@ -2,7 +2,7 @@ import '#polyfills';
 import '#service/timer-impl';
 import {Deferred} from '#core/data-structures/promise';
 import {EXPERIMENTS} from './experiments-config';
-import {SAME_SITE_ENUM, getCookie, setCookie} from '../../src/cookies';
+import {SameSite_Enum, getCookie, setCookie} from '../../src/cookies';
 import {devAssert, initLogConstructor, setReportError} from '#utils/log';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '#experiments';
@@ -286,7 +286,7 @@ function setAmpOptInCookie_(cookieState) {
     // Make sure the cookie is available for the script loads coming from
     // other domains. Chrome's default of LAX would otherwise prevent it
     // from being sent.
-    sameSite: SAME_SITE_ENUM.NONE,
+    sameSite: SameSite_Enum.NONE,
     secure: true,
   };
   setCookie(

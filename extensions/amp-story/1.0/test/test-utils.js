@@ -1,4 +1,4 @@
-import {STATE_PROPERTY_ENUM} from '../amp-story-store-service';
+import {StateProperty_Enum} from '../amp-story-store-service';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
@@ -134,7 +134,7 @@ describes.fakeWin('amp-story utils', {}, (env) => {
       const getStub = env.sandbox.stub(fakeStoreService, 'get').returns(false);
       expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.false;
       expect(getStub).to.be.calledOnceWithExactly(
-        STATE_PROPERTY_ENUM.CAN_SHOW_STORY_URL_INFO
+        StateProperty_Enum.CAN_SHOW_STORY_URL_INFO
       );
     });
 
@@ -147,7 +147,7 @@ describes.fakeWin('amp-story utils', {}, (env) => {
       const getStub = env.sandbox.stub(fakeStoreService, 'get').returns(true);
       expect(shouldShowStoryUrlInfo(fakeViewer, fakeStoreService)).to.be.true;
       expect(getStub).to.be.calledOnceWithExactly(
-        STATE_PROPERTY_ENUM.CAN_SHOW_STORY_URL_INFO
+        StateProperty_Enum.CAN_SHOW_STORY_URL_INFO
       );
     });
   });

@@ -31,7 +31,7 @@ export class AsyncInput {
  *
  * @enum {string}
  */
-export const ASYNC_INPUT_ATTRIBUTES_ENUM = {
+export const AsyncInputAttributes_Enum = {
   /**
    * data-name
    *
@@ -51,7 +51,7 @@ export const ASYNC_INPUT_ATTRIBUTES_ENUM = {
  *
  * @enum {string}
  */
-export const ASYNC_INPUT_CLASSES_ENUM = {
+export const AsyncInputClasses_Enum = {
   /**
    * i-amphtml-async-input
    *

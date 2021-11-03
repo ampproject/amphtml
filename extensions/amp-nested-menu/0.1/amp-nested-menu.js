@@ -1,6 +1,6 @@
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {isRTL, tryFocus} from '#core/dom';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   closest,
   closestAncestorElementBySelector,
@@ -17,7 +17,7 @@ import {CSS} from '../../../build/amp-nested-menu-0.1.css';
 const TAG = 'amp-nested-menu';
 
 /** @private @enum {string} */
-const SIDE_ENUM = {
+const Side_Enum = {
   LEFT: 'left',
   RIGHT: 'right',
 };
@@ -61,9 +61,9 @@ export class AmpNestedMenu extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
 
     this.side_ = element.getAttribute('side');
-    if (this.side_ != SIDE_ENUM.LEFT && this.side_ != SIDE_ENUM.RIGHT) {
+    if (this.side_ != Side_Enum.LEFT && this.side_ != Side_Enum.RIGHT) {
       // Submenus in RTL documents should open from the left by default.
-      this.side_ = isRTL(this.document_) ? SIDE_ENUM.LEFT : SIDE_ENUM.RIGHT;
+      this.side_ = isRTL(this.document_) ? Side_Enum.LEFT : Side_Enum.RIGHT;
       element.setAttribute('side', this.side_);
     }
 
@@ -108,7 +108,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
   isLayoutSupported(layout) {
     // If support is added for other layouts, we should ensure that
     // lazy loading by sidebar does not cause FOUC when sidebar first opens.
-    return layout == LAYOUT_ENUM.FILL;
+    return layout == Layout_Enum.FILL;
   }
 
   /**
@@ -263,18 +263,18 @@ export class AmpNestedMenu extends AMP.BaseElement {
       return;
     }
     switch (e.key) {
-      case KEYS_ENUM.ENTER: /* fallthrough */
-      case KEYS_ENUM.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         this.handleClick_(e);
         return;
-      case KEYS_ENUM.LEFT_ARROW: /* fallthrough */
-      case KEYS_ENUM.RIGHT_ARROW:
+      case Keys_Enum.LEFT_ARROW: /* fallthrough */
+      case Keys_Enum.RIGHT_ARROW:
         this.handleMenuNavigation_(e);
         break;
-      case KEYS_ENUM.UP_ARROW: /* fallthrough */
-      case KEYS_ENUM.DOWN_ARROW:
-      case KEYS_ENUM.HOME:
-      case KEYS_ENUM.END:
+      case Keys_Enum.UP_ARROW: /* fallthrough */
+      case Keys_Enum.DOWN_ARROW:
+      case Keys_Enum.HOME:
+      case Keys_Enum.END:
         this.handleMenuItemNavigation_(e);
         break;
     }
@@ -286,9 +286,9 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @private
    */
   handleMenuNavigation_(e) {
-    let back = e.key == KEYS_ENUM.LEFT_ARROW;
+    let back = e.key == Keys_Enum.LEFT_ARROW;
     // Press right arrow key to go back if submenu opened from left.
-    if (this.side_ == SIDE_ENUM.LEFT) {
+    if (this.side_ == Side_Enum.LEFT) {
       back = !back;
     }
     if (back) {
@@ -317,13 +317,13 @@ export class AmpNestedMenu extends AMP.BaseElement {
     }
 
     let nextItem;
-    if (e.key === KEYS_ENUM.UP_ARROW) {
+    if (e.key === Keys_Enum.UP_ARROW) {
       nextItem = item.previousElementSibling;
-    } else if (e.key === KEYS_ENUM.DOWN_ARROW) {
+    } else if (e.key === Keys_Enum.DOWN_ARROW) {
       nextItem = item.nextElementSibling;
-    } else if (e.key === KEYS_ENUM.HOME) {
+    } else if (e.key === Keys_Enum.HOME) {
       nextItem = item.parentElement.firstElementChild;
-    } else if (e.key === KEYS_ENUM.END) {
+    } else if (e.key === Keys_Enum.END) {
       nextItem = item.parentElement.lastElementChild;
     } else {
       // not a recognized key

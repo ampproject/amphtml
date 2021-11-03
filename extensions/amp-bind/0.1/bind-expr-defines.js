@@ -24,7 +24,7 @@ export class AstNode {
  * Type of a node in the AST of a `BindExpression`.
  * @enum {number}
  */
-export const AST_NODE_TYPE_ENUM = {
+export const AstNodeType_Enum = {
   // Grammar rules.
   EXPRESSION: 0,
   INVOCATION: 1,

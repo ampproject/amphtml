@@ -8,7 +8,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
 import {
-  ACTION_ENUM,
+  Action_Enum,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
@@ -128,7 +128,7 @@ describes.realWin(
         '/examples/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
       );
       await threesixty.layoutCallback();
-      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+      await storeService.dispatch(Action_Enum.CHANGE_PAGE, {
         id: 'page1',
         index: 0,
       });
@@ -140,11 +140,11 @@ describes.realWin(
         '/examples/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
       );
       await threesixty.layoutCallback();
-      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+      await storeService.dispatch(Action_Enum.CHANGE_PAGE, {
         id: 'page1',
         index: 0,
       });
-      await storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
+      await storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
       expect(threesixty.isPlaying_).to.be.true;
     });
 
@@ -153,16 +153,16 @@ describes.realWin(
         '/examples/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
       );
       await threesixty.layoutCallback();
-      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+      await storeService.dispatch(Action_Enum.CHANGE_PAGE, {
         id: 'page1',
         index: 0,
       });
-      await storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, true);
-      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+      await storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
+      await storeService.dispatch(Action_Enum.CHANGE_PAGE, {
         id: 'notPage1',
         index: 1,
       });
-      await storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
+      await storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
       expect(threesixty.isPlaying_).to.be.false;
     });
   }

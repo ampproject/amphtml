@@ -1,6 +1,6 @@
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from '../amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from '../amp-story-viewer-messaging-handler';
@@ -63,24 +63,24 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
       );
       expect(response).to.deep.equal({
         state: 'MUTED_STATE',
-        value: storeService.get(STATE_PROPERTY_ENUM.MUTED_STATE),
+        value: storeService.get(StateProperty_Enum.MUTED_STATE),
       });
     });
 
     it('should return the CURRENT_PAGE_ID', async () => {
-      storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {id: 'foo', index: 0});
+      storeService.dispatch(Action_Enum.CHANGE_PAGE, {id: 'foo', index: 0});
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
         {state: 'CURRENT_PAGE_ID'}
       );
       expect(response).to.deep.equal({
         state: 'CURRENT_PAGE_ID',
-        value: storeService.get(STATE_PROPERTY_ENUM.CURRENT_PAGE_ID),
+        value: storeService.get(StateProperty_Enum.CURRENT_PAGE_ID),
       });
     });
 
     it('should return the PAGE_ATTACHMENT_STATE', async () => {
-      storeService.dispatch(ACTION_ENUM.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      storeService.dispatch(Action_Enum.TOGGLE_PAGE_ATTACHMENT_STATE, true);
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
         {state: 'PAGE_ATTACHMENT_STATE'}
@@ -92,8 +92,8 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
     });
 
     it('should return the STORY_PROGRESS', async () => {
-      storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, [1, 2, 3, 4, 5]);
-      storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {id: 3, index: 2});
+      storeService.dispatch(Action_Enum.SET_PAGE_IDS, [1, 2, 3, 4, 5]);
+      storeService.dispatch(Action_Enum.CHANGE_PAGE, {id: 3, index: 2});
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
         {state: 'STORY_PROGRESS'}
@@ -134,12 +134,12 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
       });
 
       expect(subscribeStub).to.have.been.calledWith(
-        STATE_PROPERTY_ENUM.MUTED_STATE
+        StateProperty_Enum.MUTED_STATE
       );
     });
 
     it('should receive documentStateUpdate events', async () => {
-      storeService.dispatch(ACTION_ENUM.TOGGLE_MUTED, false);
+      storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
       const sendMessageStub = env.sandbox.stub(
         fakeViewerService,
         'sendMessage'
@@ -147,7 +147,7 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
       const state = 'MUTED_STATE';
 
       fakeViewerService.receiveMessage('onDocumentState', {state});
-      storeService.dispatch(ACTION_ENUM.TOGGLE_MUTED, true);
+      storeService.dispatch(Action_Enum.TOGGLE_MUTED, true);
 
       expect(sendMessageStub).to.have.been.calledWithExactly(
         'documentStateUpdate',
@@ -205,12 +205,12 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
     });
 
     it('should set a state', async () => {
-      storeService.dispatch(ACTION_ENUM.TOGGLE_MUTED, false);
+      storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
       await fakeViewerService.receiveMessage('setDocumentState', {
         state: 'MUTED_STATE',
         value: true,
       });
-      expect(storeService.get(STATE_PROPERTY_ENUM.MUTED_STATE)).to.be.true;
+      expect(storeService.get(StateProperty_Enum.MUTED_STATE)).to.be.true;
     });
   });
 });

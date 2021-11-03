@@ -3,7 +3,7 @@ import {mod} from '#core/math';
 /**
  * @enum {number}
  */
-export const AXIS_ENUM = {
+export const Axis_Enum = {
   X: 0,
   Y: 1,
 };
@@ -11,7 +11,7 @@ export const AXIS_ENUM = {
 /**
  * @enum {string}
  */
-export const ALIGNMENT_ENUM = {
+export const Alignment_Enum = {
   START: 'start',
   CENTER: 'center',
 };
@@ -19,7 +19,7 @@ export const ALIGNMENT_ENUM = {
 /**
  * @enum {string}
  */
-export const ORIENTATION_ENUM = {
+export const Orientation_Enum = {
   HORIZONTAL: 'horizontal',
   VERTICAL: 'vertical',
 };
@@ -43,9 +43,9 @@ export function getDimension(axis, el) {
     el./*OK*/ getBoundingClientRect();
 
   return {
-    start: Math.round(axis == AXIS_ENUM.X ? left : top),
-    end: Math.round(axis == AXIS_ENUM.X ? right : bottom),
-    length: Math.round(axis == AXIS_ENUM.X ? width : height),
+    start: Math.round(axis == Axis_Enum.X ? left : top),
+    end: Math.round(axis == Axis_Enum.X ? right : bottom),
+    length: Math.round(axis == Axis_Enum.X ? width : height),
   };
 }
 
@@ -77,7 +77,7 @@ export function getStart(axis, el) {
  *    the given alignment.
  */
 export function getPosition(axis, alignment, el) {
-  return alignment == ALIGNMENT_ENUM.START
+  return alignment == Alignment_Enum.START
     ? getStart(axis, el)
     : getCenter(axis, el);
 }
@@ -161,7 +161,7 @@ export function findOverlappingIndex(
  * @return {number} The scroll position.
  */
 export function getScrollPosition(axis, el) {
-  if (axis == AXIS_ENUM.X) {
+  if (axis == Axis_Enum.X) {
     return el./*OK*/ scrollLeft;
   }
 
@@ -175,7 +175,7 @@ export function getScrollPosition(axis, el) {
  * @return {number} The scroll capacity.
  */
 export function getScrollEnd(axis, el) {
-  if (axis == AXIS_ENUM.X) {
+  if (axis == Axis_Enum.X) {
     return el./*OK*/ scrollWidth;
   }
 
@@ -189,7 +189,7 @@ export function getScrollEnd(axis, el) {
  * @return {number} The offset position.
  */
 export function getOffsetPosition(axis, el) {
-  if (axis == AXIS_ENUM.X) {
+  if (axis == Axis_Enum.X) {
     return el./*OK*/ offsetLeft;
   }
 
@@ -203,7 +203,7 @@ export function getOffsetPosition(axis, el) {
  * @param {number} position The scroll position.
  */
 export function setScrollPosition(axis, el, position) {
-  if (axis == AXIS_ENUM.X) {
+  if (axis == Axis_Enum.X) {
     el./*OK*/ scrollLeft = position;
   } else {
     el./*OK*/ scrollTop = position;
@@ -238,7 +238,7 @@ export function scrollContainerToElement(
   el,
   offset = 0
 ) {
-  const startAligned = alignment == ALIGNMENT_ENUM.START;
+  const startAligned = alignment == Alignment_Enum.START;
   const {length} = getDimension(axis, el);
   const snapOffset = startAligned ? getStart(axis, el) : getCenter(axis, el);
   const scrollOffset = startAligned

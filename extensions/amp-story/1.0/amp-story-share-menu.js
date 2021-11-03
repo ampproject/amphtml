@@ -1,18 +1,18 @@
 import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
-  STORY_ANALYTICS_EVENT_ENUM,
+  StoryAnalyticsEvent_Enum,
   getAnalyticsService,
 } from './story-analytics';
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
+  UiType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {KEYS_ENUM} from '#core/constants/key-codes';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '#core/dom/query';
@@ -168,7 +168,7 @@ export class ShareMenu {
       'aria-label',
       localize(
         this.parentEl_,
-        LOCALIZED_STRING_ID_ENUM.AMP_STORY_CLOSE_BUTTON_LABEL
+        LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
       )
     );
 
@@ -194,7 +194,7 @@ export class ShareMenu {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
@@ -202,7 +202,7 @@ export class ShareMenu {
     );
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.SHARE_MENU_STATE,
+      StateProperty_Enum.SHARE_MENU_STATE,
       (isOpen) => {
         this.onShareMenuStateUpdate_(isOpen);
       }
@@ -216,7 +216,7 @@ export class ShareMenu {
       );
 
       this.win_.addEventListener('keyup', (event) => {
-        if (event.key == KEYS_ENUM.ESCAPE) {
+        if (event.key == Keys_Enum.ESCAPE) {
           event.preventDefault();
           this.close_();
         }
@@ -250,9 +250,7 @@ export class ShareMenu {
     }
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
     this.analyticsService_.triggerEvent(
-      isOpen
-        ? STORY_ANALYTICS_EVENT_ENUM.OPEN
-        : STORY_ANALYTICS_EVENT_ENUM.CLOSE,
+      isOpen ? StoryAnalyticsEvent_Enum.OPEN : StoryAnalyticsEvent_Enum.CLOSE,
       this.element_
     );
   }
@@ -276,12 +274,12 @@ export class ShareMenu {
 
   /**
    * Reacts to UI state updates and triggers the right UI.
-   * @param {!UI_TYPE_ENUM} uiState
+   * @param {!UiType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
-      uiState !== UI_TYPE_ENUM.MOBILE
+      uiState !== UiType_Enum.MOBILE
         ? this.element_.setAttribute('desktop', '')
         : this.element_.removeAttribute('desktop');
     });
@@ -292,6 +290,6 @@ export class ShareMenu {
    * @private
    */
   close_() {
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_SHARE_MENU, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_SHARE_MENU, false);
   }
 }

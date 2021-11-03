@@ -1,4 +1,4 @@
-import {ACTION_ENUM, SubscriptionAnalytics} from '../analytics';
+import {Action_Enum, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
@@ -14,8 +14,8 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
   let serviceAdapter;
 
   const actionMap = {
-    [ACTION_ENUM.SUBSCRIBE]: 'https://lipsum.com/subscribe',
-    [ACTION_ENUM.LOGIN]: 'https://lipsum.com/login',
+    [Action_Enum.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+    [Action_Enum.LOGIN]: 'https://lipsum.com/login',
   };
 
   const configiframeSrc = 'https://lipsum.com/iframe?rid=READER_ID';

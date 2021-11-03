@@ -31,7 +31,6 @@ module.exports = {
   'parser': '@babel/eslint-parser',
   'plugins': [
     'chai-expect',
-    'google-camelcase',
     'import',
     'jsdoc',
     'local',
@@ -97,7 +96,7 @@ module.exports = {
     'chai-expect/no-inner-compare': 2,
     'chai-expect/terminating-properties': 2,
     'curly': 2,
-    'google-camelcase/google-camelcase': 2,
+    'local/camelcase': 2,
 
     // Rules restricting/standardizing import statements
     'import/no-unresolved': [
@@ -438,7 +437,7 @@ module.exports = {
         'jsdoc/check-tag-names': 0,
         'local/closure-type-primitives': 0,
         'local/no-duplicate-name-typedef': 0,
-        'google-camelcase/google-camelcase': 0,
+        'local/camelcase': 0,
       },
     },
     {

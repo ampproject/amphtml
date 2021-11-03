@@ -1,9 +1,9 @@
 import {
-  CONSENT_ITEM_STATE_ENUM,
   ConsentInfoDef,
-  PURPOSE_CONSENT_STATE_ENUM,
+  ConsentItemState_Enum,
+  PurposeConsentState_Enum,
 } from './consent-info';
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
@@ -60,7 +60,7 @@ export class ConsentPolicyManager {
     /** @private {?string} */
     this.consentInstanceIdDepr_ = null;
 
-    /** @private {?CONSENT_ITEM_STATE_ENUM} */
+    /** @private {?ConsentItemState_Enum} */
     this.consentState_ = null;
 
     /** @private {?string} */
@@ -188,23 +188,23 @@ export class ConsentPolicyManager {
     this.consentString_ = consentStr;
     this.consentMetadata_ = consentMetadata;
     this.purposeConsents_ = purposeConsents;
-    if (state === CONSENT_ITEM_STATE_ENUM.UNKNOWN) {
+    if (state === ConsentItemState_Enum.UNKNOWN) {
       // consent state has not been resolved yet.
       return;
     }
 
-    if (state == CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED) {
+    if (state == ConsentItemState_Enum.NOT_REQUIRED) {
       const shouldOverwrite =
-        this.consentState_ != CONSENT_ITEM_STATE_ENUM.ACCEPTED &&
-        this.consentState_ != CONSENT_ITEM_STATE_ENUM.REJECTED;
+        this.consentState_ != ConsentItemState_Enum.ACCEPTED &&
+        this.consentState_ != ConsentItemState_Enum.REJECTED;
       // Ignore the consent item state and overwrite state value.
       if (shouldOverwrite) {
-        this.consentState_ = CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED;
+        this.consentState_ = ConsentItemState_Enum.NOT_REQUIRED;
       }
-    } else if (state == CONSENT_ITEM_STATE_ENUM.DISMISSED) {
+    } else if (state == ConsentItemState_Enum.DISMISSED) {
       // When dismissed, use the old value
       if (this.consentState_ === null) {
-        this.consentState_ = CONSENT_ITEM_STATE_ENUM.UNKNOWN;
+        this.consentState_ = ConsentItemState_Enum.UNKNOWN;
       }
       // None of the supplementary consent data changes with dismiss action
       this.consentString_ = prevConsentStr;
@@ -233,7 +233,7 @@ export class ConsentPolicyManager {
   /**
    * Used to wait for policy to resolve;
    * @param {string} policyId
-   * @return {!Promise<CONSENT_POLICY_STATE_ENUM>}
+   * @return {!Promise<ConsentPolicyState_Enum>}
    */
   whenPolicyResolved(policyId) {
     // If customized policy is not supported
@@ -243,7 +243,7 @@ export class ConsentPolicyManager {
         'can not find policy %s, only predefined policies are supported',
         policyId
       );
-      return Promise.resolve(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
+      return Promise.resolve(ConsentPolicyState_Enum.UNKNOWN);
     }
     return this.whenPolicyInstanceRegistered_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
@@ -334,7 +334,7 @@ export class ConsentPolicyManager {
       }
       const shouldUnblock = (purpose) =>
         hasOwn(this.purposeConsents_, purpose) &&
-        this.purposeConsents_[purpose] === PURPOSE_CONSENT_STATE_ENUM.ACCEPTED;
+        this.purposeConsents_[purpose] === PurposeConsentState_Enum.ACCEPTED;
       return purposes.every(shouldUnblock);
     });
   }
@@ -374,13 +374,13 @@ export class ConsentPolicyInstance {
     /** @private {?function()} */
     this.readyResolver_ = readyDeferred.resolve;
 
-    /** @private {CONSENT_POLICY_STATE_ENUM} */
-    this.status_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+    /** @private {ConsentPolicyState_Enum} */
+    this.status_ = ConsentPolicyState_Enum.UNKNOWN;
 
-    /** @private {!Array<CONSENT_POLICY_STATE_ENUM>} */
+    /** @private {!Array<ConsentPolicyState_Enum>} */
     this.unblockStateLists_ = config['unblockOn'] || [
-      CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
-      CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
+      ConsentPolicyState_Enum.SUFFICIENT,
+      ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED,
     ];
   }
 
@@ -406,7 +406,7 @@ export class ConsentPolicyInstance {
           timeoutConfig['fallbackAction'] &&
           timeoutConfig['fallbackAction'] == 'reject'
         ) {
-          fallbackState = CONSENT_ITEM_STATE_ENUM.REJECTED;
+          fallbackState = ConsentItemState_Enum.REJECTED;
         } else if (
           timeoutConfig['fallbackAction'] &&
           timeoutConfig['fallbackAction'] != 'dismiss'
@@ -431,7 +431,7 @@ export class ConsentPolicyInstance {
     if (timeoutSecond != null) {
       win.setTimeout(() => {
         // Force evaluate on timeout
-        fallbackState = fallbackState || CONSENT_ITEM_STATE_ENUM.UNKNOWN;
+        fallbackState = fallbackState || ConsentItemState_Enum.UNKNOWN;
         this.evaluate(fallbackState, true);
       }, timeoutSecond * 1000);
     }
@@ -440,7 +440,7 @@ export class ConsentPolicyInstance {
   /**
    * Evaluate the incoming consent state and determine if the policy instance
    * should be resolved and what the policy state should be.
-   * @param {CONSENT_ITEM_STATE_ENUM} state
+   * @param {ConsentItemState_Enum} state
    * @param {boolean} isFallback
    */
   evaluate(state, isFallback = false) {
@@ -454,14 +454,14 @@ export class ConsentPolicyInstance {
       return;
     }
 
-    if (state === CONSENT_ITEM_STATE_ENUM.ACCEPTED) {
-      this.status_ = CONSENT_POLICY_STATE_ENUM.SUFFICIENT;
-    } else if (state === CONSENT_ITEM_STATE_ENUM.REJECTED) {
-      this.status_ = CONSENT_POLICY_STATE_ENUM.INSUFFICIENT;
-    } else if (state === CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED) {
-      this.status_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED;
+    if (state === ConsentItemState_Enum.ACCEPTED) {
+      this.status_ = ConsentPolicyState_Enum.SUFFICIENT;
+    } else if (state === ConsentItemState_Enum.REJECTED) {
+      this.status_ = ConsentPolicyState_Enum.INSUFFICIENT;
+    } else if (state === ConsentItemState_Enum.NOT_REQUIRED) {
+      this.status_ = ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED;
     } else {
-      this.status_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      this.status_ = ConsentPolicyState_Enum.UNKNOWN;
     }
 
     if (this.readyResolver_) {
@@ -481,7 +481,7 @@ export class ConsentPolicyInstance {
 
   /**
    * Returns the current consent policy state
-   * @return {CONSENT_POLICY_STATE_ENUM}
+   * @return {ConsentPolicyState_Enum}
    */
   getCurrentPolicyStatus() {
     return this.status_;

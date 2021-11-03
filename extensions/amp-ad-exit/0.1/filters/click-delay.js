@@ -1,6 +1,6 @@
 import {dev, userAssert} from '#utils/log';
 
-import {FILTER_TYPE_ENUM, Filter} from './filter';
+import {Filter, FilterType_Enum} from './filter';
 
 /** @type {string} */
 const TAG = 'amp-ad-exit';
@@ -14,7 +14,7 @@ export class ClickDelayFilter extends Filter {
   constructor(name, spec, win) {
     super(name, spec.type);
     userAssert(
-      spec.type == FILTER_TYPE_ENUM.CLICK_DELAY &&
+      spec.type == FilterType_Enum.CLICK_DELAY &&
         typeof spec.delay == 'number' &&
         spec.delay > 0,
       'Invalid ClickDelay spec'
@@ -66,5 +66,5 @@ export class ClickDelayFilter extends Filter {
  * @return {!../config.ClickDelayConfig}
  */
 export function makeClickDelaySpec(delay, startTimingEvent = undefined) {
-  return {type: FILTER_TYPE_ENUM.CLICK_DELAY, delay, startTimingEvent};
+  return {type: FilterType_Enum.CLICK_DELAY, delay, startTimingEvent};
 }

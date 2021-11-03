@@ -1,5 +1,5 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -457,7 +457,7 @@ describes.repeated(
             return list.layoutCallback().then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AMP_EVENTS_ENUM.DOM_UPDATE,
+                type: AmpEvents_Enum.DOM_UPDATE,
                 bubbles: true,
               });
             });
@@ -662,7 +662,7 @@ describes.repeated(
               list.element,
               'fetch-error',
               env.sandbox.match.any,
-              ACTION_TRUST_ENUM.LOW
+              ActionTrust_Enum.LOW
             );
           });
 
@@ -1579,7 +1579,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ACTION_TRUST_ENUM.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
@@ -1590,7 +1590,7 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ACTION_TRUST_ENUM.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });

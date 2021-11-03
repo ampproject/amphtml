@@ -1,4 +1,4 @@
-import {EMBED_MODE_ENUM, parseEmbedMode} from './embed-mode';
+import {EmbedMode_Enum, parseEmbedMode} from './embed-mode';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
 import {deepEquals} from '#core/types/object/json';
@@ -33,7 +33,7 @@ export const getStoreService = (win) => {
  * Different UI experiences to display the story.
  * @const @enum {number}
  */
-export const UI_TYPE_ENUM = {
+export const UiType_Enum = {
   MOBILE: 0,
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
   DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
@@ -44,7 +44,7 @@ export const UI_TYPE_ENUM = {
  * States in which an embedded component could be found in.
  * @enum {number}
  */
-export const EMBEDDED_COMPONENT_STATE_ENUM = {
+export const EmbeddedComponentState_Enum = {
   HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
   FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
   EXPANDED: 2, // Component is in expanded mode.
@@ -118,7 +118,7 @@ export let InteractiveReactData;
 export let State;
 
 /** @const @enum {string} */
-export const STATE_PROPERTY_ENUM = {
+export const StateProperty_Enum = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
@@ -174,7 +174,7 @@ export const STATE_PROPERTY_ENUM = {
 };
 
 /** @const @enum {string} */
-export const ACTION_ENUM = {
+export const Action_Enum = {
   ADD_INTERACTIVE_REACT: 'addInteractiveReact',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
@@ -215,25 +215,25 @@ export const ACTION_ENUM = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
-  [STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST]: (old, curr) =>
+  [StateProperty_Enum.ACTIONS_ALLOWLIST]: (old, curr) =>
     old.length !== curr.length,
-  [STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE]:
+  [StateProperty_Enum.INTERACTIVE_COMPONENT_STATE]:
     /**
      * @param {InteractiveComponentDef} old
      * @param {InteractiveComponentDef} curr
      */
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
-  [STATE_PROPERTY_ENUM.NAVIGATION_PATH]: (old, curr) =>
+  [StateProperty_Enum.NAVIGATION_PATH]: (old, curr) =>
     old.length !== curr.length,
-  [STATE_PROPERTY_ENUM.PAGE_IDS]: (old, curr) => old.length !== curr.length,
-  [STATE_PROPERTY_ENUM.PAGE_SIZE]: (old, curr) =>
+  [StateProperty_Enum.PAGE_IDS]: (old, curr) => old.length !== curr.length,
+  [StateProperty_Enum.PAGE_SIZE]: (old, curr) =>
     old === null ||
     curr === null ||
     old.width !== curr.width ||
     old.height !== curr.height,
-  [STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE]: (old, curr) =>
+  [StateProperty_Enum.PANNING_MEDIA_STATE]: (old, curr) =>
     old === null || curr === null || !deepEquals(old, curr, 2),
-  [STATE_PROPERTY_ENUM.INTERACTIVE_REACT_STATE]: (old, curr) =>
+  [StateProperty_Enum.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
 
@@ -246,205 +246,205 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
-    case ACTION_ENUM.ADD_INTERACTIVE_REACT:
+    case Action_Enum.ADD_INTERACTIVE_REACT:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.INTERACTIVE_REACT_STATE]: {
-          ...state[STATE_PROPERTY_ENUM.INTERACTIVE_REACT_STATE],
+        [StateProperty_Enum.INTERACTIVE_REACT_STATE]: {
+          ...state[StateProperty_Enum.INTERACTIVE_REACT_STATE],
           [data['interactiveId']]: data,
         },
       });
-    case ACTION_ENUM.ADD_NEW_PAGE_ID:
+    case Action_Enum.ADD_NEW_PAGE_ID:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.NEW_PAGE_AVAILABLE_ID]: data,
+        [StateProperty_Enum.NEW_PAGE_AVAILABLE_ID]: data,
       });
-    case ACTION_ENUM.ADD_PANNING_MEDIA_STATE:
+    case Action_Enum.ADD_PANNING_MEDIA_STATE:
       const updatedState = {
-        ...state[STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE],
+        ...state[StateProperty_Enum.PANNING_MEDIA_STATE],
         ...data,
       };
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE]: updatedState,
+        [StateProperty_Enum.PANNING_MEDIA_STATE]: updatedState,
       });
-    case ACTION_ENUM.ADD_TO_ACTIONS_ALLOWLIST:
+    case Action_Enum.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
-        state[STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST],
+        state[StateProperty_Enum.ACTIONS_ALLOWLIST],
         data
       );
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST]: newActionsAllowlist,
+        [StateProperty_Enum.ACTIONS_ALLOWLIST]: newActionsAllowlist,
       });
     // Triggers the amp-acess paywall.
-    case ACTION_ENUM.TOGGLE_ACCESS:
+    case Action_Enum.TOGGLE_ACCESS:
       // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
-      if (state[STATE_PROPERTY_ENUM.ACCESS_STATE] === data) {
+      if (state[StateProperty_Enum.ACCESS_STATE] === data) {
         return state;
       }
 
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.ACCESS_STATE]: !!data,
-        [STATE_PROPERTY_ENUM.PAUSED_STATE]: !!data,
+        [StateProperty_Enum.ACCESS_STATE]: !!data,
+        [StateProperty_Enum.PAUSED_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_PAGE_ATTACHMENT_STATE:
+    case Action_Enum.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAGE_ATTACHMENT_STATE]: !!data,
+        [StateProperty_Enum.PAGE_ATTACHMENT_STATE]: !!data,
       });
     // Triggers the ad UI.
-    case ACTION_ENUM.TOGGLE_AD:
+    case Action_Enum.TOGGLE_AD:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.AD_STATE]: !!data,
+        [StateProperty_Enum.AD_STATE]: !!data,
       });
     // Expands or collapses the affiliate link.
-    case ACTION_ENUM.TOGGLE_AFFILIATE_LINK:
+    case Action_Enum.TOGGLE_AFFILIATE_LINK:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.AFFILIATE_LINK_STATE]: data,
+        [StateProperty_Enum.AFFILIATE_LINK_STATE]: data,
       });
-    case ACTION_ENUM.TOGGLE_EDUCATION:
+    case Action_Enum.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.EDUCATION_STATE]: !!data,
+        [StateProperty_Enum.EDUCATION_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT:
+    case Action_Enum.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAUSED_STATE]:
-          data.state === EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED ||
-          data.state === EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED,
-        [STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE]:
-          data.state !== EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED,
-        [STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE]: data,
+        [StateProperty_Enum.PAUSED_STATE]:
+          data.state === EmbeddedComponentState_Enum.EXPANDED ||
+          data.state === EmbeddedComponentState_Enum.FOCUSED,
+        [StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE]:
+          data.state !== EmbeddedComponentState_Enum.EXPANDED,
+        [StateProperty_Enum.INTERACTIVE_COMPONENT_STATE]: data,
       });
     // Shows or hides the info dialog.
-    case ACTION_ENUM.TOGGLE_INFO_DIALOG:
+    case Action_Enum.TOGGLE_INFO_DIALOG:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.INFO_DIALOG_STATE]: !!data,
-        [STATE_PROPERTY_ENUM.PAUSED_STATE]: !!data,
+        [StateProperty_Enum.INFO_DIALOG_STATE]: !!data,
+        [StateProperty_Enum.PAUSED_STATE]: !!data,
       });
     // Shows or hides the audio controls.
-    case ACTION_ENUM.TOGGLE_STORY_HAS_AUDIO:
+    case Action_Enum.TOGGLE_STORY_HAS_AUDIO:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.STORY_HAS_AUDIO_STATE]: !!data,
+        [StateProperty_Enum.STORY_HAS_AUDIO_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
+    case Action_Enum.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
+        [StateProperty_Enum.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
     // Shows or hides the play/pause controls.
-    case ACTION_ENUM.TOGGLE_STORY_HAS_PLAYBACK_UI:
+    case Action_Enum.TOGGLE_STORY_HAS_PLAYBACK_UI:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.STORY_HAS_PLAYBACK_UI_STATE]: !!data,
+        [StateProperty_Enum.STORY_HAS_PLAYBACK_UI_STATE]: !!data,
       });
     // Mutes or unmutes the story media.
-    case ACTION_ENUM.TOGGLE_MUTED:
+    case Action_Enum.TOGGLE_MUTED:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.MUTED_STATE]: !!data,
+        [StateProperty_Enum.MUTED_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_PAGE_HAS_AUDIO:
+    case Action_Enum.TOGGLE_PAGE_HAS_AUDIO:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAGE_HAS_AUDIO_STATE]: !!data,
+        [StateProperty_Enum.PAGE_HAS_AUDIO_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK:
+    case Action_Enum.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: !!data,
+        [StateProperty_Enum.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_PAUSED:
+    case Action_Enum.TOGGLE_PAUSED:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAUSED_STATE]: !!data,
+        [StateProperty_Enum.PAUSED_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_RTL:
+    case Action_Enum.TOGGLE_RTL:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.RTL_STATE]: !!data,
+        [StateProperty_Enum.RTL_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_KEYBOARD_ACTIVE_STATE:
+    case Action_Enum.TOGGLE_KEYBOARD_ACTIVE_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.KEYBOARD_ACTIVE_STATE]: !!data,
+        [StateProperty_Enum.KEYBOARD_ACTIVE_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_SUPPORTED_BROWSER:
+    case Action_Enum.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.SUPPORTED_BROWSER_STATE]: !!data,
+        [StateProperty_Enum.SUPPORTED_BROWSER_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_SHARE_MENU:
+    case Action_Enum.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAUSED_STATE]: !!data,
-        [STATE_PROPERTY_ENUM.SHARE_MENU_STATE]: !!data,
+        [StateProperty_Enum.PAUSED_STATE]: !!data,
+        [StateProperty_Enum.SHARE_MENU_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_SYSTEM_UI_IS_VISIBLE:
+    case Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
+        [StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
       });
-    case ACTION_ENUM.TOGGLE_UI:
+    case Action_Enum.TOGGLE_UI:
       if (
-        state[STATE_PROPERTY_ENUM.UI_STATE] === UI_TYPE_ENUM.VERTICAL &&
-        data !== UI_TYPE_ENUM.VERTICAL
+        state[StateProperty_Enum.UI_STATE] === UiType_Enum.VERTICAL &&
+        data !== UiType_Enum.VERTICAL
       ) {
         dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
         return state;
       }
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.UI_STATE]: data,
+        [StateProperty_Enum.UI_STATE]: data,
       });
-    case ACTION_ENUM.SET_GYROSCOPE_PERMISSION:
+    case Action_Enum.SET_GYROSCOPE_PERMISSION:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.GYROSCOPE_PERMISSION_STATE]: data,
+        [StateProperty_Enum.GYROSCOPE_PERMISSION_STATE]: data,
       });
-    case ACTION_ENUM.SET_CONSENT_ID:
+    case Action_Enum.SET_CONSENT_ID:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.CONSENT_ID]: data,
+        [StateProperty_Enum.CONSENT_ID]: data,
       });
-    case ACTION_ENUM.CHANGE_PAGE:
+    case Action_Enum.CHANGE_PAGE:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.CURRENT_PAGE_ID]: data.id,
-        [STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX]: data.index,
+        [StateProperty_Enum.CURRENT_PAGE_ID]: data.id,
+        [StateProperty_Enum.CURRENT_PAGE_INDEX]: data.index,
       });
-    case ACTION_ENUM.SET_ADVANCEMENT_MODE:
+    case Action_Enum.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.ADVANCEMENT_MODE]: data,
+        [StateProperty_Enum.ADVANCEMENT_MODE]: data,
       });
-    case ACTION_ENUM.SET_NAVIGATION_PATH:
+    case Action_Enum.SET_NAVIGATION_PATH:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.NAVIGATION_PATH]: data,
+        [StateProperty_Enum.NAVIGATION_PATH]: data,
       });
-    case ACTION_ENUM.SET_PAGE_IDS:
+    case Action_Enum.SET_PAGE_IDS:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAGE_IDS]: data,
+        [StateProperty_Enum.PAGE_IDS]: data,
       });
-    case ACTION_ENUM.SET_PAGE_SIZE:
+    case Action_Enum.SET_PAGE_SIZE:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.PAGE_SIZE]: data,
+        [StateProperty_Enum.PAGE_SIZE]: data,
       });
-    case ACTION_ENUM.SET_VIEWER_CUSTOM_CONTROLS:
+    case Action_Enum.SET_VIEWER_CUSTOM_CONTROLS:
       return /** @type {!State} */ ({
         ...state,
-        [STATE_PROPERTY_ENUM.VIEWER_CUSTOM_CONTROLS]: data,
+        [StateProperty_Enum.VIEWER_CUSTOM_CONTROLS]: data,
       });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -540,52 +540,52 @@ export class AmpStoryStoreService {
     // Compiler won't resolve the object keys and trigger an error for missing
     // properties, so we have to force the type.
     return /** @type {!State} */ ({
-      [STATE_PROPERTY_ENUM.CAN_INSERT_AUTOMATIC_AD]: true,
-      [STATE_PROPERTY_ENUM.CAN_SHOW_AUDIO_UI]: true,
-      [STATE_PROPERTY_ENUM.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
-      [STATE_PROPERTY_ENUM.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
-      [STATE_PROPERTY_ENUM.CAN_SHOW_PAGINATION_BUTTONS]: true,
-      [STATE_PROPERTY_ENUM.CAN_SHOW_SHARING_UIS]: true,
-      [STATE_PROPERTY_ENUM.CAN_SHOW_STORY_URL_INFO]: true,
-      [STATE_PROPERTY_ENUM.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
-      [STATE_PROPERTY_ENUM.VIEWER_CUSTOM_CONTROLS]: [],
-      [STATE_PROPERTY_ENUM.ACCESS_STATE]: false,
-      [STATE_PROPERTY_ENUM.AD_STATE]: false,
-      [STATE_PROPERTY_ENUM.AFFILIATE_LINK_STATE]: null,
-      [STATE_PROPERTY_ENUM.EDUCATION_STATE]: false,
-      [STATE_PROPERTY_ENUM.GYROSCOPE_PERMISSION_STATE]: '',
-      [STATE_PROPERTY_ENUM.INFO_DIALOG_STATE]: false,
-      [STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE]: {
-        state: EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN,
+      [StateProperty_Enum.CAN_INSERT_AUTOMATIC_AD]: true,
+      [StateProperty_Enum.CAN_SHOW_AUDIO_UI]: true,
+      [StateProperty_Enum.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
+      [StateProperty_Enum.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty_Enum.CAN_SHOW_PAGINATION_BUTTONS]: true,
+      [StateProperty_Enum.CAN_SHOW_SHARING_UIS]: true,
+      [StateProperty_Enum.CAN_SHOW_STORY_URL_INFO]: true,
+      [StateProperty_Enum.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty_Enum.VIEWER_CUSTOM_CONTROLS]: [],
+      [StateProperty_Enum.ACCESS_STATE]: false,
+      [StateProperty_Enum.AD_STATE]: false,
+      [StateProperty_Enum.AFFILIATE_LINK_STATE]: null,
+      [StateProperty_Enum.EDUCATION_STATE]: false,
+      [StateProperty_Enum.GYROSCOPE_PERMISSION_STATE]: '',
+      [StateProperty_Enum.INFO_DIALOG_STATE]: false,
+      [StateProperty_Enum.INTERACTIVE_COMPONENT_STATE]: {
+        state: EmbeddedComponentState_Enum.HIDDEN,
       },
-      [STATE_PROPERTY_ENUM.INTERACTIVE_REACT_STATE]: {},
-      [STATE_PROPERTY_ENUM.KEYBOARD_ACTIVE_STATE]: false,
-      [STATE_PROPERTY_ENUM.MUTED_STATE]: true,
-      [STATE_PROPERTY_ENUM.PAGE_ATTACHMENT_STATE]: false,
-      [STATE_PROPERTY_ENUM.PAGE_HAS_AUDIO_STATE]: false,
-      [STATE_PROPERTY_ENUM.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
-      [STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE]: {},
-      [STATE_PROPERTY_ENUM.PAUSED_STATE]: false,
-      [STATE_PROPERTY_ENUM.RTL_STATE]: false,
-      [STATE_PROPERTY_ENUM.SHARE_MENU_STATE]: false,
-      [STATE_PROPERTY_ENUM.SUPPORTED_BROWSER_STATE]: true,
-      [STATE_PROPERTY_ENUM.STORY_HAS_AUDIO_STATE]: false,
-      [STATE_PROPERTY_ENUM.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
-      [STATE_PROPERTY_ENUM.STORY_HAS_PLAYBACK_UI_STATE]: false,
-      [STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE]: true,
-      [STATE_PROPERTY_ENUM.UI_STATE]: UI_TYPE_ENUM.MOBILE,
+      [StateProperty_Enum.INTERACTIVE_REACT_STATE]: {},
+      [StateProperty_Enum.KEYBOARD_ACTIVE_STATE]: false,
+      [StateProperty_Enum.MUTED_STATE]: true,
+      [StateProperty_Enum.PAGE_ATTACHMENT_STATE]: false,
+      [StateProperty_Enum.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty_Enum.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
+      [StateProperty_Enum.PANNING_MEDIA_STATE]: {},
+      [StateProperty_Enum.PAUSED_STATE]: false,
+      [StateProperty_Enum.RTL_STATE]: false,
+      [StateProperty_Enum.SHARE_MENU_STATE]: false,
+      [StateProperty_Enum.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty_Enum.STORY_HAS_AUDIO_STATE]: false,
+      [StateProperty_Enum.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
+      [StateProperty_Enum.STORY_HAS_PLAYBACK_UI_STATE]: false,
+      [StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE]: true,
+      [StateProperty_Enum.UI_STATE]: UiType_Enum.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
-      [STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST]: [],
-      [STATE_PROPERTY_ENUM.CONSENT_ID]: null,
-      [STATE_PROPERTY_ENUM.CURRENT_PAGE_ID]: '',
-      [STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX]: 0,
-      [STATE_PROPERTY_ENUM.ADVANCEMENT_MODE]: '',
-      [STATE_PROPERTY_ENUM.NEW_PAGE_AVAILABLE_ID]: '',
-      [STATE_PROPERTY_ENUM.NAVIGATION_PATH]: [],
-      [STATE_PROPERTY_ENUM.PAGE_IDS]: [],
-      [STATE_PROPERTY_ENUM.PAGE_SIZE]: null,
-      [STATE_PROPERTY_ENUM.PREVIEW_STATE]: false,
+      [StateProperty_Enum.ACTIONS_ALLOWLIST]: [],
+      [StateProperty_Enum.CONSENT_ID]: null,
+      [StateProperty_Enum.CURRENT_PAGE_ID]: '',
+      [StateProperty_Enum.CURRENT_PAGE_INDEX]: 0,
+      [StateProperty_Enum.ADVANCEMENT_MODE]: '',
+      [StateProperty_Enum.NEW_PAGE_AVAILABLE_ID]: '',
+      [StateProperty_Enum.NAVIGATION_PATH]: [],
+      [StateProperty_Enum.PAGE_IDS]: [],
+      [StateProperty_Enum.PAGE_SIZE]: null,
+      [StateProperty_Enum.PREVIEW_STATE]: false,
     });
   }
 
@@ -598,33 +598,33 @@ export class AmpStoryStoreService {
   getEmbedOverrides_() {
     const embedMode = parseEmbedMode(this.win_.location.hash);
     switch (embedMode) {
-      case EMBED_MODE_ENUM.NAME_TBD:
+      case EmbedMode_Enum.NAME_TBD:
         return {
-          [STATE_PROPERTY_ENUM.CAN_INSERT_AUTOMATIC_AD]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_PAGINATION_BUTTONS]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-          [STATE_PROPERTY_ENUM.MUTED_STATE]: false,
+          [StateProperty_Enum.CAN_INSERT_AUTOMATIC_AD]: false,
+          [StateProperty_Enum.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty_Enum.CAN_SHOW_PAGINATION_BUTTONS]: false,
+          [StateProperty_Enum.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+          [StateProperty_Enum.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+          [StateProperty_Enum.MUTED_STATE]: false,
         };
-      case EMBED_MODE_ENUM.NO_SHARING:
+      case EmbedMode_Enum.NO_SHARING:
         return {
-          [STATE_PROPERTY_ENUM.CAN_SHOW_SHARING_UIS]: false,
+          [StateProperty_Enum.CAN_SHOW_SHARING_UIS]: false,
         };
-      case EMBED_MODE_ENUM.PREVIEW:
+      case EmbedMode_Enum.PREVIEW:
         return {
-          [STATE_PROPERTY_ENUM.PREVIEW_STATE]: true,
-          [STATE_PROPERTY_ENUM.CAN_INSERT_AUTOMATIC_AD]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_PAGINATION_BUTTONS]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+          [StateProperty_Enum.PREVIEW_STATE]: true,
+          [StateProperty_Enum.CAN_INSERT_AUTOMATIC_AD]: false,
+          [StateProperty_Enum.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty_Enum.CAN_SHOW_PAGINATION_BUTTONS]: false,
+          [StateProperty_Enum.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+          [StateProperty_Enum.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
         };
-      case EMBED_MODE_ENUM.NO_SHARING_NOR_AUDIO_UI:
+      case EmbedMode_Enum.NO_SHARING_NOR_AUDIO_UI:
         return {
-          [STATE_PROPERTY_ENUM.CAN_SHOW_AUDIO_UI]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_SHARING_UIS]: false,
-          [STATE_PROPERTY_ENUM.CAN_SHOW_STORY_URL_INFO]: false,
+          [StateProperty_Enum.CAN_SHOW_AUDIO_UI]: false,
+          [StateProperty_Enum.CAN_SHOW_SHARING_UIS]: false,
+          [StateProperty_Enum.CAN_SHOW_STORY_URL_INFO]: false,
         };
       default:
         return {};

@@ -1,7 +1,7 @@
-import {ACTION_SOURCE_ENUM} from './action-source';
+import {ActionSource_Enum} from './action-source';
 import {
-  ALIGNMENT_ENUM,
-  AXIS_ENUM,
+  Alignment_Enum,
+  Axis_Enum,
   findOverlappingIndex,
   getDimension,
   getPercentageOffsetFromAlignment,
@@ -12,7 +12,7 @@ import {
 } from './dimensions';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
-import {CAROUSEL_EVENTS_ENUM} from './carousel-events';
+import {CarouselEvents_Enum} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '#core/math';
 import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
@@ -267,15 +267,15 @@ export class Carousel {
      * Tracks the source of what cause the carousel to change index. This can
      * be provided when moving the carousel programmatically, and the value
      * will be propagated.
-     * @private {!ACTION_SOURCE_ENUM|undefined}
+     * @private {!ActionSource_Enum|undefined}
      */
     this.actionSource_ = undefined;
 
-    /** @private {!ALIGNMENT_ENUM} */
-    this.alignment_ = ALIGNMENT_ENUM.START;
+    /** @private {!Alignment_Enum} */
+    this.alignment_ = Alignment_Enum.START;
 
-    /** @private {!AXIS_ENUM} */
-    this.axis_ = AXIS_ENUM.X;
+    /** @private {!Axis_Enum} */
+    this.axis_ = Axis_Enum.X;
 
     /**
      * Whether slides are laid out in the forwards or reverse direction. When
@@ -339,7 +339,7 @@ export class Carousel {
 
   /**
    * Moves forward by the current advance count.
-   * @param {!ACTION_SOURCE_ENUM=} actionSource
+   * @param {!ActionSource_Enum=} actionSource
    */
   next(actionSource) {
     this.advance(this.advanceCount_, {actionSource});
@@ -347,7 +347,7 @@ export class Carousel {
 
   /**
    * Moves backwards by the current advance count.
-   * @param {!ACTION_SOURCE_ENUM=} actionSource
+   * @param {!ActionSource_Enum=} actionSource
    */
   prev(actionSource) {
     this.advance(-this.advanceCount_, {actionSource});
@@ -374,7 +374,7 @@ export class Carousel {
    * TODO(sparhami) How can we make this work well for accessibility?
    * @param {number} delta
    * @param {{
-   *   actionSource: (!ACTION_SOURCE_ENUM|undefined),
+   *   actionSource: (!ActionSource_Enum|undefined),
    *   allowWrap: (boolean|undefined),
    * }=} options
    */
@@ -466,7 +466,7 @@ export class Carousel {
    * @param {number} index
    * @param {{
    *   smoothScroll: (boolean|undefined),
-   *   actionSource: (!ACTION_SOURCE_ENUM|undefined),
+   *   actionSource: (!ActionSource_Enum|undefined),
    * }=} options
    */
   goToSlide(index, options = {}) {
@@ -507,7 +507,7 @@ export class Carousel {
    */
   updateAlignment(alignment) {
     this.alignment_ =
-      alignment === 'start' ? ALIGNMENT_ENUM.START : ALIGNMENT_ENUM.CENTER;
+      alignment === 'start' ? Alignment_Enum.START : Alignment_Enum.CENTER;
     this.updateUi();
   }
 
@@ -568,7 +568,7 @@ export class Carousel {
    *    horizontally or vertically.
    */
   updateHorizontal(horizontal) {
-    this.axis_ = horizontal ? AXIS_ENUM.X : AXIS_ENUM.Y;
+    this.axis_ = horizontal ? Axis_Enum.X : Axis_Enum.Y;
     this.updateUi();
   }
 
@@ -661,7 +661,7 @@ export class Carousel {
       this.scrollContainer_.setAttribute('hide-scrollbar', this.hideScrollbar_);
       this.scrollContainer_.setAttribute(
         'horizontal',
-        this.axis_ === AXIS_ENUM.X
+        this.axis_ === Axis_Enum.X
       );
       this.scrollContainer_.setAttribute('loop', this.isLooping());
       this.scrollContainer_.setAttribute('snap', this.snap_);
@@ -698,7 +698,7 @@ export class Carousel {
    * Updates the resting index as well as firing an event, if it actually
    * changed.
    * @param {number} restingIndex The new resting index.
-   * @param {ACTION_SOURCE_ENUM=} actionSource The actionSource associated with this
+   * @param {ActionSource_Enum=} actionSource The actionSource associated with this
    *    change.
    * @private
    */
@@ -711,7 +711,7 @@ export class Carousel {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        CAROUSEL_EVENTS_ENUM.INDEX_CHANGE,
+        CarouselEvents_Enum.INDEX_CHANGE,
         dict({
           'index': restingIndex,
           'total': this.slides_.length,
@@ -737,7 +737,7 @@ export class Carousel {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        CAROUSEL_EVENTS_ENUM.OFFSET_CHANGE,
+        CarouselEvents_Enum.OFFSET_CHANGE,
         dict({
           'index': index,
           'total': this.slides_.length,
@@ -758,7 +758,7 @@ export class Carousel {
    */
   notifyScrollStart() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, CAROUSEL_EVENTS_ENUM.SCROLL_START, null)
+      createCustomEvent(this.win_, CarouselEvents_Enum.SCROLL_START, null)
     );
   }
 
@@ -771,7 +771,7 @@ export class Carousel {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        CAROUSEL_EVENTS_ENUM.SCROLL_POSITION_CHANGED,
+        CarouselEvents_Enum.SCROLL_POSITION_CHANGED,
         null
       )
     );
@@ -784,7 +784,7 @@ export class Carousel {
    */
   handleTouchStart_() {
     this.touching_ = true;
-    this.actionSource_ = ACTION_SOURCE_ENUM.TOUCH;
+    this.actionSource_ = ActionSource_Enum.TOUCH;
     this.requestedIndex_ = null;
     this.ignoreNextScroll_ = false;
 
@@ -807,7 +807,7 @@ export class Carousel {
    * @private
    */
   handleWheel_() {
-    this.actionSource_ = ACTION_SOURCE_ENUM.WHEEL;
+    this.actionSource_ = ActionSource_Enum.WHEEL;
     this.requestedIndex_ = null;
     this.ignoreNextScroll_ = false;
   }
@@ -861,8 +861,8 @@ export class Carousel {
   isUserScrolling_() {
     return (
       this.scrolling_ &&
-      (this.actionSource_ === ACTION_SOURCE_ENUM.TOUCH ||
-        this.actionSource_ === ACTION_SOURCE_ENUM.WHEEL)
+      (this.actionSource_ === ActionSource_Enum.TOUCH ||
+        this.actionSource_ === ActionSource_Enum.WHEEL)
     );
   }
 
@@ -1030,7 +1030,7 @@ export class Carousel {
    */
   setChildrenSnapAlign_() {
     const slideCount = this.slides_.length;
-    const startAligned = this.alignment_ === ALIGNMENT_ENUM.START;
+    const startAligned = this.alignment_ === Alignment_Enum.START;
     const oddVisibleCount = mod(this.visibleCount_, 2) === 1;
     // For the legacy scroll-snap-coordinate, when center aligning with an odd
     // count, actually use a start coordinate. Otherwise it will snap to the
@@ -1336,7 +1336,7 @@ export class Carousel {
     // TODO(sparhami) The current approach of moving a set number of slides
     // does not work well for the mixed length use case.
     const {alignment_, slides_, visibleCount_} = this;
-    const isStartAligned = alignment_ === ALIGNMENT_ENUM.START;
+    const isStartAligned = alignment_ === Alignment_Enum.START;
     // How many slides fit into the current "window" of slides. When center
     // aligning, we can ignore this as we want to have the same amount on both
     // sides.
@@ -1358,7 +1358,7 @@ export class Carousel {
    */
   inLastWindow_(index) {
     const {alignment_, slides_, visibleCount_} = this;
-    const startAligned = alignment_ === ALIGNMENT_ENUM.START;
+    const startAligned = alignment_ === Alignment_Enum.START;
     const lastWindowSize = startAligned ? visibleCount_ : visibleCount_ / 2;
 
     return index >= slides_.length - lastWindowSize;

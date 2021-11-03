@@ -23,7 +23,7 @@ export const StorageKeys = {
 };
 
 /** @enum {string} */
-export const NOTIFICATION_PERMISSION_ENUM = {
+export const NotificationPermission_Enum = {
   GRANTED: 'granted',
   DENIED: 'denied',
   /*

@@ -3,8 +3,8 @@ import {Services} from '#service';
 import {listenOncePromise} from '#utils/event-helper';
 
 import {
-  PLAYING_STATES_ENUM,
-  VIDEO_EVENTS_ENUM,
+  PlayingStates_Enum,
+  VideoEvents_Enum,
 } from '../../../../src/video-interface';
 import AmpViqeoPlayer from '../amp-viqeo-player';
 
@@ -97,7 +97,7 @@ describes.realWin(
       it('should paused without autoplay', () => {
         return getViqeo().then((p) => {
           const curState = p.videoManager.getPlayingState(p.viqeo);
-          return expect(curState).to.equal(PLAYING_STATES_ENUM.PAUSED);
+          return expect(curState).to.equal(PlayingStates_Enum.PAUSED);
         });
       });
     });
@@ -123,51 +123,45 @@ describes.realWin(
       return getViqeo().then(({viqeoElement}) => {
         return Promise.resolve()
           .then(async () => {
-            const p = listenOncePromise(viqeoElement, VIDEO_EVENTS_ENUM.LOAD);
+            const p = listenOncePromise(viqeoElement, VideoEvents_Enum.LOAD);
             await fakePostMessage(viqeoElement, {action: 'ready'});
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(
-              viqeoElement,
-              VIDEO_EVENTS_ENUM.PLAYING
-            );
+            const p = listenOncePromise(viqeoElement, VideoEvents_Enum.PLAYING);
             await fakePostMessage(viqeoElement, {action: 'play'});
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(viqeoElement, VIDEO_EVENTS_ENUM.PAUSE);
+            const p = listenOncePromise(viqeoElement, VideoEvents_Enum.PAUSE);
             await fakePostMessage(viqeoElement, {action: 'pause'});
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(viqeoElement, VIDEO_EVENTS_ENUM.MUTED);
+            const p = listenOncePromise(viqeoElement, VideoEvents_Enum.MUTED);
             await fakePostMessage(viqeoElement, {action: 'mute'});
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(
-              viqeoElement,
-              VIDEO_EVENTS_ENUM.UNMUTED
-            );
+            const p = listenOncePromise(viqeoElement, VideoEvents_Enum.UNMUTED);
             await fakePostMessage(viqeoElement, {action: 'unmute'});
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(viqeoElement, VIDEO_EVENTS_ENUM.ENDED);
+            const p = listenOncePromise(viqeoElement, VideoEvents_Enum.ENDED);
             await fakePostMessage(viqeoElement, {action: 'end'});
             return p;
           })
           .then(async () => {
             const p = listenOncePromise(
               viqeoElement,
-              VIDEO_EVENTS_ENUM.AD_START
+              VideoEvents_Enum.AD_START
             );
             await fakePostMessage(viqeoElement, {action: 'startAdvert'});
             return p;
           })
           .then(async () => {
-            const p = listenOncePromise(viqeoElement, VIDEO_EVENTS_ENUM.AD_END);
+            const p = listenOncePromise(viqeoElement, VideoEvents_Enum.AD_END);
             await fakePostMessage(viqeoElement, {action: 'endAdvert'});
             return p;
           });

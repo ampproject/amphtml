@@ -1,7 +1,7 @@
 import {
-  ANALYTICS_EVENT_TYPE_ENUM,
   AmpStoryEventTracker,
   AnalyticsEvent,
+  AnalyticsEventType_Enum,
   CustomEventTracker,
   getTrackerKeyName,
 } from './events';
@@ -64,7 +64,7 @@ export class InstrumentationService {
    */
   getTrackerClass_(trackerName) {
     switch (trackerName) {
-      case ANALYTICS_EVENT_TYPE_ENUM.STORY:
+      case AnalyticsEventType_Enum.STORY:
         return AmpStoryEventTracker;
       default:
         return CustomEventTracker;

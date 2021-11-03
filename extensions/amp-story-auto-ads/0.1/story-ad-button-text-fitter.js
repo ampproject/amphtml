@@ -6,7 +6,7 @@ import {Services} from '#service';
 const MAX_HEIGHT = 32;
 
 /** @enum {number} From design spec. */
-const FONT_SIZES_ENUM = {
+const FontSizes_Enum = {
   MIN: 12,
   MAX: 14,
 };
@@ -54,10 +54,10 @@ export class ButtonTextFitter {
           this.measurer_,
           MAX_HEIGHT,
           this.getMaxWidth_(pageElement),
-          FONT_SIZES_ENUM.MIN,
-          FONT_SIZES_ENUM.MAX
+          FontSizes_Enum.MIN,
+          FontSizes_Enum.MAX
         );
-        if (fontSize >= FONT_SIZES_ENUM.MIN) {
+        if (fontSize >= FontSizes_Enum.MIN) {
           this.updateFontSize_(container, fontSize);
           success = true;
         }

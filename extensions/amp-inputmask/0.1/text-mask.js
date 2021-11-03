@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
-import {OUTPUT_MODE_ENUM} from './constants';
+import {OutputMode_Enum} from './constants';
 import {Mask} from './mask-impl';
 
 const ELEMENT_MASK_PROPERTY = '__amp_inputmask_masked';
@@ -45,7 +45,7 @@ export class TextMask {
 
     /** @private @const */
     this.outputMode_ =
-      element.getAttribute('mask-output') || OUTPUT_MODE_ENUM.RAW;
+      element.getAttribute('mask-output') || OutputMode_Enum.RAW;
 
     const mask = element.getAttribute('mask');
 
@@ -71,7 +71,7 @@ export class TextMask {
    * @param {!HTMLFormElement} form
    */
   handleBeforeSubmit_(form) {
-    if (this.outputMode_ != OUTPUT_MODE_ENUM.ALPHANUMERIC) {
+    if (this.outputMode_ != OutputMode_Enum.ALPHANUMERIC) {
       return;
     }
 
@@ -113,7 +113,7 @@ export class TextMask {
     }
 
     this.hiddenInput_.value =
-      this.outputMode_ == OUTPUT_MODE_ENUM.ALPHANUMERIC
+      this.outputMode_ == OutputMode_Enum.ALPHANUMERIC
         ? this.controller_.getUnmaskedValue()
         : this.controller_.getValue();
   }

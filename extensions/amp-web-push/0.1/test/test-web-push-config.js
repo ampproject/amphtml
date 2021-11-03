@@ -1,5 +1,5 @@
 import '../amp-web-push';
-import {WEB_PUSH_CONFIG_ATTRIBUTES_ENUM} from '../amp-web-push-config';
+import {WebPushConfigAttributes_Enum} from '../amp-web-push-config';
 import {CONFIG_TAG, TAG} from '../vars';
 
 describes.realWin(
@@ -15,13 +15,13 @@ describes.realWin(
 
     function setDefaultWebPushConfig() {
       const webPushConfig = {};
-      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL] =
+      webPushConfig[WebPushConfigAttributes_Enum.HELPER_FRAME_URL] =
         'https://a.com/webpush/amp/helper?https=1';
-      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL] =
+      webPushConfig[WebPushConfigAttributes_Enum.PERMISSION_DIALOG_URL] =
         'https://a.com/webpush/amp/subscribe?https=1';
-      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL] =
+      webPushConfig[WebPushConfigAttributes_Enum.SERVICE_WORKER_URL] =
         'https://a.com/service-worker.js?param=value';
-      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE] = '/';
+      webPushConfig[WebPushConfigAttributes_Enum.SERVICE_WORKER_SCOPE] = '/';
       return webPushConfig;
     }
 
@@ -34,20 +34,20 @@ describes.realWin(
       const element = env.win.document.createElement(CONFIG_TAG);
       element.setAttribute('layout', 'nodisplay');
       element.setAttribute(
-        WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL,
-        attributes[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL]
+        WebPushConfigAttributes_Enum.HELPER_FRAME_URL,
+        attributes[WebPushConfigAttributes_Enum.HELPER_FRAME_URL]
       );
       element.setAttribute(
-        WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL,
-        attributes[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.PERMISSION_DIALOG_URL]
+        WebPushConfigAttributes_Enum.PERMISSION_DIALOG_URL,
+        attributes[WebPushConfigAttributes_Enum.PERMISSION_DIALOG_URL]
       );
       element.setAttribute(
-        WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL,
-        attributes[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_URL]
+        WebPushConfigAttributes_Enum.SERVICE_WORKER_URL,
+        attributes[WebPushConfigAttributes_Enum.SERVICE_WORKER_URL]
       );
       element.setAttribute(
-        WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE,
-        attributes[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE]
+        WebPushConfigAttributes_Enum.SERVICE_WORKER_SCOPE,
+        attributes[WebPushConfigAttributes_Enum.SERVICE_WORKER_SCOPE]
       );
       element.setAttribute('id', TAG);
       win.document.body.appendChild(element);
@@ -83,11 +83,9 @@ describes.realWin(
 
     it('should fail if any mandatory attribute is missing', () => {
       const promises = [];
-      for (const attribute in WEB_PUSH_CONFIG_ATTRIBUTES_ENUM) {
-        const configName = WEB_PUSH_CONFIG_ATTRIBUTES_ENUM[attribute];
-        if (
-          configName !== WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.SERVICE_WORKER_SCOPE
-        ) {
+      for (const attribute in WebPushConfigAttributes_Enum) {
+        const configName = WebPushConfigAttributes_Enum[attribute];
+        if (configName !== WebPushConfigAttributes_Enum.SERVICE_WORKER_SCOPE) {
           const promise = env.ampdoc.whenReady().then(async () => {
             removeAllWebPushConfigElements();
             webPushConfig = setDefaultWebPushConfig();
@@ -108,8 +106,8 @@ describes.realWin(
 
     it('should fail if any attribute is HTTP', () => {
       const promises = [];
-      for (const attribute in WEB_PUSH_CONFIG_ATTRIBUTES_ENUM) {
-        const configName = WEB_PUSH_CONFIG_ATTRIBUTES_ENUM[attribute];
+      for (const attribute in WebPushConfigAttributes_Enum) {
+        const configName = WebPushConfigAttributes_Enum[attribute];
         const promise = env.ampdoc.whenReady().then(async () => {
           removeAllWebPushConfigElements();
           webPushConfig[configName] = 'http://example.com/test';
@@ -126,8 +124,8 @@ describes.realWin(
 
     it('should fail if any attribute is site root page', () => {
       const promises = [];
-      for (const attribute in WEB_PUSH_CONFIG_ATTRIBUTES_ENUM) {
-        const configName = WEB_PUSH_CONFIG_ATTRIBUTES_ENUM[attribute];
+      for (const attribute in WebPushConfigAttributes_Enum) {
+        const configName = WebPushConfigAttributes_Enum[attribute];
         const promise = env.ampdoc.whenReady().then(async () => {
           removeAllWebPushConfigElements();
           webPushConfig[configName] = 'http://example.com/';
@@ -144,8 +142,8 @@ describes.realWin(
 
     it("should fail if any attribute value's protocol is missing", () => {
       const promises = [];
-      for (const attribute in WEB_PUSH_CONFIG_ATTRIBUTES_ENUM) {
-        const configName = WEB_PUSH_CONFIG_ATTRIBUTES_ENUM[attribute];
+      for (const attribute in WebPushConfigAttributes_Enum) {
+        const configName = WebPushConfigAttributes_Enum[attribute];
         const promise = env.ampdoc.whenReady().then(async () => {
           removeAllWebPushConfigElements();
           webPushConfig[configName] = 'www.example.com/test';
@@ -161,7 +159,7 @@ describes.realWin(
     });
 
     it('should fail if attribute origins differ', () => {
-      webPushConfig[WEB_PUSH_CONFIG_ATTRIBUTES_ENUM.HELPER_FRAME_URL] =
+      webPushConfig[WebPushConfigAttributes_Enum.HELPER_FRAME_URL] =
         'https://another-origin.com/test';
       return env.ampdoc.whenReady().then(async () => {
         const element = createConfigElementWithAttributes(webPushConfig);

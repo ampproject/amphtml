@@ -1,8 +1,8 @@
 import '../amp-lightbox';
 import * as dom from '#core/dom';
 import {ActionService} from '#service/action-impl';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {whenCalled} from '#testing/helpers/service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -86,7 +86,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ACTION_TRUST_ENUM.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction.callCount).to.be.above(0);
         expect(element.enqueAction).to.be.calledWith(
@@ -98,7 +98,7 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ACTION_TRUST_ENUM.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });
@@ -118,9 +118,9 @@ describes.realWin(
       const setupCloseSpy = env.sandbox.spy(impl, 'close');
 
       impl.open_({caller: sourceElement});
-      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: KEYS_ENUM.ENTER}));
+      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys_Enum.ENTER}));
       impl.closeOnEscape_(
-        new KeyboardEvent('keydown', {key: KEYS_ENUM.ESCAPE})
+        new KeyboardEvent('keydown', {key: Keys_Enum.ESCAPE})
       );
       expect(setupCloseSpy).to.be.calledOnce;
     });

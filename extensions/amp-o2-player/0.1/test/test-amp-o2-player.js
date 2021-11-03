@@ -1,6 +1,6 @@
 import '../amp-o2-player';
-import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 
 import * as iframeHelper from '../../../../src/iframe-helper';
 
@@ -166,7 +166,7 @@ describes.realWin(
       };
       const resData = {
         sentinel: 'amp',
-        type: MESSAGE_TYPE_ENUM.CONSENT_DATA,
+        type: MessageType_Enum.CONSENT_DATA,
       };
 
       it('sends a consent-data CONSENT_POLICY_STATE.SUFFICIENT message', async function () {
@@ -179,7 +179,7 @@ describes.realWin(
 
           env.sandbox
             .stub(impl, 'getConsentPolicyState_')
-            .resolves(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+            .resolves(ConsentPolicyState_Enum.SUFFICIENT);
 
           sendConsentDataToIframe = env.sandbox.spy(
             impl,
@@ -190,7 +190,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MESSAGE_TYPE_ENUM.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 
@@ -221,7 +221,7 @@ describes.realWin(
 
           env.sandbox
             .stub(impl, 'getConsentPolicyState_')
-            .resolves(CONSENT_POLICY_STATE_ENUM.INSUFFICIENT);
+            .resolves(ConsentPolicyState_Enum.INSUFFICIENT);
 
           sendConsentDataToIframe = env.sandbox.spy(
             impl,
@@ -232,7 +232,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MESSAGE_TYPE_ENUM.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 
@@ -266,7 +266,7 @@ describes.realWin(
 
           env.sandbox
             .stub(impl, 'getConsentPolicyState_')
-            .resolves(CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED);
+            .resolves(ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED);
 
           sendConsentDataToIframe = env.sandbox.spy(
             impl,
@@ -277,7 +277,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MESSAGE_TYPE_ENUM.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 

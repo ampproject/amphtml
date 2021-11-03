@@ -1,11 +1,11 @@
 import * as Listen from '#utils/event-helper';
 import {
   SESSION_MAX_AGE_MILLIS,
-  SESSION_VALUES_ENUM,
   SessionManager,
+  SessionValues_Enum,
   installSessionServiceForTesting,
 } from '../session-manager';
-import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {expect} from 'chai';
 import {installVariableServiceForTesting} from '../variables';
 import {
@@ -76,12 +76,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
     it('should create new sessions', async () => {
       session = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.COUNT]: 1,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 5000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.COUNT]: 1,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -90,12 +90,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       randomVal = 0.6;
       const vendorType2 = 'myVendorType2';
       const session2 = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 6000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: 1555555555556,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: 1555555555556,
-        [SESSION_VALUES_ENUM.COUNT]: 1,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 6000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: 1555555555556,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: 1555555555556,
+        [SessionValues_Enum.COUNT]: 1,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType2)).to.deep.equals(session2);
       expect(sessionManager.sessions_[vendorType2]).to.deep.equals(session2);
@@ -104,18 +104,18 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
     it('should update an existing session in memory and storage', async () => {
       session = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.COUNT]: 1,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 5000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.COUNT]: 1,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
 
       clock.tick(1);
-      session[SESSION_VALUES_ENUM.ACCESS_TIMESTAMP] = 1555555555556;
+      session[SessionValues_Enum.ACCESS_TIMESTAMP] = 1555555555556;
       // Get again, extend the session
       storageSetSpy.resetHistory();
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
@@ -130,28 +130,28 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
     it('should not change creationTimestamp on update', async () => {
       session = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.COUNT]: 1,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 5000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.COUNT]: 1,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       await sessionManager.get(vendorType);
 
       clock.tick(1);
-      session[SESSION_VALUES_ENUM.ACCESS_TIMESTAMP] = 1555555555556;
+      session[SessionValues_Enum.ACCESS_TIMESTAMP] = 1555555555556;
 
       storageSetSpy.resetHistory();
       const storedSession = await sessionManager.get(vendorType);
-      expect(storedSession[SESSION_VALUES_ENUM.CREATION_TIMESTAMP]).to.equal(
-        session[SESSION_VALUES_ENUM.CREATION_TIMESTAMP]
+      expect(storedSession[SessionValues_Enum.CREATION_TIMESTAMP]).to.equal(
+        session[SessionValues_Enum.CREATION_TIMESTAMP]
       );
       expect(
         sessionManager.sessions_[vendorType][
-          SESSION_VALUES_ENUM.CREATION_TIMESTAMP
+          SessionValues_Enum.CREATION_TIMESTAMP
         ]
-      ).to.equal(session[SESSION_VALUES_ENUM.CREATION_TIMESTAMP]);
+      ).to.equal(session[SessionValues_Enum.CREATION_TIMESTAMP]);
 
       expect(storageSetSpy).to.be.calledOnce;
       expect(storageSetSpy).to.be.calledWith(
@@ -162,12 +162,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
     it('should create a new session for an expired session', async () => {
       session = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.COUNT]: 1,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 5000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.COUNT]: 1,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -179,12 +179,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
       storageSetSpy.resetHistory();
       session = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 6000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: 1555557355556,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: 1555557355556,
-        [SESSION_VALUES_ENUM.COUNT]: 2,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 6000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: 1555557355556,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: 1555557355556,
+        [SessionValues_Enum.COUNT]: 2,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(session);
       expect(sessionManager.sessions_[vendorType]).to.deep.equals(session);
@@ -199,36 +199,36 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
     it('should update count for a newly created a new session for an expired session', async () => {
       let storedSession = await sessionManager.get(vendorType);
-      expect(storedSession[SESSION_VALUES_ENUM.COUNT]).to.equal(1);
+      expect(storedSession[SessionValues_Enum.COUNT]).to.equal(1);
 
       // Go past expiration
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
 
       storedSession = await sessionManager.get(vendorType);
-      expect(storedSession[SESSION_VALUES_ENUM.COUNT]).to.equal(2);
+      expect(storedSession[SessionValues_Enum.COUNT]).to.equal(2);
       expect(
-        sessionManager.sessions_[vendorType][SESSION_VALUES_ENUM.COUNT]
+        sessionManager.sessions_[vendorType][SessionValues_Enum.COUNT]
       ).to.equal(2);
     });
 
     it('should retrieve a non-expired session from storage', async () => {
       storageValue = {
         ['amp-session:' + vendorType]: {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.COUNT]: 1,
         },
       };
 
       clock.tick(1);
       const parsedSession = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: 1555555555556,
-        [SESSION_VALUES_ENUM.COUNT]: 1,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 5000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: 1555555555556,
+        [SessionValues_Enum.COUNT]: 1,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -242,22 +242,22 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     it('should retrieve an expired session from storage', async () => {
       storageValue = {
         ['amp-session:' + vendorType]: {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.COUNT]: 1,
         },
       };
 
       randomVal = 0.7;
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
       const parsedSession = {
-        [SESSION_VALUES_ENUM.SESSION_ID]: 7000,
-        [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: 1555557355556,
-        [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: 1555557355556,
-        [SESSION_VALUES_ENUM.COUNT]: 2,
-        [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-        [SESSION_VALUES_ENUM.ENGAGED]: true,
+        [SessionValues_Enum.SESSION_ID]: 7000,
+        [SessionValues_Enum.CREATION_TIMESTAMP]: 1555557355556,
+        [SessionValues_Enum.ACCESS_TIMESTAMP]: 1555557355556,
+        [SessionValues_Enum.COUNT]: 2,
+        [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+        [SessionValues_Enum.ENGAGED]: true,
       };
       expect(await sessionManager.get(vendorType)).to.deep.equals(
         parsedSession
@@ -279,12 +279,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     describe('updateEvent', () => {
       it('should handle first update', async () => {
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ENGAGED]: true,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.COUNT]: 1,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ENGAGED]: true,
         };
 
         expect(Object.keys(sessionManager.sessions_).length).to.equal(0);
@@ -303,12 +303,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
       it('should handle subsequent updates', async () => {
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime + 1,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime + 1,
-          [SESSION_VALUES_ENUM.ENGAGED]: true,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime + 1,
+          [SessionValues_Enum.COUNT]: 1,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime + 1,
+          [SessionValues_Enum.ENGAGED]: true,
         };
 
         await sessionManager.updateEvent(vendorType);
@@ -341,23 +341,23 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       it('should handle updates from continued session', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
-            [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-            [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.COUNT]: 1,
-            [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ENGAGED]: true,
+            [SessionValues_Enum.SESSION_ID]: 5000,
+            [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.COUNT]: 1,
+            [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ENGAGED]: true,
           },
         };
 
         clock.tick(1);
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime + 1,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime + 1,
-          [SESSION_VALUES_ENUM.ENGAGED]: true,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime + 1,
+          [SessionValues_Enum.COUNT]: 1,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime + 1,
+          [SessionValues_Enum.ENGAGED]: true,
         };
         await sessionManager.updateEvent(vendorType);
 
@@ -374,12 +374,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       it('should handle updates from restarted session', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
-            [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-            [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.COUNT]: 1,
-            [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ENGAGED]: true,
+            [SessionValues_Enum.SESSION_ID]: 5000,
+            [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.COUNT]: 1,
+            [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ENGAGED]: true,
           },
         };
 
@@ -388,12 +388,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         const pastExpiration = 1555557355556;
 
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 6000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES_ENUM.COUNT]: 2,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: pastExpiration,
-          [SESSION_VALUES_ENUM.ENGAGED]: true,
+          [SessionValues_Enum.SESSION_ID]: 6000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: pastExpiration,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: pastExpiration,
+          [SessionValues_Enum.COUNT]: 2,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: pastExpiration,
+          [SessionValues_Enum.ENGAGED]: true,
         };
         await sessionManager.updateEvent(vendorType);
 
@@ -455,12 +455,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(sessionManager.isVisible_).to.be.false;
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: false,
         });
-        env.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.VISIBLE);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.VISIBLE);
         expect(sessionManager.isVisible_).to.be.true;
 
         expect(updateEngagedSpy.callCount).to.equal(6);
@@ -488,12 +488,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       it('should update sessions when all engaged signal changes', async () => {
         await sessionManager.get(vendorType);
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-          [SESSION_VALUES_ENUM.ENGAGED]: true,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.COUNT]: 1,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+          [SessionValues_Enum.ENGAGED]: true,
         };
 
         expect(storageSetSpy).to.be.calledOnce;
@@ -503,7 +503,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         );
 
         win.dispatchEvent(new Event('blur'));
-        session[SESSION_VALUES_ENUM.ENGAGED] = false;
+        session[SessionValues_Enum.ENGAGED] = false;
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -512,7 +512,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         );
 
         win.dispatchEvent(new Event('focus'));
-        session[SESSION_VALUES_ENUM.ENGAGED] = true;
+        session[SessionValues_Enum.ENGAGED] = true;
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -521,7 +521,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         );
 
         win.dispatchEvent(new Event('pagehide'));
-        session[SESSION_VALUES_ENUM.ENGAGED] = false;
+        session[SessionValues_Enum.ENGAGED] = false;
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -530,7 +530,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         );
 
         win.dispatchEvent(new Event('pageshow'));
-        session[SESSION_VALUES_ENUM.ENGAGED] = true;
+        session[SessionValues_Enum.ENGAGED] = true;
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -540,8 +540,8 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.HIDDEN);
-        session[SESSION_VALUES_ENUM.ENGAGED] = false;
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
+        session[SessionValues_Enum.ENGAGED] = false;
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -552,8 +552,8 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: false,
         });
-        env.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.VISIBLE);
-        session[SESSION_VALUES_ENUM.ENGAGED] = true;
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.VISIBLE);
+        session[SessionValues_Enum.ENGAGED] = true;
 
         expect(storageSetSpy).to.be.calledOnce;
         expect(storageSetSpy).to.be.calledWith(
@@ -568,12 +568,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         await sessionManager.get(vendorType2);
 
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-          [SESSION_VALUES_ENUM.ENGAGED]: false,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.COUNT]: 1,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+          [SessionValues_Enum.ENGAGED]: false,
         };
         expect(storageSetSpy.callCount).to.equal(2);
         win.dispatchEvent(new Event('blur'));
@@ -583,12 +583,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
 
       it('use persisted engaged value', async () => {
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.COUNT]: 1,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime,
-          [SESSION_VALUES_ENUM.ENGAGED]: true,
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.COUNT]: 1,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime,
+          [SessionValues_Enum.ENGAGED]: true,
         };
         storageValue = {
           ['amp-session:' + vendorType]: session,
@@ -597,7 +597,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(sessionManager.isVisible_).to.be.false;
 
         // Uses the `true` engaged value
@@ -609,24 +609,24 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       it('use resets engaged value to current engaged value', async () => {
         // New session
         session = {
-          [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-          [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]:
+          [SessionValues_Enum.SESSION_ID]: 5000,
+          [SessionValues_Enum.CREATION_TIMESTAMP]:
             defaultTime + SESSION_MAX_AGE_MILLIS + 1,
-          [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]:
+          [SessionValues_Enum.ACCESS_TIMESTAMP]:
             defaultTime + SESSION_MAX_AGE_MILLIS + 1,
-          [SESSION_VALUES_ENUM.COUNT]: 2,
-          [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-          [SESSION_VALUES_ENUM.ENGAGED]: false,
+          [SessionValues_Enum.COUNT]: 2,
+          [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+          [SessionValues_Enum.ENGAGED]: false,
         };
         // Old session
         storageValue = {
           ['amp-session:' + vendorType]: {
-            [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-            [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.COUNT]: 1,
-            [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ENGAGED]: true,
+            [SessionValues_Enum.SESSION_ID]: 5000,
+            [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.COUNT]: 1,
+            [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ENGAGED]: true,
           },
         };
 
@@ -634,7 +634,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(sessionManager.isVisible_).to.be.false;
 
         const persistedSession = await sessionManager.get(vendorType);
@@ -647,7 +647,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       it('should return current engaged value', async () => {
         const engaged = await sessionManager.getSessionValue(
           vendorType,
-          SESSION_VALUES_ENUM.ENGAGED
+          SessionValues_Enum.ENGAGED
         );
         expect(engaged).to.be.true;
       });
@@ -655,12 +655,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       it('should return persisted engaged from storage if true', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
-            [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-            [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.COUNT]: 1,
-            [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ENGAGED]: true,
+            [SessionValues_Enum.SESSION_ID]: 5000,
+            [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.COUNT]: 1,
+            [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ENGAGED]: true,
           },
         };
 
@@ -668,11 +668,11 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VISIBILITY_STATE_ENUM.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
 
         const engaged = await sessionManager.getSessionValue(
           vendorType,
-          SESSION_VALUES_ENUM.ENGAGED
+          SessionValues_Enum.ENGAGED
         );
         // Engaged is true b/c it's the persisted value
         expect(engaged).to.be.true;
@@ -681,18 +681,18 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       it('should not use persisted engaged from storage if false', async () => {
         storageValue = {
           ['amp-session:' + vendorType]: {
-            [SESSION_VALUES_ENUM.SESSION_ID]: 5000,
-            [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.COUNT]: 1,
-            [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: defaultTime,
-            [SESSION_VALUES_ENUM.ENGAGED]: false,
+            [SessionValues_Enum.SESSION_ID]: 5000,
+            [SessionValues_Enum.CREATION_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ACCESS_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.COUNT]: 1,
+            [SessionValues_Enum.EVENT_TIMESTAMP]: defaultTime,
+            [SessionValues_Enum.ENGAGED]: false,
           },
         };
 
         const engaged = await sessionManager.getSessionValue(
           vendorType,
-          SESSION_VALUES_ENUM.ENGAGED
+          SessionValues_Enum.ENGAGED
         );
         // Engaged is true current document state is engaged
         expect(engaged).to.be.true;
@@ -704,7 +704,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     it('should return undefined on no type', async () => {
       const id = await sessionManager.getSessionValue(
         undefined,
-        SESSION_VALUES_ENUM.SESSION_ID
+        SessionValues_Enum.SESSION_ID
       );
       expect(id).to.be.undefined;
     });
@@ -712,7 +712,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     it('should return SESSION_VALUE.SESSION_ID', async () => {
       let id = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.SESSION_ID
+        SessionValues_Enum.SESSION_ID
       );
       expect(id).to.equal(5000);
 
@@ -720,7 +720,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       clock.tick(1);
       id = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.SESSION_ID
+        SessionValues_Enum.SESSION_ID
       );
       expect(id).to.equal(5000);
 
@@ -728,7 +728,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
       id = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.SESSION_ID
+        SessionValues_Enum.SESSION_ID
       );
       expect(id).to.equal(9000);
     });
@@ -736,21 +736,21 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     it('should return SESSION_VALUE.CREATION_TIMESTAMP', async () => {
       let timestamp = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.CREATION_TIMESTAMP
+        SessionValues_Enum.CREATION_TIMESTAMP
       );
       expect(timestamp).to.equal(defaultTime);
 
       clock.tick(1);
       timestamp = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.CREATION_TIMESTAMP
+        SessionValues_Enum.CREATION_TIMESTAMP
       );
       expect(timestamp).to.equal(defaultTime);
 
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
       timestamp = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.CREATION_TIMESTAMP
+        SessionValues_Enum.CREATION_TIMESTAMP
       );
       // defaultTime + SESSION_MAX_AGE_MILLIS + 1
       expect(timestamp).to.equal(1555557355557);
@@ -759,21 +759,21 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
     it('should return SESSION_VALUE.COUNT', async () => {
       let count = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.COUNT
+        SessionValues_Enum.COUNT
       );
       expect(count).to.equal(1);
 
       clock.tick(1);
       count = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.COUNT
+        SessionValues_Enum.COUNT
       );
       expect(count).to.equal(1);
 
       clock.tick(SESSION_MAX_AGE_MILLIS + 1);
       count = await sessionManager.getSessionValue(
         'myVendorType',
-        SESSION_VALUES_ENUM.COUNT
+        SessionValues_Enum.COUNT
       );
       expect(count).to.equal(2);
     });

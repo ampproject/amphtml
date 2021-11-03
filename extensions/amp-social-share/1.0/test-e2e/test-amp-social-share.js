@@ -1,4 +1,4 @@
-import {KEY_ENUM} from '#testing/helpers/types';
+import {Key_Enum} from '#testing/helpers/types';
 
 describes.endtoend(
   'amp-social-share',
@@ -104,14 +104,14 @@ describes.endtoend(
       });
 
       it('tabs between multiple social-shares and opens on "enter" keypress', async () => {
-        await controller.type(null, KEY_ENUM.Tab);
-        await controller.type(null, KEY_ENUM.Tab);
-        await controller.type(null, KEY_ENUM.Tab);
+        await controller.type(null, Key_Enum.Tab);
+        await controller.type(null, Key_Enum.Tab);
+        await controller.type(null, Key_Enum.Tab);
 
         let windows = await controller.getAllWindows();
         await expect(windows.length).to.equal(1);
 
-        await controller.type(null, KEY_ENUM.Enter);
+        await controller.type(null, Key_Enum.Enter);
 
         windows = await controller.getAllWindows();
         await expect(windows.length).to.equal(2);

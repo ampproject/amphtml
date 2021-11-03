@@ -1,4 +1,4 @@
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -20,7 +20,7 @@ export class AmpNextPage extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === LAYOUT_ENUM.CONTAINER;
+    return layout === Layout_Enum.CONTAINER;
   }
 
   /** @override */

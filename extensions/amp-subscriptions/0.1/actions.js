@@ -1,4 +1,4 @@
-import {ACTION_STATUS_ENUM} from './analytics';
+import {ActionStatus_Enum} from './analytics';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
@@ -102,7 +102,7 @@ export class Actions {
 
     dev().fine(TAG, 'Start action: ', url, action);
 
-    this.analytics_.actionEvent(LOCAL, action, ACTION_STATUS_ENUM.STARTED);
+    this.analytics_.actionEvent(LOCAL, action, ActionStatus_Enum.STARTED);
     const dialogPromise = this.openPopup_(url);
     const actionPromise = dialogPromise
       .then((result) => {
@@ -112,23 +112,19 @@ export class Actions {
         const s = query['success'];
         const success = s == 'true' || s == 'yes' || s == '1';
         if (success) {
-          this.analytics_.actionEvent(
-            LOCAL,
-            action,
-            ACTION_STATUS_ENUM.SUCCESS
-          );
+          this.analytics_.actionEvent(LOCAL, action, ActionStatus_Enum.SUCCESS);
         } else {
           this.analytics_.actionEvent(
             LOCAL,
             action,
-            ACTION_STATUS_ENUM.REJECTED
+            ActionStatus_Enum.REJECTED
           );
         }
         return success || !s;
       })
       .catch((reason) => {
         dev().fine(TAG, 'Action failed: ', action, reason);
-        this.analytics_.actionEvent(LOCAL, action, ACTION_STATUS_ENUM.FAILED);
+        this.analytics_.actionEvent(LOCAL, action, ActionStatus_Enum.FAILED);
         if (this.actionPromise_ == actionPromise) {
           this.actionPromise_ = null;
         }

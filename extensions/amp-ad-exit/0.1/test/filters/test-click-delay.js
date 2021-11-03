@@ -1,9 +1,9 @@
 import {ClickDelayFilter} from '../../filters/click-delay';
-import {FILTER_TYPE_ENUM} from '../../filters/filter';
+import {FilterType_Enum} from '../../filters/filter';
 
 describes.sandboxed('click-delay', {}, (env) => {
   const DEFAULT_CONFIG = {
-    type: FILTER_TYPE_ENUM.CLICK_DELAY,
+    type: FilterType_Enum.CLICK_DELAY,
     delay: 123,
     startTimingEvent: 'navigationStart',
   };
@@ -21,19 +21,19 @@ describes.sandboxed('click-delay', {}, (env) => {
     const win = {performance: {timing: {'navigationStart': 456}}};
     const tests = [
       {config: {type: 'bar', delay: 123}, win, err: invalid},
-      {config: {type: FILTER_TYPE_ENUM.CLICK_DELAY}, win, err: invalid},
+      {config: {type: FilterType_Enum.CLICK_DELAY}, win, err: invalid},
       {
-        config: {type: FILTER_TYPE_ENUM.CLICK_DELAY, delay: 0},
+        config: {type: FilterType_Enum.CLICK_DELAY, delay: 0},
         win,
         err: invalid,
       },
       {
-        config: {type: FILTER_TYPE_ENUM.CLICK_DELAY, delay: -1},
+        config: {type: FilterType_Enum.CLICK_DELAY, delay: -1},
         win,
         err: invalid,
       },
       {
-        config: {type: FILTER_TYPE_ENUM.CLICK_DELAY, delay: 'ac'},
+        config: {type: FilterType_Enum.CLICK_DELAY, delay: 'ac'},
         win,
         err: invalid,
       },

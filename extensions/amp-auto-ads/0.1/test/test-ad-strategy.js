@@ -1,6 +1,6 @@
 import {AdStrategy} from '../ad-strategy';
 import {AdTracker} from '../ad-tracker';
-import {PLACEMENT_STATE_ENUM, getPlacementsFromConfigObj} from '../placement';
+import {PlacementState_Enum, getPlacementsFromConfigObj} from '../placement';
 
 describes.realWin(
   'amp-strategy',
@@ -180,7 +180,7 @@ describes.realWin(
 
       expect(placements).to.have.lengthOf(2);
       env.sandbox.stub(placements[0], 'placeAd').callsFake(() => {
-        return Promise.resolve(PLACEMENT_STATE_ENUM.REIZE_FAILED);
+        return Promise.resolve(PlacementState_Enum.REIZE_FAILED);
       });
 
       const attributes = {
@@ -488,10 +488,10 @@ describes.realWin(
 
       expect(placements).to.have.lengthOf(2);
       env.sandbox.stub(placements[0], 'placeAd').callsFake(() => {
-        return Promise.resolve(PLACEMENT_STATE_ENUM.REIZE_FAILED);
+        return Promise.resolve(PlacementState_Enum.REIZE_FAILED);
       });
       env.sandbox.stub(placements[1], 'placeAd').callsFake(() => {
-        return Promise.resolve(PLACEMENT_STATE_ENUM.REIZE_FAILED);
+        return Promise.resolve(PlacementState_Enum.REIZE_FAILED);
       });
 
       const attributes = {

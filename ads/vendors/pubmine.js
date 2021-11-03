@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 import {loadScript, validateData} from '#3p/3p';
 
 const pubmineOptional = [
@@ -26,11 +26,9 @@ function initMasterFrame(data, global) {
   const ctxt = global.context;
   const consent =
     ctxt.initialConsentState === null ||
-    ctxt.initialConsentState === CONSENT_POLICY_STATE_ENUM.SUFFICIENT ||
-    ctxt.initialConsentState ===
-      CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED ||
-    (ctxt.initialConsentState === CONSENT_POLICY_STATE_ENUM.UNKNOWN &&
-      paUnknown);
+    ctxt.initialConsentState === ConsentPolicyState_Enum.SUFFICIENT ||
+    ctxt.initialConsentState === ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED ||
+    (ctxt.initialConsentState === ConsentPolicyState_Enum.UNKNOWN && paUnknown);
 
   global['__ATA_PP'] = {
     pt: data['pt'] || 1,

@@ -1,4 +1,4 @@
-import {ANALYTICS_EVENT_TYPE_ENUM} from './events';
+import {AnalyticsEventType_Enum} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
@@ -258,7 +258,7 @@ export class RequestHandler {
       // TODO: iframePing will not work with batch. Add a config validation.
       if (trigger['iframePing']) {
         userAssert(
-          trigger['on'] == ANALYTICS_EVENT_TYPE_ENUM.VISIBLE,
+          trigger['on'] == AnalyticsEventType_Enum.VISIBLE,
           'iframePing is only available on page view requests.'
         );
         this.transport_.sendRequestUsingIframe(requestUrl, batchSegments[0]);

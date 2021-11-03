@@ -1,4 +1,4 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 
@@ -195,7 +195,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
         this.element,
         'timeout',
         null,
-        ACTION_TRUST_ENUM.LOW
+        ActionTrust_Enum.LOW
       );
       this.win.clearInterval(this.countDownTimer_);
     }
@@ -260,7 +260,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
    */
   getYDHMSFromMs_(ms, countUp) {
     /** @enum {number} */
-    const TIME_UNIT_ENUM = {
+    const TimeUnit_Enum = {
       DAYS: 1,
       HOURS: 2,
       MINUTES: 3,
@@ -276,27 +276,27 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     //Math.trunc is used instead of Math.floor to support negative past date
     const d =
-      TIME_UNIT_ENUM[this.biggestUnit_] == TIME_UNIT_ENUM.DAYS
+      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.DAYS
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_DAY))
         : 0;
     const h =
-      TIME_UNIT_ENUM[this.biggestUnit_] == TIME_UNIT_ENUM.HOURS
+      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.HOURS
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_HOUR))
-        : TIME_UNIT_ENUM[this.biggestUnit_] < TIME_UNIT_ENUM.HOURS
+        : TimeUnit_Enum[this.biggestUnit_] < TimeUnit_Enum.HOURS
         ? this.supportBackDate_(
             Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
           )
         : 0;
     const m =
-      TIME_UNIT_ENUM[this.biggestUnit_] == TIME_UNIT_ENUM.MINUTES
+      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.MINUTES
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_MINUTE))
-        : TIME_UNIT_ENUM[this.biggestUnit_] < TIME_UNIT_ENUM.MINUTES
+        : TimeUnit_Enum[this.biggestUnit_] < TimeUnit_Enum.MINUTES
         ? this.supportBackDate_(
             Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
           )
         : 0;
     const s =
-      TIME_UNIT_ENUM[this.biggestUnit_] == TIME_UNIT_ENUM.SECONDS
+      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.SECONDS
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_SECOND))
         : this.supportBackDate_(
             Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND)

@@ -30,7 +30,7 @@ const CARD_CSS_CLASS = 'embedly-card';
  * @see {@link http://docs.embed.ly/docs/cards#customize}
  * @const @enum {string}
  */
-export const CARD_OPTIONS_ENUM = {
+export const CardOptions_Enum = {
   cardVia: 'card-via',
   cardTheme: 'card-theme',
   cardImage: 'card-image',
@@ -68,9 +68,9 @@ export function embedly(global, data) {
 
   // Add permissible data attributes and values to card
   // when these are provided by component.
-  for (const key in CARD_OPTIONS_ENUM) {
-    if (hasOwn(CARD_OPTIONS_ENUM, key) && typeof data[key] !== 'undefined') {
-      card.setAttribute(`data-${CARD_OPTIONS_ENUM[key]}`, data[key]);
+  for (const key in CardOptions_Enum) {
+    if (hasOwn(CardOptions_Enum, key) && typeof data[key] !== 'undefined') {
+      card.setAttribute(`data-${CardOptions_Enum[key]}`, data[key]);
     }
   }
 

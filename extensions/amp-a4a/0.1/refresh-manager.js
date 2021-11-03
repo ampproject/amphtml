@@ -96,7 +96,7 @@ function checkAndSanitizeRefreshInterval(refreshInterval) {
  *
  * @enum {string}
  */
-const REFRESH_LIFECYCLE_STATE_ENUM = {
+const RefreshLifecycleState_Enum = {
   /**
    * Element has been registered, but not yet seen on screen.
    */
@@ -174,7 +174,7 @@ export class RefreshManager {
    */
   constructor(a4a, config, refreshInterval) {
     /** @private {string} */
-    this.state_ = REFRESH_LIFECYCLE_STATE_ENUM.INITIAL;
+    this.state_ = RefreshLifecycleState_Enum.INITIAL;
 
     /** @const @private {!./amp-a4a.AmpA4A} */
     this.a4a_ = a4a;
@@ -243,7 +243,7 @@ export class RefreshManager {
         return;
       }
       switch (refreshManager.state_) {
-        case REFRESH_LIFECYCLE_STATE_ENUM.INITIAL:
+        case RefreshLifecycleState_Enum.INITIAL:
           // First check if the element qualifies as "being on screen", i.e.,
           // that at least a minimum threshold of pixels is on screen. If so,
           // begin a timer, set for the duration of the minimum time on screen
@@ -254,18 +254,18 @@ export class RefreshManager {
             entry.intersectionRatio >=
             refreshManager.config_['visiblePercentageMin']
           ) {
-            refreshManager.state_ = REFRESH_LIFECYCLE_STATE_ENUM.VIEW_PENDING;
+            refreshManager.state_ = RefreshLifecycleState_Enum.VIEW_PENDING;
             refreshManager.visibilityTimeoutId_ = refreshManager.timer_.delay(
               () => {
                 refreshManager.state_ =
-                  REFRESH_LIFECYCLE_STATE_ENUM.REFRESH_PENDING;
+                  RefreshLifecycleState_Enum.REFRESH_PENDING;
                 refreshManager.startRefreshTimer_();
               },
               refreshManager.config_['continuousTimeMin']
             );
           }
           break;
-        case REFRESH_LIFECYCLE_STATE_ENUM.VIEW_PENDING:
+        case RefreshLifecycleState_Enum.VIEW_PENDING:
           // If the element goes off screen before the minimum on screen time
           // duration elapses, place it back into INITIAL state.
           if (
@@ -274,10 +274,10 @@ export class RefreshManager {
           ) {
             refreshManager.timer_.cancel(refreshManager.visibilityTimeoutId_);
             refreshManager.visibilityTimeoutId_ = null;
-            refreshManager.state_ = REFRESH_LIFECYCLE_STATE_ENUM.INITIAL;
+            refreshManager.state_ = RefreshLifecycleState_Enum.INITIAL;
           }
           break;
-        case REFRESH_LIFECYCLE_STATE_ENUM.REFRESH_PENDING:
+        case RefreshLifecycleState_Enum.REFRESH_PENDING:
         default:
           break;
       }
@@ -290,13 +290,13 @@ export class RefreshManager {
    */
   initiateRefreshCycle() {
     switch (this.state_) {
-      case REFRESH_LIFECYCLE_STATE_ENUM.INITIAL:
+      case RefreshLifecycleState_Enum.INITIAL:
         this.getIntersectionObserverWithThreshold_(
           this.config_['visiblePercentageMin']
         ).observe(this.element_);
         break;
-      case REFRESH_LIFECYCLE_STATE_ENUM.REFRESH_PENDING:
-      case REFRESH_LIFECYCLE_STATE_ENUM.VIEW_PENDING:
+      case RefreshLifecycleState_Enum.REFRESH_PENDING:
+      case RefreshLifecycleState_Enum.VIEW_PENDING:
       default:
         break;
     }
@@ -311,7 +311,7 @@ export class RefreshManager {
   startRefreshTimer_() {
     return new Promise((resolve) => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
-        this.state_ = REFRESH_LIFECYCLE_STATE_ENUM.INITIAL;
+        this.state_ = RefreshLifecycleState_Enum.INITIAL;
         this.unobserve();
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);

@@ -1,5 +1,5 @@
 import {
-  LOADING_ENUM,
+  Loading_Enum,
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
 
@@ -26,7 +26,7 @@ function getAmpContext() {
     (context = createContext({
       renderable: true,
       playable: true,
-      loading: LOADING_ENUM.AUTO,
+      loading: Loading_Enum.AUTO,
     }))
   );
 }
@@ -48,7 +48,7 @@ export function WithAmpContext({
   const renderable = renderableProp && parent.renderable;
   const playable = renderable && playableProp && parent.playable;
   const loading = loadingReducer(
-    renderable ? LOADING_ENUM.AUTO : LOADING_ENUM.LAZY,
+    renderable ? Loading_Enum.AUTO : Loading_Enum.LAZY,
     loadingReducer(loadingProp, parent.loading)
   );
   const notify = notifyProp || parent.notify;
@@ -77,7 +77,7 @@ export function useAmpContext() {
 /**
  * Whether the calling component should currently be in the loaded state.
  *
- * @param {!LOADING_ENUM|string} loadingProp
+ * @param {!Loading_Enum|string} loadingProp
  * @return {boolean}
  */
 export function useLoading(loadingProp) {

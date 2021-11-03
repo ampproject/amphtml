@@ -2,7 +2,7 @@ import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {
-  ACTION_ENUM,
+  Action_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
@@ -28,7 +28,7 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
     describe('#isStoryEligible', () => {
       it('returns false for stories < 5 pages', () => {
         const pageIds = ['1', '2', '3', '4'];
-        storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
+        storeService.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
           pageManager,
@@ -39,7 +39,7 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
 
       it('returns true for stories >= 5 pages', () => {
         const pageIds = ['1', '2', '3', '4', '5'];
-        storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
+        storeService.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
         const algo = new PredeterminedPositionAlgorithm(
           storeService,
           pageManager,
@@ -52,7 +52,7 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
     describe('#initializePages', () => {
       it('should create and insert a single page', () => {
         const pageIds = ['1', '2', '3', '4', '5', '6', '7', '8'];
-        storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
+        storeService.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
         const mockPage = {registerLoadCallback: env.sandbox.stub().callsArg(0)};
         const createPageStub = env.sandbox
           .stub(pageManager, 'createAdPage')
@@ -75,7 +75,7 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
       it('does not create a page when num ads == 0 ', () => {
         env.sandbox.stub(Math, 'random').returns(6 / 8);
         const pageIds = ['1', '2', '3', '4', '5'];
-        storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
+        storeService.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
         const mockPage = {registerLoadCallback: env.sandbox.stub().callsArg(0)};
         const createPageStub = env.sandbox
           .stub(pageManager, 'createAdPage')
@@ -100,7 +100,7 @@ describes.realWin('PredeterminedPositionAlgorithm', {amp: true}, (env) => {
       it('should create and insert the next ad page', () => {
         // ['1' ... '16']
         const pageIds = new Array(16).fill(0).map((_, i) => (i + 1).toString());
-        storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
+        storeService.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
         const mockPage = {registerLoadCallback: env.sandbox.stub().callsArg(0)};
         const createPageStub = env.sandbox
           .stub(pageManager, 'createAdPage')

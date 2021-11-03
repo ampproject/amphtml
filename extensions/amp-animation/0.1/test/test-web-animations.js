@@ -9,7 +9,7 @@ import {user} from '#utils/log';
 import {poll} from '#testing/iframe';
 
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
-import {WEB_ANIMATION_PLAY_STATE_ENUM} from '../web-animation-types';
+import {WebAnimationPlayState_Enum} from '../web-animation-types';
 import {Builder} from '../web-animations';
 
 describes.realWin('MeasureScanner', {amp: 1}, (env) => {
@@ -2079,22 +2079,22 @@ describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
 
   class WebAnimationStub {
     constructor() {
-      this.playState = WEB_ANIMATION_PLAY_STATE_ENUM.IDLE;
+      this.playState = WebAnimationPlayState_Enum.IDLE;
     }
 
     play() {
-      this.playState = WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING;
+      this.playState = WebAnimationPlayState_Enum.RUNNING;
       return;
     }
     pause() {
-      this.playState = WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED;
+      this.playState = WebAnimationPlayState_Enum.PAUSED;
       return;
     }
     reverse() {
       throw new Error('not implemented');
     }
     finish() {
-      this.playState = WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED;
+      this.playState = WebAnimationPlayState_Enum.FINISHED;
       this.onfinish();
       return;
     }
@@ -2154,9 +2154,9 @@ describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
       .returns(anim2)
       .once();
 
-    expect(runner.getPlayState()).to.equal(WEB_ANIMATION_PLAY_STATE_ENUM.IDLE);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.IDLE);
     runner.init();
-    expect(runner.getPlayState()).to.equal(WEB_ANIMATION_PLAY_STATE_ENUM.IDLE);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.IDLE);
     expect(runner.players_).to.have.length(2);
     expect(runner.players_[0]).equal(anim1);
     expect(runner.players_[1]).equal(anim2);
@@ -2175,17 +2175,15 @@ describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
       .returns(anim2)
       .once();
 
-    expect(runner.getPlayState()).to.equal(WEB_ANIMATION_PLAY_STATE_ENUM.IDLE);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.IDLE);
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
     expect(runner.players_).to.have.length(2);
     expect(runner.players_[0]).equal(anim1);
     expect(runner.players_[1]).equal(anim2);
     expect(playStateSpy).to.be.calledOnce;
     expect(playStateSpy.args[0][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+      WebAnimationPlayState_Enum.RUNNING
     );
   });
 
@@ -2219,41 +2217,31 @@ describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
 
   it('should complete all animations are complete', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1.finish();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim2.finish();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.FINISHED);
 
     expect(playStateSpy).to.be.calledTwice;
     expect(playStateSpy.args[0][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+      WebAnimationPlayState_Enum.RUNNING
     );
     expect(playStateSpy.args[1][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED
+      WebAnimationPlayState_Enum.FINISHED
     );
   });
 
   it('should pause all animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1Mock.expects('pause').callThrough().once();
     anim2Mock.expects('pause').callThrough().once();
     runner.pause();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.PAUSED);
   });
 
   it('should only allow pause when started', () => {
@@ -2266,91 +2254,67 @@ describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
 
   it('should resume all animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1Mock.expects('pause').callThrough().once();
     anim2Mock.expects('pause').callThrough().once();
     runner.pause();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.PAUSED);
 
     anim1Mock.expects('play').callThrough().once();
     anim2Mock.expects('play').callThrough().once();
     runner.resume();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1.finish();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim2.finish();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.FINISHED);
 
     expect(playStateSpy.callCount).to.equal(4);
     expect(playStateSpy.args[0][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+      WebAnimationPlayState_Enum.RUNNING
     );
-    expect(playStateSpy.args[1][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
-    );
+    expect(playStateSpy.args[1][0]).to.equal(WebAnimationPlayState_Enum.PAUSED);
     expect(playStateSpy.args[2][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+      WebAnimationPlayState_Enum.RUNNING
     );
     expect(playStateSpy.args[3][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED
+      WebAnimationPlayState_Enum.FINISHED
     );
   });
 
   it('should not resume partially finished animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1.finish();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1Mock.expects('pause').callThrough().never();
     anim2Mock.expects('pause').callThrough().once();
     runner.pause();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.PAUSED);
 
     anim1Mock.expects('play').callThrough().never();
     anim2Mock.expects('play').callThrough().once();
     runner.resume();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim2.finish();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.FINISHED);
 
     expect(playStateSpy.callCount).to.equal(4);
     expect(playStateSpy.args[0][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+      WebAnimationPlayState_Enum.RUNNING
     );
-    expect(playStateSpy.args[1][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
-    );
+    expect(playStateSpy.args[1][0]).to.equal(WebAnimationPlayState_Enum.PAUSED);
     expect(playStateSpy.args[2][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+      WebAnimationPlayState_Enum.RUNNING
     );
     expect(playStateSpy.args[3][0]).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED
+      WebAnimationPlayState_Enum.FINISHED
     );
   });
 
@@ -2364,16 +2328,12 @@ describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
 
   it('should reverse all animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1Mock.expects('reverse').once();
     anim2Mock.expects('reverse').once();
     runner.reverse();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
   });
 
   it('should only allow reverse when started', () => {
@@ -2386,69 +2346,55 @@ describes.sandboxed('NativeWebAnimationRunner', {}, (env) => {
 
   it('should finish all animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1Mock.expects('finish').callThrough().once();
     anim2Mock.expects('finish').callThrough().once();
     runner.finish();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.FINISHED);
   });
 
   it('should ignore finish when not started', () => {
     runner.finish();
-    expect(runner.getPlayState()).to.equal(WEB_ANIMATION_PLAY_STATE_ENUM.IDLE);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.IDLE);
   });
 
   it('should cancel all animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1Mock.expects('cancel').once();
     anim2Mock.expects('cancel').once();
     runner.cancel();
-    expect(runner.getPlayState()).to.equal(WEB_ANIMATION_PLAY_STATE_ENUM.IDLE);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.IDLE);
   });
 
   it('should ignore cancel when not started', () => {
     runner.cancel();
-    expect(runner.getPlayState()).to.equal(WEB_ANIMATION_PLAY_STATE_ENUM.IDLE);
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.IDLE);
   });
 
   it('should seek all animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     anim1Mock.expects('pause').callThrough().once();
     anim2Mock.expects('pause').callThrough().once();
     runner.seekTo(101);
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.PAUSED);
     expect(anim1.currentTime).to.equal(101);
     expect(anim2.currentTime).to.equal(101);
   });
 
   it('should seek percent all animations', () => {
     runner.start();
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.RUNNING);
 
     env.sandbox.stub(runner, 'getTotalDuration_').returns(500);
     anim1Mock.expects('pause').callThrough().once();
     anim2Mock.expects('pause').callThrough().once();
     runner.seekToPercent(0.5);
-    expect(runner.getPlayState()).to.equal(
-      WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
-    );
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState_Enum.PAUSED);
     expect(anim1.currentTime).to.equal(250);
     expect(anim2.currentTime).to.equal(250);
   });

@@ -23,14 +23,14 @@ import {getWin} from '#core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
-export const MEDIA_TYPE_ENUM = {
+export const MediaType_Enum = {
   UNSUPPORTED: 'unsupported',
   AUDIO: 'audio',
   VIDEO: 'video',
 };
 
 /** @const @enum {string} */
-const MEDIA_ELEMENT_ORIGIN_ENUM = {
+const MediaElementOrigin_Enum = {
   PLACEHOLDER: 'placeholder',
   POOL: 'pool',
 };
@@ -65,7 +65,7 @@ export let ElementDistanceFnDef;
  * Represents a task to be executed on a media element.
  * @typedef {function(!PoolBoundElementDef, *): !Promise}
  */
-let ElementTask_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ElementTask_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * @const {string}
@@ -116,7 +116,7 @@ let nextInstanceId = 0;
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
-   * @param {!Object<!MediaType, number>} maxCounts The maximum amount of each
+   * @param {!Object<!MediaType_Enum, number>} maxCounts The maximum amount of each
    *     media element that can be allocated by the pool.
    * @param {!ElementDistanceFnDef} distanceFn A function that, given an
    *     element, returns the distance of that element from the current position
@@ -139,14 +139,14 @@ export class MediaPool {
 
     /**
      * Holds all of the pool-bound media elements that have been allocated.
-     * @const {!Object<!MediaType, !Array<!PoolBoundElementDef>>}
+     * @const {!Object<!MediaType_Enum, !Array<!PoolBoundElementDef>>}
      * @visibleForTesting
      */
     this.allocated = {};
 
     /**
      * Holds all of the pool-bound media elements that have not been allocated.
-     * @const {!Object<!MediaType, !Array<!PoolBoundElementDef>>}
+     * @const {!Object<!MediaType_Enum, !Array<!PoolBoundElementDef>>}
      * @visibleForTesting
      */
     this.unallocated = {};
@@ -182,7 +182,7 @@ export class MediaPool {
 
     /** @const {!Object<string, (function(): !PoolBoundElementDef)>} */
     this.mediaFactory_ = {
-      [MEDIA_TYPE_ENUM.AUDIO]: () => {
+      [MediaType_Enum.AUDIO]: () => {
         const audioEl = this.win_.document.createElement('audio');
         audioEl.setAttribute('muted', '');
         audioEl.muted = true;
@@ -190,7 +190,7 @@ export class MediaPool {
         audioEl.classList.add('i-amphtml-pool-audio');
         return audioEl;
       },
-      [MEDIA_TYPE_ENUM.VIDEO]: () => {
+      [MediaType_Enum.VIDEO]: () => {
         const videoEl = this.win_.document.createElement('video');
         videoEl.setAttribute('muted', '');
         videoEl.muted = true;
@@ -209,7 +209,7 @@ export class MediaPool {
    * each of the types of media elements.  We need to create these eagerly so
    * that all media elements exist by the time that blessAll() is invoked,
    * thereby "blessing" all media elements for playback without user gesture.
-   * @param {!Object<!MediaType, number>} maxCounts The maximum amount of each
+   * @param {!Object<!MediaType_Enum, number>} maxCounts The maximum amount of each
    *     media element that can be allocated by the pool.
    * @private
    */
@@ -217,7 +217,7 @@ export class MediaPool {
     let poolIdCounter = 0;
 
     this.forEachMediaType_((key) => {
-      const type = MEDIA_TYPE_ENUM[key];
+      const type = MediaType_Enum[key];
       const count = maxCounts[type] || 0;
 
       if (count <= 0) {
@@ -250,7 +250,7 @@ export class MediaPool {
         // that was set in the seed. We need to set it again here.
         mediaEl.muted = true;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
-          MEDIA_ELEMENT_ORIGIN_ENUM.POOL;
+          MediaElementOrigin_Enum.POOL;
         this.unallocated[type].push(mediaEl);
       }
     });
@@ -310,7 +310,7 @@ export class MediaPool {
   isPoolMediaElement_(mediaElement) {
     return (
       mediaElement[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] ===
-      MEDIA_ELEMENT_ORIGIN_ENUM.POOL
+      MediaElementOrigin_Enum.POOL
     );
   }
 
@@ -318,25 +318,25 @@ export class MediaPool {
    * Gets the media type from a given element.
    * @param {!PoolBoundElementDef|!PlaceholderElementDef} mediaElement The
    *     element whose media type should be retrieved.
-   * @return {!MediaType}
+   * @return {!MediaType_Enum}
    * @private
    */
   getMediaType_(mediaElement) {
     const tagName = mediaElement.tagName.toLowerCase();
     switch (tagName) {
       case 'audio':
-        return MEDIA_TYPE_ENUM.AUDIO;
+        return MediaType_Enum.AUDIO;
       case 'video':
-        return MEDIA_TYPE_ENUM.VIDEO;
+        return MediaType_Enum.VIDEO;
       default:
-        return MEDIA_TYPE_ENUM.UNSUPPORTED;
+        return MediaType_Enum.UNSUPPORTED;
     }
   }
 
   /**
    * Reserves an element of the specified type by removing it from the set of
    * unallocated elements and returning it.
-   * @param {!MediaType} mediaType The type of media element to reserve.
+   * @param {!MediaType_Enum} mediaType The type of media element to reserve.
    * @return {?PoolBoundElementDef} The reserved element, if one exists.
    * @private
    */
@@ -347,7 +347,7 @@ export class MediaPool {
   /**
    * Retrieves the media element from the pool that matches the specified
    * element, if one exists.
-   * @param {!MediaType} mediaType The type of media element to get.
+   * @param {!MediaType_Enum} mediaType The type of media element to get.
    * @param {!DomElementDef} domMediaEl The element whose matching media
    *     element should be retrieved.
    * @return {?PoolBoundElementDef} The media element in the pool that
@@ -369,7 +369,7 @@ export class MediaPool {
 
   /**
    * Allocates the specified media element of the specified type.
-   * @param {!MediaType} mediaType The type of media element to allocate.
+   * @param {!MediaType_Enum} mediaType The type of media element to allocate.
    * @param {!PoolBoundElementDef} poolMediaEl The element to be allocated.
    * @private
    */
@@ -387,7 +387,7 @@ export class MediaPool {
   /**
    * Deallocates and returns the media element of the specified type furthest
    * from the current position in the document.
-   * @param {!MediaType} mediaType The type of media element to deallocate.
+   * @param {!MediaType_Enum} mediaType The type of media element to deallocate.
    * @param {!PlaceholderElementDef=} opt_elToAllocate If specified, the element
    *     that is trying to be allocated, such that another element must be
    *     evicted.
@@ -445,7 +445,7 @@ export class MediaPool {
   /**
    * Evicts an element of the specified type, replaces it in the DOM with the
    * original media element, and returns it.
-   * @param {!MediaType} mediaType The type of media element to evict.
+   * @param {!MediaType_Enum} mediaType The type of media element to evict.
    * @param {!PlaceholderElementDef=} opt_elToAllocate If specified, the element
    *     that is trying to be allocated, such that another element must be
    *     evicted.
@@ -466,7 +466,7 @@ export class MediaPool {
   }
 
   /**
-   * @param {!MediaType} mediaType The media type to check.
+   * @param {!MediaType_Enum} mediaType The media type to check.
    * @param {!DomElementDef} domMediaEl The element to check.
    * @return {boolean} true, if the specified element has already been allocated
    *     as the specified type of media element.
@@ -590,7 +590,7 @@ export class MediaPool {
    * @private
    */
   forEachMediaType_(callbackFn) {
-    Object.keys(MEDIA_TYPE_ENUM).forEach(callbackFn.bind(this));
+    Object.keys(MediaType_Enum).forEach(callbackFn.bind(this));
   }
 
   /**
@@ -602,7 +602,7 @@ export class MediaPool {
   forEachMediaElement_(callbackFn) {
     [this.allocated, this.unallocated].forEach((mediaSet) => {
       this.forEachMediaType_((key) => {
-        const type = MEDIA_TYPE_ENUM[key];
+        const type = MediaType_Enum[key];
         const els = /** @type {!Array} */ (mediaSet[type]);
         if (!els) {
           return;
@@ -706,7 +706,7 @@ export class MediaPool {
     // it is a placeholder element.
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
     placeholderEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
-      MEDIA_ELEMENT_ORIGIN_ENUM.PLACEHOLDER;
+      MediaElementOrigin_Enum.PLACEHOLDER;
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {
@@ -852,7 +852,7 @@ export class MediaPool {
     }
 
     // When a video is muted, reset its volume to the default value of 1.
-    if (mediaType == MediaType.VIDEO) {
+    if (mediaType == MediaType_Enum.VIDEO) {
       domMediaEl.volume = 1;
     }
 
@@ -876,7 +876,7 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    if (mediaType == MediaType.VIDEO) {
+    if (mediaType == MediaType_Enum.VIDEO) {
       const ampVideoEl = domMediaEl.parentElement;
       if (ampVideoEl) {
         const volume = ampVideoEl.getAttribute('volume');
@@ -1026,7 +1026,7 @@ export class MediaPoolRoot {
   getElementDistance(unusedElement) {}
 
   /**
-   * @return {!Object<!MediaType, number>} The maximum amount of each media
+   * @return {!Object<!MediaType_Enum, number>} The maximum amount of each media
    *     type to allow within this element.
    */
   getMaxMediaElementCounts() {}

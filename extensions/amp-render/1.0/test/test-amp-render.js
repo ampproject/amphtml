@@ -6,7 +6,7 @@ import * as BatchedJsonModule from '../../../../src/batched-json';
 import * as Style from '#core/dom/style';
 import * as log from '#utils/log';
 import {ActionInvocation} from '#service/action-impl';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
 import {waitFor} from '#testing/helpers/service';
@@ -52,7 +52,7 @@ describes.realWin(
       const source = null;
       const caller = null;
       const event = null;
-      const trust = ACTION_TRUST_ENUM.DEFAULT;
+      const trust = ActionTrust_Enum.DEFAULT;
       return new ActionInvocation(
         element,
         method,
@@ -493,7 +493,7 @@ describes.realWin(
       expect(text).to.equal('Biden, Joe');
       const options = fetchJsonStub.getCall(0).args[2];
       expect(options.urlReplacement).to.equal(
-        BatchedJsonModule.URL_REPLACEMENT_POLICY_ENUM.ALL
+        BatchedJsonModule.UrlReplacementPolicy_Enum.ALL
       );
     });
 

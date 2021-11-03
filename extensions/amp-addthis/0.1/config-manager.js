@@ -7,7 +7,7 @@ import {dict} from '#core/types/object';
  * Configuration request status enum.
  * @enum {number}
  */
-const REQUEST_STATUS_ENUM = {
+const RequestStatus_Enum = {
   NOT_REQUESTED: 0,
   REQUESTED: 1,
   COMPLETED: 2,
@@ -71,7 +71,7 @@ export class ConfigManager {
 
     const pubData = this.dataForPubId_[pubId];
     pubData.config = config;
-    pubData.requestStatus = REQUEST_STATUS_ENUM.COMPLETED;
+    pubData.requestStatus = RequestStatus_Enum.COMPLETED;
     const {iframeData} = pubData;
 
     iframeData.forEach((iframeDatum) => {
@@ -169,11 +169,11 @@ export class ConfigManager {
 
     iframe.contentWindow./*OK*/ postMessage(JSON.stringify(jsonToSend), ORIGIN);
 
-    if (configRequestStatus === REQUEST_STATUS_ENUM.NOT_REQUESTED) {
+    if (configRequestStatus === RequestStatus_Enum.NOT_REQUESTED) {
       // If a config for this pubId has not been requested yet, then this iframe
       // will be the one responsible for requesting it and sending it back here.
       this.configProviderIframes_.push(iframe);
-      pubData.requestStatus = REQUEST_STATUS_ENUM.REQUESTED;
+      pubData.requestStatus = RequestStatus_Enum.REQUESTED;
     }
   }
 
@@ -215,7 +215,7 @@ export class ConfigManager {
     const pubData = this.dataForPubId_[pubId];
 
     if (!pubData.requestStatus) {
-      pubData.requestStatus = REQUEST_STATUS_ENUM.NOT_REQUESTED;
+      pubData.requestStatus = RequestStatus_Enum.NOT_REQUESTED;
     }
 
     if (!pubData.iframeData) {

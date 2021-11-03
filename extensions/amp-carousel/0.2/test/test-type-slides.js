@@ -1,7 +1,7 @@
 import '../amp-carousel';
 import * as Listen from '#utils/event-helper';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {CAROUSEL_EVENTS_ENUM} from '../../../amp-base-carousel/0.1/carousel-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {CarouselEvents_Enum} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '#service';
 import {getDetail, listenOncePromise} from '#utils/event-helper';
 
@@ -17,7 +17,7 @@ import {getDetail, listenOncePromise} from '#utils/event-helper';
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
-  const event = await listenOncePromise(el, CAROUSEL_EVENTS_ENUM.INDEX_CHANGE);
+  const event = await listenOncePromise(el, CarouselEvents_Enum.INDEX_CHANGE);
   const impl = await el.getImpl(false);
   await impl.mutateElement(() => {});
   await impl.mutateElement(() => {});
@@ -290,7 +290,7 @@ describes.realWin(
         await afterIndexUpdate(carousel);
 
         expect(event.data.index).to.equal(1);
-        expect(event.data.actionTrust).to.equal(ACTION_TRUST_ENUM.HIGH);
+        expect(event.data.actionTrust).to.equal(ActionTrust_Enum.HIGH);
       });
     });
 
@@ -303,7 +303,7 @@ describes.realWin(
         impl.executeAction({
           method: 'goToSlide',
           args: {index: 1},
-          trust: ACTION_TRUST_ENUM.HIGH,
+          trust: ActionTrust_Enum.HIGH,
           satisfiesTrust: () => true,
         });
         await afterIndexUpdate(carousel);
@@ -312,7 +312,7 @@ describes.realWin(
           carousel,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
-          ACTION_TRUST_ENUM.HIGH
+          ActionTrust_Enum.HIGH
         );
       });
 
@@ -324,7 +324,7 @@ describes.realWin(
         impl.executeAction({
           method: 'goToSlide',
           args: {index: 1},
-          trust: ACTION_TRUST_ENUM.LOW,
+          trust: ActionTrust_Enum.LOW,
           satisfiesTrust: () => true,
         });
         await afterIndexUpdate(carousel);
@@ -333,7 +333,7 @@ describes.realWin(
           carousel,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
-          ACTION_TRUST_ENUM.LOW
+          ActionTrust_Enum.LOW
         );
       });
 
@@ -345,7 +345,7 @@ describes.realWin(
         impl.executeAction({
           method: 'goToSlide',
           args: {index: '1'},
-          trust: ACTION_TRUST_ENUM.LOW,
+          trust: ActionTrust_Enum.LOW,
           satisfiesTrust: () => true,
         });
         await afterIndexUpdate(carousel);
@@ -354,7 +354,7 @@ describes.realWin(
           carousel,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
-          ACTION_TRUST_ENUM.LOW
+          ActionTrust_Enum.LOW
         );
       });
 
@@ -368,7 +368,7 @@ describes.realWin(
             impl.executeAction({
               method: 'goToSlide',
               args: {index: 'one'},
-              trust: ACTION_TRUST_ENUM.LOW,
+              trust: ActionTrust_Enum.LOW,
               satisfiesTrust: () => true,
             });
           });

@@ -2,7 +2,7 @@ import {isAmphtml} from '#core/document/format';
 
 import {Services} from '#service';
 
-import {CHUNK_PRIORITY_ENUM, chunk} from './chunk';
+import {ChunkPriority_Enum, chunk} from './chunk';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
@@ -26,6 +26,6 @@ export function installStandaloneExtension(ampdoc) {
         .then(() => Services.standaloneServiceForDoc(ampdoc.getBody()))
         .then((standaloneService) => standaloneService.initialize());
     },
-    CHUNK_PRIORITY_ENUM.LOW
+    ChunkPriority_Enum.LOW
   );
 }

@@ -4,7 +4,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import * as consent from '../../../../src/consent';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-jwplayer',
@@ -310,9 +310,9 @@ describes.realWin(
         it('updates mute from state', () => {
           const mutedEventSpy = env.sandbox.spy();
           const unmutedEventSpy = env.sandbox.spy();
-          impl.element.addEventListener(VIDEO_EVENTS_ENUM.MUTED, mutedEventSpy);
+          impl.element.addEventListener(VideoEvents_Enum.MUTED, mutedEventSpy);
           impl.element.addEventListener(
-            VIDEO_EVENTS_ENUM.UNMUTED,
+            VideoEvents_Enum.UNMUTED,
             unmutedEventSpy
           );
           mockMessage('mute', {mute: true});

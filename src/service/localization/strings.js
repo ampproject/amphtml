@@ -13,7 +13,7 @@ import {parseJson} from '#core/types/object/json';
  *
  * @const @enum {string}
  */
-export const LOCALIZED_STRING_ID_ENUM = {
+export const LocalizedStringId_Enum = {
   // amp-story
   AMP_STORY_ACTIVATE_BUTTON_TEXT: '83',
   AMP_STORY_AUDIO_MUTE_BUTTON_LABEL: '66',

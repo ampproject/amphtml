@@ -6,7 +6,7 @@
 export let LayoutInfoDef;
 
 /** @enum {string} */
-export const FAILURE_TYPE_ENUM = {
+export const FailureType_Enum = {
   REQUEST_ERROR: 'REQUEST_ERROR',
   INVALID_RESPONSE: 'INVALID_RESPONSE',
   EMPTY_RESPONSE: 'EMPTY_RESPONSE',
@@ -15,19 +15,19 @@ export const FAILURE_TYPE_ENUM = {
 };
 
 /** @enum {string} */
-export const RECOVERY_MODE_TYPE_ENUM = {
+export const RecoveryModeType_Enum = {
   COLLAPSE: 'COLLAPSE',
   RETRY: 'RETRY',
 };
 
 /** @enum {string} */
-export const VALIDATOR_RESULT_ENUM = {
+export const ValidatorResult_Enum = {
   AMP: 'AMP',
   NON_AMP: 'NON_AMP',
 };
 
 /** @enum {string} */
-export const AD_RESPONSE_TYPE_ENUM = {
+export const AdResponseType_Enum = {
   CRYPTO: 'crypto',
   TEMPLATE: 'template',
 };

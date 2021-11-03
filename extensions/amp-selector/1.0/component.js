@@ -1,6 +1,6 @@
 import objstr from 'obj-str';
 
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 import {mod} from '#core/math';
 
@@ -28,7 +28,7 @@ const SelectorContext = Preact.createContext(
  *
  * @enum {string}
  */
-export const KEYBOARD_SELECT_MODE_ENUM = {
+export const KeyboardSelectMode_Enum = {
   NONE: 'none',
   FOCUS: 'focus',
   SELECT: 'select',
@@ -45,7 +45,7 @@ function SelectorWithRef(
     disabled,
     defaultValue = [],
     form,
-    keyboardSelectMode = KEYBOARD_SELECT_MODE_ENUM.NONE,
+    keyboardSelectMode = KeyboardSelectMode_Enum.NONE,
     value,
     multiple,
     name,
@@ -211,21 +211,21 @@ function SelectorWithRef(
       const {key} = e;
       let dir;
       switch (key) {
-        case KEYS_ENUM.LEFT_ARROW: // Fallthrough.
-        case KEYS_ENUM.UP_ARROW:
+        case Keys_Enum.LEFT_ARROW: // Fallthrough.
+        case Keys_Enum.UP_ARROW:
           dir = -1;
           break;
-        case KEYS_ENUM.RIGHT_ARROW: // Fallthrough.
-        case KEYS_ENUM.DOWN_ARROW:
+        case Keys_Enum.RIGHT_ARROW: // Fallthrough.
+        case Keys_Enum.DOWN_ARROW:
           dir = 1;
           break;
         default:
           break;
       }
       if (dir) {
-        if (keyboardSelectMode === KEYBOARD_SELECT_MODE_ENUM.SELECT) {
+        if (keyboardSelectMode === KeyboardSelectMode_Enum.SELECT) {
           selectBy(dir);
-        } else if (keyboardSelectMode === KEYBOARD_SELECT_MODE_ENUM.FOCUS) {
+        } else if (keyboardSelectMode === KeyboardSelectMode_Enum.FOCUS) {
           focusBy(dir);
         }
       }
@@ -245,7 +245,7 @@ function SelectorWithRef(
       name={name}
       onKeyDown={onKeyDown}
       tabIndex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE_ENUM.SELECT
+        tabIndex ?? keyboardSelectMode === KeyboardSelectMode_Enum.SELECT
           ? 0
           : -1
       }
@@ -335,7 +335,7 @@ export function BentoSelectorOption({
 
   const onKeyDown = useCallback(
     (e) => {
-      if (e.key === KEYS_ENUM.ENTER || e.key === KEYS_ENUM.SPACE) {
+      if (e.key === Keys_Enum.ENTER || e.key === Keys_Enum.SPACE) {
         trySelect();
       }
     },
@@ -363,7 +363,7 @@ export function BentoSelectorOption({
       role={role}
       selected={isSelected}
       tabIndex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE_ENUM.SELECT
+        tabIndex ?? keyboardSelectMode === KeyboardSelectMode_Enum.SELECT
           ? -1
           : 0
       }

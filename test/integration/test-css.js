@@ -1,4 +1,4 @@
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {computedStyle} from '#core/dom/style';
 
 import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
@@ -10,7 +10,7 @@ describes.sandboxed.configure().run('CSS', {}, () => {
       500
     );
     // Wait until layout.js CSS is applied.
-    await fixture.awaitEvent(AMP_EVENTS_ENUM.ATTACHED, 1);
+    await fixture.awaitEvent(AmpEvents_Enum.ATTACHED, 1);
     const {doc} = fixture;
 
     const iframe = doc.querySelector('amp-iframe');

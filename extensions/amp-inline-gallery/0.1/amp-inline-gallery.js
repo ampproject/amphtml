@@ -7,9 +7,9 @@ import {AmpInlineGallerySlide} from './amp-inline-gallery-slide';
 import {CSS as AmpInlineGallerySlideCSS} from '../../../build/amp-inline-gallery-slide-0.1.css';
 import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
-import {CAROUSEL_EVENTS_ENUM} from '../../amp-base-carousel/0.1/carousel-events';
-import {INLINE_GALLERY_EVENTS_ENUM} from './inline-gallery-events';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {CarouselEvents_Enum} from '../../amp-base-carousel/0.1/carousel-events';
+import {InlineGalleryEvents_Enum} from './inline-gallery-events';
+import {Layout_Enum} from '#core/dom/layout';
 import {getDetail} from '#utils/event-helper';
 import {iterateCursor} from '#core/dom';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
@@ -47,19 +47,16 @@ class AmpInlineGallery extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.addEventListener(
-      CAROUSEL_EVENTS_ENUM.OFFSET_CHANGE,
+      CarouselEvents_Enum.OFFSET_CHANGE,
       (event) => {
         this.onOffsetChange_(event);
       }
     );
+    this.element.addEventListener(CarouselEvents_Enum.INDEX_CHANGE, (event) => {
+      this.onIndexChange_(event);
+    });
     this.element.addEventListener(
-      CAROUSEL_EVENTS_ENUM.INDEX_CHANGE,
-      (event) => {
-        this.onIndexChange_(event);
-      }
-    );
-    this.element.addEventListener(
-      INLINE_GALLERY_EVENTS_ENUM.GO_TO_SLIDE,
+      InlineGalleryEvents_Enum.GO_TO_SLIDE,
       (event) => {
         this.onGoToSlide_(event);
       }
@@ -87,7 +84,7 @@ class AmpInlineGallery extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === LAYOUT_ENUM.CONTAINER;
+    return layout === Layout_Enum.CONTAINER;
   }
 
   /**

@@ -2,7 +2,7 @@ import {
   IframeTransportClient,
   IframeTransportContext,
 } from '#3p/iframe-transport-client';
-import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -87,7 +87,7 @@ describes.sandboxed('iframe-transport-client', {}, (env) => {
       expect(event).to.equal('hello, world!');
     };
     send(
-      MESSAGE_TYPE_ENUM.IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
       /** @type {!JsonObject} */ ({
         events: [{creativeId: '101', message: 'hello, world!'}],
       })
@@ -175,7 +175,7 @@ describes.sandboxed('iframe-transport-client', {}, (env) => {
     );
     const response = {foo: 'bar', answer: '42'};
     env.sandbox.stub(imc, 'sendMessage').callsFake((type, opt_payload) => {
-      expect(type).to.equal(MESSAGE_TYPE_ENUM.IFRAME_TRANSPORT_RESPONSE);
+      expect(type).to.equal(MessageType_Enum.IFRAME_TRANSPORT_RESPONSE);
       expect(opt_payload).to.not.be.null;
       expect(opt_payload.creativeId).to.equal('my_creative');
       expect(opt_payload.vendor).to.equal('my_vendor');

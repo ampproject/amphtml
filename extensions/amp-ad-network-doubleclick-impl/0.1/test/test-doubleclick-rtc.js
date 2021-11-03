@@ -7,7 +7,7 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
-import {RTC_ERROR_ENUM} from '#service/real-time-config/real-time-config-impl';
+import {RtcError_Enum} from '#service/real-time-config/real-time-config-impl';
 
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 
@@ -236,17 +236,17 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
       );
     });
 
-    Object.keys(RTC_ERROR_ENUM).forEach((errorName) => {
+    Object.keys(RtcError_Enum).forEach((errorName) => {
       it(`should send correct error value for ${errorName}`, () => {
         const rtcResponseArray = [
           {
-            error: RTC_ERROR_ENUM[errorName],
+            error: RtcError_Enum[errorName],
             callout: 'www.exampleA.com',
             rtcTime: 100,
           },
         ];
         const expectedParams = {
-          ati: `${RTC_ERROR_ENUM[errorName]}`,
+          ati: `${RtcError_Enum[errorName]}`,
           artc: '100',
           ard: 'www.exampleA.com',
         };
@@ -266,7 +266,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
       };
       const rtcResponseArray = [
         {
-          error: RTC_ERROR_ENUM.TIMEOUT,
+          error: RtcError_Enum.TIMEOUT,
           callout: 'www.exampleA.com',
           rtcTime: 1500,
         },
@@ -289,12 +289,12 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, (env) => {
           rtcTime: 500,
         },
         {
-          error: RTC_ERROR_ENUM.DUPLICATE_URL,
+          error: RtcError_Enum.DUPLICATE_URL,
           callout: 'www.exampleB.com',
           rtcTime: 0,
         },
         {
-          error: RTC_ERROR_ENUM.NETWORK_FAILURE,
+          error: RtcError_Enum.NETWORK_FAILURE,
           callout: '3PVend',
           rtcTime: 100,
         },

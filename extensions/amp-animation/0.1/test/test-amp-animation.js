@@ -2,7 +2,7 @@ import {DEFAULT_ACTION} from '#core/constants/action-constants';
 
 import {AmpAnimation} from '../amp-animation';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
-import {WEB_ANIMATION_PLAY_STATE_ENUM} from '../web-animation-types';
+import {WebAnimationPlayState_Enum} from '../web-animation-types';
 
 describes.sandboxed('AmpAnimation', {}, (env) => {
   let ioCallbacks;
@@ -347,7 +347,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         expect(anim.triggered_).to.be.true;
         expect(anim.runner_).to.exist;
 
-        runner.setPlayState_(WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED);
+        runner.setPlayState_(WebAnimationPlayState_Enum.FINISHED);
         expect(anim.triggered_).to.be.false;
         expect(anim.runner_).to.be.null;
       });
@@ -448,14 +448,14 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
             satisfiesTrust: () => true,
           };
           expect(runner.getPlayState()).to.equal(
-            WEB_ANIMATION_PLAY_STATE_ENUM.IDLE
+            WebAnimationPlayState_Enum.IDLE
           );
           expect(anim.triggered_).to.be.false;
 
           return anim.executeAction(invocation).then(() => {
             expect(anim.triggered_).to.be.true;
             expect(runner.getPlayState()).to.equal(
-              WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+              WebAnimationPlayState_Enum.RUNNING
             );
           });
         });
@@ -468,14 +468,14 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
             satisfiesTrust: () => true,
           };
           expect(runner.getPlayState()).to.equal(
-            WEB_ANIMATION_PLAY_STATE_ENUM.IDLE
+            WebAnimationPlayState_Enum.IDLE
           );
           expect(anim.triggered_).to.be.false;
 
           return anim.executeAction(invocation).then(() => {
             expect(anim.triggered_).to.be.true;
             expect(runner.getPlayState()).to.equal(
-              WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+              WebAnimationPlayState_Enum.RUNNING
             );
           });
         });
@@ -504,13 +504,13 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
             satisfiesTrust: () => true,
           };
           expect(runner.getPlayState()).to.equal(
-            WEB_ANIMATION_PLAY_STATE_ENUM.IDLE
+            WebAnimationPlayState_Enum.IDLE
           );
           expect(anim.triggered_).to.be.false;
 
           return anim.executeAction(invocation).then(() => {
             expect(runner.getPlayState()).to.equal(
-              WEB_ANIMATION_PLAY_STATE_ENUM.IDLE
+              WebAnimationPlayState_Enum.IDLE
             );
             expect(anim.triggered_).to.be.true;
           });
@@ -529,7 +529,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
             expect(cancelStub).to.be.calledOnce;
             expect(anim.triggered_).to.be.true;
             expect(runner.getPlayState()).to.equal(
-              WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+              WebAnimationPlayState_Enum.RUNNING
             );
           });
         });
@@ -550,7 +550,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
           return anim.executeAction(pauseInvocation).then(() => {
             expect(anim.triggered_).to.be.true;
             expect(runner.getPlayState()).to.equal(
-              WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
+              WebAnimationPlayState_Enum.PAUSED
             );
           });
         });
@@ -581,7 +581,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
             .then(() => {
               expect(anim.triggered_).to.be.true;
               expect(runner.getPlayState()).to.equal(
-                WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
+                WebAnimationPlayState_Enum.PAUSED
               );
               const resumeInvocation = {
                 method: 'resume',
@@ -592,7 +592,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
             })
             .then(() => {
               expect(runner.getPlayState()).to.equal(
-                WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+                WebAnimationPlayState_Enum.RUNNING
               );
             });
         });
@@ -623,13 +623,13 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
             .then(() => {
               expect(anim.triggered_).to.be.true;
               expect(runner.getPlayState()).to.equal(
-                WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED
+                WebAnimationPlayState_Enum.PAUSED
               );
               return anim.executeAction(togglePauseInvocation);
             })
             .then(() => {
               expect(runner.getPlayState()).to.equal(
-                WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING
+                WebAnimationPlayState_Enum.RUNNING
               );
             });
         });

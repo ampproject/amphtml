@@ -1,4 +1,4 @@
-import {LAYOUT_ENUM, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 
 const TAG = 'amp-story-shopping-tag';
 
@@ -25,6 +25,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === LAYOUT_ENUM.CONTAINER;
+    return layout === Layout_Enum.CONTAINER;
   }
 }

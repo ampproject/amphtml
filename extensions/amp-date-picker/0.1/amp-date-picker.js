@@ -1,11 +1,11 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
 import {isRTL, iterateCursor, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {LAYOUT_ENUM, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -82,7 +82,7 @@ const attributesToForward = [
 ];
 
 /** @enum {string} */
-const DATE_PICKER_MODE_ENUM = {
+const DatePickerMode_Enum = {
   STATIC: 'static',
   OVERLAY: 'overlay',
 };
@@ -91,7 +91,7 @@ const DATE_PICKER_MODE_ENUM = {
  * @enum {string}
  * @private visible for testing
  */
-export const DATE_PICKER_STATE_ENUM = {
+export const DatePickerState_Enum = {
   OVERLAY_CLOSED: 'overlay-closed',
   OVERLAY_OPEN_INPUT: 'overlay-open-input',
   OVERLAY_OPEN_PICKER: 'overlay-open-picker',
@@ -99,26 +99,26 @@ export const DATE_PICKER_STATE_ENUM = {
 };
 
 /** @enum {string} */
-const DATE_PICKER_TYPE_ENUM = {
+const DatePickerType_Enum = {
   SINGLE: 'single',
   RANGE: 'range',
 };
 
 /** @enum {string} */
-const DATE_FIELD_TYPE_ENUM = {
+const DateFieldType_Enum = {
   DATE: 'input',
   START_DATE: 'start-input',
   END_DATE: 'end-input',
 };
 
 const DateFieldNameByType = {
-  [DATE_FIELD_TYPE_ENUM.DATE]: 'date',
-  [DATE_FIELD_TYPE_ENUM.START_DATE]: 'start-date',
-  [DATE_FIELD_TYPE_ENUM.END_DATE]: 'end-date',
+  [DateFieldType_Enum.DATE]: 'date',
+  [DateFieldType_Enum.START_DATE]: 'start-date',
+  [DateFieldType_Enum.END_DATE]: 'end-date',
 };
 
 /** @enum {string} */
-const DATE_PICKER_EVENT_ENUM = {
+const DatePickerEvent_Enum = {
   /**
    * Triggered when the overlay opens or when the static date picker should
    * receive focus from the attached input.
@@ -261,13 +261,13 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.highlighted_ = new DatesList([]);
 
     /** @private */
-    this.type_ = DATE_PICKER_TYPE_ENUM.SINGLE;
+    this.type_ = DatePickerType_Enum.SINGLE;
 
     /** @private {?typeof React.Component} */
     this.pickerClass_ = null;
 
     /** @private {!DatePickerMode} */
-    this.mode_ = DATE_PICKER_MODE_ENUM.STATIC; // default
+    this.mode_ = DatePickerMode_Enum.STATIC; // default
 
     /** @private */
     this.weekDayFormat_ = DEFAULT_WEEK_DAY_FORMAT;
@@ -351,10 +351,10 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // NOTE: LAYOUT_ENUM.CONTAINER is only valid for mode="overlay",
+    // NOTE: Layout_Enum.CONTAINER is only valid for mode="overlay",
     // but since element attributes are not guaranteed to be present until
     // buildCallback is called, we cannot check the mode here.
-    return isLayoutSizeDefined(layout) || layout == LAYOUT_ENUM.CONTAINER;
+    return isLayoutSizeDefined(layout) || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -392,7 +392,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     this.pickerClass_ =
-      this.type_ === DATE_PICKER_TYPE_ENUM.RANGE
+      this.type_ === DatePickerType_Enum.RANGE
         ? createDateRangePicker()
         : createSingleDatePicker(); // default
 
@@ -415,7 +415,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.fullscreen_ = this.element.hasAttribute('fullscreen');
     if (this.fullscreen_) {
       userAssert(
-        this.mode_ == DATE_PICKER_MODE_ENUM.STATIC,
+        this.mode_ == DatePickerMode_Enum.STATIC,
         'amp-date-picker mode must be "static" to use fullscreen attribute'
       );
     }
@@ -435,10 +435,10 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.isRTL_ = isRTL(this.win.document);
 
-    if (this.type_ === DATE_PICKER_TYPE_ENUM.SINGLE) {
-      this.dateField_ = this.setupDateField_(DATE_FIELD_TYPE_ENUM.DATE);
+    if (this.type_ === DatePickerType_Enum.SINGLE) {
+      this.dateField_ = this.setupDateField_(DateFieldType_Enum.DATE);
       if (
-        this.mode_ == DATE_PICKER_MODE_ENUM.OVERLAY &&
+        this.mode_ == DatePickerMode_Enum.OVERLAY &&
         this.dateField_ === null
       ) {
         user().error(
@@ -447,14 +447,14 @@ export class AmpDatePicker extends AMP.BaseElement {
             'an existing input element.'
         );
       }
-    } else if (this.type_ === DATE_PICKER_TYPE_ENUM.RANGE) {
+    } else if (this.type_ === DatePickerType_Enum.RANGE) {
       this.startDateField_ = this.setupDateField_(
-        DATE_FIELD_TYPE_ENUM.START_DATE
+        DateFieldType_Enum.START_DATE
       );
-      this.endDateField_ = this.setupDateField_(DATE_FIELD_TYPE_ENUM.END_DATE);
+      this.endDateField_ = this.setupDateField_(DateFieldType_Enum.END_DATE);
 
       if (
-        this.mode_ == DATE_PICKER_MODE_ENUM.OVERLAY &&
+        this.mode_ == DatePickerMode_Enum.OVERLAY &&
         (!this.startDateField_ || !this.endDateField_)
       ) {
         user().error(
@@ -468,9 +468,9 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     const initialState =
-      this.mode_ == DATE_PICKER_MODE_ENUM.OVERLAY
-        ? DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED
-        : DATE_PICKER_STATE_ENUM.STATIC;
+      this.mode_ == DatePickerMode_Enum.OVERLAY
+        ? DatePickerState_Enum.OVERLAY_CLOSED
+        : DatePickerState_Enum.STATIC;
     this.stateMachine_ = this.setupStateMachine_(initialState);
 
     this.props_ = this.getProps_();
@@ -559,7 +559,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         return this.render(this.state_);
       })
       .then(() => {
-        if (this.mode_ == DATE_PICKER_MODE_ENUM.STATIC) {
+        if (this.mode_ == DatePickerMode_Enum.STATIC) {
           this.measureElement(() => {
             const scrollHeight = this.container_./*OK*/ scrollHeight;
             const height = this.element./*OK*/ offsetHeight;
@@ -587,7 +587,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   setupStateMachine_(initialState) {
     const sm = new FiniteStateMachine(initialState);
     const {OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, STATIC} =
-      DATE_PICKER_STATE_ENUM;
+      DatePickerState_Enum;
     const noop = () => {};
     sm.addTransition(STATIC, STATIC, noop);
 
@@ -599,7 +599,7 @@ export class AmpDatePicker extends AMP.BaseElement {
           'focused': false,
         })
       ).then(() => {
-        this.triggerEvent_(DATE_PICKER_EVENT_ENUM.ACTIVATE);
+        this.triggerEvent_(DatePickerEvent_Enum.ACTIVATE);
       });
     });
     sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
@@ -662,7 +662,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {!DatePickerState} state
    */
   transitionTo_(state) {
-    if (this.mode_ == DATE_PICKER_MODE_ENUM.STATIC) {
+    if (this.mode_ == DatePickerMode_Enum.STATIC) {
       return;
     }
 
@@ -705,10 +705,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.setState_(dict({'date': date}));
     this.updateDateField_(this.dateField_, date);
     this.element.setAttribute('date', this.getFormattedDate_(date));
-    this.triggerEvent_(
-      DATE_PICKER_EVENT_ENUM.SELECT,
-      this.getSelectData_(date)
-    );
+    this.triggerEvent_(DatePickerEvent_Enum.SELECT, this.getSelectData_(date));
   }
 
   /**
@@ -748,7 +745,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.setState_(state);
     if (startDate && endDate) {
       const selectData = this.getSelectData_(startDate, endDate);
-      this.triggerEvent_(DATE_PICKER_EVENT_ENUM.SELECT, selectData);
+      this.triggerEvent_(DatePickerEvent_Enum.SELECT, selectData);
     }
   }
 
@@ -807,12 +804,12 @@ export class AmpDatePicker extends AMP.BaseElement {
         'focusedInput': this.ReactDatesConstants_['START_DATE'],
       })
     );
-    this.triggerEvent_(DATE_PICKER_EVENT_ENUM.SELECT, null);
+    this.triggerEvent_(DatePickerEvent_Enum.SELECT, null);
 
     if (this.props_['reopenPickerOnClearDate']) {
       this.updateDateFieldFocus_(this.startDateField_, true);
-      this.triggerEvent_(DATE_PICKER_EVENT_ENUM.ACTIVATE);
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT);
+      this.triggerEvent_(DatePickerEvent_Enum.ACTIVATE);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_OPEN_INPUT);
     }
   }
 
@@ -851,10 +848,10 @@ export class AmpDatePicker extends AMP.BaseElement {
     return dict({
       'date': date,
       'endDate': endDate,
-      'focused': this.mode_ == DATE_PICKER_MODE_ENUM.STATIC,
+      'focused': this.mode_ == DatePickerMode_Enum.STATIC,
       'focusedInput': this.ReactDatesConstants_['START_DATE'],
       'isFocused': false,
-      'isOpen': this.mode_ == DATE_PICKER_MODE_ENUM.STATIC,
+      'isOpen': this.mode_ == DatePickerMode_Enum.STATIC,
       'max': max,
       'min': min,
       'startDate': startDate,
@@ -888,7 +885,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     if (existingField) {
       if (
         !this.element.hasAttribute('touch-keyboard-editable') &&
-        this.mode_ == DATE_PICKER_MODE_ENUM.OVERLAY &&
+        this.mode_ == DatePickerMode_Enum.OVERLAY &&
         this.input_.isTouchDetected()
       ) {
         setTouchNonValidationReadonly(existingField, true);
@@ -897,7 +894,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     const form = closestAncestorElementBySelector(this.element, 'form');
-    if (this.mode_ == DATE_PICKER_MODE_ENUM.STATIC && form) {
+    if (this.mode_ == DatePickerMode_Enum.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';
       hiddenInput.name = this.getHiddenInputId_(form, type);
@@ -949,7 +946,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const root = ampdoc.getRootNode().documentElement || ampdoc.getBody();
     // Only add for overlay since click events just handle opening and closing
-    if (this.mode_ == DATE_PICKER_MODE_ENUM.OVERLAY) {
+    if (this.mode_ == DatePickerMode_Enum.OVERLAY) {
       this.listen_(root, 'click', this.handleClick_.bind(this));
     }
     this.listen_(root, 'input', this.handleInput_.bind(this));
@@ -985,7 +982,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.container_.contains(target) || this.isDateField_(target);
 
     if (!clickWasInDatePicker) {
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_CLOSED);
     }
   }
 
@@ -1088,10 +1085,10 @@ export class AmpDatePicker extends AMP.BaseElement {
       } else if (target == this.dateField_) {
         this.updateDateFieldFocus_(this.dateField_);
       }
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_OPEN_INPUT);
     } else if (!this.element.contains(target)) {
       this.updateDateFieldFocus_(null);
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_CLOSED);
     }
   }
 
@@ -1144,11 +1141,11 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   handleDocumentKeydown_(e) {
     if (
-      e.key == KEYS_ENUM.ESCAPE &&
-      this.mode_ == DATE_PICKER_MODE_ENUM.OVERLAY &&
+      e.key == Keys_Enum.ESCAPE &&
+      this.mode_ == DatePickerMode_Enum.OVERLAY &&
       this.element.contains(this.document_.activeElement)
     ) {
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_CLOSED);
     }
     return true;
   }
@@ -1164,21 +1161,21 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (e.key == KEYS_ENUM.DOWN_ARROW) {
+    if (e.key == Keys_Enum.DOWN_ARROW) {
       this.updateDateFieldFocus_(target);
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_PICKER);
-      if (this.mode_ === DATE_PICKER_MODE_ENUM.STATIC) {
-        this.triggerEvent_(DATE_PICKER_EVENT_ENUM.ACTIVATE);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_OPEN_PICKER);
+      if (this.mode_ === DatePickerMode_Enum.STATIC) {
+        this.triggerEvent_(DatePickerEvent_Enum.ACTIVATE);
         const toFocus = this.container_.querySelector('[tabindex="0"]');
         if (toFocus) {
           this.mutateElement(() => toFocus./*OK*/ focus());
         }
       }
       e.preventDefault();
-    } else if (e.key == KEYS_ENUM.ESCAPE) {
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED);
+    } else if (e.key == Keys_Enum.ESCAPE) {
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_CLOSED);
     } else {
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_OPEN_INPUT);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_OPEN_INPUT);
     }
   }
 
@@ -1403,13 +1400,13 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     const selectData = this.getSelectData_(startDate, endDate);
-    this.triggerEvent_(DATE_PICKER_EVENT_ENUM.SELECT, selectData);
+    this.triggerEvent_(DatePickerEvent_Enum.SELECT, selectData);
     this.setState_(
       dict({
         'startDate': startDate,
         'endDate': endDate,
         'isFocused':
-          this.mode_ == DATE_PICKER_MODE_ENUM.STATIC || !isFinalSelection,
+          this.mode_ == DatePickerMode_Enum.STATIC || !isFinalSelection,
       })
     );
     this.updateDateField_(this.startDateField_, startDate);
@@ -1418,8 +1415,8 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.element.setAttribute('end-date', this.getFormattedDate_(endDate));
 
     if (isFinalSelection && startDate && endDate) {
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED);
-      this.triggerEvent_(DATE_PICKER_EVENT_ENUM.DEACTIVATE);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_CLOSED);
+      this.triggerEvent_(DatePickerEvent_Enum.DEACTIVATE);
     }
   }
 
@@ -1469,16 +1466,13 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {?moment} date
    */
   onDateChange(date) {
-    this.triggerEvent_(
-      DATE_PICKER_EVENT_ENUM.SELECT,
-      this.getSelectData_(date)
-    );
+    this.triggerEvent_(DatePickerEvent_Enum.SELECT, this.getSelectData_(date));
     this.setState_(dict({'date': date}));
     this.updateDateField_(this.dateField_, date);
     this.element.setAttribute('date', this.getFormattedDate_(date));
 
     if (!this.props_['keepOpenOnDateSelect']) {
-      this.transitionTo_(DATE_PICKER_STATE_ENUM.OVERLAY_CLOSED);
+      this.transitionTo_(DatePickerState_Enum.OVERLAY_CLOSED);
     }
   }
 
@@ -1502,7 +1496,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         'focusedInput': !focusedInput
           ? this.ReactDatesConstants_['START_DATE']
           : focusedInput,
-        'focused': this.mode_ == DATE_PICKER_MODE_ENUM.STATIC,
+        'focused': this.mode_ == DatePickerMode_Enum.STATIC,
       })
     );
   }
@@ -1515,7 +1509,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   updateDateFieldFocus_(focusedField, opt_toggle) {
-    if (this.mode_ == DATE_PICKER_MODE_ENUM.STATIC) {
+    if (this.mode_ == DatePickerMode_Enum.STATIC) {
       return;
     }
 
@@ -1535,7 +1529,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   triggerEvent_(name, opt_data = null) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, opt_data);
-    this.action_.trigger(this.element, name, event, ACTION_TRUST_ENUM.HIGH);
+    this.action_.trigger(this.element, name, event, ActionTrust_Enum.HIGH);
   }
 
   /**
@@ -1546,9 +1540,9 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   getSelectData_(dateOrStartDate, endDate = null) {
-    if (this.type_ == DATE_PICKER_TYPE_ENUM.SINGLE) {
+    if (this.type_ == DatePickerType_Enum.SINGLE) {
       return this.getBindDate_(dateOrStartDate);
-    } else if (this.type_ == DATE_PICKER_TYPE_ENUM.RANGE) {
+    } else if (this.type_ == DatePickerType_Enum.RANGE) {
       return dateOrStartDate
         ? this.getBindDates_(dateOrStartDate, endDate)
         : null;
@@ -1876,7 +1870,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Notify any listener (like bind) that a DOM update occurred.
    */
   onMount() {
-    if (this.mode_ == DATE_PICKER_MODE_ENUM.OVERLAY) {
+    if (this.mode_ == DatePickerMode_Enum.OVERLAY) {
       // REVIEW: this should be ok, since opening the overlay requires a
       // user interaction, and this won't run until then.
       Services.bindForDocOrNull(this.element).then((bind) => {
@@ -1887,7 +1881,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     } else {
       const renderedEvent = createCustomEvent(
         this.win,
-        AMP_EVENTS_ENUM.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );
@@ -1934,7 +1928,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       ...opt_additionalProps,
     });
     const shouldBeOpen =
-      props['isOpen'] || this.mode_ == DATE_PICKER_MODE_ENUM.STATIC;
+      props['isOpen'] || this.mode_ == DatePickerMode_Enum.STATIC;
     const Picker = shouldBeOpen ? this.pickerClass_ : null;
 
     return this.mutateElement(() => {
@@ -1984,7 +1978,7 @@ export class AmpDatePicker extends AMP.BaseElement {
           this.warnDaySizeOnce_(transitionContainer);
         }
 
-        if (this.mode_ === DATE_PICKER_MODE_ENUM.STATIC) {
+        if (this.mode_ === DatePickerMode_Enum.STATIC) {
           const scrollHeight = this.container_./*OK*/ scrollHeight;
           const height = this.element./*OK*/ offsetHeight;
           if (scrollHeight > height) {

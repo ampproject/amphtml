@@ -5,7 +5,7 @@ import {listenOncePromise} from '#utils/event-helper';
 
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
-import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
@@ -169,28 +169,28 @@ describes.realWin(
         const yt = await getYt({'data-videoid': datasource});
         const iframe = yt.querySelector('iframe');
         await Promise.resolve();
-        const p1 = listenOncePromise(yt, VIDEO_EVENTS_ENUM.MUTED);
+        const p1 = listenOncePromise(yt, VideoEvents_Enum.MUTED);
         await sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
         await p1;
-        const p2 = listenOncePromise(yt, VIDEO_EVENTS_ENUM.PLAYING);
+        const p2 = listenOncePromise(yt, VideoEvents_Enum.PLAYING);
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
         await p2;
-        const p3 = listenOncePromise(yt, VIDEO_EVENTS_ENUM.PAUSE);
+        const p3 = listenOncePromise(yt, VideoEvents_Enum.PAUSE);
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
         await p3;
-        const p4 = listenOncePromise(yt, VIDEO_EVENTS_ENUM.UNMUTED);
+        const p4 = listenOncePromise(yt, VideoEvents_Enum.UNMUTED);
         await sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
         await p4;
         // Should not send the unmute event twice if already sent once.
-        const p5 = listenOncePromise(yt, VIDEO_EVENTS_ENUM.UNMUTED).then(() => {
+        const p5 = listenOncePromise(yt, VideoEvents_Enum.UNMUTED).then(() => {
           assert.fail('Should not have dispatch unmute message twice');
         });
         await sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
         const successTimeout = timer.promise(10);
         await Promise.race([p5, successTimeout]);
         // Make sure pause and end are triggered when video ends.
-        const pEnded = listenOncePromise(yt, VIDEO_EVENTS_ENUM.ENDED);
-        const pPause = listenOncePromise(yt, VIDEO_EVENTS_ENUM.PAUSE);
+        const pEnded = listenOncePromise(yt, VideoEvents_Enum.ENDED);
+        const pPause = listenOncePromise(yt, VideoEvents_Enum.PAUSE);
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
         return Promise.all([pEnded, pPause]);
       });

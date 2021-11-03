@@ -1,9 +1,9 @@
-import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {getVendorJsPropertyName} from '#core/dom/style';
 
 /**
  * @param {!Document} doc
- * @return {!VISIBILITY_STATE_ENUM}
+ * @return {!VisibilityState_Enum}
  */
 export function getDocumentVisibilityState(doc) {
   // New API: `document.visibilityState` property.
@@ -20,11 +20,11 @@ export function getDocumentVisibilityState(doc) {
   const hiddenProp = getVendorJsPropertyName(doc, 'hidden', true);
   if (doc[hiddenProp]) {
     return doc[hiddenProp]
-      ? VISIBILITY_STATE_ENUM.HIDDEN
-      : VISIBILITY_STATE_ENUM.VISIBLE;
+      ? VisibilityState_Enum.HIDDEN
+      : VisibilityState_Enum.VISIBLE;
   }
 
-  return VISIBILITY_STATE_ENUM.VISIBLE;
+  return VisibilityState_Enum.VISIBLE;
 }
 
 /**
@@ -35,7 +35,7 @@ export function getDocumentVisibilityState(doc) {
  * @return {boolean}
  */
 export function isDocumentHidden(doc) {
-  return getDocumentVisibilityState(doc) != VISIBILITY_STATE_ENUM.VISIBLE;
+  return getDocumentVisibilityState(doc) != VisibilityState_Enum.VISIBLE;
 }
 
 /**

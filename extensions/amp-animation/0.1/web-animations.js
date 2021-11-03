@@ -23,12 +23,12 @@ import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {
   InternalWebAnimationRequestDef,
-  WEB_ANIMATION_TIMING_DIRECTION_ENUM,
-  WEB_ANIMATION_TIMING_FILL_ENUM,
   WebAnimationDef,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
   WebAnimationTimingDef,
+  WebAnimationTimingDirection_Enum,
+  WebAnimationTimingFill_Enum,
   WebCompAnimationDef,
   WebKeyframeAnimationDef,
   WebKeyframesDef,
@@ -321,8 +321,8 @@ export class MeasureScanner extends Scanner {
       iterations: 1,
       iterationStart: 0,
       easing: 'linear',
-      direction: WEB_ANIMATION_TIMING_DIRECTION_ENUM.NORMAL,
-      fill: WEB_ANIMATION_TIMING_FILL_ENUM.NONE,
+      direction: WebAnimationTimingDirection_Enum.NORMAL,
+      fill: WebAnimationTimingFill_Enum.NONE,
     };
 
     /** @private {!Array<!InternalWebAnimationRequestDef>} */
@@ -759,10 +759,10 @@ export class MeasureScanner extends Scanner {
 
     // Identifier CSS values.
     const easing = this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
-    const direction = /** @type {!WEB_ANIMATION_TIMING_DIRECTION_ENUM} */ (
+    const direction = /** @type {!WebAnimationTimingDirection_Enum} */ (
       this.css_.resolveIdent(newTiming.direction, prevTiming.direction)
     );
-    const fill = /** @type {!WEB_ANIMATION_TIMING_FILL_ENUM} */ (
+    const fill = /** @type {!WebAnimationTimingFill_Enum} */ (
       this.css_.resolveIdent(newTiming.fill, prevTiming.fill)
     );
 
@@ -782,12 +782,12 @@ export class MeasureScanner extends Scanner {
     );
 
     userAssert(
-      isEnumValue(WEB_ANIMATION_TIMING_DIRECTION_ENUM, direction),
+      isEnumValue(WebAnimationTimingDirection_Enum, direction),
       `Unknown direction: ${direction}`
     );
 
     userAssert(
-      isEnumValue(WEB_ANIMATION_TIMING_FILL_ENUM, fill),
+      isEnumValue(WebAnimationTimingFill_Enum, fill),
       `Unknown fill: ${fill}`
     );
 

@@ -24,7 +24,7 @@ export const SESSION_MAX_AGE_MILLIS = 30 * 60 * 1000;
  * Key values for retriving/storing session values
  * @enum {string}
  */
-export const SESSION_VALUES_ENUM = {
+export const SessionValues_Enum = {
   SESSION_ID: 'sessionId',
   CREATION_TIMESTAMP: 'creationTimestamp',
   ACCESS_TIMESTAMP: 'accessTimestamp',
@@ -123,7 +123,7 @@ export class SessionManager {
   updateEngagedForSessions_() {
     Object.keys(this.sessions_).forEach((key) => {
       const session = this.sessions_[key];
-      session[SESSION_VALUES_ENUM.ENGAGED] = this.getEngagedValue_();
+      session[SessionValues_Enum.ENGAGED] = this.getEngagedValue_();
       this.setSession_(key, session);
     });
   }
@@ -155,7 +155,7 @@ export class SessionManager {
    */
   updateEvent(type) {
     return this.get(type, (session) => {
-      session[SESSION_VALUES_ENUM.EVENT_TIMESTAMP] = Date.now();
+      session[SessionValues_Enum.EVENT_TIMESTAMP] = Date.now();
     });
   }
 
@@ -226,17 +226,17 @@ export class SessionManager {
    * @return {!SessionInfoDef}
    */
   updateSession_(session, opt_usePersistedEngaged) {
-    const currentCount = session[SESSION_VALUES_ENUM.COUNT];
+    const currentCount = session[SessionValues_Enum.COUNT];
     const now = Date.now();
     if (isSessionExpired(session)) {
       const newSessionCount = (currentCount ?? 0) + 1;
       session = constructSessionInfo(this.getEngagedValue_(), newSessionCount);
     } else {
       const previouslyEngaged =
-        opt_usePersistedEngaged && session[SESSION_VALUES_ENUM.ENGAGED];
+        opt_usePersistedEngaged && session[SessionValues_Enum.ENGAGED];
       // Use the persisted engaged value if it was `true`,
       // to signal that this was not a debounced session.
-      session[SESSION_VALUES_ENUM.ENGAGED] =
+      session[SessionValues_Enum.ENGAGED] =
         previouslyEngaged || this.getEngagedValue_();
       // Set the initial engaged signals to true (since it's not debounced)
       if (previouslyEngaged) {
@@ -245,7 +245,7 @@ export class SessionManager {
         this.isVisible_ = true;
       }
     }
-    session[SESSION_VALUES_ENUM.ACCESS_TIMESTAMP] = now;
+    session[SessionValues_Enum.ACCESS_TIMESTAMP] = now;
     return session;
   }
 
@@ -275,7 +275,7 @@ export class SessionManager {
  * @return {boolean}
  */
 function isSessionExpired(session) {
-  const accessTimestamp = session[SESSION_VALUES_ENUM.ACCESS_TIMESTAMP];
+  const accessTimestamp = session[SessionValues_Enum.ACCESS_TIMESTAMP];
   return accessTimestamp + SESSION_MAX_AGE_MILLIS < Date.now();
 }
 
@@ -306,17 +306,17 @@ function constructSessionFromStoredValue(storedSession) {
   }
 
   return {
-    [SESSION_VALUES_ENUM.SESSION_ID]:
-      storedSession[SESSION_VALUES_ENUM.SESSION_ID],
-    [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]:
-      storedSession[SESSION_VALUES_ENUM.CREATION_TIMESTAMP],
-    [SESSION_VALUES_ENUM.COUNT]: storedSession[SESSION_VALUES_ENUM.COUNT],
-    [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]:
-      storedSession[SESSION_VALUES_ENUM.ACCESS_TIMESTAMP],
-    [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]:
-      storedSession[SESSION_VALUES_ENUM.EVENT_TIMESTAMP],
-    [SESSION_VALUES_ENUM.ENGAGED]:
-      storedSession[SESSION_VALUES_ENUM.ENGAGED] ?? true,
+    [SessionValues_Enum.SESSION_ID]:
+      storedSession[SessionValues_Enum.SESSION_ID],
+    [SessionValues_Enum.CREATION_TIMESTAMP]:
+      storedSession[SessionValues_Enum.CREATION_TIMESTAMP],
+    [SessionValues_Enum.COUNT]: storedSession[SessionValues_Enum.COUNT],
+    [SessionValues_Enum.ACCESS_TIMESTAMP]:
+      storedSession[SessionValues_Enum.ACCESS_TIMESTAMP],
+    [SessionValues_Enum.EVENT_TIMESTAMP]:
+      storedSession[SessionValues_Enum.EVENT_TIMESTAMP],
+    [SessionValues_Enum.ENGAGED]:
+      storedSession[SessionValues_Enum.ENGAGED] ?? true,
   };
 }
 
@@ -328,12 +328,12 @@ function constructSessionFromStoredValue(storedSession) {
  */
 function constructSessionInfo(engaged, count = 1) {
   return {
-    [SESSION_VALUES_ENUM.SESSION_ID]: generateSessionId(),
-    [SESSION_VALUES_ENUM.CREATION_TIMESTAMP]: Date.now(),
-    [SESSION_VALUES_ENUM.ACCESS_TIMESTAMP]: Date.now(),
-    [SESSION_VALUES_ENUM.COUNT]: count,
-    [SESSION_VALUES_ENUM.EVENT_TIMESTAMP]: undefined,
-    [SESSION_VALUES_ENUM.ENGAGED]: engaged,
+    [SessionValues_Enum.SESSION_ID]: generateSessionId(),
+    [SessionValues_Enum.CREATION_TIMESTAMP]: Date.now(),
+    [SessionValues_Enum.ACCESS_TIMESTAMP]: Date.now(),
+    [SessionValues_Enum.COUNT]: count,
+    [SessionValues_Enum.EVENT_TIMESTAMP]: undefined,
+    [SessionValues_Enum.ENGAGED]: engaged,
   };
 }
 

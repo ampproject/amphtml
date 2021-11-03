@@ -1,4 +1,4 @@
-import {ATTRIBUTES_ENUM, getAttributesFromConfigObj} from '../attributes';
+import {Attributes_Enum, getAttributesFromConfigObj} from '../attributes';
 
 describes.sandboxed('attributes', {}, () => {
   it('should ignore attributes field if an array', () => {
@@ -7,7 +7,7 @@ describes.sandboxed('attributes', {}, () => {
     };
 
     expect(
-      getAttributesFromConfigObj(configObj, ATTRIBUTES_ENUM.BASE_ATTRIBUTES)
+      getAttributesFromConfigObj(configObj, Attributes_Enum.BASE_ATTRIBUTES)
     ).to.deep.equal({});
   });
 
@@ -24,7 +24,7 @@ describes.sandboxed('attributes', {}, () => {
     };
 
     expect(
-      getAttributesFromConfigObj(configObj, ATTRIBUTES_ENUM.BASE_ATTRIBUTES)
+      getAttributesFromConfigObj(configObj, Attributes_Enum.BASE_ATTRIBUTES)
     ).to.deep.equal({
       'type': 'val2',
       'layout': 'val3',
@@ -43,7 +43,7 @@ describes.sandboxed('attributes', {}, () => {
     expect(
       getAttributesFromConfigObj(
         configObj,
-        ATTRIBUTES_ENUM.STICKY_AD_ATTRIBUTES
+        Attributes_Enum.STICKY_AD_ATTRIBUTES
       )
     ).to.deep.equal({
       'data-no-fill': 'val1',
@@ -57,7 +57,7 @@ describes.sandboxed('attributes', {}, () => {
       },
     };
     expect(
-      getAttributesFromConfigObj(configObj, ATTRIBUTES_ENUM.BASE_ATTRIBUTES)
+      getAttributesFromConfigObj(configObj, Attributes_Enum.BASE_ATTRIBUTES)
     ).to.deep.equal({
       'data-key': '1',
     });
@@ -70,7 +70,7 @@ describes.sandboxed('attributes', {}, () => {
       },
     };
     expect(
-      getAttributesFromConfigObj(configObj, ATTRIBUTES_ENUM.BASE_ATTRIBUTES)
+      getAttributesFromConfigObj(configObj, Attributes_Enum.BASE_ATTRIBUTES)
     ).to.deep.equal({
       'data-key': 'one',
     });
@@ -84,7 +84,7 @@ describes.sandboxed('attributes', {}, () => {
       },
     };
     expect(
-      getAttributesFromConfigObj(configObj, ATTRIBUTES_ENUM.BASE_ATTRIBUTES)
+      getAttributesFromConfigObj(configObj, Attributes_Enum.BASE_ATTRIBUTES)
     ).to.deep.equal({
       'data-key1': 'true',
       'data-key2': 'false',
@@ -99,7 +99,7 @@ describes.sandboxed('attributes', {}, () => {
       },
     };
     expect(
-      getAttributesFromConfigObj(configObj, ATTRIBUTES_ENUM.BASE_ATTRIBUTES)
+      getAttributesFromConfigObj(configObj, Attributes_Enum.BASE_ATTRIBUTES)
     ).to.deep.equal({});
   });
 });

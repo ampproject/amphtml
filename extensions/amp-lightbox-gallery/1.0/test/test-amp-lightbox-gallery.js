@@ -1,6 +1,6 @@
 import '../amp-lightbox-gallery';
 import {
-  ACTION_TRUST_ENUM,
+  ActionTrust_Enum,
   DEFAULT_ACTION,
 } from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
@@ -45,7 +45,7 @@ describes.realWin(
       const source = null;
       const caller = null;
       const event = null;
-      const trust = ACTION_TRUST_ENUM.HIGH;
+      const trust = ActionTrust_Enum.HIGH;
       return new ActionInvocation(
         element,
         method,

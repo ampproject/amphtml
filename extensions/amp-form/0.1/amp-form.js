@@ -1,10 +1,10 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {
-  ASYNC_INPUT_ATTRIBUTES_ENUM,
-  ASYNC_INPUT_CLASSES_ENUM,
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
 } from '#core/constants/async-input';
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
 import {
@@ -35,7 +35,7 @@ import {setupAMPCors, setupInit, setupInput} from '#utils/xhr-utils';
 
 import {AmpFormTextarea} from './amp-form-textarea';
 import {FormDirtiness} from './form-dirtiness';
-import {FORM_EVENTS_ENUM} from './form-events';
+import {FormEvents_Enum} from './form-events';
 import {installFormProxy} from './form-proxy';
 import {FormSubmitService} from './form-submit-service';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
@@ -67,7 +67,7 @@ const TAG = 'amp-form';
 const EXTERNAL_DEPS = ['amp-selector'];
 
 /** @const @enum {string} */
-const FORM_STATE_ENUM = {
+const FormState_Enum = {
   INITIAL: 'initial',
   VERIFYING: 'verifying',
   VERIFY_ERROR: 'verify-error',
@@ -77,7 +77,7 @@ const FORM_STATE_ENUM = {
 };
 
 /** @const @enum {string} */
-const USER_VALIDITY_STATE_ENUM = {
+const UserValidityState_Enum = {
   NONE: 'none',
   USER_VALID: 'valid',
   USER_INVALID: 'invalid',
@@ -184,7 +184,7 @@ export class AmpForm {
     this.form_.classList.add('i-amphtml-form');
 
     /** @private {!FormState} */
-    this.state_ = FORM_STATE_ENUM.INITIAL;
+    this.state_ = FormState_Enum.INITIAL;
 
     const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
@@ -355,7 +355,7 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (!invocation.satisfiesTrust(ACTION_TRUST_ENUM.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'submit') {
@@ -415,7 +415,7 @@ export class AmpForm {
     );
 
     this.form_.addEventListener(
-      AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
+      AmpEvents_Enum.FORM_VALUE_CHANGE,
       (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
@@ -434,18 +434,18 @@ export class AmpForm {
           this.validator_.onBlur(e);
 
           // Only make the verify XHR if the user hasn't pressed submit.
-          if (this.state_ === FORM_STATE_ENUM.VERIFYING) {
+          if (this.state_ === FormState_Enum.VERIFYING) {
             if (errors.length) {
-              this.setState_(FORM_STATE_ENUM.VERIFY_ERROR);
+              this.setState_(FormState_Enum.VERIFY_ERROR);
               this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
                 this.triggerAction_(
-                  FORM_EVENTS_ENUM.VERIFY_ERROR,
+                  FormEvents_Enum.VERIFY_ERROR,
                   errors,
-                  ACTION_TRUST_ENUM.DEFAULT // DEFAULT because async after gesture.
+                  ActionTrust_Enum.DEFAULT // DEFAULT because async after gesture.
                 );
               });
             } else {
-              this.setState_(FORM_STATE_ENUM.INITIAL);
+              this.setState_(FormState_Enum.INITIAL);
             }
           }
         });
@@ -503,7 +503,7 @@ export class AmpForm {
    * @private
    */
   handleSubmitAction_(invocation) {
-    if (this.state_ == FORM_STATE_ENUM.SUBMITTING || !this.checkValidity_()) {
+    if (this.state_ == FormState_Enum.SUBMITTING || !this.checkValidity_()) {
       return Promise.resolve(null);
     }
     // "submit" has the same trust level as the action that caused it.
@@ -516,7 +516,7 @@ export class AmpForm {
    */
   handleClearAction_() {
     this.form_.reset();
-    this.setState_(FORM_STATE_ENUM.INITIAL);
+    this.setState_(FormState_Enum.INITIAL);
     this.form_.classList.remove('user-valid');
     this.form_.classList.remove('user-invalid');
 
@@ -558,7 +558,7 @@ export class AmpForm {
    * @private
    */
   handleSubmitEvent_(event) {
-    if (this.state_ == FORM_STATE_ENUM.SUBMITTING || !this.checkValidity_()) {
+    if (this.state_ == FormState_Enum.SUBMITTING || !this.checkValidity_()) {
       event.stopImmediatePropagation();
       event.preventDefault();
       return Promise.resolve(null);
@@ -569,12 +569,12 @@ export class AmpForm {
     }
 
     // Submits caused by user input have high trust.
-    return this.submit_(ACTION_TRUST_ENUM.HIGH, event);
+    return this.submit_(ActionTrust_Enum.HIGH, event);
   }
 
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
-   * @param {ACTION_TRUST_ENUM} trust
+   * @param {ActionTrust_Enum} trust
    * @param {?Event} event
    * @return {!Promise}
    * @private
@@ -593,7 +593,7 @@ export class AmpForm {
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
     const asyncInputs = this.form_.getElementsByClassName(
-      ASYNC_INPUT_CLASSES_ENUM.ASYNC_INPUT
+      AsyncInputClasses_Enum.ASYNC_INPUT
     );
 
     this.dirtinessHandler_.onSubmitting();
@@ -629,7 +629,7 @@ export class AmpForm {
     }
 
     // Set ourselves to the SUBMITTING State
-    this.setState_(FORM_STATE_ENUM.SUBMITTING);
+    this.setState_(FormState_Enum.SUBMITTING);
 
     // Promises to run before submit without timeout.
     const requiredActionPromises = [];
@@ -640,7 +640,7 @@ export class AmpForm {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
         asyncInput.classList.contains(
-          ASYNC_INPUT_CLASSES_ENUM.ASYNC_REQUIRED_ACTION
+          AsyncInputClasses_Enum.ASYNC_REQUIRED_ACTION
         )
       ) {
         requiredActionPromises.push(asyncCall);
@@ -666,7 +666,7 @@ export class AmpForm {
   /**
    * Handle form error for presubmit async calls.
    * @param {*} error
-   * @param {!ACTION_TRUST_ENUM} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {Promise}
    * @private
    */
@@ -690,7 +690,7 @@ export class AmpForm {
 
   /**
    * Handle successful presubmit tasks
-   * @param {!ACTION_TRUST_ENUM} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    */
   handlePresubmitSuccess_(trust) {
@@ -710,14 +710,14 @@ export class AmpForm {
    * @private
    */
   handleXhrVerify_() {
-    if (this.state_ === FORM_STATE_ENUM.SUBMITTING) {
+    if (this.state_ === FormState_Enum.SUBMITTING) {
       return Promise.resolve();
     }
-    this.setState_(FORM_STATE_ENUM.VERIFYING);
+    this.setState_(FormState_Enum.VERIFYING);
     this.triggerAction_(
-      FORM_EVENTS_ENUM.VERIFY,
+      FormEvents_Enum.VERIFY,
       /* detail */ null,
-      ACTION_TRUST_ENUM.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
@@ -726,7 +726,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {ACTION_TRUST_ENUM} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -749,7 +749,7 @@ export class AmpForm {
 
   /**
    * Handles the server side proxying and then rendering of the template.
-   * @param {ACTION_TRUST_ENUM} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -760,7 +760,7 @@ export class AmpForm {
       .then(() => {
         return this.actions_.trigger(
           this.form_,
-          FORM_EVENTS_ENUM.SUBMIT,
+          FormEvents_Enum.SUBMIT,
           /* event */ null,
           trust
         );
@@ -824,7 +824,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit-success or submit-error state depending on the response status.
    * @param {!JsonObject} response
-   * @param {!ACTION_TRUST_ENUM} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -846,7 +846,7 @@ export class AmpForm {
 
   /**
    * Triggers the analytics and renders any template for submitting state.
-   * @param {ACTION_TRUST_ENUM} trust
+   * @param {ActionTrust_Enum} trust
    */
   submittingWithTrust_(trust) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
@@ -857,7 +857,7 @@ export class AmpForm {
     this.renderTemplate_(values).then(() => {
       this.actions_.trigger(
         this.form_,
-        FORM_EVENTS_ENUM.SUBMIT,
+        FormEvents_Enum.SUBMIT,
         /* event */ null,
         trust
       );
@@ -892,7 +892,7 @@ export class AmpForm {
       .getImpl()
       .then((implementation) => implementation.getValue())
       .then((value) => {
-        const name = asyncInput.getAttribute(ASYNC_INPUT_ATTRIBUTES_ENUM.NAME);
+        const name = asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME);
         let input = this.form_.querySelector(
           `input[name=${escapeCssSelectorIdent(name)}]`
         );
@@ -901,7 +901,7 @@ export class AmpForm {
             this.win_.document,
             'input',
             dict({
-              'name': asyncInput.getAttribute(ASYNC_INPUT_ATTRIBUTES_ENUM.NAME),
+              'name': asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME),
               'hidden': 'true',
             })
           );
@@ -963,18 +963,18 @@ export class AmpForm {
 
   /**
    * Returns the action trust for submit-success and submit-error events.
-   * @param {!ACTION_TRUST_ENUM} incomingTrust
-   * @return {!ACTION_TRUST_ENUM}
+   * @param {!ActionTrust_Enum} incomingTrust
+   * @return {!ActionTrust_Enum}
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
     // Degrade trust across form submission.
-    return /** @type {!ACTION_TRUST_ENUM} */ (incomingTrust - 1);
+    return /** @type {!ActionTrust_Enum} */ (incomingTrust - 1);
   }
 
   /**
    * @param {!Response} response
-   * @param {!ACTION_TRUST_ENUM} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -998,19 +998,19 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject} result
-   * @param {!ACTION_TRUST_ENUM} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
    */
   handleSubmitSuccess_(result, incomingTrust, opt_eventData) {
-    this.setState_(FORM_STATE_ENUM.SUBMIT_SUCCESS);
+    this.setState_(FormState_Enum.SUBMIT_SUCCESS);
     // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
       this.renderTemplate_(result || {}).then(() => {
         const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
         this.triggerAction_(
-          FORM_EVENTS_ENUM.SUBMIT_SUCCESS,
+          FormEvents_Enum.SUBMIT_SUCCESS,
           opt_eventData === undefined ? result : opt_eventData,
           outgoingTrust
         );
@@ -1021,7 +1021,7 @@ export class AmpForm {
 
   /**
    * @param {*} e
-   * @param {!ACTION_TRUST_ENUM} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -1046,20 +1046,20 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
-   * @param {!ACTION_TRUST_ENUM} incomingTrust
+   * @param {!ActionTrust_Enum} incomingTrust
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
    */
   handleSubmitFailure_(error, json, incomingTrust, opt_eventData) {
-    this.setState_(FORM_STATE_ENUM.SUBMIT_ERROR);
+    this.setState_(FormState_Enum.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
     // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
         const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
         this.triggerAction_(
-          FORM_EVENTS_ENUM.SUBMIT_ERROR,
+          FormEvents_Enum.SUBMIT_ERROR,
           opt_eventData === undefined ? json : opt_eventData,
           outgoingTrust
         );
@@ -1091,7 +1091,7 @@ export class AmpForm {
     if (shouldSubmitFormElement) {
       this.form_.submit();
     }
-    this.setState_(FORM_STATE_ENUM.INITIAL);
+    this.setState_(FormState_Enum.INITIAL);
   }
 
   /**
@@ -1185,9 +1185,9 @@ export class AmpForm {
 
   /**
    * Triggers an action e.g. submit success/error with response data.
-   * @param {!FORM_EVENTS_ENUM} name
+   * @param {!FormEvents_Enum} name
    * @param {?JsonObject|!Array<{message: string, name: string}>} detail
-   * @param {!ACTION_TRUST_ENUM} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerAction_(name, detail, trust) {
@@ -1286,7 +1286,7 @@ export class AmpForm {
                 container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
-                  AMP_EVENTS_ENUM.DOM_UPDATE,
+                  AmpEvents_Enum.DOM_UPDATE,
                   /* detail */ null,
                   {bubbles: true}
                 );
@@ -1451,12 +1451,12 @@ function checkUserValidityOnSubmission(form) {
  */
 function getUserValidityStateFor(element) {
   if (element.classList.contains('user-valid')) {
-    return USER_VALIDITY_STATE_ENUM.USER_VALID;
+    return UserValidityState_Enum.USER_VALID;
   } else if (element.classList.contains('user-invalid')) {
-    return USER_VALIDITY_STATE_ENUM.USER_INVALID;
+    return UserValidityState_Enum.USER_INVALID;
   }
 
-  return USER_VALIDITY_STATE_ENUM.NONE;
+  return UserValidityState_Enum.NONE;
 }
 
 /**
@@ -1517,16 +1517,16 @@ function checkUserValidity(element, propagate = false) {
   const previousValidityState = getUserValidityStateFor(element);
   const isCurrentlyValid = element.checkValidity();
   if (
-    previousValidityState != USER_VALIDITY_STATE_ENUM.USER_VALID &&
+    previousValidityState != UserValidityState_Enum.USER_VALID &&
     isCurrentlyValid
   ) {
     element.classList.add('user-valid');
     element.classList.remove('user-invalid');
     // Don't propagate user-valid unless it was marked invalid before.
     shouldPropagate =
-      previousValidityState == USER_VALIDITY_STATE_ENUM.USER_INVALID;
+      previousValidityState == UserValidityState_Enum.USER_INVALID;
   } else if (
-    previousValidityState != USER_VALIDITY_STATE_ENUM.USER_INVALID &&
+    previousValidityState != UserValidityState_Enum.USER_INVALID &&
     !isCurrentlyValid
   ) {
     element.classList.add('user-invalid');
@@ -1581,7 +1581,7 @@ export class AmpFormService {
         const {win} = ampdoc;
         const event = createCustomEvent(
           win,
-          FORM_EVENTS_ENUM.SERVICE_INIT,
+          FormEvents_Enum.SERVICE_INIT,
           null,
           {
             bubbles: true,
@@ -1655,7 +1655,7 @@ export class AmpFormService {
    * @private
    */
   installDomUpdateEventListener_(doc) {
-    doc.addEventListener(AMP_EVENTS_ENUM.DOM_UPDATE, () => {
+    doc.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }
@@ -1669,7 +1669,7 @@ export class AmpFormService {
     doc.addEventListener('keydown', (e) => {
       if (
         e.defaultPrevented ||
-        e.key != KEYS_ENUM.ENTER ||
+        e.key != Keys_Enum.ENTER ||
         !(e.ctrlKey || e.metaKey) ||
         e.target.tagName !== 'TEXTAREA'
       ) {

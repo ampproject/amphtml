@@ -4,8 +4,8 @@ import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import helpersFactory from './helpers';
 
 import {
-  AFFILIATE_STATUS_ENUM,
   AffiliateLinkResolver,
+  AffiliateStatus_Enum,
 } from '../affiliate-link-resolver';
 import {DEFAULT_CONFIG} from '../constants';
 import {Waypoint} from '../waypoint';
@@ -48,9 +48,9 @@ describes.fakeWin(
 
     describe('resolveUnknownAnchors', () => {
       const alreadyResolvedDomains = {
-        'merchant1.com': AFFILIATE_STATUS_ENUM.AFFILIATE,
-        'non-merchant.com': AFFILIATE_STATUS_ENUM.NON_AFFILIATE,
-        'merchant2.com': AFFILIATE_STATUS_ENUM.AFFILIATE,
+        'merchant1.com': AffiliateStatus_Enum.AFFILIATE,
+        'non-merchant.com': AffiliateStatus_Enum.NON_AFFILIATE,
+        'merchant2.com': AffiliateStatus_Enum.AFFILIATE,
       };
       let resolver;
       let anchorList;
@@ -175,9 +175,9 @@ describes.fakeWin(
           resolver.resolveUnknownAnchors(anchorList);
           expect(requestIsPending).to.be.true;
           expect(resolver.domains_).to.deep.equal({
-            'merchant1.com': AFFILIATE_STATUS_ENUM.UNKNOWN,
-            'non-merchant.com': AFFILIATE_STATUS_ENUM.UNKNOWN,
-            'merchant2.com': AFFILIATE_STATUS_ENUM.UNKNOWN,
+            'merchant1.com': AffiliateStatus_Enum.UNKNOWN,
+            'non-merchant.com': AffiliateStatus_Enum.UNKNOWN,
+            'merchant2.com': AffiliateStatus_Enum.UNKNOWN,
           });
         });
       });
@@ -350,7 +350,7 @@ describes.fakeWin(
             'https://initial-merchant.com'
           );
           resolver.domains_ = {
-            'initial-merchant.com': AFFILIATE_STATUS_ENUM.AFFILIATE,
+            'initial-merchant.com': AffiliateStatus_Enum.AFFILIATE,
           };
           // Initial anchor should not be in the asyncResponse list
           const expectedAsyncData = [

@@ -10,7 +10,7 @@ import {devAssert} from '#utils/log';
 /**
  * @enum {string}
  */
-export const LIGHTBOX_CONTROLS_ACTION_ENUM = {
+export const LightboxControlsAction_Enum = {
   CLOSE: 'close',
   GALLERY: 'gallery',
   SLIDES: 'slides',
@@ -71,7 +71,7 @@ export class LightboxControls {
       );
     }
 
-    const actionStrings = Object.values(LIGHTBOX_CONTROLS_ACTION_ENUM);
+    const actionStrings = Object.values(LightboxControlsAction_Enum);
     devAssert(
       toArray(el.querySelectorAll('[data-action]'))
         .map((div) => div.getAttribute('data-action'))

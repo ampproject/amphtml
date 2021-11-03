@@ -4,7 +4,7 @@ import {setImportantStyles, setStyle} from '#core/dom/style';
 /**
  * @enum {number}
  */
-export const AXIS_ENUM = {
+export const Axis_Enum = {
   X: 0,
   Y: 1,
 };
@@ -12,7 +12,7 @@ export const AXIS_ENUM = {
 /**
  * @enum {string}
  */
-export const ALIGNMENT_ENUM = {
+export const Alignment_Enum = {
   START: 'start',
   CENTER: 'center',
 };
@@ -36,9 +36,9 @@ export function getDimension(axis, el) {
     el./*OK*/ getBoundingClientRect();
 
   return {
-    start: axis == AXIS_ENUM.X ? left : top,
-    end: axis == AXIS_ENUM.X ? right : bottom,
-    length: axis == AXIS_ENUM.X ? width : height,
+    start: axis == Axis_Enum.X ? left : top,
+    end: axis == Axis_Enum.X ? right : bottom,
+    length: axis == Axis_Enum.X ? width : height,
   };
 }
 
@@ -70,7 +70,7 @@ export function getStart(axis, el) {
  *    the given alignment.
  */
 export function getPosition(axis, alignment, el) {
-  return alignment == ALIGNMENT_ENUM.START
+  return alignment == Alignment_Enum.START
     ? getStart(axis, el)
     : getCenter(axis, el);
 }
@@ -81,7 +81,7 @@ export function getPosition(axis, alignment, el) {
  * @param {number} length The length value, in pixels, to set.
  */
 export function updateLengthStyle(axis, el, length) {
-  if (axis == AXIS_ENUM.X) {
+  if (axis == Axis_Enum.X) {
     setStyle(el, 'width', `${length}px`);
   } else {
     setStyle(el, 'height', `${length}px`);
@@ -95,8 +95,8 @@ export function updateLengthStyle(axis, el, length) {
  * @param {number} delta How much to move the Element.
  */
 export function setTransformTranslateStyle(axis, el, delta) {
-  const deltaX = axis == AXIS_ENUM.X ? delta : 0;
-  const deltaY = axis == AXIS_ENUM.X ? 0 : delta;
+  const deltaX = axis == Axis_Enum.X ? delta : 0;
+  const deltaY = axis == Axis_Enum.X ? 0 : delta;
   setStyle(el, 'transform', `translate(${deltaX}px, ${deltaY}px)`);
   // Set a custom property so that the slide itself can determine how to
   // translate the content if it so chooses.
@@ -184,7 +184,7 @@ export function findOverlappingIndex(
  * @return {number} The scroll position.
  */
 export function getScrollPosition(axis, el) {
-  if (axis == AXIS_ENUM.X) {
+  if (axis == Axis_Enum.X) {
     return el./*OK*/ scrollLeft;
   }
 
@@ -198,7 +198,7 @@ export function getScrollPosition(axis, el) {
  * @param {number} position The scroll position.
  */
 export function setScrollPosition(axis, el, position) {
-  if (axis == AXIS_ENUM.X) {
+  if (axis == Axis_Enum.X) {
     el./*OK*/ scrollLeft = position;
   } else {
     el./*OK*/ scrollTop = position;
@@ -232,7 +232,7 @@ export function scrollContainerToElement(
   el,
   offset = 0
 ) {
-  const startAligned = alignment == ALIGNMENT_ENUM.START;
+  const startAligned = alignment == Alignment_Enum.START;
   const {length} = getDimension(axis, el);
   const snapOffset = startAligned ? getStart(axis, el) : getCenter(axis, el);
   const scrollOffset = startAligned

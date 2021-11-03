@@ -9,10 +9,10 @@ import {Services} from '#service';
 
 import {dev} from '#utils/log';
 
-import {VIDEO_EVENTS_ENUM} from './video-interface';
+import {VideoEvents_Enum} from './video-interface';
 
 /** @enum {string} */
-export const SANDBOX_OPTIONS_ENUM = {
+export const SandboxOptions_Enum = {
   ALLOW_SCRIPTS: 'allow-scripts',
   ALLOW_SAME_ORIGIN: 'allow-same-origin',
   ALLOW_POPUPS: 'allow-popups',
@@ -117,7 +117,7 @@ export function objOrParseJson(objOrStr) {
  * @return {string}
  */
 export function mutedOrUnmutedEvent(isMuted) {
-  return isMuted ? VIDEO_EVENTS_ENUM.MUTED : VIDEO_EVENTS_ENUM.UNMUTED;
+  return isMuted ? VideoEvents_Enum.MUTED : VideoEvents_Enum.UNMUTED;
 }
 
 /**

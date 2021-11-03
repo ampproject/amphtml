@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {
-  ALIGNMENT_ENUM,
-  AXIS_ENUM,
+  Alignment_Enum,
+  Axis_Enum,
   findOverlappingIndex,
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
@@ -254,7 +254,7 @@ function ScrollerWithRef(
       onClick={onClick}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
-        axis === AXIS_ENUM.X ? classes.horizontalScroll : classes.verticalScroll
+        axis === Axis_Enum.X ? classes.horizontalScroll : classes.verticalScroll
       }`}
       tabIndex={0}
     >
@@ -350,7 +350,7 @@ function renderSlides(
             ? classes.enableSnap
             : classes.disableSnap
         } ${
-          alignment === ALIGNMENT_ENUM.CENTER
+          alignment === Alignment_Enum.CENTER
             ? classes.centerAlign
             : classes.startAlign
         } ${_thumbnails ? classes.thumbnails : ''} `}

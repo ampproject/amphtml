@@ -1,5 +1,5 @@
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
-import {ANALYTICS_EVENT_TYPE_ENUM, CustomEventTracker} from '../events';
+import {AnalyticsEventType_Enum, CustomEventTracker} from '../events';
 import {InstrumentationService} from '../instrumentation';
 
 describes.realWin('InstrumentationService', {amp: 1}, (env) => {
@@ -35,7 +35,7 @@ describes.realWin('InstrumentationService', {amp: 1}, (env) => {
 
   it('should trigger a custom event on the ampdoc root', () => {
     const tracker = root.getTracker(
-      ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
+      AnalyticsEventType_Enum.CUSTOM,
       CustomEventTracker
     );
     const triggerStub = env.sandbox.stub(tracker, 'trigger');

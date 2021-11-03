@@ -2,7 +2,7 @@ import {iterateCursor} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
-  SHADOW_DOM_VERSION_ENUM,
+  ShadowDomVersion_Enum,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
 } from '#core/dom/web-components';
@@ -48,7 +48,7 @@ export function createShadowRoot(hostElement) {
 
   let shadowRoot;
   const shadowDomSupported = getShadowDomSupportedVersion();
-  if (shadowDomSupported == SHADOW_DOM_VERSION_ENUM.V1) {
+  if (shadowDomSupported == ShadowDomVersion_Enum.V1) {
     shadowRoot = hostElement.attachShadow({mode: 'open'});
     if (!shadowRoot.styleSheets) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
@@ -63,7 +63,7 @@ export function createShadowRoot(hostElement) {
         },
       });
     }
-  } else if (shadowDomSupported == SHADOW_DOM_VERSION_ENUM.V0) {
+  } else if (shadowDomSupported == ShadowDomVersion_Enum.V0) {
     shadowRoot = hostElement.createShadowRoot();
   } else {
     shadowRoot = createShadowRootPolyfill(hostElement);

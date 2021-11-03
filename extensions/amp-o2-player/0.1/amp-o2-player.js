@@ -1,5 +1,5 @@
-import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {dict} from '#core/types/object';
@@ -124,7 +124,7 @@ class AmpO2Player extends AMP.BaseElement {
 
     listenFor(
       iframe,
-      MESSAGE_TYPE_ENUM.SEND_CONSENT_DATA,
+      MessageType_Enum.SEND_CONSENT_DATA,
       (data, source, origin) => {
         this.sendConsentData_(source, origin);
       }
@@ -164,22 +164,22 @@ class AmpO2Player extends AMP.BaseElement {
       (consents) => {
         let consentData;
         switch (consents[0]) {
-          case CONSENT_POLICY_STATE_ENUM.SUFFICIENT:
+          case ConsentPolicyState_Enum.SUFFICIENT:
             consentData = {
               'gdprApplies': true,
               'user_consent': 1,
               'gdprString': consents[1],
             };
             break;
-          case CONSENT_POLICY_STATE_ENUM.INSUFFICIENT:
-          case CONSENT_POLICY_STATE_ENUM.UNKNOWN:
+          case ConsentPolicyState_Enum.INSUFFICIENT:
+          case ConsentPolicyState_Enum.UNKNOWN:
             consentData = {
               'gdprApplies': true,
               'user_consent': 0,
               'gdprString': consents[1],
             };
             break;
-          case CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED:
+          case ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED:
           default:
             consentData = {
               'gdprApplies': false,
@@ -191,7 +191,7 @@ class AmpO2Player extends AMP.BaseElement {
           origin,
           dict({
             'sentinel': 'amp',
-            'type': MESSAGE_TYPE_ENUM.CONSENT_DATA,
+            'type': MessageType_Enum.CONSENT_DATA,
             'consentData': consentData,
           })
         );

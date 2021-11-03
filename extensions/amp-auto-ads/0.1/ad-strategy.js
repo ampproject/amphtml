@@ -3,7 +3,7 @@ import {tryResolve} from '#core/data-structures/promise';
 import {user} from '#utils/log';
 
 import {SizeInfoDef} from './ad-network-config';
-import {PLACEMENT_STATE_ENUM} from './placement';
+import {PlacementState_Enum} from './placement';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -98,7 +98,7 @@ export class AdStrategy {
         this.isResponsiveEnabled_
       )
       .then((state) => {
-        if (state == PLACEMENT_STATE_ENUM.PLACED) {
+        if (state == PlacementState_Enum.PLACED) {
           this.adTracker_.addAd(nextPlacement.getAdElement());
           this.adsPlaced_++;
           return true;

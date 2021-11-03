@@ -11,7 +11,7 @@ import {
   GWD_PAGE_WRAPPER_CLASS,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
-  PLAYBACK_CSS_CLASS_ENUM,
+  PlaybackCssClass_Enum,
 } from '../amp-gwd-animation-impl';
 
 describes.sandboxed('AMP GWD Animation', {}, (env) => {
@@ -131,12 +131,12 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
           it('should initially enable animations on GWD page 1', () => {
             // Page 1 should have been enabled.
             const page1 = doc.getElementById('page1');
-            expect(page1.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page1.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .true;
 
             // Page 2 should remain unaffected.
             const page2 = doc.getElementById('page2');
-            expect(page2.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page2.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .false;
           });
 
@@ -152,7 +152,7 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             const page2 = doc.getElementById('page2');
 
             // Verify the first page was activated on initialization.
-            expect(page1.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page1.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .true;
 
             // Trigger a setCurrentPage action as though it originated from a
@@ -166,9 +166,9 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             };
             impl.executeAction(setCurrentPageInvocation);
 
-            expect(page1.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page1.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .false;
-            expect(page2.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page2.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .true;
 
             // Simulate setCurrentPage from a slideChange event which originated
@@ -182,9 +182,9 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             };
             impl.executeAction(otherSetCurrentPageInvocation);
 
-            expect(page1.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page1.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .false;
-            expect(page2.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page2.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .true;
 
             // Remove the pagedeck element and verify that triggering
@@ -205,16 +205,16 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             runtime.setCurrentPage(0);
 
             // Animations should be enabled on page1 only.
-            expect(page1.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page1.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .true;
-            expect(page2.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page2.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .false;
 
             // Set an active label animation, goto counters, and a pause on
             // several descendant elements and the page element itself to test
             // that this state is reset when the page is deactivated.
-            page1.classList.add(PLAYBACK_CSS_CLASS_ENUM.PAUSE);
-            grandchild.classList.add(PLAYBACK_CSS_CLASS_ENUM.PAUSE);
+            page1.classList.add(PlaybackCssClass_Enum.PAUSE);
+            grandchild.classList.add(PlaybackCssClass_Enum.PAUSE);
             page1[GOTO_COUNTER_PROP] = {};
             grandchild[GOTO_COUNTER_PROP] = {};
             page1.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel1');
@@ -224,17 +224,17 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             runtime.setCurrentPage(1);
 
             // Animations should be enabled on page2 only.
-            expect(page1.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page1.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .false;
-            expect(page2.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PLAY)).to.be
+            expect(page2.classList.contains(PlaybackCssClass_Enum.PLAY)).to.be
               .true;
 
             // Pause, goto counters, and current label animation data should have
             // been cleared from all elements under page1, including the page
             // itself.
-            expect(page1.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE)).to
-              .be.false;
-            expect(grandchild.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
+            expect(page1.classList.contains(PlaybackCssClass_Enum.PAUSE)).to.be
+              .false;
+            expect(grandchild.classList.contains(PlaybackCssClass_Enum.PAUSE))
               .to.be.false;
             expect(page1).to.not.have.property(GOTO_COUNTER_PROP);
             expect(grandchild).to.not.have.property(GOTO_COUNTER_PROP);
@@ -269,13 +269,13 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
               satisfiesTrust: () => true,
             };
             impl.executeAction(playInvocation);
-            expect(page1Elem.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
-              .to.be.false;
+            expect(page1Elem.classList.contains(PlaybackCssClass_Enum.PAUSE)).to
+              .be.false;
 
             // Repeated play invocations should have no change.
             impl.executeAction(playInvocation);
-            expect(page1Elem.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
-              .to.be.false;
+            expect(page1Elem.classList.contains(PlaybackCssClass_Enum.PAUSE)).to
+              .be.false;
 
             // Test handling missing arguments.
             invokeWithSomeArgsUndefined(impl, playInvocation);
@@ -289,13 +289,13 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             };
 
             impl.executeAction(invocation);
-            expect(page1Elem.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
-              .to.be.true;
+            expect(page1Elem.classList.contains(PlaybackCssClass_Enum.PAUSE)).to
+              .be.true;
 
             // Repeated pause invocations should have no change.
             impl.executeAction(invocation);
-            expect(page1Elem.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
-              .to.be.true;
+            expect(page1Elem.classList.contains(PlaybackCssClass_Enum.PAUSE)).to
+              .be.true;
 
             // Test handling missing arguments.
             invokeWithSomeArgsUndefined(impl, invocation);
@@ -309,12 +309,12 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             };
 
             impl.executeAction(invocation);
-            expect(page1Elem.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
-              .to.be.true;
+            expect(page1Elem.classList.contains(PlaybackCssClass_Enum.PAUSE)).to
+              .be.true;
 
             impl.executeAction(invocation);
-            expect(page1Elem.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
-              .to.be.false;
+            expect(page1Elem.classList.contains(PlaybackCssClass_Enum.PAUSE)).to
+              .be.false;
 
             // Test handling missing arguments.
             invokeWithSomeArgsUndefined(impl, invocation);
@@ -372,8 +372,8 @@ describes.sandboxed('AMP GWD Animation', {}, (env) => {
             // switched to the label and has been paused.
             impl.executeAction(invocation);
             expect(page1Elem.classList.contains('foo')).to.be.true;
-            expect(page1Elem.classList.contains(PLAYBACK_CSS_CLASS_ENUM.PAUSE))
-              .to.be.true;
+            expect(page1Elem.classList.contains(PlaybackCssClass_Enum.PAUSE)).to
+              .be.true;
 
             win.setTimeout = origSetTimeout;
           });

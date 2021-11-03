@@ -1,9 +1,9 @@
 import {
-  ACTION_TRUST_ENUM,
+  ActionTrust_Enum,
   DEFAULT_ACTION,
 } from '#core/constants/action-constants';
 import {dispatchCustomEvent} from '#core/dom';
-import {LAYOUT_ENUM, LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
+import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
 import {isArray} from '#core/types';
 import {getWin} from '#core/window';
 
@@ -178,14 +178,14 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LAYOUT_PRIORITY_ENUM.CONTENT.
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
    *
    * @param {!AmpElement} unusedElement
    * @return {number}
    * @nocollapse
    */
   static getBuildPriority(unusedElement) {
-    return LAYOUT_PRIORITY_ENUM.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /**
@@ -241,7 +241,7 @@ export class BaseElement {
      * trust required to invoke the handler.
      * @private {?Object<string, {
      *   handler: function(!./service/action-impl.ActionInvocation),
-     *   minTrust: ACTION_TRUST_ENUM,
+     *   minTrust: ActionTrust_Enum,
      * }>} */
     this['actionMap_'] = null;
 
@@ -272,12 +272,12 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LAYOUT_PRIORITY_ENUM.CONTENT.
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
    * @return {number}
    * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutPriority() {
-    return LAYOUT_PRIORITY_ENUM.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /**
@@ -297,7 +297,7 @@ export class BaseElement {
       .updateLayoutPriority(this.element, newLayoutPriority);
   }
 
-  /** @return {!LAYOUT_ENUM} */
+  /** @return {!Layout_Enum} */
   getLayout() {
     return this.element.getLayout();
   }
@@ -357,14 +357,14 @@ export class BaseElement {
 
   /**
    * Intended to be implemented by subclasses. Tests whether the element
-   * supports the specified layout. By default only LAYOUT_ENUM.NODISPLAY is
+   * supports the specified layout. By default only Layout_Enum.NODISPLAY is
    * supported.
-   * @param {!LAYOUT_ENUM} layout
+   * @param {!Layout_Enum} layout
    * @return {boolean}
    * @public
    */
   isLayoutSupported(layout) {
-    return layout == LAYOUT_ENUM.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /**
@@ -667,10 +667,10 @@ export class BaseElement {
    *
    * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
-   * @param {ACTION_TRUST_ENUM} minTrust
+   * @param {ActionTrust_Enum} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ACTION_TRUST_ENUM.DEFAULT) {
+  registerAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     initActionMap(this);
     this['actionMap_'][alias] = {handler, minTrust};
   }
@@ -679,13 +679,13 @@ export class BaseElement {
    * Registers the default action for this component.
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {string=} alias
-   * @param {ACTION_TRUST_ENUM=} minTrust
+   * @param {ActionTrust_Enum=} minTrust
    * @public
    */
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ACTION_TRUST_ENUM.DEFAULT
+    minTrust = ActionTrust_Enum.DEFAULT
   ) {
     devAssert(
       !this['defaultActionAlias_'],

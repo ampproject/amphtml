@@ -20,7 +20,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamToUrl} from '../../../src/url';
-import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-3q-player';
 
@@ -191,12 +191,12 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     redispatch(this.element, eventType, {
-      'ready': VIDEO_EVENTS_ENUM.LOAD,
-      'playing': VIDEO_EVENTS_ENUM.PLAYING,
-      'paused': VIDEO_EVENTS_ENUM.PAUSE,
-      'complete': VIDEO_EVENTS_ENUM.ENDED,
-      'muted': VIDEO_EVENTS_ENUM.MUTED,
-      'unmuted': VIDEO_EVENTS_ENUM.UNMUTED,
+      'ready': VideoEvents_Enum.LOAD,
+      'playing': VideoEvents_Enum.PLAYING,
+      'paused': VideoEvents_Enum.PAUSE,
+      'complete': VideoEvents_Enum.ENDED,
+      'muted': VideoEvents_Enum.MUTED,
+      'unmuted': VideoEvents_Enum.UNMUTED,
     });
   }
 

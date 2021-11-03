@@ -5,7 +5,7 @@ import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '#testing/helpers/service';
-import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '#service';
 import {SessionManager} from '../session-manager';
@@ -2095,14 +2095,14 @@ describes.realWin(
 
       it('is 1 for non-inabox', () => {
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
-          LAYOUT_PRIORITY_ENUM.METADATA
+          LayoutPriority_Enum.METADATA
         );
       });
 
       it('is 0 for inabox', () => {
         env.win.__AMP_MODE.runtime = 'inabox';
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
-          LAYOUT_PRIORITY_ENUM.CONTENT
+          LayoutPriority_Enum.CONTENT
         );
       });
     });

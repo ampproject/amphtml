@@ -3,9 +3,9 @@ import {utf8Decode} from '#core/types/string/bytes';
 
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {
-  AD_RESPONSE_TYPE_ENUM,
-  VALIDATOR_RESULT_ENUM,
+  AdResponseType_Enum,
   Validator,
+  ValidatorResult_Enum,
 } from './amp-ad-type-defs';
 import {
   extensionsHasElement,
@@ -51,8 +51,8 @@ export class TemplateValidator extends Validator {
           creativeData: {
             creative: body,
           },
-          adResponseType: AD_RESPONSE_TYPE_ENUM.TEMPLATE,
-          type: VALIDATOR_RESULT_ENUM.NON_AMP,
+          adResponseType: AdResponseType_Enum.TEMPLATE,
+          type: ValidatorResult_Enum.NON_AMP,
         })
       );
     }
@@ -93,8 +93,8 @@ export class TemplateValidator extends Validator {
               templateData: parsedResponseBody,
               creativeMetadata,
             },
-            adResponseType: AD_RESPONSE_TYPE_ENUM.TEMPLATE,
-            type: VALIDATOR_RESULT_ENUM.AMP,
+            adResponseType: AdResponseType_Enum.TEMPLATE,
+            type: ValidatorResult_Enum.AMP,
           })
         );
       });

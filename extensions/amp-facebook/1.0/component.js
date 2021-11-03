@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {dashToUnderline} from '#core/types/string';
-import {MESSAGE_TYPE_ENUM, deserializeMessage} from '#core/3p-frame-messaging';
+import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {tryParseJson} from '#core/types/object/json';
 import {useCallback, useLayoutEffect, useMemo, useState} from '#preact';
@@ -55,7 +55,7 @@ function BentoFacebookWithRef(
       if (data['action'] == 'ready') {
         onLoadRef.current?.();
       }
-      if (data['type'] == MESSAGE_TYPE_ENUM.EMBED_SIZE) {
+      if (data['type'] == MessageType_Enum.EMBED_SIZE) {
         const height = data['height'];
         if (requestResize) {
           requestResize(height);

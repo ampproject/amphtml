@@ -1,9 +1,9 @@
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
-import {ANALYTICS_VARIABLE_ENUM, getVariableService} from './variable-service';
+import {AnalyticsVariable_Enum, getVariableService} from './variable-service';
 import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';
 
@@ -11,7 +11,7 @@ import {dict} from '#core/types/object';
 const TAG = 'amp-story-viewer-messaging-handler';
 
 /** @enum {number} */
-const DATA_SOURCES_ENUM = {
+const DataSources_Enum = {
   STORE_SERVICE: 0,
   VARIABLE_SERVICE: 2,
 };
@@ -19,46 +19,46 @@ const DATA_SOURCES_ENUM = {
 /**
  * @typedef {{
  *   dataSource: !DataSources,
- *   property: (!STATE_PROPERTY_ENUM|!ANALYTICS_VARIABLE_ENUM)
+ *   property: (!StateProperty_Enum|!AnalyticsVariable_Enum)
  * }}
  */
 let GetStateConfigurationDef;
 
 /** @enum {!GetStateConfigurationDef} */
-const GET_STATE_CONFIGURATIONS_ENUM = {
+const GetStateConfigurations_Enum = {
   'CURRENT_PAGE_ID': {
-    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
-    property: STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
+    dataSource: DataSources_Enum.STORE_SERVICE,
+    property: StateProperty_Enum.CURRENT_PAGE_ID,
   },
   'EDUCATION_STATE': {
-    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
-    property: STATE_PROPERTY_ENUM.EDUCATION_STATE,
+    dataSource: DataSources_Enum.STORE_SERVICE,
+    property: StateProperty_Enum.EDUCATION_STATE,
   },
   'MUTED_STATE': {
-    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
-    property: STATE_PROPERTY_ENUM.MUTED_STATE,
+    dataSource: DataSources_Enum.STORE_SERVICE,
+    property: StateProperty_Enum.MUTED_STATE,
   },
   'PAGE_ATTACHMENT_STATE': {
-    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
-    property: STATE_PROPERTY_ENUM.PAGE_ATTACHMENT_STATE,
+    dataSource: DataSources_Enum.STORE_SERVICE,
+    property: StateProperty_Enum.PAGE_ATTACHMENT_STATE,
   },
   'UI_STATE': {
-    dataSource: DATA_SOURCES_ENUM.STORE_SERVICE,
-    property: STATE_PROPERTY_ENUM.UI_STATE,
+    dataSource: DataSources_Enum.STORE_SERVICE,
+    property: StateProperty_Enum.UI_STATE,
   },
   'STORY_PROGRESS': {
-    dataSource: DATA_SOURCES_ENUM.VARIABLE_SERVICE,
-    property: ANALYTICS_VARIABLE_ENUM.STORY_PROGRESS,
+    dataSource: DataSources_Enum.VARIABLE_SERVICE,
+    property: AnalyticsVariable_Enum.STORY_PROGRESS,
   },
 };
 
-/** @typedef {{action: !ACTION_ENUM, isValueValid: function(*):boolean}} */
+/** @typedef {{action: !Action_Enum, isValueValid: function(*):boolean}} */
 let SetStateConfigurationDef;
 
 /** @enum {!SetStateConfigurationDef} */
-const SET_STATE_CONFIGURATIONS_ENUM = {
+const SetStateConfigurations_Enum = {
   'MUTED_STATE': {
-    action: ACTION_ENUM.TOGGLE_MUTED,
+    action: Action_Enum.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
   },
 };
@@ -117,7 +117,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onGetDocumentState_(data = {}) {
     const {state} = data;
-    const config = GET_STATE_CONFIGURATIONS_ENUM[state];
+    const config = GetStateConfigurations_Enum[state];
 
     if (!config) {
       return Promise.reject(`Invalid 'state' parameter`);
@@ -126,10 +126,10 @@ export class AmpStoryViewerMessagingHandler {
     let value;
 
     switch (config.dataSource) {
-      case DATA_SOURCES_ENUM.STORE_SERVICE:
+      case DataSources_Enum.STORE_SERVICE:
         value = this.storeService_.get(config.property);
         break;
-      case DATA_SOURCES_ENUM.VARIABLE_SERVICE:
+      case DataSources_Enum.VARIABLE_SERVICE:
         value = this.variableService_.get()[config.property];
         break;
       default:
@@ -147,7 +147,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onOnDocumentState_(data = {}) {
     const {state} = data;
-    const config = GET_STATE_CONFIGURATIONS_ENUM[state];
+    const config = GetStateConfigurations_Enum[state];
 
     if (!config) {
       user().error(TAG, `Invalid 'state' parameter`);
@@ -170,7 +170,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onSetDocumentState_(data = {}) {
     const {state, value} = data;
-    const config = SET_STATE_CONFIGURATIONS_ENUM[state];
+    const config = SetStateConfigurations_Enum[state];
 
     if (!config) {
       return Promise.reject(`Invalid 'state' parameter`);
@@ -192,7 +192,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onCustomDocumentUI_(data) {
     this.storeService_.dispatch(
-      ACTION_ENUM.SET_VIEWER_CUSTOM_CONTROLS,
+      Action_Enum.SET_VIEWER_CUSTOM_CONTROLS,
       data.controls
     );
   }

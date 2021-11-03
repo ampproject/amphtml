@@ -30,7 +30,7 @@ const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /** @enum {string} */
-const AMP_AD_IMPLEMENTATION_ENUM = {
+const AmpAdImplementation_Enum = {
   AMP_AD_XHR_TO_IFRAME: '2',
   AMP_AD_XHR_TO_IFRAME_OR_AMP: '3',
   AMP_AD_IFRAME_GET: '5',
@@ -41,7 +41,7 @@ const AMP_AD_IMPLEMENTATION_ENUM = {
  * than 32 capabilities to this enum.
  * @enum {number}
  */
-const CAPABILITY_ENUM = {
+const Capability_Enum = {
   SVG_SUPPORTED: 1 << 0,
   SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
   SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
@@ -327,8 +327,8 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
         'ati': ati,
         'ard': ard,
         'is_amp': this.isXhrAllowed()
-          ? AMP_AD_IMPLEMENTATION_ENUM.AMP_AD_XHR_TO_IFRAME_OR_AMP
-          : AMP_AD_IMPLEMENTATION_ENUM.AMP_AD_IFRAME_GET,
+          ? AmpAdImplementation_Enum.AMP_AD_XHR_TO_IFRAME_OR_AMP
+          : AmpAdImplementation_Enum.AMP_AD_IFRAME_GET,
         'amp_v': mode.version(),
         'd_imp': 1,
         'c': getCorrelator(win, ampDoc, clientId),
@@ -442,17 +442,17 @@ function getBrowserCapabilitiesBitmap(win) {
   let browserCapabilities = 0;
   const doc = win.document;
   if (win.SVGElement && doc.createElementNS) {
-    browserCapabilities |= CAPABILITY_ENUM.SVG_SUPPORTED;
+    browserCapabilities |= Capability_Enum.SVG_SUPPORTED;
   }
   const iframeEl = doc.createElement('iframe');
   if (iframeEl.sandbox && iframeEl.sandbox.supports) {
     if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
       browserCapabilities |=
-        CAPABILITY_ENUM.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
     }
     if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
       browserCapabilities |=
-        CAPABILITY_ENUM.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
     }
   }
   return browserCapabilities;

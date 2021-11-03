@@ -5,7 +5,7 @@ import {afterRenderPromise} from '#testing/helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  ACTION_ENUM,
+  Action_Enum,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
@@ -60,7 +60,7 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
-      storeService.dispatch(ACTION_ENUM.SET_PAGE_SIZE, {
+      storeService.dispatch(Action_Enum.SET_PAGE_SIZE, {
         width: 700,
         height: 1000,
       });
@@ -92,7 +92,7 @@ describes.realWin(
         attributes
       );
       await panningMedia.layoutCallback();
-      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+      await storeService.dispatch(Action_Enum.CHANGE_PAGE, {
         id: 'page1',
         index: 0,
       });
@@ -114,7 +114,7 @@ describes.realWin(
         '/examples/amp-story/img/conservatory-coords.jpg',
         attributes
       );
-      await storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+      await storeService.dispatch(Action_Enum.CHANGE_PAGE, {
         id: 'page1',
         index: 0,
       });

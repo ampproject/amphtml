@@ -1,5 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import '../amp-story-shopping';
 
 describes.realWin(
@@ -36,7 +36,7 @@ describes.realWin(
 
     it('should build shopping config component', () => {
       expect(() => shoppingConfig.layoutCallback()).to.not.throw();
-      expect(shoppingConfig.isLayoutSupported(LAYOUT_ENUM.NODISPLAY)).to.be
+      expect(shoppingConfig.isLayoutSupported(Layout_Enum.NODISPLAY)).to.be
         .true;
     });
   }

@@ -4,7 +4,7 @@ import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/helpers/service';
 import {createElementWithAttributes} from '#core/dom';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 
 describes.realWin(
   'amp-brightcove-v1.0',
@@ -159,7 +159,7 @@ describes.realWin(
     it('should propagate consent state to iframe', async () => {
       env.sandbox
         .stub(consent, 'getConsentPolicyState')
-        .resolves(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+        .resolves(ConsentPolicyState_Enum.SUFFICIENT);
       env.sandbox
         .stub(consent, 'getConsentPolicySharedData')
         .resolves({a: 1, b: 2});
@@ -173,7 +173,7 @@ describes.realWin(
       const iframe = element.shadowRoot.querySelector('iframe');
 
       expect(iframe.src).to.contain(
-        `ampInitialConsentState=${CONSENT_POLICY_STATE_ENUM.SUFFICIENT}`
+        `ampInitialConsentState=${ConsentPolicyState_Enum.SUFFICIENT}`
       );
       expect(iframe.src).to.contain(
         `ampConsentSharedData=${encodeURIComponent(

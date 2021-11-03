@@ -1,5 +1,5 @@
 import {
-  LAYOUT_TYPE_ENUM,
+  LayoutType_Enum,
   getAutoConfig,
   getPubControlConfig,
 } from '#ads/google/a4a/shared/content-recommendation';
@@ -10,7 +10,7 @@ describes.sandboxed('getAutoConfig', {}, function () {
       expect(
         getAutoConfig(availableWidth, /* isMobile= */ false)
       ).to.deep.equal({
-        layoutType: LAYOUT_TYPE_ENUM.IMAGE_STACKED,
+        layoutType: LayoutType_Enum.IMAGE_STACKED,
         numberOfColumns: 4,
         numberOfRows: 2,
         slotWidth: expectedWidth,
@@ -48,7 +48,7 @@ describes.sandboxed('getAutoConfig', {}, function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(getAutoConfig(availableWidth, /* isMobile= */ true)).to.deep.equal(
         {
-          layoutType: LAYOUT_TYPE_ENUM.MOBILE_BANNER_IMAGE_SIDEBYSIDE,
+          layoutType: LayoutType_Enum.MOBILE_BANNER_IMAGE_SIDEBYSIDE,
           numberOfColumns: 1,
           numberOfRows: 12,
           slotWidth: expectedWidth,
@@ -98,7 +98,7 @@ describes.sandboxed('getAutoConfig', {}, function () {
       expect(
         getAutoConfig(availableWidth, /* isMobile= */ false)
       ).to.deep.equal({
-        layoutType: LAYOUT_TYPE_ENUM.IMAGE_SIDEBYSIDE,
+        layoutType: LayoutType_Enum.IMAGE_SIDEBYSIDE,
         numberOfColumns: 1,
         numberOfRows: 13,
         slotWidth: expectedWidth,
@@ -153,13 +153,13 @@ describes.sandboxed('getPubControlConfig', {}, function () {
     const rawPubControlParams = {
       numberOfColumns: '4',
       numberOfRows: '2',
-      layoutType: LAYOUT_TYPE_ENUM.IMAGE_STACKED,
+      layoutType: LayoutType_Enum.IMAGE_STACKED,
     };
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(
         getPubControlConfig(availableWidth, rawPubControlParams)
       ).to.deep.equal({
-        layoutType: LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_STACKED,
+        layoutType: LayoutType_Enum.PUB_CONTROL_IMAGE_STACKED,
         numberOfColumns: 4,
         numberOfRows: 2,
         slotWidth: expectedWidth,
@@ -197,15 +197,15 @@ describes.sandboxed('getPubControlConfig', {}, function () {
     const rawPubControlParams = {
       numberOfColumns: '1,4',
       numberOfRows: '3,2',
-      layoutType: `${LAYOUT_TYPE_ENUM.IMAGE_SIDEBYSIDE},${LAYOUT_TYPE_ENUM.IMAGE_STACKED}`,
+      layoutType: `${LayoutType_Enum.IMAGE_SIDEBYSIDE},${LayoutType_Enum.IMAGE_STACKED}`,
     };
     const expectedDesktopConfig = {
-      layoutType: LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_STACKED,
+      layoutType: LayoutType_Enum.PUB_CONTROL_IMAGE_STACKED,
       numberOfColumns: 4,
       numberOfRows: 2,
     };
     const expectedMobileConfig = {
-      layoutType: LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_SIDEBYSIDE,
+      layoutType: LayoutType_Enum.PUB_CONTROL_IMAGE_SIDEBYSIDE,
       numberOfColumns: 1,
       numberOfRows: 3,
     };
@@ -282,8 +282,8 @@ describes.sandboxed('getPubControlConfig', {}, function () {
       });
     };
 
-    runTest(LAYOUT_TYPE_ENUM.IMAGE_SIDEBYSIDE, /* expectedHeight= */ 123);
-    runTest(LAYOUT_TYPE_ENUM.IMAGE_STACKED, /* expectedHeight= */ 382);
+    runTest(LayoutType_Enum.IMAGE_SIDEBYSIDE, /* expectedHeight= */ 123);
+    runTest(LayoutType_Enum.IMAGE_STACKED, /* expectedHeight= */ 382);
     runTest('text_card', /* expectedHeight= */ 184);
   });
 
@@ -345,12 +345,12 @@ describes.sandboxed('getPubControlConfig', {}, function () {
     const rawPubControlParams = {
       numberOfColumns: '5', // want 5 columns.
       numberOfRows: '2',
-      layoutType: LAYOUT_TYPE_ENUM.IMAGE_STACKED,
+      layoutType: LayoutType_Enum.IMAGE_STACKED,
     };
     expect(getPubControlConfig(300, rawPubControlParams)).to.deep.equal({
       numberOfColumns: 3, // only 3 columns fit at the end.
       numberOfRows: 2,
-      layoutType: LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_STACKED,
+      layoutType: LayoutType_Enum.PUB_CONTROL_IMAGE_STACKED,
       slotWidth: 300,
       slotHeight: 277,
     });

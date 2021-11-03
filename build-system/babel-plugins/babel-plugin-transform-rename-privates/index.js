@@ -69,31 +69,30 @@ module.exports = function (babel) {
 
   return {
     visitor: {
-      Method: renamePrivate('key'),
-      Property: renamePrivate('key'),
+      'Method|Property': renamePrivate('key'),
+
       VariableDeclarator(path) {
         const id = path.get('id');
         if (!id.isIdentifier()) {
           return;
         }
-        if (!id.node.name.endsWith('_ENUM')) {
+        if (!id.node.name.endsWith('_Enum')) {
           return;
         }
-        renameKeys(path.get('declarations.0.init'));
+        renameKeys(path.get('init'));
       },
 
-      MemberExpression(path, state) {
+      'MemberExpression|OptionalMemberExpression': function (path, state) {
         renamePrivate('property')(path, state);
         const obj = path.get('object');
         if (!obj.isIdentifier()) {
           return;
         }
-        if (!obj.node.name.endsWith('_ENUM')) {
+        if (!obj.node.name.endsWith('_Enum')) {
           return;
         }
         renameEnum('property', path);
       },
-      OptionalMemberExpression: renamePrivate('property'),
     },
   };
 };

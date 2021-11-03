@@ -1,8 +1,8 @@
 import * as Preact from '#preact';
 import {
-  ALIGNMENT_ENUM,
-  AXIS_ENUM,
-  ORIENTATION_ENUM,
+  Alignment_Enum,
+  Axis_Enum,
+  Orientation_Enum,
   getDimension,
   getOffsetPosition,
   getScrollEnd,
@@ -33,7 +33,7 @@ import {mod} from '#core/math';
 /**
  * @enum {string}
  */
-const CONTROLS_ENUM = {
+const Controls_Enum = {
   ALWAYS: 'always',
   NEVER: 'never',
   AUTO: 'auto',
@@ -42,7 +42,7 @@ const CONTROLS_ENUM = {
 /**
  * @enum {string}
  */
-const INTERACTION_ENUM = {
+const Interaction_Enum = {
   GENERIC: 0,
   FOCUS: 1,
   MOUSE: 2,
@@ -53,7 +53,7 @@ const INTERACTION_ENUM = {
 /**
  * @enum {string}
  */
-const DIRECTION_ENUM = {
+const Direction_Enum = {
   LTR: 'ltr',
   RTL: 'rtl',
   AUTO: 'auto',
@@ -78,9 +78,9 @@ function BentoBaseCarouselWithRef(
     autoAdvanceInterval: customAutoAdvanceInterval = MIN_AUTO_ADVANCE_INTERVAL,
     autoAdvanceLoops = Number.POSITIVE_INFINITY,
     children,
-    controls = CONTROLS_ENUM.AUTO,
+    controls = Controls_Enum.AUTO,
     defaultSlide = 0,
-    dir = DIRECTION_ENUM.AUTO,
+    dir = Direction_Enum.AUTO,
     lightbox = false,
     loop,
     mixedLength = false,
@@ -89,10 +89,10 @@ function BentoBaseCarouselWithRef(
     onMouseEnter,
     onSlideChange,
     onTouchStart,
-    orientation = ORIENTATION_ENUM.HORIZONTAL,
+    orientation = Orientation_Enum.HORIZONTAL,
     outsetArrows = false,
     snap = true,
-    snapAlign = ALIGNMENT_ENUM.START,
+    snapAlign = Alignment_Enum.START,
     snapBy = 1,
     visibleCount = 1,
     _thumbnails = false,
@@ -116,7 +116,7 @@ function BentoBaseCarouselWithRef(
     : setGlobalCurrentSlide;
   const currentSlideRef = useRef(currentSlide);
   const axis =
-    orientation == ORIENTATION_ENUM.HORIZONTAL ? AXIS_ENUM.X : AXIS_ENUM.Y;
+    orientation == Orientation_Enum.HORIZONTAL ? Axis_Enum.X : Axis_Enum.Y;
   const [id] = useState(generateCarouselKey);
 
   useLayoutEffect(() => {
@@ -139,7 +139,7 @@ function BentoBaseCarouselWithRef(
   const autoAdvance = useCallback(() => {
     if (
       autoAdvanceTimesRef.current + visibleCount / length >= autoAdvanceLoops ||
-      interaction.current !== INTERACTION_ENUM.NONE
+      interaction.current !== Interaction_Enum.NONE
     ) {
       return false;
     }
@@ -194,15 +194,15 @@ function BentoBaseCarouselWithRef(
     () =>
       /** @type {!BaseCarouselDef.CarouselApi} */ ({
         goToSlide: (index) => {
-          interaction.current = INTERACTION_ENUM.GENERIC;
+          interaction.current = Interaction_Enum.GENERIC;
           setRestingIndex(index);
         },
         next: () => {
-          interaction.current = INTERACTION_ENUM.GENERIC;
+          interaction.current = Interaction_Enum.GENERIC;
           next();
         },
         prev: () => {
-          interaction.current = INTERACTION_ENUM.GENERIC;
+          interaction.current = Interaction_Enum.GENERIC;
           prev();
         },
         get root() {
@@ -259,20 +259,20 @@ function BentoBaseCarouselWithRef(
     return false;
   };
 
-  const interaction = useRef(INTERACTION_ENUM.NONE);
+  const interaction = useRef(Interaction_Enum.NONE);
   const hideControls = useMemo(() => {
-    if (controls === CONTROLS_ENUM.ALWAYS || outsetArrows) {
+    if (controls === Controls_Enum.ALWAYS || outsetArrows) {
       return false;
     }
-    if (controls === CONTROLS_ENUM.NEVER) {
+    if (controls === Controls_Enum.NEVER) {
       return true;
     }
-    return interaction.current === INTERACTION_ENUM.TOUCH;
+    return interaction.current === Interaction_Enum.TOUCH;
   }, [controls, outsetArrows]);
 
-  const [rtl, setRtl] = useState(dir === DIRECTION_ENUM.RTL);
+  const [rtl, setRtl] = useState(dir === Direction_Enum.RTL);
   useLayoutEffect(() => {
-    if (!containRef.current || dir !== DIRECTION_ENUM.AUTO) {
+    if (!containRef.current || dir !== Direction_Enum.AUTO) {
       return;
     }
     const doc = containRef.current.ownerDocument;
@@ -289,26 +289,26 @@ function BentoBaseCarouselWithRef(
       paint={true}
       contentStyle={{
         display: 'flex',
-        direction: rtl ? DIRECTION_ENUM.RTL : DIRECTION_ENUM.LTR,
+        direction: rtl ? Direction_Enum.RTL : Direction_Enum.LTR,
       }}
       ref={containRef}
       onFocus={(e) => {
         if (onFocus) {
           onFocus(e);
         }
-        interaction.current = INTERACTION_ENUM.FOCUS;
+        interaction.current = Interaction_Enum.FOCUS;
       }}
       onMouseEnter={(e) => {
         if (onMouseEnter) {
           onMouseEnter(e);
         }
-        interaction.current = INTERACTION_ENUM.MOUSE;
+        interaction.current = Interaction_Enum.MOUSE;
       }}
       onTouchStart={(e) => {
         if (onTouchStart) {
           onTouchStart(e);
         }
-        interaction.current = INTERACTION_ENUM.TOUCH;
+        interaction.current = Interaction_Enum.TOUCH;
       }}
       tabIndex="0"
       wrapperClassName={classes.carousel}

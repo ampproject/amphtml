@@ -1,7 +1,7 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
-import {CHUNK_PRIORITY_ENUM, chunk} from '../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {SAME_SITE_ENUM, setCookie} from '../../../src/cookies';
+import {SameSite_Enum, setCookie} from '../../../src/cookies';
 import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
 import {isCookieAllowed} from './cookie-reader';
@@ -59,7 +59,7 @@ export class CookieWriter {
         this.writeDeferred_.resolve(this.init_());
       };
       // CookieWriter is not supported in inabox ad. Always chunk
-      chunk(this.element_, task, CHUNK_PRIORITY_ENUM.LOW);
+      chunk(this.element_, task, ChunkPriority_Enum.LOW);
     }
     return this.writeDeferred_.promise;
   }
@@ -112,7 +112,7 @@ export class CookieWriter {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
       const sameSite = this.getSameSiteType_(
-        // individual cookie sameSite/SAME_SITE_ENUM overrides config sameSite/SAME_SITE_ENUM
+        // individual cookie sameSite/SameSite_Enum overrides config sameSite/SameSite_Enum
         cookieObj['sameSite'] ||
           cookieObj['SameSite'] ||
           inputConfig['sameSite'] ||
@@ -203,7 +203,7 @@ export class CookieWriter {
    * @param {string} cookieName
    * @param {string} cookieValue
    * @param {number} cookieExpireDateMs
-   * @param {!SAME_SITE_ENUM=} sameSite
+   * @param {!SameSite_Enum=} sameSite
    * @return {!Promise}
    */
   expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs, sameSite) {
@@ -216,9 +216,9 @@ export class CookieWriter {
         // provide a way to overwrite or erase existing cookie
         if (value) {
           const expireDate = Date.now() + cookieExpireDateMs;
-          // SAME_SITE_ENUM=None must be secure as per
+          // SameSite_Enum=None must be secure as per
           // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
-          const secure = sameSite === SAME_SITE_ENUM.NONE;
+          const secure = sameSite === SameSite_Enum.NONE;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
             sameSite,
@@ -232,18 +232,18 @@ export class CookieWriter {
   }
 
   /**
-   * Converts SAME_SITE_ENUM string to SAME_SITE_ENUM type.
+   * Converts SameSite_Enum string to SameSite_Enum type.
    * @param {string=} sameSite
-   * @return {SAME_SITE_ENUM|undefined}
+   * @return {SameSite_Enum|undefined}
    */
   getSameSiteType_(sameSite) {
     switch (sameSite) {
       case 'Strict':
-        return SAME_SITE_ENUM.STRICT;
+        return SameSite_Enum.STRICT;
       case 'Lax':
-        return SAME_SITE_ENUM.LAX;
+        return SameSite_Enum.LAX;
       case 'None':
-        return SAME_SITE_ENUM.NONE;
+        return SameSite_Enum.NONE;
       default:
         return;
     }

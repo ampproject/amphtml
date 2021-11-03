@@ -1,4 +1,4 @@
-import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -39,7 +39,7 @@ export class AmpActionMacro extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return LAYOUT_PRIORITY_ENUM.METADATA;
+    return LayoutPriority_Enum.METADATA;
   }
 
   /**

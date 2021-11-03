@@ -1,5 +1,5 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
-import {TICK_LABEL_ENUM} from '#core/constants/enums';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {TickLabel_Enum} from '#core/constants/enums';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
@@ -209,14 +209,14 @@ export function makeBodyVisible(doc) {
       }
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);
-      ampdoc.signals().signal(COMMON_SIGNALS_ENUM.RENDER_START);
+      ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
       if (services.length > 0) {
         const resources = Services.resourcesForDoc(doc.documentElement);
         resources./*OK*/ schedulePass(1, /* relayoutAll */ true);
       }
       try {
         const perf = Services.performanceFor(win);
-        perf.tick(TICK_LABEL_ENUM.MAKE_BODY_VISIBLE);
+        perf.tick(TickLabel_Enum.MAKE_BODY_VISIBLE);
         perf.flush();
       } catch (e) {}
     });

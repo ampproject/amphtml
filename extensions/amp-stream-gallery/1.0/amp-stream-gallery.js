@@ -1,4 +1,4 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {Services} from '#service';
@@ -13,15 +13,15 @@ const TAG = 'amp-stream-gallery';
 class AmpStreamGallery extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction('prev', (api) => api.prev(), ACTION_TRUST_ENUM.LOW);
-    this.registerApiAction('next', (api) => api.next(), ACTION_TRUST_ENUM.LOW);
+    this.registerApiAction('prev', (api) => api.prev(), ActionTrust_Enum.LOW);
+    this.registerApiAction('next', (api) => api.next(), ActionTrust_Enum.LOW);
     this.registerApiAction(
       'goToSlide',
       (api, invocation) => {
         const {args} = invocation;
         api.goToSlide(args['index'] || -1);
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
 
     return super.init();
@@ -48,7 +48,7 @@ class AmpStreamGallery extends BaseElement {
       element,
       eventName,
       event,
-      ACTION_TRUST_ENUM.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(element, eventName, detail);

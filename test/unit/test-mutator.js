@@ -1,13 +1,13 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
-import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {MutatorImpl} from '#service/mutator-impl';
-import {RESOURCE_STATE_ENUM, Resource} from '#service/resource';
+import {Resource, ResourceState_Enum} from '#service/resource';
 import {ResourcesImpl} from '#service/resources-impl';
 
 import {installInputService} from '../../src/input';
@@ -82,7 +82,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       pause: () => {},
       unmount: () => {},
       isRelayoutNeeded: () => true,
-      /* eslint-disable google-camelcase/google-camelcase */
+      /* eslint-disable local/camelcase */
       contains: (unused_otherElement) => false,
       updateLayoutBox: () => {},
       togglePlaceholder: () => env.sandbox.spy(),
@@ -90,9 +90,9 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
         unused_overflown,
         unused_requestedHeight,
         unused_requestedWidth
-        /* eslint-enable google-camelcase/google-camelcase */
+        /* eslint-enable local/camelcase */
       ) => {},
-      getLayoutPriority: () => LAYOUT_PRIORITY_ENUM.CONTENT,
+      getLayoutPriority: () => LayoutPriority_Enum.CONTENT,
       signals: () => signals,
       fakeComputedStyle: {
         marginTop: '0px',
@@ -106,7 +106,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
   function createResource(id, rect) {
     const resource = new Resource(id, createElement(rect), resources);
     resource.element['__AMP__RESOURCE'] = resource;
-    resource.state_ = RESOURCE_STATE_ENUM.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     resource.initialLayoutBox_ = resource.layoutBox_ = rect;
     resource.changeSize = env.sandbox.spy();
     return resource;
@@ -177,7 +177,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       false
     );
     expect(resources.requestsChangeSize_.length).to.equal(2);
-    resource1.state_ = RESOURCE_STATE_ENUM.LAYOUT_SCHEDULED;
+    resource1.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     resource1.unlayout();
     resources.cleanupTasks_(resource1);
     expect(resources.requestsChangeSize_.length).to.equal(1);
@@ -443,7 +443,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
         resources.visible_ = false;
         env.sandbox
           .stub(resources.ampdoc, 'getVisibilityState')
-          .returns(VISIBILITY_STATE_ENUM.PRERENDER);
+          .returns(VisibilityState_Enum.PRERENDER);
         mutator.scheduleChangeSize_(
           resource1,
           111,
@@ -1374,7 +1374,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
-    element.getLayoutPriority = () => LAYOUT_PRIORITY_ENUM.CONTENT;
+    element.getLayoutPriority = () => LayoutPriority_Enum.CONTENT;
     element.getLayout = () => 'fixed';
 
     element.isInViewport = () => false;
@@ -1401,7 +1401,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
       resources
     );
     resource.element['__AMP__RESOURCE'] = resource;
-    resource.state_ = RESOURCE_STATE_ENUM.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     resource.changeSize = env.sandbox.spy();
     resource.completeCollapse = env.sandbox.spy();

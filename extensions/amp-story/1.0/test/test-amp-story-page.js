@@ -1,11 +1,11 @@
 import * as VideoUtils from '#core/dom/video';
-import {ACTION_ENUM, AmpStoryStoreService} from '../amp-story-store-service';
+import {Action_Enum, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryPage, PAGE_STATE_ENUM, SELECTORS_ENUM} from '../amp-story-page';
+import {AmpStoryPage, PageState_Enum, Selectors_Enum} from '../amp-story-page';
 import {Deferred} from '#core/data-structures/promise';
 import {LocalizationService} from '#service/localization';
-import {MEDIA_TYPE_ENUM} from '../media-pool';
+import {MediaType_Enum} from '../media-pool';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
@@ -37,8 +37,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
       getMaxMediaElementCounts: () => ({
-        [MEDIA_TYPE_ENUM.VIDEO]: 8,
-        [MEDIA_TYPE_ENUM.AUDIO]: 8,
+        [MediaType_Enum.VIDEO]: 8,
+        [MediaType_Enum.AUDIO]: 8,
       }),
     };
 
@@ -104,7 +104,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   it('should set an active attribute when state becomes active', async () => {
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     expect(page.element).to.have.attribute('active');
   });
@@ -124,7 +124,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
     await page.layoutCallback();
     resolveSignals(page);
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     // Microtask tick
     await Promise.resolve();
@@ -163,7 +163,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     const animateInStub = env.sandbox.stub(page.animationManager_, 'animateIn');
 
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     expect(animateInStub).to.have.been.calledOnce;
   });
@@ -193,7 +193,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
         mediaPoolMock.expects('play').withExactArgs(videoEl).once();
 
-        page.setState(PAGE_STATE_ENUM.PLAYING);
+        page.setState(PageState_Enum.PLAYING);
 
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
@@ -207,7 +207,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   it('should unmute audio when state becomes active', (done) => {
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
-    storeService.dispatch(ACTION_ENUM.TOGGLE_MUTED, false);
+    storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -225,7 +225,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         mediaPoolMock.expects('play').resolves();
         mediaPoolMock.expects('unmute').once();
 
-        page.setState(PAGE_STATE_ENUM.PLAYING);
+        page.setState(PageState_Enum.PLAYING);
 
         await afterRenderPromise();
         mediaPoolMock.verify();
@@ -264,7 +264,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
           mediaPoolMock.expects('play').withExactArgs(videoEl).once();
 
-          page.setState(PAGE_STATE_ENUM.PLAYING);
+          page.setState(PageState_Enum.PLAYING);
 
           // `setState` runs code that creates subtasks (Promise callbacks).
           // Waits for the next frame to make sure all the subtasks are
@@ -281,7 +281,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     await page.layoutCallback();
     expect(
-      scopedQuerySelectorAll(element, SELECTORS_ENUM.ALL_PLAYBACK_MEDIA)[0]
+      scopedQuerySelectorAll(element, Selectors_Enum.ALL_PLAYBACK_MEDIA)[0]
         .tagName
     ).to.equal('AUDIO');
   });
@@ -293,13 +293,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
     await page.layoutCallback();
 
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     await nextTick();
 
     const audioEl = scopedQuerySelectorAll(
       element,
-      SELECTORS_ENUM.ALL_PLAYBACK_MEDIA
+      Selectors_Enum.ALL_PLAYBACK_MEDIA
     )[0];
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
   });
@@ -323,13 +323,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     await page.layoutCallback();
 
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     await nextTick();
 
     const audioEl = scopedQuerySelectorAll(
       element,
-      SELECTORS_ENUM.ALL_PLAYBACK_MEDIA
+      Selectors_Enum.ALL_PLAYBACK_MEDIA
     )[0];
 
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
@@ -342,13 +342,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
     await page.layoutCallback();
 
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     await nextTick();
 
     const audioEl = scopedQuerySelectorAll(
       element,
-      SELECTORS_ENUM.ALL_PLAYBACK_MEDIA
+      Selectors_Enum.ALL_PLAYBACK_MEDIA
     )[0];
     expect(mediaPoolPreload).to.have.been.calledOnceWithExactly(audioEl);
   });
@@ -371,7 +371,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPool = await page.mediaPoolPromise_;
     const mediaPoolRegister = env.sandbox.spy(mediaPool, 'register');
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     deferred.resolve();
     await nextTick();
@@ -397,7 +397,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPool = await page.mediaPoolPromise_;
     const mediaPoolRegister = env.sandbox.spy(mediaPool, 'register');
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     // Not calling deferred.resolve();
 
@@ -441,7 +441,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.NOT_ACTIVE);
+    page.setState(PageState_Enum.NOT_ACTIVE);
 
     expect(advancementStopStub).to.have.been.calledOnce;
   });
@@ -454,7 +454,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     const cancelAllStub = env.sandbox.stub(page.animationManager_, 'cancelAll');
 
-    page.setState(PAGE_STATE_ENUM.NOT_ACTIVE);
+    page.setState(PageState_Enum.NOT_ACTIVE);
 
     expect(cancelAllStub).to.have.been.calledOnce;
   });
@@ -477,7 +477,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
           .withExactArgs(videoEl, true /** rewindToBeginning */)
           .once();
 
-        page.setState(PAGE_STATE_ENUM.NOT_ACTIVE);
+        page.setState(PageState_Enum.NOT_ACTIVE);
 
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
@@ -489,7 +489,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should mute audio when state becomes active', (done) => {
-    storeService.dispatch(ACTION_ENUM.TOGGLE_MUTED, false);
+    storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -505,7 +505,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('mute').withExactArgs(videoEl).once();
 
-        page.setState(PAGE_STATE_ENUM.NOT_ACTIVE);
+        page.setState(PageState_Enum.NOT_ACTIVE);
 
         await afterRenderPromise();
         mediaPoolMock.verify();
@@ -517,7 +517,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PAUSED);
+    page.setState(PageState_Enum.PAUSED);
 
     expect(advancementStopStub).to.have.been.calledOnce;
   });
@@ -540,7 +540,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
           .withExactArgs(videoEl, false /** rewindToBeginning */)
           .once();
 
-        page.setState(PAGE_STATE_ENUM.PAUSED);
+        page.setState(PageState_Enum.PAUSED);
 
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
@@ -618,7 +618,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.layoutCallback();
 
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
     await nextTick();
 
     const playButtonEl = element.querySelector(
@@ -631,7 +631,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   it('should not build the open attachment UI if no attachment', async () => {
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -648,7 +648,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -666,7 +666,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -684,7 +684,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -700,7 +700,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openoutlinkEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -719,7 +719,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -743,7 +743,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -768,7 +768,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -790,7 +790,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     await page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -812,7 +812,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     await page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -835,7 +835,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentLabelEl = element.querySelector(
       '.i-amphtml-story-page-attachment-label'
@@ -854,7 +854,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentLabelEl = element.querySelector(
       '.i-amphtml-story-page-attachment-label'
@@ -871,7 +871,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -892,7 +892,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     const openAttachmentEl = element.querySelector(
       '.i-amphtml-story-page-open-attachment'
@@ -916,7 +916,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     await nextTick();
 
@@ -942,9 +942,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
     await nextTick();
-    page.setState(PAGE_STATE_ENUM.NOT_ACTIVE);
+    page.setState(PageState_Enum.NOT_ACTIVE);
 
     const poolVideoEl = element.querySelector('video');
     expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(
@@ -968,7 +968,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     page.buildCallback();
     await page.layoutCallback();
-    page.setState(PAGE_STATE_ENUM.PLAYING);
+    page.setState(PageState_Enum.PLAYING);
 
     expect(startMeasuringStub).to.not.have.been.called;
   });

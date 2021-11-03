@@ -1,7 +1,7 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
-import {ANALYTICS_EVENT_TYPE_ENUM} from './events';
-import {CHUNK_PRIORITY_ENUM, chunk} from '../../../src/chunk';
+import {AnalyticsEventType_Enum} from './events';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
 import {Deferred} from '#core/data-structures/promise';
 import {
@@ -14,7 +14,7 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
-import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '#service';
@@ -36,10 +36,10 @@ const TAG = 'amp-analytics';
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
 const ALLOWLIST_EVENT_IN_SANDBOX = [
-  ANALYTICS_EVENT_TYPE_ENUM.VISIBLE,
-  ANALYTICS_EVENT_TYPE_ENUM.HIDDEN,
-  ANALYTICS_EVENT_TYPE_ENUM.INI_LOAD,
-  ANALYTICS_EVENT_TYPE_ENUM.RENDER_START,
+  AnalyticsEventType_Enum.VISIBLE,
+  AnalyticsEventType_Enum.HIDDEN,
+  AnalyticsEventType_Enum.INI_LOAD,
+  AnalyticsEventType_Enum.RENDER_START,
 ];
 export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -106,8 +106,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
     return this.isInabox_
-      ? LAYOUT_PRIORITY_ENUM.CONTENT
-      : LAYOUT_PRIORITY_ENUM.METADATA;
+      ? LayoutPriority_Enum.CONTENT
+      : LayoutPriority_Enum.METADATA;
   }
 
   /** @override */
@@ -227,7 +227,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           // Chunk in inabox ad leads to activeview regression, handle seperately
           loadConfigTask();
         } else {
-          chunk(this.element, loadConfigTask, CHUNK_PRIORITY_ENUM.HIGH);
+          chunk(this.element, loadConfigTask, ChunkPriority_Enum.HIGH);
         }
         return loadConfigDeferred.promise;
       })
@@ -359,7 +359,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (this.isSandbox_) {
           const eventType = trigger['on'];
           if (
-            isEnumValue(ANALYTICS_EVENT_TYPE_ENUM, eventType) &&
+            isEnumValue(AnalyticsEventType_Enum, eventType) &&
             !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(
@@ -602,7 +602,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       // Chunk in inabox ad leads to activeview regression, handle seperately
       linkerTask();
     } else {
-      chunk(this.element, linkerTask, CHUNK_PRIORITY_ENUM.LOW);
+      chunk(this.element, linkerTask, ChunkPriority_Enum.LOW);
     }
   }
 
@@ -746,7 +746,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         // Chunk in inabox ad leads to activeview regression, handle seperately
         sampleInTask();
       } else {
-        chunk(this.element, sampleInTask, CHUNK_PRIORITY_ENUM.LOW);
+        chunk(this.element, sampleInTask, ChunkPriority_Enum.LOW);
       }
       return sampleDeferred.promise;
     }

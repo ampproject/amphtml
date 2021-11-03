@@ -1,21 +1,21 @@
 import * as Preact from '#core/dom/jsx';
 import {
-  ACTION_ENUM,
-  EMBEDDED_COMPONENT_STATE_ENUM,
+  Action_Enum,
+  EmbeddedComponentState_Enum,
   InteractiveComponentDef,
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  StateProperty_Enum,
+  UiType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {
-  ADVANCEMENT_MODE_ENUM,
-  STORY_ANALYTICS_EVENT_ENUM,
+  AdvancementMode_Enum,
+  StoryAnalyticsEvent_Enum,
   getAnalyticsService,
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {KEYS_ENUM} from '#core/constants/key-codes';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {tryFocus} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
@@ -35,11 +35,11 @@ import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 import objstr from 'obj-str';
 
 /**
- * ACTION_ENUM icons to be placed in tooltip.
+ * Action_Enum icons to be placed in tooltip.
  * @enum {string}
  * @private
  */
-const ACTION_ICON_ENUM = {
+const ActionIcon_Enum = {
   LAUNCH: 'i-amphtml-tooltip-action-icon-launch',
   EXPAND: 'i-amphtml-tooltip-action-icon-expand',
 };
@@ -53,7 +53,7 @@ const DARK_THEME_CLASS = 'i-amphtml-story-tooltip-theme-dark';
 /**
  * @enum {string}
  */
-const TOOLTIP_THEME_ENUM = {
+const TooltipTheme_Enum = {
   LIGHT: 'light', // default
   DARK: 'dark',
 };
@@ -76,8 +76,8 @@ const MAX_TWEET_WIDTH_PX = 500;
 export const EXPANDABLE_COMPONENTS = {
   'amp-twitter': {
     customIconClassName: 'amp-social-share-twitter-no-background',
-    actionIcon: ACTION_ICON_ENUM.EXPAND,
-    localizedStringId: LOCALIZED_STRING_ID_ENUM.AMP_STORY_TOOLTIP_EXPAND_TWEET,
+    actionIcon: ActionIcon_Enum.EXPAND,
+    localizedStringId: LocalizedStringId_Enum.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
 };
@@ -89,7 +89,7 @@ export const EXPANDABLE_COMPONENTS = {
  */
 const LAUNCHABLE_COMPONENTS = {
   'a': {
-    actionIcon: ACTION_ICON_ENUM.LAUNCH,
+    actionIcon: ActionIcon_Enum.LAUNCH,
     selector: 'a[href]:not([affiliate-link-icon])',
   },
 };
@@ -503,7 +503,7 @@ export class AmpStoryEmbeddedComponent {
     this.embedsToBePaused_ = [];
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE,
+      StateProperty_Enum.INTERACTIVE_COMPONENT_STATE,
       /** @param {!InteractiveComponentDef} component */ (component) => {
         this.onComponentStateUpdate_(component);
       }
@@ -514,8 +514,8 @@ export class AmpStoryEmbeddedComponent {
       getAmpdoc(this.win_.document)
     );
 
-    /** @private {EMBEDDED_COMPONENT_STATE_ENUM} */
-    this.state_ = EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN;
+    /** @private {EmbeddedComponentState_Enum} */
+    this.state_ = EmbeddedComponentState_Enum.HIDDEN;
 
     /** @private {?Element} */
     this.buttonLeft_ = null;
@@ -540,26 +540,26 @@ export class AmpStoryEmbeddedComponent {
    */
   onComponentStateUpdate_(component) {
     switch (component.state) {
-      case EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN:
+      case EmbeddedComponentState_Enum.HIDDEN:
         this.setState_(
-          EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN,
+          EmbeddedComponentState_Enum.HIDDEN,
           null /** component */
         );
         break;
-      case EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED:
-        if (this.state_ !== EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN) {
+      case EmbeddedComponentState_Enum.FOCUSED:
+        if (this.state_ !== EmbeddedComponentState_Enum.HIDDEN) {
           dev().warn(
             TAG,
             `Invalid component update. Not possible to go from ${this.state_}
               to ${component.state}`
           );
         }
-        this.setState_(EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED, component);
+        this.setState_(EmbeddedComponentState_Enum.FOCUSED, component);
         break;
-      case EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED:
-        if (this.state_ === EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED) {
-          this.setState_(EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED, component);
-        } else if (this.state_ === EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED) {
+      case EmbeddedComponentState_Enum.EXPANDED:
+        if (this.state_ === EmbeddedComponentState_Enum.FOCUSED) {
+          this.setState_(EmbeddedComponentState_Enum.EXPANDED, component);
+        } else if (this.state_ === EmbeddedComponentState_Enum.EXPANDED) {
           this.maybeCloseExpandedView_(component.element);
         } else {
           dev().warn(
@@ -574,25 +574,25 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Sets new state for the embedded component.
-   * @param {EMBEDDED_COMPONENT_STATE_ENUM} state
+   * @param {EmbeddedComponentState_Enum} state
    * @param {?InteractiveComponentDef} component
    * @private
    */
   setState_(state, component) {
     switch (state) {
-      case EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED:
+      case EmbeddedComponentState_Enum.FOCUSED:
         this.state_ = state;
         this.onFocusedStateUpdate_(component);
         this.analyticsService_.triggerEvent(
-          STORY_ANALYTICS_EVENT_ENUM.FOCUS,
+          StoryAnalyticsEvent_Enum.FOCUS,
           this.triggeringTarget_
         );
         break;
-      case EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN:
+      case EmbeddedComponentState_Enum.HIDDEN:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
         break;
-      case EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED:
+      case EmbeddedComponentState_Enum.EXPANDED:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
         this.scheduleEmbedToPause_(component.element);
@@ -675,7 +675,7 @@ export class AmpStoryEmbeddedComponent {
       'aria-label',
       localize(
         this.storyEl_,
-        LOCALIZED_STRING_ID_ENUM.AMP_STORY_CLOSE_BUTTON_LABEL
+        LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
       )
     );
     this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
@@ -723,7 +723,7 @@ export class AmpStoryEmbeddedComponent {
       (event) => {
         event.stopPropagation();
         this.analyticsService_.triggerEvent(
-          STORY_ANALYTICS_EVENT_ENUM.CLICK_THROUGH,
+          StoryAnalyticsEvent_Enum.CLICK_THROUGH,
           this.triggeringTarget_
         );
         this.tooltip_.href && this.onAnchorClick_(event);
@@ -745,11 +745,11 @@ export class AmpStoryEmbeddedComponent {
       this.clearTooltip_();
     }, TOOLTIP_CLOSE_ANIMATION_MS);
 
-    if (this.state_ === EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED) {
+    if (this.state_ === EmbeddedComponentState_Enum.EXPANDED) {
       this.toggleExpandedView_(null);
     }
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT, {
-      state: EMBEDDED_COMPONENT_STATE_ENUM.HIDDEN,
+    this.storeService_.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
+      state: EmbeddedComponentState_Enum.HIDDEN,
     });
     this.tooltip_.removeEventListener(
       'click',
@@ -821,23 +821,23 @@ export class AmpStoryEmbeddedComponent {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(STATE_PROPERTY_ENUM.CURRENT_PAGE_ID, () => {
+    this.storeService_.subscribe(StateProperty_Enum.CURRENT_PAGE_ID, () => {
       // Hide active tooltip when page switch is triggered by keyboard or
       // desktop buttons.
-      if (this.state_ === EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED) {
+      if (this.state_ === EmbeddedComponentState_Enum.FOCUSED) {
         this.close_();
       }
 
       // Hide expanded view when page switch is triggered by keyboard or desktop
       // buttons.
-      if (this.state_ === EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED) {
+      if (this.state_ === EmbeddedComponentState_Enum.EXPANDED) {
         this.maybeCloseExpandedView_(
           null /** target */,
           true /** forceClose */
@@ -853,8 +853,8 @@ export class AmpStoryEmbeddedComponent {
 
     this.win_.addEventListener('keyup', (event) => {
       if (
-        event.key === KEYS_ENUM.ESCAPE &&
-        this.state_ === EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED
+        event.key === Keys_Enum.ESCAPE &&
+        this.state_ === EmbeddedComponentState_Enum.EXPANDED
       ) {
         event.preventDefault();
         this.maybeCloseExpandedView_(
@@ -868,7 +868,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Reacts to desktop state updates and hides navigation buttons since we
    * already have in the desktop UI.
-   * @param {!UI_TYPE_ENUM} uiState
+   * @param {!UiType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -876,8 +876,8 @@ export class AmpStoryEmbeddedComponent {
       dev().assertElement(this.focusedStateOverlay_),
       () => {
         const isDesktop = [
-          UI_TYPE_ENUM.DESKTOP_FULLBLEED,
-          UI_TYPE_ENUM.DESKTOP_ONE_PANEL,
+          UiType_Enum.DESKTOP_FULLBLEED,
+          UiType_Enum.DESKTOP_ONE_PANEL,
         ].includes(uiState);
         this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
       }
@@ -899,7 +899,7 @@ export class AmpStoryEmbeddedComponent {
     );
 
     const theme = this.triggeringTarget_.getAttribute('theme');
-    if (theme && TOOLTIP_THEME_ENUM.DARK === theme.toLowerCase()) {
+    if (theme && TooltipTheme_Enum.DARK === theme.toLowerCase()) {
       this.tooltip_.classList.add(DARK_THEME_CLASS);
     }
 
@@ -941,8 +941,8 @@ export class AmpStoryEmbeddedComponent {
     event.preventDefault();
     event.stopPropagation();
 
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT, {
-      state: EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED,
+    this.storeService_.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
+      state: EmbeddedComponentState_Enum.EXPANDED,
       element: this.triggeringTarget_,
     });
   }
@@ -1209,7 +1209,7 @@ export class AmpStoryEmbeddedComponent {
       this.buttonLeft_.removeAttribute('hidden');
       this.buttonRight_.removeAttribute('hidden');
     } else {
-      this.storeService_.get(STATE_PROPERTY_ENUM.RTL_STATE)
+      this.storeService_.get(StateProperty_Enum.RTL_STATE)
         ? this.buttonLeft_.setAttribute('hidden', true)
         : this.buttonRight_.setAttribute('hidden', true);
     }
@@ -1222,10 +1222,10 @@ export class AmpStoryEmbeddedComponent {
    */
   isLastPage_() {
     const pageIndex = this.storeService_.get(
-      STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX
+      StateProperty_Enum.CURRENT_PAGE_INDEX
     );
     const pageCount = this.storeService_.get(
-      STATE_PROPERTY_ENUM.PAGE_IDS
+      StateProperty_Enum.PAGE_IDS
     ).length;
     return pageIndex + 1 === pageCount;
   }
@@ -1423,7 +1423,7 @@ export class AmpStoryEmbeddedComponent {
     this.tooltipArrow_ = arrow;
     this.buttonLeft_ = buttonLeft;
     this.buttonRight_ = buttonRight;
-    const rtlState = this.storeService_.get(STATE_PROPERTY_ENUM.RTL_STATE);
+    const rtlState = this.storeService_.get(StateProperty_Enum.RTL_STATE);
 
     this.buttonLeft_.addEventListener('click', (e) =>
       this.onNavigationalClick_(
@@ -1451,8 +1451,8 @@ export class AmpStoryEmbeddedComponent {
   onNavigationalClick_(event, direction) {
     event.preventDefault();
     this.storeService_.dispatch(
-      ACTION_ENUM.SET_ADVANCEMENT_MODE,
-      ADVANCEMENT_MODE_ENUM.MANUAL_ADVANCE
+      Action_Enum.SET_ADVANCEMENT_MODE,
+      AdvancementMode_Enum.MANUAL_ADVANCE
     );
     dispatch(
       this.win_,

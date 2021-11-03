@@ -1,5 +1,5 @@
 import {removeElement} from '#core/dom';
-import {LAYOUT_ENUM, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 import {isEnumValue} from '#core/types';
 import {dict} from '#core/types/object';
 
@@ -13,7 +13,7 @@ import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 /**
  * @enum {string}
  */
-const EMBED_TYPE_ENUM = {
+const EmbedType_Enum = {
   POST: 'post',
   POLL: 'poll',
 };
@@ -72,9 +72,9 @@ export class AmpVk extends AMP.BaseElement {
     const createdTime = Date.now().toString(16);
     let iframeSrcPromise;
 
-    if (this.embedType_ === EMBED_TYPE_ENUM.POST) {
+    if (this.embedType_ === EmbedType_Enum.POST) {
       iframeSrcPromise = this.getVkPostIFrameSrc_();
-    } else if (this.embedType_ === EMBED_TYPE_ENUM.POLL) {
+    } else if (this.embedType_ === EmbedType_Enum.POLL) {
       iframeSrcPromise = this.getVkPollIFrameSrc_();
     }
 
@@ -147,13 +147,13 @@ export class AmpVk extends AMP.BaseElement {
     );
 
     userAssert(
-      isEnumValue(EMBED_TYPE_ENUM, this.embedType_),
+      isEnumValue(EmbedType_Enum, this.embedType_),
       `Unknown data-embedtype: ${this.embedType_}`
     );
 
-    if (this.embedType_ === EMBED_TYPE_ENUM.POST) {
+    if (this.embedType_ === EmbedType_Enum.POST) {
       this.postBuildCallback_();
-    } else if (this.embedType_ === EMBED_TYPE_ENUM.POLL) {
+    } else if (this.embedType_ === EmbedType_Enum.POLL) {
       this.pollBuildCallback_();
     }
   }
@@ -247,9 +247,9 @@ export class AmpVk extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return (
-      layout === LAYOUT_ENUM.RESPONSIVE ||
-      layout === LAYOUT_ENUM.FLEX_ITEM ||
-      layout === LAYOUT_ENUM.FIXED
+      layout === Layout_Enum.RESPONSIVE ||
+      layout === Layout_Enum.FLEX_ITEM ||
+      layout === Layout_Enum.FIXED
     );
   }
 

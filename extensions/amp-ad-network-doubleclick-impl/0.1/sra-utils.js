@@ -10,7 +10,7 @@ import {dev, devAssert} from '#utils/log';
 
 import {
   RENDERING_TYPE_HEADER,
-  XORIGIN_MODE_ENUM,
+  XoriginMode_Enum,
 } from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
@@ -413,7 +413,7 @@ export function sraBlockCallbackHandler(
     }, {});
   }
   // Force safeframe rendering method.
-  headersObj[RENDERING_TYPE_HEADER.toLowerCase()] = XORIGIN_MODE_ENUM.SAFEFRAME;
+  headersObj[RENDERING_TYPE_HEADER.toLowerCase()] = XoriginMode_Enum.SAFEFRAME;
   // Construct pseudo fetch response to be passed down the A4A
   // promise chain for this block.
   const headers =

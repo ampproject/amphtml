@@ -1,4 +1,4 @@
-import {RELATIVE_POSITIONS_ENUM} from '#core/dom/layout/rect';
+import {RelativePositions_Enum} from '#core/dom/layout/rect';
 import {throttle} from '#core/types/function';
 
 import {Services} from '#service';
@@ -7,14 +7,14 @@ import {
   installPositionObserverServiceForDoc,
 } from '#service/position-observer/position-observer-impl';
 import {
-  POSITION_OBSERVER_FIDELITY_ENUM,
   PositionInViewportEntryDef,
+  PositionObserverFidelity_Enum,
 } from '#service/position-observer/position-observer-worker';
 
 import {devAssert} from '#utils/log';
 
 /** @enum {number} */
-export const VIEWPORT_RELATIVE_POS_ENUM = {
+export const ViewportRelativePos_Enum = {
   INSIDE_VIEWPORT: 1,
   OUTSIDE_VIEWPORT: 2,
   LEAVING_VIEWPORT: 3,
@@ -28,7 +28,7 @@ const SCROLL_THROTTLE_THRESHOLD = 20;
 // TODO(wassgha): Consolidate with amp-video-docking
 // and other places where ScrollDirection is used
 /** @enum {number} */
-export const SCROLL_DIRECTION_ENUM = {UP: 1, DOWN: -1};
+export const ScrollDirection_Enum = {UP: 1, DOWN: -1};
 
 export class VisibilityObserverEntry {
   /**
@@ -38,23 +38,23 @@ export class VisibilityObserverEntry {
   constructor(observer, callback) {
     /** @private {!VisibilityObserver} */
     this.observer_ = observer;
-    /** @private {?RELATIVE_POSITIONS_ENUM} */
+    /** @private {?RelativePositions_Enum} */
     this.topSentinelPosition_ = null;
-    /** @private {?RELATIVE_POSITIONS_ENUM} */
+    /** @private {?RelativePositions_Enum} */
     this.bottomSentinelPosition_ = null;
     /** @const {function(!ViewportRelativePos)} */
     this.callback = callback;
   }
 
   /**
-   * @return {?RELATIVE_POSITIONS_ENUM}
+   * @return {?RelativePositions_Enum}
    */
   get top() {
     return this.topSentinelPosition_;
   }
 
   /**
-   * @return {?RELATIVE_POSITIONS_ENUM}
+   * @return {?RelativePositions_Enum}
    */
   get bottom() {
     return this.bottomSentinelPosition_;
@@ -75,12 +75,12 @@ export class VisibilityObserverEntry {
 
     this.observer_
       .getPositionObserver()
-      .observe(top, POSITION_OBSERVER_FIDELITY_ENUM.LOW, (position) =>
+      .observe(top, PositionObserverFidelity_Enum.LOW, (position) =>
         this.topSentinelPositionChanged_(position)
       );
     this.observer_
       .getPositionObserver()
-      .observe(bottom, POSITION_OBSERVER_FIDELITY_ENUM.LOW, (position) =>
+      .observe(bottom, PositionObserverFidelity_Enum.LOW, (position) =>
         this.bottomSentinelPositionChanged_(position)
       );
   }
@@ -156,7 +156,7 @@ export default class VisibilityObserver {
     this.lastScrollTop_ = 0;
 
     /** @private {!ScrollDirection} */
-    this.scrollDirection_ = SCROLL_DIRECTION_ENUM.DOWN;
+    this.scrollDirection_ = ScrollDirection_Enum.DOWN;
 
     /** @private {?ScrollDirection} */
     this.lastScrollDirection_ = null;
@@ -213,7 +213,7 @@ export default class VisibilityObserver {
           return;
         }
         const scrollDirection =
-          delta > 0 ? SCROLL_DIRECTION_ENUM.DOWN : SCROLL_DIRECTION_ENUM.UP;
+          delta > 0 ? ScrollDirection_Enum.DOWN : ScrollDirection_Enum.UP;
 
         this.entries_.forEach((entry) => {
           // Entries that rely on scroll should be updated on every scroll
@@ -240,14 +240,14 @@ export default class VisibilityObserver {
    * @return {boolean}
    */
   isScrollingUp() {
-    return this.scrollDirection_ === SCROLL_DIRECTION_ENUM.UP;
+    return this.scrollDirection_ === ScrollDirection_Enum.UP;
   }
 
   /**
    * @return {boolean}
    */
   isScrollingDown() {
-    return this.scrollDirection_ === SCROLL_DIRECTION_ENUM.DOWN;
+    return this.scrollDirection_ === ScrollDirection_Enum.DOWN;
   }
 
   /**
@@ -309,17 +309,17 @@ export default class VisibilityObserver {
     // be deprecated, move to async getLayoutBox()
     const {top: height} = entry.nextPageEl.getLayoutBox();
     if (scroll < height - vh) {
-      return VIEWPORT_RELATIVE_POS_ENUM.CONTAINS_VIEWPORT;
+      return ViewportRelativePos_Enum.CONTAINS_VIEWPORT;
     }
     if (scroll < height && height <= vh && scroll <= 0) {
-      return VIEWPORT_RELATIVE_POS_ENUM.INSIDE_VIEWPORT;
+      return ViewportRelativePos_Enum.INSIDE_VIEWPORT;
     }
     if (scroll < height) {
       return this.isScrollingDown()
-        ? VIEWPORT_RELATIVE_POS_ENUM.LEAVING_VIEWPORT
-        : VIEWPORT_RELATIVE_POS_ENUM.ENTERING_VIEWPORT;
+        ? ViewportRelativePos_Enum.LEAVING_VIEWPORT
+        : ViewportRelativePos_Enum.ENTERING_VIEWPORT;
     }
-    return VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT;
+    return ViewportRelativePos_Enum.OUTSIDE_VIEWPORT;
   }
 
   /**
@@ -328,7 +328,7 @@ export default class VisibilityObserver {
    */
   getRelativePosFromSentinel(entry) {
     const {bottom, top} = entry;
-    const {BOTTOM, INSIDE, TOP} = RELATIVE_POSITIONS_ENUM;
+    const {BOTTOM, INSIDE, TOP} = RelativePositions_Enum;
     if (!top && !bottom) {
       // Early exit if this an intersection change happening before a
       // sentinel position change
@@ -338,13 +338,13 @@ export default class VisibilityObserver {
       // Both the top and bottom sentinel elements are within the
       // viewport bounds meaning that the document is short enough
       // to be contained inside the viewport
-      return VIEWPORT_RELATIVE_POS_ENUM.INSIDE_VIEWPORT;
+      return ViewportRelativePos_Enum.INSIDE_VIEWPORT;
     }
     if ((!top || top === TOP) && (!bottom || bottom === BOTTOM)) {
       // The head of the document is above the viewport and the
       // foot of the document is below it, meaning that the viewport
       // is looking at a section of the document
-      return VIEWPORT_RELATIVE_POS_ENUM.CONTAINS_VIEWPORT;
+      return ViewportRelativePos_Enum.CONTAINS_VIEWPORT;
     }
     if (
       ((!top || top === TOP) && bottom === TOP) ||
@@ -353,7 +353,7 @@ export default class VisibilityObserver {
       // Both the top and the bottom of the document are either
       // above or below the document meaning that the viewport hasn't
       // reached the document yet or has passed it
-      return VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT;
+      return ViewportRelativePos_Enum.OUTSIDE_VIEWPORT;
     }
     const atBottom =
       (top === TOP || top === INSIDE) && (!bottom || bottom === BOTTOM);
@@ -362,7 +362,7 @@ export default class VisibilityObserver {
     // through being scrolling into/out of the viewport in which case
     // we don't need to update the visibility
     return !!atBottom === !!scrollingUp
-      ? VIEWPORT_RELATIVE_POS_ENUM.LEAVING_VIEWPORT
-      : VIEWPORT_RELATIVE_POS_ENUM.ENTERING_VIEWPORT;
+      ? ViewportRelativePos_Enum.LEAVING_VIEWPORT
+      : ViewportRelativePos_Enum.ENTERING_VIEWPORT;
   }
 }

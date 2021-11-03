@@ -1,16 +1,16 @@
 import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
-  ACTION_ENUM,
-  EMBEDDED_COMPONENT_STATE_ENUM,
+  Action_Enum,
+  EmbeddedComponentState_Enum,
   InteractiveComponentDef,
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  StateProperty_Enum,
+  UiType_Enum,
   getStoreService,
 } from './amp-story-store-service';
-import {ADVANCEMENT_MODE_ENUM} from './story-analytics';
+import {AdvancementMode_Enum} from './story-analytics';
 import {Services} from '#service';
 import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
-import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {closest, matches} from '#core/dom/query';
 import {dev, user} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -67,7 +67,7 @@ const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
 export const POLL_INTERVAL_MS = 300;
 
 /** @const @enum */
-export const TAP_NAVIGATION_DIRECTION_ENUM = {
+export const TapNavigationDirection_Enum = {
   'NEXT': 1,
   'PREVIOUS': 2,
 };
@@ -279,7 +279,7 @@ export class ManualAdvancement extends AdvancementConfig {
       this.storeService_ = getStoreService(element.ownerDocument.defaultView);
     }
 
-    const rtlState = this.storeService_.get(STATE_PROPERTY_ENUM.RTL_STATE);
+    const rtlState = this.storeService_.get(StateProperty_Enum.RTL_STATE);
     this.sections_ = {
       // Width and navigation direction of each section depend on whether the
       // document is RTL or LTR.
@@ -288,16 +288,16 @@ export class ManualAdvancement extends AdvancementConfig {
           ? NEXT_SCREEN_AREA_RATIO
           : PREVIOUS_SCREEN_AREA_RATIO,
         direction: rtlState
-          ? TAP_NAVIGATION_DIRECTION_ENUM.NEXT
-          : TAP_NAVIGATION_DIRECTION_ENUM.PREVIOUS,
+          ? TapNavigationDirection_Enum.NEXT
+          : TapNavigationDirection_Enum.PREVIOUS,
       },
       right: {
         widthRatio: rtlState
           ? PREVIOUS_SCREEN_AREA_RATIO
           : NEXT_SCREEN_AREA_RATIO,
         direction: rtlState
-          ? TAP_NAVIGATION_DIRECTION_ENUM.PREVIOUS
-          : TAP_NAVIGATION_DIRECTION_ENUM.NEXT,
+          ? TapNavigationDirection_Enum.PREVIOUS
+          : TapNavigationDirection_Enum.NEXT,
       },
     };
   }
@@ -354,12 +354,12 @@ export class ManualAdvancement extends AdvancementConfig {
     }
     this.touchstartTimestamp_ = Date.now();
     this.pausedState_ = /** @type {boolean} */ (
-      this.storeService_.get(STATE_PROPERTY_ENUM.PAUSED_STATE)
+      this.storeService_.get(StateProperty_Enum.PAUSED_STATE)
     );
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_PAUSED, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(
-        ACTION_ENUM.TOGGLE_SYSTEM_UI_IS_VISIBLE,
+        Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE,
         false
       );
     }, HOLD_TOUCH_THRESHOLD_MS);
@@ -395,18 +395,18 @@ export class ManualAdvancement extends AdvancementConfig {
     if (!this.touchstartTimestamp_) {
       return;
     }
-    this.storeService_.dispatch(ACTION_ENUM.TOGGLE_PAUSED, this.pausedState_);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, this.pausedState_);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     this.timeoutId_ = null;
     if (
-      !this.storeService_.get(STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE) &&
+      !this.storeService_.get(StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE) &&
       /** @type {InteractiveComponentDef} */ (
-        this.storeService_.get(STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE)
-      ).state !== EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED
+        this.storeService_.get(StateProperty_Enum.INTERACTIVE_COMPONENT_STATE)
+      ).state !== EmbeddedComponentState_Enum.EXPANDED
     ) {
       this.storeService_.dispatch(
-        ACTION_ENUM.TOGGLE_SYSTEM_UI_IS_VISIBLE,
+        Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE,
         true
       );
     }
@@ -644,10 +644,10 @@ export class ManualAdvancement extends AdvancementConfig {
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
     const stored = /** @type {InteractiveComponentDef} */ (
-      this.storeService_.get(STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE)
+      this.storeService_.get(StateProperty_Enum.INTERACTIVE_COMPONENT_STATE)
     );
     const inExpandedMode =
-      stored.state === EMBEDDED_COMPONENT_STATE_ENUM.EXPANDED;
+      stored.state === EmbeddedComponentState_Enum.EXPANDED;
 
     return (
       inExpandedMode ||
@@ -671,7 +671,7 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     const expandedElement = this.storeService_.get(
-      STATE_PROPERTY_ENUM.AFFILIATE_LINK_STATE
+      StateProperty_Enum.AFFILIATE_LINK_STATE
     );
 
     return expandedElement != null || clickedOnLink;
@@ -692,11 +692,11 @@ export class ManualAdvancement extends AdvancementConfig {
       event.stopPropagation();
       event.preventDefault();
       const embedComponent = /** @type {InteractiveComponentDef} */ (
-        this.storeService_.get(STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE)
+        this.storeService_.get(StateProperty_Enum.INTERACTIVE_COMPONENT_STATE)
       );
-      this.storeService_.dispatch(ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT, {
+      this.storeService_.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
-        state: embedComponent.state || EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED,
+        state: embedComponent.state || EmbeddedComponentState_Enum.FOCUSED,
         clientX: event.clientX,
         clientY: event.clientY,
       });
@@ -708,9 +708,9 @@ export class ManualAdvancement extends AdvancementConfig {
       event.stopPropagation();
       const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
       if (clickedOnLink) {
-        this.storeService_.dispatch(ACTION_ENUM.TOGGLE_AFFILIATE_LINK, target);
+        this.storeService_.dispatch(Action_Enum.TOGGLE_AFFILIATE_LINK, target);
       } else {
-        this.storeService_.dispatch(ACTION_ENUM.TOGGLE_AFFILIATE_LINK, null);
+        this.storeService_.dispatch(Action_Enum.TOGGLE_AFFILIATE_LINK, null);
       }
       return;
     }
@@ -729,8 +729,8 @@ export class ManualAdvancement extends AdvancementConfig {
     event.stopPropagation();
 
     this.storeService_.dispatch(
-      ACTION_ENUM.SET_ADVANCEMENT_MODE,
-      ADVANCEMENT_MODE_ENUM.MANUAL_ADVANCE
+      Action_Enum.SET_ADVANCEMENT_MODE,
+      AdvancementMode_Enum.MANUAL_ADVANCE
     );
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
@@ -748,15 +748,15 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Calculates the pageRect based on the UI_TYPE_ENUM.
+   * Calculates the pageRect based on the UiType_Enum.
    * We can an use LayoutBox for mobile since the story page occupies entire screen.
    * Desktop UI needs the most recent value from the getBoundingClientRect function.
    * @return {DOMRect | LayoutBox}
    * @private
    */
   getStoryPageRect_() {
-    const uiState = this.storeService_.get(STATE_PROPERTY_ENUM.UI_STATE);
-    if (uiState !== UI_TYPE_ENUM.DESKTOP_ONE_PANEL) {
+    const uiState = this.storeService_.get(StateProperty_Enum.UI_STATE);
+    if (uiState !== UiType_Enum.DESKTOP_ONE_PANEL) {
       return this.element_.getLayoutBox();
     } else {
       return this.element_
@@ -911,8 +911,8 @@ export class TimeBasedAdvancement extends AdvancementConfig {
   /** @override */
   onAdvance() {
     this.storeService_.dispatch(
-      ACTION_ENUM.SET_ADVANCEMENT_MODE,
-      ADVANCEMENT_MODE_ENUM.AUTO_ADVANCE_TIME
+      Action_Enum.SET_ADVANCEMENT_MODE,
+      AdvancementMode_Enum.AUTO_ADVANCE_TIME
     );
     super.onAdvance();
   }
@@ -1101,7 +1101,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     this.unlistenFns_.push(
       listenOnce(
         this.element_,
-        VIDEO_EVENTS_ENUM.ENDED,
+        VideoEvents_Enum.ENDED,
         () => this.onAdvance(),
         {
           capture: true,
@@ -1150,8 +1150,8 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   /** @override */
   onAdvance() {
     this.storeService_.dispatch(
-      ACTION_ENUM.SET_ADVANCEMENT_MODE,
-      ADVANCEMENT_MODE_ENUM.AUTO_ADVANCE_MEDIA
+      Action_Enum.SET_ADVANCEMENT_MODE,
+      AdvancementMode_Enum.AUTO_ADVANCE_MEDIA
     );
     super.onAdvance();
   }

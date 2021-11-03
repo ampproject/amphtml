@@ -2,7 +2,7 @@
  * Commonly used signals across different elements and documents.
  * @enum {string}
  */
-export const COMMON_SIGNALS_ENUM = {
+export const CommonSignals_Enum = {
   /**
    * The element's implementation has been registered and ready for upgrade.
    */

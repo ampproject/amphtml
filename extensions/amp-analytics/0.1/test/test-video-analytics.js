@@ -1,7 +1,7 @@
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
-  ANALYTICS_EVENT_TYPE_ENUM,
   AnalyticsEvent,
+  AnalyticsEventType_Enum,
   VideoEventTracker,
 } from '../events';
 import {dispatchCustomEvent} from 'src/core/dom/index';
@@ -67,7 +67,7 @@ describes.realWin(
 
       beforeEach(() => {
         tracker = root.getTracker(
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           VideoEventTracker
         );
         selectors = ['#myVideo', '#myVideo-2'];
@@ -120,7 +120,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           defaultVideoConfig,
           () => {},
           false
@@ -136,13 +136,13 @@ describes.realWin(
       it('should require selector', () => {
         allowConsoleError(() => {
           expect(() => {
-            tracker.add(analyticsElement, ANALYTICS_EVENT_TYPE_ENUM.VIDEO, {
+            tracker.add(analyticsElement, AnalyticsEventType_Enum.VIDEO, {
               selector: '',
             });
           }).to.throw(/Missing required selector on video trigger/);
 
           expect(() => {
-            tracker.add(analyticsElement, ANALYTICS_EVENT_TYPE_ENUM.VIDEO, {
+            tracker.add(analyticsElement, AnalyticsEventType_Enum.VIDEO, {
               selector: [],
             });
           }).to.throw(/Missing required selector on video trigger/);
@@ -155,11 +155,7 @@ describes.realWin(
         };
 
         expect(() => {
-          tracker.add(
-            analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
-            config
-          );
+          tracker.add(analyticsElement, AnalyticsEventType_Enum.VIDEO, config);
         }).to.throw(
           /Cannot have duplicate selectors in selectors list: #myVideo,#myVideo/
         );
@@ -171,7 +167,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-play',
             'request': 'event',
@@ -197,7 +193,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-play',
             'selector': '.video-class',
@@ -228,7 +224,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-play',
             'selector': ['.video-class', '.video3-class'],
@@ -265,7 +261,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           defaultVideoConfig,
           fn1
         );
@@ -295,7 +291,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-pause',
             'selector': selectors,
@@ -328,7 +324,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-session',
             'selector': selectors,
@@ -361,7 +357,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-ended',
             'selector': selectors,
@@ -394,7 +390,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-percentage-played',
             'selector': selectors,
@@ -448,7 +444,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-seconds-played',
             'selector': selectors,
@@ -487,14 +483,14 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           defaultVideoConfig,
           fn1
         );
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-pause',
             'request': 'event',
@@ -505,7 +501,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+          AnalyticsEventType_Enum.VIDEO,
           {
             'on': 'video-ended',
             'request': 'event',

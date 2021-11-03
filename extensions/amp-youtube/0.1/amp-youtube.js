@@ -32,7 +32,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-youtube';
 
@@ -42,7 +42,7 @@ const TAG = 'amp-youtube';
  * @enum {number}
  * @private
  */
-const PLAYER_STATES_ENUM = {
+const PlayerStates_Enum = {
   UNSTARTED: -1,
   ENDED: 0,
   PLAYING: 1,
@@ -53,7 +53,7 @@ const PLAYER_STATES_ENUM = {
  * @enum {number}
  * @private
  */
-const PLAYER_FLAGS_ENUM = {
+const PlayerFlags_Enum = {
   // Config to tell YouTube to hide annotations by default
   HIDE_ANNOTATION: 3,
 };
@@ -200,7 +200,7 @@ class AmpYoutube extends AMP.BaseElement {
       // autoplaying video to be just unmute tso annotations are not
       // interactive during autoplay anyway.
       if (!('iv_load_policy' in params)) {
-        params['iv_load_policy'] = `${PLAYER_FLAGS_ENUM.HIDE_ANNOTATION}`;
+        params['iv_load_policy'] = `${PlayerFlags_Enum.HIDE_ANNOTATION}`;
       }
 
       // Inline play must be set for autoplay regardless of original value.
@@ -247,7 +247,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    // Listening for VIDEO_EVENTS_ENUM.LOAD in AutoFullscreenManager.register may
+    // Listening for VideoEvents_Enum.LOAD in AutoFullscreenManager.register may
     // introduce race conditions which may break elements e.g. amp-ima-video
     Services.videoManagerForDoc(this.element).register(this);
 
@@ -260,7 +260,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.isLoop_ && !this.isPlaylist_) {
       this.unlistenLooping_ = listen(
         this.element,
-        VIDEO_EVENTS_ENUM.ENDED,
+        VideoEvents_Enum.ENDED,
         (unusedEvent) => this.play(false /** unusedIsAutoplay */)
       );
     }
@@ -277,7 +277,7 @@ class AmpYoutube extends AMP.BaseElement {
       .then(() => {
         // Tell YT that we want to receive messages
         this.listenToFrame_();
-        dispatchCustomEvent(this.element, VIDEO_EVENTS_ENUM.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
       });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -412,22 +412,22 @@ class AmpYoutube extends AMP.BaseElement {
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
       switch (playerState) {
-        case PLAYER_STATES_ENUM.PLAYING:
+        case PlayerStates_Enum.PLAYING:
           this.pauseHelper_.updatePlaying(true);
           break;
-        case PLAYER_STATES_ENUM.PAUSED:
-        case PLAYER_STATES_ENUM.ENDED:
+        case PlayerStates_Enum.PAUSED:
+        case PlayerStates_Enum.ENDED:
           this.pauseHelper_.updatePlaying(false);
           break;
       }
 
       redispatch(element, playerState.toString(), {
-        [PLAYER_STATES_ENUM.PLAYING]: VIDEO_EVENTS_ENUM.PLAYING,
-        [PLAYER_STATES_ENUM.PAUSED]: VIDEO_EVENTS_ENUM.PAUSE,
+        [PlayerStates_Enum.PLAYING]: VideoEvents_Enum.PLAYING,
+        [PlayerStates_Enum.PAUSED]: VideoEvents_Enum.PAUSE,
         // YT does not fire pause and ended together.
-        [PLAYER_STATES_ENUM.ENDED]: [
-          VIDEO_EVENTS_ENUM.ENDED,
-          VIDEO_EVENTS_ENUM.PAUSE,
+        [PlayerStates_Enum.ENDED]: [
+          VideoEvents_Enum.ENDED,
+          VideoEvents_Enum.PAUSE,
         ],
       });
       return;
@@ -445,7 +445,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
-      dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOADEDMETADATA);
+      dispatchCustomEvent(element, VideoEvents_Enum.LOADEDMETADATA);
       return;
     }
 

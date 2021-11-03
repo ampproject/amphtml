@@ -1,4 +1,4 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 const t = describes.sandboxed.configure().ifChrome();
@@ -18,7 +18,7 @@ t.run('amp-carousel', {}, function () {
   function waitForCarouselLayout() {
     const carousel = document.querySelector('amp-carousel');
     return whenUpgradedToCustomElement(carousel).then(() =>
-      carousel.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_START)
+      carousel.signals().whenSignal(CommonSignals_Enum.LOAD_START)
     );
   }
 

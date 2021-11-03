@@ -1,4 +1,4 @@
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
 import {dict, map} from '#core/types/object';
 
@@ -102,7 +102,7 @@ export class FormDirtiness {
 
       const formDirtinessChangeEvent = createCustomEvent(
         this.win_,
-        AMP_EVENTS_ENUM.FORM_DIRTINESS_CHANGE,
+        AmpEvents_Enum.FORM_DIRTINESS_CHANGE,
         dict({'isDirty': isDirty}),
         {bubbles: true}
       );
@@ -122,7 +122,7 @@ export class FormDirtiness {
     // `amp-bind` dispatches the custom event `FORM_VALUE_CHANGE` when it
     // mutates the value of a form field (e.g. textarea, input, etc)
     this.form_.addEventListener(
-      AMP_EVENTS_ENUM.FORM_VALUE_CHANGE,
+      AmpEvents_Enum.FORM_VALUE_CHANGE,
       this.onInput_.bind(this)
     );
   }

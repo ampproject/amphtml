@@ -5,7 +5,7 @@ import {parseQueryString} from '#core/types/string/url';
  * Embed mode for AMP story.  See ../embed-modes.md for details.
  * @enum {number}
  */
-export const EMBED_MODE_ENUM = {
+export const EmbedMode_Enum = {
   /**
    * Default mode.
    */
@@ -72,7 +72,7 @@ export function parseEmbedMode(str) {
   const unsanitizedEmbedMode = params[EmbedModeParam];
   const embedModeIndex = parseInt(unsanitizedEmbedMode, 10);
 
-  return isEnumValue(EMBED_MODE_ENUM, embedModeIndex)
+  return isEnumValue(EmbedMode_Enum, embedModeIndex)
     ? /** @type {!EmbedMode} */ (embedModeIndex)
-    : EMBED_MODE_ENUM.NOT_EMBEDDED;
+    : EmbedMode_Enum.NOT_EMBEDDED;
 }

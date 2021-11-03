@@ -1,10 +1,10 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
-  URL_REPLACEMENT_POLICY_ENUM,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '#utils/log';
@@ -19,7 +19,7 @@ const TAG = 'amp-render';
 const AMP_STATE_URI_SCHEME = 'amp-state:';
 
 /** @enum {string}  */
-const BINDING_ENUM = {
+const Binding_Enum = {
   ALWAYS: 'always',
   REFRESH: 'refresh',
   NEVER: 'never',
@@ -70,11 +70,11 @@ function getAmpStateJson(element, src) {
  * @return {boolean} Whether bind should evaluate and apply changes.
  */
 function getUpdateValue(bindingValue, isFirstMutation) {
-  if (!bindingValue || bindingValue === BINDING_ENUM.REFRESH) {
+  if (!bindingValue || bindingValue === Binding_Enum.REFRESH) {
     // default is 'refresh', so check that its not the first mutation
     return !isFirstMutation;
   }
-  if (bindingValue === BINDING_ENUM.ALWAYS) {
+  if (bindingValue === Binding_Enum.ALWAYS) {
     // TODO(dmanek): add link to amp-render docs that elaborates on performance implications of "always"
     user().warn(TAG, 'binding="always" has performance implications.');
     return true;
@@ -132,7 +132,7 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * @return {!URL_REPLACEMENT_POLICY_ENUM}
+   * @return {!UrlReplacementPolicy_Enum}
    * @private
    */
   getPolicy_() {
@@ -141,12 +141,12 @@ export class AmpRender extends BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
     // and add a `Substitution` sections in this component's markdown file.
-    let policy = URL_REPLACEMENT_POLICY_ENUM.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = URL_REPLACEMENT_POLICY_ENUM.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }
@@ -198,7 +198,7 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === LAYOUT_ENUM.CONTAINER) {
+    if (layout === Layout_Enum.CONTAINER) {
       userAssert(
         this.getPlaceholder(),
         'placeholder required with layout="container"'
@@ -281,7 +281,7 @@ export class AmpRender extends BaseElement {
   /** @override */
   handleOnLoad() {
     this.toggleLoading(false);
-    if (this.element.getAttribute('layout') !== LAYOUT_ENUM.CONTAINER) {
+    if (this.element.getAttribute('layout') !== Layout_Enum.CONTAINER) {
       this.togglePlaceholder(false);
       return;
     }
@@ -365,8 +365,8 @@ export class AmpRender extends BaseElement {
           'render': (data) => {
             const bindingValue = this.element.getAttribute('binding');
             if (
-              bindingValue === BINDING_ENUM.NEVER ||
-              bindingValue === BINDING_ENUM.NO
+              bindingValue === Binding_Enum.NEVER ||
+              bindingValue === Binding_Enum.NO
             ) {
               return this.renderTemplateAsString_(data);
             }

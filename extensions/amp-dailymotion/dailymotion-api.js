@@ -74,7 +74,7 @@ export function makeDailymotionMessage(command, param) {
  *
  * @enum {string}
  */
-export const DAILYMOTION_EVENTS_ENUM = {
+export const DailymotionEvents_Enum = {
   UNSTARTED: 'unstarted',
   API_READY: 'apiready',
   // Events fired for both the original content or ads

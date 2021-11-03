@@ -24,8 +24,8 @@ import {
   maybeInsertOriginTrialToken,
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
-import {GEO_IN_GROUP_ENUM} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
+import {GeoInGroup_Enum} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '#service';
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
@@ -956,7 +956,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         );
         env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
-            whenPolicyResolved: () => CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
+            whenPolicyResolved: () => ConsentPolicyState_Enum.SUFFICIENT,
           })
         );
         return getIdentityToken(env.win, env.ampdoc, 'default').then((result) =>
@@ -971,8 +971,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
             .stub(Services, 'consentPolicyServiceForDocOrNull')
             .returns(
               Promise.resolve({
-                whenPolicyResolved: () =>
-                  CONSENT_POLICY_STATE_ENUM.INSUFFICIENT,
+                whenPolicyResolved: () => ConsentPolicyState_Enum.INSUFFICIENT,
               })
             );
           return expect(
@@ -987,7 +986,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
             .stub(Services, 'consentPolicyServiceForDocOrNull')
             .returns(
               Promise.resolve({
-                whenPolicyResolved: () => CONSENT_POLICY_STATE_ENUM.UNKNOWN,
+                whenPolicyResolved: () => ConsentPolicyState_Enum.UNKNOWN,
               })
             );
           return expect(
@@ -1127,11 +1126,11 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
         isInCountryGroup(country) {
           switch (country) {
             case 'usca':
-              return GEO_IN_GROUP_ENUM.IN;
+              return GeoInGroup_Enum.IN;
             case 'gdpr':
-              return GEO_IN_GROUP_ENUM.NOT_IN;
+              return GeoInGroup_Enum.NOT_IN;
             default:
-              return GEO_IN_GROUP_ENUM.NOT_DEFINED;
+              return GeoInGroup_Enum.NOT_DEFINED;
           }
         },
       };

@@ -1,4 +1,4 @@
-import {MEDIA_TYPE_ENUM, MediaPool} from '../media-pool';
+import {MediaPool, MediaType_Enum} from '../media-pool';
 import {Services} from '#service';
 import {findIndex} from '#core/types/array';
 
@@ -9,8 +9,8 @@ describes.realWin('media-pool', {}, (env) => {
   let mediaPool;
   let distanceFnStub;
   const COUNTS = {
-    [MEDIA_TYPE_ENUM.AUDIO]: 2,
-    [MEDIA_TYPE_ENUM.VIDEO]: 2,
+    [MediaType_Enum.AUDIO]: 2,
+    [MediaType_Enum.VIDEO]: 2,
   };
 
   beforeEach(() => {

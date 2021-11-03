@@ -6,7 +6,7 @@ import {
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
-import {POSITION_OBSERVER_FIDELITY_ENUM} from '#service/position-observer/position-observer-worker';
+import {PositionObserverFidelity_Enum} from '#service/position-observer/position-observer-worker';
 
 import {devAssert} from '#utils/log';
 
@@ -25,10 +25,10 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
-import {FX_TYPE_ENUM} from '../fx-type'; // eslint-disable-line no-unused-vars
+import {FxType_Enum} from '../fx-type'; // eslint-disable-line no-unused-vars
 import {
-  SCROLL_TOGGLE_POSITION_ENUM, // eslint-disable-line no-unused-vars
   ScrollToggleDispatch,
+  ScrollTogglePosition_Enum, // eslint-disable-line no-unused-vars
   assertValidScrollToggleElement,
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
@@ -39,7 +39,7 @@ import {
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {!FX_TYPE_ENUM} type
+ * @param {!FxType_Enum} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
   // TODO(alanorozco): Surface FixedLayer APIs to make this work.
@@ -70,7 +70,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
       scrollToggle(
         element,
         isShown,
-        /** @type {!SCROLL_TOGGLE_POSITION_ENUM} */ (devAssert(position))
+        /** @type {!ScrollTogglePosition_Enum} */ (devAssert(position))
       );
     });
   };
@@ -88,7 +88,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
 /**
  * @param {!Element} element
  * @param {boolean} isShown
- * @param {!SCROLL_TOGGLE_POSITION_ENUM} position
+ * @param {!ScrollTogglePosition_Enum} position
  */
 function scrollToggle(element, isShown, position) {
   let offset = 0;
@@ -111,7 +111,7 @@ function scrollToggle(element, isShown, position) {
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {!FX_TYPE_ENUM} type
+ * @param {!FxType_Enum} type
  */
 export function installPositionBoundFx(ampdoc, element, type) {
   installPositionObserverServiceForDoc(ampdoc);
@@ -126,7 +126,7 @@ export class FxElement {
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element The element to give a preset effect.
-   * @param {!FX_TYPE_ENUM} fxType
+   * @param {!FxType_Enum} fxType
    */
   constructor(ampdoc, element, fxType) {
     /** @public @const  {!Window} */
@@ -153,7 +153,7 @@ export class FxElement {
     /** @public {number} */
     this.offset = 0;
 
-    /** @private @const {!FX_TYPE_ENUM} */
+    /** @private @const {!FxType_Enum} */
     this.fxType_ = fxType;
 
     Presets[fxType].userAsserts(element);
@@ -219,7 +219,7 @@ export class FxElement {
   observePositionChanges_() {
     this.positionObserver_.observe(
       this.element,
-      POSITION_OBSERVER_FIDELITY_ENUM.HIGH,
+      PositionObserverFidelity_Enum.HIGH,
       Presets[this.fxType_].update.bind(this)
     );
 

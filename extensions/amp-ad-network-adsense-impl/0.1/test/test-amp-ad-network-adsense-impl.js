@@ -4,8 +4,8 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {
-  CONSENT_POLICY_STATE_ENUM,
-  CONSENT_STRING_TYPE_ENUM,
+  ConsentPolicyState_Enum,
+  ConsentStringType_Enum,
 } from '#core/constants/consent-state';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
 import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
@@ -826,13 +826,13 @@ describes.realWin(
 
       it('should return empty string if unknown consentState', () =>
         expect(
-          impl.getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN})
+          impl.getAdUrl({consentState: ConsentPolicyState_Enum.UNKNOWN})
         ).to.eventually.equal(''));
 
       it('should include npa=1 if unknown consent & explicit npa', () => {
         impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
         return impl
-          .getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN})
+          .getAdUrl({consentState: ConsentPolicyState_Enum.UNKNOWN})
           .then((url) => {
             expect(url).to.match(/(\?|&)npa=1(&|$)/);
           });
@@ -840,14 +840,14 @@ describes.realWin(
 
       it('should include npa=1 if insufficient consent', () =>
         impl
-          .getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.INSUFFICIENT})
+          .getAdUrl({consentState: ConsentPolicyState_Enum.INSUFFICIENT})
           .then((url) => {
             expect(url).to.match(/(\?|&)npa=1(&|$)/);
           }));
 
       it('should not include not npa, if sufficient consent', () =>
         impl
-          .getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT})
+          .getAdUrl({consentState: ConsentPolicyState_Enum.SUFFICIENT})
           .then((url) => {
             expect(url).to.not.match(/(\?|&)npa=(&|$)/);
           }));
@@ -855,7 +855,7 @@ describes.realWin(
       it('should not include npa, if not required consent', () =>
         impl
           .getAdUrl({
-            consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
+            consentState: ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED,
           })
           .then((url) => {
             expect(url).to.not.match(/(\?|&)npa=(&|$)/);
@@ -863,7 +863,7 @@ describes.realWin(
       it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () =>
         impl
           .getAdUrl(
-            {consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT},
+            {consentState: ConsentPolicyState_Enum.SUFFICIENT},
             undefined,
             true
           )
@@ -874,7 +874,7 @@ describes.realWin(
       it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () =>
         impl
           .getAdUrl(
-            {consentState: CONSENT_POLICY_STATE_ENUM.INSUFFICIENT},
+            {consentState: ConsentPolicyState_Enum.INSUFFICIENT},
             undefined,
             false
           )
@@ -915,7 +915,7 @@ describes.realWin(
       it('should include us_privacy, if consentStringType matches', () =>
         impl
           .getAdUrl({
-            consentStringType: CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+            consentStringType: ConsentStringType_Enum.US_PRIVACY_STRING,
             consentString: 'usPrivacyString',
           })
           .then((url) => {
@@ -926,7 +926,7 @@ describes.realWin(
       it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
         impl
           .getAdUrl({
-            consentStringType: CONSENT_STRING_TYPE_ENUM.TCF_V2,
+            consentStringType: ConsentStringType_Enum.TCF_V2,
             consentString: 'gdprString',
           })
           .then((url) => {

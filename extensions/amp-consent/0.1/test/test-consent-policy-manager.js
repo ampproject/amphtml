@@ -1,13 +1,13 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
-  CONSENT_ITEM_STATE_ENUM,
-  PURPOSE_CONSENT_STATE_ENUM,
+  ConsentItemState_Enum,
+  PurposeConsentState_Enum,
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
 import {
-  CONSENT_POLICY_STATE_ENUM,
-  CONSENT_STRING_TYPE_ENUM,
+  ConsentPolicyState_Enum,
+  ConsentStringType_Enum,
 } from '#core/constants/consent-state';
 import {
   ConsentPolicyInstance,
@@ -73,12 +73,12 @@ describes.realWin(
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
         consentInfo = constructConsentInfo(
-          CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+          ConsentItemState_Enum.ACCEPTED,
           'test',
-          constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V1),
+          constructMetadata(ConsentStringType_Enum.TCF_V1),
           {
-            'purpose-foo': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
-            'purpose-bar': PURPOSE_CONSENT_STATE_ENUM.REJECTED,
+            'purpose-foo': PurposeConsentState_Enum.ACCEPTED,
+            'purpose-bar': PurposeConsentState_Enum.REJECTED,
           }
         );
         manager.setLegacyConsentInstanceId('ABC');
@@ -87,15 +87,13 @@ describes.realWin(
       it('should initiate consent value', async () => {
         await macroTask();
         expect(consentManagerOnChangeSpy).to.be.called;
-        expect(manager.consentState_).to.equal(
-          CONSENT_ITEM_STATE_ENUM.ACCEPTED
-        );
+        expect(manager.consentState_).to.equal(ConsentItemState_Enum.ACCEPTED);
         expect(manager.consentMetadata_).to.be.deep.equals(
-          constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V1)
+          constructMetadata(ConsentStringType_Enum.TCF_V1)
         );
         expect(manager.purposeConsents_).to.deep.equals({
-          'purpose-foo': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
-          'purpose-bar': PURPOSE_CONSENT_STATE_ENUM.REJECTED,
+          'purpose-foo': PurposeConsentState_Enum.ACCEPTED,
+          'purpose-bar': PurposeConsentState_Enum.REJECTED,
         });
       });
 
@@ -108,11 +106,11 @@ describes.realWin(
           });
           await macroTask();
           const status = await manager.whenPolicyResolved('default');
-          expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+          expect(status).to.equal(ConsentPolicyState_Enum.SUFFICIENT);
         });
 
         it('Invalid consent policy', function* () {
-          consentInfo = constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED);
+          consentInfo = constructConsentInfo(ConsentItemState_Enum.ACCEPTED);
           expectAsyncConsoleError(
             '[consent-policy-manager] ' +
               'invalid waitFor value, consent policy will never resolve'
@@ -129,68 +127,58 @@ describes.realWin(
       it('Handle consent state change', () => {
         // UNKNOWN Init value
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN)
+          constructConsentInfo(ConsentItemState_Enum.UNKNOWN)
         );
         expect(manager.consentState_).to.be.null;
 
         // Dismiss override unknown
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.DISMISSED)
+          constructConsentInfo(ConsentItemState_Enum.DISMISSED)
         );
-        expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
+        expect(manager.consentState_).to.equal(ConsentItemState_Enum.UNKNOWN);
 
         // Not required override unknown
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED)
+          constructConsentInfo(ConsentItemState_Enum.NOT_REQUIRED)
         );
         expect(manager.consentState_).to.equal(
-          CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED
+          ConsentItemState_Enum.NOT_REQUIRED
         );
 
         // Accept
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED)
+          constructConsentInfo(ConsentItemState_Enum.ACCEPTED)
         );
-        expect(manager.consentState_).to.equal(
-          CONSENT_ITEM_STATE_ENUM.ACCEPTED
-        );
+        expect(manager.consentState_).to.equal(ConsentItemState_Enum.ACCEPTED);
 
         // UNKNOWN/NOT_REQUIRED/DISMISS cannot override ACCEPTED/REJECTED
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED)
+          constructConsentInfo(ConsentItemState_Enum.NOT_REQUIRED)
         );
-        expect(manager.consentState_).to.equal(
-          CONSENT_ITEM_STATE_ENUM.ACCEPTED
-        );
+        expect(manager.consentState_).to.equal(ConsentItemState_Enum.ACCEPTED);
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN)
+          constructConsentInfo(ConsentItemState_Enum.UNKNOWN)
         );
-        expect(manager.consentState_).to.equal(
-          CONSENT_ITEM_STATE_ENUM.ACCEPTED
-        );
+        expect(manager.consentState_).to.equal(ConsentItemState_Enum.ACCEPTED);
 
         // Reject
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.REJECTED)
+          constructConsentInfo(ConsentItemState_Enum.REJECTED)
         );
-        expect(manager.consentState_).to.equal(
-          CONSENT_ITEM_STATE_ENUM.REJECTED
-        );
+        expect(manager.consentState_).to.equal(ConsentItemState_Enum.REJECTED);
 
         // UNKNOWN/NOT_REQUIRED/DISMISS cannot override ACCEPTED/REJECTED
         manager.consentStateChangeHandler_(
-          constructConsentInfo(CONSENT_ITEM_STATE_ENUM.DISMISSED)
+          constructConsentInfo(ConsentItemState_Enum.DISMISSED)
         );
-        expect(manager.consentState_).to.equal(
-          CONSENT_ITEM_STATE_ENUM.REJECTED
-        );
+        expect(manager.consentState_).to.equal(ConsentItemState_Enum.REJECTED);
       });
 
       describe('whenPolicyResolved/Unblock', () => {
         it('Invalid policy value', () => {
           expectAsyncConsoleError(/only predefined policies are supported/, 2);
           return manager.whenPolicyResolved('invalid').then((state) => {
-            expect(state).to.equal(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
+            expect(state).to.equal(ConsentPolicyState_Enum.UNKNOWN);
             return manager
               .whenPolicyUnblock('invalid')
               .then((shouldUnblock) => {
@@ -223,7 +211,7 @@ describes.realWin(
         let policy;
         beforeEach(() => {
           manager = new ConsentPolicyManager(ampdoc);
-          consentInfo = constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
+          consentInfo = constructConsentInfo(ConsentItemState_Enum.UNKNOWN);
           manager.setLegacyConsentInstanceId('ABC');
           policy = expandPolicyConfig(dict({}), 'ABC');
           const keys = Object.keys(policy);
@@ -234,34 +222,34 @@ describes.realWin(
 
         it('Not required', () => {
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED)
+            constructConsentInfo(ConsentItemState_Enum.NOT_REQUIRED)
           );
           const promises = [];
           promises.push(
             manager.whenPolicyResolved('default').then((status) => {
               expect(status).to.equal(
-                CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
+                ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED
               );
             })
           );
           promises.push(
             manager.whenPolicyResolved('_till_accepted').then((status) => {
               expect(status).to.equal(
-                CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
+                ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED
               );
             })
           );
           promises.push(
             manager.whenPolicyResolved('_till_responded').then((status) => {
               expect(status).to.equal(
-                CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
+                ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED
               );
             })
           );
           promises.push(
             manager.whenPolicyResolved('_auto_reject').then((status) => {
               expect(status).to.equal(
-                CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
+                ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED
               );
             })
           );
@@ -295,27 +283,27 @@ describes.realWin(
 
         it('Dismiss', () => {
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.DISMISSED)
+            constructConsentInfo(ConsentItemState_Enum.DISMISSED)
           );
           const promises = [];
           promises.push(
             manager.whenPolicyResolved('default').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
+              expect(status).to.equal(ConsentPolicyState_Enum.UNKNOWN);
             })
           );
           promises.push(
             manager.whenPolicyResolved('_till_accepted').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
+              expect(status).to.equal(ConsentPolicyState_Enum.UNKNOWN);
             })
           );
           promises.push(
             manager.whenPolicyResolved('_till_responded').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
+              expect(status).to.equal(ConsentPolicyState_Enum.UNKNOWN);
             })
           );
           promises.push(
             manager.whenPolicyResolved('_auto_reject').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
+              expect(status).to.equal(ConsentPolicyState_Enum.UNKNOWN);
             })
           );
 
@@ -348,27 +336,27 @@ describes.realWin(
 
         it('Accept', () => {
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED)
+            constructConsentInfo(ConsentItemState_Enum.ACCEPTED)
           );
           const promises = [];
           promises.push(
             manager.whenPolicyResolved('default').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+              expect(status).to.equal(ConsentPolicyState_Enum.SUFFICIENT);
             })
           );
           promises.push(
             manager.whenPolicyResolved('_till_accepted').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+              expect(status).to.equal(ConsentPolicyState_Enum.SUFFICIENT);
             })
           );
           promises.push(
             manager.whenPolicyResolved('_till_responded').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+              expect(status).to.equal(ConsentPolicyState_Enum.SUFFICIENT);
             })
           );
           promises.push(
             manager.whenPolicyResolved('_auto_reject').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+              expect(status).to.equal(ConsentPolicyState_Enum.SUFFICIENT);
             })
           );
 
@@ -377,12 +365,12 @@ describes.realWin(
 
         it('Reject', () => {
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.REJECTED)
+            constructConsentInfo(ConsentItemState_Enum.REJECTED)
           );
           const promises = [];
           promises.push(
             manager.whenPolicyResolved('default').then((status) => {
-              expect(status).to.equal(CONSENT_POLICY_STATE_ENUM.INSUFFICIENT);
+              expect(status).to.equal(ConsentPolicyState_Enum.INSUFFICIENT);
             })
           );
 
@@ -418,7 +406,7 @@ describes.realWin(
         let policy;
         beforeEach(() => {
           manager = new ConsentPolicyManager(ampdoc);
-          consentInfo = constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
+          consentInfo = constructConsentInfo(ConsentItemState_Enum.UNKNOWN);
           manager.setLegacyConsentInstanceId('ABC');
           policy = expandPolicyConfig(dict({}), 'ABC');
           const keys = Object.keys(policy);
@@ -429,7 +417,7 @@ describes.realWin(
 
         it('will not fire, if not set', () => {
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'abc123')
+            constructConsentInfo(ConsentItemState_Enum.ACCEPTED, 'abc123')
           );
           expect(manager.tcfConsentChangeHandler_).is.null;
         });
@@ -440,13 +428,13 @@ describes.realWin(
           expect(manager.tcfConsentChangeHandler_).to.not.be.null;
 
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'abc123')
+            constructConsentInfo(ConsentItemState_Enum.ACCEPTED, 'abc123')
           );
           expect(spy).to.be.calledOnce;
 
           // Unknown does not trigger change.
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN, '321cba')
+            constructConsentInfo(ConsentItemState_Enum.UNKNOWN, '321cba')
           );
           expect(spy).to.be.calledOnce;
         });
@@ -457,17 +445,17 @@ describes.realWin(
           expect(manager.tcfConsentChangeHandler_).to.not.be.null;
 
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'abc123')
+            constructConsentInfo(ConsentItemState_Enum.ACCEPTED, 'abc123')
           );
           expect(spy).to.be.calledOnce;
 
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'abc123')
+            constructConsentInfo(ConsentItemState_Enum.ACCEPTED, 'abc123')
           );
           expect(spy).to.be.calledTwice;
 
           manager.consentStateChangeHandler_(
-            constructConsentInfo(CONSENT_ITEM_STATE_ENUM.ACCEPTED, 'xyz123')
+            constructConsentInfo(ConsentItemState_Enum.ACCEPTED, 'xyz123')
           );
           expect(spy).to.be.calledThrice;
         });
@@ -528,7 +516,7 @@ describes.realWin(
           yield macroTask();
           expect(ready).to.be.true;
           expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_POLICY_STATE_ENUM.INSUFFICIENT
+            ConsentPolicyState_Enum.INSUFFICIENT
           );
         });
 
@@ -540,13 +528,13 @@ describes.realWin(
           yield macroTask();
           expect(ready).to.be.false;
           clock.tick(1000);
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.DISMISSED);
+          instance.evaluate(ConsentItemState_Enum.DISMISSED);
           yield macroTask();
           expect(ready).to.be.true;
           clock.tick(1001);
           yield macroTask();
           expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_POLICY_STATE_ENUM.UNKNOWN
+            ConsentPolicyState_Enum.UNKNOWN
           );
         });
       });
@@ -559,27 +547,27 @@ describes.realWin(
             },
           });
           expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_POLICY_STATE_ENUM.UNKNOWN
+            ConsentPolicyState_Enum.UNKNOWN
           );
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.REJECTED);
+          instance.evaluate(ConsentItemState_Enum.REJECTED);
           expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_POLICY_STATE_ENUM.INSUFFICIENT
+            ConsentPolicyState_Enum.INSUFFICIENT
           );
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.ACCEPTED);
+          instance.evaluate(ConsentItemState_Enum.ACCEPTED);
           expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_POLICY_STATE_ENUM.SUFFICIENT
+            ConsentPolicyState_Enum.SUFFICIENT
           );
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.DISMISSED);
+          instance.evaluate(ConsentItemState_Enum.DISMISSED);
           expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_POLICY_STATE_ENUM.UNKNOWN
+            ConsentPolicyState_Enum.UNKNOWN
           );
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED);
+          instance.evaluate(ConsentItemState_Enum.NOT_REQUIRED);
           expect(instance.getCurrentPolicyStatus()).to.equal(
-            CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
+            ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED
           );
         });
       });
@@ -591,13 +579,13 @@ describes.realWin(
               'ABC': [],
             },
           });
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.DISMISSED);
+          instance.evaluate(ConsentItemState_Enum.DISMISSED);
           expect(instance.shouldUnblock()).to.equal(false);
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.REJECTED);
+          instance.evaluate(ConsentItemState_Enum.REJECTED);
           expect(instance.shouldUnblock()).to.equal(false);
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.ACCEPTED);
+          instance.evaluate(ConsentItemState_Enum.ACCEPTED);
           expect(instance.shouldUnblock()).to.equal(true);
         });
 
@@ -607,19 +595,19 @@ describes.realWin(
               'ABC': [],
             },
             'unblockOn': [
-              CONSENT_POLICY_STATE_ENUM.UNKNOWN,
-              CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
-              CONSENT_POLICY_STATE_ENUM.INSUFFICIENT,
-              CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
+              ConsentPolicyState_Enum.UNKNOWN,
+              ConsentPolicyState_Enum.SUFFICIENT,
+              ConsentPolicyState_Enum.INSUFFICIENT,
+              ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED,
             ],
           });
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.DISMISSED);
+          instance.evaluate(ConsentItemState_Enum.DISMISSED);
           expect(instance.shouldUnblock()).to.equal(true);
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.REJECTED);
+          instance.evaluate(ConsentItemState_Enum.REJECTED);
           expect(instance.shouldUnblock()).to.equal(true);
 
-          instance.evaluate(CONSENT_ITEM_STATE_ENUM.ACCEPTED);
+          instance.evaluate(ConsentItemState_Enum.ACCEPTED);
           expect(instance.shouldUnblock()).to.equal(true);
         });
       });
@@ -635,7 +623,7 @@ describes.realWin(
           .callsFake(() => {
             return Promise.resolve();
           });
-        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
+        consentInfo = constructConsentInfo(ConsentItemState_Enum.UNKNOWN);
         manager.setLegacyConsentInstanceId('ABC');
       });
 
@@ -666,10 +654,10 @@ describes.realWin(
             return Promise.resolve();
           });
         consentInfo = constructConsentInfo(
-          CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+          ConsentItemState_Enum.ACCEPTED,
           'test',
           constructMetadata(
-            CONSENT_STRING_TYPE_ENUM.TCF_V2,
+            ConsentStringType_Enum.TCF_V2,
             '1~1.10.14.103',
             false
           )
@@ -687,7 +675,7 @@ describes.realWin(
           manager.getConsentMetadataInfo('default')
         ).to.eventually.deep.equals(
           constructMetadata(
-            CONSENT_STRING_TYPE_ENUM.TCF_V2,
+            ConsentStringType_Enum.TCF_V2,
             '1~1.10.14.103',
             false
           )
@@ -702,13 +690,13 @@ describes.realWin(
         manager = new ConsentPolicyManager(ampdoc);
         manager.setLegacyConsentInstanceId('ABC');
         consentInfo = constructConsentInfo(
-          CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+          ConsentItemState_Enum.ACCEPTED,
           undefined,
           undefined,
           {
-            'purpose-foo': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
-            'purpose-bar': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
-            'purpose-xyz': PURPOSE_CONSENT_STATE_ENUM.REJECTED,
+            'purpose-foo': PurposeConsentState_Enum.ACCEPTED,
+            'purpose-bar': PurposeConsentState_Enum.ACCEPTED,
+            'purpose-xyz': PurposeConsentState_Enum.REJECTED,
           }
         );
       });

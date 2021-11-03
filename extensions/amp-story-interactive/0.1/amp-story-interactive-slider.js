@@ -1,13 +1,13 @@
 import {
   AmpStoryInteractive,
-  INTERACTIVE_TYPE_ENUM,
+  InteractiveType_Enum,
   MID_SELECTION_CLASS,
   POST_SELECTION_CLASS,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
-import {STATE_PROPERTY_ENUM} from 'extensions/amp-story/1.0/amp-story-store-service';
+import {StateProperty_Enum} from 'extensions/amp-story/1.0/amp-story-store-service';
 
 /**
  * Generates the template for the slider.
@@ -51,7 +51,7 @@ const easeInOutCubic = (t) =>
 /**
  * @const @enum {number}
  */
-const SLIDER_TYPE_ENUM = {
+const SliderType_Enum = {
   PERCENTAGE: 'percentage',
   EMOJI: 'emoji',
 };
@@ -64,13 +64,13 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, INTERACTIVE_TYPE_ENUM.SLIDER, [0, 1]);
+    super(element, InteractiveType_Enum.SLIDER, [0, 1]);
     /** @private {?Element} bubble containing the current selection of the user while dragging */
     this.bubbleEl_ = null;
     /** @private {?Element} tracks user input */
     this.inputEl_ = null;
     /** @private {!SliderType}  */
-    this.sliderType_ = SLIDER_TYPE_ENUM.PERCENTAGE;
+    this.sliderType_ = SliderType_Enum.PERCENTAGE;
     /** @private {?number} Reference to timeout so we can cancel it if needed. */
     this.landingAnimationDelayTimeout_ = null;
     /**  @private {?number} Reference to requestAnimationFrame so we can cancel it if needed.*/
@@ -128,7 +128,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
     );
 
     if (this.options_.length > 0) {
-      this.sliderType_ = SLIDER_TYPE_ENUM.EMOJI;
+      this.sliderType_ = SliderType_Enum.EMOJI;
       const emojiWrapper = this.win.document.createElement('span');
       emojiWrapper.textContent = this.options_[0].text;
       this.bubbleEl_.appendChild(emojiWrapper);
@@ -161,7 +161,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
       true
     );
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
+      StateProperty_Enum.CURRENT_PAGE_ID,
       (currPageId) => {
         const isPostState =
           this.rootEl_.classList.contains(POST_SELECTION_CLASS);
@@ -221,7 +221,7 @@ export class AmpStoryInteractiveSlider extends AmpStoryInteractive {
    */
   onDrag_() {
     const {value} = this.inputEl_;
-    if (this.sliderType_ == SLIDER_TYPE_ENUM.PERCENTAGE) {
+    if (this.sliderType_ == SliderType_Enum.PERCENTAGE) {
       this.bubbleEl_.textContent = Math.round(value) + '%';
     }
     this.rootEl_.classList.add(MID_SELECTION_CLASS);

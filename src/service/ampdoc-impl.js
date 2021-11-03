@@ -1,4 +1,4 @@
-import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
@@ -32,7 +32,7 @@ const PARAMS_SENTINEL = '__AMP__';
  * @typedef {{
  *   params: (!Object<string, string>|undefined),
  *   signals: (?Signals|undefined),
- *   visibilityState: (?VISIBILITY_STATE_ENUM|undefined),
+ *   visibilityState: (?VisibilityState_Enum|undefined),
  * }}
  */
 export let AmpDocOptions;
@@ -41,7 +41,7 @@ export let AmpDocOptions;
  * Private ampdoc signals.
  * @enum {string}
  */
-const AMP_DOC_SIGNALS_ENUM = {
+const AmpDocSignals_Enum = {
   // A complete preinstalled list of extensions is known.
   EXTENSIONS_KNOWN: '-ampdoc-ext-known',
   // Signals the document has become visible for the first time.
@@ -258,10 +258,10 @@ export class AmpDoc {
     const paramsVisibilityState = this.params_['visibilityState'];
     devAssert(
       !paramsVisibilityState ||
-        isEnumValue(VISIBILITY_STATE_ENUM, paramsVisibilityState)
+        isEnumValue(VisibilityState_Enum, paramsVisibilityState)
     );
 
-    /** @private {?VISIBILITY_STATE_ENUM} */
+    /** @private {?VisibilityState_Enum} */
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
       paramsVisibilityState ||
@@ -270,10 +270,10 @@ export class AmpDoc {
     // Start with `null` to be updated by updateVisibilityState_ in the end
     // of the constructor to ensure the correct "update" logic and promise
     // resolution.
-    /** @private {?VISIBILITY_STATE_ENUM} */
+    /** @private {?VisibilityState_Enum} */
     this.visibilityState_ = null;
 
-    /** @private @const {!Observable<!VISIBILITY_STATE_ENUM>} */
+    /** @private @const {!Observable<!VisibilityState_Enum>} */
     this.visibilityStateHandlers_ = new Observable();
 
     /** @private {?time} */
@@ -443,7 +443,7 @@ export class AmpDoc {
    * @restricted
    */
   setExtensionsKnown() {
-    this.signals_.signal(AMP_DOC_SIGNALS_ENUM.EXTENSIONS_KNOWN);
+    this.signals_.signal(AmpDocSignals_Enum.EXTENSIONS_KNOWN);
   }
 
   /**
@@ -451,7 +451,7 @@ export class AmpDoc {
    * @return {!Promise}
    */
   whenExtensionsKnown() {
-    return this.signals_.whenSignal(AMP_DOC_SIGNALS_ENUM.EXTENSIONS_KNOWN);
+    return this.signals_.whenSignal(AmpDocSignals_Enum.EXTENSIONS_KNOWN);
   }
 
   /**
@@ -551,7 +551,7 @@ export class AmpDoc {
   }
 
   /**
-   * @param {!VISIBILITY_STATE_ENUM} visibilityState
+   * @param {!VisibilityState_Enum} visibilityState
    * @restricted
    */
   overrideVisibilityState(visibilityState) {
@@ -569,9 +569,9 @@ export class AmpDoc {
     );
 
     // Parent visibility: pick the first non-visible state.
-    let parentVisibilityState = VISIBILITY_STATE_ENUM.VISIBLE;
+    let parentVisibilityState = VisibilityState_Enum.VISIBLE;
     for (let p = this.parent_; p; p = p.getParent()) {
-      if (p.getVisibilityState() != VISIBILITY_STATE_ENUM.VISIBLE) {
+      if (p.getVisibilityState() != VisibilityState_Enum.VISIBLE) {
         parentVisibilityState = p.getVisibilityState();
         break;
       }
@@ -580,47 +580,47 @@ export class AmpDoc {
     // Pick the most restricted visibility state.
     let visibilityState;
     const visibilityStateOverride =
-      this.visibilityStateOverride_ || VISIBILITY_STATE_ENUM.VISIBLE;
+      this.visibilityStateOverride_ || VisibilityState_Enum.VISIBLE;
     if (
-      visibilityStateOverride == VISIBILITY_STATE_ENUM.VISIBLE &&
-      parentVisibilityState == VISIBILITY_STATE_ENUM.VISIBLE &&
-      naturalVisibilityState == VISIBILITY_STATE_ENUM.VISIBLE
+      visibilityStateOverride == VisibilityState_Enum.VISIBLE &&
+      parentVisibilityState == VisibilityState_Enum.VISIBLE &&
+      naturalVisibilityState == VisibilityState_Enum.VISIBLE
     ) {
-      visibilityState = VISIBILITY_STATE_ENUM.VISIBLE;
+      visibilityState = VisibilityState_Enum.VISIBLE;
     } else if (
-      naturalVisibilityState == VISIBILITY_STATE_ENUM.HIDDEN &&
-      visibilityStateOverride == VISIBILITY_STATE_ENUM.PAUSED
+      naturalVisibilityState == VisibilityState_Enum.HIDDEN &&
+      visibilityStateOverride == VisibilityState_Enum.PAUSED
     ) {
       // Hidden document state overrides "paused".
       visibilityState = naturalVisibilityState;
     } else if (
-      visibilityStateOverride == VISIBILITY_STATE_ENUM.PAUSED ||
-      visibilityStateOverride == VISIBILITY_STATE_ENUM.INACTIVE
+      visibilityStateOverride == VisibilityState_Enum.PAUSED ||
+      visibilityStateOverride == VisibilityState_Enum.INACTIVE
     ) {
       visibilityState = visibilityStateOverride;
     } else if (
-      parentVisibilityState == VISIBILITY_STATE_ENUM.PAUSED ||
-      parentVisibilityState == VISIBILITY_STATE_ENUM.INACTIVE
+      parentVisibilityState == VisibilityState_Enum.PAUSED ||
+      parentVisibilityState == VisibilityState_Enum.INACTIVE
     ) {
       visibilityState = parentVisibilityState;
     } else if (
-      visibilityStateOverride == VISIBILITY_STATE_ENUM.PRERENDER ||
-      naturalVisibilityState == VISIBILITY_STATE_ENUM.PRERENDER ||
-      parentVisibilityState == VISIBILITY_STATE_ENUM.PRERENDER
+      visibilityStateOverride == VisibilityState_Enum.PRERENDER ||
+      naturalVisibilityState == VisibilityState_Enum.PRERENDER ||
+      parentVisibilityState == VisibilityState_Enum.PRERENDER
     ) {
-      visibilityState = VISIBILITY_STATE_ENUM.PRERENDER;
+      visibilityState = VisibilityState_Enum.PRERENDER;
     } else {
-      visibilityState = VISIBILITY_STATE_ENUM.HIDDEN;
+      visibilityState = VisibilityState_Enum.HIDDEN;
     }
 
     if (this.visibilityState_ != visibilityState) {
       this.visibilityState_ = visibilityState;
-      if (visibilityState == VISIBILITY_STATE_ENUM.VISIBLE) {
+      if (visibilityState == VisibilityState_Enum.VISIBLE) {
         this.lastVisibleTime_ = Date.now();
-        this.signals_.signal(AMP_DOC_SIGNALS_ENUM.FIRST_VISIBLE);
-        this.signals_.signal(AMP_DOC_SIGNALS_ENUM.NEXT_VISIBLE);
+        this.signals_.signal(AmpDocSignals_Enum.FIRST_VISIBLE);
+        this.signals_.signal(AmpDocSignals_Enum.NEXT_VISIBLE);
       } else {
-        this.signals_.reset(AMP_DOC_SIGNALS_ENUM.NEXT_VISIBLE);
+        this.signals_.reset(AmpDocSignals_Enum.NEXT_VISIBLE);
       }
       this.visibilityStateHandlers_.fire();
     }
@@ -633,7 +633,7 @@ export class AmpDoc {
    */
   whenFirstVisible() {
     return this.signals_
-      .whenSignal(AMP_DOC_SIGNALS_ENUM.FIRST_VISIBLE)
+      .whenSignal(AmpDocSignals_Enum.FIRST_VISIBLE)
       .then(() => undefined);
   }
 
@@ -644,7 +644,7 @@ export class AmpDoc {
    */
   whenNextVisible() {
     return this.signals_
-      .whenSignal(AMP_DOC_SIGNALS_ENUM.NEXT_VISIBLE)
+      .whenSignal(AmpDocSignals_Enum.NEXT_VISIBLE)
       .then(() => undefined);
   }
 
@@ -655,7 +655,7 @@ export class AmpDoc {
    */
   getFirstVisibleTime() {
     return /** @type {?number} */ (
-      this.signals_.get(AMP_DOC_SIGNALS_ENUM.FIRST_VISIBLE)
+      this.signals_.get(AmpDocSignals_Enum.FIRST_VISIBLE)
     );
   }
 
@@ -671,7 +671,7 @@ export class AmpDoc {
   /**
    * Returns visibility state configured by the viewer.
    * See {@link isVisible}.
-   * @return {!VISIBILITY_STATE_ENUM}
+   * @return {!VisibilityState_Enum}
    */
   getVisibilityState() {
     return devAssert(this.visibilityState_);
@@ -685,7 +685,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VISIBILITY_STATE_ENUM.VISIBLE;
+    return this.visibilityState_ == VisibilityState_Enum.VISIBLE;
   }
 
   /**
@@ -702,7 +702,7 @@ export class AmpDoc {
    * Adds a "visibilitychange" event listener for viewer events. The
    * callback can check {@link isVisible} and {@link getPrefetchCount}
    * methods for more info.
-   * @param {function(!VISIBILITY_STATE_ENUM)} handler
+   * @param {function(!VisibilityState_Enum)} handler
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {

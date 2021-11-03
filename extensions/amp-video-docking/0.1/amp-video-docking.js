@@ -1,4 +1,4 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {applyFillContent} from '#core/dom/layout';
@@ -24,12 +24,12 @@ import {dev, devAssert, user, userAssert} from '#utils/log';
 import {applyBreakpointClassname} from './breakpoints';
 import {Controls} from './controls';
 import {
-  DIRECTION_X_ENUM,
-  DIRECTION_Y_ENUM,
+  DirectionX_Enum,
+  DirectionY_Enum,
   FLOAT_TOLERANCE,
   RectDef,
 } from './def';
-import {VIDEO_DOCKING_EVENTS_ENUM, pointerCoords} from './events';
+import {VideoDockingEvents_Enum, pointerCoords} from './events';
 import {HtmlLiteralTagDef} from './html';
 import {
   calculateLeftJustifiedX,
@@ -45,9 +45,9 @@ import {createViewportRect} from './viewport-rect';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
-  PLAYING_STATES_ENUM,
-  VIDEO_ATTRIBUTES_ENUM,
-  VIDEO_EVENTS_ENUM,
+  PlayingStates_Enum,
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
   VideoInterface,
   VideoOrBaseElementDef,
   isDockable,
@@ -104,10 +104,10 @@ export const PLACEHOLDER_ICON_BREAKPOINTS = [
 export const BASE_CLASS_NAME = 'i-amphtml-video-docked';
 
 /** @enum {string} */
-export const ACTIONS_ENUM = {DOCK: 'dock', UNDOCK: 'undock'};
+export const Actions_Enum = {DOCK: 'dock', UNDOCK: 'undock'};
 
 /** @enum {string} */
-export const DOCK_TARGET_TYPE_ENUM = {
+export const DockTargetType_Enum = {
   // Dynamically calculated corner based on viewport percentage. Draggable.
   CORNER: 'corner',
   // Targets author-defined element's box. Not draggable.
@@ -255,7 +255,7 @@ export class VideoDocking {
 
     /**
      * Overriden when user drags the video to a different corner.
-     * @private {?DIRECTION_X_ENUM}
+     * @private {?DirectionX_Enum}
      */
     this.cornerDirectionX_ = null;
 
@@ -289,7 +289,7 @@ export class VideoDocking {
     /** @private {?{width: number, height: number}} */
     this.sizedAt_ = null;
 
-    /** @private {?DIRECTION_Y_ENUM} */
+    /** @private {?DirectionY_Enum} */
     this.scrollDirection_ = null;
 
     /** @private {number} */
@@ -353,7 +353,7 @@ export class VideoDocking {
     const ampdoc = this.ampdoc_;
 
     const dockableSelector = `[${escapeCssSelectorIdent(
-      VIDEO_ATTRIBUTES_ENUM.DOCK
+      VideoAttributes_Enum.DOCK
     )}]`;
 
     const dockableElements = ampdoc
@@ -364,13 +364,13 @@ export class VideoDocking {
       const element = dockableElements[i];
       if (
         element.signals &&
-        element.signals().get(VIDEO_EVENTS_ENUM.REGISTERED)
+        element.signals().get(VideoEvents_Enum.REGISTERED)
       ) {
         this.registerElement(element);
       }
     }
 
-    listen(ampdoc.getBody(), VIDEO_EVENTS_ENUM.REGISTERED, (e) => {
+    listen(ampdoc.getBody(), VideoEvents_Enum.REGISTERED, (e) => {
       const target = dev().assertElement(e.target);
       if (isDockable(target)) {
         this.registerElement(target);
@@ -406,7 +406,7 @@ export class VideoDocking {
     dev().assertElement(video);
 
     userAssert(
-      video.signals().get(VIDEO_EVENTS_ENUM.REGISTERED),
+      video.signals().get(VideoEvents_Enum.REGISTERED),
       '`dock` attribute can only be set on video components.'
     );
 
@@ -503,8 +503,8 @@ export class VideoDocking {
 
     const scrollDirection =
       scrollTop > this.lastScrollTop_
-        ? DIRECTION_Y_ENUM.TOP
-        : DIRECTION_Y_ENUM.BOTTOM;
+        ? DirectionY_Enum.TOP
+        : DirectionY_Enum.BOTTOM;
 
     this.scrollDirection_ = scrollDirection;
     this.lastScrollTop_ = scrollTop;
@@ -551,11 +551,11 @@ export class VideoDocking {
     const controls = new Controls(this.ampdoc_);
     const {container, overlay} = controls;
 
-    listen(container, VIDEO_DOCKING_EVENTS_ENUM.DISMISS_ON_TAP, () => {
+    listen(container, VideoDockingEvents_Enum.DISMISS_ON_TAP, () => {
       this.dismissOnTap_();
     });
 
-    listen(container, VIDEO_DOCKING_EVENTS_ENUM.SCROLL_BACK, () => {
+    listen(container, VideoDockingEvents_Enum.SCROLL_BACK, () => {
       this.scrollBack_();
     });
 
@@ -657,12 +657,12 @@ export class VideoDocking {
     if (this.isTransitioning_) {
       return;
     }
-    if (this.scrollDirection_ == DIRECTION_Y_ENUM.TOP) {
+    if (this.scrollDirection_ == DirectionY_Enum.TOP) {
       const target = this.getTargetFor_(video, opt_inlineRect);
       if (target) {
         this.dockOnPositionChange_(video, target, opt_inlineRect);
       }
-    } else if (this.scrollDirection_ == DIRECTION_Y_ENUM.BOTTOM) {
+    } else if (this.scrollDirection_ == DirectionY_Enum.BOTTOM) {
       if (!this.currentlyDocked_) {
         return;
       }
@@ -720,7 +720,7 @@ export class VideoDocking {
     );
     return (
       this.manager_().getPlayingState(video) ==
-      PLAYING_STATES_ENUM.PLAYING_MANUAL
+      PlayingStates_Enum.PLAYING_MANUAL
     );
   }
 
@@ -833,7 +833,7 @@ export class VideoDocking {
         this.getDockedVideo_().element
     );
 
-    const trust = ACTION_TRUST_ENUM.LOW;
+    const trust = ActionTrust_Enum.LOW;
     const event = createCustomEvent(
       this.ampdoc_.win,
       /** @type {string} */ (action),
@@ -901,7 +901,7 @@ export class VideoDocking {
    * @param {number} scale
    * @param {number} step in [0..1]
    * @param {number} transitionDurationMs
-   * @param {DIRECTION_X_ENUM=} opt_relativeX
+   * @param {DirectionX_Enum=} opt_relativeX
    * @param {!RectDef=} opt_inlineRect
    * @param {string=} position
    * @return {!Promise}
@@ -940,7 +940,7 @@ export class VideoDocking {
     const placeholderBackground = this.getPlaceholderBackground_();
     const placeholderIcon = this.getPlaceholderRefs_()['icon'];
     const hasRelativePlacement = opt_relativeX !== undefined;
-    const isPlacementRtl = opt_relativeX == DIRECTION_X_ENUM.LEFT;
+    const isPlacementRtl = opt_relativeX == DirectionX_Enum.LEFT;
 
     if (hasRelativePlacement) {
       applyBreakpointClassname(
@@ -1171,7 +1171,7 @@ export class VideoDocking {
       return;
     }
     this.getControls_().setVideo(video, target.rect);
-    this.trigger_(ACTIONS_ENUM.DOCK, target);
+    this.trigger_(Actions_Enum.DOCK, target);
   }
 
   /**
@@ -1239,7 +1239,7 @@ export class VideoDocking {
       return;
     }
 
-    if (this.isDockedToType_(DOCK_TARGET_TYPE_ENUM.SLOT)) {
+    if (this.isDockedToType_(DockTargetType_Enum.SLOT)) {
       return;
     }
 
@@ -1310,7 +1310,7 @@ export class VideoDocking {
 
   /**
    * @param {!MouseEvent|!TouchEvent} e
-   * @param {!DIRECTION_X_ENUM} directionX
+   * @param {!DirectionX_Enum} directionX
    * @param {number} startX
    * @private
    */
@@ -1527,13 +1527,13 @@ export class VideoDocking {
 
   /**
    * @param {number} offsetX
-   * @return {!DIRECTION_X_ENUM}
+   * @return {!DirectionX_Enum}
    * @private
    */
   calculateDirectionX_(offsetX) {
     return this.getCenterX_(offsetX) >= this.viewportRect_.width / 2
-      ? DIRECTION_X_ENUM.RIGHT
-      : DIRECTION_X_ENUM.LEFT;
+      ? DirectionX_Enum.RIGHT
+      : DirectionX_Enum.LEFT;
   }
 
   /**
@@ -1541,7 +1541,7 @@ export class VideoDocking {
    * @param {!DockTargetDef} target
    * @param {number} step in [0..1]
    * @param {!RectDef} opt_inlineRect
-   * @return {{x: number, y: number, scale: number, relativeX: !DIRECTION_X_ENUM}}
+   * @return {{x: number, y: number, scale: number, relativeX: !DirectionX_Enum}}
    */
   getDims_(video, target, step, opt_inlineRect) {
     return interpolatedBoxesTransform(
@@ -1615,7 +1615,7 @@ export class VideoDocking {
     // Prevents ghosting
     this.getControls_().hide(/* respectSticky */ false, /* immediately */ true);
 
-    this.trigger_(ACTIONS_ENUM.UNDOCK);
+    this.trigger_(Actions_Enum.UNDOCK);
   }
 
   /**
@@ -1707,7 +1707,7 @@ export class VideoDocking {
 
     if (slot) {
       return {
-        type: DOCK_TARGET_TYPE_ENUM.SLOT,
+        type: DockTargetType_Enum.SLOT,
         rect: letterboxRect(inlineRect, slot./*OK*/ getBoundingClientRect()),
         slot,
       };
@@ -1715,12 +1715,12 @@ export class VideoDocking {
 
     if (this.cornerDirectionX_ === null) {
       this.cornerDirectionX_ = isRTL(this.getDoc_())
-        ? DIRECTION_X_ENUM.LEFT
-        : DIRECTION_X_ENUM.RIGHT;
+        ? DirectionX_Enum.LEFT
+        : DirectionX_Enum.RIGHT;
     }
 
     return {
-      type: DOCK_TARGET_TYPE_ENUM.CORNER,
+      type: DockTargetType_Enum.CORNER,
       rect: topCornerRect(
         inlineRect,
         this.viewportRect_,

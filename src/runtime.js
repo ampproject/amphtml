@@ -19,7 +19,7 @@ import {
 } from '#service/extensions-impl';
 
 import {
-  LOG_LEVEL_ENUM, // eslint-disable-line no-unused-vars
+  LogLevel_Enum, // eslint-disable-line no-unused-vars
   dev,
   initLogConstructor,
   overrideLogLevel,
@@ -149,7 +149,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!LOG_LEVEL_ENUM} level
+   * @param {!LogLevel_Enum} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 

@@ -1,4 +1,4 @@
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Observable} from '#core/data-structures/observable';
 
 import {toggleExperiment} from '#experiments';
@@ -458,7 +458,7 @@ describes.fakeWin(
       }
       function dispatchUpdateEvent(target) {
         const event = win.document.createEvent('Event');
-        event.initEvent(AMP_EVENTS_ENUM.DOM_UPDATE, true, true);
+        event.initEvent(AmpEvents_Enum.DOM_UPDATE, true, true);
         target.dispatchEvent(event);
       }
       expectGetReaderId('reader1');

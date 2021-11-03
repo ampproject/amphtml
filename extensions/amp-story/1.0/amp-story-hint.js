@@ -1,12 +1,12 @@
 import * as Preact from '#core/dom/jsx';
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {
-  EMBEDDED_COMPONENT_STATE_ENUM,
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  EmbeddedComponentState_Enum,
+  StateProperty_Enum,
+  UiType_Enum,
   getStoreService,
 } from './amp-story-store-service';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
 import {localize} from './amp-story-localization-service';
@@ -31,7 +31,7 @@ const renderHintElement = (element) => (
           <div class="i-amphtml-story-hint-tap-button-text">
             {localize(
               element,
-              LOCALIZED_STRING_ID_ENUM.AMP_STORY_HINT_UI_PREVIOUS_LABEL
+              LocalizedStringId_Enum.AMP_STORY_HINT_UI_PREVIOUS_LABEL
             )}
           </div>
         </div>
@@ -42,7 +42,10 @@ const renderHintElement = (element) => (
             <div class="i-amphtml-story-hint-tap-button-icon" />
           </div>
           <div class="i-amphtml-story-hint-tap-button-text">
-            {localize(element, LOCALIZED_STRING_ID_ENUM.AMP_STORY_HINT_UI_NEXT_LABEL)}
+            {localize(
+              element,
+              LocalizedStringId_Enum.AMP_STORY_HINT_UI_NEXT_LABEL
+            )}
           </div>
         </div>
       </div>
@@ -114,7 +117,7 @@ export class AmpStoryHint {
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -122,19 +125,19 @@ export class AmpStoryHint {
     );
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.SYSTEM_UI_IS_VISIBLE_STATE,
+      StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.INTERACTIVE_COMPONENT_STATE,
+      StateProperty_Enum.INTERACTIVE_COMPONENT_STATE,
       /** @param {./amp-story-store-service.InteractiveComponentDef} component */ (
         component
       ) => {
         this.hideOnFocusedState_(
-          component.state === EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED
+          component.state === EmbeddedComponentState_Enum.FOCUSED
         );
       }
     );
@@ -159,8 +162,7 @@ export class AmpStoryHint {
    */
   showHint_(hintClass) {
     if (
-      this.storeService_.get(STATE_PROPERTY_ENUM.UI_STATE) !==
-      UI_TYPE_ENUM.MOBILE
+      this.storeService_.get(StateProperty_Enum.UI_STATE) !== UiType_Enum.MOBILE
     ) {
       return;
     }
@@ -191,7 +193,7 @@ export class AmpStoryHint {
    */
   showNavigationOverlay() {
     // Don't show the overlay if the share menu is open.
-    if (this.storeService_.get(STATE_PROPERTY_ENUM.SHARE_MENU_STATE)) {
+    if (this.storeService_.get(StateProperty_Enum.SHARE_MENU_STATE)) {
       return;
     }
 

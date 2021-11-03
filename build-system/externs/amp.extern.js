@@ -825,13 +825,13 @@ AmpStoryVariableService.pageId;
  * src/service/real-time-config/real-time-config-impl.js
  * @enum {string}
  */
-const RTC_ERROR_ENUM = {};
+const RtcError_Enum = {};
 
 /** @typedef {{
       response: (Object|undefined),
       rtcTime: number,
       callout: string,
-      error: (RTC_ERROR_ENUM|undefined)}} */
+      error: (RtcError_Enum|undefined)}} */
 let rtcResponseDef;
 
 /**

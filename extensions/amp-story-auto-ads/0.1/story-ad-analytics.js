@@ -8,7 +8,7 @@ import {getUniqueId} from './utils';
 export const STORY_AD_ANALYTICS = 'story-ad-analytics';
 
 /** @enum {string} */
-export const ANALYTICS_EVENTS_ENUM = {
+export const AnalyticsEvents_Enum = {
   AD_REQUESTED: 'story-ad-request',
   AD_LOADED: 'story-ad-load',
   AD_INSERTED: 'story-ad-insert',
@@ -20,7 +20,7 @@ export const ANALYTICS_EVENTS_ENUM = {
 };
 
 /** @enum {string} */
-export const ANALYTICS_VARS_ENUM = {
+export const AnalyticsVars_Enum = {
   // Timestamp when ad is requested.
   AD_REQUESTED: 'requestTime',
   // Timestamp when ad emits `INI_LOAD` signal.
@@ -94,8 +94,8 @@ export class StoryAdAnalytics {
   ensurePageTrackingInitialized_(adIndex) {
     if (!this.data_[adIndex]) {
       this.data_[adIndex] = dict({
-        [ANALYTICS_VARS_ENUM.AD_INDEX]: adIndex,
-        [ANALYTICS_VARS_ENUM.AD_UNIQUE_ID]: getUniqueId(this.win_),
+        [AnalyticsVars_Enum.AD_INDEX]: adIndex,
+        [AnalyticsVars_Enum.AD_UNIQUE_ID]: getUniqueId(this.win_),
       });
     }
   }

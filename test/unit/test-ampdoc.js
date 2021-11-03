@@ -2,7 +2,7 @@ import {Signals} from '#core/data-structures/signals';
 import * as docready from '#core/document/ready';
 import * as dom from '#core/dom';
 import {
-  SHADOW_DOM_VERSION_ENUM,
+  ShadowDomVersion_Enum,
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
@@ -111,7 +111,7 @@ describes.realWin('AmpDocService', {}, (env) => {
         host = doc.createElement('div');
         setShadowDomSupportedVersionForTesting(undefined);
         if (isShadowDomSupported()) {
-          if (getShadowDomSupportedVersion() == SHADOW_DOM_VERSION_ENUM.V1) {
+          if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
             shadowRoot = host.attachShadow({mode: 'open'});
           } else {
             shadowRoot = host.createShadowRoot();
@@ -165,7 +165,7 @@ describes.realWin('AmpDocService', {}, (env) => {
       host = doc.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == SHADOW_DOM_VERSION_ENUM.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot = host.attachShadow({mode: 'open'});
         } else {
           shadowRoot = host.createShadowRoot();
@@ -275,7 +275,7 @@ describes.realWin('AmpDocService', {}, (env) => {
 
       let shadowRoot2;
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == SHADOW_DOM_VERSION_ENUM.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot2 = host2.attachShadow({mode: 'open'});
         } else {
           shadowRoot2 = host2.createShadowRoot();
@@ -305,7 +305,7 @@ describes.realWin('AmpDocService', {}, (env) => {
       host = doc.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == SHADOW_DOM_VERSION_ENUM.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot = host.attachShadow({mode: 'open'});
         } else {
           shadowRoot = host.createShadowRoot();
@@ -401,7 +401,7 @@ describes.realWin('AmpDocService', {}, (env) => {
 
       let shadowRoot2;
       if (isShadowDomSupported()) {
-        if (getShadowDomSupportedVersion() == SHADOW_DOM_VERSION_ENUM.V1) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion_Enum.V1) {
           shadowRoot2 = host2.attachShadow({mode: 'open'});
         } else {
           shadowRoot2 = host2.createShadowRoot();

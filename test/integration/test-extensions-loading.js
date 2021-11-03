@@ -1,4 +1,4 @@
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {createFixtureIframe} from '#testing/iframe';
 
@@ -26,10 +26,7 @@ function testLoadOrderFixture(fixtureName, testElements) {
       for (let i = 0; i < testElements.length; i++) {
         expect(fixture.doc.querySelectorAll(testElements[i])).to.have.length(1);
       }
-      return fixture.awaitEvent(
-        AMP_EVENTS_ENUM.LOAD_START,
-        testElements.length
-      );
+      return fixture.awaitEvent(AmpEvents_Enum.LOAD_START, testElements.length);
     })
     .then(() => {
       for (let i = 0; i < testElements.length; i++) {

@@ -1,7 +1,7 @@
 import {AmpStoryConsent} from '../amp-story-consent';
 import {
   AmpStoryStoreService,
-  STATE_PROPERTY_ENUM,
+  StateProperty_Enum,
 } from '../amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
@@ -246,7 +246,7 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     storyConsent.buildCallback();
 
     const actions = storyConsent.storeService_.get(
-      STATE_PROPERTY_ENUM.ACTIONS_ALLOWLIST
+      StateProperty_Enum.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'AMP-CONSENT',
@@ -292,7 +292,7 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     storyConsent.buildCallback();
 
     expect(
-      storyConsent.storeService_.get(STATE_PROPERTY_ENUM.CONSENT_ID)
+      storyConsent.storeService_.get(StateProperty_Enum.CONSENT_ID)
     ).to.equal(CONSENT_ID);
   });
 
@@ -308,7 +308,7 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
 
     await Promise.resolve();
     expect(
-      storyConsent.storeService_.get(STATE_PROPERTY_ENUM.CONSENT_ID)
+      storyConsent.storeService_.get(StateProperty_Enum.CONSENT_ID)
     ).to.equal(CONSENT_ID);
   });
 
@@ -323,7 +323,7 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     storyConsent.buildCallback();
 
     await Promise.resolve();
-    expect(storyConsent.storeService_.get(STATE_PROPERTY_ENUM.CONSENT_ID)).to.be
+    expect(storyConsent.storeService_.get(StateProperty_Enum.CONSENT_ID)).to.be
       .null;
   });
 

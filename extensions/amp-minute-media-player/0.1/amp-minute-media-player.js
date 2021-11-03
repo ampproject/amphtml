@@ -5,7 +5,7 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {LAYOUT_ENUM, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -23,7 +23,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-minute-media-player';
@@ -103,7 +103,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == LAYOUT_ENUM.FLEX_ITEM;
+    return isLayoutSizeDefined(layout) || layout == Layout_Enum.FLEX_ITEM;
   }
 
   /**
@@ -164,12 +164,12 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     }
 
     redispatch(this.element, data['event'], {
-      'ready': VIDEO_EVENTS_ENUM.LOAD,
-      'playing': VIDEO_EVENTS_ENUM.PLAYING,
-      'pause': VIDEO_EVENTS_ENUM.PAUSE,
-      'ended': [VIDEO_EVENTS_ENUM.ENDED, VIDEO_EVENTS_ENUM.PAUSE],
-      'ads-ad-started': VIDEO_EVENTS_ENUM.AD_START,
-      'ads-ad-ended': VIDEO_EVENTS_ENUM.AD_END,
+      'ready': VideoEvents_Enum.LOAD,
+      'playing': VideoEvents_Enum.PLAYING,
+      'pause': VideoEvents_Enum.PAUSE,
+      'ended': [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
+      'ads-ad-started': VideoEvents_Enum.AD_START,
+      'ads-ad-ended': VideoEvents_Enum.AD_END,
     });
 
     if (data['event'] === 'mute') {
@@ -220,7 +220,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOAD);
+      dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;

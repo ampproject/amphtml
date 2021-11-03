@@ -1,7 +1,7 @@
-import {ACTION_ENUM} from '../amp-story-store-service';
+import {Action_Enum} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
@@ -82,7 +82,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(COMMON_SIGNALS_ENUM.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const liveListEl = ampStory.element.querySelector('amp-live-list');
       expect(liveListEl).to.exist;
     });
@@ -94,7 +94,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(COMMON_SIGNALS_ENUM.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const liveListEl = ampStory.element.querySelector('amp-live-list');
       expect(liveListEl.id).to.equal(
         'i-amphtml-' + ampStory.element.id + '-dynamic-list'
@@ -126,7 +126,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(COMMON_SIGNALS_ENUM.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const dispatchSpy = env.sandbox.spy(ampStory.storeService_, 'dispatch');
 
       const newPage = win.document.createElement('amp-story-page');
@@ -135,7 +135,7 @@ describes.realWin(
       newPage.id = 'new-page';
       ampStory.element.appendChild(newPage);
       liveStoryManager.update();
-      expect(dispatchSpy).to.have.been.calledWith(ACTION_ENUM.SET_PAGE_IDS, [
+      expect(dispatchSpy).to.have.been.calledWith(Action_Enum.SET_PAGE_IDS, [
         'cover',
         'page-1',
         'new-page',

@@ -1,4 +1,4 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
 import {forceExperimentBranch} from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
@@ -15,15 +15,15 @@ import {
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
-import {NAVIGATION_DIRECTION_ENUM} from '../../../amp-story/1.0/amp-story-page';
+import {NavigationDirection_Enum} from '../../../amp-story/1.0/amp-story-page';
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
+  UiType_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import * as storyEvents from '../../../amp-story/1.0/events';
-import {ATTRIBUTES_ENUM, AmpStoryAutoAds} from '../amp-story-auto-ads';
+import {AmpStoryAutoAds, Attributes_Enum} from '../amp-story-auto-ads';
 import {StoryAdPage} from '../story-ad-page';
 
 const NOOP = () => {};
@@ -67,7 +67,7 @@ describes.realWin(
       storeGetterStub = env.sandbox.stub(storeService, 'get');
       // Tests by default assume an 8 page parent story. Overide if needed.
       storeGetterStub
-        .withArgs(STATE_PROPERTY_ENUM.PAGE_IDS)
+        .withArgs(StateProperty_Enum.PAGE_IDS)
         .returns(['1', '2', '3', '4', '5', '6', '7', '8']);
       storeGetterStub.callThrough();
     });
@@ -87,7 +87,7 @@ describes.realWin(
 
       it('doesnt create ad when story pages < min interval', async () => {
         storeGetterStub
-          .withArgs(STATE_PROPERTY_ENUM.PAGE_IDS)
+          .withArgs(StateProperty_Enum.PAGE_IDS)
           .returns(['1', '2', '3', '4']);
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
@@ -100,7 +100,7 @@ describes.realWin(
         await autoAds.layoutCallback();
 
         // Fake click to ad page.
-        storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -110,7 +110,7 @@ describes.realWin(
 
       it('creates multiple ads if enough pages', async () => {
         storeGetterStub
-          .withArgs(STATE_PROPERTY_ENUM.PAGE_IDS)
+          .withArgs(StateProperty_Enum.PAGE_IDS)
           .returns([
             '1',
             '2',
@@ -132,7 +132,7 @@ describes.realWin(
         await autoAds.layoutCallback();
 
         // Fake click to ad page.
-        storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -145,12 +145,12 @@ describes.realWin(
         await autoAds.layoutCallback();
 
         // Fake click to ad page.
-        storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
         // Visit ad page again.
-        storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -235,7 +235,7 @@ describes.realWin(
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
         // Switching to ad page.
-        storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -271,8 +271,8 @@ describes.realWin(
         addStoryAutoAdsConfig(adElement);
         await story.buildCallback();
         // Fire these events so that story ads thinks the parent story is ready.
-        story.signals().signal(COMMON_SIGNALS_ENUM.BUILT);
-        story.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+        story.signals().signal(CommonSignals_Enum.BUILT);
+        story.signals().signal(CommonSignals_Enum.INI_LOAD);
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
       });
@@ -297,15 +297,15 @@ describes.realWin(
           '.i-amphtml-story-ad-progress-background'
         );
         expect(adBadgeContainer).not.to.have.attribute(
-          ATTRIBUTES_ENUM.AD_SHOWING
+          Attributes_Enum.AD_SHOWING
         );
         expect(progressBackground).not.to.have.attribute(
-          ATTRIBUTES_ENUM.AD_SHOWING
+          Attributes_Enum.AD_SHOWING
         );
-        storeService.dispatch(ACTION_ENUM.TOGGLE_AD, true);
-        expect(adBadgeContainer).to.have.attribute(ATTRIBUTES_ENUM.AD_SHOWING);
+        storeService.dispatch(Action_Enum.TOGGLE_AD, true);
+        expect(adBadgeContainer).to.have.attribute(Attributes_Enum.AD_SHOWING);
         expect(progressBackground).to.have.attribute(
-          ATTRIBUTES_ENUM.AD_SHOWING
+          Attributes_Enum.AD_SHOWING
         );
       });
 
@@ -316,22 +316,22 @@ describes.realWin(
         const progressBackground = doc.querySelector(
           '.i-amphtml-story-ad-progress-background'
         );
-        storeService.dispatch(ACTION_ENUM.TOGGLE_UI, UI_TYPE_ENUM.MOBILE);
+        storeService.dispatch(Action_Enum.TOGGLE_UI, UiType_Enum.MOBILE);
         expect(adBadgeContainer).not.to.have.attribute(
-          ATTRIBUTES_ENUM.DESKTOP_ONE_PANEL
+          Attributes_Enum.DESKTOP_ONE_PANEL
         );
         expect(progressBackground).not.to.have.attribute(
-          ATTRIBUTES_ENUM.DESKTOP_ONE_PANEL
+          Attributes_Enum.DESKTOP_ONE_PANEL
         );
         storeService.dispatch(
-          ACTION_ENUM.TOGGLE_UI,
-          UI_TYPE_ENUM.DESKTOP_ONE_PANEL
+          Action_Enum.TOGGLE_UI,
+          UiType_Enum.DESKTOP_ONE_PANEL
         );
         expect(adBadgeContainer).to.have.attribute(
-          ATTRIBUTES_ENUM.DESKTOP_ONE_PANEL
+          Attributes_Enum.DESKTOP_ONE_PANEL
         );
         expect(progressBackground).to.have.attribute(
-          ATTRIBUTES_ENUM.DESKTOP_ONE_PANEL
+          Attributes_Enum.DESKTOP_ONE_PANEL
         );
       });
 
@@ -339,24 +339,24 @@ describes.realWin(
         const adBadgeContainer = doc.querySelector(
           '.i-amphtml-ad-overlay-container'
         );
-        expect(adBadgeContainer).not.to.have.attribute(ATTRIBUTES_ENUM.DIR);
-        storeService.dispatch(ACTION_ENUM.TOGGLE_RTL, true);
-        expect(adBadgeContainer).to.have.attribute(ATTRIBUTES_ENUM.DIR, 'rtl');
+        expect(adBadgeContainer).not.to.have.attribute(Attributes_Enum.DIR);
+        storeService.dispatch(Action_Enum.TOGGLE_RTL, true);
+        expect(adBadgeContainer).to.have.attribute(Attributes_Enum.DIR, 'rtl');
       });
 
       it('should propagate the pause state if ad showing', () => {
         const progressBackground = doc.querySelector(
           '.i-amphtml-story-ad-progress-background'
         );
-        storeService.dispatch(ACTION_ENUM.TOGGLE_AD, true);
+        storeService.dispatch(Action_Enum.TOGGLE_AD, true);
         expect(progressBackground).not.to.have.attribute(
-          ATTRIBUTES_ENUM.PAUSED
+          Attributes_Enum.PAUSED
         );
-        storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, true);
-        expect(progressBackground).to.have.attribute(ATTRIBUTES_ENUM.PAUSED);
-        storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
+        expect(progressBackground).to.have.attribute(Attributes_Enum.PAUSED);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
         expect(progressBackground).not.to.have.attribute(
-          ATTRIBUTES_ENUM.PAUSED
+          Attributes_Enum.PAUSED
         );
       });
 
@@ -365,17 +365,17 @@ describes.realWin(
         const progressBackground = doc.querySelector(
           '.i-amphtml-story-ad-progress-background'
         );
-        storeService.dispatch(ACTION_ENUM.TOGGLE_AD, false);
+        storeService.dispatch(Action_Enum.TOGGLE_AD, false);
         expect(progressBackground).not.to.have.attribute(
-          ATTRIBUTES_ENUM.PAUSED
+          Attributes_Enum.PAUSED
         );
-        storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, true);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
         expect(progressBackground).not.to.have.attribute(
-          ATTRIBUTES_ENUM.PAUSED
+          Attributes_Enum.PAUSED
         );
-        storeService.dispatch(ACTION_ENUM.TOGGLE_PAUSED, false);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
         expect(progressBackground).not.to.have.attribute(
-          ATTRIBUTES_ENUM.PAUSED
+          Attributes_Enum.PAUSED
         );
       });
     });
@@ -429,7 +429,7 @@ describes.realWin(
     describe('development mode', () => {
       it('should immediately insert and navigate to ad page', async () => {
         storeGetterStub
-          .withArgs(STATE_PROPERTY_ENUM.CURRENT_PAGE_ID)
+          .withArgs(StateProperty_Enum.CURRENT_PAGE_ID)
           .returns('story-page-0');
 
         const storyImpl = new MockStoryImpl(storyElement);
@@ -457,13 +457,13 @@ describes.realWin(
         const dispatchStub = env.sandbox.spy(storyEvents, 'dispatch');
 
         const ampAd = doc.querySelector('amp-ad');
-        ampAd.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+        ampAd.signals().signal(CommonSignals_Enum.INI_LOAD);
         await macroTask();
 
         expect(insertSpy).calledWith('story-page-0', 'i-amphtml-ad-page-1');
         const payload = {
           'targetPageId': 'i-amphtml-ad-page-1',
-          'direction': NAVIGATION_DIRECTION_ENUM.NEXT,
+          'direction': NavigationDirection_Enum.NEXT,
         };
         const eventInit = {bubbles: true};
         expect(dispatchStub).calledWith(

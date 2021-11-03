@@ -4,7 +4,7 @@ import {utf8Encode} from '#core/types/string/bytes';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 
 import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
-import {VALIDATOR_RESULT_ENUM} from '../amp-ad-type-defs';
+import {ValidatorResult_Enum} from '../amp-ad-type-defs';
 import {TemplateRenderer} from '../template-renderer';
 import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
@@ -102,7 +102,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     return validatorPromise.then((validatorOutput) => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.AMP);
+      expect(validatorOutput.type).to.equal(ValidatorResult_Enum.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
       return renderer
@@ -132,7 +132,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     return validatorPromise.then((validatorOutput) => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.AMP);
+      expect(validatorOutput.type).to.equal(ValidatorResult_Enum.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
       return renderer
@@ -160,7 +160,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     return validatorPromise.then((validatorOutput) => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.AMP);
+      expect(validatorOutput.type).to.equal(ValidatorResult_Enum.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
       return renderer
@@ -189,7 +189,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     return validatorPromise.then((validatorOutput) => {
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
-      expect(validatorOutput.type).to.equal(VALIDATOR_RESULT_ENUM.AMP);
+      expect(validatorOutput.type).to.equal(ValidatorResult_Enum.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
       return renderer

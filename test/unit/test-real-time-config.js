@@ -2,14 +2,14 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 import {createElementWithAttributes} from '#core/dom';
 import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 import {
-  RTC_ERROR_ENUM,
   RealTimeConfigManager,
+  RtcError_Enum,
 } from '#service/real-time-config/real-time-config-impl';
 import {Xhr} from '#service/xhr-impl';
 
@@ -246,10 +246,10 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         expectedRtcArray.push(rtcEntry(rtcCalloutResponses[i], urls[i]));
       }
       expectedRtcArray.push(
-        rtcEntry(null, urls[5], RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED)
+        rtcEntry(null, urls[5], RtcError_Enum.MAX_CALLOUTS_EXCEEDED)
       );
       expectedRtcArray.push(
-        rtcEntry(null, urls[6], RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED)
+        rtcEntry(null, urls[6], RtcError_Enum.MAX_CALLOUTS_EXCEEDED)
       );
       return executeTest({
         urls,
@@ -480,7 +480,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         rtcEntry(
           null,
           Object.keys(vendors)[0].toLowerCase(),
-          RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
+          RtcError_Enum.MAX_CALLOUTS_EXCEEDED,
           true
         )
       );
@@ -508,7 +508,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         },
         {
           callout: getCalloutParam_(urls[1]),
-          error: RTC_ERROR_ENUM.DUPLICATE_URL,
+          error: RtcError_Enum.DUPLICATE_URL,
           rtcTime: 10,
         },
       ];
@@ -547,7 +547,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         },
         {
           callout: getCalloutParam_(urls[2]),
-          error: RTC_ERROR_ENUM.INSECURE_URL,
+          error: RtcError_Enum.INSECURE_URL,
           rtcTime: 10,
         },
       ];
@@ -570,7 +570,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         rtcEntry(
           null,
           Object.keys(vendors)[0].toLowerCase(),
-          RTC_ERROR_ENUM.UNKNOWN_VENDOR,
+          RtcError_Enum.UNKNOWN_VENDOR,
           true
         )
       );
@@ -582,7 +582,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       const expectedRtcArray = [];
       rtcCalloutResponses.forEach((rtcResponse, i) => {
         expectedRtcArray.push(
-          rtcEntry(null, urls[i], RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE)
+          rtcEntry(null, urls[i], RtcError_Enum.MALFORMED_JSON_RESPONSE)
         );
       });
       const calloutCount = 1;
@@ -602,7 +602,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       const expectedRtcArray = [];
       rtcCalloutResponses.forEach((rtcResponse, i) => {
         expectedRtcArray.push(
-          rtcEntry(null, urls[i], RTC_ERROR_ENUM.NETWORK_FAILURE)
+          rtcEntry(null, urls[i], RtcError_Enum.NETWORK_FAILURE)
         );
       });
       const calloutCount = 1;
@@ -616,24 +616,24 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         failXhr: true,
       });
     });
-    for (const consentState in CONSENT_POLICY_STATE_ENUM) {
+    for (const consentState in ConsentPolicyState_Enum) {
       it(`should handle consentState ${consentState}`, () => {
         setRtcConfig({urls: ['https://foo.com']});
         const rtcResult = execute_(
           element,
           {},
-          CONSENT_POLICY_STATE_ENUM[consentState],
+          ConsentPolicyState_Enum[consentState],
           /* consentString */ undefined,
           /* consentMetadata */ undefined,
           () => {}
         );
-        switch (CONSENT_POLICY_STATE_ENUM[consentState]) {
-          case CONSENT_POLICY_STATE_ENUM.SUFFICIENT:
-          case CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED:
+        switch (ConsentPolicyState_Enum[consentState]) {
+          case ConsentPolicyState_Enum.SUFFICIENT:
+          case ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED:
             expect(rtcResult).to.be.ok;
             return rtcResult.then(() => expect(fetchJsonStub).to.be.calledOnce);
-          case CONSENT_POLICY_STATE_ENUM.UNKNOWN:
-          case CONSENT_POLICY_STATE_ENUM.INSUFFICIENT:
+          case ConsentPolicyState_Enum.UNKNOWN:
+          case ConsentPolicyState_Enum.INSUFFICIENT:
             return rtcResult.then((result) => {
               expect(result).to.deep.equal([]);
               expect(fetchJsonStub).to.not.be.called;
@@ -770,7 +770,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       inflateAndSendRtc_(url, macros);
       return rtc.promiseArray_[0].then((errorResponse) => {
         expect(errorResponse.error).to.equal(
-          RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT
+          RtcError_Enum.MACRO_EXPAND_TIMEOUT
         );
       });
     });
@@ -835,7 +835,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
 
     it('should not modify rtcConfig if consent state is valid', () => {
       const expectedRtcConfig = {...rtc.rtcConfig_};
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.SUFFICIENT;
+      rtc.consentState_ = ConsentPolicyState_Enum.SUFFICIENT;
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
@@ -845,31 +845,31 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.vendors = {};
       expectedRtcConfig.urls = [];
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      rtc.consentState_ = ConsentPolicyState_Enum.UNKNOWN;
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
 
     it('should handle empty urls array', () => {
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      rtc.consentState_ = ConsentPolicyState_Enum.UNKNOWN;
       rtc.rtcConfig_.urls = [];
       expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle empty vendors object', () => {
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      rtc.consentState_ = ConsentPolicyState_Enum.UNKNOWN;
       rtc.rtcConfig_.vendors = {};
       expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing urls array', () => {
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      rtc.consentState_ = ConsentPolicyState_Enum.UNKNOWN;
       rtc.rtcConfig_.urls = undefined;
       expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing vendors object', () => {
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      rtc.consentState_ = ConsentPolicyState_Enum.UNKNOWN;
       rtc.rtcConfig_.vendors = undefined;
       expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
@@ -891,7 +891,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       };
       const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.urls = [];
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      rtc.consentState_ = ConsentPolicyState_Enum.UNKNOWN;
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
@@ -909,7 +909,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       ];
       const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.vendors = {};
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.INSUFFICIENT;
+      rtc.consentState_ = ConsentPolicyState_Enum.INSUFFICIENT;
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
@@ -946,7 +946,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
           'url': 'https://www.rtc.com/example1',
         },
       ];
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.INSUFFICIENT;
+      rtc.consentState_ = ConsentPolicyState_Enum.INSUFFICIENT;
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
@@ -986,7 +986,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         },
         'https://www.other-rtc.com/example2',
       ];
-      rtc.consentState_ = CONSENT_POLICY_STATE_ENUM.INSUFFICIENT;
+      rtc.consentState_ = ConsentPolicyState_Enum.INSUFFICIENT;
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
@@ -1021,7 +1021,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       env.sandbox.stub(Xhr.prototype, 'fetch');
       imageMock = {};
       imageStub = env.sandbox.stub(env.win, 'Image').returns(imageMock);
-      errorType = RTC_ERROR_ENUM.TIMEOUT;
+      errorType = RtcError_Enum.TIMEOUT;
       errorReportingUrl = 'https://www.example.test?e=ERROR_TYPE&h=HREF';
     });
 

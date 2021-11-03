@@ -6,7 +6,7 @@ import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
 /**
  * @enum {string}
  */
-export const AFFILIATE_STATUS_ENUM = {
+export const AffiliateStatus_Enum = {
   // Can be monetized
   AFFILIATE: 'affiliate',
   // Can't be monetized but can be tracked
@@ -162,8 +162,8 @@ export class AffiliateLinkResolver {
       // Always replace unknown, we will overwrite them after asking
       // the api if needed
       const shouldReplace =
-        status === AFFILIATE_STATUS_ENUM.AFFILIATE ||
-        status === AFFILIATE_STATUS_ENUM.UNKNOWN;
+        status === AffiliateStatus_Enum.AFFILIATE ||
+        status === AffiliateStatus_Enum.UNKNOWN;
       if (shouldReplace) {
         replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
       }
@@ -182,10 +182,10 @@ export class AffiliateLinkResolver {
    */
   getDomainAffiliateStatus_(domain) {
     if (isExcludedDomain(domain, this.skimOptions_)) {
-      return AFFILIATE_STATUS_ENUM.IGNORE;
+      return AffiliateStatus_Enum.IGNORE;
     }
 
-    return this.domains_[domain] || AFFILIATE_STATUS_ENUM.UNKNOWN;
+    return this.domains_[domain] || AffiliateStatus_Enum.UNKNOWN;
   }
 
   /**
@@ -226,10 +226,10 @@ export class AffiliateLinkResolver {
       }
 
       if (isExcludedDomain(domain, this.skimOptions_)) {
-        this.domains_[domain] = AFFILIATE_STATUS_ENUM.IGNORE;
+        this.domains_[domain] = AffiliateStatus_Enum.IGNORE;
       }
 
-      this.domains_[domain] = AFFILIATE_STATUS_ENUM.UNKNOWN;
+      this.domains_[domain] = AffiliateStatus_Enum.UNKNOWN;
     });
   }
 
@@ -283,8 +283,8 @@ export class AffiliateLinkResolver {
     allDomains.forEach((domain) => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
       this.domains_[domain] = isAffiliateDomain
-        ? AFFILIATE_STATUS_ENUM.AFFILIATE
-        : AFFILIATE_STATUS_ENUM.NON_AFFILIATE;
+        ? AffiliateStatus_Enum.AFFILIATE
+        : AffiliateStatus_Enum.NON_AFFILIATE;
     });
   }
 

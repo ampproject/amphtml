@@ -1,14 +1,14 @@
 import * as analyticsApi from '#utils/analytics';
 import {
-  ACTION_ENUM,
-  EMBEDDED_COMPONENT_STATE_ENUM,
+  Action_Enum,
+  EmbeddedComponentState_Enum,
   getStoreService,
 } from '../amp-story-store-service';
 import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {STORY_ANALYTICS_EVENT_ENUM} from '../story-analytics';
+import {StoryAnalyticsEvent_Enum} from '../story-analytics';
 import {addAttributesToElement} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
@@ -58,7 +58,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     component = new AmpStoryEmbeddedComponent(win, parentEl);
     fakeComponent = {
       element: clickableEl,
-      state: EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED,
+      state: EmbeddedComponentState_Enum.FOCUSED,
       clientX: 50,
       clientY: 50,
     };
@@ -85,7 +85,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
       fakePage.appendChild(clickableEl);
 
       storeService.dispatch(
-        ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+        Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
         fakeComponent
       );
 
@@ -98,7 +98,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     fakePage.appendChild(clickableEl);
 
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
 
@@ -112,11 +112,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   it('should hide the tooltip when switching page', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
 
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {id: 'newPageId'});
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {id: 'newPageId'});
 
     expect(component.focusedStateOverlay_).to.have.class('i-amphtml-hidden');
   });
@@ -124,7 +124,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   it('should hide the tooltip when clicking outside of it', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
 
@@ -136,7 +136,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   it('should navigate when tooltip is open and user clicks on arrow', () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
 
@@ -158,9 +158,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
       'story is RTL',
     () => {
       fakePage.appendChild(clickableEl);
-      storeService.dispatch(ACTION_ENUM.TOGGLE_RTL, true);
+      storeService.dispatch(Action_Enum.TOGGLE_RTL, true);
       storeService.dispatch(
-        ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+        Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
         fakeComponent
       );
 
@@ -182,7 +182,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     addAttributesToElement(clickableEl, {'data-tooltip-icon': '/my-icon'});
     fakePage.appendChild(clickableEl);
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
 
@@ -208,7 +208,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
 
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
     const tooltipIconEl = component.focusedStateOverlay_.querySelector(
@@ -222,7 +222,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     addAttributesToElement(clickableEl, {'data-tooltip-text': 'my cool text'});
     fakePage.appendChild(clickableEl);
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
 
@@ -238,7 +238,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   it('should append href url when text attribute is not present', async () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(
-      ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT,
+      Action_Enum.TOGGLE_INTERACTIVE_COMPONENT,
       fakeComponent
     );
 
@@ -253,14 +253,14 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
   it('should fire analytics event when entering a tooltip', () => {
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT, {
+    storeService.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
-      state: EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED,
+      state: EmbeddedComponentState_Enum.FOCUSED,
     });
 
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
-      STORY_ANALYTICS_EVENT_ENUM.FOCUS
+      StoryAnalyticsEvent_Enum.FOCUS
     );
   });
 
@@ -270,14 +270,14 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     });
     fakePage.appendChild(clickableEl);
 
-    storeService.dispatch(ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT, {
+    storeService.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
-      state: EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED,
+      state: EmbeddedComponentState_Enum.FOCUSED,
     });
 
     expect(analyticsTriggerStub).to.be.calledWithMatch(
       parentEl,
-      STORY_ANALYTICS_EVENT_ENUM.FOCUS,
+      StoryAnalyticsEvent_Enum.FOCUS,
       {
         tooltipId: '1234',
       }
@@ -286,9 +286,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
   it('should fire analytics event when clicking on the tooltip of a link', () => {
     fakePage.appendChild(clickableEl);
-    storeService.dispatch(ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT, {
+    storeService.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
-      state: EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED,
+      state: EmbeddedComponentState_Enum.FOCUSED,
     });
 
     const tooltip = component
@@ -302,7 +302,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
-      STORY_ANALYTICS_EVENT_ENUM.CLICK_THROUGH
+      StoryAnalyticsEvent_Enum.CLICK_THROUGH
     );
   });
 
@@ -313,9 +313,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     });
     fakePage.appendChild(clickableEl);
 
-    storeService.dispatch(ACTION_ENUM.TOGGLE_INTERACTIVE_COMPONENT, {
+    storeService.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
-      state: EMBEDDED_COMPONENT_STATE_ENUM.FOCUSED,
+      state: EmbeddedComponentState_Enum.FOCUSED,
     });
 
     const tooltip = component
@@ -329,7 +329,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
-      STORY_ANALYTICS_EVENT_ENUM.FOCUS
+      StoryAnalyticsEvent_Enum.FOCUS
     );
   });
 });

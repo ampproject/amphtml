@@ -8,7 +8,7 @@ import {devAssert} from '#utils/log';
 import {loadScript} from './3p';
 
 /** @const @enum {string} */
-export const FACEBOOK_EMBED_TYPE_ENUM = {
+export const FacebookEmbedType_Enum = {
   // Embeds a single comment or reply to a comment on a post rendered by
   // amp-facebook.
   COMMENT: 'comment',
@@ -189,17 +189,17 @@ function getLikeContainer(global, data) {
  * @return {!Element} div
  */
 function getEmbedContainer(global, data, embedAs) {
-  devAssert(isEnumValue(FACEBOOK_EMBED_TYPE_ENUM, embedAs));
+  devAssert(isEnumValue(FacebookEmbedType_Enum, embedAs));
   switch (embedAs) {
-    case FACEBOOK_EMBED_TYPE_ENUM.PAGE:
+    case FacebookEmbedType_Enum.PAGE:
       return getPageContainer(global, data);
-    case FACEBOOK_EMBED_TYPE_ENUM.LIKE:
+    case FacebookEmbedType_Enum.LIKE:
       return getLikeContainer(global, data);
-    case FACEBOOK_EMBED_TYPE_ENUM.COMMENTS:
+    case FacebookEmbedType_Enum.COMMENTS:
       return getCommentsContainer(global, data);
-    case FACEBOOK_EMBED_TYPE_ENUM.COMMENT:
+    case FacebookEmbedType_Enum.COMMENT:
       return getCommentContainer(global, data);
-    case FACEBOOK_EMBED_TYPE_ENUM.VIDEO:
+    case FacebookEmbedType_Enum.VIDEO:
       return getVideoContainer(global, data);
     default:
       return getPostContainer(global, data);

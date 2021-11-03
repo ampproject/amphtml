@@ -5,7 +5,7 @@ import {dict, hasOwn, map} from '#core/types/object';
 
 import {devAssert, user} from '#utils/log';
 
-import {AST_NODE_TYPE_ENUM} from './bind-expr-defines';
+import {AstNodeType_Enum} from './bind-expr-defines';
 
 import {getMode} from '../../../src/mode';
 
@@ -278,7 +278,7 @@ export class BindExpression {
    */
   isMacroInvocationNode_(ast) {
     const isInvocationWithNoCaller =
-      ast.type === AST_NODE_TYPE_ENUM.INVOCATION && !ast.args[0];
+      ast.type === AstNodeType_Enum.INVOCATION && !ast.args[0];
     if (isInvocationWithNoCaller) {
       const macroExistsWithValue = this.macros_[String(ast.value)] != null;
       return macroExistsWithValue;
@@ -296,7 +296,7 @@ export class BindExpression {
   argumentsForInvocation_(ast) {
     // The INVOCATION node may or may not contain an ARGS child node.
     const argsNode =
-      ast.args.length === 2 && ast.args[1].type === AST_NODE_TYPE_ENUM.ARGS
+      ast.args.length === 2 && ast.args[1].type === AstNodeType_Enum.ARGS
         ? ast.args[1]
         : null;
     if (argsNode) {
@@ -304,10 +304,7 @@ export class BindExpression {
       const {args} = argsNode;
       if (args.length === 0) {
         return [];
-      } else if (
-        args.length === 1 &&
-        args[0].type === AST_NODE_TYPE_ENUM.ARRAY
-      ) {
+      } else if (args.length === 1 && args[0].type === AstNodeType_Enum.ARRAY) {
         // An ARRAY node contains an actual array.
         const arrayNode = args[0];
         return arrayNode.args || [];
@@ -333,15 +330,15 @@ export class BindExpression {
     const {args, type, value} = node;
 
     // `value` should always exist for literals.
-    if (type === AST_NODE_TYPE_ENUM.LITERAL && value !== undefined) {
+    if (type === AstNodeType_Enum.LITERAL && value !== undefined) {
       return value;
     }
 
     switch (type) {
-      case AST_NODE_TYPE_ENUM.EXPRESSION:
+      case AstNodeType_Enum.EXPRESSION:
         return this.eval_(args[0], scope);
 
-      case AST_NODE_TYPE_ENUM.INVOCATION:
+      case AstNodeType_Enum.INVOCATION:
         // Built-in functions and macros don't have a caller object.
         const isBuiltInOrMacro = args[0] === undefined;
 
@@ -401,7 +398,7 @@ export class BindExpression {
 
         throw new Error(unsupportedError);
 
-      case AST_NODE_TYPE_ENUM.MEMBER_ACCESS:
+      case AstNodeType_Enum.MEMBER_ACCESS:
         const target = this.eval_(args[0], scope);
         const member = this.eval_(args[1], scope);
 
@@ -421,27 +418,27 @@ export class BindExpression {
         }
         return null;
 
-      case AST_NODE_TYPE_ENUM.MEMBER:
+      case AstNodeType_Enum.MEMBER:
         return value || this.eval_(args[0], scope);
 
-      case AST_NODE_TYPE_ENUM.VARIABLE:
+      case AstNodeType_Enum.VARIABLE:
         const variable = value;
         if (hasOwn(scope, String(variable))) {
           return scope[variable];
         }
         return null;
 
-      case AST_NODE_TYPE_ENUM.ARGS:
-      case AST_NODE_TYPE_ENUM.ARRAY_LITERAL:
+      case AstNodeType_Enum.ARGS:
+      case AstNodeType_Enum.ARRAY_LITERAL:
         return args.length > 0 ? this.eval_(args[0], scope) : [];
 
-      case AST_NODE_TYPE_ENUM.ARRAY:
+      case AstNodeType_Enum.ARRAY:
         return args.map((element) => this.eval_(element, scope));
 
-      case AST_NODE_TYPE_ENUM.OBJECT_LITERAL:
+      case AstNodeType_Enum.OBJECT_LITERAL:
         return args.length > 0 ? this.eval_(args[0], scope) : map();
 
-      case AST_NODE_TYPE_ENUM.OBJECT:
+      case AstNodeType_Enum.OBJECT:
         const object = map();
         args.forEach((keyValue) => {
           const {k, v} = this.eval_(keyValue, scope);
@@ -449,78 +446,78 @@ export class BindExpression {
         });
         return object;
 
-      case AST_NODE_TYPE_ENUM.KEY_VALUE:
+      case AstNodeType_Enum.KEY_VALUE:
         return {
           k: this.eval_(args[0], scope),
           v: this.eval_(args[1], scope),
         };
 
-      case AST_NODE_TYPE_ENUM.NOT:
+      case AstNodeType_Enum.NOT:
         return !this.eval_(args[0], scope);
 
-      case AST_NODE_TYPE_ENUM.UNARY_MINUS:
+      case AstNodeType_Enum.UNARY_MINUS:
         return -Number(this.eval_(args[0], scope));
 
-      case AST_NODE_TYPE_ENUM.UNARY_PLUS:
+      case AstNodeType_Enum.UNARY_PLUS:
         return +Number(this.eval_(args[0], scope));
 
-      case AST_NODE_TYPE_ENUM.PLUS:
+      case AstNodeType_Enum.PLUS:
         return this.eval_(args[0], scope) + this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.MINUS:
+      case AstNodeType_Enum.MINUS:
         return (
           Number(this.eval_(args[0], scope)) -
           Number(this.eval_(args[1], scope))
         );
 
-      case AST_NODE_TYPE_ENUM.MULTIPLY:
+      case AstNodeType_Enum.MULTIPLY:
         return (
           Number(this.eval_(args[0], scope)) *
           Number(this.eval_(args[1], scope))
         );
 
-      case AST_NODE_TYPE_ENUM.DIVIDE:
+      case AstNodeType_Enum.DIVIDE:
         return (
           Number(this.eval_(args[0], scope)) /
           Number(this.eval_(args[1], scope))
         );
 
-      case AST_NODE_TYPE_ENUM.MODULO:
+      case AstNodeType_Enum.MODULO:
         return (
           Number(this.eval_(args[0], scope)) %
           Number(this.eval_(args[1], scope))
         );
 
-      case AST_NODE_TYPE_ENUM.LOGICAL_AND:
+      case AstNodeType_Enum.LOGICAL_AND:
         return this.eval_(args[0], scope) && this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.LOGICAL_OR:
+      case AstNodeType_Enum.LOGICAL_OR:
         return this.eval_(args[0], scope) || this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.LESS_OR_EQUAL:
+      case AstNodeType_Enum.LESS_OR_EQUAL:
         return this.eval_(args[0], scope) <= this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.LESS:
+      case AstNodeType_Enum.LESS:
         return this.eval_(args[0], scope) < this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.GREATER_OR_EQUAL:
+      case AstNodeType_Enum.GREATER_OR_EQUAL:
         return this.eval_(args[0], scope) >= this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.GREATER:
+      case AstNodeType_Enum.GREATER:
         return this.eval_(args[0], scope) > this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.NOT_EQUAL:
+      case AstNodeType_Enum.NOT_EQUAL:
         return this.eval_(args[0], scope) != this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.EQUAL:
+      case AstNodeType_Enum.EQUAL:
         return this.eval_(args[0], scope) == this.eval_(args[1], scope);
 
-      case AST_NODE_TYPE_ENUM.TERNARY:
+      case AstNodeType_Enum.TERNARY:
         return this.eval_(args[0], scope)
           ? this.eval_(args[1], scope)
           : this.eval_(args[2], scope);
 
-      case AST_NODE_TYPE_ENUM.ARROW_FUNCTION:
+      case AstNodeType_Enum.ARROW_FUNCTION:
         const functionScope = map(scope);
         return (...values) => {
           // Support parameters in arrow functions by forwarding their values

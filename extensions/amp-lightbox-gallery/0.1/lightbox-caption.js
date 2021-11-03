@@ -5,7 +5,7 @@ import {dev} from '#utils/log';
 /**
  * @enum {string}
  */
-export const OVERFLOW_STATE_ENUM = {
+export const OverflowState_Enum = {
   NONE: 'none',
   CLIP: 'clip',
   EXPAND: 'expand',
@@ -107,7 +107,7 @@ export class LightboxCaption {
    * @private
    */
   nextOverflowState_(overflowState, overflows, requestExpansion) {
-    const isExpanded = overflowState == OVERFLOW_STATE_ENUM.EXPAND;
+    const isExpanded = overflowState == OverflowState_Enum.EXPAND;
     const expand =
       requestExpansion !== undefined ? requestExpansion : !isExpanded;
     // If we are already expanded, we know we have some overflow, even if
@@ -115,10 +115,10 @@ export class LightboxCaption {
     const hasOverflow = isExpanded || overflows;
 
     if (!hasOverflow) {
-      return OVERFLOW_STATE_ENUM.NONE;
+      return OverflowState_Enum.NONE;
     }
 
-    return expand ? OVERFLOW_STATE_ENUM.EXPAND : OVERFLOW_STATE_ENUM.CLIP;
+    return expand ? OverflowState_Enum.EXPAND : OverflowState_Enum.CLIP;
   }
 
   /**
@@ -151,7 +151,7 @@ export class LightboxCaption {
       );
 
       this.setOverflowState(newState);
-      if (newState != OVERFLOW_STATE_ENUM.EXPAND) {
+      if (newState != OverflowState_Enum.EXPAND) {
         scrollContainer_./*OK*/ scrollTop = 0;
       }
     };

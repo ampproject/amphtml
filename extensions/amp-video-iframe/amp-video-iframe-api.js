@@ -1,4 +1,4 @@
-import {VIDEO_EVENTS_ENUM} from '../../src/video-interface';
+import {VideoEvents_Enum} from '../../src/video-interface';
 
 /**
  * @fileoverview
@@ -14,11 +14,11 @@ import {VIDEO_EVENTS_ENUM} from '../../src/video-interface';
  * @private @const
  */
 export const BUBBLE_MESSAGE_EVENTS = [
-  VIDEO_EVENTS_ENUM.PLAYING,
-  VIDEO_EVENTS_ENUM.PAUSE,
-  VIDEO_EVENTS_ENUM.ENDED,
-  VIDEO_EVENTS_ENUM.MUTED,
-  VIDEO_EVENTS_ENUM.UNMUTED,
-  VIDEO_EVENTS_ENUM.AD_START,
-  VIDEO_EVENTS_ENUM.AD_END,
+  VideoEvents_Enum.PLAYING,
+  VideoEvents_Enum.PAUSE,
+  VideoEvents_Enum.ENDED,
+  VideoEvents_Enum.MUTED,
+  VideoEvents_Enum.UNMUTED,
+  VideoEvents_Enum.AD_START,
+  VideoEvents_Enum.AD_END,
 ];

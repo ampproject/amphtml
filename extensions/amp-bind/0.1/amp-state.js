@@ -1,7 +1,7 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag} from '#core/dom';
-import {LAYOUT_PRIORITY_ENUM} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
 import {dict, map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
@@ -12,7 +12,7 @@ import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
 import {
-  URL_REPLACEMENT_POLICY_ENUM,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {getSourceOrigin} from '../../../src/url';
@@ -39,7 +39,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return LAYOUT_PRIORITY_ENUM.METADATA;
+    return LayoutPriority_Enum.METADATA;
   }
 
   /** @override */
@@ -144,7 +144,7 @@ export class AmpState extends AMP.BaseElement {
   /**
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!URL_REPLACEMENT_POLICY_ENUM} policy
+   * @param {!UrlReplacementPolicy_Enum} policy
    * @param {boolean=} opt_refresh
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
@@ -173,8 +173,8 @@ export class AmpState extends AMP.BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     const policy =
       isCorsFetch && !isInit
-        ? URL_REPLACEMENT_POLICY_ENUM.OPT_IN
-        : URL_REPLACEMENT_POLICY_ENUM.ALL;
+        ? UrlReplacementPolicy_Enum.OPT_IN
+        : UrlReplacementPolicy_Enum.ALL;
 
     return this.fetch_(ampdoc, policy, opt_refresh).catch((error) => {
       const event = error
@@ -186,7 +186,7 @@ export class AmpState extends AMP.BaseElement {
         : null;
       // Trigger "fetch-error" event on fetch failure.
       const actions = Services.actionServiceForDoc(element);
-      actions.trigger(element, 'fetch-error', event, ACTION_TRUST_ENUM.LOW);
+      actions.trigger(element, 'fetch-error', event, ActionTrust_Enum.LOW);
     });
   }
 

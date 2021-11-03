@@ -1,4 +1,4 @@
-import {Entitlement, GRANT_REASON_ENUM} from '../entitlement';
+import {Entitlement, GrantReason_Enum} from '../entitlement';
 
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
@@ -24,7 +24,7 @@ describes.realWin('Platform store', {}, (env) => {
     raw: 'raw',
     service: 'local',
     granted: true,
-    grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+    grantReason: GrantReason_Enum.SUBSCRIBER,
   });
 
   /**
@@ -311,7 +311,7 @@ describes.realWin('Platform store', {}, (env) => {
           raw: '',
           service: 'local',
           granted: true,
-          grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+          grantReason: GrantReason_Enum.SUBSCRIBER,
         })
       );
       platformStore.resolveEntitlement(
@@ -340,7 +340,7 @@ describes.realWin('Platform store', {}, (env) => {
           raw: '',
           service: 'another',
           granted: true,
-          grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+          grantReason: GrantReason_Enum.SUBSCRIBER,
         })
       );
       expect(
@@ -812,7 +812,7 @@ describes.realWin('Platform store', {}, (env) => {
         env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
         platformStore.resolvePlatform(platformKeys[0], anotherPlatform);
         platformStore.resolvePlatform('local', platform);
-        fallbackEntitlement.grantReason = GRANT_REASON_ENUM.METERING;
+        fallbackEntitlement.grantReason = GrantReason_Enum.METERING;
         platformStore.reportPlatformFailureAndFallback('local');
         platformStore.resolveEntitlement(
           platformKeys[0],
@@ -845,13 +845,13 @@ describes.realWin('Platform store', {}, (env) => {
       source: 'local',
       service: 'local',
       granted: true,
-      grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+      grantReason: GrantReason_Enum.SUBSCRIBER,
     });
     const meteringEntitlement = new Entitlement({
       source: 'local',
       service: 'local',
       granted: true,
-      grantReason: GRANT_REASON_ENUM.METERING,
+      grantReason: GrantReason_Enum.METERING,
     });
     const noEntitlement = new Entitlement({
       source: 'local',
@@ -903,7 +903,7 @@ describes.realWin('Platform store', {}, (env) => {
         source: 'local',
         service: 'local',
         granted: false,
-        grantReason: GRANT_REASON_ENUM.METERING,
+        grantReason: GrantReason_Enum.METERING,
       };
       const entitlement = new Entitlement(entitlementData);
       platformStore.saveGrantEntitlement_(entitlement);
@@ -930,11 +930,11 @@ describes.realWin('Platform store', {}, (env) => {
         const entitlement = new Entitlement(entitlementData);
         const nextMeteredEntitlement = new Entitlement({
           ...entitlementData,
-          grantReason: GRANT_REASON_ENUM.METERING,
+          grantReason: GrantReason_Enum.METERING,
         });
         const subscribedMeteredEntitlement = new Entitlement({
           ...entitlementData,
-          grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+          grantReason: GrantReason_Enum.SUBSCRIBER,
         });
         platformStore.saveGrantEntitlement_(entitlement);
         expect(platformStore.grantStatusEntitlement_.json()).to.deep.equal(

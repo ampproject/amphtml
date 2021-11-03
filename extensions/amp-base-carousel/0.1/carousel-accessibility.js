@@ -1,4 +1,4 @@
-import {CAROUSEL_EVENTS_ENUM} from './carousel-events';
+import {CarouselEvents_Enum} from './carousel-events';
 import {getDetail} from '#utils/event-helper';
 
 /**
@@ -55,7 +55,7 @@ export class CarouselAccessibility {
       },
       true
     );
-    element.addEventListener(CAROUSEL_EVENTS_ENUM.INDEX_CHANGE, (event) => {
+    element.addEventListener(CarouselEvents_Enum.INDEX_CHANGE, (event) => {
       this.onIndexChanged_(event);
     });
   }

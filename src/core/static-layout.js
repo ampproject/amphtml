@@ -1,6 +1,6 @@
 import {devAssert, devAssertString, userAssert} from '#core/assert';
 import {
-  LAYOUT_ENUM,
+  Layout_Enum,
   getLayoutClass,
   getLengthNumeral,
   getLengthUnits,
@@ -91,7 +91,7 @@ export function getNaturalDimensions(element) {
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
  * @param {!AmpElement} element
- * @return {!LAYOUT_ENUM}
+ * @return {!Layout_Enum}
  */
 export function applyStaticLayout(element) {
   // Check if the layout has already been done by server-side rendering or
@@ -100,18 +100,18 @@ export function applyStaticLayout(element) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!LAYOUT_ENUM} */ (
+    const layout = /** @type {!Layout_Enum} */ (
       devAssert(parseLayout(completedLayoutAttr))
     );
     if (
-      (layout == LAYOUT_ENUM.RESPONSIVE || layout == LAYOUT_ENUM.INTRINSIC) &&
+      (layout == Layout_Enum.RESPONSIVE || layout == Layout_Enum.INTRINSIC) &&
       element.firstElementChild
     ) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
         element.querySelector('i-amphtml-sizer') || undefined;
       element.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
-    } else if (layout == LAYOUT_ENUM.NODISPLAY) {
+    } else if (layout == Layout_Enum.NODISPLAY) {
       toggle(element, false);
     }
     return layout;
@@ -127,18 +127,18 @@ export function applyStaticLayout(element) {
   if (isLayoutSizeDefined(layout)) {
     element.classList.add('i-amphtml-layout-size-defined');
   }
-  if (layout == LAYOUT_ENUM.NODISPLAY) {
+  if (layout == Layout_Enum.NODISPLAY) {
     // CSS defines layout=nodisplay automatically with `display:none`. Thus
     // no additional styling is needed.
     toggle(element, false);
-  } else if (layout == LAYOUT_ENUM.FIXED) {
+  } else if (layout == Layout_Enum.FIXED) {
     setStyles(element, {
       width: devAssertString(width),
       height: devAssertString(height),
     });
-  } else if (layout == LAYOUT_ENUM.FIXED_HEIGHT) {
+  } else if (layout == Layout_Enum.FIXED_HEIGHT) {
     setStyle(element, 'height', devAssertString(height));
-  } else if (layout == LAYOUT_ENUM.RESPONSIVE) {
+  } else if (layout == Layout_Enum.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     sizer.setAttribute('slot', 'i-amphtml-svc');
     setStyles(sizer, {
@@ -147,7 +147,7 @@ export function applyStaticLayout(element) {
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
-  } else if (layout == LAYOUT_ENUM.INTRINSIC) {
+  } else if (layout == Layout_Enum.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
     // trick Note a naked svg won't work because other things expect the
     // i-amphtml-sizer element
@@ -163,13 +163,13 @@ export function applyStaticLayout(element) {
     );
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
-  } else if (layout == LAYOUT_ENUM.FILL) {
+  } else if (layout == Layout_Enum.FILL) {
     // Do nothing.
-  } else if (layout == LAYOUT_ENUM.CONTAINER) {
+  } else if (layout == Layout_Enum.CONTAINER) {
     // Do nothing. Elements themselves will check whether the supplied
     // layout value is acceptable. In particular container is only OK
     // sometimes.
-  } else if (layout == LAYOUT_ENUM.FLEX_ITEM) {
+  } else if (layout == Layout_Enum.FLEX_ITEM) {
     // Set height and width to a flex item if they exist.
     // The size set to a flex item could be overridden by `display: flex` later.
     if (width) {
@@ -178,7 +178,7 @@ export function applyStaticLayout(element) {
     if (height) {
       setStyle(element, 'height', height);
     }
-  } else if (layout == LAYOUT_ENUM.FLUID) {
+  } else if (layout == Layout_Enum.FLUID) {
     element.classList.add('i-amphtml-layout-awaiting-size');
     if (width) {
       setStyle(element, 'width', width);
@@ -195,7 +195,7 @@ export function applyStaticLayout(element) {
  * Gets the effective layout for an element.
  *
  * @param {!Element} element
- * @return {!LAYOUT_ENUM}
+ * @return {!Layout_Enum}
  */
 export function getEffectiveLayout(element) {
   // Return the pre-existing value if layout has already been applied.
@@ -209,7 +209,7 @@ export function getEffectiveLayout(element) {
 
 /**
  * @typedef {{
- *  layout: !LAYOUT_ENUM,
+ *  layout: !Layout_Enum,
  *  height: (string|number|null),
  *  width: (string|number|null)
  * }}
@@ -268,8 +268,8 @@ function getEffectiveLayoutInternal(element) {
   // Calculate effective width and height.
   if (
     (!inputLayout ||
-      inputLayout == LAYOUT_ENUM.FIXED ||
-      inputLayout == LAYOUT_ENUM.FIXED_HEIGHT) &&
+      inputLayout == Layout_Enum.FIXED ||
+      inputLayout == Layout_Enum.FIXED_HEIGHT) &&
     (!inputWidth || !inputHeight) &&
     hasNaturalDimensions(element.tagName)
   ) {
@@ -277,7 +277,7 @@ function getEffectiveLayoutInternal(element) {
     // width/height and are defined to have natural browser dimensions.
     const dimensions = getNaturalDimensions(element);
     width =
-      inputWidth || inputLayout == LAYOUT_ENUM.FIXED_HEIGHT
+      inputWidth || inputLayout == Layout_Enum.FIXED_HEIGHT
         ? inputWidth
         : dimensions.width;
     height = inputHeight || dimensions.height;
@@ -290,26 +290,26 @@ function getEffectiveLayoutInternal(element) {
   if (inputLayout) {
     layout = inputLayout;
   } else if (!width && !height) {
-    layout = LAYOUT_ENUM.CONTAINER;
+    layout = Layout_Enum.CONTAINER;
   } else if (height == 'fluid') {
-    layout = LAYOUT_ENUM.FLUID;
+    layout = Layout_Enum.FLUID;
   } else if (height && (!width || width == 'auto')) {
-    layout = LAYOUT_ENUM.FIXED_HEIGHT;
+    layout = Layout_Enum.FIXED_HEIGHT;
   } else if (height && width && (sizesAttr || heightsAttr)) {
-    layout = LAYOUT_ENUM.RESPONSIVE;
+    layout = Layout_Enum.RESPONSIVE;
   } else {
-    layout = LAYOUT_ENUM.FIXED;
+    layout = Layout_Enum.FIXED;
   }
 
   if (
-    layout == LAYOUT_ENUM.FIXED ||
-    layout == LAYOUT_ENUM.FIXED_HEIGHT ||
-    layout == LAYOUT_ENUM.RESPONSIVE ||
-    layout == LAYOUT_ENUM.INTRINSIC
+    layout == Layout_Enum.FIXED ||
+    layout == Layout_Enum.FIXED_HEIGHT ||
+    layout == Layout_Enum.RESPONSIVE ||
+    layout == Layout_Enum.INTRINSIC
   ) {
     userAssert(height, 'The "height" attribute is missing: %s', element);
   }
-  if (layout == LAYOUT_ENUM.FIXED_HEIGHT) {
+  if (layout == Layout_Enum.FIXED_HEIGHT) {
     userAssert(
       !width || width == 'auto',
       'The "width" attribute must be missing or "auto": %s',
@@ -317,9 +317,9 @@ function getEffectiveLayoutInternal(element) {
     );
   }
   if (
-    layout == LAYOUT_ENUM.FIXED ||
-    layout == LAYOUT_ENUM.RESPONSIVE ||
-    layout == LAYOUT_ENUM.INTRINSIC
+    layout == Layout_Enum.FIXED ||
+    layout == Layout_Enum.RESPONSIVE ||
+    layout == Layout_Enum.INTRINSIC
   ) {
     userAssert(
       width && width != 'auto',
@@ -328,7 +328,7 @@ function getEffectiveLayoutInternal(element) {
     );
   }
 
-  if (layout == LAYOUT_ENUM.RESPONSIVE || layout == LAYOUT_ENUM.INTRINSIC) {
+  if (layout == Layout_Enum.RESPONSIVE || layout == Layout_Enum.INTRINSIC) {
     userAssert(
       getLengthUnits(width) == getLengthUnits(height),
       'Length units should be the same for "width" and "height": %s, %s, %s',

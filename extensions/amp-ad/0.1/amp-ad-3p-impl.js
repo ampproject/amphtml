@@ -5,11 +5,11 @@ import {
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
-  CONSENT_POLICY_STATE_ENUM, // eslint-disable-line no-unused-vars
+  ConsentPolicyState_Enum, // eslint-disable-line no-unused-vars
 } from '#core/constants/consent-state';
 import {
-  LAYOUT_ENUM, // eslint-disable-line no-unused-vars
-  LAYOUT_PRIORITY_ENUM,
+  LayoutPriority_Enum,
+  Layout_Enum, // eslint-disable-line no-unused-vars
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {Services} from '#service';
@@ -136,7 +136,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LAYOUT_PRIORITY_ENUM.METADATA : LAYOUT_PRIORITY_ENUM.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -150,7 +150,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @param {!LAYOUT_ENUM} layout
+   * @param {!Layout_Enum} layout
    * @override
    */
   isLayoutSupported(layout) {
@@ -453,7 +453,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise<?CONSENT_POLICY_STATE_ENUM>}
+   * @return {!Promise<?ConsentPolicyState_Enum>}
    */
   getConsentState() {
     const consentPolicyId = super.getConsentPolicy();

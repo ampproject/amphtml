@@ -29,8 +29,8 @@ import {
 } from '#ads/google/a4a/utils';
 
 import {
-  CONSENT_POLICY_STATE_ENUM,
-  CONSENT_STRING_TYPE_ENUM,
+  ConsentPolicyState_Enum,
+  ConsentStringType_Enum,
 } from '#core/constants/consent-state';
 import {removeElement} from '#core/dom';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
@@ -292,7 +292,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       consentStringType = consentTuple.consentStringType;
     }
     if (
-      consentState == CONSENT_POLICY_STATE_ENUM.UNKNOWN &&
+      consentState == ConsentPolicyState_Enum.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
@@ -356,8 +356,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'iu': slotname,
       'fa': {bottom: 1, top: 2}[this.element.getAttribute('sticky')],
       'npa':
-        consentState == CONSENT_POLICY_STATE_ENUM.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE_ENUM.UNKNOWN ||
+        consentState == ConsentPolicyState_Enum.INSUFFICIENT ||
+        consentState == ConsentPolicyState_Enum.UNKNOWN ||
         !!opt_serveNpaSignal
           ? 1
           : null,
@@ -385,12 +385,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent':
-        consentStringType != CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
+        consentStringType != ConsentStringType_Enum.US_PRIVACY_STRING
           ? consentString
           : null,
       'addtl_consent': additionalConsent,
       'us_privacy':
-        consentStringType == CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
+        consentStringType == ConsentStringType_Enum.US_PRIVACY_STRING
           ? consentString
           : null,
       'pfx': pfx ? '1' : '0',

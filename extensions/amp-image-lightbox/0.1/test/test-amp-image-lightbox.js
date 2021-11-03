@@ -1,8 +1,8 @@
 import '../amp-image-lightbox';
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import * as dom from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {parseSrcset} from '#core/dom/srcset';
@@ -246,7 +246,7 @@ describes.realWin(
       ampImage.setAttribute('height', '100');
       impl.open_({caller: ampImage});
       impl.closeOnEscape_(
-        new KeyboardEvent('keydown', {key: KEYS_ENUM.ESCAPE})
+        new KeyboardEvent('keydown', {key: Keys_Enum.ESCAPE})
       );
       expect(setupCloseSpy).to.be.calledOnce;
 
@@ -304,7 +304,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ACTION_TRUST_ENUM.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
@@ -315,7 +315,7 @@ describes.realWin(
           method: 'open',
           node: element,
           source: 'source',
-          trust: ACTION_TRUST_ENUM.HIGH,
+          trust: ActionTrust_Enum.HIGH,
         })
       );
       expect(impl.open_).to.be.calledOnce;

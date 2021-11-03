@@ -6,7 +6,7 @@ import {
 
 import {dev} from '#utils/log';
 
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 
 const TAG = 'amp-apester-media';
 
@@ -15,7 +15,7 @@ const AWAIT_TIME_OUT_FOR_RESPONSE = 3000;
 const awaitPromiseTimeout = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve([CONSENT_POLICY_STATE_ENUM.UNKNOWN, undefined]);
+      resolve([ConsentPolicyState_Enum.UNKNOWN, undefined]);
     }, AWAIT_TIME_OUT_FOR_RESPONSE);
   });
 };
@@ -27,7 +27,7 @@ export function getConsentData(apesterElement) {
   const consentStatePromise = getConsentPolicyState(apesterElement).catch(
     (err) => {
       dev().error(TAG, 'Error determining consent state', err);
-      return CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+      return ConsentPolicyState_Enum.UNKNOWN;
     }
   );
   const consentStringPromise = getConsentPolicyInfo(
@@ -46,12 +46,12 @@ export function getConsentData(apesterElement) {
       const consentStatus = consentDataResponse[0];
       const gdprString = consentDataResponse[1];
       switch (consentStatus) {
-        case CONSENT_POLICY_STATE_ENUM.SUFFICIENT:
+        case ConsentPolicyState_Enum.SUFFICIENT:
           return dict({'gdpr': 1, 'user_consent': 1, 'gdprString': gdprString});
-        case CONSENT_POLICY_STATE_ENUM.INSUFFICIENT:
-        case CONSENT_POLICY_STATE_ENUM.UNKNOWN:
+        case ConsentPolicyState_Enum.INSUFFICIENT:
+        case ConsentPolicyState_Enum.UNKNOWN:
           return dict({'gdpr': 1, 'user_consent': 0, 'gdprString': gdprString});
-        case CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED:
+        case ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED:
         default:
           return {};
       }

@@ -6,7 +6,7 @@ import {
   isFullscreenElement,
 } from '#core/dom/fullscreen';
 import {
-  LAYOUT_ENUM, // eslint-disable-line no-unused-vars
+  Layout_Enum, // eslint-disable-line no-unused-vars
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -21,21 +21,21 @@ import {dev, userAssert} from '#utils/log';
 import {getIframe} from '../../../src/3p-frame';
 import {redispatch} from '../../../src/iframe-video';
 import {
-  VIDEO_ATTRIBUTES_ENUM,
-  VIDEO_EVENTS_ENUM,
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
 } from '../../../src/video-interface';
 
 const TAG = 'amp-viqeo-player';
 
 const EVENTS = {
-  'ready': VIDEO_EVENTS_ENUM.LOAD,
-  'play': VIDEO_EVENTS_ENUM.PLAYING,
-  'pause': VIDEO_EVENTS_ENUM.PAUSE,
-  'mute': VIDEO_EVENTS_ENUM.MUTED,
-  'unmute': VIDEO_EVENTS_ENUM.UNMUTED,
-  'end': VIDEO_EVENTS_ENUM.ENDED,
-  'startAdvert': VIDEO_EVENTS_ENUM.AD_START,
-  'endAdvert': VIDEO_EVENTS_ENUM.AD_END,
+  'ready': VideoEvents_Enum.LOAD,
+  'play': VideoEvents_Enum.PLAYING,
+  'pause': VideoEvents_Enum.PAUSE,
+  'mute': VideoEvents_Enum.MUTED,
+  'unmute': VideoEvents_Enum.UNMUTED,
+  'end': VideoEvents_Enum.ENDED,
+  'startAdvert': VideoEvents_Enum.AD_START,
+  'endAdvert': VideoEvents_Enum.AD_END,
 };
 
 /**
@@ -86,7 +86,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {!LAYOUT_ENUM} layout
+   * @param {!Layout_Enum} layout
    * @return {boolean}
    * @override
    */
@@ -109,7 +109,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     );
 
     this.hasAutoplay_ = this.element.hasAttribute(
-      VIDEO_ATTRIBUTES_ENUM.AUTOPLAY
+      VideoAttributes_Enum.AUTOPLAY
     );
 
     const deferred = new Deferred();

@@ -1,6 +1,6 @@
 import {
   IframeTransportEventDef,
-  MESSAGE_TYPE_ENUM,
+  MessageType_Enum,
 } from '#core/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dev, devAssert} from '#utils/log';
@@ -34,7 +34,7 @@ export class IframeTransportMessageQueue {
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(
       this.frame_,
-      MESSAGE_TYPE_ENUM.SEND_IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.SEND_IFRAME_TRANSPORT_EVENTS,
       true,
       () => {
         this.setIsReady();
@@ -99,7 +99,7 @@ export class IframeTransportMessageQueue {
   flushQueue_() {
     if (this.isReady() && this.queueSize()) {
       this.postMessageApi_.send(
-        MESSAGE_TYPE_ENUM.IFRAME_TRANSPORT_EVENTS,
+        MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
         /** @type {!JsonObject} */
         ({events: this.pendingEvents_})
       );

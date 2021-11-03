@@ -14,7 +14,7 @@ const DEFAULT = 'default';
  * @enum {string}
  * @private
  */
-const METHODS_ENUM = {
+const Methods_Enum = {
   'mute': 'muted',
   'unmute': 'muted',
   'showControls': 'controls',
@@ -142,7 +142,7 @@ function makeMessage(method) {
       break;
   }
   return JSON.stringify({
-    'command': METHODS_ENUM[method] ?? method,
+    'command': Methods_Enum[method] ?? method,
     'args': arg,
   });
 }

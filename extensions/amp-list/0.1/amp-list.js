@@ -1,10 +1,10 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
 import {removeChildren, tryFocus} from '#core/dom';
 import {
-  LAYOUT_ENUM,
+  Layout_Enum,
   applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
@@ -40,7 +40,7 @@ import {LoadMoreService} from './service/load-more-service';
 
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
-  URL_REPLACEMENT_POLICY_ENUM,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
@@ -177,7 +177,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === LAYOUT_ENUM.CONTAINER) {
+    if (layout === Layout_Enum.CONTAINER) {
       const doc = this.element.ownerDocument;
       const isEmail = doc && isAmp4Email(doc);
       const hasPlaceholder =
@@ -705,7 +705,7 @@ export class AmpList extends AMP.BaseElement {
       this.element,
       'fetch-error',
       event,
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -1146,7 +1146,7 @@ export class AmpList extends AMP.BaseElement {
 
       const event = createCustomEvent(
         this.win,
-        AMP_EVENTS_ENUM.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );
@@ -1329,7 +1329,7 @@ export class AmpList extends AMP.BaseElement {
    */
   attemptToFit_(target) {
     if (
-      this.element.getAttribute('layout') == LAYOUT_ENUM.CONTAINER &&
+      this.element.getAttribute('layout') == Layout_Enum.CONTAINER &&
       !this.enableManagedResizing_
     ) {
       return Promise.resolve(true);
@@ -1365,7 +1365,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    if (this.element.getAttribute('layout') == LAYOUT_ENUM.CONTAINER) {
+    if (this.element.getAttribute('layout') == Layout_Enum.CONTAINER) {
       return;
     }
     this.measureElement(() => {
@@ -1406,15 +1406,15 @@ export class AmpList extends AMP.BaseElement {
     // TODO(amphtml): Remove [width] and [height] attributes too?
     if (
       [
-        LAYOUT_ENUM.FIXED,
-        LAYOUT_ENUM.FLEX_ITEM,
-        LAYOUT_ENUM.FLUID,
-        LAYOUT_ENUM.INTRINSIC,
-        LAYOUT_ENUM.RESPONSIVE,
+        Layout_Enum.FIXED,
+        Layout_Enum.FLEX_ITEM,
+        Layout_Enum.FLUID,
+        Layout_Enum.INTRINSIC,
+        Layout_Enum.RESPONSIVE,
       ].includes(layout)
     ) {
       setStyles(this.element, {width: '', height: ''});
-    } else if (layout == LAYOUT_ENUM.FIXED_HEIGHT) {
+    } else if (layout == Layout_Enum.FIXED_HEIGHT) {
       setStyles(this.element, {height: ''});
     }
 
@@ -1442,7 +1442,7 @@ export class AmpList extends AMP.BaseElement {
     }
     const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
-    if (previousLayout == LAYOUT_ENUM.CONTAINER) {
+    if (previousLayout == Layout_Enum.CONTAINER) {
       return Promise.resolve();
     }
     return this.mutateElement(() => {
@@ -1625,18 +1625,18 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!URL_REPLACEMENT_POLICY_ENUM}
+   * @return {!UrlReplacementPolicy_Enum}
    */
   getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    let policy = URL_REPLACEMENT_POLICY_ENUM.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = URL_REPLACEMENT_POLICY_ENUM.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }

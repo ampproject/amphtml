@@ -2,7 +2,7 @@ import {matches} from '#core/dom/query';
 
 import {dev, userAssert} from '#utils/log';
 
-import {FILTER_TYPE_ENUM, Filter} from './filter';
+import {Filter, FilterType_Enum} from './filter';
 
 /**
  * A Filter that ignores events originating from elements that match a specified
@@ -34,7 +34,7 @@ export class InactiveElementFilter extends Filter {
  */
 function isValidInactiveElementSpec(spec) {
   return (
-    spec.type == FILTER_TYPE_ENUM.INACTIVE_ELEMENT &&
+    spec.type == FilterType_Enum.INACTIVE_ELEMENT &&
     typeof spec.selector == 'string'
   );
 }
@@ -44,5 +44,5 @@ function isValidInactiveElementSpec(spec) {
  * @return {!../config.ClickLocationConfig}
  */
 export function makeInactiveElementSpec(selector) {
-  return {type: FILTER_TYPE_ENUM.INACTIVE_ELEMENT, selector};
+  return {type: FilterType_Enum.INACTIVE_ELEMENT, selector};
 }

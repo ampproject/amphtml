@@ -200,7 +200,7 @@ class Bezier {
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function
  * @enum {!CurveDef}
  */
-export const CURVES_ENUM = {
+export const Curves_Enum = {
   /**
    * linear
    * @param {!NormTimeDef} xVal
@@ -251,11 +251,11 @@ export const CURVES_ENUM = {
  * @const {!Object<string, !CurveDef>}
  */
 const NAME_MAP = {
-  'linear': CURVES_ENUM.LINEAR,
-  'ease': CURVES_ENUM.EASE,
-  'ease-in': CURVES_ENUM.EASE_IN,
-  'ease-out': CURVES_ENUM.EASE_OUT,
-  'ease-in-out': CURVES_ENUM.EASE_IN_OUT,
+  'linear': Curves_Enum.LINEAR,
+  'ease': Curves_Enum.EASE,
+  'ease-in': Curves_Enum.EASE_IN,
+  'ease-out': Curves_Enum.EASE_OUT,
+  'ease-in-out': Curves_Enum.EASE_IN_OUT,
 };
 
 /**

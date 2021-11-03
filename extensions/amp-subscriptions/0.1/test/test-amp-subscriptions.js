@@ -1,5 +1,5 @@
 import * as utilsStory from '#utils/story';
-import {Entitlement, GRANT_REASON_ENUM} from '../entitlement';
+import {Entitlement, GrantReason_Enum} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
 import {LocalSubscriptionRemotePlatform} from '../local-subscription-platform-remote';
 import {
@@ -9,7 +9,7 @@ import {
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '#service';
-import {SUBSCRIPTION_ANALYTICS_EVENTS_ENUM} from '../analytics';
+import {SubscriptionAnalyticsEvents_Enum} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
@@ -46,7 +46,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     ],
     fallbackEntitlement: {
       source: 'local',
-      grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+      grantReason: GrantReason_Enum.SUBSCRIBER,
       granted: true,
     },
   };
@@ -76,7 +76,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     ],
     fallbackEntitlement: {
       source: 'local',
-      grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+      grantReason: GrantReason_Enum.SUBSCRIBER,
       granted: true,
     },
   };
@@ -132,7 +132,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
     await subscriptionService.initialize_();
     expect(analyticsEventStub).to.be.calledWith(
-      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.STARTED
+      SubscriptionAnalyticsEvents_Enum.STARTED
     );
     expect(localPlatformStub).to.be.called;
   });
@@ -289,7 +289,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     const entitlementData = {
       source: 'local',
       granted: true,
-      grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+      grantReason: GrantReason_Enum.SUBSCRIBER,
     };
     const entitlement = Entitlement.parseFromJson(entitlementData);
     const factoryStub = env.sandbox.stub().callsFake(() => platform);
@@ -313,13 +313,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.serviceAdapter_
     );
     expect(analyticsEventStub).to.be.calledWith(
-      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REGISTERED,
+      SubscriptionAnalyticsEvents_Enum.PLATFORM_REGISTERED,
       {
         serviceId: 'local',
       }
     );
     expect(analyticsEventStub).to.be.calledWith(
-      SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_REGISTERED_DEPRECATED,
+      SubscriptionAnalyticsEvents_Enum.PLATFORM_REGISTERED_DEPRECATED,
       {
         serviceId: 'local',
       }
@@ -419,7 +419,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       await subscriptionService.initialize_();
       resolveRequiredPromises({
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       });
       const localPlatform =
         subscriptionService.platformStore_.getLocalPlatform_();
@@ -434,19 +434,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       expect(activateStub.firstCall.args[1].source).to.equal('local');
       expect(selectPlatformStub).to.be.called;
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
+        SubscriptionAnalyticsEvents_Enum.PLATFORM_ACTIVATED,
         {
           'serviceId': 'local',
         }
       );
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACCESS_GRANTED,
+        SubscriptionAnalyticsEvents_Enum.ACCESS_GRANTED,
         {
           'serviceId': 'local',
         }
       );
       expect(analyticsEventStub).to.not.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED
+        SubscriptionAnalyticsEvents_Enum.PAYWALL_ACTIVATED
       );
     });
 
@@ -464,7 +464,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
           service: 'other',
           source: 'other',
           granted: true,
-          grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+          grantReason: GrantReason_Enum.SUBSCRIBER,
         }
       );
       const localPlatform =
@@ -480,19 +480,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       expect(activateStub.firstCall.args[1].source).to.equal('other');
       expect(selectPlatformStub).to.be.called;
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
+        SubscriptionAnalyticsEvents_Enum.PLATFORM_ACTIVATED,
         {
           'serviceId': 'local',
         }
       );
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACCESS_GRANTED,
+        SubscriptionAnalyticsEvents_Enum.ACCESS_GRANTED,
         {
           'serviceId': 'other',
         }
       );
       expect(analyticsEventStub).to.not.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED
+        SubscriptionAnalyticsEvents_Enum.PAYWALL_ACTIVATED
       );
     });
 
@@ -504,7 +504,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       await subscriptionService.initialize_();
       resolveRequiredPromises({
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       });
       const selectPlatformStub =
         subscriptionService.platformStore_.selectPlatform;
@@ -527,19 +527,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       await subscriptionService.selectAndActivatePlatform_();
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PLATFORM_ACTIVATED,
+        SubscriptionAnalyticsEvents_Enum.PLATFORM_ACTIVATED,
         {
           'serviceId': 'local',
         }
       );
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.PAYWALL_ACTIVATED,
+        SubscriptionAnalyticsEvents_Enum.PAYWALL_ACTIVATED,
         {
           'serviceId': 'local',
         }
       );
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ACCESS_DENIED,
+        SubscriptionAnalyticsEvents_Enum.ACCESS_DENIED,
         {
           'serviceId': 'local',
         }
@@ -570,7 +570,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       });
 
       env.sandbox.stub(platform, 'activate');
@@ -626,7 +626,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       it('allow metering platform to consume entitlement before setting grant state, when the metering platform granted', async () => {
         // Metering platform granted this entitlement.
-        entitlement.grantReason = GRANT_REASON_ENUM.METERING;
+        entitlement.grantReason = GrantReason_Enum.METERING;
         entitlement.service = meteringPlatformConfig.services[0].serviceId;
 
         subscriptionService.startAuthorizationFlow_();
@@ -810,7 +810,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       });
       env.sandbox
         .stub(platform, 'getEntitlements')
@@ -825,7 +825,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       expect(resolveStub).to.be.calledOnce;
       expect(resolveStub.getCall(0).args[1]).to.deep.equal(entitlement);
       expect(analyticsEventStub).to.be.calledWith(
-        SUBSCRIPTION_ANALYTICS_EVENTS_ENUM.ENTITLEMENT_RESOLVED,
+        SubscriptionAnalyticsEvents_Enum.ENTITLEMENT_RESOLVED,
         {
           'serviceId': 'local',
         }
@@ -860,7 +860,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       });
       env.sandbox
         .stub(platform, 'getEntitlements')
@@ -915,7 +915,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       });
       env.sandbox
         .stub(platform, 'getEntitlements')
@@ -933,7 +933,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: false,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       });
       env.sandbox
         .stub(platform, 'getEntitlements')
@@ -951,7 +951,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: false,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
         decryptedDocumentKey: 'key',
       });
       env.sandbox
@@ -1124,7 +1124,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const entitlementData = {
         source: 'local',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       };
       let resolver;
       subscriptionService.viewTrackerPromise_ = new Promise((resolve) => {
@@ -1150,7 +1150,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const entitlementData = {
         source: 'local',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       };
       const entitlement = Entitlement.parseFromJson(entitlementData);
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
@@ -1171,7 +1171,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const entitlementData = {
         source: 'local',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       };
       const entitlement = Entitlement.parseFromJson(entitlementData);
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
@@ -1202,7 +1202,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const entitlementData = {
         source: 'local',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       };
       const entitlement = Entitlement.parseFromJson(entitlementData);
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
@@ -1332,7 +1332,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
         dataObject: {
           test: 'a1',
         },
@@ -1357,7 +1357,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
         dataObject: {
           test: 'a1',
         },
@@ -1385,7 +1385,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         source: 'local',
         raw: 'raw',
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
         dataObject: {
           test: 'a1',
         },
@@ -1432,7 +1432,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       await expect(
         subscriptionService.getAuthdataField('grantReason')
-      ).to.eventually.equal(GRANT_REASON_ENUM.FREE);
+      ).to.eventually.equal(GrantReason_Enum.FREE);
       await expect(
         subscriptionService.getAuthdataField('data.userAccount')
       ).to.eventually.equal(undefined);

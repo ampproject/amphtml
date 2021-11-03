@@ -81,7 +81,7 @@ const buildContainerTemplate = (element) => {
 };
 
 /** @enum {string} */
-const DEV_TOOLS_TAB_ENUM = {
+const DevToolsTab_Enum = {
   PREVIEW: 'Preview',
   DEBUG: 'Debug',
 };
@@ -104,11 +104,11 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     /** @private {!DevToolsTab} get URL param for tab (eg: #tab=page-experience) or default to PREVIEW*/
     this.currentTab_ =
       (this.hashParams_['tab']
-        ? Object.values(DEV_TOOLS_TAB_ENUM).find(
+        ? Object.values(DevToolsTab_Enum).find(
             (tab) =>
               tab.toLowerCase().replace(' ', '-') === this.hashParams_['tab']
           )
-        : null) || DEV_TOOLS_TAB_ENUM.PREVIEW;
+        : null) || DevToolsTab_Enum.PREVIEW;
 
     /** @private {!Object<string, !Element>} maps tabs to contents */
     this.tabContents_ = {};
@@ -146,7 +146,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     const tabsContainer = container.querySelector(
       '.i-amphtml-story-dev-tools-tabs'
     );
-    Object.values(DEV_TOOLS_TAB_ENUM).forEach((tabTitle) => {
+    Object.values(DevToolsTab_Enum).forEach((tabTitle) => {
       const tabSelector = this.win.document.createElement('button');
       tabSelector.classList.add('i-amphtml-story-dev-tools-tab-selector');
       tabSelector.setAttribute('data-tab', tabTitle);
@@ -166,7 +166,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     tabsContainer.addEventListener('click', (event) => {
       const tab = event.target.getAttribute('data-tab');
       if (
-        Object.values(DEV_TOOLS_TAB_ENUM).find((t) => t == tab) &&
+        Object.values(DevToolsTab_Enum).find((t) => t == tab) &&
         this.currentTab_ != tab
       ) {
         this.switchTab_(tab);
@@ -174,7 +174,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
         updateHash(
           {
             'tab':
-              tab == DEV_TOOLS_TAB_ENUM.PREVIEW
+              tab == DevToolsTab_Enum.PREVIEW
                 ? null
                 : tab.toLowerCase().replace(' ', '-'),
           },
@@ -191,12 +191,12 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     const container = this.element.querySelector(
       '.i-amphtml-story-dev-tools-container'
     );
-    this.tabContents_[DEV_TOOLS_TAB_ENUM.PREVIEW] = createTabPreviewElement(
+    this.tabContents_[DevToolsTab_Enum.PREVIEW] = createTabPreviewElement(
       this.win,
       this.storyUrl_,
       this.hashParams_['devices']
     );
-    this.tabContents_[DEV_TOOLS_TAB_ENUM.DEBUG] = createTabDebugElement(
+    this.tabContents_[DevToolsTab_Enum.DEBUG] = createTabDebugElement(
       this.win,
       this.storyUrl_
     );

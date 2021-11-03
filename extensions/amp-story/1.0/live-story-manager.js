@@ -1,6 +1,6 @@
 import * as Preact from '#core/dom/jsx';
-import {ACTION_ENUM, getStoreService} from './amp-story-store-service';
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {Action_Enum, getStoreService} from './amp-story-store-service';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Services} from '#service';
 import {lastChildElement} from '#core/dom/query';
 import {userAssert} from '#utils/log';
@@ -54,7 +54,7 @@ export class LiveStoryManager {
 
     this.ampStory_.element
       .signals()
-      .whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => {
         Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
           this.ampdoc_,
@@ -75,7 +75,7 @@ export class LiveStoryManager {
     const storyPages = this.storyEl_.querySelectorAll('amp-story-page');
     const pageIds = Array.prototype.map.call(storyPages, (el) => el.id);
 
-    this.storeService_.dispatch(ACTION_ENUM.SET_PAGE_IDS, pageIds);
-    this.storeService_.dispatch(ACTION_ENUM.ADD_NEW_PAGE_ID, lastNewPageEl.id);
+    this.storeService_.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(Action_Enum.ADD_NEW_PAGE_ID, lastNewPageEl.id);
   }
 }

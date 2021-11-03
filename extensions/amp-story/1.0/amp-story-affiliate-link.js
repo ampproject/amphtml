@@ -4,11 +4,8 @@ import * as Preact from '#core/dom/jsx';
  */
 
 import {Services} from '#service';
-import {STATE_PROPERTY_ENUM, getStoreService} from './amp-story-store-service';
-import {
-  STORY_ANALYTICS_EVENT_ENUM,
-  getAnalyticsService,
-} from './story-analytics';
+import {StateProperty_Enum, getStoreService} from './amp-story-store-service';
+import {StoryAnalyticsEvent_Enum, getAnalyticsService} from './story-analytics';
 import {getAmpdoc} from '../../../src/service-helpers';
 
 /**
@@ -81,7 +78,7 @@ export class AmpStoryAffiliateLink {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.AFFILIATE_LINK_STATE,
+      StateProperty_Enum.AFFILIATE_LINK_STATE,
       (elementToToggleExpand) => {
         const expand = this.element_ === elementToToggleExpand;
         if (expand) {
@@ -96,7 +93,7 @@ export class AmpStoryAffiliateLink {
         if (expand) {
           this.element_.removeAttribute('pristine');
           this.analyticsService_.triggerEvent(
-            STORY_ANALYTICS_EVENT_ENUM.FOCUS,
+            StoryAnalyticsEvent_Enum.FOCUS,
             this.element_
           );
         }
@@ -107,7 +104,7 @@ export class AmpStoryAffiliateLink {
       if (this.element_.hasAttribute('expanded')) {
         event.stopPropagation();
         this.analyticsService_.triggerEvent(
-          STORY_ANALYTICS_EVENT_ENUM.CLICK_THROUGH,
+          StoryAnalyticsEvent_Enum.CLICK_THROUGH,
           this.element_
         );
       }

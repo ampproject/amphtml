@@ -9,7 +9,7 @@ const STATE = 'state';
 export const LOCAL_STORAGE_KEY = 'amp-story-state';
 
 /** @enum {string} */
-export const HISTORY_STATE_ENUM = {
+export const HistoryState_Enum = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
 };

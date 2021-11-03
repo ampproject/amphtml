@@ -1,4 +1,4 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
@@ -43,7 +43,7 @@ class AmpAccordion extends BaseElement {
       section,
       eventName,
       event,
-      ACTION_TRUST_ENUM.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(section, eventName, detail);

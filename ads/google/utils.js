@@ -1,5 +1,5 @@
 import {
-  EXTERNAL_CORE_PUB_VARS_ENUM,
+  ExternalCorePubVars_Enum,
   MIN_PUB_CONTROL_WIDTH_OF_DESKTOP,
   getAutoConfig,
   getPubControlConfig,
@@ -194,11 +194,9 @@ export function getMatchedContentResponsiveHeightAndUpdatePubParams(
   element
 ) {
   const pubControlParams = {
-    numberOfRows: element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM),
-    numberOfColumns: element.getAttribute(
-      EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM
-    ),
-    layoutType: element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE),
+    numberOfRows: element.getAttribute(ExternalCorePubVars_Enum.ROWS_NUM),
+    numberOfColumns: element.getAttribute(ExternalCorePubVars_Enum.COLUMNS_NUM),
+    layoutType: element.getAttribute(ExternalCorePubVars_Enum.UI_TYPE),
   };
   let config;
   if (
@@ -222,15 +220,12 @@ export function getMatchedContentResponsiveHeightAndUpdatePubParams(
     // Return 0 as height to hide slot.
     return 0;
   }
+  element.setAttribute(ExternalCorePubVars_Enum.ROWS_NUM, config.numberOfRows);
   element.setAttribute(
-    EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM,
-    config.numberOfRows
-  );
-  element.setAttribute(
-    EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM,
+    ExternalCorePubVars_Enum.COLUMNS_NUM,
     config.numberOfColumns
   );
-  element.setAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE, config.layoutType);
+  element.setAttribute(ExternalCorePubVars_Enum.UI_TYPE, config.layoutType);
 
   return config.slotHeight;
 }

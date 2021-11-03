@@ -1,7 +1,7 @@
 import {
-  CONSENT_ITEM_STATE_ENUM,
-  METADATA_STORAGE_KEY_ENUM,
-  PURPOSE_CONSENT_STATE_ENUM,
+  ConsentItemState_Enum,
+  MetadataStorageKey_Enum,
+  PurposeConsentState_Enum,
   composeMetadataStoreValue,
   composeStoreValue,
   constructConsentInfo,
@@ -11,7 +11,7 @@ import {
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE_ENUM} from '#core/constants/consent-state';
+import {ConsentStringType_Enum} from '#core/constants/consent-state';
 import {dict} from '#core/types/object';
 
 describes.fakeWin('ConsentInfo', {}, () => {
@@ -19,7 +19,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
     it('construct consentInfo from undefined', () => {
       expect(getStoredConsentInfo(undefined)).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.UNKNOWN,
+          'consentState': ConsentItemState_Enum.UNKNOWN,
           'consentString': undefined,
           'consentMetadata': undefined,
           'purposeConsents': undefined,
@@ -31,7 +31,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
     it('construct consentInfo from legacy value', () => {
       expect(getStoredConsentInfo(true)).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+          'consentState': ConsentItemState_Enum.ACCEPTED,
           'consentString': undefined,
           'consentMetadata': undefined,
           'purposeConsents': undefined,
@@ -40,7 +40,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
       );
       expect(getStoredConsentInfo(false)).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
+          'consentState': ConsentItemState_Enum.REJECTED,
           'consentString': undefined,
           'consentMetadata': undefined,
           'purposeConsents': undefined,
@@ -56,7 +56,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         })
       ).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+          'consentState': ConsentItemState_Enum.ACCEPTED,
           'consentString': undefined,
           'consentMetadata': constructMetadata(),
           'purposeConsents': undefined,
@@ -70,7 +70,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         })
       ).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
+          'consentState': ConsentItemState_Enum.REJECTED,
           'consentString': 'test',
           'consentMetadata': constructMetadata(),
           'purposeConsents': undefined,
@@ -85,7 +85,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         })
       ).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
+          'consentState': ConsentItemState_Enum.REJECTED,
           'consentString': 'test',
           'isDirty': undefined,
           'purposeConsents': undefined,
@@ -97,20 +97,20 @@ describes.fakeWin('ConsentInfo', {}, () => {
           's': 0,
           'r': 'test',
           'm': {
-            [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
-              CONSENT_STRING_TYPE_ENUM.TCF_V2,
-            [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '1~1.35.41.101',
-            [METADATA_STORAGE_KEY_ENUM.GDPR_APPLIES]: false,
+            [MetadataStorageKey_Enum.CONSENT_STRING_TYPE]:
+              ConsentStringType_Enum.TCF_V2,
+            [MetadataStorageKey_Enum.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+            [MetadataStorageKey_Enum.GDPR_APPLIES]: false,
           },
         })
       ).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.REJECTED,
+          'consentState': ConsentItemState_Enum.REJECTED,
           'consentString': 'test',
           'isDirty': undefined,
           'purposeConsents': undefined,
           'consentMetadata': constructMetadata(
-            CONSENT_STRING_TYPE_ENUM.TCF_V2,
+            ConsentStringType_Enum.TCF_V2,
             '1~1.35.41.101',
             false
           ),
@@ -121,20 +121,20 @@ describes.fakeWin('ConsentInfo', {}, () => {
           's': -1,
           'r': 'test',
           'm': {
-            [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
-              CONSENT_STRING_TYPE_ENUM.TCF_V2,
-            [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+            [MetadataStorageKey_Enum.CONSENT_STRING_TYPE]:
+              ConsentStringType_Enum.TCF_V2,
+            [MetadataStorageKey_Enum.ADDITIONAL_CONSENT]: '1~1.35.41.101',
           },
           'd': 1,
         })
       ).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.UNKNOWN,
+          'consentState': ConsentItemState_Enum.UNKNOWN,
           'consentString': 'test',
           'isDirty': true,
           'purposeConsents': undefined,
           'consentMetadata': constructMetadata(
-            CONSENT_STRING_TYPE_ENUM.TCF_V2,
+            ConsentStringType_Enum.TCF_V2,
             '1~1.35.41.101'
           ),
         })
@@ -151,12 +151,12 @@ describes.fakeWin('ConsentInfo', {}, () => {
         })
       ).to.deep.equal(
         dict({
-          'consentState': CONSENT_ITEM_STATE_ENUM.UNKNOWN,
+          'consentState': ConsentItemState_Enum.UNKNOWN,
           'consentString': 'test',
           'isDirty': true,
           'purposeConsents': {
-            'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED,
-            'xyz': PURPOSE_CONSENT_STATE_ENUM.REJECTED,
+            'abc': PurposeConsentState_Enum.ACCEPTED,
+            'xyz': PurposeConsentState_Enum.REJECTED,
           },
           'consentMetadata': constructMetadata(),
         })
@@ -172,12 +172,12 @@ describes.fakeWin('ConsentInfo', {}, () => {
       });
       expect(
         convertStorageMetadata({
-          [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
-            CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+          [MetadataStorageKey_Enum.CONSENT_STRING_TYPE]:
+            ConsentStringType_Enum.US_PRIVACY_STRING,
         })
       ).to.deep.equal(
         dict({
-          'consentStringType': CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+          'consentStringType': ConsentStringType_Enum.US_PRIVACY_STRING,
           'additionalConsent': undefined,
           'gdprApplies': undefined,
           'purposeOne': undefined,
@@ -186,7 +186,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
       expect(
         convertStorageMetadata({
           undefined,
-          [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+          [MetadataStorageKey_Enum.ADDITIONAL_CONSENT]: '1~1.35.41.101',
         })
       ).to.deep.equal(
         dict({
@@ -198,14 +198,14 @@ describes.fakeWin('ConsentInfo', {}, () => {
       );
       expect(
         convertStorageMetadata({
-          [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
-            CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
-          [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '1~1.35.41.101',
-          [METADATA_STORAGE_KEY_ENUM.PURPOSE_ONE]: true,
+          [MetadataStorageKey_Enum.CONSENT_STRING_TYPE]:
+            ConsentStringType_Enum.US_PRIVACY_STRING,
+          [MetadataStorageKey_Enum.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+          [MetadataStorageKey_Enum.PURPOSE_ONE]: true,
         })
       ).to.deep.equal(
         dict({
-          'consentStringType': CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+          'consentStringType': ConsentStringType_Enum.US_PRIVACY_STRING,
           'additionalConsent': '1~1.35.41.101',
           'gdprApplies': undefined,
           'purposeOne': true,
@@ -222,7 +222,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
 
   it('composeStoreValue/getStoredConsentInfo', () => {
     let consentInfo = constructConsentInfo(
-      CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+      ConsentItemState_Enum.ACCEPTED,
       undefined,
       constructMetadata()
     );
@@ -231,7 +231,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
     );
 
     consentInfo = constructConsentInfo(
-      CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+      ConsentItemState_Enum.ACCEPTED,
       'test',
       constructMetadata()
     );
@@ -240,20 +240,20 @@ describes.fakeWin('ConsentInfo', {}, () => {
     );
 
     consentInfo = constructConsentInfo(
-      CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+      ConsentItemState_Enum.ACCEPTED,
       'test',
       constructMetadata(),
-      {'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED}
+      {'abc': PurposeConsentState_Enum.ACCEPTED}
     );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
       consentInfo
     );
 
     consentInfo = constructConsentInfo(
-      CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+      ConsentItemState_Enum.ACCEPTED,
       'test',
-      constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V2, '1~1.35.41.101', true),
-      {'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED},
+      constructMetadata(ConsentStringType_Enum.TCF_V2, '1~1.35.41.101', true),
+      {'abc': PurposeConsentState_Enum.ACCEPTED},
       true
     );
     expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
@@ -265,20 +265,20 @@ describes.fakeWin('ConsentInfo', {}, () => {
     let consentInfo;
     beforeEach(() => {
       consentInfo = {
-        'consentState': CONSENT_ITEM_STATE_ENUM.UNKNOWN,
+        'consentState': ConsentItemState_Enum.UNKNOWN,
       };
     });
 
     it('new format', () => {
       expect(composeStoreValue(consentInfo)).to.be.null;
-      consentInfo['consentState'] = CONSENT_ITEM_STATE_ENUM.ACCEPTED;
+      consentInfo['consentState'] = ConsentItemState_Enum.ACCEPTED;
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 1,
       });
     });
 
     it('add field only when defined', () => {
-      consentInfo['consentState'] = CONSENT_ITEM_STATE_ENUM.REJECTED;
+      consentInfo['consentState'] = ConsentItemState_Enum.REJECTED;
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
       });
@@ -289,7 +289,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'r': 'test',
       });
       consentInfo['purposeConsents'] = {
-        'zyx': PURPOSE_CONSENT_STATE_ENUM.REJECTED,
+        'zyx': PurposeConsentState_Enum.REJECTED,
       };
       expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 0,
@@ -304,7 +304,7 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'd': 1,
       });
       consentInfo['consentMetadata'] = constructMetadata(
-        CONSENT_STRING_TYPE_ENUM.TCF_V1,
+        ConsentStringType_Enum.TCF_V1,
         '1~1.35.41.101',
         false
       );
@@ -313,10 +313,10 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'r': 'test',
         'd': 1,
         'm': {
-          [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
-            CONSENT_STRING_TYPE_ENUM.TCF_V1,
-          [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '1~1.35.41.101',
-          [METADATA_STORAGE_KEY_ENUM.GDPR_APPLIES]: false,
+          [MetadataStorageKey_Enum.CONSENT_STRING_TYPE]:
+            ConsentStringType_Enum.TCF_V1,
+          [MetadataStorageKey_Enum.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+          [MetadataStorageKey_Enum.GDPR_APPLIES]: false,
         },
       });
     });
@@ -324,37 +324,37 @@ describes.fakeWin('ConsentInfo', {}, () => {
     it('add field only when defined for metadata', () => {
       expect(
         composeMetadataStoreValue(
-          constructMetadata(CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING)
+          constructMetadata(ConsentStringType_Enum.US_PRIVACY_STRING)
         )
       ).to.deep.equal({
-        [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
-          CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+        [MetadataStorageKey_Enum.CONSENT_STRING_TYPE]:
+          ConsentStringType_Enum.US_PRIVACY_STRING,
       });
       expect(
         composeMetadataStoreValue(constructMetadata(undefined, '1~1.35.41.101'))
       ).to.deep.equal({
-        [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+        [MetadataStorageKey_Enum.ADDITIONAL_CONSENT]: '1~1.35.41.101',
       });
       expect(
         composeMetadataStoreValue(
           constructMetadata(undefined, undefined, false)
         )
       ).to.deep.equal({
-        [METADATA_STORAGE_KEY_ENUM.GDPR_APPLIES]: false,
+        [MetadataStorageKey_Enum.GDPR_APPLIES]: false,
       });
       expect(
         composeMetadataStoreValue(
           constructMetadata(
-            CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+            ConsentStringType_Enum.US_PRIVACY_STRING,
             '1~1.35.41.101',
             true
           )
         )
       ).to.deep.equal({
-        [METADATA_STORAGE_KEY_ENUM.CONSENT_STRING_TYPE]:
-          CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
-        [METADATA_STORAGE_KEY_ENUM.ADDITIONAL_CONSENT]: '1~1.35.41.101',
-        [METADATA_STORAGE_KEY_ENUM.GDPR_APPLIES]: true,
+        [MetadataStorageKey_Enum.CONSENT_STRING_TYPE]:
+          ConsentStringType_Enum.US_PRIVACY_STRING,
+        [MetadataStorageKey_Enum.ADDITIONAL_CONSENT]: '1~1.35.41.101',
+        [MetadataStorageKey_Enum.GDPR_APPLIES]: true,
       });
     });
   });
@@ -363,31 +363,31 @@ describes.fakeWin('ConsentInfo', {}, () => {
     // Always respect reject/accept
 
     let newState, previousState;
-    newState = CONSENT_ITEM_STATE_ENUM.ACCEPTED;
-    previousState = CONSENT_ITEM_STATE_ENUM.REJECTED;
+    newState = ConsentItemState_Enum.ACCEPTED;
+    previousState = ConsentItemState_Enum.REJECTED;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
       newState
     );
 
     // UNKNOWN will clear stored REJECTED/ACCEPTED
-    newState = CONSENT_ITEM_STATE_ENUM.UNKNOWN;
+    newState = ConsentItemState_Enum.UNKNOWN;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
-      CONSENT_ITEM_STATE_ENUM.UNKNOWN
+      ConsentItemState_Enum.UNKNOWN
     );
 
     //DISMISS/NOT_REQUIRED cannot override reject/accept
-    newState = CONSENT_ITEM_STATE_ENUM.DISMISSED;
+    newState = ConsentItemState_Enum.DISMISSED;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
       previousState
     );
-    newState = CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED;
+    newState = ConsentItemState_Enum.NOT_REQUIRED;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
       previousState
     );
 
     // DISMISS cannot override NOT_REQUIRED
-    previousState = CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED;
-    newState = CONSENT_ITEM_STATE_ENUM.DISMISSED;
+    previousState = ConsentItemState_Enum.NOT_REQUIRED;
+    newState = ConsentItemState_Enum.DISMISSED;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
       previousState
     );
@@ -395,10 +395,10 @@ describes.fakeWin('ConsentInfo', {}, () => {
     // DISMISS is converted to UNKNOWN
     expect(
       recalculateConsentStateValue(
-        CONSENT_ITEM_STATE_ENUM.DISMISSED,
-        CONSENT_ITEM_STATE_ENUM.UNKNOWN
+        ConsentItemState_Enum.DISMISSED,
+        ConsentItemState_Enum.UNKNOWN
       )
-    ).to.equal(CONSENT_ITEM_STATE_ENUM.UNKNOWN);
+    ).to.equal(ConsentItemState_Enum.UNKNOWN);
   });
 
   it('isConsentInfoStoredValueSame', () => {
@@ -407,10 +407,10 @@ describes.fakeWin('ConsentInfo', {}, () => {
 
     // consentInfo equals when stored value is same
     const infoA = {
-      'consentState': CONSENT_ITEM_STATE_ENUM.UNKNOWN,
+      'consentState': ConsentItemState_Enum.UNKNOWN,
     };
     const infoB = {
-      'consentState': CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED,
+      'consentState': ConsentItemState_Enum.NOT_REQUIRED,
     };
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.true;
 
@@ -421,29 +421,29 @@ describes.fakeWin('ConsentInfo', {}, () => {
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.true;
 
     // consentInfo not equal
-    infoA['consentState'] = CONSENT_ITEM_STATE_ENUM.ACCEPTED;
+    infoA['consentState'] = ConsentItemState_Enum.ACCEPTED;
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
-    infoB['consentState'] = CONSENT_ITEM_STATE_ENUM.ACCEPTED;
+    infoB['consentState'] = ConsentItemState_Enum.ACCEPTED;
     infoB['consentString'] = 'test';
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
     infoA['consentString'] = 'test';
     infoB['consentMetadata'] = constructMetadata();
     infoA['consentMetadata'] = constructMetadata(
-      CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
+      ConsentStringType_Enum.US_PRIVACY_STRING
     );
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
     infoB['consentMetadata'] = constructMetadata(
-      CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
+      ConsentStringType_Enum.US_PRIVACY_STRING
     );
 
-    infoB['purposeConsents'] = {'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED};
-    infoA['purposeConsents'] = {'xyz': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED};
+    infoB['purposeConsents'] = {'abc': PurposeConsentState_Enum.ACCEPTED};
+    infoA['purposeConsents'] = {'xyz': PurposeConsentState_Enum.ACCEPTED};
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
-    infoB['purposeConsents'] = {'xyz': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED};
+    infoB['purposeConsents'] = {'xyz': PurposeConsentState_Enum.ACCEPTED};
     infoB['isDirty'] = true;
     expect(isConsentInfoStoredValueSame(infoA, infoB)).to.be.false;
 
@@ -460,9 +460,9 @@ describes.fakeWin('ConsentInfo', {}, () => {
         'purposeOne': undefined,
       });
       expect(
-        constructMetadata(CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING)
+        constructMetadata(ConsentStringType_Enum.US_PRIVACY_STRING)
       ).to.deep.equal({
-        'consentStringType': CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+        'consentStringType': ConsentStringType_Enum.US_PRIVACY_STRING,
         'additionalConsent': undefined,
         'gdprApplies': undefined,
         'purposeOne': undefined,
@@ -483,13 +483,13 @@ describes.fakeWin('ConsentInfo', {}, () => {
       });
       expect(
         constructMetadata(
-          CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+          ConsentStringType_Enum.US_PRIVACY_STRING,
           '1~1.35.41.101',
           true,
           true
         )
       ).to.deep.equal({
-        'consentStringType': CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+        'consentStringType': ConsentStringType_Enum.US_PRIVACY_STRING,
         'additionalConsent': '1~1.35.41.101',
         'gdprApplies': true,
         'purposeOne': true,

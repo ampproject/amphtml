@@ -1,7 +1,7 @@
 import {dict} from '#core/types/object';
 
 /** @enum {string} */
-export const GRANT_REASON_ENUM = {
+export const GrantReason_Enum = {
   'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
   'FREE': 'UNLOCKED',
@@ -123,7 +123,7 @@ export class Entitlement {
    * @return {boolean}
    */
   isSubscriber() {
-    return this.granted && this.grantReason === GRANT_REASON_ENUM.SUBSCRIBER;
+    return this.granted && this.grantReason === GrantReason_Enum.SUBSCRIBER;
   }
 
   /**
@@ -131,6 +131,6 @@ export class Entitlement {
    * @return {boolean}
    */
   isFree() {
-    return this.granted && this.grantReason === GRANT_REASON_ENUM.FREE;
+    return this.granted && this.grantReason === GrantReason_Enum.FREE;
   }
 }

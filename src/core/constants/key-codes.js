@@ -1,7 +1,7 @@
 /**
  * @enum {number}
  */
-export const KEY_CODES_ENUM = {
+export const KeyCodes_Enum = {
   ENTER: 13,
   ESCAPE: 27,
   SPACE: 32,
@@ -14,7 +14,7 @@ export const KEY_CODES_ENUM = {
 /**
  * @enum {string}
  */
-export const KEYS_ENUM = {
+export const Keys_Enum = {
   ENTER: 'Enter',
   ESCAPE: 'Escape',
   SPACE: ' ',

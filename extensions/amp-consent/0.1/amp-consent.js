@@ -1,5 +1,5 @@
 import {
-  CONSENT_ITEM_STATE_ENUM,
+  ConsentItemState_Enum,
   ConsentMetadataDef,
   assertMetadataValues,
   constructMetadata,
@@ -46,7 +46,7 @@ const TAG = 'amp-consent';
  * @enum {string}
  * @visibleForTesting
  */
-export const ACTION_TYPE_ENUM = {
+export const ActionType_Enum = {
   ACCEPT: 'accept',
   REJECT: 'reject',
   DISMISS: 'dismiss',
@@ -251,15 +251,15 @@ export class AmpConsent extends AMP.BaseElement {
    */
   enableInteractions_() {
     this.registerAction('accept', (invocation) => {
-      this.handleClosingUiAction_(ACTION_TYPE_ENUM.ACCEPT, invocation);
+      this.handleClosingUiAction_(ActionType_Enum.ACCEPT, invocation);
     });
 
     this.registerAction('reject', (invocation) => {
-      this.handleClosingUiAction_(ACTION_TYPE_ENUM.REJECT, invocation);
+      this.handleClosingUiAction_(ActionType_Enum.REJECT, invocation);
     });
 
     this.registerAction('dismiss', () => {
-      this.handleClosingUiAction_(ACTION_TYPE_ENUM.DISMISS);
+      this.handleClosingUiAction_(ActionType_Enum.DISMISS);
     });
 
     this.registerAction('setPurpose', (invocation) => {
@@ -321,7 +321,7 @@ export class AmpConsent extends AMP.BaseElement {
           );
           data['info'] = undefined;
         }
-        if (data['action'] === ACTION_TYPE_ENUM.DISMISS) {
+        if (data['action'] === ActionType_Enum.DISMISS) {
           if (data['info']) {
             this.user().error(
               TAG,
@@ -343,7 +343,7 @@ export class AmpConsent extends AMP.BaseElement {
           const {action, purposeConsents} = data;
           // Check if we have a valid action and valid state
           if (
-            !isEnumValue(ACTION_TYPE_ENUM, action) ||
+            !isEnumValue(ActionType_Enum, action) ||
             !this.isReadyToHandleAction_()
           ) {
             continue;
@@ -351,7 +351,7 @@ export class AmpConsent extends AMP.BaseElement {
           if (
             purposeConsents &&
             Object.keys(purposeConsents).length &&
-            action !== ACTION_TYPE_ENUM.DISMISS
+            action !== ActionType_Enum.DISMISS
           ) {
             this.validatePurposeConsents_(purposeConsents);
             this.consentStateManager_.updateConsentInstancePurposes(
@@ -455,23 +455,23 @@ export class AmpConsent extends AMP.BaseElement {
   handleAction_(action, consentString, opt_consentMetadata) {
     this.consentStateChangedViaPromptUI_ = true;
 
-    if (action == ACTION_TYPE_ENUM.ACCEPT) {
+    if (action == ActionType_Enum.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
-        CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+        ConsentItemState_Enum.ACCEPTED,
         consentString,
         opt_consentMetadata
       );
-    } else if (action == ACTION_TYPE_ENUM.REJECT) {
+    } else if (action == ActionType_Enum.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
-        CONSENT_ITEM_STATE_ENUM.REJECTED,
+        ConsentItemState_Enum.REJECTED,
         consentString,
         opt_consentMetadata
       );
-    } else if (action == ACTION_TYPE_ENUM.DISMISS) {
+    } else if (action == ActionType_Enum.DISMISS) {
       this.consentStateManager_.updateConsentInstanceState(
-        CONSENT_ITEM_STATE_ENUM.DISMISSED
+        ConsentItemState_Enum.DISMISSED
       );
     }
 
@@ -490,7 +490,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (typeof opt_invocation?.args?.purposeConsentDefault !== 'boolean') {
       return Promise.resolve();
     }
-    if (action === ACTION_TYPE_ENUM.DISMISS) {
+    if (action === ActionType_Enum.DISMISS) {
       dev.warn(TAG, 'Dismiss cannot have a `purposeConsentDefault` parameter.');
       return Promise.resolve();
     }
@@ -838,7 +838,7 @@ export class AmpConsent extends AMP.BaseElement {
         // no need to prompt if remote reponse say so
         // Also no need to display postPromptUI
         this.consentStateManager_.updateConsentInstanceState(
-          CONSENT_ITEM_STATE_ENUM.NOT_REQUIRED
+          ConsentItemState_Enum.NOT_REQUIRED
         );
         return false;
       }

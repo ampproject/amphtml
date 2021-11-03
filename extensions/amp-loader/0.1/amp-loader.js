@@ -25,7 +25,7 @@ const LOADER_APPEAR_TIME = 600;
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-const LOADER_BACKGROUND_TAGS_ENUM = {
+const LoaderBackgroundTags_Enum = {
   'AMP-IMG': true,
   'AMP-ANIM': true,
   'AMP-PINTEREST': true,
@@ -215,7 +215,7 @@ class LoaderBuilder {
     const {tagName} = this.element_;
 
     return (
-      LOADER_BACKGROUND_TAGS_ENUM[tagName] ||
+      LoaderBackgroundTags_Enum[tagName] ||
       isIframeVideoPlayerComponent(tagName)
     );
   }

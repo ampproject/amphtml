@@ -1,4 +1,4 @@
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 import {tryCallback} from '#core/error';
 
@@ -6,9 +6,9 @@ import {listen} from '#utils/event-helper';
 import {devAssert} from '#utils/log';
 
 import {
-  FX_OBSERVES_SIGNAL_ENUM,
-  FX_TYPE_ENUM, // eslint-disable-line no-unused-vars
   FxBindings,
+  FxObservesSignal_Enum,
+  FxType_Enum, // eslint-disable-line no-unused-vars
   getFxTypes,
 } from './fx-type';
 import {
@@ -39,7 +39,7 @@ export class AmpFxCollection {
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
-      listen(root, AMP_EVENTS_ENUM.DOM_UPDATE, () => this.scan_());
+      listen(root, AmpEvents_Enum.DOM_UPDATE, () => this.scan_());
     });
   }
 
@@ -77,12 +77,12 @@ export class AmpFxCollection {
 
   /**
    * @param {!Element} element
-   * @param {!FX_TYPE_ENUM} type
+   * @param {!FxType_Enum} type
    * @private
    */
   install_(element, type) {
     const {observes} = devAssert(FxBindings[type]);
-    if (observes == FX_OBSERVES_SIGNAL_ENUM.SCROLL_TOGGLE) {
+    if (observes == FxObservesSignal_Enum.SCROLL_TOGGLE) {
       installScrollToggledFx(this.ampdoc_, element, type);
       return;
     }

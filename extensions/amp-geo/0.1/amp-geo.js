@@ -38,7 +38,7 @@ import {Services} from '#service';
  */
 import {dev, user, userAssert} from '#utils/log';
 
-import {GEO_IN_GROUP_ENUM} from './amp-geo-in-group';
+import {GeoInGroup_Enum} from './amp-geo-in-group';
 import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 
 import {urls} from '../../../src/config';
@@ -67,7 +67,7 @@ const GEO_HOTPATCH_STR_REGEX = /^(?:(\w{2})(?:\s(\w{2}-\w{2}))?)?\s*/;
  * Operating Mode
  * @enum {number}
  */
-const MODE_ENUM = {
+const Mode_Enum = {
   GEO_HOT_PATCH: 0, // Default mode, geo is patched by GFE when js is served
   GEO_PRERENDER: 1, // We've been prerendered by an AMP Cache or publisher CMS
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
@@ -80,7 +80,7 @@ const MODE_ENUM = {
  *   ISOCountry: string,
  *   matchedISOCountryGroups: !Array<string>,
  *   allISOCountryGroups: !Array<string>,
- *   isInCountryGroup: (function(string):GEO_IN_GROUP_ENUM),
+ *   isInCountryGroup: (function(string):GeoInGroup_Enum),
  * }}
  */
 export let GeoDef;
@@ -96,7 +96,7 @@ export class AmpGeo extends AMP.BaseElement {
     super(element);
 
     /** @private {number} */
-    this.mode_ = MODE_ENUM.GEO_HOT_PATCH;
+    this.mode_ = Mode_Enum.GEO_HOT_PATCH;
     /** @private {boolean} */
     this.error_ = false;
     /** @private {string} */
@@ -188,7 +188,7 @@ export class AmpGeo extends AMP.BaseElement {
           // Allow subdivision_ to be customized for testing, not checking us-ca
           this.subdivision_ = overrideGeoMatch[2];
         }
-        this.mode_ = MODE_ENUM.GEO_OVERRIDE;
+        this.mode_ = Mode_Enum.GEO_OVERRIDE;
       }
     } else if (
       preRenderMatch &&
@@ -198,11 +198,11 @@ export class AmpGeo extends AMP.BaseElement {
       // since there is no way the publisher could know the geo of the client.
       // When caches start pre-rendering geo we'll need to add specifc code
       // to handle that.
-      this.mode_ = MODE_ENUM.GEO_PRERENDER;
+      this.mode_ = Mode_Enum.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
     } else if (trimmedGeoMatch[1]) {
       // We have a valid 2 letter ISO country
-      this.mode_ = MODE_ENUM.GEO_HOT_PATCH;
+      this.mode_ = Mode_Enum.GEO_HOT_PATCH;
       this.country_ = trimmedGeoMatch[1].toLowerCase();
       if (
         trimmedGeoMatch[2] &&
@@ -213,7 +213,7 @@ export class AmpGeo extends AMP.BaseElement {
       }
     } else if (trimmedGeoMatch[0] === '' && urls.geoApi) {
       // We were not patched, but an API is available
-      this.mode_ = MODE_ENUM.GEO_API;
+      this.mode_ = Mode_Enum.GEO_API;
     } else if (trimmedGeoMatch[0] === '' && !getMode(this.win).localDev) {
       // We were not patched, if we're not in dev this is an error
       // and we leave the country at the default 'unknown'
@@ -224,7 +224,7 @@ export class AmpGeo extends AMP.BaseElement {
       );
     }
 
-    return this.mode_ !== MODE_ENUM.GEO_API
+    return this.mode_ !== Mode_Enum.GEO_API
       ? Promise.resolve()
       : this.fetchCountry_().then((data) => {
           if (data) {
@@ -466,11 +466,11 @@ export class AmpGeo extends AMP.BaseElement {
         let classesToRemove = [];
 
         switch (self.mode_) {
-          case MODE_ENUM.GEO_OVERRIDE:
+          case Mode_Enum.GEO_OVERRIDE:
             classesToRemove = self.clearPreRender_(body);
           // Intentionally fall through.
-          case MODE_ENUM.GEO_HOT_PATCH:
-          case MODE_ENUM.GEO_API:
+          case Mode_Enum.GEO_HOT_PATCH:
+          case Mode_Enum.GEO_API:
             // Build the AMP State, add classes
             states.ISOCountry = self.country_;
 
@@ -524,7 +524,7 @@ export class AmpGeo extends AMP.BaseElement {
             }, body);
 
             break;
-          case MODE_ENUM.GEO_PRERENDER:
+          case Mode_Enum.GEO_PRERENDER:
             break;
         }
 
@@ -541,7 +541,7 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * isInCountryGroup API
    * @param {string} targetGroup group or comma delimited list of groups
-   * @return {GEO_IN_GROUP_ENUM}
+   * @return {GeoInGroup_Enum}
    * @public
    */
   isInCountryGroup(targetGroup) {
@@ -553,7 +553,7 @@ export class AmpGeo extends AMP.BaseElement {
         return this.definedGroups_.indexOf(group) >= 0;
       }).length !== targets.length
     ) {
-      return GEO_IN_GROUP_ENUM.NOT_DEFINED;
+      return GeoInGroup_Enum.NOT_DEFINED;
     }
 
     // If any of the groups match it's a match
@@ -562,11 +562,11 @@ export class AmpGeo extends AMP.BaseElement {
         return this.matchedGroups_.indexOf(group) >= 0;
       }).length > 0
     ) {
-      return GEO_IN_GROUP_ENUM.IN;
+      return GeoInGroup_Enum.IN;
     }
 
     // If we got here nothing matched
-    return GEO_IN_GROUP_ENUM.NOT_IN;
+    return GeoInGroup_Enum.NOT_IN;
   }
 }
 

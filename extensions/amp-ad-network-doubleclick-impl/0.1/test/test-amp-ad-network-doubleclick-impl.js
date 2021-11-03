@@ -6,12 +6,12 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 
 import {
-  CONSENT_POLICY_STATE_ENUM,
-  CONSENT_STRING_TYPE_ENUM,
+  ConsentPolicyState_Enum,
+  ConsentStringType_Enum,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import * as bytesUtils from '#core/types/string/bytes';
 
 import {toggleExperiment} from '#experiments';
@@ -22,12 +22,12 @@ import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
-  XORIGIN_MODE_ENUM,
+  XoriginMode_Enum,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {
   AMP_SIGNATURE_HEADER,
-  VERIFICATION_STATUS_ENUM,
+  VerificationStatus_Enum,
 } from '../../../amp-a4a/0.1/signature-verifier';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
@@ -1024,7 +1024,7 @@ for (const {config, name} of [
 
         it('should return empty string if unknown consentState', () =>
           impl
-            .getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN})
+            .getAdUrl({consentState: ConsentPolicyState_Enum.UNKNOWN})
             .then((url) => {
               expect(url).equal('');
               return expect(impl.getAdUrlDeferred.promise).to.eventually.equal(
@@ -1036,7 +1036,7 @@ for (const {config, name} of [
           impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
           impl.uiHandler = {isStickyAd: () => false};
           return impl
-            .getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN})
+            .getAdUrl({consentState: ConsentPolicyState_Enum.UNKNOWN})
             .then((url) => {
               expect(url).to.match(/(\?|&)npa=1(&|$)/);
             });
@@ -1045,7 +1045,7 @@ for (const {config, name} of [
         it('should include npa=1 if insufficient consent', () => {
           impl.uiHandler = {isStickyAd: () => false};
           return impl
-            .getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.INSUFFICIENT})
+            .getAdUrl({consentState: ConsentPolicyState_Enum.INSUFFICIENT})
             .then((url) => {
               expect(url).to.match(/(\?|&)npa=1(&|$)/);
             });
@@ -1054,7 +1054,7 @@ for (const {config, name} of [
         it('should not include npa, if sufficient consent', () => {
           impl.uiHandler = {isStickyAd: () => false};
           return impl
-            .getAdUrl({consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT})
+            .getAdUrl({consentState: ConsentPolicyState_Enum.SUFFICIENT})
             .then((url) => {
               expect(url).to.not.match(/(\?|&)npa=(&|$)/);
             });
@@ -1064,7 +1064,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
-              consentState: CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
+              consentState: ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED,
             })
             .then((url) => {
               expect(url).to.not.match(/(\?|&)npa=(&|$)/);
@@ -1075,7 +1075,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl(
-              {consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT},
+              {consentState: ConsentPolicyState_Enum.SUFFICIENT},
               undefined,
               true
             )
@@ -1088,7 +1088,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl(
-              {consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT},
+              {consentState: ConsentPolicyState_Enum.SUFFICIENT},
               undefined,
               true
             )
@@ -1101,7 +1101,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl(
-              {consentState: CONSENT_POLICY_STATE_ENUM.INSUFFICIENT},
+              {consentState: ConsentPolicyState_Enum.INSUFFICIENT},
               undefined,
               false
             )
@@ -1156,7 +1156,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
-              consentStringType: CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
+              consentStringType: ConsentStringType_Enum.US_PRIVACY_STRING,
               consentString: 'usPrivacyString',
             })
             .then((url) => {
@@ -1169,7 +1169,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
-              consentStringType: CONSENT_STRING_TYPE_ENUM.TCF_V2,
+              consentStringType: ConsentStringType_Enum.TCF_V2,
               consentString: 'gdprString',
             })
             .then((url) => {
@@ -1242,7 +1242,7 @@ for (const {config, name} of [
           const impl = new AmpAdNetworkDoubleclickImpl(element);
           expect(
             impl.getPageParameters({
-              consentState: CONSENT_POLICY_STATE_ENUM.INSUFFICIENT,
+              consentState: ConsentPolicyState_Enum.INSUFFICIENT,
             }).npa
           ).to.equal(1);
         });
@@ -1259,7 +1259,7 @@ for (const {config, name} of [
           impl.serveNpaSignal_ = true;
           expect(
             impl.getPageParameters({
-              consentState: CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
+              consentState: ConsentPolicyState_Enum.SUFFICIENT,
             }).npa
           ).to.equal(1);
         });
@@ -1399,7 +1399,7 @@ for (const {config, name} of [
         function stubForAmpCreative() {
           env.sandbox
             .stub(signatureVerifierFor(impl.win), 'verify')
-            .callsFake(() => Promise.resolve(VERIFICATION_STATUS_ENUM.OK));
+            .callsFake(() => Promise.resolve(VerificationStatus_Enum.OK));
         }
 
         /**
@@ -1723,9 +1723,9 @@ for (const {config, name} of [
         });
 
         it('should return safeframe if fluid', () => {
-          impl.isLayoutSupported(LAYOUT_ENUM.FLUID);
+          impl.isLayoutSupported(Layout_Enum.FLUID);
           expect(impl.getNonAmpCreativeRenderingMethod()).to.equal(
-            XORIGIN_MODE_ENUM.SAFEFRAME
+            XoriginMode_Enum.SAFEFRAME
           );
         });
 
@@ -1735,7 +1735,7 @@ for (const {config, name} of [
             new AmpAdNetworkDoubleclickImpl(
               element
             ).getNonAmpCreativeRenderingMethod()
-          ).to.equal(XORIGIN_MODE_ENUM.SAFEFRAME);
+          ).to.equal(XoriginMode_Enum.SAFEFRAME);
         });
       });
 

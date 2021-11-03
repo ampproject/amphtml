@@ -1,5 +1,5 @@
 import {
-  SHADOW_DOM_VERSION_ENUM,
+  ShadowDomVersion_Enum,
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
@@ -31,7 +31,7 @@ describes.realWin('Web Components spec', {}, (env) => {
       win.Element.prototype.attachShadow = undefined;
 
       expect(getShadowDomSupportedVersion(win.Element)).to.equal(
-        SHADOW_DOM_VERSION_ENUM.NONE
+        ShadowDomVersion_Enum.NONE
       );
     });
 
@@ -41,7 +41,7 @@ describes.realWin('Web Components spec', {}, (env) => {
         !!win.Element.prototype.attachShadow
       ) {
         expect(getShadowDomSupportedVersion(win.Element)).to.equal(
-          SHADOW_DOM_VERSION_ENUM.V1
+          ShadowDomVersion_Enum.V1
         );
       }
     });
@@ -51,7 +51,7 @@ describes.realWin('Web Components spec', {}, (env) => {
         win.Element.prototype.attachShadow = undefined;
 
         expect(getShadowDomSupportedVersion(win.Element)).to.equal(
-          SHADOW_DOM_VERSION_ENUM.V0
+          ShadowDomVersion_Enum.V0
         );
       }
     });

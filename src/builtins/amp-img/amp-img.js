@@ -1,8 +1,8 @@
-import {READY_STATE_ENUM} from '#core/constants/ready-state';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 import {isServerRendered, removeElement} from '#core/dom';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
 import {
-  LAYOUT_ENUM,
+  Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -138,7 +138,7 @@ export class AmpImg extends BaseElement {
       }
 
       if (AmpImg.R1() && !this.img_.complete) {
-        this.setReadyState(READY_STATE_ENUM.LOADING);
+        this.setReadyState(ReadyState_Enum.LOADING);
       }
     }
   }
@@ -270,7 +270,7 @@ export class AmpImg extends BaseElement {
     const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
     let defaultSize = width + 'px';
 
-    if (this.getLayout() !== LAYOUT_ENUM.FIXED) {
+    if (this.getLayout() !== Layout_Enum.FIXED) {
       const ratio = Math.round((width * 100) / viewportWidth);
       defaultSize = Math.max(ratio, 100) + 'vw';
     }
@@ -310,21 +310,21 @@ export class AmpImg extends BaseElement {
     const img = this.initialize_();
     if (!initialized) {
       listen(img, 'load', () => {
-        this.setReadyState(READY_STATE_ENUM.COMPLETE);
+        this.setReadyState(ReadyState_Enum.COMPLETE);
         this.firstLayoutCompleted();
         this.hideFallbackImg_();
       });
       listen(img, 'error', (reason) => {
-        this.setReadyState(READY_STATE_ENUM.ERROR, reason);
+        this.setReadyState(ReadyState_Enum.ERROR, reason);
         this.onImgLoadingError_();
       });
     }
     if (img.complete) {
-      this.setReadyState(READY_STATE_ENUM.COMPLETE);
+      this.setReadyState(ReadyState_Enum.COMPLETE);
       this.firstLayoutCompleted();
       this.hideFallbackImg_();
     } else {
-      this.setReadyState(READY_STATE_ENUM.LOADING);
+      this.setReadyState(ReadyState_Enum.LOADING);
     }
   }
 

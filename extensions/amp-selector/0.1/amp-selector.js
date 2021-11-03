@@ -1,6 +1,6 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {isRTL, tryFocus} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {mod} from '#core/math';
@@ -22,7 +22,7 @@ const TAG = 'amp-selector';
  *
  * @enum {string}
  */
-const KEYBOARD_SELECT_MODES_ENUM = {
+const KeyboardSelectModes_Enum = {
   NONE: 'none',
   FOCUS: 'focus',
   SELECT: 'select',
@@ -62,7 +62,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.focusedIndex_ = 0;
 
     /** @private {!KEYBOARD_SELECT_MODES} */
-    this.kbSelectMode_ = KEYBOARD_SELECT_MODES_ENUM.NONE;
+    this.kbSelectMode_ = KeyboardSelectModes_Enum.NONE;
   }
 
   /** @override */
@@ -91,18 +91,16 @@ export class AmpSelector extends AMP.BaseElement {
     if (kbSelectMode) {
       kbSelectMode = kbSelectMode.toLowerCase();
       userAssert(
-        isEnumValue(KEYBOARD_SELECT_MODES_ENUM, kbSelectMode),
+        isEnumValue(KeyboardSelectModes_Enum, kbSelectMode),
         `Unknown keyboard-select-mode: ${kbSelectMode}`
       );
       userAssert(
-        !(
-          this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES_ENUM.SELECT
-        ),
+        !(this.isMultiple_ && kbSelectMode == KeyboardSelectModes_Enum.SELECT),
         '[keyboard-select-mode=select] not supported for multiple ' +
           'selection amp-selector'
       );
     } else {
-      kbSelectMode = KEYBOARD_SELECT_MODES_ENUM.NONE;
+      kbSelectMode = KeyboardSelectModes_Enum.NONE;
     }
     this.kbSelectMode_ = /** @type {!KEYBOARD_SELECT_MODES} */ (kbSelectMode);
 
@@ -120,7 +118,7 @@ export class AmpSelector extends AMP.BaseElement {
         const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
         this.select_(delta, trust);
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
 
     this.registerAction(
@@ -130,7 +128,7 @@ export class AmpSelector extends AMP.BaseElement {
         const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
         this.select_(delta, trust);
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
 
     this.registerAction(
@@ -149,7 +147,7 @@ export class AmpSelector extends AMP.BaseElement {
           return Promise.reject("'index' must be specified");
         }
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
 
     /** If the element is in an `email` document, allow its `clear`,
@@ -162,7 +160,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     // Triggers on DOM children updates
     this.element.addEventListener(
-      AMP_EVENTS_ENUM.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       this.maybeRefreshOnUpdate_.bind(this)
     );
   }
@@ -238,7 +236,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   updateFocus_(opt_focusEl) {
-    if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES_ENUM.NONE) {
+    if (this.kbSelectMode_ == KeyboardSelectModes_Enum.NONE) {
       // Don't manage focus.
       return;
     }
@@ -366,7 +364,7 @@ export class AmpSelector extends AMP.BaseElement {
       // Newly picked option should always have focus.
       this.updateFocus_(el);
       // User gesture trigger is "high" trust.
-      this.fireSelectEvent_(el, ACTION_TRUST_ENUM.HIGH);
+      this.fireSelectEvent_(el, ActionTrust_Enum.HIGH);
     });
   }
 
@@ -403,7 +401,7 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles toggle action.
    * @param {number} index
    * @param {boolean|undefined} value
-   * @param {!ACTION_TRUST_ENUM} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -441,7 +439,7 @@ export class AmpSelector extends AMP.BaseElement {
    * 'targetOption' - option value of the selected or deselected element.
    * 'selectedOptions' - array of option values of selected elements.
    * @param {!Element} el The element that was selected or deslected.
-   * @param {!ACTION_TRUST_ENUM} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   fireSelectEvent_(el, trust) {
@@ -460,7 +458,7 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles selectUp events.
    * @param {number} delta
-   * @param {!ACTION_TRUST_ENUM} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   select_(delta, trust) {
@@ -500,18 +498,18 @@ export class AmpSelector extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case KEYS_ENUM.LEFT_ARROW: /* fallthrough */
-      case KEYS_ENUM.UP_ARROW: /* fallthrough */
-      case KEYS_ENUM.RIGHT_ARROW: /* fallthrough */
-      case KEYS_ENUM.DOWN_ARROW: /* fallthrough */
-      case KEYS_ENUM.HOME: /* fallthrough */
-      case KEYS_ENUM.END:
-        if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES_ENUM.NONE) {
+      case Keys_Enum.LEFT_ARROW: /* fallthrough */
+      case Keys_Enum.UP_ARROW: /* fallthrough */
+      case Keys_Enum.RIGHT_ARROW: /* fallthrough */
+      case Keys_Enum.DOWN_ARROW: /* fallthrough */
+      case Keys_Enum.HOME: /* fallthrough */
+      case Keys_Enum.END:
+        if (this.kbSelectMode_ != KeyboardSelectModes_Enum.NONE) {
           return this.navigationKeyDownHandler_(event);
         }
         return Promise.resolve();
-      case KEYS_ENUM.ENTER: /* fallthrough */
-      case KEYS_ENUM.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         this.selectionKeyDownHandler_(event);
         return Promise.resolve();
     }
@@ -529,27 +527,27 @@ export class AmpSelector extends AMP.BaseElement {
     const doc = this.win.document;
     let dir = 0;
     switch (event.key) {
-      case KEYS_ENUM.LEFT_ARROW:
+      case Keys_Enum.LEFT_ARROW:
         // Left is considered 'previous' in LTR and 'next' in RTL.
         dir = isRTL(doc) ? 1 : -1;
         break;
-      case KEYS_ENUM.UP_ARROW:
+      case Keys_Enum.UP_ARROW:
         // Up is considered 'previous' in both LTR and RTL.
         dir = -1;
         break;
-      case KEYS_ENUM.RIGHT_ARROW:
+      case Keys_Enum.RIGHT_ARROW:
         // Right is considered 'next' in LTR and 'previous' in RTL.
         dir = isRTL(doc) ? -1 : 1;
         break;
-      case KEYS_ENUM.DOWN_ARROW:
+      case Keys_Enum.DOWN_ARROW:
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
-      case KEYS_ENUM.HOME:
+      case Keys_Enum.HOME:
         // Home looks for first nonhidden element, in 'next' direction.
         dir = 1;
         break;
-      case KEYS_ENUM.END:
+      case Keys_Enum.END:
         // End looks for last nonhidden element, in 'previous' direction.
         dir = -1;
         break;
@@ -566,10 +564,10 @@ export class AmpSelector extends AMP.BaseElement {
 
       // For Home/End keys, start at end/beginning respectively and wrap around
       switch (event.key) {
-        case KEYS_ENUM.HOME:
+        case Keys_Enum.HOME:
           this.focusedIndex_ = this.elements_.length - 1;
           break;
-        case KEYS_ENUM.END:
+        case Keys_Enum.END:
           this.focusedIndex_ = 0;
           break;
       }
@@ -596,7 +594,7 @@ export class AmpSelector extends AMP.BaseElement {
       tryFocus(newSelectedOption);
 
       const focusedOption = this.elements_[this.focusedIndex_];
-      if (this.kbSelectMode_ == KEYBOARD_SELECT_MODES_ENUM.SELECT) {
+      if (this.kbSelectMode_ == KeyboardSelectModes_Enum.SELECT) {
         this.onOptionPicked_(focusedOption);
       }
     });
@@ -609,7 +607,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   selectionKeyDownHandler_(event) {
     const {key} = event;
-    if (key == KEYS_ENUM.SPACE || key == KEYS_ENUM.ENTER) {
+    if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
       if (this.elements_.includes(dev().assertElement(event.target))) {
         event.preventDefault();
         const el = dev().assertElement(event.target);

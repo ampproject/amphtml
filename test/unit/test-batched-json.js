@@ -3,7 +3,7 @@ import {Services} from '#service';
 import {user} from '#utils/log';
 
 import {
-  URL_REPLACEMENT_POLICY_ENUM,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../src/batched-json';
 
@@ -74,7 +74,7 @@ describes.sandboxed('batchFetchJsonFor', {}, (env) => {
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
         urlReplacements.collectDisallowedVarsSync.withArgs(el).returns(['BAR']);
 
-        const optIn = URL_REPLACEMENT_POLICY_ENUM.OPT_IN;
+        const optIn = UrlReplacementPolicy_Enum.OPT_IN;
         const rejectError =
           /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
         return batchFetchJsonFor(ampdoc, el, {
@@ -91,7 +91,7 @@ describes.sandboxed('batchFetchJsonFor', {}, (env) => {
         .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
 
       const userError = env.sandbox.stub(user(), 'error');
-      const all = URL_REPLACEMENT_POLICY_ENUM.ALL;
+      const all = UrlReplacementPolicy_Enum.ALL;
       return batchFetchJsonFor(ampdoc, el, {urlReplacement: all}).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
         expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;

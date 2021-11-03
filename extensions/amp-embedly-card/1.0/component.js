@@ -1,4 +1,4 @@
-import {MESSAGE_TYPE_ENUM, deserializeMessage} from '#core/3p-frame-messaging';
+import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
 
 import * as Preact from '#preact';
 import {useCallback, useContext, useState} from '#preact';
@@ -31,7 +31,7 @@ export function BentoEmbedlyCardWithRef(
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
-      if (data['type'] == MESSAGE_TYPE_ENUM.EMBED_SIZE) {
+      if (data['type'] == MessageType_Enum.EMBED_SIZE) {
         const height = data['height'];
         if (requestResize) {
           requestResize(height);

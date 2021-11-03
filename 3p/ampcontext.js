@@ -1,5 +1,5 @@
-import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {isObject} from '#core/types';
 import {dict, map} from '#core/types/object';
@@ -129,8 +129,8 @@ export class AbstractAmpContext {
   /** Registers an general handler for page visibility. */
   listenForPageVisibility_() {
     this.client_.makeRequest(
-      MESSAGE_TYPE_ENUM.SEND_EMBED_STATE,
-      MESSAGE_TYPE_ENUM.EMBED_STATE,
+      MessageType_Enum.SEND_EMBED_STATE,
+      MessageType_Enum.EMBED_STATE,
       (data) => {
         this.hidden = data['pageHidden'];
         this.dispatchVisibilityChangeEvent_();
@@ -145,7 +145,7 @@ export class AbstractAmpContext {
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
     event.data = {hidden: this.hidden};
-    event.initEvent(AMP_EVENTS_ENUM.VISIBILITY_CHANGE, true, true);
+    event.initEvent(AmpEvents_Enum.VISIBILITY_CHANGE, true, true);
     this.win_.dispatchEvent(event);
   }
 
@@ -158,7 +158,7 @@ export class AbstractAmpContext {
    */
   onPageVisibilityChange(callback) {
     return this.client_.registerCallback(
-      MESSAGE_TYPE_ENUM.EMBED_STATE,
+      MessageType_Enum.EMBED_STATE,
       (data) => {
         callback({hidden: data['pageHidden']});
       }
@@ -174,8 +174,8 @@ export class AbstractAmpContext {
    */
   observeIntersection(callback) {
     return this.client_.makeRequest(
-      MESSAGE_TYPE_ENUM.SEND_INTERSECTIONS,
-      MESSAGE_TYPE_ENUM.INTERSECTION,
+      MessageType_Enum.SEND_INTERSECTIONS,
+      MessageType_Enum.INTERSECTION,
       (intersection) => {
         callback(intersection['changes']);
       }
@@ -191,7 +191,7 @@ export class AbstractAmpContext {
    */
   getHtml(selector, attributes, callback) {
     this.client_.getData(
-      MESSAGE_TYPE_ENUM.GET_HTML,
+      MessageType_Enum.GET_HTML,
       dict({
         'selector': selector,
         'attributes': attributes,
@@ -206,7 +206,7 @@ export class AbstractAmpContext {
    * @param {function(*)} callback
    */
   getConsentState(callback) {
-    this.client_.getData(MESSAGE_TYPE_ENUM.GET_CONSENT_STATE, null, callback);
+    this.client_.getData(MessageType_Enum.GET_CONSENT_STATE, null, callback);
   }
 
   /**
@@ -220,7 +220,7 @@ export class AbstractAmpContext {
   requestResize(width, height, hasOverflow) {
     const requestId = this.nextResizeRequestId_++;
     this.client_.sendMessage(
-      MESSAGE_TYPE_ENUM.EMBED_SIZE,
+      MessageType_Enum.EMBED_SIZE,
       dict({
         'id': requestId,
         'width': width,
@@ -238,7 +238,7 @@ export class AbstractAmpContext {
    */
   listenToResizeResponse_() {
     this.client_.registerCallback(
-      MESSAGE_TYPE_ENUM.EMBED_SIZE_CHANGED,
+      MessageType_Enum.EMBED_SIZE_CHANGED,
       (data) => {
         const id = data['id'];
         if (id !== undefined) {
@@ -249,7 +249,7 @@ export class AbstractAmpContext {
     );
 
     this.client_.registerCallback(
-      MESSAGE_TYPE_ENUM.EMBED_SIZE_DENIED,
+      MessageType_Enum.EMBED_SIZE_DENIED,
       (data) => {
         const id = data['id'];
         if (id !== undefined) {
@@ -266,7 +266,7 @@ export class AbstractAmpContext {
    */
   sendDeprecationNotice_(endpoint) {
     this.client_.sendMessage(
-      MESSAGE_TYPE_ENUM.USER_ERROR_IN_IFRAME,
+      MessageType_Enum.USER_ERROR_IN_IFRAME,
       dict({
         'message': `${endpoint} is deprecated`,
         'expected': true,
@@ -283,7 +283,7 @@ export class AbstractAmpContext {
    */
   onResizeSuccess(callback) {
     this.client_.registerCallback(
-      MESSAGE_TYPE_ENUM.EMBED_SIZE_CHANGED,
+      MessageType_Enum.EMBED_SIZE_CHANGED,
       (obj) => {
         callback(obj['requestedHeight'], obj['requestedWidth']);
       }
@@ -299,12 +299,9 @@ export class AbstractAmpContext {
    *    request is denied.
    */
   onResizeDenied(callback) {
-    this.client_.registerCallback(
-      MESSAGE_TYPE_ENUM.EMBED_SIZE_DENIED,
-      (obj) => {
-        callback(obj['requestedHeight'], obj['requestedWidth']);
-      }
-    );
+    this.client_.registerCallback(MessageType_Enum.EMBED_SIZE_DENIED, (obj) => {
+      callback(obj['requestedHeight'], obj['requestedWidth']);
+    });
     this.sendDeprecationNotice_('onResizeDenied');
   }
 
@@ -312,7 +309,7 @@ export class AbstractAmpContext {
    *  Make the ad interactive.
    */
   signalInteractive() {
-    this.client_.sendMessage(MESSAGE_TYPE_ENUM.SIGNAL_INTERACTIVE);
+    this.client_.sendMessage(MessageType_Enum.SIGNAL_INTERACTIVE);
   }
 
   /**
@@ -329,7 +326,7 @@ export class AbstractAmpContext {
    *  Notifies the parent document of no content available inside embed.
    */
   noContentAvailable() {
-    this.client_.sendMessage(MESSAGE_TYPE_ENUM.NO_CONTENT);
+    this.client_.sendMessage(MessageType_Enum.NO_CONTENT);
   }
 
   /**
@@ -429,7 +426,7 @@ export class AbstractAmpContext {
       return;
     }
     this.client_.sendMessage(
-      MESSAGE_TYPE_ENUM.USER_ERROR_IN_IFRAME,
+      MessageType_Enum.USER_ERROR_IN_IFRAME,
       dict({
         'message': e.message,
       })

@@ -24,7 +24,7 @@ import {webPushServiceForDoc} from './web-push-service';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /** @enum {string} */
-export const WEB_PUSH_CONFIG_ATTRIBUTES_ENUM = {
+export const WebPushConfigAttributes_Enum = {
   HELPER_FRAME_URL: 'helper-iframe-url',
   PERMISSION_DIALOG_URL: 'permission-dialog-url',
   SERVICE_WORKER_URL: 'service-worker-url',
@@ -32,7 +32,7 @@ export const WEB_PUSH_CONFIG_ATTRIBUTES_ENUM = {
 };
 
 /** @enum {string} */
-export const WEB_PUSH_WIDGET_ACTIONS_ENUM = {
+export const WebPushWidgetActions_Enum = {
   SUBSCRIBE: 'subscribe',
   UNSUBSCRIBE: 'unsubscribe',
 };
@@ -78,8 +78,8 @@ export class WebPushConfig extends AMP.BaseElement {
       'service-worker-scope': null,
     };
 
-    for (const attribute in WEB_PUSH_CONFIG_ATTRIBUTES_ENUM) {
-      const value = WEB_PUSH_CONFIG_ATTRIBUTES_ENUM[attribute];
+    for (const attribute in WebPushConfigAttributes_Enum) {
+      const value = WebPushConfigAttributes_Enum[attribute];
       userAssert(
         this.element.getAttribute(value) || value === 'service-worker-scope',
         `The ${value} attribute is required for <${CONFIG_TAG}>`
@@ -141,8 +141,8 @@ export class WebPushConfig extends AMP.BaseElement {
   parseConfig() {
     const config = {};
 
-    for (const attribute in WEB_PUSH_CONFIG_ATTRIBUTES_ENUM) {
-      const value = WEB_PUSH_CONFIG_ATTRIBUTES_ENUM[attribute];
+    for (const attribute in WebPushConfigAttributes_Enum) {
+      const value = WebPushConfigAttributes_Enum[attribute];
       config[value] = this.element.getAttribute(value);
     }
 
@@ -159,11 +159,11 @@ export class WebPushConfig extends AMP.BaseElement {
     });
 
     this.registerAction(
-      WEB_PUSH_WIDGET_ACTIONS_ENUM.SUBSCRIBE,
+      WebPushWidgetActions_Enum.SUBSCRIBE,
       this.onSubscribe_.bind(this)
     );
     this.registerAction(
-      WEB_PUSH_WIDGET_ACTIONS_ENUM.UNSUBSCRIBE,
+      WebPushWidgetActions_Enum.UNSUBSCRIBE,
       this.onUnsubscribe_.bind(this)
     );
   }

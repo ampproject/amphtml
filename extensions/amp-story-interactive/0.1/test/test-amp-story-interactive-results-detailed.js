@@ -1,10 +1,10 @@
 import {
-  ACTION_ENUM,
+  Action_Enum,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveResultsDetailed} from '../amp-story-interactive-results-detailed';
-import {INTERACTIVE_TYPE_ENUM} from '../amp-story-interactive-abstract';
+import {InteractiveType_Enum} from '../amp-story-interactive-abstract';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {addConfigToInteractive, addThresholdsToInteractive} from './helpers';
@@ -84,10 +84,10 @@ describes.realWin(
       addConfigToInteractive(ampStoryResultsDetailed, 3);
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {'resultscategory': 'results-category 2'},
-        'type': INTERACTIVE_TYPE_ENUM.POLL,
+        'type': InteractiveType_Enum.POLL,
       });
       expect(
         ampStoryResultsDetailed.rootEl_.querySelector(
@@ -100,15 +100,15 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
       expect(
         ampStoryResultsDetailed.rootEl_.querySelector(
@@ -121,20 +121,20 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
       expect(
         ampStoryResultsDetailed.rootEl_.querySelector(
@@ -145,25 +145,25 @@ describes.realWin(
 
     it('should correctly create elements corresponding to the number of quizzes', async () => {
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'l',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.POLL,
+        'type': InteractiveType_Enum.POLL,
       });
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
@@ -176,20 +176,20 @@ describes.realWin(
 
     it('should correctly create elements corresponding to the number of polls', async () => {
       addConfigToInteractive(ampStoryResultsDetailed, 3);
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.POLL,
+        'type': InteractiveType_Enum.POLL,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.POLL,
+        'type': InteractiveType_Enum.POLL,
       });
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
@@ -203,10 +203,10 @@ describes.realWin(
     it('should correctly set images for the detailed results elements', async () => {
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
       const image = 'https://example.com/image';
-      storeService.dispatch(ACTION_ENUM.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct', image},
-        'type': INTERACTIVE_TYPE_ENUM.QUIZ,
+        'type': InteractiveType_Enum.QUIZ,
       });
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();

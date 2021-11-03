@@ -1,6 +1,6 @@
 import {
-  EXTERNAL_CORE_PUB_VARS_ENUM,
-  LAYOUT_TYPE_ENUM,
+  ExternalCorePubVars_Enum,
+  LayoutType_Enum,
 } from '#ads/google/a4a/shared/content-recommendation';
 import {
   getMatchedContentResponsiveHeightAndUpdatePubParams,
@@ -136,38 +136,38 @@ describes.sandboxed(
       expect(
         getMatchedContentResponsiveHeightAndUpdatePubParams(400, element)
       ).to.equal(1472);
+      expect(element.getAttribute(ExternalCorePubVars_Enum.ROWS_NUM)).to.equal(
+        '12'
+      );
       expect(
-        element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM)
-      ).to.equal('12');
-      expect(
-        element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM)
+        element.getAttribute(ExternalCorePubVars_Enum.COLUMNS_NUM)
       ).to.equal('1');
-      expect(
-        element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE)
-      ).to.equal(LAYOUT_TYPE_ENUM.MOBILE_BANNER_IMAGE_SIDEBYSIDE);
+      expect(element.getAttribute(ExternalCorePubVars_Enum.UI_TYPE)).to.equal(
+        LayoutType_Enum.MOBILE_BANNER_IMAGE_SIDEBYSIDE
+      );
     });
 
     it('should use pub control logic when pub params present', () => {
       const element = document.createElement('div');
-      element.setAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM, '1,2');
-      element.setAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM, '3,4');
+      element.setAttribute(ExternalCorePubVars_Enum.ROWS_NUM, '1,2');
+      element.setAttribute(ExternalCorePubVars_Enum.COLUMNS_NUM, '3,4');
       element.setAttribute(
-        EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE,
-        `${LAYOUT_TYPE_ENUM.IMAGE_SIDEBYSIDE},${LAYOUT_TYPE_ENUM.IMAGE_STACKED}`
+        ExternalCorePubVars_Enum.UI_TYPE,
+        `${LayoutType_Enum.IMAGE_SIDEBYSIDE},${LayoutType_Enum.IMAGE_STACKED}`
       );
 
       expect(
         getMatchedContentResponsiveHeightAndUpdatePubParams(800, element)
       ).to.equal(382);
+      expect(element.getAttribute(ExternalCorePubVars_Enum.ROWS_NUM)).to.equal(
+        '2'
+      );
       expect(
-        element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.ROWS_NUM)
-      ).to.equal('2');
-      expect(
-        element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.COLUMNS_NUM)
+        element.getAttribute(ExternalCorePubVars_Enum.COLUMNS_NUM)
       ).to.equal('4');
-      expect(
-        element.getAttribute(EXTERNAL_CORE_PUB_VARS_ENUM.UI_TYPE)
-      ).to.equal(LAYOUT_TYPE_ENUM.PUB_CONTROL_IMAGE_STACKED);
+      expect(element.getAttribute(ExternalCorePubVars_Enum.UI_TYPE)).to.equal(
+        LayoutType_Enum.PUB_CONTROL_IMAGE_STACKED
+      );
     });
   }
 );

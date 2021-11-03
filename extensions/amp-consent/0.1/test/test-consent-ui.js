@@ -1,11 +1,11 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
-  CONSENT_ITEM_STATE_ENUM,
-  PURPOSE_CONSENT_STATE_ENUM,
+  ConsentItemState_Enum,
+  PurposeConsentState_Enum,
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE_ENUM} from '#core/constants/consent-state';
+import {ConsentStringType_Enum} from '#core/constants/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
@@ -84,13 +84,13 @@ describes.realWin(
           getLastConsentInstanceInfo: () => {
             return Promise.resolve(
               constructConsentInfo(
-                CONSENT_ITEM_STATE_ENUM.ACCEPTED,
+                ConsentItemState_Enum.ACCEPTED,
                 'test',
                 constructMetadata(
-                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
+                  ConsentStringType_Enum.TCF_V2,
                   '1~1.10.12.103'
                 ),
-                {'abc': PURPOSE_CONSENT_STATE_ENUM.ACCEPTED}
+                {'abc': PurposeConsentState_Enum.ACCEPTED}
               )
             );
           },
@@ -365,7 +365,7 @@ describes.realWin(
             'consentState': 'accepted',
             'consentStateValue': 'accepted',
             'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE_ENUM.TCF_V2,
+              ConsentStringType_Enum.TCF_V2,
               '1~1.10.12.103'
             ),
             'consentString': 'test',

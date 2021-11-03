@@ -3,7 +3,7 @@ import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
-  A_4_A_VAR_NAMES_ENUM,
+  A4AVarNames_Enum,
   createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
@@ -170,8 +170,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     it('returns the created anchor', () => {
       const metadata = {
-        [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]: 'SHOP',
-        [A_4_A_VAR_NAMES_ENUM.CTA_URL]: 'https://www.cats.com',
+        [A4AVarNames_Enum.CTA_TYPE]: 'SHOP',
+        [A4AVarNames_Enum.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -189,9 +189,9 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     it('returns null if button text is too long', () => {
       const metadata = {
-        [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]:
+        [A4AVarNames_Enum.CTA_TYPE]:
           'cta that is way too long to fit in a button',
-        [A_4_A_VAR_NAMES_ENUM.CTA_URL]: 'https://www.cats.com',
+        [A4AVarNames_Enum.CTA_URL]: 'https://www.cats.com',
       };
       const container = doc.createElement('div');
       container.width = '400px';
@@ -206,8 +206,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     it('returns null if url protocol is not http || https', () => {
       const metadata = {
-        [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]: 'SHOP',
-        [A_4_A_VAR_NAMES_ENUM.CTA_URL]: 'mailto:meow@cats.com',
+        [A4AVarNames_Enum.CTA_TYPE]: 'SHOP',
+        [A4AVarNames_Enum.CTA_URL]: 'mailto:meow@cats.com',
       };
       return createCta(
         doc,
@@ -240,8 +240,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         'cta-image':
           '/examples/visual-tests/picsum.photos/image1068_300x169.jpg',
         'theme': 'custom',
-        [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]: 'SHOP',
-        [A_4_A_VAR_NAMES_ENUM.CTA_URL]: 'https://www.cats.com',
+        [A4AVarNames_Enum.CTA_TYPE]: 'SHOP',
+        [A4AVarNames_Enum.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -277,8 +277,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     it('createCta page outlink light theme element', () => {
       const metadata = {
         'theme': 'light',
-        [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]: 'SHOP',
-        [A_4_A_VAR_NAMES_ENUM.CTA_URL]: 'https://www.cats.com',
+        [A4AVarNames_Enum.CTA_TYPE]: 'SHOP',
+        [A4AVarNames_Enum.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -302,8 +302,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     it('createCta page outlink dark theme element', () => {
       const metadata = {
         'theme': 'dark',
-        [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]: 'SHOP',
-        [A_4_A_VAR_NAMES_ENUM.CTA_URL]: 'https://www.cats.com',
+        [A4AVarNames_Enum.CTA_TYPE]: 'SHOP',
+        [A4AVarNames_Enum.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,
@@ -329,8 +329,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         'theme': 'dark',
         'cta-accent-color': '#FF00FF',
         'cta-accent-element': 'text',
-        [A_4_A_VAR_NAMES_ENUM.CTA_TYPE]: 'SHOP',
-        [A_4_A_VAR_NAMES_ENUM.CTA_URL]: 'https://www.cats.com',
+        [A4AVarNames_Enum.CTA_TYPE]: 'SHOP',
+        [A4AVarNames_Enum.CTA_URL]: 'https://www.cats.com',
       };
       return createCta(
         doc,

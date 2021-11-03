@@ -1,5 +1,5 @@
 import {
-  SHADOW_DOM_VERSION_ENUM,
+  ShadowDomVersion_Enum,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
 } from '#core/dom/web-components';
@@ -26,9 +26,9 @@ describes.sandboxed('shadow-embed', {}, (env) => {
   });
 
   [
-    SHADOW_DOM_VERSION_ENUM.NONE,
-    SHADOW_DOM_VERSION_ENUM.V0,
-    SHADOW_DOM_VERSION_ENUM.V1,
+    ShadowDomVersion_Enum.NONE,
+    ShadowDomVersion_Enum.V0,
+    ShadowDomVersion_Enum.V1,
   ].forEach((scenario) => {
     describe('shadow APIs', () => {
       let hostElement;
@@ -42,14 +42,14 @@ describes.sandboxed('shadow-embed', {}, (env) => {
       describe(scenario, function () {
         before(function () {
           if (
-            scenario == SHADOW_DOM_VERSION_ENUM.V0 &&
+            scenario == ShadowDomVersion_Enum.V0 &&
             !Element.prototype.createShadowRoot
           ) {
             this.skipTest();
           }
 
           if (
-            scenario == SHADOW_DOM_VERSION_ENUM.V1 &&
+            scenario == ShadowDomVersion_Enum.V1 &&
             !Element.prototype.attachShadow
           ) {
             this.skipTest();
@@ -62,7 +62,7 @@ describes.sandboxed('shadow-embed', {}, (env) => {
           const style = installStylesForDoc(ampdoc, 'body {}', null, true);
           expect(shadowRoot.contains(style)).to.be.true;
           const css = style.textContent.replace(/\s/g, '');
-          if (scenario == SHADOW_DOM_VERSION_ENUM.NONE) {
+          if (scenario == ShadowDomVersion_Enum.NONE) {
             expect(css).to.match(/amp-body/);
           } else {
             expect(css).to.equal('body{}');
@@ -97,7 +97,7 @@ describes.sandboxed('shadow-embed', {}, (env) => {
             expect(shadowRoot.getElementById(spanId)).to.equal(span);
           });
 
-          if (scenario == SHADOW_DOM_VERSION_ENUM.NONE) {
+          if (scenario == ShadowDomVersion_Enum.NONE) {
             it('should add id for polyfill', () => {
               const shadowRoot = createShadowRoot(hostElement);
               expect(shadowRoot.tagName).to.equal('I-AMPHTML-SHADOW-ROOT');
@@ -199,10 +199,10 @@ describes.sandboxed('shadow-embed', {}, (env) => {
             const body = importShadowBody(shadowRoot, source, true);
             expect(shadowRoot.body).to.equal(body);
             expect(body.tagName).to.equal(
-              scenario == SHADOW_DOM_VERSION_ENUM.NONE ? 'AMP-BODY' : 'BODY'
+              scenario == ShadowDomVersion_Enum.NONE ? 'AMP-BODY' : 'BODY'
             );
             expect(body.style.position).to.equal('relative');
-            if (scenario == SHADOW_DOM_VERSION_ENUM.NONE) {
+            if (scenario == ShadowDomVersion_Enum.NONE) {
               expect(body.style.display).to.equal('block');
             }
             expect(shadowRoot.contains(body)).to.be.true;
@@ -216,10 +216,10 @@ describes.sandboxed('shadow-embed', {}, (env) => {
             const body = importShadowBody(shadowRoot, source, false);
             expect(shadowRoot.body).to.equal(body);
             expect(body.tagName).to.equal(
-              scenario == SHADOW_DOM_VERSION_ENUM.NONE ? 'AMP-BODY' : 'BODY'
+              scenario == ShadowDomVersion_Enum.NONE ? 'AMP-BODY' : 'BODY'
             );
             expect(body.style.position).to.equal('relative');
-            if (scenario == SHADOW_DOM_VERSION_ENUM.NONE) {
+            if (scenario == ShadowDomVersion_Enum.NONE) {
               expect(body.style.display).to.equal('block');
             }
             expect(shadowRoot.contains(body)).to.be.true;

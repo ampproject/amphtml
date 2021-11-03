@@ -1,9 +1,9 @@
 import {
   AmpStoryInteractive,
-  INTERACTIVE_TYPE_ENUM,
+  InteractiveType_Enum,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-0.1.css';
-import {STATE_PROPERTY_ENUM} from '../../amp-story/1.0/amp-story-store-service';
+import {StateProperty_Enum} from '../../amp-story/1.0/amp-story-store-service';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {dev} from '#utils/log';
 import {htmlFor} from '#core/dom/static-template';
@@ -101,7 +101,7 @@ export const processResultsCategory = (interactiveState, options) => {
 
   // Vote for category for each answered poll
   Object.values(interactiveState).forEach((e) => {
-    if (e.type == INTERACTIVE_TYPE_ENUM.POLL) {
+    if (e.type == InteractiveType_Enum.POLL) {
       if (
         e.option &&
         e.option.resultscategory &&
@@ -133,7 +133,7 @@ export const processResultsPercentage = (interactiveState, options) => {
   let quizCount = 0;
   let quizCorrect = 0;
   Object.values(interactiveState).forEach((e) => {
-    if (e.type == INTERACTIVE_TYPE_ENUM.QUIZ) {
+    if (e.type == InteractiveType_Enum.QUIZ) {
       quizCount += 1;
       if (e.option && e.option.correct != null) {
         quizCorrect += 1;
@@ -186,7 +186,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, INTERACTIVE_TYPE_ENUM.RESULTS, [2, 4]);
+    super(element, InteractiveType_Enum.RESULTS, [2, 4]);
   }
 
   /** @override */
@@ -218,7 +218,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
       ).textContent = this.element.getAttribute('prompt-text');
     }
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.INTERACTIVE_REACT_STATE,
+      StateProperty_Enum.INTERACTIVE_REACT_STATE,
       (data) => this.onInteractiveReactStateUpdate(data),
       true
     );

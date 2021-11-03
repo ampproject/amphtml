@@ -9,8 +9,8 @@ import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
-  WEB_ANIMATION_PLAY_STATE_ENUM,
   WebAnimationDef,
+  WebAnimationPlayState_Enum,
   WebAnimationSelectorDef,
   WebAnimationTimingDef,
   WebKeyframesCreateFnDef,
@@ -59,7 +59,7 @@ export function hasAnimations(element) {
 }
 
 /** @enum {number} */
-const PLAYBACK_ACTIVITY_ENUM = {
+const PlaybackActivity_Enum = {
   START: 0,
   FINISH: 1,
 };
@@ -335,7 +335,7 @@ export class AnimationRunner {
       return;
     }
 
-    this.playback_(PLAYBACK_ACTIVITY_ENUM.START, this.getStartWaitPromise_());
+    this.playback_(PlaybackActivity_Enum.START, this.getStartWaitPromise_());
   }
 
   /**
@@ -360,10 +360,10 @@ export class AnimationRunner {
   /** @return {boolean} */
   hasStarted() {
     return (
-      this.isActivityScheduled_(PLAYBACK_ACTIVITY_ENUM.START) ||
+      this.isActivityScheduled_(PlaybackActivity_Enum.START) ||
       (!!this.runner_ &&
         devAssert(this.runner_).getPlayState() ==
-          WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING)
+          WebAnimationPlayState_Enum.RUNNING)
     );
   }
 
@@ -372,7 +372,7 @@ export class AnimationRunner {
     if (!this.runner_) {
       this.notifyFinish_();
     }
-    this.playback_(PLAYBACK_ACTIVITY_ENUM.FINISH);
+    this.playback_(PlaybackActivity_Enum.FINISH);
   }
 
   /** Pauses the animation. */
@@ -474,9 +474,9 @@ export class AnimationRunner {
       this.scheduledWait_ = null;
 
       switch (activity) {
-        case PLAYBACK_ACTIVITY_ENUM.START:
+        case PlaybackActivity_Enum.START:
           return this.startWhenReady_(runner);
-        case PLAYBACK_ACTIVITY_ENUM.FINISH:
+        case PlaybackActivity_Enum.FINISH:
           return this.finishWhenReady_(runner);
       }
     });
@@ -491,7 +491,7 @@ export class AnimationRunner {
     this.runner_ = runner;
 
     runner.onPlayStateChanged((state) => {
-      if (state == WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED) {
+      if (state == WebAnimationPlayState_Enum.FINISHED) {
         this.notifyFinish_();
       }
     });

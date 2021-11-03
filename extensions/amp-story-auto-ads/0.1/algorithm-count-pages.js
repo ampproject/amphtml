@@ -1,8 +1,8 @@
 import {hasOwn, map} from '#core/types/object';
 
-import {INSERTION_STATE_ENUM} from './story-ad-page-manager';
+import {InsertionState_Enum} from './story-ad-page-manager';
 
-import {STATE_PROPERTY_ENUM} from '../../amp-story/1.0/amp-story-store-service';
+import {StateProperty_Enum} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {number} */
 const INTERVAL = 7;
@@ -36,9 +36,7 @@ export class CountPagesAlgorithm {
 
   /** @override */
   isStoryEligible() {
-    const numPages = this.storeService_.get(
-      STATE_PROPERTY_ENUM.PAGE_IDS
-    ).length;
+    const numPages = this.storeService_.get(StateProperty_Enum.PAGE_IDS).length;
     return numPages > INTERVAL;
   }
 
@@ -84,9 +82,7 @@ export class CountPagesAlgorithm {
    * @return {boolean}
    */
   shouldCreateNextAd_(pageIndex) {
-    const numPages = this.storeService_.get(
-      STATE_PROPERTY_ENUM.PAGE_IDS
-    ).length;
+    const numPages = this.storeService_.get(StateProperty_Enum.PAGE_IDS).length;
     return numPages - pageIndex > INTERVAL;
   }
 
@@ -123,7 +119,7 @@ export class CountPagesAlgorithm {
       .maybeInsertPageAfter(pageBeforeAdId, nextAdPage)
       .then((insertionState) => {
         this.tryingToInsert_ = false;
-        if (insertionState === INSERTION_STATE_ENUM.SUCCESS) {
+        if (insertionState === InsertionState_Enum.SUCCESS) {
           // We have an ad inserted that has yet to be viewed.
           this.pendingAdView_ = true;
         }

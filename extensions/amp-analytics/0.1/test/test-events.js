@@ -1,8 +1,8 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
-  ANALYTICS_EVENT_TYPE_ENUM,
   AmpStoryEventTracker,
   AnalyticsEvent,
+  AnalyticsEventType_Enum,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
@@ -90,7 +90,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
   describe('AnalyticsEventType', () => {
     it('should match TRACKER_TYPES', () => {
-      const analyticsEventTypes = Object.values(ANALYTICS_EVENT_TYPE_ENUM);
+      const analyticsEventTypes = Object.values(AnalyticsEventType_Enum);
       const trackerTypes = Object.keys(trackerTypeForTesting);
       expect(analyticsEventTypes).to.deep.equal(trackerTypes);
     });
@@ -210,7 +210,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     let fakeViewport;
     let getFakeViewportChangedEvent;
     const defaultScrollConfig = {
-      'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+      'on': AnalyticsEventType_Enum.SCROLL,
       'scrollSpec': {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
@@ -220,7 +220,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
     beforeEach(() => {
       tracker = root.getTracker(
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         ScrollEventTracker
       );
       fakeViewport = {
@@ -256,7 +256,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         defaultScrollConfig,
         env.sandbox.stub()
       );
@@ -271,15 +271,15 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         defaultScrollConfig,
         fn1
       );
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         {
-          'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          'on': AnalyticsEventType_Enum.SCROLL,
           'scrollSpec': {
             'verticalBoundaries': [92],
             'horizontalBoundaries': [92],
@@ -332,9 +332,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         {
-          'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          'on': AnalyticsEventType_Enum.SCROLL,
           'scrollSpec': {
             'verticalBoundaries': [0, 50, 100],
           },
@@ -343,9 +343,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
       );
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         {
-          'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          'on': AnalyticsEventType_Enum.SCROLL,
           'scrollSpec': {
             'verticalBoundaries': [0, 50, 100],
             'useInitialPageSize': true,
@@ -398,7 +398,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn1 = env.sandbox.stub();
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         defaultScrollConfig,
         fn1
       );
@@ -419,17 +419,17 @@ describes.realWin('Events', {amp: 1}, (env) => {
       allowConsoleError(() => {
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
-          {'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL},
+          AnalyticsEventType_Enum.SCROLL,
+          {'on': AnalyticsEventType_Enum.SCROLL},
           fn1
         );
         expect(fn1).to.have.not.been.called;
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          AnalyticsEventType_Enum.SCROLL,
           {
-            'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+            'on': AnalyticsEventType_Enum.SCROLL,
             'scrollSpec': {},
           },
           fn1
@@ -438,9 +438,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          AnalyticsEventType_Enum.SCROLL,
           {
-            'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+            'on': AnalyticsEventType_Enum.SCROLL,
             'scrollSpec': {
               'verticalBoundaries': undefined,
               'horizontalBoundaries': undefined,
@@ -452,9 +452,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          AnalyticsEventType_Enum.SCROLL,
           {
-            'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+            'on': AnalyticsEventType_Enum.SCROLL,
             'scrollSpec': {
               'verticalBoundaries': [],
               'horizontalBoundaries': [],
@@ -466,9 +466,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          AnalyticsEventType_Enum.SCROLL,
           {
-            'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+            'on': AnalyticsEventType_Enum.SCROLL,
             'scrollSpec': {
               'verticalBoundaries': ['foo'],
               'horizontalBoundaries': ['foo'],
@@ -500,9 +500,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         {
-          'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          'on': AnalyticsEventType_Enum.SCROLL,
           'scrollSpec': {
             'verticalBoundaries': [1],
           },
@@ -511,9 +511,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
       );
       tracker.add(
         undefined,
-        ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+        AnalyticsEventType_Enum.SCROLL,
         {
-          'on': ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          'on': AnalyticsEventType_Enum.SCROLL,
           'scrollSpec': {
             'verticalBoundaries': [4],
           },
@@ -534,7 +534,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     beforeEach(() => {
       clock = env.sandbox.useFakeTimers();
       tracker = root.getTracker(
-        ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
+        AnalyticsEventType_Enum.CUSTOM,
         CustomEventTracker
       );
       getElementSpy = env.sandbox.spy(root, 'getElement');
@@ -779,7 +779,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     beforeEach(() => {
       clock = env.sandbox.useFakeTimers();
       tracker = root.getTracker(
-        ANALYTICS_EVENT_TYPE_ENUM.STORY,
+        AnalyticsEventType_Enum.STORY,
         AmpStoryEventTracker
       );
       rootTarget = root.getRootElement();
@@ -1163,7 +1163,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     beforeEach(() => {
       clock = fakeTimers.withGlobal(root.ampdoc.win).install();
       tracker = root.getTracker(
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         TimerEventTracker
       );
     });
@@ -1196,7 +1196,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {},
             handler
           );
@@ -1204,7 +1204,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {timerSpec: 1},
             handler
           );
@@ -1212,7 +1212,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {timerSpec: {}},
             handler
           );
@@ -1220,7 +1220,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: null,
@@ -1232,7 +1232,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: 'two',
@@ -1244,7 +1244,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: 0.1,
@@ -1256,7 +1256,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: 0.49,
@@ -1268,7 +1268,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: 1,
@@ -1281,7 +1281,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: 1,
@@ -1294,7 +1294,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: 1,
@@ -1310,7 +1310,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       expect(() => {
         tracker.add(
           analyticsElement,
-          ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+          AnalyticsEventType_Enum.TIMER,
           {timerSpec: {interval: 1}},
           handler
         );
@@ -1320,7 +1320,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       expect(() => {
         tracker.add(
           analyticsElement,
-          ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+          AnalyticsEventType_Enum.TIMER,
           {
             timerSpec: {
               startSpec: {on: 'click', selector: '.target'},
@@ -1341,7 +1341,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 1,
@@ -1363,18 +1363,18 @@ describes.realWin('Events', {amp: 1}, (env) => {
       expect(fn1).to.be.calledOnce;
       expect(fn1.args[0][0]).to.be.instanceOf(AnalyticsEvent);
       expect(fn1.args[0][0].target).to.equal(root.getRootElement());
-      expect(fn1.args[0][0].type).to.equal(ANALYTICS_EVENT_TYPE_ENUM.TIMER);
+      expect(fn1.args[0][0].type).to.equal(AnalyticsEventType_Enum.TIMER);
       target.click(); // Stop timer.
 
       const fn2 = env.sandbox.stub();
       const customTracker = root.getTracker(
-        ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
+        AnalyticsEventType_Enum.CUSTOM,
         CustomEventTracker
       );
       const getElementSpy = env.sandbox.spy(root, 'getElement');
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 1,
@@ -1395,7 +1395,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(fn2).to.be.calledOnce;
         expect(fn2.args[0][0]).to.be.instanceOf(AnalyticsEvent);
         expect(fn2.args[0][0].target).to.equal(root.getRootElement());
-        expect(fn2.args[0][0].type).to.equal(ANALYTICS_EVENT_TYPE_ENUM.TIMER);
+        expect(fn2.args[0][0].type).to.equal(AnalyticsEventType_Enum.TIMER);
         customTracker.trigger(new AnalyticsEvent(target, 'custom-event-stop'));
 
         expect(getElementSpy.returnValues.length).to.equal(2);
@@ -1415,7 +1415,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         const fn1 = env.sandbox.stub();
         tracker.add(
           analyticsElement,
-          ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+          AnalyticsEventType_Enum.TIMER,
           {
             timerSpec: {
               interval: 1,
@@ -1459,7 +1459,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         expect(() => {
           tracker.add(
             analyticsElement,
-            ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+            AnalyticsEventType_Enum.TIMER,
             {
               timerSpec: {
                 interval: 0,
@@ -1474,7 +1474,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 1,
@@ -1485,14 +1485,14 @@ describes.realWin('Events', {amp: 1}, (env) => {
       expect(fn2).to.be.calledOnce;
       expect(fn2.args[0][0]).to.be.instanceOf(AnalyticsEvent);
       expect(fn2.args[0][0].target).to.equal(root.getRootElement());
-      expect(fn2.args[0][0].type).to.equal(ANALYTICS_EVENT_TYPE_ENUM.TIMER);
+      expect(fn2.args[0][0].type).to.equal(AnalyticsEventType_Enum.TIMER);
     });
 
     it('fires on the appropriate interval', () => {
       const fn1 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1505,7 +1505,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 15,
@@ -1518,7 +1518,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn3 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1532,7 +1532,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn4 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 15,
@@ -1563,14 +1563,14 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
       expect(fn1.args[0][0]).to.be.instanceOf(AnalyticsEvent);
       expect(fn1.args[0][0].target).to.equal(root.getRootElement());
-      expect(fn1.args[0][0].type).to.equal(ANALYTICS_EVENT_TYPE_ENUM.TIMER);
+      expect(fn1.args[0][0].type).to.equal(AnalyticsEventType_Enum.TIMER);
     });
 
     it('stops firing after the maxTimerLength is exceeded', () => {
       const fn1 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1584,7 +1584,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1598,7 +1598,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn3 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 3600,
@@ -1611,7 +1611,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn4 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1625,7 +1625,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn5 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1674,7 +1674,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn1 = env.sandbox.stub();
       const u1 = tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1688,7 +1688,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       const u2 = tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1715,7 +1715,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn1 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1729,7 +1729,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 10,
@@ -1750,7 +1750,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
       const handler = env.sandbox.stub();
       tracker.add(
         analyticsElement,
-        ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+        AnalyticsEventType_Enum.TIMER,
         {
           timerSpec: {
             interval: 3,

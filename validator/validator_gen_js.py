@@ -266,7 +266,7 @@ def ElementTypeFor(descriptor, field_desc):
           lambda: 'boolean',
       descriptor.FieldDescriptor.TYPE_STRING:
           lambda: 'string',
-      descriptor.FieldDescriptor.TYPE_ENUM: (
+      descriptor.FieldDescriptor.Type_Enum: (
           lambda: field_desc.enum_type.full_name),
       descriptor.FieldDescriptor.TYPE_MESSAGE: (
           lambda: field_desc.message_type.full_name)
@@ -312,7 +312,7 @@ def ValueToString(descriptor, field_desc, value):
     if value:
       return 'true'
     return 'false'
-  if field_desc.type == descriptor.FieldDescriptor.TYPE_ENUM:
+  if field_desc.type == descriptor.FieldDescriptor.Type_Enum:
     enum_value_name = field_desc.enum_type.values_by_number[value].name
     return '%s.%s' % (field_desc.enum_type.full_name, enum_value_name)
   if value is None:

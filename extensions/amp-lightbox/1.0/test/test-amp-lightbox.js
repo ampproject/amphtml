@@ -1,7 +1,7 @@
 import '../amp-lightbox';
 import {ActionInvocation} from '#service/action-impl';
 import {
-  ACTION_TRUST_ENUM,
+  ActionTrust_Enum,
   DEFAULT_ACTION,
 } from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
@@ -80,7 +80,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ACTION_TRUST_ENUM.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,

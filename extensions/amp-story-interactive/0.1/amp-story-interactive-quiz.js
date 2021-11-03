@@ -1,9 +1,9 @@
 import {
   AmpStoryInteractive,
-  INTERACTIVE_TYPE_ENUM,
+  InteractiveType_Enum,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 import objstr from 'obj-str';
@@ -49,7 +49,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, INTERACTIVE_TYPE_ENUM.QUIZ);
+    super(element, InteractiveType_Enum.QUIZ);
 
     /** @private {!Array<string>} */
     this.localizedAnswerChoices_ = [];
@@ -79,10 +79,10 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
 
     // Localize the answer choice options
     this.localizedAnswerChoices_ = [
-      LOCALIZED_STRING_ID_ENUM.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
-      LOCALIZED_STRING_ID_ENUM.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
-      LOCALIZED_STRING_ID_ENUM.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
-      LOCALIZED_STRING_ID_ENUM.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
     ].map((choice) => this.localizationService.getLocalizedString(choice));
     const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-quiz-option-container'

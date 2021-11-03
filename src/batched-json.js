@@ -27,7 +27,7 @@ export let BatchFetchOptionsDef;
 /**
  * @enum {number}
  */
-export const URL_REPLACEMENT_POLICY_ENUM = {
+export const UrlReplacementPolicy_Enum = {
   NONE: 0,
   OPT_IN: 1,
   ALL: 2,
@@ -47,7 +47,7 @@ export const URL_REPLACEMENT_POLICY_ENUM = {
 export function batchFetchJsonFor(ampdoc, element, options = {}) {
   const {
     expr = '.',
-    urlReplacement = URL_REPLACEMENT_POLICY_ENUM.NONE,
+    urlReplacement = UrlReplacementPolicy_Enum.NONE,
     refresh = false,
     xssiPrefix = undefined,
   } = options;
@@ -84,14 +84,14 @@ export function requestForBatchFetch(element, replacement, refresh) {
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(element);
   const promise =
-    replacement >= URL_REPLACEMENT_POLICY_ENUM.OPT_IN
+    replacement >= UrlReplacementPolicy_Enum.OPT_IN
       ? urlReplacements.expandUrlAsync(url)
       : Promise.resolve(url);
 
   return promise.then((xhrUrl) => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
-    if (replacement == URL_REPLACEMENT_POLICY_ENUM.OPT_IN) {
+    if (replacement == UrlReplacementPolicy_Enum.OPT_IN) {
       const invalid = urlReplacements.collectDisallowedVarsSync(element);
       if (invalid.length > 0) {
         throw user().createError(

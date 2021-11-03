@@ -5,7 +5,7 @@
 /**
  * @enum {string}
  */
-const MESSAGE_TYPE_ENUM = {
+const MessageType_Enum = {
   iframeReady: 'iframe-ready',
   workerReady: 'worker-ready',
   init: 'init-worker',
@@ -22,7 +22,7 @@ let parentOrigin = '*';
  * @param {*} message
  */
 function send(type, message) {
-  if (type !== MESSAGE_TYPE_ENUM.iframeReady && parentOrigin === '*') {
+  if (type !== MessageType_Enum.iframeReady && parentOrigin === '*') {
     throw new Error('Broadcast banned except for iframe-ready message.');
   }
   parent./*OK*/ postMessage({type, message}, parentOrigin);
@@ -47,21 +47,21 @@ function listen(type, handler) {
 }
 
 // Send initialization.
-send(MESSAGE_TYPE_ENUM.iframeReady);
+send(MessageType_Enum.iframeReady);
 
 let worker = null;
 // Listen for Worker Init.
-listen(MESSAGE_TYPE_ENUM.init, ({code}) => {
+listen(MessageType_Enum.init, ({code}) => {
   if (worker) {
     return;
   }
   worker = new Worker(URL.createObjectURL(new Blob([code])));
 
   // Proxy messages Worker to parent Window.
-  worker.onmessage = (e) => send(MESSAGE_TYPE_ENUM.onmessage, e.data);
-  worker.onmessageerror = (e) => send(MESSAGE_TYPE_ENUM.onmessageerror, e.data);
+  worker.onmessage = (e) => send(MessageType_Enum.onmessage, e.data);
+  worker.onmessageerror = (e) => send(MessageType_Enum.onmessageerror, e.data);
   worker.onerror = (e) =>
-    send(MESSAGE_TYPE_ENUM.onerror, {
+    send(MessageType_Enum.onerror, {
       lineno: e.lineno,
       colno: e.colno,
       message: e.message,
@@ -69,9 +69,9 @@ listen(MESSAGE_TYPE_ENUM.init, ({code}) => {
     });
 
   // Proxy message from parent Window to Worker.
-  listen(MESSAGE_TYPE_ENUM./*OK*/ postMessage, ({message}) =>
+  listen(MessageType_Enum./*OK*/ postMessage, ({message}) =>
     worker./*OK*/ postMessage(message)
   );
 
-  send(MESSAGE_TYPE_ENUM.workerReady);
+  send(MessageType_Enum.workerReady);
 });

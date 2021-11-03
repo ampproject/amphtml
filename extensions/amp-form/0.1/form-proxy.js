@@ -163,7 +163,7 @@ function setupLegacyProxy(form, proxy) {
     const desc = LEGACY_PROPS[name];
     const current = form[name];
     if (desc) {
-      if (desc.access == LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE) {
+      if (desc.access == LegacyPropAccessType_Enum.READ_ONCE) {
         // A property such as `style`. The only way is to read this value
         // once and use it for all subsequent calls.
         let actual;
@@ -186,7 +186,7 @@ function setupLegacyProxy(form, proxy) {
             return actual;
           },
         });
-      } else if (desc.access == LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR) {
+      } else if (desc.access == LegacyPropAccessType_Enum.ATTR) {
         // An attribute-based property. We can use DOM API to read and write
         // with a minimal type conversion.
         const attr = desc.attr || name;
@@ -196,13 +196,13 @@ function setupLegacyProxy(form, proxy) {
             if (value == null && desc.def !== undefined) {
               return desc.def;
             }
-            if (desc.type == LEGACY_PROP_DATA_TYPE_ENUM.BOOL) {
+            if (desc.type == LegacyPropDataType_Enum.BOOL) {
               return value === 'true';
             }
-            if (desc.type == LEGACY_PROP_DATA_TYPE_ENUM.TOGGLE) {
+            if (desc.type == LegacyPropDataType_Enum.TOGGLE) {
               return value != null;
             }
-            if (desc.type == LEGACY_PROP_DATA_TYPE_ENUM.URL) {
+            if (desc.type == LegacyPropDataType_Enum.URL) {
               // URLs, e.g. in `action` attribute are resolved against the
               // document's base.
               const str = /** @type {string} */ (value || '');
@@ -211,7 +211,7 @@ function setupLegacyProxy(form, proxy) {
             return value;
           },
           set(value) {
-            if (desc.type == LEGACY_PROP_DATA_TYPE_ENUM.TOGGLE) {
+            if (desc.type == LegacyPropDataType_Enum.TOGGLE) {
               if (value) {
                 value = '';
               } else {
@@ -245,7 +245,7 @@ function setupLegacyProxy(form, proxy) {
 /**
  * @enum {number}
  */
-const LEGACY_PROP_ACCESS_TYPE_ENUM = {
+const LegacyPropAccessType_Enum = {
   ATTR: 1,
   READ_ONCE: 2,
 };
@@ -253,7 +253,7 @@ const LEGACY_PROP_ACCESS_TYPE_ENUM = {
 /**
  * @enum {number}
  */
-const LEGACY_PROP_DATA_TYPE_ENUM = {
+const LegacyPropDataType_Enum = {
   URL: 1,
   BOOL: 2,
   TOGGLE: 3,
@@ -269,92 +269,92 @@ const LEGACY_PROP_DATA_TYPE_ENUM = {
  */
 const LEGACY_PROPS = {
   'acceptCharset': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
     attr: 'accept-charset',
   },
   'accessKey': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
     attr: 'accesskey',
   },
   'action': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
-    type: LEGACY_PROP_DATA_TYPE_ENUM.URL,
+    access: LegacyPropAccessType_Enum.ATTR,
+    type: LegacyPropDataType_Enum.URL,
   },
   'attributes': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'autocomplete': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
     def: 'on',
   },
   'children': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'dataset': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'dir': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
   },
   'draggable': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
-    type: LEGACY_PROP_DATA_TYPE_ENUM.BOOL,
+    access: LegacyPropAccessType_Enum.ATTR,
+    type: LegacyPropDataType_Enum.BOOL,
     def: false,
   },
   'elements': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'encoding': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'enctype': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
   },
   'hidden': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
-    type: LEGACY_PROP_DATA_TYPE_ENUM.TOGGLE,
+    access: LegacyPropAccessType_Enum.ATTR,
+    type: LegacyPropDataType_Enum.TOGGLE,
     def: false,
   },
   'id': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
     def: '',
   },
   'lang': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
   },
   'localName': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'method': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
     def: 'get',
   },
   'name': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
   },
   'noValidate': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
     attr: 'novalidate',
-    type: LEGACY_PROP_DATA_TYPE_ENUM.TOGGLE,
+    type: LegacyPropDataType_Enum.TOGGLE,
     def: false,
   },
   'prefix': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'spellcheck': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
   },
   'style': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.READ_ONCE,
+    access: LegacyPropAccessType_Enum.READ_ONCE,
   },
   'target': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
     def: '',
   },
   'title': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
   },
   'translate': {
-    access: LEGACY_PROP_ACCESS_TYPE_ENUM.ATTR,
+    access: LegacyPropAccessType_Enum.ATTR,
   },
 };

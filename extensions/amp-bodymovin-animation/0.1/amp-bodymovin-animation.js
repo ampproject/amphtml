@@ -1,4 +1,4 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -90,21 +90,21 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       () => {
         this.play_();
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'pause',
       () => {
         this.pause_();
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'stop',
       () => {
         this.stop_();
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'seekTo',
@@ -114,7 +114,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
           this.seekTo_(args);
         }
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
   }
 

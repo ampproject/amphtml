@@ -1,4 +1,4 @@
-import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {Services} from '#service';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dict} from '#core/types/object';
@@ -65,7 +65,7 @@ export class LegacyAdIntersectionObserverHost {
      */
     this.postMessageApi_ = new SubscriptionApi(
       adIframe,
-      MESSAGE_TYPE_ENUM.SEND_INTERSECTIONS,
+      MessageType_Enum.SEND_INTERSECTIONS,
       true, // is3p
       // Each time someone subscribes we make sure that they
       // get an update.
@@ -199,7 +199,7 @@ export class LegacyAdIntersectionObserverHost {
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
     this.postMessageApi_.send(
-      MESSAGE_TYPE_ENUM.INTERSECTION,
+      MessageType_Enum.INTERSECTION,
       dict({
         'changes': this.pendingChanges_,
       })

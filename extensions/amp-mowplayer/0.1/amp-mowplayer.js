@@ -23,7 +23,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-mowplayer';
 
@@ -31,7 +31,7 @@ const TAG = 'amp-mowplayer';
  * @enum {number}
  * @private
  */
-const PLAYER_STATES_ENUM = {
+const PlayerStates_Enum = {
   UNSTARTED: -1,
   ENDED: 0,
   PLAYING: 1,
@@ -132,7 +132,7 @@ class AmpMowplayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
       this.listenToFrame_();
-      dispatchCustomEvent(this.element, VIDEO_EVENTS_ENUM.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
     });
     this.playerReadyResolver_(loaded);
 
@@ -233,12 +233,12 @@ class AmpMowplayer extends AMP.BaseElement {
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
       redispatch(element, playerState.toString(), {
-        [PLAYER_STATES_ENUM.PLAYING]: VIDEO_EVENTS_ENUM.PLAYING,
-        [PLAYER_STATES_ENUM.PAUSED]: VIDEO_EVENTS_ENUM.PAUSE,
+        [PlayerStates_Enum.PLAYING]: VideoEvents_Enum.PLAYING,
+        [PlayerStates_Enum.PAUSED]: VideoEvents_Enum.PAUSE,
         // mowplayer does not fire pause and ended together.
-        [PLAYER_STATES_ENUM.ENDED]: [
-          VIDEO_EVENTS_ENUM.ENDED,
-          VIDEO_EVENTS_ENUM.PAUSE,
+        [PlayerStates_Enum.ENDED]: [
+          VideoEvents_Enum.ENDED,
+          VideoEvents_Enum.PAUSE,
         ],
       });
       return;

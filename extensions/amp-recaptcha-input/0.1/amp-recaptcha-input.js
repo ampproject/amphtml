@@ -9,11 +9,11 @@ import {
   recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
 import {
-  ASYNC_INPUT_ATTRIBUTES_ENUM,
-  ASYNC_INPUT_CLASSES_ENUM,
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
 } from '#core/constants/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {setStyles, toggle} from '#core/dom/style';
 import {userAssert} from '#utils/log';
 
@@ -57,9 +57,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     );
 
     userAssert(
-      this.element.getAttribute(ASYNC_INPUT_ATTRIBUTES_ENUM.NAME),
+      this.element.getAttribute(AsyncInputAttributes_Enum.NAME),
       'The %s attribute is required for <amp-recaptcha-input> %s',
-      ASYNC_INPUT_ATTRIBUTES_ENUM.NAME,
+      AsyncInputAttributes_Enum.NAME,
       this.element
     );
 
@@ -71,7 +71,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       return this.mutateElement(() => {
         toggle(this.element);
         // Add the required AsyncInput class
-        this.element.classList.add(ASYNC_INPUT_CLASSES_ENUM.ASYNC_INPUT);
+        this.element.classList.add(AsyncInputClasses_Enum.ASYNC_INPUT);
         /**
          * These styles will create an in-place element, that is 1x1,
          * but invisible. Absolute positioning keeps it where it would have
@@ -91,7 +91,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == LAYOUT_ENUM.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /** @override */

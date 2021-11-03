@@ -25,7 +25,7 @@ const DEFAULT_GROUP = 'default';
 const EXPOSED_CAPTION_CLASS = 'amp-lightbox-gallery-caption';
 
 /** @enum {string}  */
-const CAPTION_STATE_ENUM = {
+const CaptionState_Enum = {
   AUTO: 'auto',
   CLIP: 'clip',
   EXPAND: 'expanded',
@@ -141,7 +141,7 @@ export function BentoLightboxGalleryProviderWithRef(
 
   const captionRef = useRef(undefined);
   const [caption, setCaption] = useState(null);
-  const [captionState, setCaptionState] = useState(CAPTION_STATE_ENUM.AUTO);
+  const [captionState, setCaptionState] = useState(CaptionState_Enum.AUTO);
   useLayoutEffect(() => {
     carouselRef.current?.goToSlide(index);
     if (group) {
@@ -157,14 +157,14 @@ export function BentoLightboxGalleryProviderWithRef(
         // Normalized carousel index.
         mod(index, count.current[group]);
       setCaption(captions.current[group][inflatedIndex]);
-      setCaptionState(CAPTION_STATE_ENUM.AUTO);
+      setCaptionState(CaptionState_Enum.AUTO);
     }
   }, [group, index]);
 
   useLayoutEffect(() => {
     const {offsetHeight, scrollHeight} = captionRef.current ?? {};
     if (scrollHeight > offsetHeight + PADDING_ALLOWANCE) {
-      setCaptionState(CAPTION_STATE_ENUM.CLIP);
+      setCaptionState(CaptionState_Enum.CLIP);
     }
   }, [caption]);
 
@@ -225,15 +225,15 @@ export function BentoLightboxGalleryProviderWithRef(
             [classes[captionState]]: true,
           })}
           ref={captionRef}
-          {...(captionState === CAPTION_STATE_ENUM.AUTO
+          {...(captionState === CaptionState_Enum.AUTO
             ? null
             : {
                 onClick: () => {
                   onToggleCaption?.();
-                  if (captionState === CAPTION_STATE_ENUM.CLIP) {
-                    setCaptionState(CAPTION_STATE_ENUM.EXPAND);
+                  if (captionState === CaptionState_Enum.CLIP) {
+                    setCaptionState(CaptionState_Enum.EXPAND);
                   } else {
-                    setCaptionState(CAPTION_STATE_ENUM.CLIP);
+                    setCaptionState(CaptionState_Enum.CLIP);
                   }
                 },
                 ...CAPTION_PROPS,

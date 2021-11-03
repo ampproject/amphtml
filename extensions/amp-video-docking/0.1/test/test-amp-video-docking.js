@@ -5,11 +5,11 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {PLAYING_STATES_ENUM} from '../../../../src/video-interface';
+import {PlayingStates_Enum} from '../../../../src/video-interface';
 import {
-  ACTIONS_ENUM,
+  Actions_Enum,
   BASE_CLASS_NAME,
-  DOCK_TARGET_TYPE_ENUM,
+  DockTargetType_Enum,
   PLACEHOLDER_ICON_BREAKPOINTS,
   PLACEHOLDER_ICON_LARGE_MARGIN,
   PLACEHOLDER_ICON_LARGE_WIDTH,
@@ -19,7 +19,7 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {DIRECTION_X_ENUM, DIRECTION_Y_ENUM} from '../def';
+import {DirectionX_Enum, DirectionY_Enum} from '../def';
 
 const slotId = 'my-slot-element';
 
@@ -154,7 +154,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     manager = {
       getPlayingState() {
-        return PLAYING_STATES_ENUM.PLAYING_MANUAL;
+        return PlayingStates_Enum.PLAYING_MANUAL;
       },
       isMuted() {
         return false;
@@ -439,7 +439,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
           transitionDurationMs,
           // Expecting relative placement to apply icon styling but direction
           // is irrelevant in this case.
-          DIRECTION_X_ENUM.RIGHT
+          DirectionX_Enum.RIGHT
         );
 
         expect(
@@ -449,12 +449,12 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       [
         {
-          relativeX: DIRECTION_X_ENUM.RIGHT,
+          relativeX: DirectionX_Enum.RIGHT,
           relativeXTextual: 'right',
           expectedIconX: width - iconWidth - iconMargin * 2,
         },
         {
-          relativeX: DIRECTION_X_ENUM.LEFT,
+          relativeX: DirectionX_Enum.LEFT,
           relativeXTextual: 'left',
           expectedIconX: -width + iconWidth + iconMargin * 2,
         },
@@ -510,7 +510,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
           /* scale */ 0.5,
           /* step */ 0,
           /* transitionDurationMs */ 300,
-          DIRECTION_X_ENUM.RIGHT,
+          DirectionX_Enum.RIGHT,
           /* opt_clientRect */ undefined,
           'sticky'
         );
@@ -535,7 +535,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
           /* scale */ 0.5,
           /* step */ 0,
           /* transitionDurationMs */ 300,
-          DIRECTION_X_ENUM.RIGHT,
+          DirectionX_Enum.RIGHT,
           /* opt_clientRect */ undefined,
           'absolute'
         );
@@ -562,7 +562,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
           /* scale */ 0.5,
           /* step */ 0,
           /* transitionDurationMs */ 300,
-          DIRECTION_X_ENUM.RIGHT,
+          DirectionX_Enum.RIGHT,
           /* opt_clientRect */ undefined,
           'fixed'
         );
@@ -576,12 +576,12 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     [
       {
-        relativeX: DIRECTION_X_ENUM.RIGHT,
+        relativeX: DirectionX_Enum.RIGHT,
         directionTextual: 'left to right',
         hasAmpRtl: false,
       },
       {
-        relativeX: DIRECTION_X_ENUM.LEFT,
+        relativeX: DirectionX_Enum.LEFT,
         directionTextual: 'right to left',
         hasAmpRtl: true,
       },
@@ -877,13 +877,13 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     [
       {
-        expectedRelativeX: DIRECTION_X_ENUM.RIGHT,
+        expectedRelativeX: DirectionX_Enum.RIGHT,
         placementTextual: 'right',
         videoX: 0,
         targetX: 10,
       },
       {
-        expectedRelativeX: DIRECTION_X_ENUM.LEFT,
+        expectedRelativeX: DirectionX_Enum.LEFT,
         placementTextual: 'left',
         videoX: 10,
         targetX: 0,
@@ -923,7 +923,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       x: 20,
       y: 10,
       scale: 0.5,
-      relativeX: DIRECTION_X_ENUM.RIGHT,
+      relativeX: DirectionX_Enum.RIGHT,
     };
 
     beforeEach(() => {
@@ -1014,7 +1014,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       docking.setCurrentlyDocked_(video, target, step);
 
-      expect(trigger.withArgs(ACTIONS_ENUM.DOCK)).to.have.been.calledOnce;
+      expect(trigger.withArgs(Actions_Enum.DOCK)).to.have.been.calledOnce;
     });
 
     it('does not retrigger action', () => {
@@ -1024,7 +1024,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       docking.setCurrentlyDocked_(video, target, step);
       docking.setCurrentlyDocked_(video, target, step);
 
-      expect(trigger.withArgs(ACTIONS_ENUM.DOCK)).to.have.been.calledOnce;
+      expect(trigger.withArgs(Actions_Enum.DOCK)).to.have.been.calledOnce;
     });
 
     it('retriggers action when videos change', () => {
@@ -1034,7 +1034,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       docking.setCurrentlyDocked_({a: 'b'}, target, step);
       docking.setCurrentlyDocked_({c: 'd'}, target, step);
 
-      expect(trigger.withArgs(ACTIONS_ENUM.DOCK)).to.have.been.calledThrice;
+      expect(trigger.withArgs(Actions_Enum.DOCK)).to.have.been.calledThrice;
     });
 
     it('retriggers action when target rects change', () => {
@@ -1051,7 +1051,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       docking.setCurrentlyDocked_(video, d, step);
       docking.setCurrentlyDocked_(video, d, step);
 
-      expect(trigger.withArgs(ACTIONS_ENUM.DOCK).callCount).to.equal(4);
+      expect(trigger.withArgs(Actions_Enum.DOCK).callCount).to.equal(4);
     });
 
     it("updates controls' video reference", () => {
@@ -1073,7 +1073,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       x: 20,
       y: 10,
       scale: 0.5,
-      relativeX: DIRECTION_X_ENUM.RIGHT,
+      relativeX: DirectionX_Enum.RIGHT,
     };
 
     beforeEach(() => {
@@ -1101,7 +1101,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       await docking.undock_(video);
 
-      expect(trigger.withArgs(ACTIONS_ENUM.UNDOCK)).to.have.been.calledOnce;
+      expect(trigger.withArgs(Actions_Enum.UNDOCK)).to.have.been.calledOnce;
     });
 
     it('sets position: absolute on undock', async () => {
@@ -1367,7 +1367,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
           placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
 
-          setScrollDirection(DIRECTION_Y_ENUM.TOP);
+          setScrollDirection(DirectionY_Enum.TOP);
 
           setValidAreaWidth();
           setValidAreaHeight(videoHeight);
@@ -1378,9 +1378,9 @@ describes.realWin('video docking', {amp: true}, (env) => {
           expect(target.rect).to.not.be.null;
 
           if (useSlot) {
-            expect(target.type).to.equal(DOCK_TARGET_TYPE_ENUM.SLOT);
+            expect(target.type).to.equal(DockTargetType_Enum.SLOT);
           } else {
-            expect(target.type).to.equal(DOCK_TARGET_TYPE_ENUM.CORNER);
+            expect(target.type).to.equal(DockTargetType_Enum.CORNER);
             expect(target.directionX).to.not.be.undefined;
           }
         });
@@ -1398,7 +1398,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
           placeElementLtwh(video, 0, -200, videoWidth, videoHeight);
 
-          setScrollDirection(DIRECTION_Y_ENUM.TOP);
+          setScrollDirection(DirectionY_Enum.TOP);
 
           mockInvalidAreaWidth();
           setValidAreaHeight(videoHeight);
@@ -1417,7 +1417,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
           const videoWidth = 300;
           const videoHeight = 400;
 
-          setScrollDirection(DIRECTION_Y_ENUM.TOP);
+          setScrollDirection(DirectionY_Enum.TOP);
 
           setValidAreaWidth();
           setValidAreaHeight(videoHeight);
@@ -1440,7 +1440,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
           placeElementLtwh(video, 0, -100, 0, 0);
 
-          setScrollDirection(DIRECTION_Y_ENUM.TOP);
+          setScrollDirection(DirectionY_Enum.TOP);
 
           setValidAreaWidth();
           setValidAreaHeight();
@@ -1462,7 +1462,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
           docking.currentlyDocked_ = {video: createVideo()};
 
-          setScrollDirection(DIRECTION_Y_ENUM.TOP);
+          setScrollDirection(DirectionY_Enum.TOP);
 
           docking.updateOnPositionChange_(video);
 
@@ -1475,7 +1475,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
           const dock = stubDockInTransferLayerStep();
           const video = createVideo();
 
-          setScrollDirection(DIRECTION_Y_ENUM.TOP);
+          setScrollDirection(DirectionY_Enum.TOP);
 
           const videoWidth = 400;
           const videoHeight = 300;
@@ -1501,7 +1501,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
           setValidAreaWidth();
           setValidAreaHeight(videoHeight);
-          setScrollDirection(DIRECTION_Y_ENUM.TOP);
+          setScrollDirection(DirectionY_Enum.TOP);
           placeElementLtwh(video, 0, topBoundary + 1, videoWidth, videoHeight);
 
           docking.updateOnPositionChange_(video);
@@ -1525,8 +1525,8 @@ describes.realWin('video docking', {amp: true}, (env) => {
             video,
             target: {
               type: useSlot
-                ? DOCK_TARGET_TYPE_ENUM.SLOT
-                : DOCK_TARGET_TYPE_ENUM.CORNER,
+                ? DockTargetType_Enum.SLOT
+                : DockTargetType_Enum.CORNER,
               slot: useSlot ? slot : undefined,
             },
           };

@@ -1,4 +1,4 @@
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -9,7 +9,7 @@ import {
 import {dev} from '#utils/log';
 
 /** @const @enum {number} */
-const FULL_WIDTH_SIGNALS_ENUM = {
+const FullWidthSignals_Enum = {
   OVERFLOW_HIDDEN: 4,
   ELEMENT_HIDDEN: 128,
 };
@@ -25,13 +25,13 @@ function getElementWidthVisitor(setWidth) {
   return (element, style) => {
     const layout = element.getAttribute('layout');
     switch (layout) {
-      case LAYOUT_ENUM.FIXED:
+      case Layout_Enum.FIXED:
         setWidth(parseInt(element.getAttribute('width'), 10) || 0);
         return true;
-      case LAYOUT_ENUM.RESPONSIVE:
-      case LAYOUT_ENUM.FILL:
-      case LAYOUT_ENUM.FIXED_HEIGHT:
-      case LAYOUT_ENUM.FLUID:
+      case Layout_Enum.RESPONSIVE:
+      case Layout_Enum.FILL:
+      case Layout_Enum.FIXED_HEIGHT:
+      case Layout_Enum.FLUID:
         // The above layouts determine the width of the element by the
         // containing element, or by CSS max-width property.
         const maxWidth = parseInt(style.maxWidth, 10);
@@ -40,15 +40,15 @@ function getElementWidthVisitor(setWidth) {
           return true;
         }
         break;
-      case LAYOUT_ENUM.CONTAINER:
+      case Layout_Enum.CONTAINER:
         // Container layout allows the container's size to be determined by
         // the children within it, so in principle we can grow as large as the
         // viewport.
         const viewport = Services.viewportForDoc(dev().assertElement(element));
         setWidth(viewport.getSize().width);
         return true;
-      case LAYOUT_ENUM.NODISPLAY:
-      case LAYOUT_ENUM.FLEX_ITEM:
+      case Layout_Enum.NODISPLAY:
+      case Layout_Enum.FLEX_ITEM:
         setWidth(0);
         return true;
       default:
@@ -77,11 +77,11 @@ function getElementWidthVisitor(setWidth) {
 function getFullWidthSignalVisitor(setSignal) {
   return (element, style) => {
     if (style.overflowY && style.overflowY != 'visible') {
-      setSignal(FULL_WIDTH_SIGNALS_ENUM.OVERFLOW_HIDDEN);
+      setSignal(FullWidthSignals_Enum.OVERFLOW_HIDDEN);
       return true;
     }
     if (style.display == 'none') {
-      setSignal(FULL_WIDTH_SIGNALS_ENUM.ELEMENT_HIDDEN);
+      setSignal(FullWidthSignals_Enum.ELEMENT_HIDDEN);
       return true;
     }
   };

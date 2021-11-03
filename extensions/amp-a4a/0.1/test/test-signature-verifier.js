@@ -7,7 +7,7 @@ import {dev, user} from '#utils/log';
 
 import {
   SignatureVerifier,
-  VERIFICATION_STATUS_ENUM,
+  VerificationStatus_Enum,
 } from '../signature-verifier';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};
@@ -46,7 +46,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
         new Uint8Array(256)
       )
       .then((status) => {
-        expect(status).to.equal(VERIFICATION_STATUS_ENUM.CRYPTO_UNAVAILABLE);
+        expect(status).to.equal(VerificationStatus_Enum.CRYPTO_UNAVAILABLE);
         expect(env.fetchMock.called()).to.be.false;
       });
   });
@@ -148,7 +148,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             signature,
             creative1
           )
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.OK);
+        ).to.eventually.equal(VerificationStatus_Enum.OK);
       }));
 
     it('should verify multiple signatures with only one network request', () =>
@@ -167,7 +167,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               creative1
             )
             .then((status) => {
-              expect(status).to.equal(VERIFICATION_STATUS_ENUM.OK);
+              expect(status).to.equal(VerificationStatus_Enum.OK);
               verifier.loadKeyset('service-1');
               return expect(
                 verifier.verifyCreativeAndSignature(
@@ -176,7 +176,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   signature2,
                   creative2
                 )
-              ).to.eventually.equal(VERIFICATION_STATUS_ENUM.OK);
+              ).to.eventually.equal(VerificationStatus_Enum.OK);
             });
         })
       ));
@@ -197,7 +197,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               creative1
             )
             .then((status) => {
-              expect(status).to.equal(VERIFICATION_STATUS_ENUM.OK);
+              expect(status).to.equal(VerificationStatus_Enum.OK);
               env.fetchMock.getOnce(
                 'https://signingservice2.net/keyset.json',
                 jwkSet([key2])
@@ -210,7 +210,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   signature2,
                   creative2
                 )
-              ).to.eventually.equal(VERIFICATION_STATUS_ENUM.OK);
+              ).to.eventually.equal(VerificationStatus_Enum.OK);
             });
         })
       ));
@@ -232,7 +232,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               creative1
             )
             .then((status) => {
-              expect(status).to.equal(VERIFICATION_STATUS_ENUM.OK);
+              expect(status).to.equal(VerificationStatus_Enum.OK);
               env.fetchMock.getOnce(
                 'https://signingservice2.net/keyset.json',
                 jwkSet([key1FromService2])
@@ -245,7 +245,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   signature2,
                   creative2
                 )
-              ).to.eventually.equal(VERIFICATION_STATUS_ENUM.OK);
+              ).to.eventually.equal(VerificationStatus_Enum.OK);
             });
         });
       }));
@@ -267,7 +267,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             signature,
             creative1
           )
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.OK);
+        ).to.eventually.equal(VerificationStatus_Enum.OK);
       }));
 
     it('should return ERROR_KEY_NOT_FOUND for a nonexistent kid', () =>
@@ -287,7 +287,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             signature,
             creative1
           )
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.ERROR_KEY_NOT_FOUND);
+        ).to.eventually.equal(VerificationStatus_Enum.ERROR_KEY_NOT_FOUND);
       }));
 
     it('should not make more network requests retrying a nonexistent kid', () =>
@@ -313,7 +313,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             )
             .then((status) => {
               expect(status).to.equal(
-                VERIFICATION_STATUS_ENUM.ERROR_KEY_NOT_FOUND
+                VerificationStatus_Enum.ERROR_KEY_NOT_FOUND
               );
               verifier.loadKeyset('service-1');
               return expect(
@@ -324,7 +324,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   creative2
                 )
               ).to.eventually.equal(
-                VERIFICATION_STATUS_ENUM.ERROR_KEY_NOT_FOUND
+                VerificationStatus_Enum.ERROR_KEY_NOT_FOUND
               );
             });
         })
@@ -344,9 +344,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             signature,
             creative1
           )
-        ).to.eventually.equal(
-          VERIFICATION_STATUS_ENUM.ERROR_SIGNATURE_MISMATCH
-        );
+        ).to.eventually.equal(VerificationStatus_Enum.ERROR_SIGNATURE_MISMATCH);
       }));
 
     it('should return UNVERIFIED and report on Web Cryptography error', () =>
@@ -370,7 +368,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             signature,
             creative1
           )
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+        ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
       }));
 
     it('should return UNVERIFIED on network connectivity error', () =>
@@ -387,7 +385,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             signature,
             creative1
           )
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+        ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
       }));
 
     it('should not retry for same service on network connectivity error', () =>
@@ -406,7 +404,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               creative1
             )
             .then((status) => {
-              expect(status).to.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              expect(status).to.equal(VerificationStatus_Enum.UNVERIFIED);
               verifier.loadKeyset('service-1');
               return expect(
                 verifier.verifyCreativeAndSignature(
@@ -415,7 +413,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   signature2,
                   creative2
                 )
-              ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
             });
         })
       ));
@@ -437,7 +435,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               creative1
             )
             .then((status) => {
-              expect(status).to.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              expect(status).to.equal(VerificationStatus_Enum.UNVERIFIED);
               verifier.loadKeyset('service-1');
               return expect(
                 verifier.verifyCreativeAndSignature(
@@ -446,7 +444,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   signature2,
                   creative2
                 )
-              ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
             });
         })
       ));
@@ -468,7 +466,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               creative1
             )
             .then((status) => {
-              expect(status).to.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              expect(status).to.equal(VerificationStatus_Enum.UNVERIFIED);
               verifier.loadKeyset('service-1');
               return expect(
                 verifier.verifyCreativeAndSignature(
@@ -477,7 +475,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   signature2,
                   creative2
                 )
-              ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
             });
         })
       ));
@@ -500,7 +498,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
             signature,
             creative1
           )
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.OK);
+        ).to.eventually.equal(VerificationStatus_Enum.OK);
       }));
 
     it('should return UNVERIFIED, report, and not retry on malformed key', () =>
@@ -520,7 +518,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               creative1
             )
             .then((status) => {
-              expect(status).to.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              expect(status).to.equal(VerificationStatus_Enum.UNVERIFIED);
               verifier.loadKeyset('service-1');
               return expect(
                 verifier.verifyCreativeAndSignature(
@@ -529,7 +527,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                   signature2,
                   creative2
                 )
-              ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+              ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
             });
         })
       ));
@@ -551,7 +549,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
                 )}`,
               })
             )
-          ).to.eventually.equal(VERIFICATION_STATUS_ENUM.OK);
+          ).to.eventually.equal(VerificationStatus_Enum.OK);
         }));
 
       it('should return UNVERIFIED on no header', () => {
@@ -562,7 +560,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
         verifier.loadKeyset('service-1');
         return expect(
           verifier.verify(creative1, new Headers())
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+        ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
       });
 
       it('should return UNVERIFIED on no header when crypto unavailable', () => {
@@ -574,7 +572,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
         verifier.loadKeyset('service-1');
         return expect(
           verifier.verify(creative1, new Headers())
-        ).to.eventually.equal(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+        ).to.eventually.equal(VerificationStatus_Enum.UNVERIFIED);
       });
 
       it('should return ERROR_SIGNATURE_MISMATCH on malformed header', () => {
@@ -591,9 +589,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, (env) => {
               'AMP-Fast-Fetch-Signature': 'service-1:key-1:Invalid base64!',
             })
           )
-        ).to.eventually.equal(
-          VERIFICATION_STATUS_ENUM.ERROR_SIGNATURE_MISMATCH
-        );
+        ).to.eventually.equal(VerificationStatus_Enum.ERROR_SIGNATURE_MISMATCH);
       });
     });
   });

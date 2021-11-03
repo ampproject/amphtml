@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 
 import {userAssert} from '#utils/log';
 
@@ -37,7 +37,7 @@ export class AmpAdNetworkDianomiImpl extends AmpA4A {
     };
     if (
       consentTuple &&
-      consentTuple.consentState === CONSENT_POLICY_STATE_ENUM.UNKNOWN
+      consentTuple.consentState === ConsentPolicyState_Enum.UNKNOWN
     ) {
       return '';
     }

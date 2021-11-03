@@ -2,7 +2,7 @@
  * Registred singleton on AMP doc.
  * @enum {number}
  */
-export const AMPDOC_SINGLETON_NAME_ENUM = {
+export const AmpdocSingletonName_Enum = {
   TRACKING_IFRAME: 1,
   LINKER: 2,
 };
@@ -11,7 +11,7 @@ export const AMPDOC_SINGLETON_NAME_ENUM = {
  * Enum for tick labels (used by Performance service)
  * @enum {string}
  */
-export const TICK_LABEL_ENUM = {
+export const TickLabel_Enum = {
   ACCESS_AUTHORIZATION: 'aaa',
   ACCESS_AUTHORIZATION_VISIBLE: 'aaav',
   CUMULATIVE_LAYOUT_SHIFT: 'cls',

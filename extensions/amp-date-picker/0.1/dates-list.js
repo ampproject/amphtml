@@ -4,7 +4,7 @@ import {requireExternal} from '../../../src/module';
 const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // closure imports into .default, esbuild flattens a layer.
 
 /** @enum {string} */
-const DATE_TYPE_ENUM = {
+const DateType_Enum = {
   INVALID: 'invalid',
   RRULE: 'rrule',
   DATE: 'date',
@@ -28,12 +28,12 @@ export class DatesList {
 
     /** @private @const */
     this.rrulestrs_ = dates
-      .filter((d) => this.getDateType_(d) === DATE_TYPE_ENUM.RRULE)
+      .filter((d) => this.getDateType_(d) === DateType_Enum.RRULE)
       .map((d) => tryParseRrulestr(d));
 
     /** @private @const */
     this.dates_ = dates
-      .filter((d) => this.getDateType_(d) == DATE_TYPE_ENUM.DATE)
+      .filter((d) => this.getDateType_(d) == DateType_Enum.DATE)
       .map((d) => this.moment_(d))
       .sort((a, b) => a.toDate() - b.toDate());
   }
@@ -116,15 +116,15 @@ export class DatesList {
    */
   getDateType_(date) {
     if (this.moment_(date).isValid()) {
-      return DATE_TYPE_ENUM.DATE;
+      return DateType_Enum.DATE;
     }
 
     const dateStr = /** @type {string} */ (date);
     if (tryParseRrulestr(dateStr)) {
-      return DATE_TYPE_ENUM.RRULE;
+      return DateType_Enum.RRULE;
     }
 
-    return DATE_TYPE_ENUM.INVALID;
+    return DateType_Enum.INVALID;
   }
 }
 

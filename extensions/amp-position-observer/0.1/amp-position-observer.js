@@ -1,4 +1,4 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {
   assertLength,
   getLengthNumeral,
@@ -6,7 +6,7 @@ import {
   parseLength,
 } from '#core/dom/layout';
 import {
-  RELATIVE_POSITIONS_ENUM,
+  RelativePositions_Enum,
   layoutRectLtwh,
   layoutRectsRelativePos,
 } from '#core/dom/layout/rect';
@@ -14,7 +14,7 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
-import {POSITION_OBSERVER_FIDELITY_ENUM} from '#service/position-observer/position-observer-worker';
+import {PositionObserverFidelity_Enum} from '#service/position-observer/position-observer-worker';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
@@ -117,7 +117,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         const scene = this.discoverScene_();
         this.positionObserver_.observe(
           scene,
-          POSITION_OBSERVER_FIDELITY_ENUM.HIGH,
+          PositionObserverFidelity_Enum.HIGH,
           /** @type {function(?PositionInViewportEntryDef)} */ (
             this.positionChanged_.bind(this)
           )
@@ -132,7 +132,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   triggerEnter_() {
     const name = 'enter';
     const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
-    this.action_.trigger(this.element, name, event, ACTION_TRUST_ENUM.LOW);
+    this.action_.trigger(this.element, name, event, ActionTrust_Enum.LOW);
   }
 
   /**
@@ -142,7 +142,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   triggerExit_() {
     const name = 'exit';
     const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
-    this.action_.trigger(this.element, name, event, ACTION_TRUST_ENUM.LOW);
+    this.action_.trigger(this.element, name, event, ActionTrust_Enum.LOW);
   }
 
   /**
@@ -169,7 +169,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         'positionObserverData': positionObserverData,
       })
     );
-    this.action_.trigger(this.element, name, event, ACTION_TRUST_ENUM.LOW);
+    this.action_.trigger(this.element, name, event, ActionTrust_Enum.LOW);
     // TODO(nainar): We want to remove the position observer if the scroll
     // event is only used by the AnimationWorklet codepath of amp-animation.
     // This involves having amp-animation signal back to amp-position-observer
@@ -217,7 +217,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting to handle fast-scroll.
-      this.scrollProgress_ = relPos == RELATIVE_POSITIONS_ENUM.BOTTOM ? 0 : 1;
+      this.scrollProgress_ = relPos == RelativePositions_Enum.BOTTOM ? 0 : 1;
       this.triggerScroll_();
       this.triggerExit_();
       this.firstIterationComplete_ = true;
@@ -238,23 +238,23 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Calculates whether the scene is visible considering ratios and margins.
    * @param {!../../../src/layout-rect.LayoutRectDef} positionRect position rect as returned by position observer
    * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
-   * @param {!RELATIVE_POSITIONS_ENUM} relativePos Relative position of rect to viewportRect
+   * @param {!RelativePositions_Enum} relativePos Relative position of rect to viewportRect
    * @private
    */
   updateVisibility_(positionRect, adjustedViewportRect, relativePos) {
     // Fully inside margin-adjusted viewport.
-    if (relativePos == RELATIVE_POSITIONS_ENUM.INSIDE) {
+    if (relativePos == RelativePositions_Enum.INSIDE) {
       this.isVisible_ = true;
       return;
     }
 
     const ratioToUse =
-      relativePos == RELATIVE_POSITIONS_ENUM.TOP
+      relativePos == RelativePositions_Enum.TOP
         ? this.topRatio_
         : this.bottomRatio_;
 
     const offset = positionRect.height * ratioToUse;
-    if (relativePos == RELATIVE_POSITIONS_ENUM.BOTTOM) {
+    if (relativePos == RelativePositions_Enum.BOTTOM) {
       this.isVisible_ =
         positionRect.top <= adjustedViewportRect.bottom - offset;
     } else {

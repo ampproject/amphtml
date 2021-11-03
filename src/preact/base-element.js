@@ -1,8 +1,8 @@
 import {devAssert} from '#core/assert';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
-import {LOADING_ENUM} from '#core/constants/loading-instructions';
-import {READY_STATE_ENUM} from '#core/constants/ready-state';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Loading_Enum} from '#core/constants/loading-instructions';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 import {
   addGroup,
   discover,
@@ -13,7 +13,7 @@ import {
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
 import {
-  LAYOUT_ENUM,
+  Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -147,7 +147,7 @@ export class PreactBaseElement extends BaseElement {
 
     /** @private {!JsonObject} */
     this.defaultProps_ = dict({
-      'loading': LOADING_ENUM.AUTO,
+      'loading': Loading_Enum.AUTO,
       'onReadyState': (state, opt_failure) => {
         this.onReadyState_(state, opt_failure);
       },
@@ -169,7 +169,7 @@ export class PreactBaseElement extends BaseElement {
     this.context_ = {
       renderable: false,
       playable: true,
-      loading: LOADING_ENUM.AUTO,
+      loading: Loading_Enum.AUTO,
       notify: () => this.mutateElement(() => {}),
     };
 
@@ -256,7 +256,7 @@ export class PreactBaseElement extends BaseElement {
         // Besides normal benefits of using plain CSS, an important feature of
         // using this layout is that AMP does not add "sizer" elements thus
         // keeping the user DOM clean.
-        layout == LAYOUT_ENUM.CONTAINER
+        layout == Layout_Enum.CONTAINER
       );
     }
     return super.isLayoutSupported(layout);
@@ -337,7 +337,7 @@ export class PreactBaseElement extends BaseElement {
     this.scheduleRender_();
 
     if (Ctor['loadable']) {
-      this.setReadyState?.(READY_STATE_ENUM.LOADING);
+      this.setReadyState?.(ReadyState_Enum.LOADING);
     }
     this.maybeUpdateReadyState_();
 
@@ -350,7 +350,7 @@ export class PreactBaseElement extends BaseElement {
     if (!Ctor['loadable']) {
       return;
     }
-    this.mutateProps(dict({'loading': LOADING_ENUM.EAGER}));
+    this.mutateProps(dict({'loading': Loading_Enum.EAGER}));
     this.resetLoading_ = true;
   }
 
@@ -358,8 +358,8 @@ export class PreactBaseElement extends BaseElement {
   mountCallback() {
     discover(this.element);
     const Ctor = this.constructor;
-    if (Ctor['loadable'] && this.getProp('loading') != LOADING_ENUM.AUTO) {
-      this.mutateProps({'loading': LOADING_ENUM.AUTO});
+    if (Ctor['loadable'] && this.getProp('loading') != Loading_Enum.AUTO) {
+      this.mutateProps({'loading': Loading_Enum.AUTO});
       this.resetLoading_ = false;
     }
   }
@@ -369,7 +369,7 @@ export class PreactBaseElement extends BaseElement {
     discover(this.element);
     const Ctor = this.constructor;
     if (Ctor['loadable']) {
-      this.mutateProps({'loading': LOADING_ENUM.UNLOAD});
+      this.mutateProps({'loading': Loading_Enum.UNLOAD});
     }
     this.updateIsPlaying_(false);
     this.mediaQueryProps_?.dispose();
@@ -422,10 +422,10 @@ export class PreactBaseElement extends BaseElement {
    * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
    * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ACTION_TRUST_ENUM} minTrust
+   * @param {../action-constants.ActionTrust_Enum} minTrust
    * @protected
    */
-  registerApiAction(alias, handler, minTrust = ACTION_TRUST_ENUM.DEFAULT) {
+  registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     this.registerAction?.(
       alias,
       (invocation) => handler(this.api(), invocation),
@@ -502,7 +502,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {!READY_STATE_ENUM} state
+   * @param {!ReadyState_Enum} state
    * @param {*=} opt_failure
    * @private
    */
@@ -514,13 +514,13 @@ export class PreactBaseElement extends BaseElement {
       // These are typically iframe-based elements where we don't know
       // whether a media is currently playing. So we have to assume that
       // it is whenever the element is loaded.
-      this.updateIsPlaying_(state == READY_STATE_ENUM.COMPLETE);
+      this.updateIsPlaying_(state == ReadyState_Enum.COMPLETE);
     }
 
     // Reset "loading" property back to "auto".
     if (this.resetLoading_) {
       this.resetLoading_ = false;
-      this.mutateProps({'loading': LOADING_ENUM.AUTO});
+      this.mutateProps({'loading': Loading_Enum.AUTO});
     }
   }
 
@@ -710,7 +710,7 @@ export class PreactBaseElement extends BaseElement {
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
     if (!isShadow && !isDetached) {
       this.mutateElement(() =>
-        dispatchCustomEvent(this.element, AMP_EVENTS_ENUM.DOM_UPDATE, null)
+        dispatchCustomEvent(this.element, AmpEvents_Enum.DOM_UPDATE, null)
       );
     }
 
@@ -832,7 +832,7 @@ export class PreactBaseElement extends BaseElement {
   pauseCallback() {
     const Ctor = this.constructor;
     if (Ctor['unloadOnPause']) {
-      this.mutateProps(dict({'loading': LOADING_ENUM.UNLOAD}));
+      this.mutateProps(dict({'loading': Loading_Enum.UNLOAD}));
       this.resetLoading_ = true;
     } else {
       const {currentRef_: api} = this;

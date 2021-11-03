@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
@@ -40,7 +40,7 @@ let RtcConfigDef;
  *  3 = deprecated generic RTC failures.
  * @enum {string}
  */
-export const RTC_ERROR_ENUM = {
+export const RtcError_Enum = {
   // Occurs when response is unparseable as JSON
   MALFORMED_JSON_RESPONSE: '4',
   // Occurs when a publisher has specified the same url
@@ -80,7 +80,7 @@ export class RealTimeConfigService {
    * @param {!Element} element
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    *   substitutions available to use.
-   * @param {?CONSENT_POLICY_STATE_ENUM} consentState
+   * @param {?ConsentPolicyState_Enum} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @param {!Function} checkStillCurrent
@@ -129,7 +129,7 @@ export class RealTimeConfigManager {
     /** @private {?RtcConfigDef} */
     this.rtcConfig_ = null;
 
-    /** @private {?CONSENT_POLICY_STATE_ENUM} */
+    /** @private {?ConsentPolicyState_Enum} */
     this.consentState_ = null;
 
     /** @private {?string} */
@@ -158,7 +158,7 @@ export class RealTimeConfigManager {
   }
 
   /**
-   * @param {string} errorType Uses the RTC_ERROR_ENUM above.
+   * @param {string} errorType Uses the RtcError_Enum above.
    * @param {string} errorReportingUrl
    */
   sendErrorMessage(errorType, errorReportingUrl) {
@@ -216,12 +216,10 @@ export class RealTimeConfigManager {
       for (let i = 0; i < sendRegardlessOfConsentState.length; i++) {
         if (
           this.consentState_ ==
-          CONSENT_POLICY_STATE_ENUM[sendRegardlessOfConsentState[i]]
+          ConsentPolicyState_Enum[sendRegardlessOfConsentState[i]]
         ) {
           return true;
-        } else if (
-          !CONSENT_POLICY_STATE_ENUM[sendRegardlessOfConsentState[i]]
-        ) {
+        } else if (!ConsentPolicyState_Enum[sendRegardlessOfConsentState[i]]) {
           dev().warn(
             TAG,
             'Invalid RTC consent state given: ' +
@@ -249,15 +247,15 @@ export class RealTimeConfigManager {
    *            {url: 'https://www.rtcSite2.example/example',
    *             sendRegardlessOfConsentState: ['UNKNOWN']}]
    *    }
-   * and the consentState is CONSENT_POLICY_STATE_ENUM.UNKNOWN,
+   * and the consentState is ConsentPolicyState_Enum.UNKNOWN,
    * then this method call would clear the callouts to vendorB, and to the first
    * custom URL.
    */
   modifyRtcConfigForConsentStateSettings() {
     if (
       this.consentState_ == undefined ||
-      this.consentState_ == CONSENT_POLICY_STATE_ENUM.SUFFICIENT ||
-      this.consentState_ == CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
+      this.consentState_ == ConsentPolicyState_Enum.SUFFICIENT ||
+      this.consentState_ == ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED
     ) {
       return;
     }
@@ -347,7 +345,7 @@ export class RealTimeConfigManager {
       if (!url) {
         return this.promiseArray_.push(
           this.buildErrorResponse_(
-            RTC_ERROR_ENUM.UNKNOWN_VENDOR,
+            RtcError_Enum.UNKNOWN_VENDOR,
             vendor,
             errorReportingUrl
           )
@@ -412,7 +410,7 @@ export class RealTimeConfigManager {
     const send = (url) => {
       if (Object.keys(this.seenUrls_).length == MAX_RTC_CALLOUTS) {
         return this.buildErrorResponse_(
-          RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
+          RtcError_Enum.MAX_CALLOUTS_EXCEEDED,
           callout,
           errorReportingUrl
         );
@@ -422,14 +420,14 @@ export class RealTimeConfigManager {
         !isAmpScriptUri(url)
       ) {
         return this.buildErrorResponse_(
-          RTC_ERROR_ENUM.INSECURE_URL,
+          RtcError_Enum.INSECURE_URL,
           callout,
           errorReportingUrl
         );
       }
       if (this.seenUrls_[url]) {
         return this.buildErrorResponse_(
-          RTC_ERROR_ENUM.DUPLICATE_URL,
+          RtcError_Enum.DUPLICATE_URL,
           callout,
           errorReportingUrl
         );
@@ -471,7 +469,7 @@ export class RealTimeConfigManager {
           return isCancellation(error)
             ? undefined
             : this.buildErrorResponse_(
-                RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+                RtcError_Enum.MACRO_EXPAND_TIMEOUT,
                 callout,
                 errorReportingUrl
               );
@@ -518,7 +516,7 @@ export class RealTimeConfigManager {
           const rtcTime = Date.now() - this.rtcStartTime_;
           if (typeof json !== 'object') {
             return this.buildErrorResponse_(
-              RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
+              RtcError_Enum.MALFORMED_JSON_RESPONSE,
               callout,
               errorReportingUrl,
               rtcTime
@@ -548,7 +546,7 @@ export class RealTimeConfigManager {
             return response
               ? {response, rtcTime, callout}
               : this.buildErrorResponse_(
-                  RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
+                  RtcError_Enum.MALFORMED_JSON_RESPONSE,
                   callout,
                   errorReportingUrl,
                   rtcTime
@@ -573,8 +571,8 @@ export class RealTimeConfigManager {
               // X's are hidden special characters. That's why we use
               // match here.
               /^timeout/.test(error.message)
-                ? RTC_ERROR_ENUM.TIMEOUT
-                : RTC_ERROR_ENUM.NETWORK_FAILURE,
+                ? RtcError_Enum.TIMEOUT
+                : RtcError_Enum.NETWORK_FAILURE,
               callout,
               errorReportingUrl,
               Date.now() - this.rtcStartTime_
@@ -588,7 +586,7 @@ export class RealTimeConfigManager {
    * @param {!Element} element
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    *   substitutions available to use.
-   * @param {?CONSENT_POLICY_STATE_ENUM} consentState
+   * @param {?ConsentPolicyState_Enum} consentState
    * @param {?string} consentString
    * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @param {!Function} checkStillCurrent

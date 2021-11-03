@@ -14,14 +14,14 @@ import {
 import {GaaMeteringRegwall} from '#third_party/subscriptions-project/swg-gaa';
 
 import {
-  ACTION_ENUM,
-  ACTION_STATUS_ENUM,
+  ActionStatus_Enum,
+  Action_Enum,
   SubscriptionAnalytics,
 } from '../../../amp-subscriptions/0.1/analytics';
-import {SUBSCRIPTIONS_SCORE_FACTOR_ENUM} from '../../../amp-subscriptions/0.1/constants';
+import {SubscriptionsScoreFactor_Enum} from '../../../amp-subscriptions/0.1/constants';
 import {
   Entitlement,
-  GRANT_REASON_ENUM,
+  GrantReason_Enum,
 } from '../../../amp-subscriptions/0.1/entitlement';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {
@@ -542,7 +542,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       new Entitlement({
         service: PLATFORM_ID,
         granted: true,
-        grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+        grantReason: GrantReason_Enum.SUBSCRIBER,
       })
     );
     expect(methods.showOffers).to.not.be.called;
@@ -564,7 +564,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       new Entitlement({
         service: PLATFORM_ID,
         granted: true,
-        grantReason: GRANT_REASON_ENUM.METERING,
+        grantReason: GrantReason_Enum.METERING,
       })
     );
     await flush();
@@ -580,7 +580,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const grantEntitlement = new Entitlement({
       service: 'local',
       granted: true,
-      grantReason: GRANT_REASON_ENUM.SUBSCRIBER,
+      grantReason: GrantReason_Enum.SUBSCRIBER,
     });
     platform.activate(entitlement, grantEntitlement);
     expect(methods.showOffers).to.not.be.called;
@@ -592,7 +592,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const grantEntitlement = new Entitlement({
       service: 'local',
       granted: true,
-      grantReason: GRANT_REASON_ENUM.METERING,
+      grantReason: GrantReason_Enum.METERING,
     });
     platform.activate(entitlement, grantEntitlement);
     await flush();
@@ -617,7 +617,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const grantEntitlement = new Entitlement({
       service: 'local',
       granted: true,
-      grantReason: GRANT_REASON_ENUM.METERING,
+      grantReason: GrantReason_Enum.METERING,
     });
     platform.activate(entitlement, grantEntitlement);
     await flush();
@@ -664,7 +664,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should delegate login when linking not requested', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(ACTION_ENUM.LOGIN, null)
+      .withExactArgs(Action_Enum.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -675,7 +675,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     platform.isGoogleViewer_ = false;
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(ACTION_ENUM.LOGIN, null)
+      .withExactArgs(Action_Enum.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: true});
@@ -690,7 +690,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should reauthorize on complete linking', () => {
     analyticsMock
       .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, ACTION_ENUM.LINK, ACTION_STATUS_ENUM.SUCCESS)
+      .withExactArgs(PLATFORM_ID, Action_Enum.LINK, ActionStatus_Enum.SUCCESS)
       .once();
     serviceAdapterMock.expects('resetPlatforms').once();
     callback(callbacks.linkComplete)();
@@ -699,7 +699,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should reauthorize on canceled linking', () => {
     analyticsMock
       .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, ACTION_ENUM.LINK, ACTION_STATUS_ENUM.REJECTED)
+      .withExactArgs(PLATFORM_ID, Action_Enum.LINK, ActionStatus_Enum.REJECTED)
       .once();
     serviceAdapterMock.expects('resetPlatforms').once();
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
@@ -714,15 +714,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         .expects('actionEvent')
         .withExactArgs(
           PLATFORM_ID,
-          ACTION_ENUM.SUBSCRIBE,
-          ACTION_STATUS_ENUM.STARTED,
+          Action_Enum.SUBSCRIBE,
+          ActionStatus_Enum.STARTED,
           {
             active: true,
             product: productId,
           }
         )
         .once();
-      callback(callbacks.flowStarted)({flow: ACTION_ENUM.SUBSCRIBE, data});
+      callback(callbacks.flowStarted)({flow: Action_Enum.SUBSCRIBE, data});
     });
     it('should work without a productId', () => {
       productId = 'unknown productId';
@@ -741,11 +741,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       .expects('actionEvent')
       .withExactArgs(
         PLATFORM_ID,
-        ACTION_ENUM.SUBSCRIBE,
-        ACTION_STATUS_ENUM.REJECTED
+        Action_Enum.SUBSCRIBE,
+        ActionStatus_Enum.REJECTED
       )
       .once();
-    callback(callbacks.flowCanceled)({flow: ACTION_ENUM.SUBSCRIBE});
+    callback(callbacks.flowCanceled)({flow: Action_Enum.SUBSCRIBE});
   });
 
   describe('should reauthorize on complete subscribe', () => {
@@ -758,8 +758,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         .expects('actionEvent')
         .withExactArgs(
           PLATFORM_ID,
-          ACTION_ENUM.SUBSCRIBE,
-          ACTION_STATUS_ENUM.SUCCESS,
+          Action_Enum.SUBSCRIBE,
+          ActionStatus_Enum.SUCCESS,
           {
             active: true,
             product: productId,
@@ -818,7 +818,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should delegate native subscribe request', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(ACTION_ENUM.SUBSCRIBE, null)
+      .withExactArgs(Action_Enum.SUBSCRIBE, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.subscribeRequest)();
@@ -828,7 +828,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(ACTION_ENUM.LOGIN, null)
+      .withExactArgs(Action_Enum.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -841,7 +841,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(false);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(ACTION_ENUM.LOGIN, null)
+      .withExactArgs(Action_Enum.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -854,7 +854,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(ACTION_ENUM.SUBSCRIBE, null)
+      .withExactArgs(Action_Enum.SUBSCRIBE, null)
       .returns(loginResult)
       .once();
     callback(callbacks.subscribeRequest)();
@@ -988,7 +988,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
 
   it('should show offers if subscribe action is delegated', () => {
     const executeStub = platform.runtime_.showOffers;
-    platform.executeAction(ACTION_ENUM.SUBSCRIBE);
+    platform.executeAction(Action_Enum.SUBSCRIBE);
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
@@ -1004,7 +1004,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       },
     };
     const executeStub = platform.runtime_.subscribe;
-    platform.executeAction(ACTION_ENUM.SUBSCRIBE, 'rtcTestButton');
+    platform.executeAction(Action_Enum.SUBSCRIBE, 'rtcTestButton');
     expect(executeStub).to.not.be.called;
   });
 
@@ -1020,7 +1020,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       },
     };
     const executeStub = platform.runtime_.subscribe;
-    platform.executeAction(ACTION_ENUM.SUBSCRIBE, 'rtcTestButton');
+    platform.executeAction(Action_Enum.SUBSCRIBE, 'rtcTestButton');
     expect(executeStub).to.be.calledWith('testSku');
   });
 
@@ -1036,7 +1036,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       },
     };
     const executeStub = platform.runtime_.showOffers;
-    platform.executeAction(ACTION_ENUM.SUBSCRIBE, 'rtcTestButton');
+    platform.executeAction(Action_Enum.SUBSCRIBE, 'rtcTestButton');
     expect(executeStub).to.be.calledWith({
       isClosable: true,
       skus: ['testSku1', 'testsku2'],
@@ -1045,13 +1045,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
 
   it('should show contributions if contribute action is delegated', () => {
     const executeStub = platform.runtime_.showContributionOptions;
-    platform.executeAction(ACTION_ENUM.CONTRIBUTE);
+    platform.executeAction(Action_Enum.CONTRIBUTE);
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
   it('should link accounts if login action is delegated', async () => {
     const executeStub = platform.runtime_.linkAccount;
-    platform.executeAction(ACTION_ENUM.LOGIN);
+    platform.executeAction(Action_Enum.LOGIN);
     await 'Event loop tick';
     expect(executeStub).to.be.calledWith();
   });
@@ -1067,7 +1067,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       const entitlement = await platform.getEntitlements();
       expect(entitlement.source).to.be.equal('google');
       expect(entitlement.granted).to.be.equal(true);
-      expect(entitlement.grantReason).to.be.equal(GRANT_REASON_ENUM.SUBSCRIBER);
+      expect(entitlement.grantReason).to.be.equal(GrantReason_Enum.SUBSCRIBER);
       expect(entitlement.data).to.deep.equal(entitlementResponse);
     });
 
@@ -1118,7 +1118,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       await platform.getEntitlements();
       expect(
         platform.getSupportedScoreFactor(
-          SUBSCRIPTIONS_SCORE_FACTOR_ENUM.IS_READY_TO_PAY
+          SubscriptionsScoreFactor_Enum.IS_READY_TO_PAY
         )
       ).to.equal(0);
     });
@@ -1141,7 +1141,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       await platform.getEntitlements();
       expect(
         platform.getSupportedScoreFactor(
-          SUBSCRIPTIONS_SCORE_FACTOR_ENUM.IS_READY_TO_PAY
+          SubscriptionsScoreFactor_Enum.IS_READY_TO_PAY
         )
       ).to.equal(1);
     });
@@ -1164,7 +1164,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       await platform.getEntitlements();
       expect(
         platform.getSupportedScoreFactor(
-          SUBSCRIPTIONS_SCORE_FACTOR_ENUM.IS_READY_TO_PAY
+          SubscriptionsScoreFactor_Enum.IS_READY_TO_PAY
         )
       ).to.equal(0);
     });

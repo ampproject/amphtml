@@ -1,5 +1,5 @@
 import {getDataParamsFromAttributes} from '#core/dom';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
@@ -136,7 +136,7 @@ class AmpSocialShare extends BaseElement {
     this.element.classList.add(`amp-social-share-${this.ampSocialShareType_}`);
 
     this.renderWithHrefAndTarget_(typeConfig);
-    if (this.element.getAttribute('layout') === LAYOUT_ENUM.RESPONSIVE) {
+    if (this.element.getAttribute('layout') === Layout_Enum.RESPONSIVE) {
       return DEFAULT_RESPONSIVE_DIMENSIONS;
     }
   }

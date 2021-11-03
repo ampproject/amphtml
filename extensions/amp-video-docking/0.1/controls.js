@@ -17,13 +17,13 @@ import {createCustomEvent, listen} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 
 import {applyBreakpointClassname} from './breakpoints';
-import {VIDEO_DOCKING_EVENTS_ENUM, pointerCoords} from './events';
+import {VideoDockingEvents_Enum, pointerCoords} from './events';
 import {HtmlLiteralTagDef} from './html';
 import {Timeout} from './timeout';
 
 import {
-  PLAYING_STATES_ENUM,
-  VIDEO_EVENTS_ENUM,
+  PlayingStates_Enum,
+  VideoEvents_Enum,
 } from '../../../src/video-interface';
 
 /**
@@ -34,7 +34,7 @@ import {
  * e.g. `PLAYBACK: 'playback'` gets `amp-video-docked-control-set-playback`
  * @enum {string}
  */
-const CONTROL_SET_ENUM = {
+const ControlSet_Enum = {
   // Playback buttons like play/pause, mute and fullscreen.
   PLAYBACK: 'playback',
 
@@ -272,7 +272,7 @@ export class Controls {
 
     this.videoUnlisteners_.push(
       this.listenWhenEnabled_(this.dismissButton_, click, () => {
-        this.dispatch_(VIDEO_DOCKING_EVENTS_ENUM.DISMISS_ON_TAP);
+        this.dispatch_(VideoDockingEvents_Enum.DISMISS_ON_TAP);
       }),
 
       this.listenWhenEnabled_(this.playButton_, click, () => {
@@ -296,30 +296,30 @@ export class Controls {
       }),
 
       this.listenWhenEnabled_(this.scrollBackButton_, click, () => {
-        this.dispatch_(VIDEO_DOCKING_EVENTS_ENUM.SCROLL_BACK);
+        this.dispatch_(VideoDockingEvents_Enum.SCROLL_BACK);
       }),
 
       listen(this.container, 'mouseup', () =>
         this.hideOnTimeout(TIMEOUT_AFTER_INTERACTION)
       ),
 
-      listen(element, VIDEO_EVENTS_ENUM.PLAYING, () => this.onPlay_()),
-      listen(element, VIDEO_EVENTS_ENUM.PAUSE, () => this.onPause_()),
-      listen(element, VIDEO_EVENTS_ENUM.MUTED, () => this.onMute_()),
-      listen(element, VIDEO_EVENTS_ENUM.UNMUTED, () => this.onUnmute_()),
+      listen(element, VideoEvents_Enum.PLAYING, () => this.onPlay_()),
+      listen(element, VideoEvents_Enum.PAUSE, () => this.onPause_()),
+      listen(element, VideoEvents_Enum.MUTED, () => this.onMute_()),
+      listen(element, VideoEvents_Enum.UNMUTED, () => this.onUnmute_()),
 
-      listen(element, VIDEO_EVENTS_ENUM.AD_START, () =>
-        this.useControlSet_(CONTROL_SET_ENUM.SCROLL_BACK)
+      listen(element, VideoEvents_Enum.AD_START, () =>
+        this.useControlSet_(ControlSet_Enum.SCROLL_BACK)
       ),
 
-      listen(element, VIDEO_EVENTS_ENUM.AD_END, () =>
-        this.useControlSet_(CONTROL_SET_ENUM.PLAYBACK)
+      listen(element, VideoEvents_Enum.AD_END, () =>
+        this.useControlSet_(ControlSet_Enum.PLAYBACK)
       )
     );
   }
 
   /**
-   * @param {VIDEO_DOCKING_EVENTS_ENUM} event
+   * @param {VideoDockingEvents_Enum} event
    * @private
    */
   dispatch_(event) {
@@ -409,7 +409,7 @@ export class Controls {
     const isRollingAd = manager.isRollingAd(video);
     const isMuted = manager.isMuted(video);
     const isPlaying =
-      manager.getPlayingState(video) !== PLAYING_STATES_ENUM.PAUSED;
+      manager.getPlayingState(video) !== PlayingStates_Enum.PAUSED;
 
     const {container, overlay} = this;
 
@@ -419,7 +419,7 @@ export class Controls {
     overlay.classList.add('amp-video-docked-controls-bg');
 
     this.useControlSet_(
-      isRollingAd ? CONTROL_SET_ENUM.SCROLL_BACK : CONTROL_SET_ENUM.PLAYBACK
+      isRollingAd ? ControlSet_Enum.SCROLL_BACK : ControlSet_Enum.PLAYBACK
     );
 
     toggle(this.playButton_, !isPlaying);

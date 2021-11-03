@@ -1,7 +1,7 @@
 import '../amp-nested-menu';
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
@@ -158,7 +158,7 @@ describes.realWin(
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl.hasAttribute('open')).to.be.true;
       const keyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.LEFT_ARROW,
+        key: Keys_Enum.LEFT_ARROW,
       });
       menuEl.dispatchEvent(keyEvent);
       expect(menuEl.hasAttribute('child-open')).to.be.false;
@@ -173,7 +173,7 @@ describes.realWin(
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl.hasAttribute('open')).to.be.true;
       const keyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.RIGHT_ARROW,
+        key: Keys_Enum.RIGHT_ARROW,
       });
       menuEl.dispatchEvent(keyEvent);
       expect(menuEl.hasAttribute('child-open')).to.be.false;
@@ -189,7 +189,7 @@ describes.realWin(
       tryFocus(openEl);
       expect(doc.activeElement).to.equal(openEl);
       const keyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.RIGHT_ARROW,
+        key: Keys_Enum.RIGHT_ARROW,
         bubbles: true,
       });
       openEl.dispatchEvent(keyEvent);
@@ -206,7 +206,7 @@ describes.realWin(
       tryFocus(openEl);
       expect(doc.activeElement).to.equal(openEl);
       const keyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.LEFT_ARROW,
+        key: Keys_Enum.LEFT_ARROW,
         bubbles: true,
       });
       openEl.dispatchEvent(keyEvent);
@@ -221,13 +221,13 @@ describes.realWin(
       tryFocus(openEl1);
       expect(doc.activeElement).to.equal(openEl1);
       const downKeyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.DOWN_ARROW,
+        key: Keys_Enum.DOWN_ARROW,
         bubbles: true,
       });
       openEl1.dispatchEvent(downKeyEvent);
       expect(doc.activeElement).to.equal(openEl2);
       const upKeyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.UP_ARROW,
+        key: Keys_Enum.UP_ARROW,
         bubbles: true,
       });
       openEl2.dispatchEvent(upKeyEvent);
@@ -241,13 +241,13 @@ describes.realWin(
       tryFocus(openEl1);
       expect(doc.activeElement).to.equal(openEl1);
       const endKeyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.END,
+        key: Keys_Enum.END,
         bubbles: true,
       });
       openEl1.dispatchEvent(endKeyEvent);
       expect(doc.activeElement).to.equal(openEl4);
       const homeKeyEvent = new KeyboardEvent('keydown', {
-        key: KEYS_ENUM.HOME,
+        key: Keys_Enum.HOME,
         bubbles: true,
       });
       openEl4.dispatchEvent(homeKeyEvent);

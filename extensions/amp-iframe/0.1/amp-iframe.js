@@ -1,13 +1,13 @@
 import {playIgnoringError} from '#core/dom/video';
-import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {AmpdocSingletonName_Enum} from '#core/constants/enums';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {
-  LAYOUT_PRIORITY_ENUM,
+  LayoutPriority_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {MESSAGE_TYPE_ENUM} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
@@ -337,7 +337,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.isTrackingFrame_) {
       if (
         !this.getAmpDoc().registerSingleton(
-          AMPDOC_SINGLETON_NAME_ENUM.TRACKING_IFRAME
+          AmpdocSingletonName_Enum.TRACKING_IFRAME
         )
       ) {
         console /*OK*/
@@ -426,7 +426,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     listenFor(
       iframe,
-      MESSAGE_TYPE_ENUM.SEND_CONSENT_DATA,
+      MessageType_Enum.SEND_CONSENT_DATA,
       (data, source, origin) => {
         this.sendConsentData_(source, origin);
       }
@@ -497,7 +497,7 @@ export class AmpIframe extends AMP.BaseElement {
           Object.assign(
             dict({
               'sentinel': 'amp',
-              'type': MESSAGE_TYPE_ENUM.CONSENT_DATA,
+              'type': MessageType_Enum.CONSENT_DATA,
             }),
             consents
           )
@@ -548,10 +548,10 @@ export class AmpIframe extends AMP.BaseElement {
   /** @override  */
   getLayoutPriority() {
     if (this.isAdLike_) {
-      return LAYOUT_PRIORITY_ENUM.ADS; // See AmpAd3PImpl.
+      return LayoutPriority_Enum.ADS; // See AmpAd3PImpl.
     }
     if (this.isTrackingFrame_) {
-      return LAYOUT_PRIORITY_ENUM.METADATA;
+      return LayoutPriority_Enum.METADATA;
     }
     return super.getLayoutPriority();
   }
@@ -784,7 +784,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.element,
         'message',
         event,
-        ACTION_TRUST_ENUM.HIGH
+        ActionTrust_Enum.HIGH
       );
     };
     // TODO(choumx): Consider using global listener in iframe-helper.

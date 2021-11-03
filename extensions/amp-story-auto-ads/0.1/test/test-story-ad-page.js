@@ -1,4 +1,4 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
 import {macroTask} from '#testing/helpers';
 
@@ -6,8 +6,8 @@ import {Gestures} from '../../../../src/gesture';
 import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
 import {
-  ACTION_ENUM,
-  UI_TYPE_ENUM,
+  Action_Enum,
+  UiType_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {StoryAdAnalytics} from '../story-ad-analytics';
@@ -94,7 +94,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       const ampAdElement = doc.querySelector('amp-ad');
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
 
       const adDoc = storyAdPage.getAdDoc();
       expect(adDoc).to.exist;
@@ -123,7 +123,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       // Stub delegateVideoAutoplay.
       pageElement.getImpl = () => Promise.resolve(pageImplMock);
 
-      await adElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await adElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       expect(storyAdPage.isLoaded()).to.be.true;
     });
   });
@@ -147,7 +147,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       expect(someFunc).to.have.not.been.called;
 
       const adElement = doc.querySelector('amp-ad');
-      await adElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await adElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       expect(someFunc.calledOnce).to.be.true;
     });
   });
@@ -162,7 +162,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       const ampAdElement = doc.querySelector('amp-ad');
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
 
       const iframeBody = iframe.contentDocument.body;
       expect(iframeBody).not.to.have.attribute('amp-story-visible');
@@ -193,7 +193,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
             </div>
         </div>
         </body>`);
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
 
       const altBody =
         iframe.contentDocument.querySelector('#x-a4a-former-body');
@@ -297,7 +297,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         </head>
         <body></body>`);
 
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
 
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
@@ -326,7 +326,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
           </amp-ad-exit>
         </body>`);
 
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const anchor = doc.querySelector('a');
@@ -364,7 +364,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         </head>
         <body></body>`);
 
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
@@ -390,8 +390,8 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
     it('propagates fullbleed state to attribution icon', async () => {
       storeService.dispatch(
-        ACTION_ENUM.TOGGLE_UI,
-        UI_TYPE_ENUM.DESKTOP_FULLBLEED
+        Action_Enum.TOGGLE_UI,
+        UiType_Enum.DESKTOP_FULLBLEED
       );
 
       const iframe = doc.createElement('iframe');
@@ -404,18 +404,18 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
             <meta name="amp4ads-vars-attribution-url" content="https://www.google.com">
           </head>
           <body></body>`);
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       await storyAdPage.maybeCreateCta();
 
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
       expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
 
-      storeService.dispatch(ACTION_ENUM.TOGGLE_UI, UI_TYPE_ENUM.MOBILE);
+      storeService.dispatch(Action_Enum.TOGGLE_UI, UiType_Enum.MOBILE);
       expect(attribution).not.to.have.class('i-amphtml-story-ad-fullbleed');
 
       storeService.dispatch(
-        ACTION_ENUM.TOGGLE_UI,
-        UI_TYPE_ENUM.DESKTOP_FULLBLEED
+        Action_Enum.TOGGLE_UI,
+        UiType_Enum.DESKTOP_FULLBLEED
       );
       expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
     });
@@ -434,7 +434,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         </head>
         <body></body>`);
 
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
@@ -455,7 +455,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         </head>
         <body></body>`);
 
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
@@ -499,7 +499,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       pageElement.getImpl = () => Promise.resolve(pageImplMock);
 
       const ampAdElement = doc.querySelector('amp-ad');
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
       await macroTask();
       expect(fireEventStub).to.be.calledWithExactly(
         pageElement,
@@ -538,7 +538,7 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       const ampAdElement = doc.querySelector('amp-ad');
       ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
-      await ampAdElement.signals().signal(COMMON_SIGNALS_ENUM.INI_LOAD);
+      await ampAdElement.signals().signal(CommonSignals_Enum.INI_LOAD);
 
       await storyAdPage.maybeCreateCta();
       const cta = doc.querySelector('.i-amphtml-story-ad-link');

@@ -1,4 +1,4 @@
-import {INTERACTIVE_TYPE_ENUM} from './amp-story-interactive-abstract';
+import {InteractiveType_Enum} from './amp-story-interactive-abstract';
 import {
   AmpStoryInteractiveResults,
   decideStrategy,
@@ -74,8 +74,8 @@ export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResul
 
     components.forEach((e) => {
       if (
-        (this.usePercentage_ && e.type === INTERACTIVE_TYPE_ENUM.QUIZ) ||
-        (!this.usePercentage_ && e.type === INTERACTIVE_TYPE_ENUM.POLL)
+        (this.usePercentage_ && e.type === InteractiveType_Enum.QUIZ) ||
+        (!this.usePercentage_ && e.type === InteractiveType_Enum.POLL)
       ) {
         if (!this.resultEls_[e.interactiveId]) {
           updateLayout = true;

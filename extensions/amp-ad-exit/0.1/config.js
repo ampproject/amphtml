@@ -1,6 +1,6 @@
 import {user, userAssert} from '#utils/log';
 
-import {FILTER_TYPE_ENUM} from './filters/filter';
+import {FilterType_Enum} from './filters/filter';
 
 import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors';
 
@@ -58,7 +58,7 @@ export let BehaviorsDef;
 
 /**
  * @typedef {{
- *   type: !FILTER_TYPE_ENUM,
+ *   type: !FilterType_Enum,
  *   delay: number,
  *   startTimingEvent: (string|undefined)
  * }}
@@ -67,7 +67,7 @@ export let ClickDelayConfig;
 
 /**
  * @typedef {{
- *   type: !FILTER_TYPE_ENUM,
+ *   type: !FilterType_Enum,
  *   top: (number|undefined),
  *   right: (number|undefined),
  *   bottom: (number|undefined),
@@ -79,7 +79,7 @@ export let ClickLocationConfig;
 
 /**
  * @typedef {{
- *   type: !FILTER_TYPE_ENUM,
+ *   type: !FilterType_Enum,
  *   selector: string
  * }}
  */
@@ -89,7 +89,7 @@ export let InactiveElementConfig;
 export let FilterConfig;
 
 /** @enum {string} */
-export const TRANSPORT_MODE_ENUM = {
+export const TransportMode_Enum = {
   BEACON: 'beacon',
   IMAGE: 'image',
 };
@@ -123,7 +123,7 @@ export function assertConfig(config) {
 function assertTransport(transport) {
   for (const t in transport) {
     userAssert(
-      t == TRANSPORT_MODE_ENUM.BEACON || t == TRANSPORT_MODE_ENUM.IMAGE,
+      t == TransportMode_Enum.BEACON || t == TransportMode_Enum.IMAGE,
       `Unknown transport option: '${t}'`
     );
     userAssert(typeof transport[t] == 'boolean');
@@ -136,9 +136,9 @@ function assertTransport(transport) {
  */
 function assertFilters(filters) {
   const validFilters = [
-    FILTER_TYPE_ENUM.CLICK_DELAY,
-    FILTER_TYPE_ENUM.CLICK_LOCATION,
-    FILTER_TYPE_ENUM.INACTIVE_ELEMENT,
+    FilterType_Enum.CLICK_DELAY,
+    FilterType_Enum.CLICK_LOCATION,
+    FilterType_Enum.INACTIVE_ELEMENT,
   ];
   for (const name in filters) {
     userAssert(

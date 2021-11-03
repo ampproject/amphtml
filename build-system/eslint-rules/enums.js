@@ -1,5 +1,9 @@
 'use strict';
 
+const camelcase = require('lodash.camelcase');
+
+/* eslint-disable */
+
 /**
  * Enforces naming rules for enums.
  *
@@ -35,13 +39,13 @@ module.exports = function (context) {
 
     const decl = node.declarations[0];
     checkInit(decl.init, decl);
-    checkId(decl.id);
+    checkEnumId(decl.id);
   }
 
   /**
    * @param {!Node|undefined} node
    */
-  function checkId(node) {
+  function checkEnumId(node) {
     if (node.type !== 'Identifier') {
       context.report({
         node,
@@ -50,12 +54,34 @@ module.exports = function (context) {
       return;
     }
 
-    if (!/^[A-Z0-9_]+_ENUM$/.test(node.name)) {
+    if (!/^[A-Z][A-Za-z0-9]+_Enum$/.test(node.name)) {
       context.report({
         node,
-        message: 'Must use all caps with trailing "_ENUM"',
+        message: 'Enums muse use PascalCaseCapitalization and end in "_Enum"',
       });
       return;
+    }
+  }
+
+  /**
+   * @param {!Node} node
+   */
+  function checkNonEnumIds(node) {
+    if (!node.declarations) {
+      return;
+    }
+    for (const decl of node.declarations) {
+      const {id} = decl;
+      if (id.type !== 'Identifier') {
+        continue;
+      }
+
+      if (id.name.endsWith('_Enum')) {
+        context.report({
+          node: decl,
+          message: 'Must not mark non-enum as _Enum',
+        });
+      }
     }
   }
 
@@ -73,26 +99,33 @@ module.exports = function (context) {
   }
 
   return {
-    VariableDeclaration(node) {
-      if (!hasEnumAnnotation(node)) {
-        return;
+    Identifier(node) {
+      if (node.name.endsWith('_ENUM')) {
+        context.report({
+          node,
+          message: 'use pascal case',
+          fix(fixer) {
+            let newName = camelcase(node.name);
+            newName = newName[0].toUpperCase() + newName.slice(1);
+            newName = newName.replace(/Enum$/, '_Enum');
+            return fixer.replaceText(node, newName);
+          },
+        })
       }
-
-      check(node);
     },
 
-    ExportNamedDeclaration(node) {
-      if (!hasEnumAnnotation(node)) {
-        return;
-      }
-      if (!node.declaration) {
-        return context.report({
-          node,
-          message: 'Exported enum does not define enum',
-        });
+    VariableDeclaration(node) {
+      let annotationNode = node;
+      const {parent} = node;
+      if (parent.type === 'ExportNamedDeclaration') {
+        annotationNode = parent;
       }
 
-      check(node.declaration);
+      if (hasEnumAnnotation(annotationNode)) {
+        check(node);
+      } else {
+        checkNonEnumIds(node);
+      }
     },
   };
 };

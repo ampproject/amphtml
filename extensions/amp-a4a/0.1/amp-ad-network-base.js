@@ -3,7 +3,7 @@ import {map} from '#core/types/object';
 
 import {dev, devAssert} from '#utils/log';
 
-import {FAILURE_TYPE_ENUM, RECOVERY_MODE_TYPE_ENUM} from './amp-ad-type-defs';
+import {FailureType_Enum, RecoveryModeType_Enum} from './amp-ad-type-defs';
 import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
@@ -35,8 +35,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.context_ = {};
 
     // Register default error modes.
-    for (const failureType in FAILURE_TYPE_ENUM) {
-      this.recoveryModes_[failureType] = RECOVERY_MODE_TYPE_ENUM.COLLAPSE;
+    for (const failureType in FailureType_Enum) {
+      this.recoveryModes_[failureType] = RecoveryModeType_Enum.COLLAPSE;
     }
 
     /**
@@ -71,8 +71,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!FAILURE_TYPE_ENUM} failure
-   * @param {!RECOVERY_MODE_TYPE_ENUM} recovery
+   * @param {!FailureType_Enum} failure
+   * @param {!RecoveryModeType_Enum} recovery
    * @final
    */
   onFailure(failure, recovery) {
@@ -152,7 +152,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   invokeValidator_(response) {
     if (!response.arrayBuffer) {
       return Promise.reject(
-        this.handleFailure_(FAILURE_TYPE_ENUM.INVALID_RESPONSE)
+        this.handleFailure_(FailureType_Enum.INVALID_RESPONSE)
       );
     }
     return response.arrayBuffer().then((unvalidatedBytes) => {
@@ -167,7 +167,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
           response.headers
         )
         .catch((err) =>
-          Promise.reject({type: FAILURE_TYPE_ENUM.VALIDATOR_ERROR, msg: err})
+          Promise.reject({type: FailureType_Enum.VALIDATOR_ERROR, msg: err})
         );
     });
   }
@@ -183,12 +183,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     return renderer
       .render(this.context_, this.element, validatorOutput.creativeData)
       .catch((err) =>
-        Promise.reject({type: FAILURE_TYPE_ENUM.RENDERER_ERROR, msg: err})
+        Promise.reject({type: FailureType_Enum.RENDERER_ERROR, msg: err})
       );
   }
 
   /**
-   * @param {FAILURE_TYPE_ENUM} failureType
+   * @param {FailureType_Enum} failureType
    * @param {*=} error
    * @private
    */
@@ -198,10 +198,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       dev().warn(TAG, error);
     }
     switch (recoveryMode) {
-      case RECOVERY_MODE_TYPE_ENUM.COLLAPSE:
+      case RecoveryModeType_Enum.COLLAPSE:
         this.forceCollapse_();
         break;
-      case RECOVERY_MODE_TYPE_ENUM.RETRY:
+      case RecoveryModeType_Enum.RETRY:
         if (this.retryLimit_--) {
           this.sendRequest_();
         }

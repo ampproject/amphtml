@@ -8,7 +8,7 @@ import {Services} from '#service';
 
 import {dev, devAssert, userAssert} from '#utils/log';
 
-import {FX_TYPE_ENUM} from '../fx-type';
+import {FxType_Enum} from '../fx-type';
 
 /**
  * These fully qualified names, my goodness.
@@ -120,9 +120,9 @@ function isInViewportConsideringMargins(entry, fxElement, opt_vh) {
   return !!top && top <= (1 - fxElement.marginStart) * vh;
 }
 
-/** @const {!Object<!FX_TYPE_ENUM, !FxPresetDef>} */
+/** @const {!Object<!FxType_Enum, !FxPresetDef>} */
 export const Presets = {
-  [FX_TYPE_ENUM.PARALLAX]: {
+  [FxType_Enum.PARALLAX]: {
     userAsserts(element) {
       const factorValue = userAssert(
         element.getAttribute('data-parallax-factor'),
@@ -159,7 +159,7 @@ export const Presets = {
       });
     },
   },
-  [FX_TYPE_ENUM.FLY_IN_BOTTOM]: {
+  [FxType_Enum.FLY_IN_BOTTOM]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -170,7 +170,7 @@ export const Presets = {
       flyIn(fxElement, 'Y', /* coeff */ -1);
     },
   },
-  [FX_TYPE_ENUM.FLY_IN_LEFT]: {
+  [FxType_Enum.FLY_IN_LEFT]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -181,7 +181,7 @@ export const Presets = {
       flyIn(fxElement, 'X', /* coeff */ 1);
     },
   },
-  [FX_TYPE_ENUM.FLY_IN_RIGHT]: {
+  [FxType_Enum.FLY_IN_RIGHT]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -192,7 +192,7 @@ export const Presets = {
       flyIn(fxElement, 'X', /* coeff */ -1);
     },
   },
-  [FX_TYPE_ENUM.FLY_IN_TOP]: {
+  [FxType_Enum.FLY_IN_TOP]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -203,7 +203,7 @@ export const Presets = {
       flyIn(fxElement, 'Y', /* coeff */ 1);
     },
   },
-  [FX_TYPE_ENUM.FADE_IN]: {
+  [FxType_Enum.FADE_IN]: {
     userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
@@ -221,7 +221,7 @@ export const Presets = {
       });
     },
   },
-  [FX_TYPE_ENUM.FADE_IN_SCROLL]: {
+  [FxType_Enum.FADE_IN_SCROLL]: {
     userAsserts(element) {
       const marginStart = marginStartAsserts(element);
       const marginEnd = parseFloat(element.getAttribute('data-margin-end'));

@@ -1,6 +1,6 @@
 import * as imaVideoObj from '#ads/google/ima/ima-video';
 
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 
 describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
   const srcUrl = 'http://rmcdn.2mdn.net/Demo/vast_inspector/android.mp4';
@@ -1305,7 +1305,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     div.setAttribute('id', 'c');
     doc.body.appendChild(div);
 
-    win.context.initialConsentState = CONSENT_POLICY_STATE_ENUM.UNKNOWN;
+    win.context.initialConsentState = ConsentPolicyState_Enum.UNKNOWN;
     imaVideoObj.imaVideo(win, {
       width: 640,
       height: 360,
@@ -1330,7 +1330,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
       tag: adTagUrl,
     });
 
-    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE_ENUM.UNKNOWN);
+    imaVideoObj.setConsentStateForTesting(ConsentPolicyState_Enum.UNKNOWN);
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().imaLoadAllowed).to.eql(false);
@@ -1352,9 +1352,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     const mockAdsRequest = {adTagUrl: 'vast.mxl'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
-    imaVideoObj.setConsentStateForTesting(
-      CONSENT_POLICY_STATE_ENUM.INSUFFICIENT
-    );
+    imaVideoObj.setConsentStateForTesting(ConsentPolicyState_Enum.INSUFFICIENT);
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
@@ -1378,7 +1376,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     const mockAdsRequest = {adTagUrl: 'vast.mxl'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
-    imaVideoObj.setConsentStateForTesting(CONSENT_POLICY_STATE_ENUM.SUFFICIENT);
+    imaVideoObj.setConsentStateForTesting(ConsentPolicyState_Enum.SUFFICIENT);
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
@@ -1403,7 +1401,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
     imaVideoObj.setConsentStateForTesting(
-      CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED
+      ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED
     );
     imaVideoObj.requestAds();
 

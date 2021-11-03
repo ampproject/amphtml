@@ -20,8 +20,8 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {
-  VIDEO_ATTRIBUTES_ENUM,
-  VIDEO_EVENTS_ENUM,
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
 } from '../../../src/video-interface';
 import {
   VIMEO_EVENTS,
@@ -142,7 +142,7 @@ class AmpVimeo extends AMP.BaseElement {
    * @private
    */
   isAutoplay_() {
-    if (!this.element.hasAttribute(VIDEO_ATTRIBUTES_ENUM.AUTOPLAY)) {
+    if (!this.element.hasAttribute(VideoAttributes_Enum.AUTOPLAY)) {
       return Promise.resolve(false);
     }
     return isAutoplaySupported(this.win);
@@ -156,7 +156,7 @@ class AmpVimeo extends AMP.BaseElement {
 
     Services.videoManagerForDoc(element).register(this);
 
-    dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOAD);
+    dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
   }
 
   /**

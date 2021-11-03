@@ -1,9 +1,9 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
 import {
-  PLAYING_STATES_ENUM,
-  VIDEO_ANALYTICS_EVENTS_ENUM,
+  PlayingStates_Enum,
+  VideoAnalyticsEvents_Enum,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
 import {deepMerge, dict, hasOwn} from '#core/types/object';
@@ -30,7 +30,7 @@ const SESSION_DEBOUNCE_TIME_MS = 500;
  * @const
  * @enum {string}
  */
-export const ANALYTICS_EVENT_TYPE_ENUM = {
+export const AnalyticsEventType_Enum = {
   CLICK: 'click',
   BROWSER_EVENT: 'browser-event',
   CUSTOM: 'custom',
@@ -60,80 +60,80 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
-  [ANALYTICS_EVENT_TYPE_ENUM.CLICK]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.CLICK,
+  [AnalyticsEventType_Enum.CLICK]: {
+    name: AnalyticsEventType_Enum.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function (root) {
       return new ClickEventTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+  [AnalyticsEventType_Enum.BROWSER_EVENT]: {
+    name: AnalyticsEventType_Enum.BROWSER_EVENT,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function (root) {
       return new BrowserEventTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.CUSTOM]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.CUSTOM,
+  [AnalyticsEventType_Enum.CUSTOM]: {
+    name: AnalyticsEventType_Enum.CUSTOM,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function (root) {
       return new CustomEventTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.HIDDEN]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.VISIBLE, // Reuse tracker with visibility
+  [AnalyticsEventType_Enum.HIDDEN]: {
+    name: AnalyticsEventType_Enum.VISIBLE, // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function (root) {
       return new VisibilityTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.INI_LOAD]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.INI_LOAD,
+  [AnalyticsEventType_Enum.INI_LOAD]: {
+    name: AnalyticsEventType_Enum.INI_LOAD,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
     klass: function (root) {
       return new IniLoadTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.RENDER_START]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.RENDER_START,
+  [AnalyticsEventType_Enum.RENDER_START]: {
+    name: AnalyticsEventType_Enum.RENDER_START,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
     klass: function (root) {
       return new SignalTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.SCROLL]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+  [AnalyticsEventType_Enum.SCROLL]: {
+    name: AnalyticsEventType_Enum.SCROLL,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function (root) {
       return new ScrollEventTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.STORY]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.STORY,
+  [AnalyticsEventType_Enum.STORY]: {
+    name: AnalyticsEventType_Enum.STORY,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
     klass: function (root) {
       return new AmpStoryEventTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.TIMER]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.TIMER,
+  [AnalyticsEventType_Enum.TIMER]: {
+    name: AnalyticsEventType_Enum.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
     klass: function (root) {
       return new TimerEventTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.VIDEO]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.VIDEO,
+  [AnalyticsEventType_Enum.VIDEO]: {
+    name: AnalyticsEventType_Enum.VIDEO,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function (root) {
       return new VideoEventTracker(root);
     },
   },
-  [ANALYTICS_EVENT_TYPE_ENUM.VISIBLE]: {
-    name: ANALYTICS_EVENT_TYPE_ENUM.VISIBLE,
+  [AnalyticsEventType_Enum.VISIBLE]: {
+    name: AnalyticsEventType_Enum.VISIBLE,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function (root) {
       return new VisibilityTracker(root);
@@ -185,7 +185,7 @@ function isCustomBrowserTriggerType(triggerType) {
  * @return {boolean}
  */
 function isReservedTriggerType(triggerType) {
-  return isEnumValue(ANALYTICS_EVENT_TYPE_ENUM, triggerType);
+  return isEnumValue(AnalyticsEventType_Enum, triggerType);
 }
 
 /**
@@ -194,16 +194,16 @@ function isReservedTriggerType(triggerType) {
  */
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
-    return ANALYTICS_EVENT_TYPE_ENUM.VIDEO;
+    return AnalyticsEventType_Enum.VIDEO;
   }
   if (isCustomBrowserTriggerType(eventType)) {
-    return ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT;
+    return AnalyticsEventType_Enum.BROWSER_EVENT;
   }
   if (isAmpStoryTriggerType(eventType)) {
-    return ANALYTICS_EVENT_TYPE_ENUM.STORY;
+    return AnalyticsEventType_Enum.STORY;
   }
   if (!isReservedTriggerType(eventType)) {
-    return ANALYTICS_EVENT_TYPE_ENUM.CUSTOM;
+    return AnalyticsEventType_Enum.CUSTOM;
   }
   return hasOwn(TRACKER_TYPE, eventType)
     ? TRACKER_TYPE[eventType].name
@@ -829,7 +829,7 @@ export class ScrollEventTracker extends EventTracker {
       listener(
         new AnalyticsEvent(
           this.root_.getRootElement(),
-          ANALYTICS_EVENT_TYPE_ENUM.SCROLL,
+          AnalyticsEventType_Enum.SCROLL,
           vars,
           /** enableDataVars */ false
         )
@@ -957,8 +957,8 @@ export class IniLoadTracker extends EventTracker {
     }
     const signals = element.signals();
     return Promise.race([
-      signals.whenSignal(COMMON_SIGNALS_ENUM.INI_LOAD),
-      signals.whenSignal(COMMON_SIGNALS_ENUM.LOAD_END),
+      signals.whenSignal(CommonSignals_Enum.INI_LOAD),
+      signals.whenSignal(CommonSignals_Enum.LOAD_END),
     ]);
   }
 }
@@ -1364,22 +1364,19 @@ export class VideoEventTracker extends EventTracker {
       this.sessionObservable_
     );
 
-    Object.keys(VIDEO_ANALYTICS_EVENTS_ENUM).forEach((key) => {
+    Object.keys(VideoAnalyticsEvents_Enum).forEach((key) => {
       this.root
         .getRoot()
-        .addEventListener(
-          VIDEO_ANALYTICS_EVENTS_ENUM[key],
-          this.boundOnSession_
-        );
+        .addEventListener(VideoAnalyticsEvents_Enum[key], this.boundOnSession_);
     });
   }
 
   /** @override */
   dispose() {
     const root = this.root.getRoot();
-    Object.keys(VIDEO_ANALYTICS_EVENTS_ENUM).forEach((key) => {
+    Object.keys(VideoAnalyticsEvents_Enum).forEach((key) => {
       root.removeEventListener(
-        VIDEO_ANALYTICS_EVENTS_ENUM[key],
+        VideoAnalyticsEvents_Enum[key],
         this.boundOnSession_
       );
     });
@@ -1426,7 +1423,7 @@ export class VideoEventTracker extends EventTracker {
       }
 
       if (
-        normalizedType === VIDEO_ANALYTICS_EVENTS_ENUM.SECONDS_PLAYED &&
+        normalizedType === VideoAnalyticsEvents_Enum.SECONDS_PLAYED &&
         !interval
       ) {
         user().error(
@@ -1436,14 +1433,14 @@ export class VideoEventTracker extends EventTracker {
         return;
       }
 
-      if (normalizedType === VIDEO_ANALYTICS_EVENTS_ENUM.SECONDS_PLAYED) {
+      if (normalizedType === VideoAnalyticsEvents_Enum.SECONDS_PLAYED) {
         intervalCounter++;
         if (intervalCounter % interval !== 0) {
           return;
         }
       }
 
-      if (normalizedType === VIDEO_ANALYTICS_EVENTS_ENUM.PERCENTAGE_PLAYED) {
+      if (normalizedType === VideoAnalyticsEvents_Enum.PERCENTAGE_PLAYED) {
         if (!percentages) {
           user().error(
             TAG,
@@ -1490,7 +1487,7 @@ export class VideoEventTracker extends EventTracker {
       }
 
       if (
-        type === VIDEO_ANALYTICS_EVENTS_ENUM.SESSION_VISIBLE &&
+        type === VideoAnalyticsEvents_Enum.SESSION_VISIBLE &&
         !endSessionWhenInvisible
       ) {
         return;
@@ -1498,7 +1495,7 @@ export class VideoEventTracker extends EventTracker {
 
       if (
         excludeAutoplay &&
-        details['state'] === PLAYING_STATES_ENUM.PLAYING_AUTO
+        details['state'] === PlayingStates_Enum.PLAYING_AUTO
       ) {
         return;
       }
@@ -1531,13 +1528,13 @@ export class VideoEventTracker extends EventTracker {
  * @return {string}
  */
 function normalizeVideoEventType(type, details) {
-  if (type == VIDEO_ANALYTICS_EVENTS_ENUM.SESSION_VISIBLE) {
-    return VIDEO_ANALYTICS_EVENTS_ENUM.SESSION;
+  if (type == VideoAnalyticsEvents_Enum.SESSION_VISIBLE) {
+    return VideoAnalyticsEvents_Enum.SESSION;
   }
 
   // Custom video analytics events are listened to from one signal type,
   // but they're configured by user with their custom name.
-  if (type == VIDEO_ANALYTICS_EVENTS_ENUM.CUSTOM) {
+  if (type == VideoAnalyticsEvents_Enum.CUSTOM) {
     return dev().assertString(details[videoAnalyticsCustomEventTypeKey]);
   }
 
@@ -1588,7 +1585,7 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    if (eventType === ANALYTICS_EVENT_TYPE_ENUM.HIDDEN) {
+    if (eventType === AnalyticsEventType_Enum.HIDDEN) {
       if (reportWhenSpec) {
         user().error(
           TAG,

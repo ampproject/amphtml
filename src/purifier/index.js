@@ -171,7 +171,7 @@ export class Purifier {
       return true;
     }
     // Don't allow binding attributes for now.
-    if (bindingTypeForAttr(attr) !== BINDING_TYPE_ENUM.NONE) {
+    if (bindingTypeForAttr(attr) !== BindingType_Enum.NONE) {
       return false;
     }
     const pure = this.domPurify_.isValidAttribute(tag, attr, value);
@@ -321,11 +321,11 @@ export class Purifier {
       // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
       // This is because DOMPurify eagerly removes attributes and re-adds them
       // after sanitization, which fails because `[]` are not valid attr chars.
-      if (bindingType === BINDING_TYPE_ENUM.CLASSIC) {
+      if (bindingType === BindingType_Enum.CLASSIC) {
         const property = attrName.substring(1, attrName.length - 1);
         element.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
       }
-      if (bindingType !== BINDING_TYPE_ENUM.NONE) {
+      if (bindingType !== BindingType_Enum.NONE) {
         // Set a custom attribute to mark this element as containing a binding.
         // This is an optimization that obviates the need for DOM scan later.
         element.setAttribute('i-amphtml-binding', '');
@@ -456,7 +456,7 @@ function standardPurifyConfig() {
 /**
  * @enum {number}
  */
-const BINDING_TYPE_ENUM = {
+const BindingType_Enum = {
   NONE: 0,
   CLASSIC: 1,
   ALTERNATIVE: 2,
@@ -468,10 +468,10 @@ const BINDING_TYPE_ENUM = {
  */
 function bindingTypeForAttr(attrName) {
   if (attrName[0] == '[' && attrName[attrName.length - 1] == ']') {
-    return BINDING_TYPE_ENUM.CLASSIC;
+    return BindingType_Enum.CLASSIC;
   }
   if (attrName.startsWith(BIND_PREFIX)) {
-    return BINDING_TYPE_ENUM.ALTERNATIVE;
+    return BindingType_Enum.ALTERNATIVE;
   }
-  return BINDING_TYPE_ENUM.NONE;
+  return BindingType_Enum.NONE;
 }

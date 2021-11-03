@@ -1,7 +1,7 @@
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {
   closest,
@@ -75,7 +75,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === LAYOUT_ENUM.FIXED_HEIGHT;
+    return layout === Layout_Enum.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -89,7 +89,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
     // items may not be present after build if dynamically rendered via amp-list,
     // in which case register them after DOM update instead.
     this.element.addEventListener(
-      AMP_EVENTS_ENUM.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       this.domUpdateHandler_
     );
 
@@ -103,7 +103,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.element.removeEventListener(
-      AMP_EVENTS_ENUM.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       this.domUpdateHandler_
     );
     // Ensure that menu is closed when hidden via media query.
@@ -228,7 +228,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * @private
    */
   handleRootKeyDown_(event) {
-    if (event.key === KEYS_ENUM.ESCAPE && this.collapse_()) {
+    if (event.key === Keys_Enum.ESCAPE && this.collapse_()) {
       event.preventDefault();
     }
   }
@@ -285,12 +285,12 @@ export class AmpMegaMenu extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case KEYS_ENUM.LEFT_ARROW: /* fallthrough */
-      case KEYS_ENUM.RIGHT_ARROW:
+      case Keys_Enum.LEFT_ARROW: /* fallthrough */
+      case Keys_Enum.RIGHT_ARROW:
         this.handleNavigationKeyDown_(event);
         return;
-      case KEYS_ENUM.ENTER: /* fallthrough */
-      case KEYS_ENUM.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         if (event.target == event.currentTarget) {
           this.handleHeadingClick_(event);
         }
@@ -308,7 +308,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
     const index = this.items_.indexOf(item);
     if (index !== -1) {
       event.preventDefault();
-      let dir = event.key == KEYS_ENUM.LEFT_ARROW ? -1 : 1;
+      let dir = event.key == Keys_Enum.LEFT_ARROW ? -1 : 1;
       // Left is 'previous' in LTR and 'next' in RTL; vice versa for Right.
       if (isRTL(this.document_)) {
         dir = -dir;

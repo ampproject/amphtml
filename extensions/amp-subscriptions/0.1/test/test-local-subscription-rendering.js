@@ -1,4 +1,4 @@
-import {ACTION_ENUM} from '../analytics';
+import {Action_Enum} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
@@ -52,14 +52,14 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
     beforeEach(() => {
       actions1 = createElementWithAttributes(doc, 'div', {
         id: 'actions1',
-        'subscriptions-action': ACTION_ENUM.LOGIN,
+        'subscriptions-action': Action_Enum.LOGIN,
         'subscriptions-display': 'loggedIn',
       });
       actions2 = createElementWithAttributes(doc, 'div', {
         id: 'actions2',
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
-        'subscriptions-action': ACTION_ENUM.LOGIN,
+        'subscriptions-action': Action_Enum.LOGIN,
         'subscriptions-service': 'service',
         'subscriptions-decorate': '',
       });

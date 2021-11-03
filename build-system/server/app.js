@@ -1336,7 +1336,7 @@ app.use('/subscription/register', (req, res) => {
   meteringStateStore[req.body.ampReaderId] = {
     id: meteringStateId,
     standardAttributes: {
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       registered_user: {
         timestamp: registrationTimestamp, // In seconds.
       },

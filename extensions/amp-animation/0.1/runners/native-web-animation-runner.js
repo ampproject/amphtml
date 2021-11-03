@@ -7,8 +7,8 @@ import {AnimationRunner} from './animation-runner';
 import {getTotalDuration} from './utils';
 
 import {
-  WEB_ANIMATION_PLAY_STATE_ENUM,
   WebAnimationDef,
+  WebAnimationPlayState_Enum,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
   WebAnimationTimingDef,
@@ -34,8 +34,8 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     /** @private {number} */
     this.runningCount_ = 0;
 
-    /** @private {!WEB_ANIMATION_PLAY_STATE_ENUM} */
-    this.playState_ = WEB_ANIMATION_PLAY_STATE_ENUM.IDLE;
+    /** @private {!WebAnimationPlayState_Enum} */
+    this.playState_ = WebAnimationPlayState_Enum.IDLE;
 
     /** @private {!Observable} */
     this.playStateChangedObservable_ = new Observable();
@@ -43,7 +43,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
 
   /**
    * @override
-   * @return {!WEB_ANIMATION_PLAY_STATE_ENUM}
+   * @return {!WebAnimationPlayState_Enum}
    */
   getPlayState() {
     return this.playState_;
@@ -51,7 +51,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
 
   /**
    * @override
-   * @param {function(!WEB_ANIMATION_PLAY_STATE_ENUM)} handler
+   * @param {function(!WebAnimationPlayState_Enum)} handler
    * @return {!UnlistenDef}
    */
   onPlayStateChanged(handler) {
@@ -81,7 +81,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
       player.onfinish = () => {
         this.runningCount_--;
         if (this.runningCount_ == 0) {
-          this.setPlayState_(WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED);
+          this.setPlayState_(WebAnimationPlayState_Enum.FINISHED);
         }
       };
     });
@@ -104,9 +104,9 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    */
   pause() {
     devAssert(this.players_);
-    this.setPlayState_(WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED);
+    this.setPlayState_(WebAnimationPlayState_Enum.PAUSED);
     this.players_.forEach((player) => {
-      if (player.playState == WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING) {
+      if (player.playState == WebAnimationPlayState_Enum.RUNNING) {
         player.pause();
       }
     });
@@ -118,10 +118,10 @@ export class NativeWebAnimationRunner extends AnimationRunner {
   resume() {
     devAssert(this.players_);
     const oldRunnerPlayState = this.playState_;
-    if (oldRunnerPlayState == WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING) {
+    if (oldRunnerPlayState == WebAnimationPlayState_Enum.RUNNING) {
       return;
     }
-    this.setPlayState_(WEB_ANIMATION_PLAY_STATE_ENUM.RUNNING);
+    this.setPlayState_(WebAnimationPlayState_Enum.RUNNING);
     this.runningCount_ = 0;
     this.players_.forEach((player) => {
       /**
@@ -133,9 +133,9 @@ export class NativeWebAnimationRunner extends AnimationRunner {
        * remove the exception below.
        */
       if (
-        oldRunnerPlayState != WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED ||
-        player.playState == WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED ||
-        player.playState == WEB_ANIMATION_PLAY_STATE_ENUM.PENDING
+        oldRunnerPlayState != WebAnimationPlayState_Enum.PAUSED ||
+        player.playState == WebAnimationPlayState_Enum.PAUSED ||
+        player.playState == WebAnimationPlayState_Enum.PENDING
       ) {
         player.play();
         this.runningCount_++;
@@ -162,7 +162,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     if (!this.players_) {
       return;
     }
-    this.setPlayState_(WEB_ANIMATION_PLAY_STATE_ENUM.PAUSED);
+    this.setPlayState_(WebAnimationPlayState_Enum.PAUSED);
     this.players_.forEach((player) => {
       player.pause();
       player.currentTime = time;
@@ -191,7 +191,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     }
     const players = this.players_;
     this.players_ = null;
-    this.setPlayState_(WEB_ANIMATION_PLAY_STATE_ENUM.FINISHED);
+    this.setPlayState_(WebAnimationPlayState_Enum.FINISHED);
     players.forEach((player) => {
       if (pauseOnError) {
         try {
@@ -213,14 +213,14 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     if (!this.players_) {
       return;
     }
-    this.setPlayState_(WEB_ANIMATION_PLAY_STATE_ENUM.IDLE);
+    this.setPlayState_(WebAnimationPlayState_Enum.IDLE);
     this.players_.forEach((player) => {
       player.cancel();
     });
   }
 
   /**
-   * @param {!WEB_ANIMATION_PLAY_STATE_ENUM} playState
+   * @param {!WebAnimationPlayState_Enum} playState
    * @private
    */
   setPlayState_(playState) {

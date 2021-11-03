@@ -24,7 +24,7 @@ export const safeframeHosts = {};
 let safeframeListenerCreated_ = false;
 
 /** @enum {string} */
-export const MESSAGE_FIELDS_ENUM = {
+export const MessageFields_Enum = {
   CHANNEL: 'c',
   SENTINEL: 'e',
   ENDPOINT_IDENTITY: 'i',
@@ -34,7 +34,7 @@ export const MESSAGE_FIELDS_ENUM = {
 };
 
 /** @enum {string} */
-export const SERVICE_ENUM = {
+export const Service_Enum = {
   GEOMETRY_UPDATE: 'geometry_update',
   CREATIVE_GEOMETRY_UPDATE: 'creative_geometry_update',
   EXPAND_REQUEST: 'expand_request',
@@ -60,12 +60,12 @@ export function safeframeListener(event) {
   if (!data) {
     return;
   }
-  const payload = tryParseJson(data[MESSAGE_FIELDS_ENUM.PAYLOAD]) || {};
+  const payload = tryParseJson(data[MessageFields_Enum.PAYLOAD]) || {};
   /**
    * If the sentinel is provided at the top level, this is a message simply
    * to setup the postMessage channel, so set it up.
    */
-  const sentinel = data[MESSAGE_FIELDS_ENUM.SENTINEL] || payload['sentinel'];
+  const sentinel = data[MessageFields_Enum.SENTINEL] || payload['sentinel'];
   const safeframeHost = safeframeHosts[sentinel];
   if (!safeframeHost) {
     dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
@@ -76,12 +76,12 @@ export function safeframeListener(event) {
     return;
   }
   if (!safeframeHost.channel) {
-    safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS_ENUM.CHANNEL]);
+    safeframeHost.connectMessagingChannel(data[MessageFields_Enum.CHANNEL]);
   } else if (payload) {
     // Currently we do not expect a payload on initial connection messages.
     safeframeHost.processMessage(
       /** @type {!JsonObject} */ (payload),
-      data[MESSAGE_FIELDS_ENUM.SERVICE]
+      data[MessageFields_Enum.SERVICE]
     );
   }
 }
@@ -366,7 +366,7 @@ export class SafeframeHostApi {
             newGeometry: formattedGeom,
             uid: this.uid_,
           },
-          SERVICE_ENUM.GEOMETRY_UPDATE
+          Service_Enum.GEOMETRY_UPDATE
         );
       })
       .catch((err) => dev().error(TAG, err));
@@ -450,13 +450,13 @@ export class SafeframeHostApi {
       return;
     }
     const message = dict();
-    message[MESSAGE_FIELDS_ENUM.CHANNEL] = this.channel;
-    message[MESSAGE_FIELDS_ENUM.PAYLOAD] = JSON.stringify(
+    message[MessageFields_Enum.CHANNEL] = this.channel;
+    message[MessageFields_Enum.PAYLOAD] = JSON.stringify(
       /** @type {!JsonObject} */ (payload)
     );
-    message[MESSAGE_FIELDS_ENUM.SERVICE] = serviceName;
-    message[MESSAGE_FIELDS_ENUM.SENTINEL] = this.sentinel_;
-    message[MESSAGE_FIELDS_ENUM.ENDPOINT_IDENTITY] = this.endpointIdentity_;
+    message[MessageFields_Enum.SERVICE] = serviceName;
+    message[MessageFields_Enum.SENTINEL] = this.sentinel_;
+    message[MessageFields_Enum.ENDPOINT_IDENTITY] = this.endpointIdentity_;
     this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
 
@@ -469,19 +469,19 @@ export class SafeframeHostApi {
     // We are not logging unexpected messages, and some expected
     // messages are being dropped, like init_done, as we don't need them.
     switch (service) {
-      case SERVICE_ENUM.CREATIVE_GEOMETRY_UPDATE:
+      case Service_Enum.CREATIVE_GEOMETRY_UPDATE:
         this.handleFluidMessage_(payload);
         break;
-      case SERVICE_ENUM.EXPAND_REQUEST:
+      case Service_Enum.EXPAND_REQUEST:
         this.handleExpandRequest_(payload);
         break;
-      case SERVICE_ENUM.REGISTER_DONE:
+      case Service_Enum.REGISTER_DONE:
         this.isRegistered_ = true;
         break;
-      case SERVICE_ENUM.COLLAPSE_REQUEST:
+      case Service_Enum.COLLAPSE_REQUEST:
         this.handleCollapseRequest_();
         break;
-      case SERVICE_ENUM.RESIZE_REQUEST:
+      case Service_Enum.RESIZE_REQUEST:
         this.handleResizeRequest_(payload);
       default:
         break;
@@ -519,7 +519,7 @@ export class SafeframeHostApi {
       dev().error(TAG, 'Invalid expand values.');
       this.sendResizeResponse(
         /* SUCCESS? */ false,
-        SERVICE_ENUM.EXPAND_RESPONSE
+        Service_Enum.EXPAND_RESPONSE
       );
       return;
     }
@@ -530,14 +530,14 @@ export class SafeframeHostApi {
     ) {
       this.sendResizeResponse(
         /* SUCCESS? */ false,
-        SERVICE_ENUM.EXPAND_RESPONSE
+        Service_Enum.EXPAND_RESPONSE
       );
       return;
     }
     this.handleSizeChange(
       expandHeight,
       expandWidth,
-      SERVICE_ENUM.EXPAND_RESPONSE
+      Service_Enum.EXPAND_RESPONSE
     );
   }
 
@@ -549,14 +549,14 @@ export class SafeframeHostApi {
     if (this.isCollapsed_ || !this.isRegistered_) {
       this.sendResizeResponse(
         /* SUCCESS? */ false,
-        SERVICE_ENUM.COLLAPSE_RESPONSE
+        Service_Enum.COLLAPSE_RESPONSE
       );
       return;
     }
     this.handleSizeChange(
       this.initialCreativeSize_.height,
       this.initialCreativeSize_.width,
-      SERVICE_ENUM.COLLAPSE_RESPONSE,
+      Service_Enum.COLLAPSE_RESPONSE,
       /** isCollapse */ true
     );
   }
@@ -567,7 +567,7 @@ export class SafeframeHostApi {
    * @param {string} messageType
    */
   resizeSafeframe(height, width, messageType) {
-    this.isCollapsed_ = messageType == SERVICE_ENUM.COLLAPSE_RESPONSE;
+    this.isCollapsed_ = messageType == Service_Enum.COLLAPSE_RESPONSE;
     this.baseInstance_.measureMutateElement(
       /** MEASURER */ () => {
         this.baseInstance_.getResource().measure();
@@ -646,7 +646,7 @@ export class SafeframeHostApi {
     this.resizeAmpAdAndSafeframe(
       resizeHeight,
       resizeWidth,
-      SERVICE_ENUM.RESIZE_RESPONSE,
+      Service_Enum.RESIZE_RESPONSE,
       true
     );
   }

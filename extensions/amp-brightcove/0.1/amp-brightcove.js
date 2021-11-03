@@ -1,7 +1,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {VIDEO_EVENTS_ENUM} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 import {
   createFrameFor,
@@ -244,7 +244,7 @@ class AmpBrightcove extends AMP.BaseElement {
 
     if (
       redispatch(element, eventType, {
-        'ready': VIDEO_EVENTS_ENUM.LOAD,
+        'ready': VideoEvents_Enum.LOAD,
         ...BRIGHTCOVE_EVENTS,
       })
     ) {

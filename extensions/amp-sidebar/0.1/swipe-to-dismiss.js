@@ -36,7 +36,7 @@ const SWIPE_TO_CLOSE_MOMENTUM_TIMING = 'cubic-bezier(0.15, .55, .3, 0.95)';
  * Direction in which swipe to dismiss is allowed.
  * @const @enum {string}
  */
-export const DIRECTION_ENUM = {
+export const Direction_Enum = {
   BACKWARD: 'backward',
   FORWARD: 'forward',
 };
@@ -45,7 +45,7 @@ export const DIRECTION_ENUM = {
  * Orientation in which swipe to dismiss is allowed.
  * @const @enum {string}
  */
-export const ORIENTATION_ENUM = {
+export const Orientation_Enum = {
   HORIZONTAL: 'horizontal',
   VERTICAL: 'vertical',
 };
@@ -70,10 +70,10 @@ export class SwipeToDismiss {
     this.onclose_ = onclose;
 
     /** @private {!Direction} */
-    this.direction_ = DIRECTION_ENUM.BACKWARD;
+    this.direction_ = Direction_Enum.BACKWARD;
 
     /** @private {!Orientation} */
-    this.orientation_ = ORIENTATION_ENUM.HORIZONTAL;
+    this.orientation_ = Orientation_Enum.HORIZONTAL;
 
     /**
      * The element that is moving with the swipe to dismiss.
@@ -93,7 +93,7 @@ export class SwipeToDismiss {
    * @return {number} length in pixels
    */
   getSwipeElementLength_() {
-    return this.orientation_ == ORIENTATION_ENUM.HORIZONTAL
+    return this.orientation_ == Orientation_Enum.HORIZONTAL
       ? this.swipeElement_./*OK*/ offsetWidth
       : this.swipeElement_./*OK*/ offsetHeight;
   }
@@ -106,8 +106,8 @@ export class SwipeToDismiss {
    */
   capDistance_(deltaX, deltaY) {
     const delta =
-      this.orientation_ == ORIENTATION_ENUM.HORIZONTAL ? deltaX : deltaY;
-    return this.direction_ == DIRECTION_ENUM.BACKWARD
+      this.orientation_ == Orientation_Enum.HORIZONTAL ? deltaX : deltaY;
+    return this.direction_ == Direction_Enum.BACKWARD
       ? -Math.min(delta, 0)
       : Math.max(delta, 0);
   }
@@ -120,13 +120,13 @@ export class SwipeToDismiss {
    */
   translateBy_(value, unit = '') {
     const distance =
-      this.direction_ == DIRECTION_ENUM.BACKWARD ? -value : value;
+      this.direction_ == Direction_Enum.BACKWARD ? -value : value;
     const x =
-      this.orientation_ == ORIENTATION_ENUM.HORIZONTAL
+      this.orientation_ == Orientation_Enum.HORIZONTAL
         ? `${distance}${unit}`
         : 0;
     const y =
-      this.orientation_ == ORIENTATION_ENUM.HORIZONTAL
+      this.orientation_ == Orientation_Enum.HORIZONTAL
         ? 0
         : `${distance}${unit}`;
     return `translate(${x}, ${y})`;

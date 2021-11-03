@@ -1,4 +1,4 @@
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
@@ -22,14 +22,14 @@ export class VideoBaseElement extends BaseElement {
   /**
    * @param {string} alias
    * @param {function(!VideoWrapperDef.Api, !../../../src/service/action-impl.ActionInvocation)} handler
-   * @param {!../../../src/core/constants/action-constants.ACTION_TRUST_ENUM=} minTrust
+   * @param {!../../../src/core/constants/action-constants.ActionTrust_Enum=} minTrust
    * @private
    */
-  registerApiAction_(alias, handler, minTrust = ACTION_TRUST_ENUM.HIGH) {
+  registerApiAction_(alias, handler, minTrust = ActionTrust_Enum.HIGH) {
     this.registerApiAction(
       alias,
       (api, invocation) => {
-        if (invocation.trust >= ACTION_TRUST_ENUM.HIGH) {
+        if (invocation.trust >= ActionTrust_Enum.HIGH) {
           // TODO(alanorozco): There may be a better solution that doesn't
           // require this method which is not standard in HTMLMediaElement, like
           // potentially toggling `autoplay` instead.

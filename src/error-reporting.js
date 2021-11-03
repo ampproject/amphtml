@@ -1,4 +1,4 @@
-import {AMP_EVENTS_ENUM} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {
   USER_ERROR_SENTINEL,
@@ -209,7 +209,7 @@ export function reportError(error, opt_associatedElement) {
     }
     if (element && element.dispatchCustomEventForTesting) {
       element.dispatchCustomEventForTesting(
-        AMP_EVENTS_ENUM.ERROR,
+        AmpEvents_Enum.ERROR,
         error.message
       );
     }

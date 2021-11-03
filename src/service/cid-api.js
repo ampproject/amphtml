@@ -15,7 +15,7 @@ const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
 
 /** @enum {string} */
-export const TOKEN_STATUS_ENUM = {
+export const TokenStatus_Enum = {
   RETRIEVING: '$RETRIEVING',
   OPT_OUT: '$OPT_OUT',
   NOT_FOUND: '$NOT_FOUND',
@@ -70,17 +70,16 @@ export class GoogleCidApi {
     return (this.cidPromise_[scope] = this.timer_
       .poll(200, () => {
         token = getCookie(this.win_, AMP_TOKEN);
-        return token !== TOKEN_STATUS_ENUM.RETRIEVING;
+        return token !== TokenStatus_Enum.RETRIEVING;
       })
       .then(() => {
-        if (token === TOKEN_STATUS_ENUM.OPT_OUT) {
-          return TOKEN_STATUS_ENUM.OPT_OUT;
+        if (token === TokenStatus_Enum.OPT_OUT) {
+          return TokenStatus_Enum.OPT_OUT;
         }
         // If the page referrer is proxy origin, we force to use API even the
         // token indicates a previous fetch returned nothing
         const forceFetch =
-          token === TOKEN_STATUS_ENUM.NOT_FOUND &&
-          this.isReferrerProxyOrigin_();
+          token === TokenStatus_Enum.NOT_FOUND && this.isReferrerProxyOrigin_();
 
         // Token is in a special state, fallback to existing cookie
         if (!forceFetch && this.isStatusToken_(token)) {
@@ -88,7 +87,7 @@ export class GoogleCidApi {
         }
 
         if (!token || this.isStatusToken_(token)) {
-          this.persistToken_(TOKEN_STATUS_ENUM.RETRIEVING, TIMEOUT);
+          this.persistToken_(TokenStatus_Enum.RETRIEVING, TIMEOUT);
         }
 
         const url = GOOGLE_API_URL + apiKey;
@@ -109,7 +108,7 @@ export class GoogleCidApi {
             return cid;
           })
           .catch((e) => {
-            this.persistToken_(TOKEN_STATUS_ENUM.ERROR, TIMEOUT);
+            this.persistToken_(TokenStatus_Enum.ERROR, TIMEOUT);
             if (e && e.response) {
               e.response.json().then((res) => {
                 dev().error(TAG, JSON.stringify(res));
@@ -156,8 +155,8 @@ export class GoogleCidApi {
    */
   handleResponse_(res) {
     if (res['optOut']) {
-      this.persistToken_(TOKEN_STATUS_ENUM.OPT_OUT, YEAR);
-      return TOKEN_STATUS_ENUM.OPT_OUT;
+      this.persistToken_(TokenStatus_Enum.OPT_OUT, YEAR);
+      return TokenStatus_Enum.OPT_OUT;
     }
     if (res['clientId']) {
       this.persistToken_(res['securityToken'], YEAR);
@@ -166,7 +165,7 @@ export class GoogleCidApi {
     if (res['alternateUrl']) {
       return null;
     }
-    this.persistToken_(TOKEN_STATUS_ENUM.NOT_FOUND, HOUR);
+    this.persistToken_(TokenStatus_Enum.NOT_FOUND, HOUR);
     return null;
   }
 

@@ -1,7 +1,7 @@
 import {dev} from '#utils/log';
 
 /** @enum {string} */
-export const VIDEO_DOCKING_EVENTS_ENUM = {
+export const VideoDockingEvents_Enum = {
   DISMISS_ON_TAP: 'dock-dismiss-on-tap',
   SCROLL_BACK: 'dock-scroll-back',
 };

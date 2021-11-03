@@ -1,4 +1,4 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
@@ -93,7 +93,7 @@ class CustomEventReporter {
 
     this.parent_
       .signals()
-      .whenSignal(COMMON_SIGNALS_ENUM.LOAD_START)
+      .whenSignal(CommonSignals_Enum.LOAD_START)
       .then(() => {
         insertAnalyticsElement(this.parent_, config, true);
       });
@@ -215,7 +215,7 @@ export function useAnalyticsInSandbox(element, promise) {
   // Listener to LOAD_START signal. Insert analytics element on LOAD_START
   element
     .signals()
-    .whenSignal(COMMON_SIGNALS_ENUM.LOAD_START)
+    .whenSignal(CommonSignals_Enum.LOAD_START)
     .then(() => {
       if (analyticsElement || !configPromise) {
         return;
@@ -233,7 +233,7 @@ export function useAnalyticsInSandbox(element, promise) {
   // Listener to UNLOAD signal. Destroy remove element on UNLOAD
   element
     .signals()
-    .whenSignal(COMMON_SIGNALS_ENUM.UNLOAD)
+    .whenSignal(CommonSignals_Enum.UNLOAD)
     .then(() => {
       configPromise = null;
       if (analyticsElement) {

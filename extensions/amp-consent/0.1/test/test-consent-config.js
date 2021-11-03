@@ -1,10 +1,10 @@
-import {CONSENT_POLICY_STATE_ENUM} from '#core/constants/consent-state';
+import {ConsentPolicyState_Enum} from '#core/constants/consent-state';
 import {
   ConsentConfig,
   expandConsentEndpointUrl,
   expandPolicyConfig,
 } from '../consent-config';
-import {GEO_IN_GROUP_ENUM} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {GeoInGroup_Enum} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
 import {dict} from '#core/types/object';
 import {macroTask} from '#testing/helpers';
@@ -152,7 +152,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       env.sandbox.stub(Services, 'geoForDocOrNull').returns(
         Promise.resolve({
           isInCountryGroup() {
-            return GEO_IN_GROUP_ENUM.IN;
+            return GeoInGroup_Enum.IN;
           },
         })
       );
@@ -265,7 +265,7 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
         env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup() {
-              return GEO_IN_GROUP_ENUM.NOT_IN;
+              return GeoInGroup_Enum.NOT_IN;
             },
           })
         );
@@ -286,9 +286,9 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'nafta') {
-                return GEO_IN_GROUP_ENUM.IN;
+                return GeoInGroup_Enum.IN;
               }
-              return GEO_IN_GROUP_ENUM.NOT_IN;
+              return GeoInGroup_Enum.NOT_IN;
             },
           })
         );
@@ -307,9 +307,9 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'waldo') {
-                return GEO_IN_GROUP_ENUM.IN;
+                return GeoInGroup_Enum.IN;
               }
-              return GEO_IN_GROUP_ENUM.NOT_IN;
+              return GeoInGroup_Enum.NOT_IN;
             },
           })
         );
@@ -337,9 +337,9 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'geoGroupUnknown') {
-                return GEO_IN_GROUP_ENUM.IN;
+                return GeoInGroup_Enum.IN;
               }
-              return GEO_IN_GROUP_ENUM.NOT_IN;
+              return GeoInGroup_Enum.NOT_IN;
             },
           })
         );
@@ -375,9 +375,9 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'na') {
-                return GEO_IN_GROUP_ENUM.IN;
+                return GeoInGroup_Enum.IN;
               }
-              return GEO_IN_GROUP_ENUM.NOT_IN;
+              return GeoInGroup_Enum.NOT_IN;
             },
           })
         );
@@ -397,9 +397,9 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'invalid') {
-                return GEO_IN_GROUP_ENUM.IN;
+                return GeoInGroup_Enum.IN;
               }
-              return GEO_IN_GROUP_ENUM.NOT_IN;
+              return GeoInGroup_Enum.NOT_IN;
             },
           })
         );
@@ -591,10 +591,10 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           'ABC': undefined,
         },
         'unblockOn': [
-          CONSENT_POLICY_STATE_ENUM.UNKNOWN,
-          CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
-          CONSENT_POLICY_STATE_ENUM.INSUFFICIENT,
-          CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
+          ConsentPolicyState_Enum.UNKNOWN,
+          ConsentPolicyState_Enum.SUFFICIENT,
+          ConsentPolicyState_Enum.INSUFFICIENT,
+          ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED,
         ],
       });
     });
@@ -619,10 +619,10 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           'fallbackAction': 'reject',
         },
         'unblockOn': [
-          CONSENT_POLICY_STATE_ENUM.UNKNOWN,
-          CONSENT_POLICY_STATE_ENUM.SUFFICIENT,
-          CONSENT_POLICY_STATE_ENUM.INSUFFICIENT,
-          CONSENT_POLICY_STATE_ENUM.UNKNOWN_NOT_REQUIRED,
+          ConsentPolicyState_Enum.UNKNOWN,
+          ConsentPolicyState_Enum.SUFFICIENT,
+          ConsentPolicyState_Enum.INSUFFICIENT,
+          ConsentPolicyState_Enum.UNKNOWN_NOT_REQUIRED,
         ],
       });
     });

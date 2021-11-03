@@ -1,8 +1,8 @@
 import {trimEnd} from '#core/types/string';
 
 import {
-  BINARY_SEARCH_PREFERENCE_ENUM,
-  BINARY_SEARCH_STOP_ENUM,
+  BinarySearchPreference_Enum,
+  BinarySearchStop_Enum,
   binarySearch,
 } from './binary-search';
 
@@ -280,11 +280,11 @@ function maybeEllipsizeNode(node, container, containerRect) {
   // occur. As long as we have underflow, we will keep looking at a higher
   // index. Note:
   //
-  // - We use BINARY_SEARCH_PREFERENCE_ENUM.NEXT to find the index that is
+  // - We use BinarySearchPreference_Enum.NEXT to find the index that is
   //   overflowing when the return value is negative. When everything overflows
-  //   overflows, BINARY_SEARCH_PREFERENCE_ENUM.PREV returns `-0`, so we would need to
+  //   overflows, BinarySearchPreference_Enum.PREV returns `-0`, so we would need to
   //   special case that.
-  // - We use BINARY_SEARCH_STOP_ENUM.RIGHT to find the last index that is not
+  // - We use BinarySearchStop_Enum.RIGHT to find the last index that is not
   //   overflowing when the return value is positive.
   const searchIndex = binarySearch(
     0,
@@ -300,8 +300,8 @@ function maybeEllipsizeNode(node, container, containerRect) {
 
       return underflowAtPosition(container, node, text, offset);
     },
-    BINARY_SEARCH_STOP_ENUM.RIGHT,
-    BINARY_SEARCH_PREFERENCE_ENUM.NEXT
+    BinarySearchStop_Enum.RIGHT,
+    BinarySearchPreference_Enum.NEXT
   );
 
   // When positive, seachIndex is the last underflowing index, so add one to

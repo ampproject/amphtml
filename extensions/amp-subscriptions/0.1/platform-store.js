@@ -1,7 +1,4 @@
-import {
-  DEFAULT_SCORE_CONFIG,
-  SUBSCRIPTIONS_SCORE_FACTOR_ENUM,
-} from './constants';
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor_Enum} from './constants';
 import {Deferred} from '#core/data-structures/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '#core/data-structures/observable';
@@ -275,7 +272,7 @@ export class PlatformStore {
       this.platformKeys_.map((platformId) => {
         states[platformId] = dict();
         return Promise.all(
-          Object.values(SUBSCRIPTIONS_SCORE_FACTOR_ENUM).map((scoreFactor) =>
+          Object.values(SubscriptionsScoreFactor_Enum).map((scoreFactor) =>
             this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
               (factorValue) => {
                 states[platformId][scoreFactor] = factorValue;
@@ -635,7 +632,7 @@ export class PlatformStore {
    */
   selectPlatformForLogin() {
     return this.selectApplicablePlatformForFactor_(
-      SUBSCRIPTIONS_SCORE_FACTOR_ENUM.SUPPORTS_VIEWER
+      SubscriptionsScoreFactor_Enum.SUPPORTS_VIEWER
     );
   }
 }

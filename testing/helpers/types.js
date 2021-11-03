@@ -1,9 +1,9 @@
 import {
   DOMRectDef,
   ElementHandle,
-  KEY_ENUM,
+  Key_Enum,
   ScrollToOptionsDef,
   WindowRectDef,
 } from '../../build-system/tasks/e2e/e2e-types';
 
-export {ElementHandle, KEY_ENUM, WindowRectDef, DOMRectDef, ScrollToOptionsDef};
+export {ElementHandle, Key_Enum, WindowRectDef, DOMRectDef, ScrollToOptionsDef};

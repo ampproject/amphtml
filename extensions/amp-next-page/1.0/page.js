@@ -1,11 +1,11 @@
-import {VISIBILITY_STATE_ENUM} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 
 import {devAssert} from '#utils/log';
 
-import {VIEWPORT_RELATIVE_POS_ENUM} from './visibility-observer';
+import {ViewportRelativePos_Enum} from './visibility-observer';
 
 /** @enum {number} */
-export const PAGE_STATE_ENUM = {
+export const PageState_Enum = {
   QUEUED: 1,
   FETCHING: 2,
   LOADED: 3,
@@ -50,11 +50,11 @@ export class Page {
     /** @private {?Document} */
     this.content_ = null;
     /** @private {!PageState} */
-    this.state_ = PAGE_STATE_ENUM.QUEUED;
-    /** @private {!VISIBILITY_STATE_ENUM} */
-    this.visibilityState_ = VISIBILITY_STATE_ENUM.PRERENDER;
-    /** @private {!VIEWPORT_RELATIVE_POS_ENUM} */
-    this.relativePos_ = VIEWPORT_RELATIVE_POS_ENUM.OUTSIDE_VIEWPORT;
+    this.state_ = PageState_Enum.QUEUED;
+    /** @private {!VisibilityState_Enum} */
+    this.visibilityState_ = VisibilityState_Enum.PRERENDER;
+    /** @private {!ViewportRelativePos_Enum} */
+    this.relativePos_ = ViewportRelativePos_Enum.OUTSIDE_VIEWPORT;
   }
 
   /** @return {string} */
@@ -84,7 +84,7 @@ export class Page {
     return this.title_;
   }
 
-  /** @return {!VIEWPORT_RELATIVE_POS_ENUM} */
+  /** @return {!ViewportRelativePos_Enum} */
   get relativePos() {
     return this.relativePos_;
   }
@@ -107,7 +107,7 @@ export class Page {
     return this.shadowDoc_;
   }
 
-  /** @param {!VIEWPORT_RELATIVE_POS_ENUM} position */
+  /** @param {!ViewportRelativePos_Enum} position */
   set relativePos(position) {
     this.relativePos_ = position;
   }
@@ -125,9 +125,9 @@ export class Page {
    */
   isLoaded() {
     return (
-      this.state_ === PAGE_STATE_ENUM.LOADED ||
-      this.state_ === PAGE_STATE_ENUM.INSERTED ||
-      this.state_ === PAGE_STATE_ENUM.PAUSED
+      this.state_ === PageState_Enum.LOADED ||
+      this.state_ === PageState_Enum.INSERTED ||
+      this.state_ === PageState_Enum.PAUSED
     );
   }
 
@@ -136,12 +136,12 @@ export class Page {
    */
   isVisible() {
     return (
-      this.isLoaded() && this.visibilityState_ === VISIBILITY_STATE_ENUM.VISIBLE
+      this.isLoaded() && this.visibilityState_ === VisibilityState_Enum.VISIBLE
     );
   }
 
   /**
-   * @param {VISIBILITY_STATE_ENUM} visibilityState
+   * @param {VisibilityState_Enum} visibilityState
    */
   setVisibility(visibilityState) {
     if (!this.isLoaded() || visibilityState == this.visibilityState_) {
@@ -150,8 +150,8 @@ export class Page {
 
     //Reload the page if necessary
     if (
-      this.is(PAGE_STATE_ENUM.PAUSED) &&
-      visibilityState === VISIBILITY_STATE_ENUM.VISIBLE
+      this.is(PageState_Enum.PAUSED) &&
+      visibilityState === VisibilityState_Enum.VISIBLE
     ) {
       this.resume();
     }
@@ -181,8 +181,8 @@ export class Page {
     return this.shadowDoc_.close().then(() => {
       return this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
-        this.visibilityState_ = VISIBILITY_STATE_ENUM.HIDDEN;
-        this.state_ = PAGE_STATE_ENUM.PAUSED;
+        this.visibilityState_ = VisibilityState_Enum.HIDDEN;
+        this.state_ = PageState_Enum.PAUSED;
       });
     });
   }
@@ -205,20 +205,20 @@ export class Page {
     // TOOD(wassgha): Should we re-fetch on failure? or show a failed state?
     // or skip to the next available document? (currently breaks silently)
     if (
-      this.state_ === PAGE_STATE_ENUM.INSERTED ||
-      this.state_ === PAGE_STATE_ENUM.FETCHING ||
-      this.state_ === PAGE_STATE_ENUM.LOADED ||
-      this.state_ === PAGE_STATE_ENUM.FAILED
+      this.state_ === PageState_Enum.INSERTED ||
+      this.state_ === PageState_Enum.FETCHING ||
+      this.state_ === PageState_Enum.LOADED ||
+      this.state_ === PageState_Enum.FAILED
     ) {
       return Promise.resolve();
     }
 
-    this.state_ = PAGE_STATE_ENUM.FETCHING;
+    this.state_ = PageState_Enum.FETCHING;
 
     return this.manager_
       .fetchPageDocument(this)
       .then((content) => {
-        this.state_ = PAGE_STATE_ENUM.LOADED;
+        this.state_ = PageState_Enum.LOADED;
         this.content_ = content;
         this.container_ = this.manager_.createDocumentContainerForPage(
           this /** page */
@@ -228,7 +228,7 @@ export class Page {
         return this.attach_();
       })
       .catch(() => {
-        this.state_ = PAGE_STATE_ENUM.FAILED;
+        this.state_ = PageState_Enum.FAILED;
       });
   }
 
@@ -241,16 +241,16 @@ export class Page {
       .attachDocumentToPage(
         this /** page */,
         /** @type {!Document} */ (devAssert(this.content_)),
-        this.is(PAGE_STATE_ENUM.PAUSED) /** force */
+        this.is(PageState_Enum.PAUSED) /** force */
       )
       .then((shadowDoc) => {
         if (!shadowDoc) {
-          this.state_ = PAGE_STATE_ENUM.FAILED;
+          this.state_ = PageState_Enum.FAILED;
           return;
         }
-        this.state_ = PAGE_STATE_ENUM.INSERTED;
+        this.state_ = PageState_Enum.INSERTED;
         this.shadowDoc_ = shadowDoc;
-        if (!this.is(PAGE_STATE_ENUM.PAUSED)) {
+        if (!this.is(PageState_Enum.PAUSED)) {
           this.manager_.setLastFetchedPage(this);
         }
       });
@@ -262,7 +262,7 @@ export class HostPage extends Page {
    * @param {!./service.NextPageService} manager
    * @param {{ url: string, title: string, image: string }} meta
    * @param {!PageState} initState
-   * @param {!VISIBILITY_STATE_ENUM} initVisibility
+   * @param {!VisibilityState_Enum} initVisibility
    * @param {!Document} doc
    */
   constructor(manager, meta, initState, initVisibility, doc) {

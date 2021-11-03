@@ -3,7 +3,7 @@ import selenium from 'selenium-webdriver';
 const {logging} = selenium;
 
 /** @enum {string} */
-const PERFORMANCE_METHODS_ENUM = {
+const PerformanceMethods_Enum = {
   'FRAME_ATTACHED': 'Page.frameAttached',
   'FRAME_NAVIGATED': 'Page.frameNavigated',
   'FRAME_STARTED_LOADING': 'Page.frameStartedLoading',
@@ -44,7 +44,7 @@ export class NetworkLogger {
    */
   async getSentRequests(url) {
     const entries = await this.getEntries_(
-      PERFORMANCE_METHODS_ENUM.REQUEST_WILL_BE_SENT
+      PerformanceMethods_Enum.REQUEST_WILL_BE_SENT
     );
     if (url) {
       return entries.filter((entry) => entry.message.params.request.url == url);

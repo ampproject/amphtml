@@ -1,7 +1,7 @@
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {mapRange} from '#core/math';
 
-import {DIRECTION_X_ENUM, RectDef} from './def';
+import {DirectionX_Enum, RectDef} from './def';
 
 /**
  * @param {number} containerWidth
@@ -65,14 +65,14 @@ const mapStep = (step, min, max) => mapRange(step, 0, 1, min, max);
  * @param {!RectDef} from
  * @param {!RectDef} to
  * @param {number=} step  in [0..1]
- * @return {{x: number, y: number, scale: number, relativeX: !DIRECTION_X_ENUM}}
+ * @return {{x: number, y: number, scale: number, relativeX: !DirectionX_Enum}}
  *  - x is offset from the original box in pixels.
  *  - y is offset from the original box in pixels.
  *  - scale is the
  */
 export function interpolatedBoxesTransform(from, to, step = 1) {
   const relativeX =
-    to.x < from.x ? DIRECTION_X_ENUM.LEFT : DIRECTION_X_ENUM.RIGHT;
+    to.x < from.x ? DirectionX_Enum.LEFT : DirectionX_Enum.RIGHT;
   const x = mapStep(step, from.x, to.x);
   const y = mapStep(step, from.y, to.y);
   const width = mapStep(step, from.width, to.width);
@@ -111,7 +111,7 @@ export function letterboxRect(original, container) {
 /**
  * @param {!RectDef} original
  * @param {!RectDef} container
- * @param {DIRECTION_X_ENUM} horizontalEdge
+ * @param {DirectionX_Enum} horizontalEdge
  * @param {number} widthRatio
  * @param {number} widthMin
  * @param {number} marginRatio
@@ -136,7 +136,7 @@ export function topCornerRect(
   const height = width / aspect;
 
   const x =
-    horizontalEdge == DIRECTION_X_ENUM.RIGHT
+    horizontalEdge == DirectionX_Enum.RIGHT
       ? container.right - margin - width
       : container.left + margin;
 

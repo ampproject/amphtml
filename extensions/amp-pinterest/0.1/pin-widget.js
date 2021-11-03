@@ -1,4 +1,4 @@
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {getWin} from '#core/window';
 
@@ -48,7 +48,7 @@ export class PinWidget {
    * @param {Event} event
    */
   handleKeyDown(event) {
-    if (event.key == KEYS_ENUM.ENTER || event.key == KEYS_ENUM.SPACE) {
+    if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
       this.handleClick(event);
     }
   }

@@ -1,9 +1,9 @@
-import {LOG_LEVEL_ENUM, devAssert} from '#utils/log';
+import {LogLevel_Enum, devAssert} from '#utils/log';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {tryResolve} from '#core/data-structures/promise';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
-let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ElementPredicate_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * A log type is an abstract rule or best practice that should be followed when
@@ -29,14 +29,14 @@ let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-cam
  *
  * @typedef {{
  *   message: string,
- *   level: !LOG_LEVEL_ENUM,
+ *   level: !LogLevel_Enum,
  *   moreInfo: (string|undefined),
  *   selector: (string|undefined),
  *   precondition: (!ElementPredicate_1_0_Def|undefined),
  *   predicate: (!ElementPredicate_1_0_Def|undefined),
  * }}
  */
-let AmpStoryLogType_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let AmpStoryLogType_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * A log entry is a more concrete version of a rule or best practice; it refers
@@ -47,7 +47,7 @@ let AmpStoryLogType_1_0_Def; // eslint-disable-line google-camelcase/google-came
  *   element: !Element,
  *   rootElement: !Element,
  *   message: string,
- *   level: !LOG_LEVEL_ENUM,
+ *   level: !LogLevel_Enum,
  *   conforms: boolean,
  *   moreInfo: (string|undefined),
  * }}
@@ -71,13 +71,13 @@ function getPosterFromVideo(el) {
 }
 
 /** @enum {!AmpStoryLogType_1_0_Def} */
-const LOG_TYPE_ENUM = {
+const LogType_Enum = {
   /** Errors */
   VIDEOS_POSTER_SPECIFIED: {
     message: 'Videos should specify a poster image.',
     moreInfo: AMPPROJECT_DOCS + '/reference/components/amp-video#poster',
     selector: 'video:not([poster])',
-    level: LOG_LEVEL_ENUM.ERROR,
+    level: LogLevel_Enum.ERROR,
   },
 
   /** Warnings */
@@ -88,28 +88,28 @@ const LOG_TYPE_ENUM = {
     moreInfo: AMPPROJECT_DOCS + '/guides/responsive/art_direction#srcset',
     selector: 'img:not([srcset])',
     predicate: (el) => el.naturalWidth <= 720 && el.naturalHeight <= 1280,
-    level: LOG_LEVEL_ENUM.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   IMAGES_PORTRAIT: {
     message: 'Full-bleed images should be in portrait orientation.',
     selector: 'amp-story-grid-layer[template="fill"] > amp-img > img',
     predicate: (el) => el.naturalWidth < el.naturalHeight,
-    level: LOG_LEVEL_ENUM.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEOS_MAX_720P: {
     message: 'Videos should not be larger than 720p.',
     selector: 'video',
     predicate: (el) => el.videoWidth <= 720 && el.videoHeight <= 1280,
-    level: LOG_LEVEL_ENUM.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEOS_PORTRAIT: {
     message: 'Full-bleed videos should be in portrait orientation.',
     selector: 'amp-story-grid-layer[template="fill"] > amp-video > video',
     predicate: (el) => el.videoWidth < el.videoHeight,
-    level: LOG_LEVEL_ENUM.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEO_POSTER_MAX_720P: {
@@ -119,7 +119,7 @@ const LOG_TYPE_ENUM = {
       getPosterFromVideo(el).then((poster) => {
         return poster.naturalWidth <= 720 && poster.naturalHeight <= 1280;
       }),
-    level: LOG_LEVEL_ENUM.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEO_POSTER_POTRAIT: {
@@ -132,7 +132,7 @@ const LOG_TYPE_ENUM = {
       getPosterFromVideo(el).then(
         (poster) => poster.naturalWidth < poster.naturalHeight
       ),
-    level: LOG_LEVEL_ENUM.WARN,
+    level: LogLevel_Enum.WARN,
   },
 };
 
@@ -142,7 +142,7 @@ const LOG_TYPE_ENUM = {
  * @return {!AmpStoryLogType_1_0_Def}
  */
 function getLogType(logTypeKey) {
-  const logType = LOG_TYPE_ENUM[logTypeKey];
+  const logType = LogType_Enum[logTypeKey];
   devAssert(logType, `There is no log type "${logTypeKey}".`);
   devAssert(
     logType.message,
@@ -218,7 +218,7 @@ function logEntryCompareFn(logEntryA, logEntryB) {
  * @return {!Promise<!Array<!AmpStoryLogEntryDef>>}
  */
 export function getLogEntries(rootElement) {
-  const logEntryPromises = Object.keys(LOG_TYPE_ENUM).reduce((entries, key) => {
+  const logEntryPromises = Object.keys(LogType_Enum).reduce((entries, key) => {
     const logType = getLogType(key);
     const newEntries = getLogEntriesForType(rootElement, logType);
     return entries.concat(newEntries);

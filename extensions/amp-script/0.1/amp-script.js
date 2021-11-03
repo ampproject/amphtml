@@ -2,7 +2,7 @@ import {upgrade} from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 
 import {Deferred} from '#core/data-structures/promise';
 import {
-  LAYOUT_ENUM,
+  Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -51,7 +51,7 @@ const MAX_TOTAL_SCRIPT_SIZE = 150000;
  * See src/transfer/Phase.ts in worker-dom.
  * @enum {number}
  */
-const PHASE_ENUM = {
+const Phase_Enum = {
   INITIALIZING: 0,
   HYDRATING: 1,
   MUTATING: 2,
@@ -62,7 +62,7 @@ const PHASE_ENUM = {
  * @enum {number}
  * @visibleForTesting
  */
-export const STORAGE_LOCATION_ENUM = {
+export const StorageLocation_Enum = {
   LOCAL: 0,
   SESSION: 1,
   AMP_STATE: 2,
@@ -142,7 +142,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == LAYOUT_ENUM.CONTAINER || isLayoutSizeDefined(layout);
+    return layout == Layout_Enum.CONTAINER || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -489,7 +489,7 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   mutationPump_(flush, phase) {
-    if (phase == PHASE_ENUM.HYDRATING) {
+    if (phase == Phase_Enum.HYDRATING) {
       this.vsync_.mutate(() =>
         this.element.classList.add('i-amphtml-hydrated')
       );
@@ -511,7 +511,7 @@ export class AmpScript extends AMP.BaseElement {
         user().error(TAG, this.mutationTypeToErrorMessage_(type, count));
       });
 
-      if (disallowedTypes.length > 0 && phase === PHASE_ENUM.MUTATING) {
+      if (disallowedTypes.length > 0 && phase === Phase_Enum.MUTATING) {
         this.workerDom_.terminate();
 
         this.element.classList.remove('i-amphtml-hydrated');
@@ -832,7 +832,7 @@ export class SanitizerImpl {
    * @return {!Promise<Object>|?Object}
    */
   getStorage(location, opt_key) {
-    if (location === STORAGE_LOCATION_ENUM.AMP_STATE) {
+    if (location === StorageLocation_Enum.AMP_STATE) {
       return Services.bindForDocOrNull(this.element_).then((bind) => {
         if (bind) {
           return bind.getStateValue(opt_key || '.');
@@ -860,7 +860,7 @@ export class SanitizerImpl {
    * @return {!Promise}
    */
   setStorage(location, key, value) {
-    if (location === STORAGE_LOCATION_ENUM.AMP_STATE) {
+    if (location === StorageLocation_Enum.AMP_STATE) {
       return Services.bindForDocOrNull(this.element_).then((bind) => {
         if (bind) {
           const state = tryParseJson(value, () => {
@@ -913,9 +913,9 @@ export class SanitizerImpl {
    * @private
    */
   storageFor_(location) {
-    if (location === STORAGE_LOCATION_ENUM.LOCAL) {
+    if (location === StorageLocation_Enum.LOCAL) {
       return this.win_.localStorage;
-    } else if (location === STORAGE_LOCATION_ENUM.SESSION) {
+    } else if (location === StorageLocation_Enum.SESSION) {
       return this.win_.sessionStorage;
     }
     return null;

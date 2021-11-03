@@ -7,10 +7,7 @@ import {
 
 import {createCustomEvent} from '#utils/event-helper';
 
-import {
-  PLAYING_STATES_ENUM,
-  VIDEO_EVENTS_ENUM,
-} from '../../src/video-interface';
+import {PlayingStates_Enum, VideoEvents_Enum} from '../../src/video-interface';
 
 describes.fakeWin(
   'video-manager-impl#AnalyticsPercentageTracker',
@@ -58,7 +55,7 @@ describes.fakeWin(
     }
 
     function dispatchLoadedMetadata(element) {
-      dispatchCustom(element, VIDEO_EVENTS_ENUM.LOADEDMETADATA);
+      dispatchCustom(element, VideoEvents_Enum.LOADEDMETADATA);
     }
 
     function mockTrigger(tracker) {
@@ -77,7 +74,7 @@ describes.fakeWin(
       mockEntry = {
         video: createFakeVideo(),
         getPlayingState() {
-          return PLAYING_STATES_ENUM.PAUSED;
+          return PlayingStates_Enum.PAUSED;
         },
       };
 
@@ -150,7 +147,7 @@ describes.fakeWin(
 
           const {element} = video;
 
-          setPlayingState(mockEntry, PLAYING_STATES_ENUM.PLAYING_MANUAL);
+          setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
           tracker.start();
 
           dispatchLoadedMetadata(element);
@@ -195,7 +192,7 @@ describes.fakeWin(
 
         dispatchLoadedMetadata(element);
 
-        setPlayingState(mockEntry, PLAYING_STATES_ENUM.PLAYING_MANUAL);
+        setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
         const cutoff = (validDurationSeconds / 100) * interval;
 
@@ -230,7 +227,7 @@ describes.fakeWin(
 
           dispatchLoadedMetadata(element);
 
-          setPlayingState(mockEntry, PLAYING_STATES_ENUM.PLAYING_MANUAL);
+          setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
           for (
             let timeSeconds = startTimeSeconds;
@@ -268,14 +265,14 @@ describes.fakeWin(
         setDuration(video, validDurationSeconds);
         setCurrentTime(video, startTimeSeconds);
 
-        setPlayingState(mockEntry, PLAYING_STATES_ENUM.PLAYING_MANUAL);
+        setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
         tracker.start();
 
         dispatchLoadedMetadata(element);
 
         mockTimerCallback();
-        dispatchCustom(element, VIDEO_EVENTS_ENUM.ENDED);
+        dispatchCustom(element, VideoEvents_Enum.ENDED);
 
         expect(triggerMock.withArgs(100)).to.have.been.calledOnce;
       });
@@ -294,7 +291,7 @@ describes.fakeWin(
         setDuration(video, validDurationSeconds);
         setCurrentTime(video, startTimeSeconds);
 
-        setPlayingState(mockEntry, PLAYING_STATES_ENUM.PLAYING_MANUAL);
+        setPlayingState(mockEntry, PlayingStates_Enum.PLAYING_MANUAL);
 
         tracker.start();
 
@@ -303,7 +300,7 @@ describes.fakeWin(
         tracker.stop();
 
         mockTimerCallback();
-        dispatchCustom(element, VIDEO_EVENTS_ENUM.ENDED);
+        dispatchCustom(element, VideoEvents_Enum.ENDED);
 
         expect(triggerMock).to.not.have.been.called;
       });

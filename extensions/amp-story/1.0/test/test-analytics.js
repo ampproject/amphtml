@@ -1,4 +1,4 @@
-import {ACTION_ENUM, getStoreService} from '../amp-story-store-service';
+import {Action_Enum, getStoreService} from '../amp-story-store-service';
 import {getAnalyticsService} from '../story-analytics';
 import {installDocService} from '#service/ampdoc-impl';
 
@@ -20,7 +20,7 @@ describes.fakeWin('amp-story analytics', {}, (env) => {
   it('should trigger `story-page-visible` on change', () => {
     const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
@@ -31,16 +31,16 @@ describes.fakeWin('amp-story analytics', {}, (env) => {
   it('should trigger `story-last-page-visible` when last page is visible', () => {
     const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
-    storeService.dispatch(ACTION_ENUM.SET_PAGE_IDS, [
+    storeService.dispatch(Action_Enum.SET_PAGE_IDS, [
       'cover',
       'page1',
       'page2',
     ]);
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'page1',
       index: 1,
     });
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'page2',
       index: 2,
     });
@@ -51,7 +51,7 @@ describes.fakeWin('amp-story analytics', {}, (env) => {
   it('should not mark an event as repeated the first time it fires', () => {
     const trigger = env.sandbox.spy(analytics, 'triggerEvent');
 
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
@@ -65,17 +65,17 @@ describes.fakeWin('amp-story analytics', {}, (env) => {
   it('should mark event as repeated when fired more than once', () => {
     const trigger = env.sandbox.spy(analytics, 'triggerEvent');
 
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
 
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'test-page2',
       index: 2,
     });
 
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });

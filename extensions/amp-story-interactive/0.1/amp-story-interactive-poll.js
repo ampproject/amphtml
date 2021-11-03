@@ -1,6 +1,6 @@
 import {
   AmpStoryInteractive,
-  INTERACTIVE_TYPE_ENUM,
+  InteractiveType_Enum,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
 import {computedStyle, setStyle} from '#core/dom/style';
@@ -50,7 +50,7 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, INTERACTIVE_TYPE_ENUM.POLL, [2, 4]);
+    super(element, InteractiveType_Enum.POLL, [2, 4]);
   }
 
   /** @override */

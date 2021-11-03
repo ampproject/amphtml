@@ -1,8 +1,8 @@
-import {ACTION_ENUM, AmpStoryStoreService} from '../amp-story-store-service';
+import {Action_Enum, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
-import {MEDIA_TYPE_ENUM} from '../media-pool';
+import {MediaType_Enum} from '../media-pool';
 import {Services} from '#service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {setStyles} from '#core/dom/style';
@@ -26,8 +26,8 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
       getMaxMediaElementCounts: () => ({
-        [MEDIA_TYPE_ENUM.VIDEO]: 8,
-        [MEDIA_TYPE_ENUM.AUDIO]: 8,
+        [MediaType_Enum.VIDEO]: 8,
+        [MediaType_Enum.AUDIO]: 8,
       }),
     };
 
@@ -111,7 +111,7 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   it('should apply the aspect-ratio attribute from the responsiveness preset', async () => {
     gridLayerEl.setAttribute('preset', '2021-foreground');
 
-    storeService.dispatch(ACTION_ENUM.SET_PAGE_SIZE, {
+    storeService.dispatch(Action_Enum.SET_PAGE_SIZE, {
       width: 1000,
       height: 1000,
     });

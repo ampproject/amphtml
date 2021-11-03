@@ -1,7 +1,7 @@
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
-  ANALYTICS_EVENT_TYPE_ENUM,
   AnalyticsEvent,
+  AnalyticsEventType_Enum,
   BrowserEventTracker,
 } from '../events';
 import {macroTask} from '#testing/helpers';
@@ -55,7 +55,7 @@ describes.realWin(
 
       beforeEach(() => {
         tracker = root.getTracker(
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           BrowserEventTracker
         );
         selectors = ['#inputField', '#inputField2'];
@@ -87,7 +87,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           changeEventConfig,
           () => {},
           false
@@ -103,7 +103,7 @@ describes.realWin(
           expect(() => {
             tracker.add(
               analyticsElement,
-              ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+              AnalyticsEventType_Enum.BROWSER_EVENT,
               {
                 selector: '',
               }
@@ -111,7 +111,7 @@ describes.realWin(
           }).to.throw(/Missing required selector on browser event trigger/);
 
           expect(() => {
-            tracker.add(analyticsElement, ANALYTICS_EVENT_TYPE_ENUM.VIDEO, {
+            tracker.add(analyticsElement, AnalyticsEventType_Enum.VIDEO, {
               selector: [],
             });
           }).to.throw(/Missing required selector on browser event trigger/);
@@ -144,7 +144,7 @@ describes.realWin(
           .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           changeEventConfig,
           listenerStub
         );
@@ -170,7 +170,7 @@ describes.realWin(
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           blurEventConfig,
           listenerStub
         );
@@ -198,7 +198,7 @@ describes.realWin(
           .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           multiBlurConfig,
           listenerStub
         );
@@ -231,7 +231,7 @@ describes.realWin(
           .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           multiChangeConfig,
           listenerStub
         );
@@ -264,14 +264,14 @@ describes.realWin(
           .callsFake((e) => tracker.boundOnSession_(e));
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           multiBlurConfig,
           listenerStub
         );
 
         tracker.add(
           undefined,
-          ANALYTICS_EVENT_TYPE_ENUM.BROWSER_EVENT,
+          AnalyticsEventType_Enum.BROWSER_EVENT,
           multiChangeConfig,
           listenerStub
         );

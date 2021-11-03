@@ -1,6 +1,6 @@
 import {
-  CONSENT_POLICY_STATE_ENUM,
-  CONSENT_STRING_TYPE_ENUM,
+  ConsentPolicyState_Enum,
+  ConsentStringType_Enum,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
@@ -191,8 +191,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
         const consentPolicySharedData = values[2];
         const consentMetadata = values[3];
         const ampConsentInfo = {
-          'consentPolicyStateEnum': CONSENT_POLICY_STATE_ENUM,
-          'consentStringTypeEnum': CONSENT_STRING_TYPE_ENUM,
+          'consentPolicyStateEnum': ConsentPolicyState_Enum,
+          'consentStringTypeEnum': ConsentStringType_Enum,
           'consentPolicyState': {
             'error': consentPolicyState.reason,
             'value': consentPolicyState.value,

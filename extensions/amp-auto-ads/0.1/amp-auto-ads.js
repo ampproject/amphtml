@@ -14,7 +14,7 @@ import {
   getExistingAds,
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
-import {ATTRIBUTES_ENUM, getAttributesFromConfigObj} from './attributes';
+import {Attributes_Enum, getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
 
 /** @const */
@@ -119,7 +119,7 @@ export class AmpAutoAds extends AMP.BaseElement {
         Object.assign(
           dict({}),
           this.adNetwork_.getAttributes(),
-          getAttributesFromConfigObj(configObj, ATTRIBUTES_ENUM.BASE_ATTRIBUTES)
+          getAttributesFromConfigObj(configObj, Attributes_Enum.BASE_ATTRIBUTES)
         )
       );
       const sizing = this.adNetwork_.getSizing();
@@ -140,7 +140,7 @@ export class AmpAutoAds extends AMP.BaseElement {
           attributes,
           getAttributesFromConfigObj(
             configObj,
-            ATTRIBUTES_ENUM.STICKY_AD_ATTRIBUTES
+            Attributes_Enum.STICKY_AD_ATTRIBUTES
           )
         )
       );

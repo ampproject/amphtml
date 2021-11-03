@@ -1,5 +1,5 @@
 import '../amp-stream-gallery';
-import {CAROUSEL_EVENTS_ENUM} from '../../../amp-base-carousel/0.1/carousel-events';
+import {CarouselEvents_Enum} from '../../../amp-base-carousel/0.1/carousel-events';
 import {getDetail, listenOncePromise} from '#utils/event-helper';
 import {setStyle, setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
@@ -17,7 +17,7 @@ import {toggleExperiment} from '#experiments';
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
-  const event = await listenOncePromise(el, CAROUSEL_EVENTS_ENUM.INDEX_CHANGE);
+  const event = await listenOncePromise(el, CarouselEvents_Enum.INDEX_CHANGE);
   const impl = await el.getImpl(false);
   await impl.mutateElement(() => {});
   await impl.mutateElement(() => {});

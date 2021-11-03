@@ -1,4 +1,4 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {
   createElementWithAttributes,
   isJsonScriptTag,
@@ -19,12 +19,12 @@ import {getData, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
 import {
-  ANALYTICS_EVENTS_ENUM,
-  ANALYTICS_VARS_ENUM,
+  AnalyticsEvents_Enum,
+  AnalyticsVars_Enum,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {
-  A_4_A_VAR_NAMES_ENUM,
+  A4AVarNames_Enum,
   START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
@@ -39,8 +39,8 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  StateProperty_Enum,
+  UiType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -56,7 +56,7 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
 
 /** @enum {string} */
-const PAGE_ATTRIBUTES_ENUM = {
+const PageAttributes_Enum = {
   LOADING: 'i-amphtml-loading',
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
 };
@@ -185,15 +185,12 @@ export class StoryAdPage {
     if (this.adDoc_) {
       toggleAttribute(
         dev().assertElement(this.adDoc_.body),
-        PAGE_ATTRIBUTES_ENUM.IFRAME_BODY_VISIBLE
+        PageAttributes_Enum.IFRAME_BODY_VISIBLE
       );
       // TODO(#24829) Remove alternate body when we have full ad network support.
       const alternateBody = this.adDoc_.querySelector('#x-a4a-former-body');
       alternateBody &&
-        toggleAttribute(
-          alternateBody,
-          PAGE_ATTRIBUTES_ENUM.IFRAME_BODY_VISIBLE
-        );
+        toggleAttribute(alternateBody, PageAttributes_Enum.IFRAME_BODY_VISIBLE);
     }
   }
 
@@ -222,8 +219,8 @@ export class StoryAdPage {
     this.listenForAdLoadSignals_();
     this.listenForSwipes_();
 
-    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_REQUESTED, {
-      [ANALYTICS_VARS_ENUM.AD_REQUESTED]: Date.now(),
+    this.analyticsEvent_(AnalyticsEvents_Enum.AD_REQUESTED, {
+      [AnalyticsVars_Enum.AD_REQUESTED]: Date.now(),
     });
 
     return this.pageElement_;
@@ -262,18 +259,18 @@ export class StoryAdPage {
         return false;
       }
 
-      uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE] =
+      uiMetadata[A4AVarNames_Enum.CTA_TYPE] =
         localizeCtaText(
-          uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE],
+          uiMetadata[A4AVarNames_Enum.CTA_TYPE],
           this.localizationService_
-        ) || uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE];
+        ) || uiMetadata[A4AVarNames_Enum.CTA_TYPE];
 
       // Store the cta-type as an accesible var for any further pings.
       this.analytics_.then((analytics) =>
         analytics.setVar(
           this.index_, // adIndex
-          ANALYTICS_VARS_ENUM.CTA_TYPE,
-          uiMetadata[A_4_A_VAR_NAMES_ENUM.CTA_TYPE]
+          AnalyticsVars_Enum.CTA_TYPE,
+          uiMetadata[A4AVarNames_Enum.CTA_TYPE]
         )
       );
 
@@ -285,7 +282,7 @@ export class StoryAdPage {
         ))
       ) {
         this.storeService_.subscribe(
-          STATE_PROPERTY_ENUM.UI_STATE,
+          StateProperty_Enum.UI_STATE,
           (uiState) => {
             this.onUIStateUpdate_(uiState);
           },
@@ -354,7 +351,7 @@ export class StoryAdPage {
     this.adElement_
       .signals()
       // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(COMMON_SIGNALS_ENUM.INI_LOAD)
+      .whenSignal(CommonSignals_Enum.INI_LOAD)
       .then(() => this.onAdLoaded_());
 
     // Inabox custom event.
@@ -381,8 +378,8 @@ export class StoryAdPage {
       false /* shouldStopPropogation */
     );
     gestures.onGesture(SwipeXRecognizer, () => {
-      this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_SWIPED, {
-        [ANALYTICS_VARS_ENUM.AD_SWIPED]: Date.now(),
+      this.analyticsEvent_(AnalyticsEvents_Enum.AD_SWIPED, {
+        [AnalyticsVars_Enum.AD_SWIPED]: Date.now(),
       });
       gestures.cleanup();
     });
@@ -414,10 +411,10 @@ export class StoryAdPage {
 
     // Remove loading attribute once loaded so that desktop CSS will position
     // offscren with all other pages.
-    this.pageElement_.removeAttribute(PAGE_ATTRIBUTES_ENUM.LOADING);
+    this.pageElement_.removeAttribute(PageAttributes_Enum.LOADING);
 
-    this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_LOADED, {
-      [ANALYTICS_VARS_ENUM.AD_LOADED]: Date.now(),
+    this.analyticsEvent_(AnalyticsEvents_Enum.AD_LOADED, {
+      [AnalyticsVars_Enum.AD_LOADED]: Date.now(),
     });
 
     if (this.getAdFrame_() && !this.is3pAdFrame_) {
@@ -449,9 +446,9 @@ export class StoryAdPage {
         // the appropriate time.
         anchor.addEventListener('click', () => {
           const vars = {
-            [ANALYTICS_VARS_ENUM.AD_CLICKED]: Date.now(),
+            [AnalyticsVars_Enum.AD_CLICKED]: Date.now(),
           };
-          this.analyticsEvent_(ANALYTICS_EVENTS_ENUM.AD_CLICKED, vars);
+          this.analyticsEvent_(AnalyticsEvents_Enum.AD_CLICKED, vars);
         });
         return true;
       }
@@ -494,7 +491,7 @@ export class StoryAdPage {
           Object.keys(config['targets']) &&
           config['targets'][Object.keys(config['targets'])[0]];
         const finalUrl = target && target['finalUrl'];
-        return target ? {[A_4_A_VAR_NAMES_ENUM.CTA_URL]: finalUrl} : {};
+        return target ? {[A4AVarNames_Enum.CTA_URL]: finalUrl} : {};
       } catch (e) {
         dev().error(TAG, e);
         return {};
@@ -505,7 +502,7 @@ export class StoryAdPage {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed attribution icon.
-   * @param {!UI_TYPE_ENUM} uiState
+   * @param {!UiType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -515,7 +512,7 @@ export class StoryAdPage {
 
     this.adChoicesIcon_.classList.toggle(
       DESKTOP_FULLBLEED_CLASS,
-      uiState === UI_TYPE_ENUM.DESKTOP_FULLBLEED
+      uiState === UiType_Enum.DESKTOP_FULLBLEED
     );
   }
 

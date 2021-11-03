@@ -14,7 +14,7 @@ export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';
  *
  * @enum {number}
  */
-export const VERIFICATION_STATUS_ENUM = {
+export const VerificationStatus_Enum = {
   /** The ad was successfully verified as AMP. */
   OK: 0,
 
@@ -156,7 +156,7 @@ export class SignatureVerifier {
     const signatureFormat =
       /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
     if (!headers.has(AMP_SIGNATURE_HEADER)) {
-      return Promise.resolve(VERIFICATION_STATUS_ENUM.UNVERIFIED);
+      return Promise.resolve(VerificationStatus_Enum.UNVERIFIED);
     }
     const headerValue = headers.get(AMP_SIGNATURE_HEADER);
     const match = signatureFormat.exec(headerValue);
@@ -166,7 +166,7 @@ export class SignatureVerifier {
         'AMP-A4A',
         `Invalid signature header: ${headerValue.split(':')[0]}`
       );
-      return Promise.resolve(VERIFICATION_STATUS_ENUM.ERROR_SIGNATURE_MISMATCH);
+      return Promise.resolve(VerificationStatus_Enum.ERROR_SIGNATURE_MISMATCH);
     }
     return this.verifyCreativeAndSignature(
       match[1],
@@ -205,7 +205,7 @@ export class SignatureVerifier {
   ) {
     if (!this.signers_) {
       // Web Cryptography isn't available.
-      return Promise.resolve(VERIFICATION_STATUS_ENUM.CRYPTO_UNAVAILABLE);
+      return Promise.resolve(VerificationStatus_Enum.CRYPTO_UNAVAILABLE);
     }
     const signer = this.signers_[signingServiceName];
     devAssert(
@@ -217,7 +217,7 @@ export class SignatureVerifier {
       if (!success) {
         // The public keyset couldn't be fetched and imported. Probably a
         // network connectivity failure.
-        return VERIFICATION_STATUS_ENUM.UNVERIFIED;
+        return VerificationStatus_Enum.UNVERIFIED;
       }
       const keyPromise = signer.keys[keypairId];
       if (keyPromise === undefined) {
@@ -244,20 +244,20 @@ export class SignatureVerifier {
         );
       } else if (keyPromise === null) {
         // We don't have this key and we already tried cachebusting.
-        return VERIFICATION_STATUS_ENUM.ERROR_KEY_NOT_FOUND;
+        return VerificationStatus_Enum.ERROR_KEY_NOT_FOUND;
       } else {
         return keyPromise.then((key) => {
           if (!key) {
             // This particular public key couldn't be imported. Probably the
             // signing service's fault.
-            return VERIFICATION_STATUS_ENUM.UNVERIFIED;
+            return VerificationStatus_Enum.UNVERIFIED;
           }
           const crypto = Services.cryptoFor(this.win_);
           return crypto.verifyPkcs(key, signature, creative).then(
             (result) =>
               result
-                ? VERIFICATION_STATUS_ENUM.OK
-                : VERIFICATION_STATUS_ENUM.ERROR_SIGNATURE_MISMATCH,
+                ? VerificationStatus_Enum.OK
+                : VerificationStatus_Enum.ERROR_SIGNATURE_MISMATCH,
             (err) => {
               // Web Cryptography rejected the verification attempt. This
               // hopefully won't happen in the wild, but browsers can be weird
@@ -266,7 +266,7 @@ export class SignatureVerifier {
               // this occurred.
               const message = err && err.message;
               dev().error('AMP-A4A', `Failed to verify signature: ${message}`);
-              return VERIFICATION_STATUS_ENUM.UNVERIFIED;
+              return VerificationStatus_Enum.UNVERIFIED;
             }
           );
         });

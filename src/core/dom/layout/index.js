@@ -9,7 +9,7 @@ import {isFiniteNumber} from '#core/types';
 /**
  * @enum {string}
  */
-export const LAYOUT_ENUM = {
+export const Layout_Enum = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   FIXED_HEIGHT: 'fixed-height',
@@ -26,7 +26,7 @@ export const LAYOUT_ENUM = {
  * BaseElement#updateLayoutPriority().
  * @enum {number}
  */
-export const LAYOUT_PRIORITY_ENUM = {
+export const LayoutPriority_Enum = {
   CONTENT: 0,
   METADATA: 1,
   ADS: 2,
@@ -54,7 +54,7 @@ export let DimensionsDef;
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ENUM = {
+export const LoadingElements_Enum = {
   'AMP-AD': true,
   'AMP-ANIM': true,
   'AMP-EMBED': true,
@@ -87,9 +87,9 @@ const videoPlayerTagNameRe =
  *   the layout string.
  */
 export function parseLayout(s) {
-  for (const k in LAYOUT_ENUM) {
-    if (LAYOUT_ENUM[k] == s) {
-      return LAYOUT_ENUM[k];
+  for (const k in Layout_Enum) {
+    if (Layout_Enum[k] == s) {
+      return Layout_Enum[k];
     }
   }
   return undefined;
@@ -110,13 +110,13 @@ export function getLayoutClass(layout) {
  */
 export function isLayoutSizeDefined(layout) {
   return (
-    layout == LAYOUT_ENUM.FIXED ||
-    layout == LAYOUT_ENUM.FIXED_HEIGHT ||
-    layout == LAYOUT_ENUM.RESPONSIVE ||
-    layout == LAYOUT_ENUM.FILL ||
-    layout == LAYOUT_ENUM.FLEX_ITEM ||
-    layout == LAYOUT_ENUM.FLUID ||
-    layout == LAYOUT_ENUM.INTRINSIC
+    layout == Layout_Enum.FIXED ||
+    layout == Layout_Enum.FIXED_HEIGHT ||
+    layout == Layout_Enum.RESPONSIVE ||
+    layout == Layout_Enum.FILL ||
+    layout == Layout_Enum.FLEX_ITEM ||
+    layout == Layout_Enum.FLUID ||
+    layout == Layout_Enum.INTRINSIC
   );
 }
 
@@ -126,7 +126,7 @@ export function isLayoutSizeDefined(layout) {
  * @return {boolean}
  */
 export function isLayoutSizeFixed(layout) {
-  return layout == LAYOUT_ENUM.FIXED || layout == LAYOUT_ENUM.FIXED_HEIGHT;
+  return layout == Layout_Enum.FIXED || layout == Layout_Enum.FIXED_HEIGHT;
 }
 
 /**
@@ -216,9 +216,7 @@ export function getLengthNumeral(length) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  return (
-    LOADING_ELEMENTS_ENUM[tagName] || isIframeVideoPlayerComponent(tagName)
-  );
+  return LoadingElements_Enum[tagName] || isIframeVideoPlayerComponent(tagName);
 }
 
 /**

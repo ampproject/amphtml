@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {STATE_PROPERTY_ENUM, getStoreService} from './amp-story-store-service';
+import {StateProperty_Enum, getStoreService} from './amp-story-store-service';
 import {dict} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
@@ -9,7 +9,7 @@ import {registerServiceBuilder} from '../../../src/service-helpers';
 export let StoryVariableDef;
 
 /** @enum {string} */
-export const ANALYTICS_VARIABLE_ENUM = {
+export const AnalyticsVariable_Enum = {
   STORY_INTERACTIVE_ID: 'storyInteractiveId',
   STORY_INTERACTIVE_RESPONSE: 'storyInteractiveResponse',
   STORY_INTERACTIVE_TYPE: 'storyInteractiveType',
@@ -54,16 +54,16 @@ export class AmpStoryVariableService {
   constructor(win) {
     /** @private {!StoryVariableDef} */
     this.variables_ = dict({
-      [ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_ID]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_RESPONSE]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_INTERACTIVE_TYPE]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_PAGE_INDEX]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_PAGE_ID]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_PAGE_COUNT]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_PROGRESS]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_IS_MUTED]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_PREVIOUS_PAGE_ID]: null,
-      [ANALYTICS_VARIABLE_ENUM.STORY_ADVANCEMENT_MODE]: null,
+      [AnalyticsVariable_Enum.STORY_INTERACTIVE_ID]: null,
+      [AnalyticsVariable_Enum.STORY_INTERACTIVE_RESPONSE]: null,
+      [AnalyticsVariable_Enum.STORY_INTERACTIVE_TYPE]: null,
+      [AnalyticsVariable_Enum.STORY_PAGE_INDEX]: null,
+      [AnalyticsVariable_Enum.STORY_PAGE_ID]: null,
+      [AnalyticsVariable_Enum.STORY_PAGE_COUNT]: null,
+      [AnalyticsVariable_Enum.STORY_PROGRESS]: null,
+      [AnalyticsVariable_Enum.STORY_IS_MUTED]: null,
+      [AnalyticsVariable_Enum.STORY_PREVIOUS_PAGE_ID]: null,
+      [AnalyticsVariable_Enum.STORY_ADVANCEMENT_MODE]: null,
     });
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -74,36 +74,35 @@ export class AmpStoryVariableService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(STATE_PROPERTY_ENUM.PAGE_IDS, (pageIds) => {
-      this.variables_[ANALYTICS_VARIABLE_ENUM.STORY_PAGE_COUNT] =
-        pageIds.length;
+    this.storeService_.subscribe(StateProperty_Enum.PAGE_IDS, (pageIds) => {
+      this.variables_[AnalyticsVariable_Enum.STORY_PAGE_COUNT] = pageIds.length;
     });
 
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
+      StateProperty_Enum.CURRENT_PAGE_ID,
       (pageId) => {
         if (!pageId) {
           return;
         }
 
-        this.variables_[ANALYTICS_VARIABLE_ENUM.STORY_PREVIOUS_PAGE_ID] =
-          this.variables_[ANALYTICS_VARIABLE_ENUM.STORY_PAGE_ID];
+        this.variables_[AnalyticsVariable_Enum.STORY_PREVIOUS_PAGE_ID] =
+          this.variables_[AnalyticsVariable_Enum.STORY_PAGE_ID];
 
-        this.variables_[ANALYTICS_VARIABLE_ENUM.STORY_PAGE_ID] = pageId;
+        this.variables_[AnalyticsVariable_Enum.STORY_PAGE_ID] = pageId;
 
         const pageIndex = /** @type {number} */ (
-          this.storeService_.get(STATE_PROPERTY_ENUM.CURRENT_PAGE_INDEX)
+          this.storeService_.get(StateProperty_Enum.CURRENT_PAGE_INDEX)
         );
-        this.variables_[ANALYTICS_VARIABLE_ENUM.STORY_PAGE_INDEX] = pageIndex;
+        this.variables_[AnalyticsVariable_Enum.STORY_PAGE_INDEX] = pageIndex;
 
         const numberOfPages = this.storeService_.get(
-          STATE_PROPERTY_ENUM.PAGE_IDS
+          StateProperty_Enum.PAGE_IDS
         ).length;
         if (numberOfPages > 0) {
           if (numberOfPages === 1) {
-            this.variables_[ANALYTICS_VARIABLE_ENUM.STORY_PROGRESS] = 0;
+            this.variables_[AnalyticsVariable_Enum.STORY_PROGRESS] = 0;
           } else {
-            this.variables_[ANALYTICS_VARIABLE_ENUM.STORY_PROGRESS] =
+            this.variables_[AnalyticsVariable_Enum.STORY_PROGRESS] =
               pageIndex / (numberOfPages - 1);
           }
         }

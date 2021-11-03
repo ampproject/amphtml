@@ -1,17 +1,14 @@
 import * as Preact from '#core/dom/jsx';
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
-  UI_TYPE_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
+  UiType_Enum,
 } from './amp-story-store-service';
-import {DRAWER_STATE_ENUM, DraggableDrawer} from './amp-story-draggable-drawer';
-import {HISTORY_STATE_ENUM, setHistoryState} from './history';
-import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
+import {DraggableDrawer, DrawerState_Enum} from './amp-story-draggable-drawer';
+import {HistoryState_Enum, setHistoryState} from './history';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
-import {
-  STORY_ANALYTICS_EVENT_ENUM,
-  getAnalyticsService,
-} from './story-analytics';
+import {StoryAnalyticsEvent_Enum, getAnalyticsService} from './story-analytics';
 import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
 import {dev} from '#utils/log';
@@ -51,7 +48,7 @@ const POST_TAP_ANIMATION_DURATION = 500;
 /**
  * @enum {string}
  */
-export const ATTACHMENT_THEME_ENUM = {
+export const AttachmentTheme_Enum = {
   LIGHT: 'light', // default
   DARK: 'dark',
   CUSTOM: 'custom',
@@ -60,7 +57,7 @@ export const ATTACHMENT_THEME_ENUM = {
 /**
  * @enum
  */
-const ATTACHMENT_TYPE_ENUM = {
+const AttachmentType_Enum = {
   INLINE: 0,
   OUTLINK: 1,
 };
@@ -98,10 +95,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
       this.element.hasAttribute('href');
     this.type_ = isOutlink
-      ? ATTACHMENT_TYPE_ENUM.OUTLINK
-      : ATTACHMENT_TYPE_ENUM.INLINE;
+      ? AttachmentType_Enum.OUTLINK
+      : AttachmentType_Enum.INLINE;
 
-    if (this.type_ === ATTACHMENT_TYPE_ENUM.INLINE) {
+    if (this.type_ === AttachmentType_Enum.INLINE) {
       this.buildInline_();
     }
 
@@ -124,7 +121,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   layoutCallback() {
     super.layoutCallback();
     // Outlink renders an image and must be built in layoutCallback.
-    if (this.type_ === ATTACHMENT_TYPE_ENUM.OUTLINK) {
+    if (this.type_ === AttachmentType_Enum.OUTLINK) {
       this.buildOutlink_();
     }
   }
@@ -139,7 +136,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         class="i-amphtml-story-page-attachment-close-button"
         aria-label={localize(
           this.element,
-          LOCALIZED_STRING_ID_ENUM.AMP_STORY_CLOSE_BUTTON_LABEL
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
         )}
         role="button"
       ></button>
@@ -170,7 +167,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         getResponseAttributeElements(form).forEach((el) => {
           new this.win.ResizeObserver((e) => {
             if (
-              this.state === DRAWER_STATE_ENUM.OPEN &&
+              this.state === DrawerState_Enum.OPEN &&
               e[0].contentRect.height > 0
             ) {
               el./*OK*/ scrollIntoView({
@@ -272,7 +269,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Set url prevew text.
     const localizedOpenString = localize(
       this.element,
-      LOCALIZED_STRING_ID_ENUM.AMP_STORY_OPEN_OUTLINK_TEXT
+      LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
     );
     openStringEl.textContent = localizedOpenString;
     urlStringEl.textContent = hrefAttr;
@@ -323,10 +320,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     // Closes the remote attachment drawer when navigation deeplinked to an app.
-    if (this.type_ === ATTACHMENT_TYPE_ENUM.OUTLINK) {
+    if (this.type_ === AttachmentType_Enum.OUTLINK) {
       const ampdoc = this.getAmpDoc();
       ampdoc.onVisibilityChanged(() => {
-        if (ampdoc.isVisible() && this.state === DRAWER_STATE_ENUM.OPEN) {
+        if (ampdoc.isVisible() && this.state === DrawerState_Enum.OPEN) {
           this.closeInternal_(false /** shouldAnimate */);
         }
       });
@@ -337,27 +334,27 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   open(shouldAnimate = true) {
-    if (this.state === DRAWER_STATE_ENUM.OPEN) {
+    if (this.state === DrawerState_Enum.OPEN) {
       return;
     }
 
     super.open(shouldAnimate);
 
-    this.storeService.dispatch(ACTION_ENUM.TOGGLE_PAGE_ATTACHMENT_STATE, true);
-    this.storeService.dispatch(ACTION_ENUM.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    this.storeService.dispatch(Action_Enum.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+    this.storeService.dispatch(Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
     this.toggleBackgroundOverlay_(true);
 
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
-    if (this.type_ !== ATTACHMENT_TYPE_ENUM.OUTLINK) {
+    if (this.type_ !== AttachmentType_Enum.OUTLINK) {
       const currentHistoryState = /** @type {!Object} */ (
         getHistoryState(this.win.history)
       );
       const historyState = {
         ...currentHistoryState,
-        [HISTORY_STATE_ENUM.ATTACHMENT_PAGE_ID]: this.storeService.get(
-          STATE_PROPERTY_ENUM.CURRENT_PAGE_ID
+        [HistoryState_Enum.ATTACHMENT_PAGE_ID]: this.storeService.get(
+          StateProperty_Enum.CURRENT_PAGE_ID
         ),
       };
 
@@ -365,14 +362,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     this.analyticsService_.triggerEvent(
-      STORY_ANALYTICS_EVENT_ENUM.OPEN,
+      StoryAnalyticsEvent_Enum.OPEN,
       this.element
     );
     this.analyticsService_.triggerEvent(
-      STORY_ANALYTICS_EVENT_ENUM.PAGE_ATTACHMENT_ENTER
+      StoryAnalyticsEvent_Enum.PAGE_ATTACHMENT_ENTER
     );
 
-    if (this.type_ === ATTACHMENT_TYPE_ENUM.OUTLINK) {
+    if (this.type_ === AttachmentType_Enum.OUTLINK) {
       this.openRemote_();
     }
   }
@@ -404,8 +401,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     };
 
     const isMobileUI =
-      this.storeService.get(STATE_PROPERTY_ENUM.UI_STATE) ===
-      UI_TYPE_ENUM.MOBILE;
+      this.storeService.get(StateProperty_Enum.UI_STATE) === UiType_Enum.MOBILE;
     if (!isMobileUI) {
       programaticallyClickOnTarget();
     } else {
@@ -425,13 +421,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     switch (this.state) {
       // If the drawer was open, pop the history entry that was added, which
       // will close the drawer through the onPop callback.
-      case DRAWER_STATE_ENUM.OPEN:
-      case DRAWER_STATE_ENUM.DRAGGING_TO_CLOSE:
+      case DrawerState_Enum.OPEN:
+      case DrawerState_Enum.DRAGGING_TO_CLOSE:
         this.historyService_.goBack();
         break;
       // If the drawer was not open, no history entry was added, so we can
       // close the drawer directly.
-      case DRAWER_STATE_ENUM.DRAGGING_TO_OPEN:
+      case DrawerState_Enum.DRAGGING_TO_OPEN:
         this.closeInternal_();
         break;
     }
@@ -441,7 +437,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   closeInternal_(shouldAnimate = true) {
-    if (this.state === DRAWER_STATE_ENUM.CLOSED) {
+    if (this.state === DrawerState_Enum.CLOSED) {
       return;
     }
 
@@ -449,8 +445,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.toggleBackgroundOverlay_(false);
 
-    this.storeService.dispatch(ACTION_ENUM.TOGGLE_PAGE_ATTACHMENT_STATE, false);
-    this.storeService.dispatch(ACTION_ENUM.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    this.storeService.dispatch(Action_Enum.TOGGLE_PAGE_ATTACHMENT_STATE, false);
+    this.storeService.dispatch(Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const animationEl = storyEl.querySelector(
@@ -462,14 +458,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       });
     }
 
-    setHistoryState(this.win, HISTORY_STATE_ENUM.ATTACHMENT_PAGE_ID, null);
+    setHistoryState(this.win, HistoryState_Enum.ATTACHMENT_PAGE_ID, null);
 
     this.analyticsService_.triggerEvent(
-      STORY_ANALYTICS_EVENT_ENUM.CLOSE,
+      StoryAnalyticsEvent_Enum.CLOSE,
       this.element
     );
     this.analyticsService_.triggerEvent(
-      STORY_ANALYTICS_EVENT_ENUM.PAGE_ATTACHMENT_EXIT
+      StoryAnalyticsEvent_Enum.PAGE_ATTACHMENT_EXIT
     );
   }
 
@@ -498,7 +494,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   maybeSetDarkThemeForElement_(element) {
     const theme = this.element.getAttribute('theme')?.toLowerCase();
-    if (theme && ATTACHMENT_THEME_ENUM.DARK === theme) {
+    if (theme && AttachmentTheme_Enum.DARK === theme) {
       element.setAttribute('theme', theme);
     }
   }

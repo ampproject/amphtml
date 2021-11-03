@@ -5,7 +5,7 @@ import {Services} from '#service';
 
 import {listenOncePromise} from '#utils/event-helper';
 
-import {VIDEO_EVENTS_ENUM} from '../../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
 const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
@@ -85,28 +85,28 @@ describes.realWin(
 
           return Promise.resolve()
             .then(async () => {
-              const p = listenOncePromise(mp, VIDEO_EVENTS_ENUM.MUTED);
+              const p = listenOncePromise(mp, VideoEvents_Enum.MUTED);
               await sendFakeInfoDeliveryMessage(mp, iframe, {muted: true});
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(mp, VIDEO_EVENTS_ENUM.PLAYING);
+              const p = listenOncePromise(mp, VideoEvents_Enum.PLAYING);
               await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 1});
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(mp, VIDEO_EVENTS_ENUM.PAUSE);
+              const p = listenOncePromise(mp, VideoEvents_Enum.PAUSE);
               await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 2});
               return p;
             })
             .then(async () => {
-              const p = listenOncePromise(mp, VIDEO_EVENTS_ENUM.UNMUTED);
+              const p = listenOncePromise(mp, VideoEvents_Enum.UNMUTED);
               await sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
               return p;
             })
             .then(async () => {
               // Should not send the unmute event twice if already sent once.
-              const p = listenOncePromise(mp, VIDEO_EVENTS_ENUM.UNMUTED).then(
+              const p = listenOncePromise(mp, VideoEvents_Enum.UNMUTED).then(
                 () => {
                   assert.fail('Should not have dispatch unmute message twice');
                 }
@@ -117,8 +117,8 @@ describes.realWin(
             })
             .then(async () => {
               // Make sure pause and end are triggered when video ends.
-              const pEnded = listenOncePromise(mp, VIDEO_EVENTS_ENUM.ENDED);
-              const pPause = listenOncePromise(mp, VIDEO_EVENTS_ENUM.PAUSE);
+              const pEnded = listenOncePromise(mp, VideoEvents_Enum.ENDED);
+              const pPause = listenOncePromise(mp, VideoEvents_Enum.PAUSE);
               await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 0});
               return Promise.all([pEnded, pPause]);
             });

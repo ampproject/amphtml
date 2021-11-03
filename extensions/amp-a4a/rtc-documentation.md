@@ -231,7 +231,7 @@ In both cases, the requirements for an errorReportingUrl are the same:
 -   errorReportingUrl must use HTTPS.
 -   Response should be an empty 200.
 -   errorReportingUrl may utilize two available macros that will be substituted in:
-    -   **ERROR_TYPE** - Will be sent as an enum value that corresponds to values in `RTC_ERROR_ENUM` found in [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/real-time-config-impl.js).
+    -   **ERROR_TYPE** - Will be sent as an enum value that corresponds to values in `RtcError_Enum` found in [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/real-time-config-impl.js).
     -   **HREF** - The actual full URL of the page. Equivalent to historical value of AMP's window.context.location.href.
 
 The error ping will be sent by creating an image pixel in the document. See `sendErrorMessage` in [real-time-config-impl.js](https://github.com/ampproject/amphtml/blob/main/src/service/real-time-config/real-time-config-impl.js) for implementation details.

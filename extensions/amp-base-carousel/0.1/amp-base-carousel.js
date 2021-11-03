@@ -1,10 +1,10 @@
-import {ACTION_SOURCE_ENUM} from './action-source';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionSource_Enum} from './action-source';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel';
-import {CAROUSEL_EVENTS_ENUM} from './carousel-events';
+import {CarouselEvents_Enum} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
-import {KEYS_ENUM} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
@@ -27,7 +27,7 @@ import {toArray} from '#core/types/array';
 /**
  * @enum {number}
  */
-const CONTROLS_ENUM = {
+const Controls_Enum = {
   ALWAYS: 0,
   NEVER: 1,
   AUTO: 2,
@@ -86,7 +86,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.childLayoutManager_ = null;
 
     /** @private {!Controls} */
-    this.controls_ = CONTROLS_ENUM.AUTO;
+    this.controls_ = Controls_Enum.AUTO;
   }
 
   /**
@@ -225,7 +225,7 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {number} index
    * @param {{
    *   smoothScroll: (boolean|undefined),
-   *   actionSource: (!ACTION_SOURCE_ENUM|undefined),
+   *   actionSource: (!ActionSource_Enum|undefined),
    * }=} options
    */
   goToSlide(index, options = {}) {
@@ -237,14 +237,14 @@ class AmpCarousel extends AMP.BaseElement {
    * Goes to the next slide. This should be called from a user interaction.
    */
   interactionNext() {
-    this.carousel_.next(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
+    this.carousel_.next(ActionSource_Enum.GENERIC_HIGH_TRUST);
   }
 
   /**
    * Goes to the previous slide. This should be called from a user interaction.
    */
   interactionPrev() {
-    this.carousel_.prev(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
+    this.carousel_.prev(ActionSource_Enum.GENERIC_HIGH_TRUST);
   }
 
   /**
@@ -361,14 +361,14 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ACTION_SOURCE_ENUM to use for a given ACTION_TRUST_ENUM.
-   * @param {!ACTION_TRUST_ENUM} trust
-   * @return {!ACTION_SOURCE_ENUM}
+   * Gets the ActionSource_Enum to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
+   * @return {!ActionSource_Enum}
    */
   getActionSource_(trust) {
-    return trust >= ACTION_TRUST_ENUM.DEFAULT
-      ? ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST
-      : ACTION_SOURCE_ENUM.GENERIC_LOW_TRUST;
+    return trust >= ActionTrust_Enum.DEFAULT
+      ? ActionSource_Enum.GENERIC_HIGH_TRUST
+      : ActionSource_Enum.GENERIC_LOW_TRUST;
   }
 
   /**
@@ -420,7 +420,7 @@ class AmpCarousel extends AMP.BaseElement {
         const {trust} = actionInvocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'next',
@@ -428,7 +428,7 @@ class AmpCarousel extends AMP.BaseElement {
         const {trust} = actionInvocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'goToSlide',
@@ -438,7 +438,7 @@ class AmpCarousel extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -446,17 +446,14 @@ class AmpCarousel extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.element.addEventListener(
-      CAROUSEL_EVENTS_ENUM.INDEX_CHANGE,
-      (event) => {
-        this.onIndexChanged_(event);
-      }
-    );
-    this.element.addEventListener(CAROUSEL_EVENTS_ENUM.SCROLL_START, () => {
+    this.element.addEventListener(CarouselEvents_Enum.INDEX_CHANGE, (event) => {
+      this.onIndexChanged_(event);
+    });
+    this.element.addEventListener(CarouselEvents_Enum.SCROLL_START, () => {
       this.onScrollStarted_();
     });
     this.element.addEventListener(
-      CAROUSEL_EVENTS_ENUM.SCROLL_POSITION_CHANGED,
+      CarouselEvents_Enum.SCROLL_POSITION_CHANGED,
       () => {
         this.onScrollPositionChanged_();
       }
@@ -472,14 +469,14 @@ class AmpCarousel extends AMP.BaseElement {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
-        this.carousel_.prev(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
+        this.carousel_.prev(ActionSource_Enum.GENERIC_HIGH_TRUST);
       }
     });
     this.nextArrowSlot_.addEventListener('click', (event) => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
-        this.carousel_.next(ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST);
+        this.carousel_.next(ActionSource_Enum.GENERIC_HIGH_TRUST);
       }
     });
   }
@@ -488,11 +485,11 @@ class AmpCarousel extends AMP.BaseElement {
    * @return {boolean} Whether or not controls should be hidden.
    */
   shouldHideControls_() {
-    if (this.controls_ === CONTROLS_ENUM.NEVER) {
+    if (this.controls_ === Controls_Enum.NEVER) {
       return true;
     }
 
-    if (this.controls_ === CONTROLS_ENUM.ALWAYS) {
+    if (this.controls_ === Controls_Enum.ALWAYS) {
       return false;
     }
 
@@ -506,13 +503,13 @@ class AmpCarousel extends AMP.BaseElement {
   updateControls_(controls) {
     switch (controls) {
       case 'always':
-        this.controls_ = CONTROLS_ENUM.ALWAYS;
+        this.controls_ = Controls_Enum.ALWAYS;
         break;
       case 'never':
-        this.controls_ = CONTROLS_ENUM.NEVER;
+        this.controls_ = Controls_Enum.NEVER;
         break;
       default:
-        this.controls_ = CONTROLS_ENUM.AUTO;
+        this.controls_ = Controls_Enum.AUTO;
         break;
     }
     this.updateUi_();
@@ -574,8 +571,8 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onKeydown_(event) {
-    const isRight = event.key === KEYS_ENUM.RIGHT_ARROW;
-    const isLeft = event.key === KEYS_ENUM.LEFT_ARROW;
+    const isRight = event.key === Keys_Enum.RIGHT_ARROW;
+    const isLeft = event.key === Keys_Enum.LEFT_ARROW;
 
     if (!isRight && !isLeft) {
       return;
@@ -603,15 +600,15 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ACTION_SOURCE_ENUM|undefined} actionSource
+   * @param {!ActionSource_Enum|undefined} actionSource
    * @return {boolean} Whether or not the action is a high trust action.
    * @private
    */
   isHighTrustActionSource_(actionSource) {
     return (
-      actionSource === ACTION_SOURCE_ENUM.WHEEL ||
-      actionSource === ACTION_SOURCE_ENUM.TOUCH ||
-      actionSource === ACTION_SOURCE_ENUM.GENERIC_HIGH_TRUST
+      actionSource === ActionSource_Enum.WHEEL ||
+      actionSource === ActionSource_Enum.TOUCH ||
+      actionSource === ActionSource_Enum.GENERIC_HIGH_TRUST
     );
   }
 
@@ -626,13 +623,12 @@ class AmpCarousel extends AMP.BaseElement {
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ACTION_TRUST_ENUM.HIGH : ACTION_TRUST_ENUM.LOW;
+    const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
     dispatchCustomEvent(this.element, name, data);
-    this.hadTouch_ =
-      this.hadTouch_ || actionSource === ACTION_SOURCE_ENUM.TOUCH;
+    this.hadTouch_ = this.hadTouch_ || actionSource === ActionSource_Enum.TOUCH;
     this.updateUi_();
   }
 

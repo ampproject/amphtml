@@ -1,5 +1,5 @@
 import * as analytics from '#utils/analytics';
-import {ACTION_ENUM, getStoreService} from '../amp-story-store-service';
+import {Action_Enum, getStoreService} from '../amp-story-store-service';
 import {StoryAnalyticsService} from '../story-analytics';
 
 describes.realWin('amp-story-analytics', {amp: true}, (env) => {
@@ -18,7 +18,7 @@ describes.realWin('amp-story-analytics', {amp: true}, (env) => {
       analytics,
       'triggerAnalyticsEvent'
     );
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'page-1',
       index: 0,
     });
@@ -34,8 +34,8 @@ describes.realWin('amp-story-analytics', {amp: true}, (env) => {
       analytics,
       'triggerAnalyticsEvent'
     );
-    storeService.dispatch(ACTION_ENUM.TOGGLE_AD, true);
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.TOGGLE_AD, true);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'ad-page-1',
       index: 1,
     });
@@ -47,7 +47,7 @@ describes.realWin('amp-story-analytics', {amp: true}, (env) => {
       analytics,
       'triggerAnalyticsEvent'
     );
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'page-1',
       index: 0,
     });
@@ -56,14 +56,14 @@ describes.realWin('amp-story-analytics', {amp: true}, (env) => {
       'story-page-visible',
       env.sandbox.match({storyPageIndex: 0, storyPageId: 'page-1'})
     );
-    storeService.dispatch(ACTION_ENUM.TOGGLE_AD, true);
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.TOGGLE_AD, true);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'ad-page-1',
       index: 1,
     });
     expect(triggerAnalyticsStub).to.have.been.calledOnce;
-    storeService.dispatch(ACTION_ENUM.TOGGLE_AD, false);
-    storeService.dispatch(ACTION_ENUM.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.TOGGLE_AD, false);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'page-2',
       index: 2,
     });

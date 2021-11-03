@@ -1,5 +1,5 @@
 import {
-  ACTION_TRUST_ENUM,
+  ActionTrust_Enum,
   DEFAULT_ACTION,
 } from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
@@ -41,12 +41,12 @@ class AmpLightboxGallery extends BaseElement {
     this.registerApiAction(
       DEFAULT_ACTION,
       (api, invocation) => this.openAction(api, invocation),
-      ACTION_TRUST_ENUM.HIGH
+      ActionTrust_Enum.HIGH
     );
     this.registerApiAction(
       'open',
       (api, invocation) => this.openAction(api, invocation),
-      ACTION_TRUST_ENUM.HIGH
+      ActionTrust_Enum.HIGH
     );
     return super.init();
   }

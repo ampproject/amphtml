@@ -1,6 +1,6 @@
-import {COMMON_SIGNALS_ENUM} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {LAYOUT_ENUM} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {closest} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
@@ -12,8 +12,8 @@ import {dev, user} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {
-  ACTION_ENUM,
-  STATE_PROPERTY_ENUM,
+  Action_Enum,
+  StateProperty_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -117,7 +117,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() =>
-        this.ampImgEl_.signals().whenSignal(COMMON_SIGNALS_ENUM.LOAD_END)
+        this.ampImgEl_.signals().whenSignal(CommonSignals_Enum.LOAD_END)
       )
       .then(() => {
         const imgEl = dev().assertElement(this.element_.querySelector('img'));
@@ -131,7 +131,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.PAGE_SIZE,
+      StateProperty_Enum.PAGE_SIZE,
       () => {
         this.elementSize_ = {
           width: this.element_./*OK*/ offsetWidth,
@@ -144,7 +144,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.CURRENT_PAGE_ID,
+      StateProperty_Enum.CURRENT_PAGE_ID,
       (currPageId) => {
         this.isOnActivePage_ = currPageId === this.getPageId_();
         this.animate_();
@@ -152,7 +152,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
-      STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE,
+      StateProperty_Enum.PANNING_MEDIA_STATE,
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
@@ -231,12 +231,12 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       return;
     }
     const startPos = this.storeService_.get(
-      STATE_PROPERTY_ENUM.PANNING_MEDIA_STATE
+      StateProperty_Enum.PANNING_MEDIA_STATE
     )[this.groupId_];
 
     // Don't animate if first instance of group or prefers-reduced-motion.
     if (!startPos || prefersReducedMotion(this.win)) {
-      this.storeService_.dispatch(ACTION_ENUM.ADD_PANNING_MEDIA_STATE, {
+      this.storeService_.dispatch(Action_Enum.ADD_PANNING_MEDIA_STATE, {
         [this.groupId_]: this.animateTo_,
       });
       return;
@@ -254,7 +254,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       if (elapsedTime < DURATION_MS) {
         const {x, y, zoom} = this.animateTo_;
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
-        this.storeService_.dispatch(ACTION_ENUM.ADD_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(Action_Enum.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: {
             x: startPos.x + (x - startPos.x) * easing,
             y: startPos.y + (y - startPos.y) * easing,
@@ -266,7 +266,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           requestAnimationFrame(nextFrame);
         }
       } else {
-        this.storeService_.dispatch(ACTION_ENUM.ADD_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(Action_Enum.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: this.animateTo_,
         });
       }
@@ -386,7 +386,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == LAYOUT_ENUM.FILL;
+    return layout == Layout_Enum.FILL;
   }
 }
 

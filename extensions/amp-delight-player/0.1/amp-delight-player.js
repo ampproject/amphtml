@@ -27,8 +27,8 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {
-  VIDEO_ATTRIBUTES_ENUM,
-  VIDEO_EVENTS_ENUM,
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
 } from '../../../src/video-interface';
 
 /** @const */
@@ -41,7 +41,7 @@ const TAG = 'amp-delight-player';
 const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @const @enum {string} */
-const DELIGHT_EVENT_ENUM = {
+const DelightEvent_Enum = {
   READY: 'x-dl8-to-parent-ready',
   PLAYING: 'x-dl8-to-parent-playing',
   PAUSED: 'x-dl8-to-parent-paused',
@@ -194,7 +194,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.element.hasAttribute(VIDEO_ATTRIBUTES_ENUM.DOCK)) {
+    if (this.element.hasAttribute(VideoAttributes_Enum.DOCK)) {
       return false; // do nothing, do not relayout
     }
 
@@ -284,23 +284,23 @@ class AmpDelightPlayer extends AMP.BaseElement {
     const {element} = this;
 
     switch (data['type']) {
-      case DELIGHT_EVENT_ENUM.PLAYING:
+      case DelightEvent_Enum.PLAYING:
         this.pauseHelper_.updatePlaying(true);
         break;
-      case DELIGHT_EVENT_ENUM.PAUSED:
-      case DELIGHT_EVENT_ENUM.ENDED:
+      case DelightEvent_Enum.PAUSED:
+      case DelightEvent_Enum.ENDED:
         this.pauseHelper_.updatePlaying(false);
         break;
     }
 
     const redispatched = redispatch(element, data['type'], {
-      [DELIGHT_EVENT_ENUM.PLAYING]: VIDEO_EVENTS_ENUM.PLAYING,
-      [DELIGHT_EVENT_ENUM.PAUSED]: VIDEO_EVENTS_ENUM.PAUSE,
-      [DELIGHT_EVENT_ENUM.ENDED]: VIDEO_EVENTS_ENUM.ENDED,
-      [DELIGHT_EVENT_ENUM.MUTED]: VIDEO_EVENTS_ENUM.MUTED,
-      [DELIGHT_EVENT_ENUM.UNMUTED]: VIDEO_EVENTS_ENUM.UNMUTED,
-      [DELIGHT_EVENT_ENUM.AD_START]: VIDEO_EVENTS_ENUM.AD_START,
-      [DELIGHT_EVENT_ENUM.AD_END]: VIDEO_EVENTS_ENUM.AD_END,
+      [DelightEvent_Enum.PLAYING]: VideoEvents_Enum.PLAYING,
+      [DelightEvent_Enum.PAUSED]: VideoEvents_Enum.PAUSE,
+      [DelightEvent_Enum.ENDED]: VideoEvents_Enum.ENDED,
+      [DelightEvent_Enum.MUTED]: VideoEvents_Enum.MUTED,
+      [DelightEvent_Enum.UNMUTED]: VideoEvents_Enum.UNMUTED,
+      [DelightEvent_Enum.AD_START]: VideoEvents_Enum.AD_START,
+      [DelightEvent_Enum.AD_END]: VideoEvents_Enum.AD_END,
     });
 
     if (redispatched) {
@@ -308,13 +308,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     switch (data['type']) {
-      case DELIGHT_EVENT_ENUM.PING: {
+      case DelightEvent_Enum.PING: {
         const guid = data['guid'];
         if (guid) {
           this.iframe_.contentWindow./*OK*/ postMessage(
             JSON.stringify(
               /** @type {JsonObject} */ ({
-                type: DELIGHT_EVENT_ENUM.PONG,
+                type: DelightEvent_Enum.PONG,
                 guid,
                 idx: 0,
               })
@@ -324,43 +324,43 @@ class AmpDelightPlayer extends AMP.BaseElement {
         }
         break;
       }
-      case DELIGHT_EVENT_ENUM.READY: {
-        dispatchCustomEvent(element, VIDEO_EVENTS_ENUM.LOAD);
+      case DelightEvent_Enum.READY: {
+        dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
         this.playerReadyResolver_(this.iframe_);
         break;
       }
-      case DELIGHT_EVENT_ENUM.PLAYER_READY: {
+      case DelightEvent_Enum.PLAYER_READY: {
         this.sendConsentData_();
         break;
       }
-      case DELIGHT_EVENT_ENUM.TIME_UPDATE: {
+      case DelightEvent_Enum.TIME_UPDATE: {
         const payload = data['payload'];
         this.currentTime_ = payload.currentTime;
         this.playedRanges_ = payload.playedRanges;
         break;
       }
-      case DELIGHT_EVENT_ENUM.DURATION: {
+      case DelightEvent_Enum.DURATION: {
         const payload = data['payload'];
         this.totalDuration_ = payload.duration;
         break;
       }
-      case DELIGHT_EVENT_ENUM.EXPANDED: {
+      case DelightEvent_Enum.EXPANDED: {
         this.setFullHeight_();
         break;
       }
-      case DELIGHT_EVENT_ENUM.MINIMIZED: {
+      case DelightEvent_Enum.MINIMIZED: {
         this.setInlineHeight_();
         break;
       }
-      case DELIGHT_EVENT_ENUM.ENTERED_FULLSCREEN: {
+      case DelightEvent_Enum.ENTERED_FULLSCREEN: {
         this.isFullscreen_ = true;
         break;
       }
-      case DELIGHT_EVENT_ENUM.EXITED_FULLSCREEN: {
+      case DelightEvent_Enum.EXITED_FULLSCREEN: {
         this.isFullscreen_ = false;
         break;
       }
-      case DELIGHT_EVENT_ENUM.CUSTOM_TICK: {
+      case DelightEvent_Enum.CUSTOM_TICK: {
         const payload = data['payload'];
         this.dispatchCustomAnalyticsEvent_(payload.type, payload);
         break;
@@ -375,7 +375,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   dispatchCustomAnalyticsEvent_(eventType, vars) {
     dispatchCustomEvent(
       this.element,
-      VIDEO_EVENTS_ENUM.CUSTOM_TICK,
+      VideoEvents_Enum.CUSTOM_TICK,
       dict({
         'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
         'vars': vars,
@@ -426,7 +426,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         window.screen.orientation ||
         window.screen.mozOrientation ||
         window.screen.msOrientation;
-      this.sendCommand_(DELIGHT_EVENT_ENUM.SCREEN_CHANGE, {
+      this.sendCommand_(DelightEvent_Enum.SCREEN_CHANGE, {
         orientation: {
           angle: orientation.angle,
           type: orientation.type,
@@ -435,12 +435,12 @@ class AmpDelightPlayer extends AMP.BaseElement {
     };
     const dispatchOrientationChangeEvents = () => {
       const {orientation} = window;
-      this.sendCommand_(DELIGHT_EVENT_ENUM.WINDOW_ORIENTATIONCHANGE, {
+      this.sendCommand_(DelightEvent_Enum.WINDOW_ORIENTATIONCHANGE, {
         orientation,
       });
     };
     const dispatchDeviceOrientationEvents = (event) => {
-      this.sendCommand_(DELIGHT_EVENT_ENUM.WINDOW_DEVICEORIENTATION, {
+      this.sendCommand_(DelightEvent_Enum.WINDOW_DEVICEORIENTATION, {
         alpha: event.alpha,
         beta: event.beta,
         gamma: event.gamma,
@@ -480,7 +480,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
           },
         });
       }
-      this.sendCommand_(DELIGHT_EVENT_ENUM.WINDOW_DEVICEMOTION, payload);
+      this.sendCommand_(DelightEvent_Enum.WINDOW_DEVICEMOTION, payload);
     };
     if (window.screen) {
       const screen =
@@ -565,7 +565,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
       consentPolicyStatePromise,
       consentPolicySharedDataPromise,
     ]).then((consents) => {
-      this.sendCommand_(DELIGHT_EVENT_ENUM.CONSENT_DATA, {
+      this.sendCommand_(DelightEvent_Enum.CONSENT_DATA, {
         'consentMetadata': consents[0],
         'consentString': consents[1],
         'consentPolicyState': consents[2],
@@ -588,46 +588,46 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.PLAY);
+    this.sendCommand_(DelightEvent_Enum.PLAY);
   }
 
   /** @override */
   pause() {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.PAUSE);
+    this.sendCommand_(DelightEvent_Enum.PAUSE);
   }
 
   /** @override */
   mute() {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.MUTE);
+    this.sendCommand_(DelightEvent_Enum.MUTE);
   }
 
   /** @override */
   unmute() {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.UNMUTE);
+    this.sendCommand_(DelightEvent_Enum.UNMUTE);
   }
 
   /** @override */
   showControls() {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.ENABLE_INTERFACE);
+    this.sendCommand_(DelightEvent_Enum.ENABLE_INTERFACE);
   }
 
   /** @override */
   hideControls() {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.DISABLE_INTERFACE);
+    this.sendCommand_(DelightEvent_Enum.DISABLE_INTERFACE);
   }
 
   /**
    * @override
    */
   fullscreenEnter() {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.ENTER_FULLSCREEN);
+    this.sendCommand_(DelightEvent_Enum.ENTER_FULLSCREEN);
   }
 
   /**
    * @override
    */
   fullscreenExit() {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.EXIT_FULLSCREEN);
+    this.sendCommand_(DelightEvent_Enum.EXIT_FULLSCREEN);
   }
 
   /** @override */
@@ -667,7 +667,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(time) {
-    this.sendCommand_(DELIGHT_EVENT_ENUM.SEEK, {time});
+    this.sendCommand_(DelightEvent_Enum.SEEK, {time});
   }
 }
 

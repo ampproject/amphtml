@@ -6,7 +6,7 @@ import {Services} from '#service';
 import {createCustomEvent} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
-import {FORM_EVENTS_ENUM} from './form-events';
+import {FormEvents_Enum} from './form-events';
 import {ValidationBubble} from './validation-bubble';
 
 /** @const @private {string} */
@@ -51,7 +51,7 @@ export function setCheckValiditySupportedForTesting(isSupported) {
 }
 
 /** @const @enum {string} */
-const CUSTOM_VALIDATION_TYPES_ENUM = {
+const CustomValidationTypes_Enum = {
   AsYouGo: 'as-you-go',
   ShowAllOnSubmit: 'show-all-on-submit',
   InteractAndSubmit: 'interact-and-submit',
@@ -177,8 +177,8 @@ export class FormValidator {
     if (previousValidity !== this.formValidity_) {
       const win = getWin(this.form);
       const type = this.formValidity_
-        ? FORM_EVENTS_ENUM.VALID
-        : FORM_EVENTS_ENUM.INVALID;
+        ? FormEvents_Enum.VALID
+        : FormEvents_Enum.INVALID;
       const event = createCustomEvent(win, type, null, {bubbles: true});
       this.form.dispatchEvent(event);
     }
@@ -521,13 +521,13 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
 export function getFormValidator(form) {
   const customValidation = form.getAttribute('custom-validation-reporting');
   switch (customValidation) {
-    case CUSTOM_VALIDATION_TYPES_ENUM.AsYouGo:
+    case CustomValidationTypes_Enum.AsYouGo:
       return new AsYouGoValidator(form);
-    case CUSTOM_VALIDATION_TYPES_ENUM.ShowAllOnSubmit:
+    case CustomValidationTypes_Enum.ShowAllOnSubmit:
       return new ShowAllOnSubmitValidator(form);
-    case CUSTOM_VALIDATION_TYPES_ENUM.InteractAndSubmit:
+    case CustomValidationTypes_Enum.InteractAndSubmit:
       return new InteractAndSubmitValidator(form);
-    case CUSTOM_VALIDATION_TYPES_ENUM.ShowFirstOnSubmit:
+    case CustomValidationTypes_Enum.ShowFirstOnSubmit:
       return new ShowFirstOnSubmitValidator(form);
   }
 

@@ -1,9 +1,9 @@
 import {
-  MESSAGE_TYPE_ENUM,
+  MessageType_Enum,
   deserializeMessage,
   listen,
 } from '#core/3p-frame-messaging';
-import {ACTION_TRUST_ENUM} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
@@ -15,10 +15,10 @@ import {Services} from '#service';
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {TRANSPORT_MODE_ENUM, assertConfig, assertVendor} from './config';
+import {TransportMode_Enum, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {createFilter} from './filters/factory';
-import {FILTER_TYPE_ENUM} from './filters/filter';
+import {FilterType_Enum} from './filters/filter';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 
 import {getAmpAdResourceId} from '../../../src/ad-helper';
@@ -43,7 +43,7 @@ let NavigationTargetDef;
  * Indicates the status of the `attribution-reporting` API.
  * @enum
  */
-const ATTRIBUTION_REPORTING_STATUS_ENUM = {
+const AttributionReportingStatus_Enum = {
   ATTRIBUTION_MACRO_PRESENT: 1,
   ATTRIBUTION_DATA_PRESENT: 2,
   ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED: 3,
@@ -83,7 +83,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.registerAction(
       'setVariable',
       this.setVariable.bind(this),
-      ACTION_TRUST_ENUM.LOW
+      ActionTrust_Enum.LOW
     );
 
     /** @private @const {!Object<string, !Object<string, string>>} */
@@ -374,7 +374,7 @@ export class AmpAdExit extends AMP.BaseElement {
       }
       for (const name in config['filters']) {
         const spec = config['filters'][name];
-        if (spec.type == FILTER_TYPE_ENUM.CLICK_DELAY) {
+        if (spec.type == FilterType_Enum.CLICK_DELAY) {
           spec.startTimingEvent =
             spec.startTimingEvent || defaultClickStartTimingEvent;
         }
@@ -417,9 +417,9 @@ export class AmpAdExit extends AMP.BaseElement {
         }
       }
       this.transport_.beacon =
-        config['transport'][TRANSPORT_MODE_ENUM.BEACON] !== false;
+        config['transport'][TransportMode_Enum.BEACON] !== false;
       this.transport_.image =
-        config['transport'][TRANSPORT_MODE_ENUM.IMAGE] !== false;
+        config['transport'][TransportMode_Enum.IMAGE] !== false;
     } catch (e) {
       this.user().error(TAG, 'Invalid JSON config', e);
       throw e;
@@ -519,7 +519,7 @@ export class AmpAdExit extends AMP.BaseElement {
       const responseMsg = deserializeMessage(getData(event));
       if (
         !responseMsg ||
-        responseMsg['type'] != MESSAGE_TYPE_ENUM.IFRAME_TRANSPORT_RESPONSE
+        responseMsg['type'] != MessageType_Enum.IFRAME_TRANSPORT_RESPONSE
       ) {
         return;
       }
@@ -596,9 +596,9 @@ export function getAttributionReportingStatus(
     target?.behaviors?.browserAdConversion &&
     isAttributionReportingSupported
   ) {
-    return ATTRIBUTION_REPORTING_STATUS_ENUM.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
+    return AttributionReportingStatus_Enum.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
   } else if (target?.behaviors?.browserAdConversion) {
-    return ATTRIBUTION_REPORTING_STATUS_ENUM.ATTRIBUTION_DATA_PRESENT;
+    return AttributionReportingStatus_Enum.ATTRIBUTION_DATA_PRESENT;
   }
-  return ATTRIBUTION_REPORTING_STATUS_ENUM.ATTRIBUTION_MACRO_PRESENT;
+  return AttributionReportingStatus_Enum.ATTRIBUTION_MACRO_PRESENT;
 }

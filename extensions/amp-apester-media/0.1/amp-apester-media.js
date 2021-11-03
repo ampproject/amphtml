@@ -44,7 +44,7 @@ const BOTTOM_AD_MESSAGE = dict({'type': 'has_bottom_ad', 'adHeight': 50});
 /**
  * @enum {string}
  */
-const APESTER_EVENT_NAMES_ENUM = {
+const ApesterEventNames_Enum = {
   SET_FULL_SCREEN: 'fullscreen_on',
   REMOVE_FULL_SCREEN: 'fullscreen_off',
   RESIZE_UNIT: 'apester_resize_unit',
@@ -428,7 +428,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    */
   registerToApesterEvents_() {
     registerEvent(
-      APESTER_EVENT_NAMES_ENUM.SET_FULL_SCREEN,
+      ApesterEventNames_Enum.SET_FULL_SCREEN,
       (data) => {
         // User clicked full screen button.
         if (this.mediaId_ === data.id) {
@@ -440,7 +440,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       this.unlisteners_
     );
     registerEvent(
-      APESTER_EVENT_NAMES_ENUM.REMOVE_FULL_SCREEN,
+      ApesterEventNames_Enum.REMOVE_FULL_SCREEN,
       (data) => {
         // User clicked close full screen button.
         if (this.mediaId_ === data.id) {
@@ -452,7 +452,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       this.unlisteners_
     );
     registerEvent(
-      APESTER_EVENT_NAMES_ENUM.RESIZE_UNIT,
+      ApesterEventNames_Enum.RESIZE_UNIT,
       (data) => {
         if (this.mediaId_ === data.id && data.height) {
           this.attemptChangeHeight(data.height);

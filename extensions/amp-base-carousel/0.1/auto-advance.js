@@ -1,5 +1,5 @@
-import {ACTION_SOURCE_ENUM} from './action-source';
-import {CAROUSEL_EVENTS_ENUM} from './carousel-events';
+import {ActionSource_Enum} from './action-source';
+import {CarouselEvents_Enum} from './carousel-events';
 import {debounce} from '#core/types/function';
 import {getDetail, listen, listenOnce} from '#utils/event-helper';
 
@@ -8,7 +8,7 @@ const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 /**
  * @typedef {{
  *   advance: function(number, {
- *     actionSource: (!ACTION_SOURCE_ENUM|undefined),
+ *     actionSource: (!ActionSource_Enum|undefined),
  *     allowWrap: (boolean|undefined),
  *   }),
  * }}
@@ -81,7 +81,7 @@ export class AutoAdvance {
       () => this.handleTouchStart_(),
       {capture: true, passive: true}
     );
-    listen(element, CAROUSEL_EVENTS_ENUM.INDEX_CHANGE, (event) => {
+    listen(element, CarouselEvents_Enum.INDEX_CHANGE, (event) => {
       this.handleIndexChange_(event);
     });
   }
@@ -222,7 +222,7 @@ export class AutoAdvance {
     const detail = getDetail(event);
     const actionSource = detail['actionSource'];
 
-    if (actionSource && actionSource !== ACTION_SOURCE_ENUM.AUTOPLAY) {
+    if (actionSource && actionSource !== ActionSource_Enum.AUTOPLAY) {
       this.stop();
     }
   }
@@ -236,7 +236,7 @@ export class AutoAdvance {
     }
 
     this.advanceable_.advance(this.autoAdvanceCount_, {
-      actionSource: ACTION_SOURCE_ENUM.AUTOPLAY,
+      actionSource: ActionSource_Enum.AUTOPLAY,
       allowWrap: true,
     });
     this.advances_ += this.autoAdvanceCount_;
