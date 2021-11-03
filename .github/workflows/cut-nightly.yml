@@ -23,6 +23,7 @@ jobs:
       - name: Set Up Node
         uses: actions/setup-node@v2
         with:
+          check-latest: true
           node-version: lts/*
 
       - name: Set Up Environment
