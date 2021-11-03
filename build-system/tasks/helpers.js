@@ -535,7 +535,7 @@ async function minify(code, map) {
   const terserOptions = {
     mangle: {
       properties: {
-        regex: '_AMP_PRIVATE_$|^[A-Z]*$',
+        regex: '_AMP_PRIVATE_$|^[A-Z_]+$',
         // eslint-disable-next-line google-camelcase/google-camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
       },
