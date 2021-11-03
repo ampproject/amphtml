@@ -97,8 +97,6 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       prevButton,
       nextButton,
       go: this.go.bind(this),
-      hasPrev: this.hasPrev.bind(this),
-      hasNext: this.hasNext.bind(this),
     });
     this.setupBehavior_();
   }
@@ -112,7 +110,10 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
-    this.controls_.setControlsState();
+    this.controls_.setControlsState({
+      prev: this.hasPrev(),
+      next: this.hasNext(),
+    });
     return Promise.resolve();
   }
 
@@ -294,7 +295,10 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
     this.oldPos_ = pos;
     this.pos_ = pos;
-    this.controls_.setControlsState();
+    this.controls_.setControlsState({
+      prev: this.hasPrev(),
+      next: this.hasNext(),
+    });
   }
 
   /**
@@ -304,7 +308,6 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * @private
    */
   nextPos_(pos, dir) {
-    // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.element./*OK*/ offsetWidth;
     const fullWidth = this.container_./*OK*/ scrollWidth;
     const newPos = pos + dir * containerWidth;
