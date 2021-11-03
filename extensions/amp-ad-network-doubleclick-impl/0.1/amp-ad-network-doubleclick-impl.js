@@ -55,6 +55,7 @@ import {
   setStyles,
 } from '#core/dom/style';
 import {isArray} from '#core/types';
+import {enumValues} from '#core/types/enum';
 import {deepMerge, dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {stringHash32} from '#core/types/string';
@@ -459,14 +460,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 'amp-ad[type=doubleclick][data-enable-refresh], ' +
                 'meta[name=amp-ad-doubleclick-sra]'
             ),
-          branches: Object.keys(DoubleclickSraExpBranches_Enum).map(
-            (key) => DoubleclickSraExpBranches_Enum[key]
-          ),
+          branches: enumValues(DoubleclickSraExpBranches_Enum),
         },
         {
           experimentId: ZINDEX_EXP,
           isTrafficEligible: () => true,
-          branches: Object.values(ZindexExpBranches_Enum),
+          branches: enumValues(ZindexExpBranches_Enum),
         },
         {
           experimentId: IDLE_CWV_EXP,
@@ -476,7 +475,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               !this.element.getAttribute('data-loading-strategy')
             );
           },
-          branches: Object.values(IdleCwvExpBranches_Enum),
+          branches: enumValues(IdleCwvExpBranches_Enum),
         },
       ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);

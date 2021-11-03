@@ -259,12 +259,12 @@ export class AmpDateCountdown extends AMP.BaseElement {
    * @private
    */
   getYDHMSFromMs_(ms, countUp) {
-    /** @enum {number} */
-    const TimeUnit_Enum = {
-      DAYS: 1,
-      HOURS: 2,
-      MINUTES: 3,
-      SECONDS: 4,
+    /** @const {!Object<string, number>} */
+    const TimeUnit = {
+      'DAYS': 1,
+      'HOURS': 2,
+      'MINUTES': 3,
+      'SECONDS': 4,
     };
 
     // If user supplies 'count-up' attribute, we return the negative of what
@@ -276,27 +276,27 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     //Math.trunc is used instead of Math.floor to support negative past date
     const d =
-      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.DAYS
+      this.biggestUnit_ == 'DAYS'
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_DAY))
         : 0;
     const h =
-      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.HOURS
+      this.biggestUnit_ == 'HOURS'
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_HOUR))
-        : TimeUnit_Enum[this.biggestUnit_] < TimeUnit_Enum.HOURS
+        : TimeUnit[this.biggestUnit_] < TimeUnit['HOURS']
         ? this.supportBackDate_(
             Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
           )
         : 0;
     const m =
-      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.MINUTES
+      this.biggestUnit_ == 'MINUTES'
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_MINUTE))
-        : TimeUnit_Enum[this.biggestUnit_] < TimeUnit_Enum.MINUTES
+        : TimeUnit[this.biggestUnit_] < TimeUnit['MINUTES']
         ? this.supportBackDate_(
             Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
           )
         : 0;
     const s =
-      TimeUnit_Enum[this.biggestUnit_] == TimeUnit_Enum.SECONDS
+      this.biggestUnit_ == 'SECONDS'
         ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_SECOND))
         : this.supportBackDate_(
             Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND)

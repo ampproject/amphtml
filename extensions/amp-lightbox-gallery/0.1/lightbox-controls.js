@@ -1,5 +1,6 @@
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
+import {isEnumValue} from '#core/types/enum';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -71,11 +72,10 @@ export class LightboxControls {
       );
     }
 
-    const actionStrings = Object.values(LightboxControlsAction_Enum);
     devAssert(
       toArray(el.querySelectorAll('[data-action]'))
         .map((div) => div.getAttribute('data-action'))
-        .every((action) => actionStrings.includes(action)),
+        .every((action) => isEnumValue(LightboxControlsAction_Enum, action)),
       'Action for a button does not map to enum.'
     );
 

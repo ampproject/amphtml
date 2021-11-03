@@ -8,6 +8,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, tryFocus} from '#core/dom';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
+import {isEnumValue} from '#core/types/enum';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
@@ -78,14 +79,14 @@ const DeprecatedButtonTypes_Enum = {
 const DeprecatedButtonClasses_Enum = {
   BASE: 'amp-story-player-exit-control-button',
   HIDDEN: 'amp-story-player-hide-button',
-  [DeprecatedButtonTypes_Enum.BACK]: 'amp-story-player-back-button',
-  [DeprecatedButtonTypes_Enum.CLOSE]: 'amp-story-player-close-button',
+  BACK: 'amp-story-player-back-button',
+  CLOSE: 'amp-story-player-close-button',
 };
 
 /** @enum {string} */
 const DeprecatedEventNames_Enum = {
-  [DeprecatedButtonTypes_Enum.BACK]: 'amp-story-player-back',
-  [DeprecatedButtonTypes_Enum.CLOSE]: 'amp-story-player-close',
+  BACK: 'amp-story-player-back',
+  CLOSE: 'amp-story-player-close',
 };
 
 /** @enum {string} */
@@ -479,21 +480,28 @@ export class AmpStoryPlayer {
    */
   initializeButton_() {
     const option = this.element_.getAttribute('exit-control');
-    if (!Object.values(DeprecatedButtonTypes_Enum).includes(option)) {
+    if (!isEnumValue(DeprecatedButtonTypes_Enum, option)) {
       return;
     }
 
     const button = this.doc_.createElement('button');
     this.rootEl_.appendChild(button);
 
-    button.classList.add(DeprecatedButtonClasses_Enum[option]);
+    const isBack = option === DeprecatedButtonTypes_Enum.BACK;
+    button.classList.add(
+      isBack
+        ? DeprecatedButtonClasses_Enum.BACK
+        : DeprecatedButtonClasses_Enum.CLOSE
+    );
     button.classList.add(DeprecatedButtonClasses_Enum.BASE);
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
         createCustomEvent(
           this.win_,
-          DeprecatedEventNames_Enum[option],
+          isBack
+            ? DeprecatedEventNames_Enum.BASE
+            : DeprecatedEventNames_Enum.CLOSE,
           dict({})
         )
       );

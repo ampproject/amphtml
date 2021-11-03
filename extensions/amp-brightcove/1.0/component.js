@@ -11,10 +11,10 @@ import {useValueRef} from '#preact/component';
 const DEFAULT = 'default';
 
 /**
- * @enum {string}
+ * @const {!Object<string, string>}
  * @private
  */
-const Methods_Enum = {
+const methodsMap = {
   'mute': 'muted',
   'unmute': 'muted',
   'showControls': 'controls',
@@ -142,7 +142,7 @@ function makeMessage(method) {
       break;
   }
   return JSON.stringify({
-    'command': Methods_Enum[method] ?? method,
+    'command': methodsMap[method] ?? method,
     'args': arg,
   });
 }

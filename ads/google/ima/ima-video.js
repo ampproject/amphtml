@@ -1442,7 +1442,7 @@ export function getPropertiesForTesting() {
     interactEvent,
     playbackStarted,
     playerState,
-    PlayerStates_Enum,
+    // PlayerStates_Enum,
     uiTicker,
     hideControlsQueued,
     icons,

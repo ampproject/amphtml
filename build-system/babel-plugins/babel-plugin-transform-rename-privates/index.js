@@ -10,6 +10,14 @@ module.exports = function (babel) {
   const {types: t} = babel;
 
   /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  function isRenamed(name) {
+    return name.endsWith('_AMP_PRIVATE_') || name.endsWith('_AMP_ENUM_KEY_');
+  }
+
+  /**
    * Adds trailing AMP_PRIVATE_ suffix to private identifiers.
    * @param {string} field
    * @return {function(*, *):void}
@@ -29,7 +37,7 @@ module.exports = function (babel) {
       }
 
       const {name} = key.node;
-      if (name.endsWith('_AMP_PRIVATE_')) {
+      if (isRenamed(name)) {
         return;
       }
 
@@ -45,13 +53,17 @@ module.exports = function (babel) {
    * @param {*} path
    */
   function renameEnum(field, path) {
+    if (path.node.computed) {
+      return;
+    }
+
     const key = path.get(field);
     if (!key.isIdentifier()) {
       return;
     }
 
     const {name} = key.node;
-    if (name.endsWith('_AMP_ENUM_KEY_')) {
+    if (isRenamed(name)) {
       return;
     }
 
@@ -67,32 +79,55 @@ module.exports = function (babel) {
     }
   }
 
+  /**
+   * @param {*} path
+   * @param {*} state
+   */
+  function Member(path, state) {
+    renamePrivate('property')(path, state);
+
+    if (path.node.computed) {
+      return;
+    }
+
+    const obj = path.get('object');
+    if (!obj.isIdentifier()) {
+      return;
+    }
+    if (!obj.node.name.endsWith('_Enum')) {
+      return;
+    }
+    renameEnum('property', path);
+  }
+
   return {
     visitor: {
-      'Method|Property': renamePrivate('key'),
+      Method: renamePrivate('key'),
+      Property: renamePrivate('key'),
 
       VariableDeclarator(path) {
         const id = path.get('id');
-        if (!id.isIdentifier()) {
-          return;
+        if (id.isIdentifier()) {
+          if (!id.node.name.endsWith('_Enum')) {
+            return;
+          }
+          renameKeys(path.get('init'));
         }
-        if (!id.node.name.endsWith('_Enum')) {
-          return;
+
+        if (id.isObjectPattern()) {
+          const init = path.get('init');
+          if (!init.isIdentifier()) {
+            return;
+          }
+          if (!init.node.name.endsWith('_Enum')) {
+            return;
+          }
+          renameKeys(id);
         }
-        renameKeys(path.get('init'));
       },
 
-      'MemberExpression|OptionalMemberExpression': function (path, state) {
-        renamePrivate('property')(path, state);
-        const obj = path.get('object');
-        if (!obj.isIdentifier()) {
-          return;
-        }
-        if (!obj.node.name.endsWith('_Enum')) {
-          return;
-        }
-        renameEnum('property', path);
-      },
+      MemberExpression: Member,
+      OptionalMemberExpression: Member,
     },
   };
 };

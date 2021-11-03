@@ -10,6 +10,7 @@ import {
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {PauseHelper} from '#core/dom/video/pause-helper';
+import {enumToObject} from '#core/types/enum';
 import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
@@ -191,8 +192,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
         const consentPolicySharedData = values[2];
         const consentMetadata = values[3];
         const ampConsentInfo = {
-          'consentPolicyStateEnum': ConsentPolicyState_Enum,
-          'consentStringTypeEnum': ConsentStringType_Enum,
+          'consentPolicyStateEnum': enumToObject(ConsentPolicyState_Enum),
+          'consentStringTypeEnum': enumToObject(ConsentStringType_Enum),
           'consentPolicyState': {
             'error': consentPolicyState.reason,
             'value': consentPolicyState.value,

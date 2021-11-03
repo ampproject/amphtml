@@ -1,6 +1,7 @@
 import {Services} from '#service';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
+import {isEnumValue} from '#core/types/enum';
 import {dict} from '#core/types/object';
 import {user, userAssert} from '#utils/log';
 
@@ -66,9 +67,7 @@ export class AmpAdUIHandler {
         StickyAdPositions_Enum.BOTTOM_RIGHT;
       this.element_.setAttribute(STICKY_AD_PROP, this.stickyAdPosition_);
 
-      if (
-        !Object.values(StickyAdPositions_Enum).includes(this.stickyAdPosition_)
-      ) {
+      if (!isEnumValue(StickyAdPositions_Enum, this.stickyAdPosition_)) {
         user().error(TAG, `Invalid sticky ad type: ${this.stickyAdPosition_}`);
         this.stickyAdPosition_ = null;
       }

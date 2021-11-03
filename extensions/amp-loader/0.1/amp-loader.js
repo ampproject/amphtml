@@ -19,21 +19,6 @@ import {installStylesForDoc} from '../../../src/style-installer';
 const LOADER_APPEAR_TIME = 600;
 
 /**
- * Elements will get a default gray background if they don't already have a
- * placeholder. This list does not include video players which are detected
- * using `isIframeVideoPlayerComponent`
- * @enum {boolean}
- * @private  Visible for testing only!
- */
-const LoaderBackgroundTags_Enum = {
-  'AMP-IMG': true,
-  'AMP-ANIM': true,
-  'AMP-PINTEREST': true,
-  'AMP-INSTAGRAM': true,
-  'AMP-GOOGLE-DOCUMENT-EMBED': true,
-};
-
-/**
  * Used to cache the loader DOM once created, so we do not need to recreate it
  * each time.
  * @type {?Element}
@@ -214,10 +199,21 @@ class LoaderBuilder {
   tagNeedsBackground_() {
     const {tagName} = this.element_;
 
-    return (
-      LoaderBackgroundTags_Enum[tagName] ||
-      isIframeVideoPlayerComponent(tagName)
-    );
+    /**
+     * Elements will get a default gray background if they don't already have a
+     * placeholder. This list does not include video players which are detected
+     * using `isIframeVideoPlayerComponent`
+     */
+    if (
+      tagName === 'AMP-IMG' ||
+      tagName === 'AMP-ANIM' ||
+      tagName === 'AMP-PINTEREST' ||
+      tagName === 'AMP-INSTAGRAM' ||
+      tagName === 'AMP-GOOGLE-DOCUMENT-EMBED'
+    ) {
+      return true;
+    }
+    return isIframeVideoPlayerComponent(tagName);
   }
 
   /**

@@ -6,6 +6,7 @@ import {
   VideoAnalyticsEvents_Enum,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
+import {enumValues} from '#core/types/enum';
 import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getData} from '#utils/event-helper';
@@ -1364,21 +1365,16 @@ export class VideoEventTracker extends EventTracker {
       this.sessionObservable_
     );
 
-    Object.keys(VideoAnalyticsEvents_Enum).forEach((key) => {
-      this.root
-        .getRoot()
-        .addEventListener(VideoAnalyticsEvents_Enum[key], this.boundOnSession_);
+    enumValues(VideoAnalyticsEvents_Enum).forEach((value) => {
+      this.root.getRoot().addEventListener(value, this.boundOnSession_);
     });
   }
 
   /** @override */
   dispose() {
     const root = this.root.getRoot();
-    Object.keys(VideoAnalyticsEvents_Enum).forEach((key) => {
-      root.removeEventListener(
-        VideoAnalyticsEvents_Enum[key],
-        this.boundOnSession_
-      );
+    enumValues(VideoAnalyticsEvents_Enum).forEach((value) => {
+      root.removeEventListener(value, this.boundOnSession_);
     });
     this.boundOnSession_ = null;
     this.sessionObservable_ = null;

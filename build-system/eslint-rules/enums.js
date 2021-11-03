@@ -1,9 +1,5 @@
 'use strict';
 
-const camelcase = require('lodash.camelcase');
-
-/* eslint-disable */
-
 /**
  * Enforces naming rules for enums.
  *
@@ -38,7 +34,15 @@ module.exports = function (context) {
     }
 
     const decl = node.declarations[0];
-    checkInit(decl.init, decl);
+    if (decl.init.type !== 'ObjectExpression') {
+      context.report({
+        node: decl.init || decl,
+        message: 'Not initialized to a static object expression',
+      });
+      return;
+    }
+
+    checkEnumKeys(decl.init);
     checkEnumId(decl.id);
   }
 
@@ -87,31 +91,69 @@ module.exports = function (context) {
 
   /**
    * @param {!Node|undefined} node
-   * @param {!Node} reportNode
    */
-  function checkInit(node, reportNode) {
-    if (node?.type !== 'ObjectExpression') {
-      context.report({
-        node: node || reportNode,
-        message: 'Not initialized to a static object expression',
-      });
+  function checkEnumKeys(node) {
+    for (const prop of node.properties) {
+      if (prop.computed || prop.key.type !== 'Identifier') {
+        context.report({
+          node: prop,
+          message: 'Enums key must be a normal prop identifier',
+        });
+      }
     }
   }
 
   return {
     Identifier(node) {
-      if (node.name.endsWith('_ENUM')) {
-        context.report({
-          node,
-          message: 'use pascal case',
-          fix(fixer) {
-            let newName = camelcase(node.name);
-            newName = newName[0].toUpperCase() + newName.slice(1);
-            newName = newName.replace(/Enum$/, '_Enum');
-            return fixer.replaceText(node, newName);
-          },
-        })
+      if (!node.name.endsWith('_Enum')) {
+        return;
       }
+      const {parent} = node;
+      if (parent.type === 'ImportSpecifier') {
+        return;
+      }
+      if (parent.type === 'VariableDeclarator') {
+        if (parent.id === node) {
+          return;
+        }
+        if (parent.init === node && parent.id.type === 'ObjectPattern') {
+          checkEnumKeys(parent.id);
+          return;
+        }
+      }
+      if (parent.type === 'MemberExpression') {
+        if (parent.object === node && parent.computed === false) {
+          return;
+        }
+      }
+      if (parent.type === 'CallExpression') {
+        const {arguments: args, callee} = parent;
+        if (args[0] === node) {
+          if (callee.type === 'Identifier') {
+            const {name} = callee;
+            if (
+              name === 'isEnumValue' ||
+              name === 'enumValues' ||
+              name === 'enumKeys' ||
+              name === 'enumToObject'
+            ) {
+              return;
+            }
+          }
+        }
+      }
+
+      context.report({
+        node,
+        message: [
+          `Improper use of enum, you may only do:`,
+          `- \`${node.name}.key\` get access.`,
+          `- \`isEnumValue(${node.name}, someValue)\` value checks.`,
+          `- \`enumKeys(${node.name})\` keys gathering.`,
+          `- \`enumValues(${node.name})\` values gathering.`,
+          `- \`enumToObject(${node.name})\` conversion (AVOID if you can, it cannot be minified).`,
+        ].join('\n\t'),
+      });
     },
 
     VariableDeclaration(node) {

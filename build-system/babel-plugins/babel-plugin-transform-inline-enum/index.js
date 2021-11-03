@@ -64,7 +64,7 @@ module.exports = function (babel) {
   }
 
   return {
-    name: 'transform-inline-isenumvalue',
+    name: 'transform-inline-enum',
     visitor: {
       CallExpression(path, state) {
         const callee = path.get('callee');

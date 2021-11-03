@@ -6,12 +6,6 @@ import {utf8Encode} from '#core/types/string/bytes';
 
 import {dev, user} from '#utils/log';
 
-/** @enum {number} Allowed fetch responses. */
-const AllowedFetchTypes_Enum = {
-  document: 1,
-  text: 2,
-};
-
 /** @const {!Array<string>} */
 const allowedMethods = ['GET', 'POST'];
 
@@ -49,7 +43,7 @@ export function fetchPolyfill(input, init = {}) {
       xhr.withCredentials = true;
     }
 
-    if (init.responseType in AllowedFetchTypes_Enum) {
+    if (init.responseType === 'document' || init.responseType === 'text') {
       xhr.responseType = init.responseType;
     }
 

@@ -1,4 +1,5 @@
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {enumKeys} from '#core/types/enum';
 import {map} from '#core/types/object';
 
 import {dev, devAssert} from '#utils/log';
@@ -35,7 +36,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.context_ = {};
 
     // Register default error modes.
-    for (const failureType in FailureType_Enum) {
+    for (const failureType in enumKeys(FailureType_Enum)) {
       this.recoveryModes_[failureType] = RecoveryModeType_Enum.COLLAPSE;
     }
 
