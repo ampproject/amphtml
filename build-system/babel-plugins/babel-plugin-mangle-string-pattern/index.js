@@ -3,7 +3,7 @@ const {basename, dirname} = require('path');
 const {outputJsonSync, readJsonSync} = require('fs-extra');
 
 // Use our own charset instead of base62 since HTML classnames are case insensitive
-const CHARSET = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
+const CHARSET = '0123456789abcdefghijklmnopqrstuvwxyz-'.split('');
 
 /**
  * @param {number} int
