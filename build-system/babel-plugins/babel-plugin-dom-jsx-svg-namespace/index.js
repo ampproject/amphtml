@@ -95,6 +95,9 @@ module.exports = function (babel) {
             '<foreignObject> is not supported. See src/core/dom/jsx.js'
           );
         }
+        if (!svgTags.has(name)) {
+          return;
+        }
         if (path.node.attributes.find((attr) => attr.name.name === 'xmlns')) {
           return;
         }
