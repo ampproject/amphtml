@@ -1,3 +1,5 @@
+import {getTimeZoneName} from '#bento/components/amp-date-display/format';
+
 import {getDate} from '#core/types/date';
 
 import * as Preact from '#preact';
@@ -6,8 +8,6 @@ import {Wrapper, useRenderer} from '#preact/component';
 import {useResourcesNotify} from '#preact/utils';
 
 import {user} from '#utils/log';
-
-import {getTimeZoneName} from '../format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
