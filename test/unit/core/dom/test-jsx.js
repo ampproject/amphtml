@@ -144,18 +144,20 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     );
   });
 
-  it('renders with SVG namespace with props.__svg', () => {
-    const withProp = createElement('svg', {__svg: true});
-    expect(withProp.namespaceURI).to.equal('http://www.w3.org/2000/svg');
+  it('renders with SVG namespace with props.xmlns', () => {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const withProp = createElement('svg', {xmlns});
+    expect(withProp.namespaceURI).to.equal(xmlns);
     const withoutProp = createElement('svg');
-    expect(withoutProp.namespaceURI).to.not.equal('http://www.w3.org/2000/svg');
+    expect(withoutProp.namespaceURI).to.not.equal(xmlns);
   });
 
-  it('renders with SVG namespace with props.__svg (compiled)', () => {
+  it('renders with SVG namespace with props.xmlns (compiled)', () => {
+    const xmlns = 'http://www.w3.org/2000/svg';
     const withProp = <svg />;
-    expect(withProp.namespaceURI).to.equal('http://www.w3.org/2000/svg');
+    expect(withProp.namespaceURI).to.equal(xmlns);
     const withoutProp = <div />;
-    expect(withoutProp.namespaceURI).to.not.equal('http://www.w3.org/2000/svg');
+    expect(withoutProp.namespaceURI).to.not.equal(xmlns);
   });
 
   describe('unsupported JSX features', () => {
