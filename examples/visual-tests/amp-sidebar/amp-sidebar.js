@@ -2,7 +2,7 @@
 
 const {
   verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
+} = require('../../../build-system/tasks/visual-diff/verifiers');
 
 module.exports = {
   'open sidebar': async (page, name) => {
