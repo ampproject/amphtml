@@ -731,6 +731,7 @@ tags: {
         "viewport"
         ")(\\s|$)"
   }
+  attrs: { name: "media" } # For varying theme-color.
   attrs: { name: "property" }  # property is non-standard, but commonly seen.
   # scheme is used by Dublin Core, see issue #13993
   attrs: { name: "scheme" }
