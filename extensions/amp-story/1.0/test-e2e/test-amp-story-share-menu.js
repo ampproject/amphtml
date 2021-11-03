@@ -1,4 +1,4 @@
-import {Key} from '#testing/helpers/types';
+import {KEY_ENUM} from '#testing/helpers/types';
 import {sleep} from '#testing/helpers';
 
 describes.endtoend(
@@ -43,7 +43,7 @@ describes.endtoend(
       const input = await controller.findElement('.input-field');
       await controller.click(input);
       await sleep(500);
-      await controller.type(input, Key.CtrlV);
+      await controller.type(input, KEY_ENUM.CtrlV);
       await sleep(500);
 
       const output = await controller.getElementProperty(input, 'value');

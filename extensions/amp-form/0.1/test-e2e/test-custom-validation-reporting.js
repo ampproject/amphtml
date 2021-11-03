@@ -1,4 +1,4 @@
-import {Key} from '#testing/helpers/types';
+import {KEY_ENUM} from '#testing/helpers/types';
 
 const expectedSubmitUrl =
   'https://example.com/submit?__amp_source_origin=http%3A%2F%2Flocalhost%3A8000';
@@ -47,7 +47,7 @@ describes.endtoend(
       ).to.not.contain('visible');
 
       // removes input:
-      await controller.type(fullnameInput, Key.Backspace);
+      await controller.type(fullnameInput, KEY_ENUM.Backspace);
       await expect(
         controller.getElementProperty(message, 'className')
       ).to.contain('visible');
@@ -81,7 +81,7 @@ describes.endtoend(
       ).to.not.contain('visible');
 
       // undoes pattern complete:
-      await controller.type(fullnameInput, Key.Backspace);
+      await controller.type(fullnameInput, KEY_ENUM.Backspace);
       await expect(
         controller.getElementProperty(message, 'className')
       ).to.contain('visible');
