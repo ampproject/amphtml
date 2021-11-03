@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ACTION_ENUM,
   STATE_PROPERTY_ENUM,
@@ -8,8 +9,6 @@ import {EventType, dispatch} from './events';
 import {LOCALIZED_STRING_ID_ENUM} from '#service/localization/strings';
 import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
-
-import {htmlFor} from '#core/dom/static-template';
 import {localize} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
@@ -46,14 +45,13 @@ const ForwardButtonStates = {
 };
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildPaginationButton = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-button-container">
-        <button class="i-amphtml-story-button-move"></button>
-      </div>`;
+const renderPaginationButton = () => (
+  <div class="i-amphtml-story-button-container">
+    <button class="i-amphtml-story-button-move"></button>
+  </div>
+);
 
 /**
  * Desktop navigation buttons.
@@ -70,7 +68,7 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = buildPaginationButton(doc);
+    this.element = renderPaginationButton();
 
     /** @private @const {!Element} */
     this.buttonElement_ = dev().assertElement(

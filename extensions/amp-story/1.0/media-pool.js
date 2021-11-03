@@ -851,6 +851,11 @@ export class MediaPool {
       return Promise.resolve();
     }
 
+    // When a video is muted, reset its volume to the default value of 1.
+    if (mediaType == MediaType.VIDEO) {
+      domMediaEl.volume = 1;
+    }
+
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
   }
 
@@ -869,6 +874,16 @@ export class MediaPool {
 
     if (!poolMediaEl) {
       return Promise.resolve();
+    }
+
+    if (mediaType == MediaType.VIDEO) {
+      const ampVideoEl = domMediaEl.parentElement;
+      if (ampVideoEl) {
+        const volume = ampVideoEl.getAttribute('volume');
+        if (volume) {
+          domMediaEl.volume = parseFloat(volume);
+        }
+      }
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());

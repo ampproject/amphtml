@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   STORY_ANALYTICS_EVENT_ENUM,
@@ -19,7 +20,6 @@ import {createShadowRootWithStyle} from './utils';
 import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
 
 /** @const {string} Class to toggle the share menu. */
@@ -27,27 +27,34 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
- * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = (element) => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
+const renderShareMenu = () => {
+  return (
+    <div
+      class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
+      aria-hidden="true"
+      role="alert"
+    >
       <div class="i-amphtml-story-share-menu-container">
-        <button class="i-amphtml-story-share-menu-close-button" aria-label="close" role="button">
+        <button
+          class="i-amphtml-story-share-menu-close-button"
+          aria-label="close"
+          role="button"
+        >
           &times;
         </button>
       </div>
-    </div>`;
+    </div>
+  );
 };
 
 /**
  * System amp-social-share button template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getAmpSocialSystemShareTemplate = (element) => {
-  return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
+const renderAmpSocialSystemShareElement = () => {
+  return <amp-social-share type="system"></amp-social-share>;
 };
 
 /**
@@ -129,7 +136,7 @@ export class ShareMenu {
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
+    this.element_ = renderAmpSocialSystemShareElement();
 
     this.initializeListeners_();
 
@@ -151,7 +158,7 @@ export class ShareMenu {
     const root = this.win_.document.createElement('div');
     root.classList.add('i-amphtml-story-share-menu-host');
 
-    this.element_ = getTemplate(this.parentEl_);
+    this.element_ = renderShareMenu();
     createShadowRootWithStyle(root, this.element_, CSS);
 
     this.closeButton_ = dev().assertElement(

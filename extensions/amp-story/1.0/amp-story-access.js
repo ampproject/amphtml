@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ACTION_ENUM,
   STATE_PROPERTY_ENUM,
@@ -8,7 +9,6 @@ import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
 import {dev, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
-import {htmlFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
 import {setImportantStyles} from '#core/dom/style';
@@ -26,37 +26,37 @@ export const TYPE_ENUM = {
 
 /**
  * Story access blocking type template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getBlockingTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-header">
-            <div class="i-amphtml-story-access-logo"></div>
-          </div>
-          <div class="i-amphtml-story-access-content"></div>
+const renderBlockingElement = () => {
+  return (
+    <div class="i-amphtml-story-access-overflow">
+      <div class="i-amphtml-story-access-container">
+        <div class="i-amphtml-story-access-header">
+          <div class="i-amphtml-story-access-logo"></div>
         </div>
-      </div>`;
+        <div class="i-amphtml-story-access-content"></div>
+      </div>
+    </div>
+  );
 };
 
 /**
  * Story access notification type template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getNotificationTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-content">
-            <span class="i-amphtml-story-access-close-button" role="button">
-              &times;
-            </span>
-          </div>
+const renderNotificationElement = () => {
+  return (
+    <div class="i-amphtml-story-access-overflow">
+      <div class="i-amphtml-story-access-container">
+        <div class="i-amphtml-story-access-content">
+          <span class="i-amphtml-story-access-close-button" role="button">
+            &times;
+          </span>
         </div>
-      </div>`;
+      </div>
+    </div>
+  );
 };
 
 /**
@@ -201,7 +201,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
   renderDrawerEl_() {
     switch (this.getType_()) {
       case TYPE_ENUM.BLOCKING:
-        const drawerEl = getBlockingTemplate(this.element);
+        const drawerEl = renderBlockingElement();
 
         const logoSrc = getStoryAttributeSrc(
           this.element,
@@ -219,7 +219,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
         return drawerEl;
         break;
       case TYPE_ENUM.NOTIFICATION:
-        return getNotificationTemplate(this.element);
+        return renderNotificationElement();
         break;
       default:
         user().error(
