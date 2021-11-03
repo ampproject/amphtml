@@ -485,7 +485,7 @@ async function buildExtension(
   }
   if (options.npm) {
     await buildNpmBinaries(extDir, name, options);
-    await buildNpmCss(extDir, options);
+    // await buildNpmCss(extDir, options);
   }
   if (options.binaries) {
     await buildBinaries(extDir, options.binaries, options);

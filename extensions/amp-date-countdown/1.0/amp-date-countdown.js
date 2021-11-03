@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/amp-date-countdown/1.0/base-element';
+
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 
@@ -6,8 +8,6 @@ import {isExperimentOn} from '#experiments';
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

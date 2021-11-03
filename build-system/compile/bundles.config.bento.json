@@ -1,5 +1,14 @@
 [
   {
+    "name": "amp-date-countdown",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "bento": true,
+      "npm": true
+    }
+  },
+  {
     "name": "amp-jwplayer",
     "version": "1.0"
   }
