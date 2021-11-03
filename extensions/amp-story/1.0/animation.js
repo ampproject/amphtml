@@ -46,7 +46,7 @@ const ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME = 'animate-in-timing-function';
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /** @const {string} selector for disabling animations on first page when first loaded */
 const DISABLE_ANIMATIONS_FIRST_PAGE_SELECTOR =
-  'amp-story-page:first-of-type:not([i-amphtml-visited])';
+  '[i-amphtml-initial]:not([i-amphtml-visited])';
 
 /** @const {string} */
 const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';

@@ -789,19 +789,6 @@ describes.realWin(
         });
       });
 
-      it('should add previous visited attribute', async () => {
-        env.sandbox
-          .stub(utils, 'setAttributeInMutate')
-          .callsFake((el, attr) => el.element.setAttribute(attr, ''));
-
-        await createStoryWithPages(2, ['page-0', 'page-1']);
-        const pages = story.element.querySelectorAll('amp-story-page');
-        const page0 = pages[0];
-        await story.layoutCallback();
-        await story.switchTo_('page-1');
-        expect(page0.hasAttribute('i-amphtml-visited')).to.be.true;
-      });
-
       describe('amp-story audio', () => {
         it('should register and preload the background audio', async () => {
           const src = 'https://example.com/foo.mp3';
