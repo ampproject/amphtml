@@ -42,6 +42,7 @@ function getUnminifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     '@babel/plugin-transform-classes',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
   const unminifiedPresets = [presetEnv];
