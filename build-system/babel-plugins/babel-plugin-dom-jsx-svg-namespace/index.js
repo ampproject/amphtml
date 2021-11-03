@@ -41,7 +41,6 @@ const svgTags = new Set([
   'feTile',
   'feTurbulence',
   'filter',
-  'foreignObject',
   'g',
   'image',
   'line',
@@ -91,6 +90,11 @@ module.exports = function (babel) {
           return;
         }
         const {name} = path.node.name;
+        if (name === 'foreignObject') {
+          throw path.buildCodeFrameError(
+            '<foreignObject> is not supported. See src/core/dom/jsx.js'
+          );
+        }
         if (svgTags.has(name)) {
           path.node.attributes = path.node.attributes.filter(
             // We can remove this for bundle size since the renderer will
