@@ -24,6 +24,11 @@
  * 🚫 No dangerouslySetInnerHTML
  *   - You should not do this anyway.
  *
+ * 🚫 No SVG <foreignObject>
+ *   - This tag is rather obscure. You should be able to restructure your tree.
+ *     If you absolutely need it, get in touch with `@alanorozco` to consider
+ *     enabling support.
+ *
  * TODO(https://go.amp.dev/issue/36679): Lint these unsupported features.
  */
 import {devAssert} from '#core/assert';
