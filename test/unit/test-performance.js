@@ -12,7 +12,6 @@ import {
 } from '#service/performance-impl';
 import {installPlatformService} from '#service/platform-impl';
 
-import * as IniLoad from '../../src/ini-load';
 import {getMode} from '../../src/mode';
 
 describes.realWin('performance', {amp: false}, (env) => {
@@ -257,7 +256,7 @@ describes.realWin('performance', {amp: true}, (env) => {
               value: 100,
             });
 
-            expect(flushSpy).to.have.callCount(5);
+            expect(flushSpy).to.have.callCount(2);
             expect(perf.events_.length).to.equal(0);
           });
         });
@@ -287,10 +286,9 @@ describes.realWin('performance', {amp: true}, (env) => {
             perf.coreServicesAvailable(),
             ampdoc.whenFirstVisible(),
           ]).then(() => {
-            expect(flushSpy).to.have.callCount(4);
+            expect(flushSpy).to.have.callCount(1);
             expect(perf.isMessagingReady_).to.be.false;
-            const count = 5;
-            expect(perf.events_.length).to.equal(count);
+            expect(perf.events_.length).to.equal(2);
           });
         });
       });
@@ -429,7 +427,7 @@ describes.realWin('performance', {amp: true}, (env) => {
               value: timeOrigin + 1,
             });
             expect(
-              viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
+              viewerSendMessageStub.withArgs('tick').getCall(2).args[1]
             ).to.be.jsonEqual({
               label: 'msr',
               delta: 1,
@@ -516,218 +514,6 @@ describes.realWin('performance', {amp: true}, (env) => {
         });
       });
     });
-
-  it('should wait for visible resources', () => {
-    const resources = Services.resourcesForDoc(ampdoc);
-    env.sandbox.stub(resources, 'whenFirstPass').returns(Promise.resolve());
-    const whenContentIniLoadStub = env.sandbox
-      .stub(IniLoad, 'whenContentIniLoad')
-      .returns(Promise.resolve());
-    perf.resources_ = resources;
-
-    return perf.whenViewportLayoutComplete_().then(() => {
-      expect(whenContentIniLoadStub).to.be.calledWith(
-        perf.win.document.documentElement,
-        perf.win,
-        env.sandbox.match(
-          (arg) =>
-            arg.left == 0 &&
-            arg.top == 0 &&
-            arg.width == perf.win.innerWidth &&
-            arg.height == perf.win.innerHeight
-        ),
-        /* inPrerender */ true
-      );
-    });
-  });
-
-  describe('coreServicesAvailable', () => {
-    let tickSpy;
-    let viewer;
-    let viewerSendMessageStub;
-    let whenFirstVisiblePromise;
-    let whenFirstVisibleResolve;
-    let whenViewportLayoutCompletePromise;
-    let whenViewportLayoutCompleteResolve;
-
-    function stubHasBeenVisible(visibility) {
-      env.sandbox.stub(ampdoc, 'hasBeenVisible').returns(visibility);
-    }
-
-    function getPerformanceMarks() {
-      return win.performance
-        .getEntriesByType('mark')
-        .map((entry) => entry.name);
-    }
-
-    beforeEach(() => {
-      viewer = Services.viewerForDoc(ampdoc);
-      env.sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
-      viewerSendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
-
-      tickSpy = env.sandbox.spy(perf, 'tick');
-
-      whenFirstVisiblePromise = new Promise((resolve) => {
-        whenFirstVisibleResolve = resolve;
-      });
-
-      whenViewportLayoutCompletePromise = new Promise((resolve) => {
-        whenViewportLayoutCompleteResolve = resolve;
-      });
-
-      env.sandbox
-        .stub(ampdoc, 'whenFirstVisible')
-        .returns(whenFirstVisiblePromise);
-      env.sandbox
-        .stub(perf, 'whenViewportLayoutComplete_')
-        .returns(whenViewportLayoutCompletePromise);
-      return viewer.whenMessagingReady();
-    });
-
-    describe('document started in prerender', () => {
-      beforeEach(() => {
-        clock.tick(100);
-        stubHasBeenVisible(false);
-        return perf.coreServicesAvailable();
-      });
-
-      it('should call prerenderComplete on viewer', () => {
-        clock.tick(100);
-        whenFirstVisibleResolve();
-        env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
-        env.sandbox.stub(viewer, 'isEmbedded').returns(true);
-        return ampdoc.whenFirstVisible().then(() => {
-          clock.tick(400);
-          whenViewportLayoutCompleteResolve();
-          return perf.whenViewportLayoutComplete_().then(() => {
-            expect(
-              viewerSendMessageStub.withArgs('prerenderComplete').firstCall
-                .args[1].value
-            ).to.equal(400);
-
-            expect(getPerformanceMarks()).to.have.members([
-              'dr',
-              'ol',
-              'visible',
-              'ofv',
-              'pc',
-            ]);
-          });
-        });
-      });
-
-      it('should call prerenderComplete on viewer even if csi is off', () => {
-        clock.tick(100);
-        whenFirstVisibleResolve();
-        env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
-        return ampdoc.whenFirstVisible().then(() => {
-          clock.tick(400);
-          whenViewportLayoutCompleteResolve();
-          return perf.whenViewportLayoutComplete_().then(() => {
-            expect(
-              viewerSendMessageStub.withArgs('prerenderComplete').firstCall
-                .args[1].value
-            ).to.equal(400);
-          });
-        });
-      });
-
-      it(
-        'should tick `pc` with delta=400 when user request document ' +
-          'to be visible before before first viewport completion',
-        () => {
-          clock.tick(100);
-          whenFirstVisibleResolve();
-          const initialCount = tickSpy.callCount;
-          return ampdoc.whenFirstVisible().then(() => {
-            clock.tick(400);
-            expect(tickSpy).to.have.callCount(initialCount + 1);
-            whenViewportLayoutCompleteResolve();
-            return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(initialCount + 1);
-              expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
-              return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(initialCount + 2);
-                expect(tickSpy.withArgs('pc')).to.be.calledOnce;
-                expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
-              });
-            });
-          });
-        }
-      );
-
-      it(
-        'should tick `pc` with `delta=0` when viewport is complete ' +
-          'before user request document to be visible',
-        () => {
-          clock.tick(300);
-          whenViewportLayoutCompleteResolve();
-          return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.withArgs('ol')).to.be.calledOnce;
-            expect(tickSpy.withArgs('pc')).to.have.callCount(0);
-            whenFirstVisibleResolve();
-            return whenFirstVisiblePromise.then(() => {
-              expect(tickSpy.withArgs('pc')).to.be.calledOnce;
-              expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
-              expect(getPerformanceMarks()).to.have.members([
-                'dr',
-                'ol',
-                'pc',
-                'visible',
-                'ofv',
-              ]);
-            });
-          });
-        }
-      );
-    });
-
-    describe('document did not start in prerender', () => {
-      beforeEach(() => {
-        stubHasBeenVisible(true);
-        perf.coreServicesAvailable();
-      });
-
-      it('should call prerenderComplete on viewer', async () => {
-        env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
-        env.sandbox.stub(viewer, 'isEmbedded').returns(true);
-        clock.tick(100);
-        whenFirstVisibleResolve();
-        await whenFirstVisiblePromise.then(() => {
-          clock.tick(300);
-        });
-        whenViewportLayoutCompleteResolve();
-        return perf.whenViewportLayoutComplete_().then(() => {
-          expect(
-            viewerSendMessageStub.withArgs('prerenderComplete').firstCall
-              .args[1].value
-          ).to.equal(300);
-          expect(getPerformanceMarks()).to.have.members([
-            'dr',
-            'ol',
-            'visible',
-            'ofv',
-            'pc',
-          ]);
-        });
-      });
-
-      it(
-        'should tick `pc` with `opt_value=undefined` when user requests ' +
-          'document to be visible',
-        () => {
-          clock.tick(300);
-          whenViewportLayoutCompleteResolve();
-          return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.withArgs('ol')).to.be.calledOnce;
-            expect(tickSpy.withArgs('pc')).to.be.calledOnce;
-            expect(tickSpy.withArgs('pc').args[0][2]).to.be.undefined;
-            expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'pc']);
-          });
-        }
-      );
-    });
-  });
 });
 
 describes.realWin('performance with experiment', {amp: true}, (env) => {
@@ -912,20 +698,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = Services.performanceFor(env.win);
 
-      expect(perf.events_.length).to.equal(3);
+      expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual(
-        {
-          label: 'fp',
-          delta: 11,
-        },
-        {
-          label: 'fcp',
-          delta: 15,
-        },
-        {
-          label: 'fcpv',
-          delta: 15,
-        }
+        {label: 'fcp', delta: 15},
+        {label: 'fcpv', delta: 15}
       );
 
       delete env.win.PerformancePaintTiming;
@@ -974,20 +750,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       };
       // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(3);
+      expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual(
-        {
-          label: 'fp',
-          delta: 11,
-        },
-        {
-          label: 'fcp',
-          delta: 15,
-        },
-        {
-          label: 'fcpv',
-          delta: 15,
-        }
+        {label: 'fcp', delta: 15},
+        {label: 'fcpv', delta: 15}
       );
     });
   });
@@ -1285,87 +1051,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       perf.tick('mbv', 1);
       const value = await perf.getMetric('mbv');
       expect(value).to.eq(1);
-    });
-  });
-
-  describe('forwards navigation metrics', () => {
-    let PerformanceObserverConstructorStub, performanceObserver;
-    beforeEach(() => {
-      // Stub and fake the PerformanceObserver constructor.
-      const PerformanceObserverStub = env.sandbox.stub();
-      PerformanceObserverStub.callsFake((callback) => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-      PerformanceObserverConstructorStub = env.sandbox.stub(
-        env.win,
-        'PerformanceObserver'
-      );
-      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
-    });
-
-    it('after performance service registered', () => {
-      // Pretend that the Navigation API exists.
-      PerformanceObserverConstructorStub.supportedEntryTypes = ['navigation'];
-
-      installPerformanceService(env.win);
-
-      const perf = Services.performanceFor(env.win);
-
-      // Fake fid that occured before the Performance service is started.
-      performanceObserver.triggerCallback({
-        getEntries() {
-          return [
-            {
-              entryType: 'navigation',
-              domComplete: 0,
-              domContentLoadedEventEnd: 1,
-              domContentLoadedEventStart: 2,
-              domInteractive: 3,
-              loadEventEnd: 4,
-              loadEventStart: 5,
-              requestStart: 6,
-              responseStart: 7,
-            },
-          ];
-        },
-      });
-
-      expect(perf.events_.length).to.equal(8);
-      expect(perf.events_).to.be.jsonEqual([
-        {
-          label: 'domComplete',
-          delta: 0,
-        },
-        {
-          label: 'domContentLoadedEventEnd',
-          delta: 1,
-        },
-        {
-          label: 'domContentLoadedEventStart',
-          delta: 2,
-        },
-        {
-          label: 'domInteractive',
-          delta: 3,
-        },
-        {
-          label: 'loadEventEnd',
-          delta: 4,
-        },
-        {
-          label: 'loadEventStart',
-          delta: 5,
-        },
-        {
-          label: 'requestStart',
-          delta: 6,
-        },
-        {
-          label: 'responseStart',
-          delta: 7,
-        },
-      ]);
     });
   });
 
