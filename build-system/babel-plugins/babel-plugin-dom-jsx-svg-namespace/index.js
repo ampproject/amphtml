@@ -41,7 +41,6 @@ const svgTags = new Set([
   'feTile',
   'feTurbulence',
   'filter',
-  'foreignObject',
   'g',
   'image',
   'line',
@@ -90,8 +89,11 @@ module.exports = function (babel) {
         if (!isCoreDomJsx) {
           return;
         }
-        if (!svgTags.has(path.node.name.name)) {
-          return;
+        const {name} = path.node.name;
+        if (name === 'foreignObject') {
+          throw path.buildCodeFrameError(
+            '<foreignObject> is not supported. See src/core/dom/jsx.js'
+          );
         }
         if (path.node.attributes.find((attr) => attr.name.name === 'xmlns')) {
           return;
