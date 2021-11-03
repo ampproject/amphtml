@@ -80,6 +80,7 @@ module.exports = function (babel) {
             ImportDeclaration(path) {
               if (path.node.source.value.endsWith('/core/dom/jsx')) {
                 isCoreDomJsx = true;
+                path.stop();
               }
             },
           });
