@@ -120,12 +120,7 @@ module.exports = function (context) {
         // isEnumValue(Enum, value)
         if (callee.type === 'Identifier') {
           const {name} = callee;
-          if (
-            name === 'isEnumValue' // ||
-            // name === 'enumValues' ||
-            // name === 'enumKeys' ||
-            // name === 'enumToObject'
-          ) {
+          if (name === 'isEnumValue') {
             return;
           }
         }
@@ -138,9 +133,6 @@ module.exports = function (context) {
         `Improper use of enum, you may only do:`,
         `- \`${node.name}.key\` get access.`,
         `- \`isEnumValue(${node.name}, someValue)\` value checks.`,
-        // `- \`enumKeys(${node.name})\` keys gathering.`,
-        // `- \`enumValues(${node.name})\` values gathering.`,
-        // `- \`enumToObject(${node.name})\` conversion (AVOID if you can, it cannot be minified).`,
       ].join('\n\t'),
     });
   }
