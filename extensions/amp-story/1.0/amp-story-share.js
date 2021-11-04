@@ -64,9 +64,10 @@ const renderShareItemListElement = (child) => (
 /**
  * @private
  * @param {!Element} el
+ * @param {function(e)} onClick
  * @return {!Element}
  */
-function renderLinkShareButtonElement(el) {
+function renderLinkShareButtonElement(el, onClick) {
   return (
     <div
       class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
@@ -76,6 +77,16 @@ function renderLinkShareButtonElement(el) {
         el,
         LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
       )}
+      onClick={onClick}
+      onKeyUp={(e) => {
+        // Check if pressed Space or Enter to trigger button.
+        // TODO(wg-stories): Try switching this element to a <button> and
+        // removing this keyup handler, since it gives you this behavior for free.
+        const code = e.charCode || e.keyCode;
+        if (code === 32 || code === 13) {
+          onClick();
+        }
+      }}
     >
       <span class="i-amphtml-story-share-label">
         {localize(
@@ -215,22 +226,12 @@ export class ShareWidget {
       return;
     }
 
-    const linkShareButton = renderLinkShareButtonElement(this.storyEl_);
-
-    this.add_(linkShareButton);
-
-    listen(linkShareButton, 'click', (e) => {
+    const linkShareButton = renderLinkShareButtonElement(this.storyEl_, (e) => {
       e.preventDefault();
       this.copyUrlToClipboard_();
     });
-    listen(linkShareButton, 'keyup', (e) => {
-      const code = e.charCode || e.keyCode;
-      // Check if pressed Space or Enter to trigger button.
-      if (code === 32 || code === 13) {
-        e.preventDefault();
-        this.copyUrlToClipboard_();
-      }
-    });
+
+    this.add_(linkShareButton);
   }
 
   /**
