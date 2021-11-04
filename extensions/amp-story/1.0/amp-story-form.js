@@ -65,12 +65,13 @@ export function setupResponseAttributeElements(formEl) {
     if (!el) {
       const children = createStatusChildrenByAttribute[attribute](formEl);
       const element = (
-        <div {...{[attribute]: true}}>
+        <div>
           <div class="i-amphtml-story-page-attachment-form-submission-status">
             {children}
           </div>
         </div>
       );
+      element.setAttribute(attribute, '');
       formEl.appendChild(element);
     }
   }
