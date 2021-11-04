@@ -49,6 +49,10 @@ function BentoTwitterWithRef(
 
   const setComponentHeight = useCallback(
     (height) => {
+      if (!bentoTwitterRef.current) {
+        return;
+      }
+
       setStyle(bentoTwitterRef.current, 'height', height, 'px');
     },
     [bentoTwitterRef]
