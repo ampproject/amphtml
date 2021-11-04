@@ -8,7 +8,7 @@
 module.exports = function (context) {
   return {
     Identifier(node) {
-      const name = node.name.replace(/^_+|_+$/g, '');
+      let name = node.name.replace(/^_+|_+$/g, '');
 
       // allow SCREAMING_SNAKE_CASE
       if (name === name.toUpperCase()) {
