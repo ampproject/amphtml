@@ -58,6 +58,14 @@ function launchEnv(env) {
  * @param {string} env 'amp' or 'preact'
  */
 function buildEnv(env) {
+  if (env === 'amp') {
+    log(
+      yellow('AMP environment for storybook is temporarily disabled.\n') +
+        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
+    );
+    return;
+  }
+
   const configDir = envConfigDir(env);
 
   if (env === 'amp' && isPullRequestBuild()) {
