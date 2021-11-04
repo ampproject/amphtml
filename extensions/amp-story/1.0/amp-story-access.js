@@ -7,11 +7,11 @@ import {
 import {Layout_Enum} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
-import {dev, user} from '#utils/log';
+import {user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
 import {isArray, isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
-import {setImportantStyles} from '#core/dom/style';
+import {devAssert} from '#core/assert';
 
 /** @const {string} */
 const TAG = 'amp-story-access';
@@ -25,35 +25,16 @@ export const Type_Enum = {
 };
 
 /**
- * Story access blocking type template.
+ * @param {?Element=} header
+ * @param {?Element=} closeButton
  * @return {!Element}
  */
-const renderBlockingElement = () => {
+const renderDrawerElement = (header, closeButton) => {
   return (
     <div class="i-amphtml-story-access-overflow">
       <div class="i-amphtml-story-access-container">
-        <div class="i-amphtml-story-access-header">
-          <div class="i-amphtml-story-access-logo"></div>
-        </div>
-        <div class="i-amphtml-story-access-content"></div>
-      </div>
-    </div>
-  );
-};
-
-/**
- * Story access notification type template.
- * @return {!Element}
- */
-const renderNotificationElement = () => {
-  return (
-    <div class="i-amphtml-story-access-overflow">
-      <div class="i-amphtml-story-access-container">
-        <div class="i-amphtml-story-access-content">
-          <span class="i-amphtml-story-access-close-button" role="button">
-            &times;
-          </span>
-        </div>
+        {header}
+        <div class="i-amphtml-story-access-content">{closeButton}</div>
       </div>
     </div>
   );
@@ -83,10 +64,10 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     const drawerEl = this.renderDrawerEl_();
 
-    this.containerEl_ = dev().assertElement(
+    this.containerEl_ = devAssert(
       drawerEl.querySelector('.i-amphtml-story-access-container')
     );
-    const contentEl = dev().assertElement(
+    const contentEl = devAssert(
       drawerEl.querySelector('.i-amphtml-story-access-content')
     );
 
@@ -156,7 +137,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   onClick_(event) {
-    const el = dev().assertElement(event.target);
+    const el = devAssert(event.target);
 
     if (el.classList.contains('i-amphtml-story-access-close-button')) {
       return this.toggle_(false);
@@ -198,26 +179,29 @@ export class AmpStoryAccess extends AMP.BaseElement {
   renderDrawerEl_() {
     switch (this.getType_()) {
       case Type_Enum.BLOCKING:
-        const drawerEl = renderBlockingElement();
-
         const logoSrc = getStoryAttributeSrc(
           this.element,
           'publisher-logo-src',
           /* warn */ true
         );
-
-        if (logoSrc) {
-          const logoEl = dev().assertElement(
-            drawerEl.querySelector('.i-amphtml-story-access-logo')
-          );
-          setImportantStyles(logoEl, {'background-image': `url(${logoSrc})`});
-        }
-
-        return drawerEl;
-        break;
+        const header = (
+          <div class="i-amphtml-story-access-header">
+            <div
+              class="i-amphtml-story-access-logo"
+              style={
+                logoSrc ? `background-image: url(${logoSrc}) !important;` : null
+              }
+            ></div>
+          </div>
+        );
+        return renderDrawerElement(header);
       case Type_Enum.NOTIFICATION:
-        return renderNotificationElement();
-        break;
+        const closeButton = (
+          <span class="i-amphtml-story-access-close-button" role="button">
+            &times;
+          </span>
+        );
+        return renderDrawerElement(null, closeButton);
       default:
         user().error(
           TAG,
@@ -241,7 +225,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   allowlistActions_() {
-    const accessEl = dev().assertElement(
+    const accessEl = devAssert(
       this.win.document.getElementById('amp-access'),
       'Cannot find the amp-access configuration'
     );
