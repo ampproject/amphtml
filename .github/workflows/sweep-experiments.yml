@@ -23,8 +23,7 @@ jobs:
       - name: Set Up Node
         uses: actions/setup-node@v2
         with:
-          check-latest: true
-          node-version: lts/*
+          node-version: 16
 
       - name: Set Up Environment
         run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
