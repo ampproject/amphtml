@@ -11,8 +11,6 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
-import {expect} from 'chai';
-
 describes.realWin(
   'amp-story-shopping-config-v0.1',
   {
