@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
-import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
+
+import * as Preact from '#preact';
+
+import {VideoElementWithActions} from '../../../../../../extensions/amp-video/1.0/storybook/_helpers';
 
 export default {
   title: 'amp-brightcove-1_0',

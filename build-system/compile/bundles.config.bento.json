@@ -18,6 +18,15 @@
     }
   },
   {
+    "name": "amp-brightcove",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-date-countdown",
     "version": "1.0",
     "latestVersion": "0.1",

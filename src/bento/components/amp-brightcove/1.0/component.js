@@ -1,11 +1,17 @@
+import {
+  BRIGHTCOVE_EVENTS,
+  getBrightcoveIframeSrc,
+} from '#bento/apis/brightcove-api';
+
+import {dispatchCustomEvent} from '#core/dom';
+
 import * as Preact from '#preact';
 import {useCallback, useMemo, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {dispatchCustomEvent} from '#core/dom';
-import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 import {useValueRef} from '#preact/component';
+
+import {VideoIframe} from '../../../../../extensions/amp-video/1.0/video-iframe';
+import {mutedOrUnmutedEvent} from '../../../../iframe-video';
 
 /** @const {string} */
 const DEFAULT = 'default';
