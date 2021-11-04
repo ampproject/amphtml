@@ -23,16 +23,15 @@ const {getStdout} = require('../common/process');
 const {parse, traverse} = require('../common/acorn');
 
 /**
- * We mangle `i-amphtml-story-*` instead of all internal substrings since
+ * We mangle `i-amphtml-story-*` instead of all internal substrings.
  * amp-story benefits particularly because it's very CSS-heavy. Mangling the
- * rest of the substrings present in source would be risky and not yield much
- * benefit.
+ * rest of the substrings in source would be risky and not yield much benefit.
  *
- * It's important that those creating amp-story specific substrings follow use
- * this prefix as a general practice.
+ * It's important that those creating substrings specific to amp-story use this
+ * prefix as a general practice.
  */
 const prefix = 'i-amphtml-story-';
-const outputPrefix = 'i-amphtml--';
+const outputPrefix = 'i-amphtml-_';
 
 // TODO(alanorozco): These should be prefixed on source. They're a ~250 B delta.
 const specificPattern = new RegExp(
@@ -75,7 +74,7 @@ const specificPattern = new RegExp(
 );
 
 // Use our own charset instead of base62 since HTML classsubstrings are case insensitive
-const CHARSET = '0123456789abcdefghijklmnopqrstuvwxyz-'.split('');
+const CHARSET = '0123456789abcdefghijklmnopqrstuvwxyz_'.split('');
 
 /**
  * @param {number} int
@@ -113,13 +112,13 @@ async function collectMangledSubstrings() {
  * @return {Promise<[string, string][]>}
  */
 async function collect() {
-  const frequency = {};
+  const count = {};
 
   let pattern;
   /**
    * @param {string} value
    */
-  function addAll(value) {
+  function countAll(value) {
     if (!pattern) {
       pattern = new RegExp(`${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9]`, 'g');
     }
@@ -127,17 +126,17 @@ async function collect() {
       ...value.matchAll(pattern),
       ...value.matchAll(specificPattern),
     ];
-    for (const [name] of matches) {
-      frequency[name] = frequency[name] || 0;
-      frequency[name]++;
+    for (const [substring] of matches) {
+      count[substring] = count[substring] || 0;
+      count[substring]++;
     }
   }
 
   const possibleFiles = globby.sync([
-    'build/**/*.css.js',
     'extensions/**/*.js',
-    '!extensions/**/build/**',
-    '!extensions/**/test*/**',
+    'extensions/**/*.css',
+    '!**/build/**',
+    '!**/test*/**',
   ]);
 
   const filesIncludingString = getStdout(
@@ -148,35 +147,39 @@ async function collect() {
 
   await Promise.all(
     filesIncludingString.map(async (filename) => {
-      let tree;
       try {
         const source = await readFile(filename, 'utf8');
-        tree = parse(source);
+        if (!filename.endsWith('.js')) {
+          countAll(source);
+          return;
+        }
+        const tree = parse(source);
+        traverse(tree, (node) => {
+          if (node.type === 'Literal' && typeof node.value === 'string') {
+            countAll(node.value);
+          } else if (node.type === 'TemplateElement' && node.value.cooked) {
+            countAll(node.value.cooked);
+          }
+        });
       } catch (e) {
         e.message = `${filename}: ${e.message}`;
         throw e;
       }
-      traverse(tree, (node) => {
-        if (node.type === 'Literal' && typeof node.value === 'string') {
-          addAll(node.value);
-        } else if (node.type === 'TemplateElement' && node.value.cooked) {
-          addAll(node.value.cooked);
-        }
-      });
     })
   );
 
   return (
-    Object.keys(frequency)
-      // We need the order to be stable, so we sort lexicographically first.
+    Object.keys(count)
+      // Sort lexicographically to stabilize.
+      // Otherwise, compression would result in random bundle sizes.
       .sort()
-      // Then generate by frequency, so that the most frequent are the shortest.
-      .sort((a, b) => frequency[b] - frequency[a])
+      // Prioritize mangling by count, so that the most frequent are the shortest.
+      .sort((a, b) => count[b] - count[a])
       .map((substring, i) => {
         const mangled = `${outputPrefix}${encode(i)}`;
         return /** @type {[string, string]} */ ([substring, mangled]);
       })
-      // Finally, output sorted by length to prevent replacing sub-substrings.
+      // Finally, sort by longest first to prevent replacing sub-substrings.
       .sort(([a], [b]) => b.length - a.length)
   );
 }
