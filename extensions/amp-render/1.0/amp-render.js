@@ -1,7 +1,7 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {Layout} from '#core/dom/layout';
@@ -132,7 +132,7 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!UrlReplacementPolicy_Enum}
    * @private
    */
   getPolicy_() {
@@ -141,12 +141,12 @@ export class AmpRender extends BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
     // and add a `Substitution` sections in this component's markdown file.
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }

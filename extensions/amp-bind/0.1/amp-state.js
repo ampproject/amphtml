@@ -12,7 +12,7 @@ import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
 
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {getSourceOrigin} from '../../../src/url';
@@ -144,7 +144,7 @@ export class AmpState extends AMP.BaseElement {
   /**
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!UrlReplacementPolicy} policy
+   * @param {!UrlReplacementPolicy_Enum} policy
    * @param {boolean=} opt_refresh
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
@@ -173,8 +173,8 @@ export class AmpState extends AMP.BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     const policy =
       isCorsFetch && !isInit
-        ? UrlReplacementPolicy.OPT_IN
-        : UrlReplacementPolicy.ALL;
+        ? UrlReplacementPolicy_Enum.OPT_IN
+        : UrlReplacementPolicy_Enum.ALL;
 
     return this.fetch_(ampdoc, policy, opt_refresh).catch((error) => {
       const event = error
