@@ -1,11 +1,9 @@
 'use strict';
 
 const puppeteer = require('puppeteer');
-const {
-  replaceMangledSubstrings,
-} = require('../../compile/mangleable-substrings');
 const {cyan} = require('kleur/colors');
 const {log} = require('./log');
+const {replaceMangledSubstrings} = require('../../compile/mangled-substrings');
 const {sleep} = require('./helpers');
 const {VisibilityDef} = require('./types');
 

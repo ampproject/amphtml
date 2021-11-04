@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "cacheFilename": "build-system/babel-plugins/babel-plugin-mangled-substrings/test/fixtures/transform/transform/substrings.json"
+      }
+    ]
+  ]
+}
