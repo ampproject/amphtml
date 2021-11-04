@@ -6,6 +6,9 @@ const {
   Key,
   ScrollToOptionsDef,
 } = require('./e2e-types');
+const {
+  replaceMangledSubstrings,
+} = require('../../compile/mangleable-substrings');
 const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
@@ -110,9 +113,10 @@ class SeleniumWebDriverController {
    * @return {!Promise<!ElementHandle<!selenium.WebElement>>}
    */
   async findElement(selector, timeout = ELEMENT_WAIT_TIMEOUT) {
+    const mangledSelector = replaceMangledSubstrings(selector);
     const bySelector = By.css(selector);
 
-    const label = 'for element to be located ' + selector;
+    const label = `for element to be located ${selector} (${mangledSelector})`;
     const condition = new Condition(label, async () => {
       try {
         const root = await this.getRoot_();
@@ -140,9 +144,10 @@ class SeleniumWebDriverController {
    * @return {!Promise<!Array<!ElementHandle<!selenium.WebElement>>>}
    */
   async findElements(selector) {
+    const mangledSelector = replaceMangledSubstrings(selector);
     const bySelector = By.css(selector);
 
-    const label = 'for at least one element to be located ' + selector;
+    const label = `for at least one element to be located ${selector} (${mangledSelector})`;
     const condition = new Condition(label, async () => {
       try {
         const root = await this.getRoot_();
