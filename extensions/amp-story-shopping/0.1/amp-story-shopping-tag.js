@@ -36,7 +36,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         this.storeService_.subscribe(
           StateProperty.SHOPPING_STATE,
           (shoppingState) => {
-            this.onShoppingStateUpdate_(shoppingState);
+            this.updateShoppingTag_(shoppingState);
           }
         );
       }),
@@ -46,15 +46,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.CONTAINER;
-  }
-
-  /**
-   * Reacts to shopping state updates.
-   * @param {boolean} shoppingState
-   * @private
-   */
-  onShoppingStateUpdate_(shoppingState) {
-    this.updateShoppingTag_(shoppingState);
   }
 
   /**
