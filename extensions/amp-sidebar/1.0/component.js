@@ -14,7 +14,6 @@ import {
 } from '#preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './component.jss';
-import {useToolbarHook} from './sidebar-toolbar-hook';
 import objstr from 'obj-str';
 
 /**

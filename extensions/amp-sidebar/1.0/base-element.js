@@ -1,4 +1,3 @@
-import * as Preact from '#preact';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '#preact/base-element';
 import {BentoSidebar} from './component';
