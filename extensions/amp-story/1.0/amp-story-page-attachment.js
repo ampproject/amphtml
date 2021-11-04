@@ -223,10 +223,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const link = (
       <a
         class="i-amphtml-story-page-attachment-remote-content"
-        // The target must be '_top' for page outlinks, which will result in the
-        // link opening in the current tab. Opening links in a new tab requires a
-        // trusted event, and Safari does not consider swiping up to be trusted.
-        target={isPageOutlink ? '_top' : '_blank'}
+        target="_blank"
         // URL will be validated and resolved based on the canonical URL if
         // relative when navigating.
         href={hrefAttr}
@@ -249,6 +246,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         </svg>
       </a>
     );
+
+    if (isPageOutlink) {
+      // The target must be '_top' for page outlinks, which will result in the
+      // link opening in the current tab. Opening links in a new tab requires a
+      // trusted event, and Safari does not consider swiping up to be trusted.
+      this.element.querySelector('a').setAttribute('target', '_top');
+    }
 
     const {openStringEl, urlStringEl} = htmlRefs(link);
 

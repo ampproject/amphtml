@@ -238,7 +238,7 @@ export class ShareMenu {
     const {firstElementChild} = this.element_;
 
     if (
-      el.classList.has('.i-amphtml-story-share-menu-close-button') ||
+      el.classList.contains('.i-amphtml-story-share-menu-close-button') ||
       // Click happened outside of the menu main container:
       !closest(el, (el) => el === firstElementChild, this.element_)
     ) {
