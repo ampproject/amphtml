@@ -573,7 +573,9 @@ async function createEmptyBuild(browser) {
   const page = await newPage(browser);
 
   try {
-    await page.goto('about:blank');
+    await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
+    );
   } catch {
     // Ignore failures
   }
