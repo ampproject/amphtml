@@ -45,23 +45,23 @@ describes.realWin(
     });
 
     it('should process config data and set text container content if data not null', () => {
-      shoppingTag.container_.id = 'sunglasses';
+      shoppingTag.element.setAttribute('tag-data-id', 'sunglasses');
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
       shoppingTag.updateShoppingTag_(shoppingState);
-      expect(shoppingTag.container_.textContent).to.equal(
+      expect(shoppingTag.element.textContent).to.equal(
         'Spectacular Spectacles'
       );
     });
 
     it('should not process config data and set text container content if id not found is null', () => {
-      shoppingTag.container_.id = 'hat';
+      shoppingTag.element.setAttribute('tag-data-id', 'hat');
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
       shoppingTag.updateShoppingTag_(shoppingState);
-      expect(shoppingTag.container_.textContent).to.not.equal(
+      expect(shoppingTag.element.textContent).to.not.equal(
         'Spectacular Spectacles'
       );
     });

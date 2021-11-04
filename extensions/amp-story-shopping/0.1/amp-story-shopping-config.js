@@ -1,5 +1,5 @@
 import {isJsonScriptTag} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout} from '#core/dom/layout';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -11,33 +11,23 @@ import {Action} from '../../amp-story/1.0/amp-story-store-service';
 const TAG = 'amp-story-shopping-config';
 
 export class AmpStoryShoppingConfig extends AMP.BaseElement {
-  /**
-   * @param {!Element} element amp-story-shoppin-config element
-   */
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /** @private {string} */
     this.element_ = element;
 
-    /** @private {string} */
-    this.myText_ = TAG;
-
-    /** @private {?Element} */
-    this.container_ = null;
-
-    /** @private {!Window} Window element */
-    this.win_ = this.win;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
 
   /**
+   * Keys product data to product-ids and adds them to the store service.
+   * @private
    * @param {!JsonObject} storyConfig
    */
-  dispatchConfig(storyConfig) {
-    //Set Shopping Story config to storeService here
+  dispatchConfig_(storyConfig) {
     const productIDtoProduct = {};
 
     for (const item of storyConfig['items']) {
@@ -46,16 +36,12 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.ADD_SHOPPING_STATE, productIDtoProduct);
 
-    //TODO: add call to validate config here.
+    //TODO: add call to validate config here. See validation I2I #36412 for implementation details
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
@@ -67,11 +53,11 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
           if (storyConfig == null && this.element_.hasAttribute('src')) {
             this.getInlineConfig_(this.element_.firstElementChild).then(
               (storyInlineconfig) => {
-                this.dispatchConfig(storyInlineconfig);
+                this.dispatchConfig_(storyInlineconfig);
               }
             );
           } else {
-            this.dispatchConfig(storyConfig);
+            this.dispatchConfig_(storyConfig);
           }
         });
       }
@@ -114,7 +100,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   getRemoteConfig_() {
-    return Services.xhrFor(this.win_)
+    return Services.xhrFor(this.win)
       .fetchJson(this.element_.getAttribute('src'))
       .then((response) => response.json())
       .catch((err) => {

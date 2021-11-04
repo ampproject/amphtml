@@ -11,12 +11,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    this.myText_ = TAG;
-
-    /** @private {?Element} */
-    this.container_ = null;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
@@ -24,20 +18,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.container_.id = this.element.id;
-    this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
-
+    this.element.textContent = this.myText_;
+    applyFillContent(this.element, /* replacedContent */ true);
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         this.storeService_ = storeService;
         this.storeService_.subscribe(
           StateProperty.SHOPPING_STATE,
-          (shoppingState) => {
-            this.updateShoppingTag_(shoppingState);
-          }
+          (shoppingState) => this.updateShoppingTag_(shoppingState)
         );
       }),
     ]);
@@ -53,9 +41,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   updateShoppingTag_(shoppingState) {
-    if (shoppingState[this.container_.id] != null) {
-      this.myText_ = shoppingState[this.container_.id]['product-title'];
-      this.container_.textContent = this.myText_;
+    const tagData = shoppingState[this.element.getAttribute('tag-data-id')];
+    if (tagData != null) {
+      this.element.textContent = tagData['product-title'];
     }
   }
 }
