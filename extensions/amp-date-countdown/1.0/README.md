@@ -121,7 +121,7 @@ interface DateParams {
 }
 ```
 
-## Returned Time Parameters
+### Returned Time Parameters
 
 This table lists the format you can specify in your Mustache template:
 
@@ -140,7 +140,7 @@ This table lists the format you can specify in your Mustache template:
 | minutes | internationalization string for minute or minutes |
 | seconds | internationalization string for second or seconds |
 
-### Samples of formatted values
+#### Samples of formatted values
 
 This table provides examples of formatted values specified in a Mustache template, and a sample of what the output:
 

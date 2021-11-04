@@ -107,7 +107,7 @@ interface DateParams {
 }
 ```
 
-## Returned Time Parameters
+### Returned Time Parameters
 
 This table lists the format you can specify in your Mustache template:
 
