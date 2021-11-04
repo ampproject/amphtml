@@ -164,9 +164,6 @@ export class ShareWidget {
    * @param {!Element} storyEl
    */
   constructor(win, storyEl) {
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = null;
-
     /** @protected @const {!Window} */
     this.win = win;
 
@@ -190,13 +187,10 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    */
-  build(ampdoc) {
+  build() {
     devAssert(!this.root, 'Already built.');
-
-    this.ampdoc_ = ampdoc;
 
     this.root = renderElement();
 
@@ -212,7 +206,7 @@ export class ShareWidget {
    * @private
    */
   getAmpDoc_() {
-    return devAssert(this.ampdoc_);
+    return devAssert(this.storyEl_.getAmpDoc());
   }
 
   /** @private */
@@ -346,11 +340,10 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc=} ampdoc
    */
-  loadRequiredExtensions(ampdoc = this.getAmpDoc_()) {
+  loadRequiredExtensions() {
     Services.extensionsFor(this.win).installExtensionForDoc(
-      ampdoc,
+      this.getAmpDoc_(),
       'amp-social-share'
     );
   }

@@ -16,7 +16,6 @@ import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '#utils/log';
-import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
 import {devAssert} from '#core/assert';
 
@@ -56,7 +55,7 @@ export class InfoDialog {
     this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
+    this.mutator_ = Services.mutatorForDoc(parentEl);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.parentEl_);
