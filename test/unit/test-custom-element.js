@@ -2,7 +2,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {AmpEvents} from '#core/constants/amp-events';
 import {CommonSignals} from '#core/constants/common-signals';
-import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
+import {LOADING_ELEMENTS_ENUMENUM, Layout} from '#core/dom/layout';
 
 import {Services} from '#service';
 import {elementConnectedCallback} from '#service/custom-element-registry';
@@ -2151,7 +2151,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         ElementClass = createAmpElementForTesting(win, TestElement);
         win.customElements.define('amp-test-loader', ElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;
-        LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
+        LOADING_ELEMENTS_ENUMENUM['amp-test-loader'.toUpperCase()] = true;
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
         resourcesMock = env.sandbox.mock(resources);
@@ -2206,7 +2206,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
 
         it('should disable when element is not allowlisted', () => {
-          LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
+          LOADING_ELEMENTS_ENUMENUM['amp-test-loader'.toUpperCase()] = false;
           element.toggleLoading(true);
           expect(loadingIndicatorServiceStub.track).to.not.be.called;
         });

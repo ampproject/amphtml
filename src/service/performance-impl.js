@@ -45,7 +45,7 @@ let TickEventDef;
 /**
  * @enum {number}
  */
-export const ELEMENT_TYPE = {
+export const ELEMENT_TYPE_ENUM = {
   other: 0,
   image: 1 << 0,
   video: 1 << 1,
@@ -57,33 +57,33 @@ export const ELEMENT_TYPE = {
 
 /**
  * @param {?Node} node
- * @return {ELEMENT_TYPE}
+ * @return {ELEMENT_TYPE_ENUM}
  */
 function getElementType(node) {
   if (node == null) {
-    return ELEMENT_TYPE.other;
+    return ELEMENT_TYPE_ENUM.other;
   }
   const outer = getOutermostAmpElement(node);
   const {nodeName} = outer;
   if (nodeName === 'IMG' || nodeName === 'AMP-IMG') {
-    return ELEMENT_TYPE.image;
+    return ELEMENT_TYPE_ENUM.image;
   }
   if (nodeName === 'VIDEO' || nodeName === 'AMP-VIDEO') {
-    return ELEMENT_TYPE.video;
+    return ELEMENT_TYPE_ENUM.video;
   }
   if (nodeName === 'AMP-CAROUSEL') {
-    return ELEMENT_TYPE.carousel;
+    return ELEMENT_TYPE_ENUM.carousel;
   }
   if (nodeName === 'AMP-BASE-CAROUSEL') {
-    return ELEMENT_TYPE.bcarousel;
+    return ELEMENT_TYPE_ENUM.bcarousel;
   }
   if (nodeName === 'AMP-AD') {
-    return ELEMENT_TYPE.ad;
+    return ELEMENT_TYPE_ENUM.ad;
   }
   if (!nodeName.startsWith('AMP-') && outer.textContent) {
-    return ELEMENT_TYPE.text;
+    return ELEMENT_TYPE_ENUM.text;
   }
-  return ELEMENT_TYPE.other;
+  return ELEMENT_TYPE_ENUM.other;
 }
 
 /**
@@ -241,7 +241,7 @@ export class Performance {
 
     /**
      * Which type of element was chosen as the LCP.
-     * @private {ELEMENT_TYPE}
+     * @private {ELEMENT_TYPE_ENUM}
      */
     this.largestContentfulPaintType_ = null;
 
