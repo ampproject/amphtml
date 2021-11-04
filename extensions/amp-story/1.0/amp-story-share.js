@@ -12,6 +12,7 @@ import {localize} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
 import {listen} from '#utils/event-helper';
+import {addAttributesToElement} from '#core/dom';
 
 /**
  * Maps share provider type to visible name.
@@ -115,19 +116,19 @@ function buildProvider(doc, shareType, opt_params) {
     `No localized string to display name for share type ${shareType}.`
   );
 
-  return (
+  const social = (
     <amp-social-share
       width={48}
       height={48}
       class="i-amphtml-story-share-icon"
       type={shareType}
-      {...buildProviderParams(opt_params)}
     >
       <span class="i-amphtml-story-share-label">
         {localize(doc, shareProviderLocalizedStringId)}
       </span>
     </amp-social-share>
   );
+  return addAttributesToElement(social, buildProviderParams(opt_params));
 }
 
 /**
