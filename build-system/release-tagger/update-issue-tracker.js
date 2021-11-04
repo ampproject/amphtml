@@ -125,16 +125,12 @@ async function setup(head) {
  * @return {Promise<void>}
  */
 async function createOrUpdateTracker(head, base, channel, time) {
-  const timePT =
-    new Date(`${time} UTC`).toLocaleString('en-US', {
-      timeZone: 'America/Los_Angeles',
-    }) + ' PT';
   const {isCherrypick, issue} = await setup(head);
 
   // create new tracker
   if (!issue) {
     const tracker = new IssueTracker(head, base);
-    tracker.checkTask(channel, timePT);
+    tracker.checkTask(channel, time);
     const {footer, header, label, main, title} = tracker;
     const body = `${header}\n\n${main}\n\n${footer}`;
     return await createIssue(body, label, title);
@@ -145,7 +141,7 @@ async function createOrUpdateTracker(head, base, channel, time) {
   if (isCherrypick) {
     tracker.addCherrypickTasks(channel);
   }
-  tracker.checkTask(channel, timePT);
+  tracker.checkTask(channel, time);
   const {footer, header, main, number, title} = tracker;
   const body = `${header}\n\n${main}\n\n${footer}`;
   await updateIssue(body, number, title);
