@@ -57,7 +57,7 @@ The example below contains an `bento-accordion` with three sections. The
   />
 </head>
 <body>
-  <bento-accordion id="my-accordion" disable-session-states>
+  <bento-accordion id="my-accordion">
     <section>
       <h2>Section 1</h2>
       <p>Content in section 1.</p>
