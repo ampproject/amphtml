@@ -166,6 +166,7 @@ module.exports = {
     'local/camelcase': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
+    'local/enums': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,
