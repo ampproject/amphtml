@@ -5,7 +5,7 @@
 The Bento Date Display component displays time data that you can render in your page. By providing specific [attributes](#attributes) in the
 Bento Date Display tag, the Bento Date Display extension returns a list of time
 parameters, which you can pass to
-[an amp-mustache template](../../amp-mustache/amp-mustache.md)
+[an amp-mustache template](../../../../../extensions/amp-mustache/amp-mustache.md)
 for rendering. Refer to the
 [list below for each returned time parameter](#returned-time-parameters).
 

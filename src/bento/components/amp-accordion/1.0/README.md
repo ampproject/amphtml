@@ -305,7 +305,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 Include the `animate` attribute in `<bento-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
 
-This attribute can be configured to based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
+This attribute can be configured to based on a [media query](./../../../../../docs/spec/amp-html-responsive-attributes.md).
 
 ```html
 <bento-accordion animate>
@@ -625,7 +625,7 @@ Callback to listen for expand state changes. Takes a boolean flag as parameter i
 
 ##### Common props
 
-This component supports the [common props](../../../docs/spec/bento-common-props.md) for React and Preact components.
+This component supports the [common props](../../../../../docs/spec/bento-common-props.md) for React and Preact components.
 
 BentoAccordionHeader does not yet support any custom props
 
@@ -633,6 +633,6 @@ BentoAccordionHeader does not yet support any custom props
 
 ##### Common props
 
-This component supports the [common props](../../../docs/spec/bento-common-props.md) for React and Preact components.
+This component supports the [common props](../../../../../docs/spec/bento-common-props.md) for React and Preact components.
 
 BentoAccordionContent does not yet support any custom props
