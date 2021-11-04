@@ -56,12 +56,13 @@ module.exports = function (context) {
    * @param {!Node|undefined} node
    */
   function checkEnumId(node) {
-    if (/^[A-Z][A-Za-z0-9]+_Enum$/.test(node.name)) {
+    if (/^[A-Z](?:[A-Za-z0-9]+_Enum|[A-Z0-9_]+_ENUM)$/.test(node.name)) {
       return;
     }
     context.report({
       node,
-      message: 'Enums muse use PascalCaseCapitalization and end in "_Enum"',
+      message:
+        'Enums should use PascalCase and end in "_Enum", or SCREAMING_SNAKE_CASE and end in "_ENUM"',
     });
   }
 
@@ -70,7 +71,7 @@ module.exports = function (context) {
    */
   function checkEnumKeys(node) {
     for (const prop of node.properties) {
-      if (prop.computed || prop.key.type !== 'Identifier') {
+      if (prop.computed || prop.key?.type !== 'Identifier') {
         context.report({
           node: prop,
           message: [
@@ -82,6 +83,9 @@ module.exports = function (context) {
     }
   }
 
+  /**
+   * @param {!Node} node
+   */
   function checkStaticEnumUse(node) {
     const {parent} = node;
     // import { Enum } from '.'
@@ -143,7 +147,7 @@ module.exports = function (context) {
 
   return {
     Identifier(node) {
-      if (node.name.endsWith('_Enum')) {
+      if (/_E(NUM|num)$/.test(node.name)) {
         checkStaticEnumUse(node);
       }
     },
@@ -158,7 +162,7 @@ module.exports = function (context) {
       if (id.type !== 'Identifier') {
         return;
       }
-      if (!id.name.endsWith('_Enum')) {
+      if (!/_E(NUM|num)$/.test(id.name)) {
         return;
       }
 
