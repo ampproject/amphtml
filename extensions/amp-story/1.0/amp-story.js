@@ -279,9 +279,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?AmpStoryViewerMessagingHandler} */
     this.viewerMessagingHandler_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
-
     /**
      * Store the current paused state, to make sure the story does not play on
      * resume if it was previously paused. null when nothing to restore.
@@ -297,6 +294,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?UIType} */
     this.uiState_ = null;
+
+    /** @private {boolean} whether the styles were rewritten */
+    this.didRewriteStyles_ = false;
   }
 
   /** @override */
@@ -307,9 +307,7 @@ export class AmpStory extends AMP.BaseElement {
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
 
-    this.localizationService_ = getLocalizationService(this.element);
-
-    this.localizationService_
+    getLocalizationService(this.element)
       .registerLocalizedStringBundle('default', LocalizedStringsEn)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
       .registerLocalizedStringBundle('de', LocalizedStringsDe)
@@ -331,16 +329,11 @@ export class AmpStory extends AMP.BaseElement {
       .registerLocalizedStringBundle('tr', LocalizedStringsTr)
       .registerLocalizedStringBundle('vi', LocalizedStringsVi)
       .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
-      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
-
-    const enXaPseudoLocaleBundle = createPseudoLocale(
-      LocalizedStringsEn,
-      (s) => `[${s} one two]`
-    );
-    this.localizationService_.registerLocalizedStringBundle(
-      'en-xa',
-      enXaPseudoLocaleBundle
-    );
+      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
+      .registerLocalizedStringBundle(
+        'en-xa',
+        createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
+      );
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -489,12 +482,6 @@ export class AmpStory extends AMP.BaseElement {
     if (mediaQueryEls.length) {
       this.initializeMediaQueries_(mediaQueryEls);
     }
-
-    const styleEl = this.win.document.querySelector('style[amp-custom]');
-
-    if (styleEl) {
-      this.rewriteStyles_(styleEl);
-    }
   }
 
   /**
@@ -545,19 +532,22 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Element} styleEl
    * @private
    */
-  rewriteStyles_(styleEl) {
+  rewriteStyles_() {
     // TODO(#15955): Update this to use CssContext from
     // ../../../extensions/amp-animation/0.1/web-animations.js
-    this.mutateElement(() => {
-      styleEl.textContent = styleEl.textContent
-        .replace(/(-?[\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
-        .replace(/(-?[\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
-        .replace(/(-?[\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
-        .replace(/(-?[\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
-    });
+    if (this.didRewriteStyles_) {
+      return;
+    }
+    this.didRewriteStyles_ = true;
+    const styleEl = this.win.document.querySelector('style[amp-custom]');
+    if (styleEl) {
+      styleEl.textContent = styleEl.textContent.replace(
+        /(-?[\d.]+)v(w|h|min|max)/gim,
+        'calc($1 * var(--story-page-v$2))'
+      );
+    }
   }
 
   /**
@@ -1665,6 +1655,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
         this.vsync_.mutate(() => {
+          this.rewriteStyles_();
           this.win.document.documentElement.removeAttribute(
             'i-amphtml-story-mobile'
           );
@@ -1692,6 +1683,7 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         this.vsync_.mutate(() => {
+          this.rewriteStyles_();
           this.element.setAttribute('i-amphtml-vertical', '');
           this.win.document.documentElement.classList.add(
             'i-amphtml-story-vertical'

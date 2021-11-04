@@ -40,8 +40,12 @@ defineBentoTimeago();
     }
   </style>
 </head>
-<bento-timeago id="my-timeago" datetime="2017-04-11T00:37:33.809Z" locale="en">
-  Saturday 11 April 2017 00.37
+<bento-timeago
+  id="my-timeago"
+  datetime="2017-04-11T00:37:33.809Z"
+  locale="en"
+  style="height: 30px">
+    Saturday 11 April 2017 00.37
 </bento-timeago>
 <div class="buttons" style="margin-top: 8px">
   <button id="ar-button">Change locale to Arabic</button>

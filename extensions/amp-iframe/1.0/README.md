@@ -1,6 +1,9 @@
 # Bento Iframe
 
-Displays an iframe.
+The Bento Iframe component is used to display an iframe. However, it has other important differences from vanilla iframes:
+
+1. Allows dynamic resizing when the component is outside to the viewport. This is to avoid content shifts.
+1. Bento Iframe can be set up to receive `IntersectionObserver` style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
 
 ## Usage
 
@@ -37,13 +40,6 @@ defineBentoIframe();
     type="text/css"
     href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
   />
-  <style>
-    bento-iframe {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
 </head>
 <bento-iframe
   id="my-iframe"

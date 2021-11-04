@@ -29,7 +29,7 @@ test('create', async (t) => {
         '(https://github.com/ampproject/amphtml/releases/tag/2109080123000)\n\n' +
         '### Promotions\n\n' +
         '- [x] <!-- amp-version=2109080123000 channel=beta-opt-in -->' +
-        '2109080123000 promoted to Experimental and Beta (opt-in) channels (9/15/2021, 5:34:56 AM PT)\n' +
+        '2109080123000 promoted to Experimental and Beta (opt-in) channels (9/15/2021, 12:34:56 AM PT)\n' +
         '- [ ] <!-- amp-version=2109080123000 channel=beta-percent -->' +
         '2109080123000 promoted to Experimental and Beta (1% traffic) channels <!-- promote-time -->\n' +
         '- [ ] <!-- amp-version=2109080123000 channel=stable -->' +
@@ -44,7 +44,7 @@ test('create', async (t) => {
     '2109080123000',
     '2109010123000',
     'beta-opt-in',
-    '2021-09-15 12:34:56'
+    '9/15/2021, 12:34:56 AM PT'
   );
   t.true(graphql.isDone());
   t.true(rest.isDone());
@@ -118,7 +118,7 @@ test('mark task complete', async (t) => {
         '- [x] <!-- amp-version=2109080123000 channel=beta-percent -->' +
         '2109080123000 promoted to Experimental and Beta (1% traffic) channels (percenttime)\n' +
         '- [x] <!-- amp-version=2109080123000 channel=stable -->' +
-        '2109080123000 promoted to Stable channel (9/15/2021, 5:34:56 AM PT)\n' +
+        '2109080123000 promoted to Stable channel (9/15/2021, 12:34:56 AM PT)\n' +
         '- [ ] <!-- amp-version=2109080123000 channel=lts -->' +
         '2109080123000 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
@@ -137,7 +137,7 @@ test('mark task complete', async (t) => {
     '2109080123000',
     '2109010123000',
     'stable',
-    '2021-09-15 12:34:56'
+    '9/15/2021, 12:34:56 AM PT'
   );
   t.true(graphql.isDone());
   t.true(rest.isDone());
@@ -210,7 +210,7 @@ test('add cherrypick tasks', async (t) => {
         '2109080123000 promoted to Stable channel (stabletime)\n' +
         '🌸 2109080123000 was cherry-picked to create 2109080123002\n' +
         '- [x] <!-- amp-version=2109080123002 channel=stable -->' +
-        '2109080123002 promoted to Stable channel (9/15/2021, 5:34:56 AM PT)\n' +
+        '2109080123002 promoted to Stable channel (9/15/2021, 12:34:56 AM PT)\n' +
         '- [ ] <!-- amp-version=2109080123002 channel=lts -->' +
         '2109080123002 promoted to LTS channel <!-- promote-time -->\n\n' +
         '/cc @ampproject/release-on-duty',
@@ -222,7 +222,7 @@ test('add cherrypick tasks', async (t) => {
     '2109080123002',
     '2109080123000',
     'stable',
-    '2021-09-15 12:34:56'
+    '9/15/2021, 12:34:56 AM PT'
   );
   t.true(graphql.isDone());
   t.true(rest.isDone());

@@ -2,7 +2,7 @@ describes.endtoend(
   'bento-wordpress-embed',
   {
     version: '1.0',
-    fixture: 'bento/bento-wordpress-embed.html',
+    fixture: 'bento/wordpress-embed.html',
     environments: ['single'],
   },
   (env) => {

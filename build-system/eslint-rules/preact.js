@@ -1,18 +1,18 @@
 'use strict';
 
-const path = require('path');
+const astUtils = require('eslint/lib/rules/utils/ast-utils');
 
 // Enforces importing a Preact namespace specifier if using JSX
 //
 // Good
-// import * as Preact from 'path/to/preact';
+// import * as Preact from '#preact';
 // <div />
 //
 // Bad
 // <div />
 //
 // Bad
-// import { createElement } from 'path/to/preact';
+// import { createElement } from '#preact';
 // <div />
 module.exports = {
   meta: {
@@ -32,19 +32,16 @@ module.exports = {
       }
       warned = true;
 
+      const [packageName = '#preact'] = context.options;
+
       context.report({
         node,
         message: [
           'Using JSX requires importing the Preact namespace',
-          "Eg, `import * as Preact from 'src/preact'`",
+          `Eg, \`import * as Preact from '${packageName}'\``,
         ].join('\n\t'),
 
         fix(fixer) {
-          const fileName = context.getFilename();
-          const absolutePath = path
-            .relative(path.dirname(fileName), './src/preact')
-            .replace(/\.js$/, '');
-
           const ancestors = context.getAncestors();
           const program = ancestors[0];
           let firstImport = program.body.find(
@@ -56,7 +53,7 @@ module.exports = {
 
           return fixer.insertTextBefore(
             firstImport,
-            `import * as Preact from '${absolutePath}';\n`
+            `import * as Preact from '${packageName}';\n`
           );
         },
       });
@@ -64,16 +61,19 @@ module.exports = {
 
     let imported = false;
     let warned = false;
+    let staticTemplate = false;
 
     return {
       Program() {
         imported = false;
         warned = false;
+        staticTemplate = false;
       },
 
       ImportNamespaceSpecifier(node) {
         if (node.local.name === 'Preact') {
           imported = true;
+          staticTemplate = node.parent.source.value !== '#preact';
         }
       },
 
@@ -83,6 +83,67 @@ module.exports = {
 
       JSXFragment(node) {
         requirePreact(node);
+      },
+
+      JSXSpreadAttribute(node) {
+        if (!staticTemplate) {
+          return;
+        }
+
+        context.report({
+          node,
+          message: [
+            'Static JSX Templates are required to use static attribute definitions',
+            'This prevents an issue with spread attributes accidentally overriding a "safe" attribute with user-provided data.',
+          ].join('\n\t'),
+        });
+      },
+
+      JSXOpeningElement(node) {
+        if (!staticTemplate) {
+          return;
+        }
+
+        const {name} = node;
+        if (name.type === 'JSXMemberExpression') {
+          return context.report({
+            node,
+            message: [
+              'Static JSX Templates are required to use regular DOM nodes or Imported Components',
+              'This prevents an issue with `<json.type />` accidentally creating a <script> node.',
+            ].join('\n\t'),
+          });
+        }
+
+        if (name.name && /^[a-z]/.test(name.name)) {
+          return;
+        }
+
+        const variable = astUtils.getVariableByName(
+          context.getScope(),
+          name.name
+        );
+
+        if (!variable || variable.defs.length === 0) {
+          return context.report({
+            node,
+            message: `Could not find ${name.name} in the lexcial scope`,
+          });
+        }
+
+        for (const def of variable.defs) {
+          if (def.type === 'ImportBinding' || def.type === 'FunctionName') {
+            continue;
+          }
+
+          context.report({
+            node,
+            message: [
+              'Static JSX Templates are required to use regular DOM nodes or Imported Components',
+              'This prevents an issue with `<UserProvidedType />` accidentally creating a <script> node.',
+            ].join('\n\t'),
+          });
+        }
       },
     };
   },

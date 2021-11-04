@@ -45,6 +45,7 @@ defineBentoInstagram();
     id="my-instagram"
     data-shortcode="CKXYAzuj7TE"
     data-captioned
+    style="height: 800px; width: 400px;"
   >
   </bento-instagram>
   <button id="change-shortcode">Change shortcode</button>

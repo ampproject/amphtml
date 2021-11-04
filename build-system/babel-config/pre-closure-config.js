@@ -31,7 +31,7 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-react-constant-elements',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
     argv.esm || argv.sxg
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
@@ -42,10 +42,7 @@ function getPreClosureConfig() {
       {replaceCallArguments: false},
     ],
     './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
-    [
-      './build-system/babel-plugins/babel-plugin-transform-json-import',
-      {freeze: false},
-    ],
+    './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
