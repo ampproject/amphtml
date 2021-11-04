@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/1.0/component';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {setStyle} from '#core/dom/style';
 import {getWin} from '#core/window';

@@ -1,6 +1,6 @@
 import {getCarousel, getSlides} from './helpers';
 import {afterRenderPromise, sleep} from '#testing/helpers';
-import {useStyles} from '../component.jss';
+import {useStyles} from '#bento/components/amp-base-carousel/1.0/component.jss';
 
 const pageWidth = 800;
 const pageHeight = 600;

@@ -4,7 +4,7 @@ import {
   getPrevArrowSlot,
   getSlide,
 } from './helpers';
-import {useStyles} from '../component.jss';
+import {useStyles} from '#bento/components/amp-base-carousel/1.0/component.jss';
 
 /** The total number of slides in the carousel */
 const SLIDE_COUNT = 7;

@@ -2,7 +2,7 @@ import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
 import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust} from '#core/constants/action-constants';
-import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
+import {CarouselContextProp} from '#bento/components/amp-base-carousel/1.0/carousel-props';
 import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 import {subscribe} from '#core/context';

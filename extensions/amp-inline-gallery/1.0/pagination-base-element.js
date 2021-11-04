@@ -1,5 +1,5 @@
 import {CSS} from './pagination.jss';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
+import {CarouselContextProp} from '#bento/components/amp-base-carousel/1.0/carousel-props';
 import {BentoInlineGalleryPagination} from './pagination';
 import {PreactBaseElement} from '#preact/base-element';
 

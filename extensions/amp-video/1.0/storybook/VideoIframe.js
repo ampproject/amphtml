@@ -19,7 +19,7 @@ import {
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../../../amp-accordion/1.0/component';
+} from '#bento/components/amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
 import {createCustomEvent} from '#utils/event-helper';
 import {useCallback} from '#preact';

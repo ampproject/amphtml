@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/amp-accordion/1.0/base-element';
+
 import {ActionTrust} from '#core/constants/action-constants';
 import {getWin} from '#core/window';
 
@@ -7,8 +9,6 @@ import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 

@@ -57,7 +57,7 @@ module.exports = {
         './polyfills/custom-elements.extern.js',
         './experiments/experiments.extern.js',
         './experiments/shame.extern.js',
-        './bento/components/amp-jwplayer/1.0/component.js',
+        './bento/components/**',
       ],
       'rules': {'local/no-global': 0},
     },

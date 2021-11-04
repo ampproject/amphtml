@@ -1,5 +1,5 @@
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
+import {CSS as CAROUSEL_CSS} from '#bento/components/amp-base-carousel/1.0/component.jss';
+import {CarouselContextProp} from '#bento/components/amp-base-carousel/1.0/carousel-props';
 import {PreactBaseElement} from '#preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
 import {BentoInlineGalleryThumbnails} from './thumbnails';

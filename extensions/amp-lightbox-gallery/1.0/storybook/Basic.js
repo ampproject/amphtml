@@ -1,8 +1,9 @@
 import {withKnobs} from '@storybook/addon-knobs';
 
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/1.0/component';
+
 import * as Preact from '#preact';
 
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {
   BentoLightboxGalleryProvider,
   WithBentoLightboxGallery,

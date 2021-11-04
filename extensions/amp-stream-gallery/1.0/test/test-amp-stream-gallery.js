@@ -7,7 +7,7 @@ import {poll} from '#testing/iframe';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {toggleExperiment} from '#experiments';
-import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
+import {useStyles} from '#bento/components/amp-base-carousel/1.0/component.jss';
 import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(

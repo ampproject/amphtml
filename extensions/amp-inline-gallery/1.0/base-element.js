@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
+import {CarouselContextProp} from '#bento/components/amp-base-carousel/1.0/carousel-props';
 import {BentoInlineGallery} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 import {dict} from '#core/types/object';

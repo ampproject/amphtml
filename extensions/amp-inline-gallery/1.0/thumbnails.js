@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/1.0/component';
+import {CarouselContext} from '#bento/components/amp-base-carousel/1.0/carousel-context';
 import {px} from '#core/dom/style';
 import {
   useContext,

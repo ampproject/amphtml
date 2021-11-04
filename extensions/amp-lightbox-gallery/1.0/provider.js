@@ -1,5 +1,7 @@
 import objstr from 'obj-str';
 
+import {BentoBaseCarousel} from '#bento/components/amp-base-carousel/1.0/component';
+
 import {mod} from '#core/math';
 
 import * as Preact from '#preact';
@@ -15,7 +17,6 @@ import {forwardRef} from '#preact/compat';
 import {PADDING_ALLOWANCE, useStyles} from './component.jss';
 import {BentoLightboxGalleryContext} from './context';
 
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {BentoLightbox} from '../../amp-lightbox/1.0/component';
 
 /** @const {string} */
