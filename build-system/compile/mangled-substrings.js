@@ -3,7 +3,7 @@
  * Collects a cache of substrings that can be mangled in source.
  *
  * We run this as a pre-processing step since files are later processed by babel
- * in an unordered way. If we were to find mangleable substrings as we go, we
+ * in an unordered way. If we were to find mangled substrings as we go, we
  * would cause the compressed size to be unstable due to frequency of substrings.
  *
  * Additionally, this allows us to optimize the compressed output size by using
@@ -94,19 +94,19 @@ function encode(int) {
   return res;
 }
 
-const cacheFilename = `build/${basename(__filename).split('.', 1)[0]}.json`;
+const realCacheFilename = `build/${basename(__filename).split('.', 1)[0]}.json`;
 
 /**
  * @return {Promise}
  */
-async function collectMangleableSubstrings() {
-  if (pathExistsSync(cacheFilename)) {
+async function collectMangledSubstrings() {
+  if (pathExistsSync(realCacheFilename)) {
     return;
   }
   const startTime = Date.now();
   const result = await collect();
-  await outputJson(cacheFilename, result, {spaces: 2});
-  endBuildStep('Wrote', cacheFilename, startTime);
+  await outputJson(realCacheFilename, result, {spaces: 2});
+  endBuildStep('Wrote', realCacheFilename, startTime);
 }
 
 /**
@@ -182,18 +182,21 @@ async function collect() {
 }
 
 let cache;
+let resolvedCachedFilename;
 
 /**
  * Replaces mangled substrings.
  * Has to be sync due to babel.
  * @param {string} string
+ * @param {string} cacheFilename
  * @return {string}
  */
-function replaceMangledSubstrings(string) {
-  if (!cache) {
+function replaceMangledSubstrings(string, cacheFilename = realCacheFilename) {
+  if (!cache || resolvedCachedFilename !== cacheFilename) {
     if (!pathExistsSync(cacheFilename)) {
       return string;
     }
+    resolvedCachedFilename = cacheFilename;
     cache = readJsonSync(cacheFilename).map(([key, value]) => [
       new RegExp(key, 'g'),
       value,
@@ -206,7 +209,6 @@ function replaceMangledSubstrings(string) {
 }
 
 module.exports = {
-  collectMangleableSubstrings,
-  cacheFilename,
+  collectMangledSubstrings,
   replaceMangledSubstrings,
 };

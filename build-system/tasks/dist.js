@@ -30,6 +30,7 @@ const {buildBentoComponents} = require('./build-bento');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
+const {collectMangledSubstrings} = require('../compile/mangled-substrings');
 const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
@@ -96,7 +97,7 @@ async function runPreDistSteps(options) {
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
-  await collectMangleableSubstrings();
+  await collectMangledSubstrings();
   displayLifecycleDebugging();
 }
 

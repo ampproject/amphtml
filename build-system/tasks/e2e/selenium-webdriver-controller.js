@@ -6,12 +6,10 @@ const {
   Key,
   ScrollToOptionsDef,
 } = require('./e2e-types');
-const {
-  replaceMangledSubstrings,
-} = require('../../compile/mangleable-substrings');
 const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
 const {NetworkLogger} = require('./network-logger');
+const {replaceMangledSubstrings} = require('../../compile/mangled-substrings');
 
 const {By, Condition, Key: SeleniumKey, error} = selenium;
 

@@ -1,10 +1,8 @@
-const {
-  replaceMangledSubstrings,
-} = require('../../compile/mangleable-substrings');
+const {replaceMangledSubstrings} = require('../../compile/mangled-substrings');
 
 module.exports = function () {
   return {
-    name: 'mangle-string-pattern',
+    name: 'mangled-substrings',
     visitor: {
       StringLiteral(path) {
         path.node.value = replaceMangledSubstrings(path.node.value);

@@ -3,12 +3,10 @@
 <<<<<<< HEAD
 =======
 const argv = require('minimist')(process.argv.slice(2));
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
-const {
-  replaceMangledSubstrings,
-} = require('../../compile/mangleable-substrings');
+const puppeteer = require('puppeteer');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {log: logBase} = require('../../common/logging');
+const {replaceMangledSubstrings} = require('../../compile/mangled-substrings');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;

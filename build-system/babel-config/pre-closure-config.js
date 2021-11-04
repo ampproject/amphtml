@@ -6,11 +6,12 @@ const {getImportResolverPlugin} = require('./import-resolver');
 const {getReplacePlugin} = require('./helpers');
 
 /**
- * Gets the config for minified babel transforms run, used by 3p vendors.
+ * Gets the config for pre-closure babel transforms run during `amp dist`.
  *
  * @return {!Object}
  */
-function getMinifiedConfig() {
+function getPreClosureConfig() {
+  const isCheckTypes = argv._.includes('check-types');
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
@@ -22,74 +23,63 @@ function getMinifiedConfig() {
     },
   ];
   const replacePlugin = getReplacePlugin();
-
-  const plugins = [
+  const preClosurePlugins = [
     'optimize-objstr',
-    './build-system/babel-plugins/babel-plugin-mangle-object-values',
-    './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    './build-system/babel-plugins/babel-plugin-transform-rename-privates',
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
-    (argv.esm || argv.sxg) &&
-      './build-system/babel-plugins/babel-plugin-transform-dev-methods',
+    argv.esm || argv.sxg
+      ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
+      : null,
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
     ],
+    './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
+    './build-system/babel-plugins/babel-plugin-transform-default-assignment',
+    './build-system/babel-plugins/babel-plugin-mangled-substrings',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
-    './build-system/babel-plugins/babel-plugin-mangled-substrings',
     // TODO(erwinm, #28698): fix this in fixit week
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
-    './build-system/babel-plugins/babel-plugin-transform-json-configuration',
+    !isCheckTypes &&
+      './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     isProd && [
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       BUILD_CONSTANTS,
     ],
-    ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: false,
-      targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
-      shippedProposals: true,
+      targets: {esmodules: true},
     },
   ];
-  const presetTypescript = [
-    '@babel/preset-typescript',
-    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
-  ];
-
-  return {
+  const preClosurePresets = argv.esm || argv.sxg ? [presetEnv] : [];
+  const preClosureConfig = {
     compact: false,
-    plugins,
-    sourceMaps: true,
-    presets: [presetTypescript, presetEnv],
+    plugins: preClosurePlugins,
+    presets: preClosurePresets,
     retainLines: true,
-    assumptions: {
-      constantSuper: true,
-      noClassCalls: true,
-      setClassMethods: true,
-      setPublicClassFields: true,
-    },
+    sourceMaps: true,
   };
+  return preClosureConfig;
 }
 
 module.exports = {
-  getMinifiedConfig,
+  getPreClosureConfig,
 };
