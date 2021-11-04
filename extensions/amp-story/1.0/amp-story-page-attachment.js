@@ -219,11 +219,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       );
 
     // Use an anchor element to make this a real link in vertical rendering.
-    // TODO(wg-stories): Evaluate whether this link needs noopener or noreferrer.
-    // See https://lgtm.com/rules/1806963085/ and remove disabling comment for js/unsafe-external-link
     const link = (
+      // TODO(wg-stories): Evaluate whether this link needs noopener or noreferrer.
+      // See https://lgtm.com/rules/1806963085/ and remove disabling comment below.
+      // lgtm [js/unsafe-external-link]
       <a
-        class="i-amphtml-story-page-attachment-remote-content" // lgtm [js/unsafe-external-link]
+        class="i-amphtml-story-page-attachment-remote-content"
         target="_blank"
         // URL will be validated and resolved based on the canonical URL if
         // relative when navigating.
