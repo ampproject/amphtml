@@ -121,6 +121,8 @@ function buildProvider(doc, shareType, opt_params) {
       height={48}
       class="i-amphtml-story-share-icon"
       type={shareType}
+      // TODO(alanorozco): Remove this exception, and loop to `setAttributes`.
+      // eslint-disable-next-line local/preact
       {...buildProviderParams(opt_params)}
     >
       <span class="i-amphtml-story-share-label">
@@ -241,7 +243,7 @@ export class ShareWidget {
 
     if (!copyTextToClipboard(this.win, url)) {
       const failureString = localize(
-        this.storyEl_,
+        this.storyEl,
         LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl, dev().assertString(failureString));
