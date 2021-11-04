@@ -52,8 +52,9 @@ const MUSTACHE_TAG = 'amp-mustache';
  * Map of experiment IDs that might be enabled by the player to
  * their experiment names. Used to toggle client side experiment on.
  * @const {Object<string, string>}
+ * @visibleForTesting
  */
-const RELEVANT_PLAYER_EXPS = {
+export const RELEVANT_PLAYER_EXPS = {
   [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
   [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
   [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
@@ -193,7 +194,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           ids.forEach((id) => {
             const relevantExp = RELEVANT_PLAYER_EXPS[id];
             if (relevantExp) {
-              forceExperimentBranch(this.win, relevantExp, id);
+              forceExperimentBranch(this.win, relevantExp, id.toString());
             }
           });
         }
