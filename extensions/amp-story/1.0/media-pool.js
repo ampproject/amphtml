@@ -65,7 +65,7 @@ export let ElementDistanceFnDef;
  * Represents a task to be executed on a media element.
  * @typedef {function(!PoolBoundElementDef, *): !Promise}
  */
-let ElementTask_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ElementTask_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * @const {string}

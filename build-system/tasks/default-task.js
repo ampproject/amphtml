@@ -47,7 +47,7 @@ module.exports = {
   defaultTask,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 defaultTask.description =
   'Start the dev server, lazily build JS when requested, and watch for changes';

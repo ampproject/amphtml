@@ -12,7 +12,7 @@ import {ResourcesImpl} from '#service/resources-impl';
 
 import {loadPromise} from '#utils/event-helper';
 
-/*eslint "google-camelcase/google-camelcase": 0*/
+/*eslint "local/camelcase": 0*/
 describes.realWin('Resources', {amp: true}, (env) => {
   let window, document;
   let clock;

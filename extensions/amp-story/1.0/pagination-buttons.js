@@ -12,7 +12,7 @@ import {dev, devAssert} from '#utils/log';
 import {localize} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
-let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ButtonState_1_0_Def; // eslint-disable-line local/camelcase
 
 /** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {

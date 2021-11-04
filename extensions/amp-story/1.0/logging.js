@@ -3,7 +3,7 @@ import {scopedQuerySelectorAll} from '#core/dom/query';
 import {tryResolve} from '#core/data-structures/promise';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
-let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ElementPredicate_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * A log type is an abstract rule or best practice that should be followed when
@@ -36,7 +36,7 @@ let ElementPredicate_1_0_Def; // eslint-disable-line google-camelcase/google-cam
  *   predicate: (!ElementPredicate_1_0_Def|undefined),
  * }}
  */
-let AmpStoryLogType_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let AmpStoryLogType_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * A log entry is a more concrete version of a rule or best practice; it refers
