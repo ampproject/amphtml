@@ -1,6 +1,6 @@
 # Bento Selector
 
-The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
+An input that presents any type of content as list of options. The contents of the options aren't just limited to text. It can be configured to allow the user to select only one, or multiple options.
 
 ## Web Component
 

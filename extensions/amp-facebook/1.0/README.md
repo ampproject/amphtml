@@ -1,6 +1,6 @@
 # Bento Facebook
 
-The Bento Facebook component allows you to embed a Facebook post, a Facebook video, or a comment on a Facebook post.
+Embeds a [Facebook](https://facebook.com) post, a Facebook video, or a comment on a Facebook post.
 
 ## Web Component
 
