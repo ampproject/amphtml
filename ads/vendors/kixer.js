@@ -13,7 +13,7 @@ __kx_viewability: false,
  * @param {!Object} data
  */
 export function kixer(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
 
   validateData(data, ['adslot'], []);
 

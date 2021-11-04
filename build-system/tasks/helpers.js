@@ -536,7 +536,7 @@ async function minify(code, map) {
     mangle: {
       properties: {
         regex: '_AMP_PRIVATE_$',
-        // eslint-disable-next-line google-camelcase/google-camelcase
+        // eslint-disable-next-line local/camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
       },
     },
@@ -547,7 +547,7 @@ async function minify(code, map) {
     },
     output: {
       beautify: !!argv.pretty_print,
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       keep_quoted_props: true,
     },
     sourceMap: {content: map},
