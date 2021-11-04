@@ -65,11 +65,11 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
         this.getConfig().then((storyConfig) => {
           //if remote config is not valid, try using the inline config
           if (storyConfig == null && this.element_.hasAttribute('src')) {
-            storyConfig = this.getInlineConfig_(
-              this.element_.firstElementChild
-            ).then((storyInlineconfig) => {
-              this.dispatchConfig(storyInlineconfig);
-            });
+            this.getInlineConfig_(this.element_.firstElementChild).then(
+              (storyInlineconfig) => {
+                this.dispatchConfig(storyInlineconfig);
+              }
+            );
           } else {
             this.dispatchConfig(storyConfig);
           }
