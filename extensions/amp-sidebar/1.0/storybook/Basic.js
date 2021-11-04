@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
-import {BentoSidebar, BentoSidebarToolbar} from '../component';
-import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
+import {BentoSidebar} from '../component';
+import {boolean, color, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Sidebar',
@@ -59,36 +59,6 @@ export const _default = () => {
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
       />
-    </main>
-  );
-};
-
-export const toolbar = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const toolbarMedia = text('toolbar media', '(max-width: 500px)');
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-
-  return (
-    <main>
-      <BentoSidebarWithActions
-        side={side}
-        style={{color: foregroundColor, backgroundColor}}
-        backdropStyle={{backgroundColor: backdropColor}}
-      >
-        <BentoSidebarToolbar
-          toolbar={toolbarMedia}
-          toolbarTarget="toolbar-target"
-        >
-          <ul>
-            <li>Toolbar Item 1</li>
-            <li>Toolbar Item 2</li>
-          </ul>
-        </BentoSidebarToolbar>
-      </BentoSidebarWithActions>
-      <div id="toolbar-target"></div>
     </main>
   );
 };

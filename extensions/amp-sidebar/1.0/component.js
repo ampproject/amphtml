@@ -163,28 +163,3 @@ function BentoSidebarWithRef(
 const BentoSidebar = forwardRef(BentoSidebarWithRef);
 BentoSidebar.displayName = 'BentoSidebar'; // Make findable for tests.
 export {BentoSidebar};
-
-/**
- * @param {!BentoSidebarDef.BentoSidebarToolbarProps} props
- * @return {PreactDef.Renderable}
- */
-export function BentoSidebarToolbar({
-  children,
-  toolbar: mediaQueryProp,
-  toolbarTarget: toolbarTargetProp,
-  ...rest
-}) {
-  const ref = useRef(null);
-  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
-
-  return (
-    <nav
-      ref={ref}
-      toolbar={mediaQueryProp}
-      toolbar-target={toolbarTargetProp}
-      {...rest}
-    >
-      {children}
-    </nav>
-  );
-}

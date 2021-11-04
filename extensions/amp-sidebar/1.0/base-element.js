@@ -4,11 +4,8 @@ import {PreactBaseElement} from '#preact/base-element';
 import {BentoSidebar} from './component';
 import {dict} from '#core/types/object';
 import {pauseAll} from '#core/dom/resource-container-helper';
-import {realChildNodes} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
-import {useToolbarHook} from './sidebar-toolbar-hook';
-import {useValueRef} from '#preact/component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -30,25 +27,6 @@ export class BaseElement extends PreactBaseElement {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
-    });
-  }
-
-  /** @override */
-  updatePropsForRendering(props) {
-    realChildNodes(this.element).map((child) => {
-      if (
-        child.nodeName === 'NAV' &&
-        child.hasAttribute('toolbar') &&
-        child.hasAttribute('toolbar-target')
-      ) {
-        props['children'].push(
-          <ToolbarShim
-            toolbar={child.getAttribute('toolbar')}
-            toolbarTarget={child.getAttribute('toolbar-target')}
-            domElement={child}
-          ></ToolbarShim>
-        );
-      }
     });
   }
 
@@ -96,15 +74,3 @@ BaseElement['props'] = {
   'children': {passthrough: true},
   'side': {attr: 'side', type: 'string'},
 };
-
-/**
- * @param {!BentoSidebarDef.ToolbarShimProps} props
- */
-function ToolbarShim({
-  domElement,
-  toolbar: mediaQueryProp,
-  toolbarTarget: toolbarTargetProp,
-}) {
-  const ref = useValueRef(domElement);
-  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
-}
