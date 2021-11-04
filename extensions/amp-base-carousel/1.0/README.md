@@ -99,7 +99,7 @@ const api = await carousel.getApi();
 
 The `bento-base-carousel` API allows you to perform the following actions:
 
-###### next()
+##### next()
 
 Moves the carousel forwards by `advance-count` slides.
 
@@ -107,7 +107,7 @@ Moves the carousel forwards by `advance-count` slides.
 api.next();
 ```
 
-###### prev()
+##### prev()
 
 Moves the carousel backwards by `advance-count` slides.
 
@@ -115,7 +115,7 @@ Moves the carousel backwards by `advance-count` slides.
 api.prev();
 ```
 
-###### goToSlide(index: number)
+##### goToSlide(index: number)
 
 Moves the carousel to the slide specified by the `index` argument.
 Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
@@ -125,7 +125,7 @@ api.goToSlide(0); // Advance to first slide.
 api.goToSlide(length - 1); // Advance to last slide.
 ```
 
-##### Events
+#### Events
 
 The `bento-base-carousel` API allows you to register and respond to the following events:
 
