@@ -153,9 +153,11 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
     anchorChild?.textContent ||
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
-  const openLabel = openLabelAttr
-    ? openLabelAttr.trim()
-    : localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+  // TODO(#36724): Clean this up once the "Read more" CTA has been translated.
+  const fallbackCta =
+    localize(pageEl, LocalizedStringId.AMP_STORY_READ_MORE) ??
+    localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+  const openLabel = (openLabelAttr && openLabelAttr.trim()) || fallbackCta;
   ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
@@ -197,9 +199,11 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   const openLabelAttr =
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
-  const openLabel =
-    (openLabelAttr && openLabelAttr.trim()) ||
+  // TODO(#36724): Clean this up once the "Read more" CTA has been translated.
+  const fallbackCta =
+    localize(pageEl, LocalizedStringId.AMP_STORY_READ_MORE) ??
     localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+  const openLabel = (openLabelAttr && openLabelAttr.trim()) || fallbackCta;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   if (openLabel !== 'none') {
