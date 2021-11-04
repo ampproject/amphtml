@@ -18,11 +18,6 @@ const remapping = /** @type {*} */ (Remapping);
  */
 async function terserMinify(code) {
   const options = {
-    mangle: false,
-    compress: {
-      defaults: false,
-      unused: true,
-    },
     output: {
       beautify: !!argv.pretty_print,
       comments: /\/*/,
