@@ -121,6 +121,8 @@ function buildProvider(doc, shareType, opt_params) {
       height={48}
       class="i-amphtml-story-share-icon"
       type={shareType}
+      // TODO(alanorozco): Remove this exception, and loop to `setAttributes`.
+      // eslint-disable-next-line local/preact
       {...buildProviderParams(opt_params)}
     >
       <span class="i-amphtml-story-share-label">
