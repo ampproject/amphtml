@@ -1,18 +1,14 @@
 # Bento Lightbox
 
-The Bento Lightbox component displays elements in a full-viewport "lightbox" modal.
+Displays any content in a full-viewport "lightbox" modal.
 
-## Usage
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
 The examples below demonstrate use of the `<bento-lightbox>` web component.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/lightbox
@@ -23,7 +19,7 @@ import {defineElement as defineBentoLightbox} from '@bentoproject/lightbox';
 defineBentoLightbox();
 ```
 
-#### Example: Import via `<script>`
+### Example: Import via `<script>`
 
 ```html
 <head>
@@ -56,7 +52,7 @@ defineBentoLightbox();
 </script>
 ```
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento enabled components in standalone use are highly interactive through their API.
 
@@ -67,29 +63,31 @@ await customElements.whenDefined('bento-lightbox');
 const api = await lightbox.getApi();
 ```
 
-##### Actions
+#### Actions
 
 The `amp-lightbox` API allows you to perform the following actions:
 
-**open()**
+##### open()
+
 Opens the lightbox.
 
 ```js
 api.open();
 ```
 
-**close()**
+##### close()
+
 Closes the lightbox.
 
 ```js
 api.close();
 ```
 
-##### Events
+#### Events
 
 The `amp-lightbox` API allows you to register and respond to the following events:
 
-**open**
+##### open
 
 This event is triggered when the lightbox is opened.
 
@@ -97,7 +95,7 @@ This event is triggered when the lightbox is opened.
 lightbox.addEventListener('open', (e) => console.log(e));
 ```
 
-**close**
+##### close
 
 This event is triggered when the lightbox is closed.
 
@@ -105,7 +103,7 @@ This event is triggered when the lightbox is closed.
 lightbox.addEventListener('close', (e) => console.log(e));
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -127,34 +125,34 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-#### Attributes
+### Attributes
 
-##### `id`
+#### `id`
 
 A unique identifier for the lightbox.
 
-##### `hidden`
+#### `hidden`
 
 Must be present when the lightbox is closed and the contents should not be displayed, such as on first layout.
 
-##### `animation`
+#### `animation`
 
 Defines the style of animation for opening the lightbox. By default, this will
 be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 `fly-in-top`.
 
-##### `scrollable`
+#### `scrollable`
 
 When the `scrollable` attribute is present, the content of the lightbox can
 scroll when overflowing the height of the lightbox.
 
-### Preact/React Component
+---
+
+## Preact/React Component
 
 The examples below demonstrates use of the `<BentoLightbox>` as a functional component usable with the Preact or React libraries.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/lightbox
@@ -180,9 +178,9 @@ function App() {
 }
 ```
 
-#### Layout and style
+### Layout and style
 
-**Container type**
+#### Container type
 
 The `BentoLightbox` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
@@ -203,28 +201,28 @@ Or via `className`:
 }
 ```
 
-#### Props
+### Props
 
-##### **animation**
+#### animation
 
 Animation used to display the lightbox. Options are `fade-in`, `fly-in-top` or `fly-in-bottom`, Default is `fade-in`.
 
-##### **children**
+#### children
 
 The content to show within this lightbox.
 
-##### **closeButtonAs**
+#### closeButtonAs
 
 A prop which takes a function (as a render prop) to specify a custom close button.
 
-##### **onBeforeOpen**
+#### onBeforeOpen
 
 A prop which takes a function which is executed before the lightbox is opened.
 
-##### **onAfterOpen**
+#### onAfterOpen
 
 A prop which takes a function which is executed after the lightbox is opened.
 
-##### **onAfterClose**
+#### onAfterClose
 
 A prop which takes a function which is executed after the lightbox is closed.

@@ -1,27 +1,20 @@
 # Bento Carousel
 
-The Bento Carousel component is a generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
+A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
 
-## Usage
+Each of the component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary children.
 
-Each of the component’s immediate children is considered an
-item in the carousel. Each of these nodes may also have arbitrary children.
+The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
 
-The carousel consists of an arbitrary number of items, as well as optional
-navigational arrows to go forward or backwards a single item.
+The carousel advances between items if the user swipes or uses the customizable arrow buttons.
 
-The carousel advances between items if the user swipes or uses the customizable
-arrow buttons.
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
 The examples below demonstrate use of the `<bento-base-carousel>` web component.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/base-carousel
@@ -32,7 +25,7 @@ import {defineElement as defineBentoBaseCarousel} from '@bentoproject/base-carou
 defineBentoBaseCarousel();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
 
 ```html
 <head>
@@ -93,7 +86,7 @@ defineBentoBaseCarousel();
 </script>
 ```
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-base-carousel` component API is accessible by including the following script tag in your document:
 
@@ -102,25 +95,28 @@ await customElements.whenDefined('bento-base-carousel');
 const api = await carousel.getApi();
 ```
 
-##### Actions
+#### Actions
 
 The `bento-base-carousel` API allows you to perform the following actions:
 
-**next()**
+###### next()
+
 Moves the carousel forwards by `advance-count` slides.
 
 ```javascript
 api.next();
 ```
 
-**prev()**
+###### prev()
+
 Moves the carousel backwards by `advance-count` slides.
 
 ```javascript
 api.prev();
 ```
 
-**goToSlide(index: number)**
+###### goToSlide(index: number)
+
 Moves the carousel to the slide specified by the `index` argument.
 Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
@@ -133,7 +129,7 @@ api.goToSlide(length - 1); // Advance to last slide.
 
 The `bento-base-carousel` API allows you to register and respond to the following events:
 
-**slideChange**
+##### slideChange
 
 This event is triggered when the index displayed by the carousel has changed.
 The new index is available via `event.data.index`.
@@ -142,7 +138,7 @@ The new index is available via `event.data.index`.
 carousel.addEventListener('slideChange', (e) => console.log(e.data.index));
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -166,7 +162,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-**Container type**
+#### Container type
 
 The `bento-base-carousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
 
@@ -181,7 +177,7 @@ bento-base-carousel > * {
 }
 ```
 
-#### Right-to-left slide change
+### Right-to-left slide change
 
 `<bento-base-carousel>` requires that you define when it is in an
 right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
@@ -195,7 +191,7 @@ know that it should operate as `rtl` as follows:
 If the carousel is in a RTL context, and you want the carousel to operate as
 LTR, you can explicitly set the `dir="ltr"` on the carousel.
 
-#### Slide layout
+### Slide layout
 
 Slides are automatically sized by the carousel when **not** specifying
 `mixed-lengths`.
@@ -213,7 +209,7 @@ the slide will be vertically centered within the carousel.
 If you want to horizontally center your slide content, you will want to create a
 wrapping element, and use that to center the content.
 
-#### Number of visible slides
+### Number of visible slides
 
 When changing the number of visible slides using `visible-slides`, in response
 to a media query, you will likely want to change the aspect ratio of the
@@ -235,36 +231,36 @@ addition, when changing `visible-slides`, you likely want to change
 </bento-base-carousel>
 ```
 
-#### Attributes
+### Attributes
 
-##### Media Queries
+#### Media Queries
 
 The attributes for `<bento-base-carousel>` can be configured to use different
 options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
-##### Number of visible slides
+#### Number of visible slides
 
-###### mixed-length
+##### mixed-length
 
 Either `true` or `false`, defaults to `false`. When true, uses the existing
 width (or height when horizontal) for each of the slides. This allows for a
 carousel with slides of different widths to be used.
 
-###### visible-count
+##### visible-count
 
 A number, defaults to `1`. Determines how many slides should be shown at a given
 time. Fractional values can be used to make part of a(n) additional slide(s)
 visible. This option is ignored when `mixed-length` is `true`.
 
-###### advance-count
+##### advance-count
 
 A number, defaults to `1`. Determines how many slides the carousel will advance
 when advancing using the previous or next arrows. This is useful when specifying
 the `visible-count` attribute.
 
-##### Auto advance
+#### Auto advance
 
-###### auto-advance
+##### auto-advance
 
 Either `true` or `false`, defaults to `false`. Automatically advances the
 carousel to the next slide based on a delay. If the user manually changes
@@ -272,44 +268,44 @@ slides, then the auto advance is stopped. Note that if `loop` is not enabled,
 when reaching the last item, the auto advance will move backwards to the first
 item.
 
-###### auto-advance-count
+##### auto-advance-count
 
 A number, defaults to `1`. Determines how many slides the carousel will advance
 when automatically advancing. This is useful when specifying the `visible-count`
 attribute.
 
-###### auto-advance-interval
+##### auto-advance-interval
 
 A number, defaults to `1000`. Specifies the amount of time, in milliseconds,
 between subsequent automatic advances of the carousel.
 
-###### auto-advance-loops
+##### auto-advance-loops
 
 A number, defaults to `∞`. The number of times the carousel should advance
 through the slides before stopping.
 
-##### Snapping
+#### Snapping
 
-###### snap
+##### snap
 
 Either `true` or `false`, defaults to `true`. Determines whether or not the
 carousel should snap on slides when scrolling.
 
-###### snap-align
+##### snap-align
 
 Either `start` or `center`. When start aligning, the start of a slide (e.g. the
 left edge, when horizontal aligning) is aligned with the start of a carousel.
 When center aligning, the center of a slide is aligned with the center of a
 carousel.
 
-###### snap-by
+##### snap-by
 
 A number, defaults to `1`. This determines the granularity of snapping and is
 useful when using `visible-count`.
 
-##### Miscellaneous
+#### Miscellaneous
 
-###### controls
+##### controls
 
 Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines if and when prev/next navigational arrows are displayed. Note: When `outset-arrows` is `true`, the arrows are shown `"always"`.
 
@@ -317,26 +313,26 @@ Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines
 -   `auto`: Arrows are displayed when the carousel has most recently received interaction via mouse, and not displayed when the carousel has most recently received interaction via touch. On first load for touch devices, arrows are displayed until first interaction.
 -   `never`: Arrows are never displayed.
 
-###### slide
+##### slide
 
 A number, defaults to `0`. This determines the initial slide shown in the
 carousel. This may be mutated with `Element.setAttribute` to control which slide is currently
 showing.
 
-###### loop
+##### loop
 
 Either `true` or `false`, defaults to `false` when omitted. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three times the `visible-count` of slides present for looping to occur.
 
-###### orientation
+##### orientation
 
 Either `horizontal` or `vertical`, defaults to `horizontal`. When `horizontal` the carousel will lay out horizontally, with the user being able to swipe left and right. When `vertical`, the carousel lays out vertically, with the user being able to swipe up and down.
 
-#### Styling
+### Styling
 
 You may use the `bento-base-carousel` element selector to style the carousel
 freely.
 
-##### Customizing arrow buttons
+#### Customizing arrow buttons
 
 Arrow buttons can be customized by passing in your own custom markup. For
 example, you can recreate the default styling with the following HTML and CSS:
@@ -375,13 +371,13 @@ example, you can recreate the default styling with the following HTML and CSS:
 </bento-base-carousel>
 ```
 
-### Preact/React Component
+---
+
+## Preact/React Component
 
 The examples below demonstrate use of the `<BentoBaseCarousel>` as a functional component usable with the Preact or React libraries.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/base-carousel
@@ -403,7 +399,7 @@ function App() {
 }
 ```
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento components are highly interactive through their API. The `BentoBaseCarousel` component API is accessible by passing a `ref`:
 
@@ -422,25 +418,28 @@ function App() {
 }
 ```
 
-##### Actions
+#### Actions
 
 The `BentoBaseCarousel` API allows you to perform the following actions:
 
-**next()**
+##### next()
+
 Moves the carousel forwards by `advanceCount` slides.
 
 ```javascript
 ref.current.next();
 ```
 
-**prev()**
+##### prev()
+
 Moves the carousel backwards by `advanceCount` slides.
 
 ```javascript
 ref.current.prev();
 ```
 
-**goToSlide(index: number)**
+##### goToSlide(index: number)
+
 Moves the carousel to the slide specified by the `index` argument.
 Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
@@ -449,11 +448,11 @@ ref.current.goToSlide(0); // Advance to first slide.
 ref.current.goToSlide(length - 1); // Advance to last slide.
 ```
 
-##### Events
+#### Events
 
 The `BentoBaseCarousel` API allows you to register and respond to the following events:
 
-**onSlideChange**
+##### onSlideChange
 
 This event is triggered when the index displayed by the carousel has changed.
 
@@ -465,9 +464,9 @@ This event is triggered when the index displayed by the carousel has changed.
 </BentoBaseCarousel>
 ```
 
-#### Layout and style
+### Layout and style
 
-**Container type**
+#### Container type
 
 The `BentoBaseCarousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
@@ -500,7 +499,7 @@ Or via `className`:
 }
 ```
 
-#### Right-to-left slide change
+### Right-to-left slide change
 
 `<BentoBaseCarousel>` requires that you define when it is in an
 right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
@@ -514,7 +513,7 @@ know that it should operate as `rtl` as follows:
 If the carousel is in a RTL context, and you want the carousel to operate as
 LTR, you can explicitly set the `dir="ltr"` on the carousel.
 
-#### Slide layout
+### Slide layout
 
 Slides are automatically sized by the carousel when **not** specifying
 `mixedLengths`.
@@ -532,7 +531,7 @@ the slide will be vertically centered within the carousel.
 If you want to horizontally center your slide content, you will want to create a
 wrapping element, and use that to center the content.
 
-#### Number of visible slides
+### Number of visible slides
 
 When changing the number of visible slides using `visibleSlides`, in response
 to a media query, you will likely want to change the aspect ratio of the
@@ -551,31 +550,31 @@ const count = window.matchMedia('(max-width: 600px)').matches ? 4 : 3;
 </BentoBaseCarousel>
 ```
 
-#### Props
+### Props
 
-##### Number of visible slides
+#### Number of visible slides
 
-###### mixedLength
+##### mixedLength
 
 Either `true` or `false`, defaults to `false`. When true, uses the existing
 width (or height when horizontal) for each of the slides. This allows for a
 carousel with slides of different widths to be used.
 
-###### visibleCount
+##### visibleCount
 
 A number, defaults to `1`. Determines how many slides should be shown at a given
 time. Fractional values can be used to make part of a(n) additional slide(s)
 visible. This option is ignored when `mixedLength` is `true`.
 
-###### advanceCount
+##### advanceCount
 
 A number, defaults to `1`. Determines how many slides the carousel will advance
 when advancing using the previous or next arrows. This is useful when specifying
 the `visibleCount` attribute.
 
-##### Auto advance
+#### Auto advance
 
-###### autoAdvance
+##### autoAdvance
 
 Either `true` or `false`, defaults to `false`. Automatically advances the
 carousel to the next slide based on a delay. If the user manually changes
@@ -583,44 +582,44 @@ slides, then the auto advance is stopped. Note that if `loop` is not enabled,
 when reaching the last item, the auto advance will move backwards to the first
 item.
 
-###### autoAdvanceCount
+##### autoAdvanceCount
 
 A number, defaults to `1`. Determines how many slides the carousel will advance
 when automatically advancing. This is useful when specifying the `visible-count`
 attribute.
 
-###### autoAdvanceInterval
+##### autoAdvanceInterval
 
 A number, defaults to `1000`. Specifies the amount of time, in milliseconds,
 between subsequent automatic advances of the carousel.
 
-###### autoAdvanceLoops
+##### autoAdvanceLoops
 
 A number, defaults to `∞`. The number of times the carousel should advance
 through the slides before stopping.
 
-##### Snapping
+#### Snapping
 
-###### snap
+##### snap
 
 Either `true` or `false`, defaults to `true`. Determines whether or not the
 carousel should snap on slides when scrolling.
 
-###### snapAlign
+##### snapAlign
 
 Either `start` or `center`. When start aligning, the start of a slide (e.g. the
 left edge, when horizontal aligning) is aligned with the start of a carousel.
 When center aligning, the center of a slide is aligned with the center of a
 carousel.
 
-###### snapBy
+##### snapBy
 
 A number, defaults to `1`. This determines the granularity of snapping and is
 useful when using `visible-count`.
 
-##### Miscellaneous
+#### Miscellaneous
 
-###### controls
+##### controls
 
 Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines if and when prev/next navigational arrows are displayed. Note: When `outset-arrows` is `true`, the arrows are shown `"always"`.
 
@@ -628,23 +627,23 @@ Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines
 -   `auto`: Arrows are displayed when the carousel has most recently received interaction via mouse, and not displayed when the carousel has most recently received interaction via touch. On first load for touch devices, arrows are displayed until first interaction.
 -   `never`: Arrows are never displayed.
 
-###### defaultSlide
+##### defaultSlide
 
 A number, defaults to `0`. This determines the initial slide shown in the carousel.
 
-###### loop
+##### loop
 
 Either `true` or `false`, defaults to `false` when omitted. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three times the `visible-count` of slides present for looping to occur.
 
-###### orientation
+##### orientation
 
 Either `horizontal` or `vertical`, defaults to `horizontal`. When `horizontal` the carousel will lay out horizontally, with the user being able to swipe left and right. When `vertical`, the carousel lays out vertically, with the user being able to swipe up and down.
 
-#### Styling
+### Styling
 
 You may use the `BentoBaseCarousel` element selector to style the carousel freely.
 
-##### Customizing arrow buttons
+#### Customizing arrow buttons
 
 Arrow buttons can be customized by passing in your own custom markup. For example, you can recreate the default styling with the following HTML and CSS:
 

@@ -1,16 +1,9 @@
 # Bento Date Display
 
-## Usage
-
-The Bento Date Display component displays time data that you can render in your page. By providing specific [attributes](#attributes) in the
-Bento Date Display tag, the Bento Date Display extension returns a list of time
-parameters, which you can pass to
-[an amp-mustache template](../../amp-mustache/amp-mustache.md)
-for rendering. Refer to the
-[list below for each returned time parameter](#returned-time-parameters).
+Displays time data that you can render in your page. By providing specific [attributes](#attributes) in the Bento Date Display tag, the Bento Date Display extension returns a list of time parameters, which you can pass to [an amp-mustache template](../../amp-mustache/amp-mustache.md) for rendering. Refer to the [list below for each returned time parameter](#returned-time-parameters).
 
 <!--
-### Web Component
+## Web Component
 
 TODO(https://go.amp.dev/issue/36619): Restore this section. We don't include it because we don't support <template> in Bento Web Components yet.
 
@@ -19,13 +12,13 @@ An older version of this file contains the removed section, though it's incorrec
 https://github.com/ampproject/amphtml/blob/422d171e87571c4d125a2bf956e78e92444c10e8/extensions/amp-date-display/1.0/README.md
 -->
 
-### Preact/React Component
+---
+
+## Preact/React Component
 
 The examples below demonstrates use of the `<BentoDateDisplay>` as a functional component usable with the Preact or React libraries.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/date-display
@@ -50,36 +43,36 @@ function App() {
 }
 ```
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 The Bento Date Display component does not have an imperative API. However, the Bento Date Display Preact/React component does accept a `render` prop that renders the consumer's template. This `render` prop should be a function which the Bento Date Display Preact/React component can use to render its template. The `render` callback will be provided a variety of date-related parameters for consumers to interpolate in the rendered template. See the [`render` prop section](#render) for more information.
 
-#### Layout and style
+### Layout and style
 
 The Bento Date Display Preact/React component allows consumers to render their own templates. These templates may use inline styles, `<style>` tags, Preact/React components that import their own stylesheets.
 
-#### Props
+### Props
 
-##### `datetime`
+#### `datetime`
 
 Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a
 standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
 
-##### `displayIn`
+#### `displayIn`
 
 Optional prop that can be either `"utc"` or `"local"` and defaults to `"local"`. This prop indicates what timezone to display the date in. If set to the value `"utc"`, the component will convert the given date to UTC.
 
-##### `locale`
+#### `locale`
 
 An internationalization language string for each timer unit. The default value is `en` (for English). This prop supports all values that are supported by the user's browser.
 
-##### `localeOptions`
+#### `localeOptions`
 
 The `localeOptions` object supports all the options under [Intl.DateTimeFormat.options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters) parameter that specifies the formatting style to use for `localeString` format.
 
 Note that if the `displayIn` prop is set to `utc`, the value of `localeOptions.timeZone` will automatically be converted to `UTC`.
 
-##### `render`
+#### `render`
 
 Optional callback that should render a template. The callback will be provided an object with properties/values related to the date expressed in `datetime`.
 By default, the Bento Date Display component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption.
@@ -114,7 +107,7 @@ interface DateParams {
 }
 ```
 
-### Returned Time Parameters
+## Returned Time Parameters
 
 This table lists the format you can specify in your Mustache template:
 

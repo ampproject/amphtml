@@ -2,15 +2,11 @@
 
 The Bento Facebook component allows you to embed a Facebook post, a Facebook video, or a comment on a Facebook post.
 
-## Usage
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/facebook
@@ -21,7 +17,7 @@ import {defineElement as defineBentoFacebook} from '@bentoproject/facebook';
 defineBentoFacebook();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
 
 ```html
 <head>
@@ -137,7 +133,7 @@ defineBentoFacebook();
 </bento-facebook>
 ```
 
-#### Layout and Style
+### Layout and Style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -161,16 +157,16 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-#### Attributes
+### Attributes
 
-##### `data-href`
+#### `data-href`
 
 The URL of the Facebook post/video/comment. For example, a post or video will
 look like `https://www.facebook.com/zuck/posts/10102593740125791`. A comment or
 comment reply will look like
 `https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185`.
 
-##### `data-embed-as`
+#### `data-embed-as`
 
 The value can be either `post`, `video`, `comments`, `like`, or `page`.
 The default value is `post`.
@@ -196,52 +192,52 @@ The `comment` value is deprecated but previously was used to embed a single comm
 This is not to be confused with
 [`amp-facebook-comments`](https://amp.dev/documentation/examples/components/amp-facebook-comments/).
 
-##### `data-align-center`
+#### `data-align-center`
 
 The value is either `true` or `false`. The default is `false`.
 
 For posts and videos, having this attribute set to true would align the
 post/video container to center.
 
-##### `data-allowfullscreen`
+#### `data-allowfullscreen`
 
 The value is either set or omitted. The default is omitted (no fullscreen).
 
 When embedding a video, set this value to allow for a fullscreen experience.
 
-##### `data-include-comment-parent`
+#### `data-include-comment-parent`
 
 The value is either `true` or `false`. The default is `false`.
 
 When you are embedding a comment reply, you can optionally also include the
 parent comment of the reply.
 
-##### `data-action` (optional)
+#### `data-action` (optional)
 
 The verb to display on the button. Can be either `like` or `recommend`. The
 default is `like`.
 
-##### `data-hide-cover` (optional)
+#### `data-hide-cover` (optional)
 
 Hides the cover photo in the header. Default value is `false`.
 
-##### `data-hide-cta` (optional)
+#### `data-hide-cta` (optional)
 
 Hides the custom call to action button (if available). Default value is `false`.
 
-##### `data-kd_site` (optional)
+#### `data-kd_site` (optional)
 
 This attribute is also known as `data-kid_directed_site` in the Facebook SDK.
 If your web site or online service, or a portion of your service, is directed to
 children under 13 you must enable this attribute. The default is `false`.
 
-##### `data-layout` (optional)
+#### `data-layout` (optional)
 
 Selects one of the different layouts that are available for the plugin. Can be
 one of `standard`, `button_count`, `button` or `box_count`. The default is
 `standard`.
 
-##### `data-locale` (optional)
+#### `data-locale` (optional)
 
 By default, the locale is set to user's system language; however, you can
 specify a locale as well.
@@ -249,32 +245,32 @@ specify a locale as well.
 For details on strings accepted here please visit the
 [Facebook API Localization page](https://developers.facebook.com/docs/internationalization).
 
-##### `data-numposts` (optional)
+#### `data-numposts` (optional)
 
 The number of comments to show. Currently Facebook SDK limits this to max 100.
 For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-##### `data-order-by` (optional)
+#### `data-order-by` (optional)
 
 The order to use when displaying comments. For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-##### `data-ref` (optional)
+#### `data-ref` (optional)
 
 A label for tracking referrals which must be less than 50 characters and can
 contain alphanumeric characters and some punctuation.
 
-##### `data-share` (optional)
+#### `data-share` (optional)
 
 Specifies whether to include a share button beside the Like button. This only
 works with the XFBML version. The default is `false`.
 
-##### `data-show-facepile` (optional)
+#### `data-show-facepile` (optional)
 
 Shows profile photos of friends who like the page. Default value is `true`.
 
-##### `data-size` (optional)
+#### `data-size` (optional)
 
 The size of the button, which can be one of two sizes, `large` or `small`. The
 default is `small`.
@@ -282,27 +278,27 @@ default is `small`.
 For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button#settings).
 
-##### `data-small-header` (optional)
+#### `data-small-header` (optional)
 
 Uses the small header instead. Default value is `false`.
 
-##### `data-tabs` (optional)
+#### `data-tabs` (optional)
 
 Specifies the tabs to render (i.e., `timeline`, `events`, `messages`). Use a
 comma-separated list to add multiple tabs (e.g., `timeline, events`). By
 default, the Facebook page plugin shows the timeline activity.
 
-##### title (optional)
+#### title (optional)
 
 Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook"`.
 
-### Preact/React Component
+---
+
+## Preact/React Component
 
 The examples below demonstrate use of the `<BentoFacebook>` as a functional component usable with the Preact or React libraries.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/facebook
@@ -323,16 +319,16 @@ function App() {
 }
 ```
 
-#### Props
+### Props
 
-##### `href`
+#### `href`
 
 The URL of the Facebook post/video/comment. For example, a post or video will
 look like `https://www.facebook.com/zuck/posts/10102593740125791`. A comment or
 comment reply will look like
 `https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185`.
 
-##### `embedAs`
+#### `embedAs`
 
 The value can be either `post`, `video`, `comments`, `like`, or `page`.
 The default value is `post`.
@@ -358,52 +354,52 @@ The `comment` value is deprecated but previously was used to embed a single comm
 This is not to be confused with
 [`amp-facebook-comments`](https://amp.dev/documentation/examples/components/amp-facebook-comments/).
 
-##### `alignCenter`
+#### `alignCenter`
 
 The value is either `true` or `false`. The default is `false`.
 
 For posts and videos, having this attribute set to true would align the
 post/video container to center.
 
-##### `allowFullScreen`
+#### `allowFullScreen`
 
 The value is either set or omitted. The default is omitted (no fullscreen).
 
 When embedding a video, set this value to allow for a fullscreen experience.
 
-##### `includeCommentParent`
+#### `includeCommentParent`
 
 The value is either `true` or `false`. The default is `false`.
 
 When you are embedding a comment reply, you can optionally also include the
 parent comment of the reply.
 
-##### `action` (optional)
+#### `action` (optional)
 
 The verb to display on the button. Can be either `like` or `recommend`. The
 default is `like`.
 
-##### `dataLayout` (optional)
+#### `dataLayout` (optional)
 
 Selects one of the different layouts that are available for the plugin. Can be
 one of `standard`, `button_count`, `button` or `box_count`. The default is
 `standard`.
 
-##### `hideCover` (optional)
+#### `hideCover` (optional)
 
 Hides the cover photo in the header. Default value is `false`.
 
-##### `hideCta` (optional)
+#### `hideCta` (optional)
 
 Hides the custom call to action button (if available). Default value is `false`.
 
-##### `kdSite` (optional)
+#### `kdSite` (optional)
 
 This attribute is also known as `data-kid_directed_site` in the Facebook SDK.
 If your web site or online service, or a portion of your service, is directed to
 children under 13 you must enable this attribute. The default is `false`.
 
-##### `locale` (optional)
+#### `locale` (optional)
 
 By default, the locale is set to user's system language; however, you can
 specify a locale as well.
@@ -411,32 +407,32 @@ specify a locale as well.
 For details on strings accepted here please visit the
 [Facebook API Localization page](https://developers.facebook.com/docs/internationalization).
 
-##### `numposts` (optional)
+#### `numposts` (optional)
 
 The number of comments to show. Currently Facebook SDK limits this to max 100.
 For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-##### `orderBy` (optional)
+#### `orderBy` (optional)
 
 The order to use when displaying comments. For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-##### `refLabel` (optional)
+#### `refLabel` (optional)
 
 A label for tracking referrals which must be less than 50 characters and can
 contain alphanumeric characters and some punctuation.
 
-##### `share` (optional)
+#### `share` (optional)
 
 Specifies whether to include a share button beside the Like button. This only
 works with the XFBML version. The default is `false`.
 
-##### `showFacepile` (optional)
+#### `showFacepile` (optional)
 
 Shows profile photos of friends who like the page. Default value is `true`.
 
-##### `size` (optional)
+#### `size` (optional)
 
 The size of the button, which can be one of two sizes, `large` or `small`. The
 default is `small`.
@@ -444,16 +440,16 @@ default is `small`.
 For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/like-button#settings).
 
-##### `smallHeader` (optional)
+#### `smallHeader` (optional)
 
 Uses the small header instead. Default value is `false`.
 
-##### `tabs` (optional)
+#### `tabs` (optional)
 
 Specifies the tabs to render (i.e., `timeline`, `events`, `messages`). Use a
 comma-separated list to add multiple tabs (e.g., `timeline, events`). By
 default, the Facebook page plugin shows the timeline activity.
 
-##### title (optional)
+#### title (optional)
 
 Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook"`.
