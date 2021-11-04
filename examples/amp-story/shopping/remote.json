@@ -1,6 +1,6 @@
 {
-  "items" : [
-     {
+  "items": [
+    {
       "product-tag-id": "hat",
       "brand-label": "...",
       "brand-favicon": "...",
@@ -12,8 +12,8 @@
       "reviews-data": "...",
       "cta-text": 1,
       "shipping-text": 1
-     },
-     {
+    },
+    {
       "product-tag-id": "sunglasses",
       "brand-label": "...",
       "brand-favicon": "...",
@@ -25,8 +25,8 @@
       "reviews-data": "...",
       "cta-text": 1,
       "shipping-text": 1
-     },
-     {
+    },
+    {
       "product-tag-id": "backpack",
       "brand-label": "...",
       "brand-favicon": "...",
@@ -38,6 +38,6 @@
       "reviews-data": "...",
       "cta-text": 1,
       "shipping-text": 1
-     }
+    }
   ]
 }
