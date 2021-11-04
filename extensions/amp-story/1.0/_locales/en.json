@@ -254,5 +254,9 @@
   "99": {
     "string": "Form successfully submitted",
     "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+  },
+  "100": {
+    "string": "Read more",
+    "description": "Label for a button to open a drawer containing additional content."
   }
 }
