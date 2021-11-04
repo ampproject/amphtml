@@ -74,9 +74,7 @@ export class InfoDialog {
 
     this.isBuilt_ = true;
 
-    const {canonicalUrl} = Services.documentInfoForDoc(
-      getAmpdoc(this.parentEl_)
-    );
+    const {canonicalUrl} = Services.documentInfoForDoc(this.parentEl_);
 
     this.element_ = (
       <div

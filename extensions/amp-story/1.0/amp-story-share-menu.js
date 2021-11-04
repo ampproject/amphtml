@@ -118,9 +118,7 @@ export class ShareMenu {
 
     this.isBuilt_ = true;
 
-    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported(
-      getAmpdoc(this.parentEl_)
-    );
+    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported();
 
     const child = this.isSystemShareSupported_
       ? this.buildForSystemSharing_()

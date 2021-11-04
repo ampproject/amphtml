@@ -171,7 +171,7 @@ export class ShareWidget {
     this.win = win;
 
     /** @protected @const {!Element} */
-    this.storyEl = storyEl;
+    this.storyEl_ = storyEl;
 
     /** @protected {?Element} */
     this.root = null;
@@ -221,7 +221,7 @@ export class ShareWidget {
       return;
     }
 
-    const linkShareButton = renderLinkShareButtonElement(this.storyEl);
+    const linkShareButton = renderLinkShareButtonElement(this.storyEl_);
 
     this.add_(linkShareButton);
 
@@ -250,11 +250,11 @@ export class ShareWidget {
         this.storyEl,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
-      Toast.show(this.storyEl, devAssert(failureString));
+      Toast.show(this.storyEl_, devAssert(failureString));
       return;
     }
 
-    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url));
+    Toast.show(this.storyEl_, buildCopySuccessfulToast(this.win.document, url));
   }
 
   /** @private */
@@ -277,13 +277,11 @@ export class ShareWidget {
   /**
    * NOTE(alanorozco): This is a duplicate of the logic in the
    * `amp-social-share` component.
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc=}  ampdoc
    * @return {boolean} Whether the browser supports native system sharing.
    */
-  isSystemShareSupported(ampdoc = this.getAmpDoc_()) {
-    const viewer = Services.viewerForDoc(ampdoc);
-
-    const platform = Services.platformFor(this.win);
+  isSystemShareSupported() {
+    const viewer = Services.viewerForDoc(this.storyEl_);
+    const platform = Services.platformFor(this.storyEl_);
 
     // Chrome exports navigator.share in WebView but does not implement it.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
