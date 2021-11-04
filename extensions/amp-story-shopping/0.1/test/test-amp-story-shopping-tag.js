@@ -2,6 +2,8 @@ import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 import '../amp-story-shopping';
 
+import {getStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
   {
@@ -17,6 +19,9 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
+
+      getStoreService(win);
+
       await createAmpStoryShoppingTag();
     });
 
@@ -37,6 +42,28 @@ describes.realWin(
     it('should build shopping tag component', () => {
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
       expect(shoppingTag.isLayoutSupported(Layout.CONTAINER)).to.be.true;
+    });
+
+    it('should process config data and set text container content if data not null', () => {
+      shoppingTag.container_.id = 'sunglasses';
+      const shoppingState = {
+        'sunglasses': {'product-title': 'Spectacular Spectacles'},
+      };
+      shoppingTag.updateShoppingTag_(shoppingState);
+      expect(shoppingTag.container_.textContent).to.equal(
+        'Spectacular Spectacles'
+      );
+    });
+
+    it('should not process config data and set text container content if id not found is null', () => {
+      shoppingTag.container_.id = 'hat';
+      const shoppingState = {
+        'sunglasses': {'product-title': 'Spectacular Spectacles'},
+      };
+      shoppingTag.updateShoppingTag_(shoppingState);
+      expect(shoppingTag.container_.textContent).to.not.equal(
+        'Spectacular Spectacles'
+      );
     });
   }
 );

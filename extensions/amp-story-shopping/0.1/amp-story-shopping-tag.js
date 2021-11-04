@@ -62,7 +62,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   updateShoppingTag_(shoppingState) {
-    this.myText_ = shoppingState[this.container_.id]['product-title'];
-    this.container_.textContent = this.myText_;
+    if (shoppingState[this.container_.id] != null) {
+      this.myText_ = shoppingState[this.container_.id]['product-title'];
+      this.container_.textContent = this.myText_;
+    }
   }
 }
