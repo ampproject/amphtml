@@ -14,9 +14,10 @@ const remapping = /** @type {*} */ (Remapping);
  * Minify passed string.
  *
  * @param {string} code
+ * @param {boolean} compress whether to compress or only remove whitespace
  * @return {Promise<Object<string, terser.SourceMapOptions['content']>>}
  */
-async function terserMinify(code) {
+async function terserMinify(code, compress) {
   const options = {
     output: {
       beautify: !!argv.pretty_print,
@@ -26,7 +27,14 @@ async function terserMinify(code) {
     },
     sourceMap: true,
   };
-  const minified = await terser.minify(code, options);
+  let minified;
+  if (compress) {
+    minified = await terser.minify(code, options);
+  } else {
+    options.mangle = false;
+    options.compress = {defaults: false, unused: true};
+    minified = await terser.minify(code, options);
+  }
 
   return {
     compressed: minified.code,
@@ -45,7 +53,6 @@ async function postClosureBabel(file) {
     debug(CompilationLifecycles['complete'], file);
     return;
   }
-
   debug(CompilationLifecycles['closured-pre-babel'], file);
   /** @type {?babel.TransformOptions} */
   const babelOptions = babel.loadOptions({caller: {name: 'post-closure'}});
@@ -56,7 +63,10 @@ async function postClosureBabel(file) {
   }
 
   debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
-  const {compressed, terserMap} = await terserMinify(code);
+  const {compressed, terserMap} = await terserMinify(
+    code,
+    !file.includes('shadow-dom-polyfill')
+  );
   await fs.outputFile(file, compressed);
 
   const closureMap = await fs.readJson(`${file}.map`, 'utf8');
