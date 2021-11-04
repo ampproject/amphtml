@@ -242,7 +242,7 @@ export class ShareWidget {
 
     if (!copyTextToClipboard(this.win, url)) {
       const failureString = localize(
-        this.storyEl_,
+        this.storyEl,
         LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl, dev().assertString(failureString));
