@@ -275,7 +275,7 @@ export class ShareWidget {
    */
   isSystemShareSupported() {
     const viewer = Services.viewerForDoc(this.storyEl_);
-    const platform = Services.platformFor(this.storyEl_.win);
+    const platform = Services.platformFor(this.win);
 
     // Chrome exports navigator.share in WebView but does not implement it.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
