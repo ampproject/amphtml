@@ -1,16 +1,17 @@
+import * as Preact from '#core/dom/jsx';
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
+import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
 import {dev} from '#utils/log';
 import {getHistoryState} from '#core/window/history';
 import {localize} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {htmlRefs} from '#core/dom/static-template';
 import {
   allowlistFormActions,
   getResponseAttributeElements,
@@ -124,18 +125,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    const closeButtonEl = htmlFor(this.element)`
-          <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
-              role="button">
-          </button>`;
-    closeButtonEl.setAttribute(
-      'aria-label',
-      localize(this.element, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
+    const closeButtonEl = (
+      <button
+        class="i-amphtml-story-page-attachment-close-button"
+        aria-label={localize(
+          this.element,
+          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+        role="button"
+      ></button>
     );
 
     const titleAndCloseWrapperEl = this.headerEl.appendChild(
-      htmlFor(this.element)`
-            <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
+      <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>
     );
     titleAndCloseWrapperEl.appendChild(closeButtonEl);
 
@@ -143,8 +145,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.element.getAttribute('title') ||
       this.element.getAttribute('data-title');
     if (titleText) {
-      const titleEl = htmlFor(this.element)`
-        <span class="i-amphtml-story-page-attachment-title"></span>`;
+      const titleEl = (
+        <span class="i-amphtml-story-page-attachment-title"></span>
+      );
       titleEl.textContent = titleText;
       titleAndCloseWrapperEl.appendChild(titleEl);
     }
@@ -203,11 +206,21 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
     // Use an anchor element to make this a real link in vertical rendering.
-    const link = htmlFor(this.element)`
+    const link = (
       <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-        <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
-        <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
-      </a>`;
+        <span class="i-amphtml-story-page-attachment-remote-title">
+          <span ref="openStringEl"></span>
+          <span ref="urlStringEl"></span>
+        </span>
+        <svg
+          class="i-amphtml-story-page-attachment-remote-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 48 48"
+        >
+          <path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path>
+        </svg>
+      </a>
+    );
 
     const isPageOutlink = this.element.tagName === 'AMP-STORY-PAGE-OUTLINK';
     if (isPageOutlink) {
@@ -243,7 +256,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       link.prepend(ctaImgEl);
     } else if (!openImgAttr) {
       // Attach link icon SVG by default.
-      const linkImage = buildOutlinkLinkIconElement(link);
+      const linkImage = renderOutlinkLinkIconElement();
       link.prepend(linkImage);
     }
 
@@ -497,6 +510,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   getPublisherOrigin_() {
     const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
-    return publisherOrigin.replace(/https?:\/\//, '');
+    return publisherOrigin.replace(/^http(s)?:\/\/(www.)?/, '');
   }
 }

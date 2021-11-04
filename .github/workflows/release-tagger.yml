@@ -27,6 +27,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v2
         with:
+          check-latest: true
           node-version: lts/*
       - uses: actions/checkout@v2
       - run: bash ./.github/workflows/install_dependencies.sh

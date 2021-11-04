@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
@@ -26,8 +27,6 @@ import {dict} from '#core/types/object';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
-
-import {renderAsElement} from './simple-template';
 
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
@@ -89,237 +88,115 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
 /**
  * @param {!Element} element
- * @return {!./simple-template.ElementDef}
+ * @return {!Element}
  */
-const getTemplate = (element) => ({
-  tag: 'aside',
-  attrs: dict({
-    'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
-  }),
-  children: [
-    {
-      tag: 'a',
-      attrs: dict({
-        'class': ATTRIBUTION_CLASS,
-        'target': '_blank',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-logo-container',
-          }),
-          children: [
-            {
-              tag: 'img',
-              attrs: dict({
-                'alt': '',
-                'class': 'i-amphtml-story-attribution-logo',
-              }),
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-text',
-          }),
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-has-new-page-notification-container',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-has-new-page-text-wrapper',
-          }),
-          children: [
-            {
-              tag: 'span',
-              attrs: dict({
-                'class': 'i-amphtml-story-has-new-page-circle-icon',
-              }),
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-has-new-page-text',
-              }),
-              children: [
-                localize(element, [
-                  LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
-                ]),
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': INFO_CLASS + ' i-amphtml-story-button',
-            'aria-label': localize(
+const renderSystemLayerElement = (element) => (
+  <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
+    <a class={ATTRIBUTION_CLASS} target="_blank">
+      <div class="i-amphtml-story-attribution-logo-container">
+        <img alt="" class="i-amphtml-story-attribution-logo" />
+      </div>
+      <div class="i-amphtml-story-attribution-text" />
+    </a>
+    <div class="i-amphtml-story-has-new-page-notification-container">
+      <div class="i-amphtml-story-has-new-page-text-wrapper">
+        <span class="i-amphtml-story-has-new-page-circle-icon" />
+        <div class="i-amphtml-story-has-new-page-text">
+          {localize(element, LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT)}
+        </div>
+      </div>
+    </div>
+    <div class="i-amphtml-story-system-layer-buttons">
+      <div
+        role="button"
+        class={INFO_CLASS + ' i-amphtml-story-button'}
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL
+        )}
+      />
+      <div class="i-amphtml-story-sound-display">
+        <div role="alert" class="i-amphtml-message-container">
+          <div class="i-amphtml-story-mute-text">
+            {localize(
               element,
-              LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL
-            ),
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-sound-display',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({
-                'role': 'alert',
-                'class': 'i-amphtml-message-container',
-              }),
-              children: [
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-mute-text',
-                  }),
-                  children: [
-                    localize(
-                      element,
-                      LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
-                    ),
-                  ],
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-unmute-sound-text',
-                  }),
-                  children: [
-                    localize(
-                      element,
-                      LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
-                    ),
-                  ],
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-unmute-no-sound-text',
-                  }),
-                  children: [
-                    localize(
-                      element,
-                      LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
-                    ),
-                  ],
-                },
-              ],
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-                'aria-label': localize(
-                  element,
-                  LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
-                ),
-              }),
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': MUTE_CLASS + ' i-amphtml-story-button',
-                'aria-label': localize(
-                  element,
-                  LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
-                ),
-              }),
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-paused-display',
-          }),
-          children: [
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': PAUSE_CLASS + ' i-amphtml-story-button',
-                'aria-label': localize(
-                  element,
-                  LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL
-                ),
-              }),
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': PLAY_CLASS + ' i-amphtml-story-button',
-                'aria-label': localize(
-                  element,
-                  LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL
-                ),
-              }),
-            },
-          ],
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class':
-              SKIP_TO_NEXT_CLASS +
-              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
-            'aria-label': localize(
+              LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
+            )}
+          </div>
+          <div class="i-amphtml-story-unmute-sound-text">
+            {localize(
               element,
-              LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
-            ),
-          }),
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class': SHARE_CLASS + ' i-amphtml-story-button',
-            'aria-label': localize(
+              LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
+            )}
+          </div>
+          <div class="i-amphtml-story-unmute-no-sound-text">
+            {localize(
               element,
-              LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL
-            ),
-          }),
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class':
-              CLOSE_CLASS +
-              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
-            'aria-label': localize(
-              element,
-              LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-            ),
-          }),
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-system-layer-buttons-start-position',
-      }),
-    },
-  ],
-});
+              LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
+            )}
+          </div>
+        </div>
+        <button
+          class={UNMUTE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
+          )}
+        />
+        <button
+          class={MUTE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
+          )}
+        />
+      </div>
+      <div class="i-amphtml-paused-display">
+        <button
+          class={PAUSE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL
+          )}
+        />
+        <button
+          class={PLAY_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL
+          )}
+        />
+      </div>
+      <button
+        class={
+          SKIP_TO_NEXT_CLASS +
+          ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+        }
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
+        )}
+      />
+      <button
+        class={SHARE_CLASS + ' i-amphtml-story-button'}
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL
+        )}
+      />
+      <button
+        class={
+          CLOSE_CLASS + ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+        }
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+      />
+    </div>
+    <div class="i-amphtml-story-system-layer-buttons-start-position" />
+  </aside>
+);
 
 /**
  * Contains the event name belonging to the viewer control.
@@ -432,10 +309,7 @@ export class SystemLayer {
 
     this.root_ = this.win_.document.createElement('div');
     this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderAsElement(
-      this.win_.document,
-      getTemplate(this.parentEl_)
-    );
+    this.systemLayerEl_ = renderSystemLayerElement(this.parentEl_);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.

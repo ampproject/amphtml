@@ -1,5 +1,6 @@
+import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
-import {createElementWithAttributes, removeElement} from '#core/dom';
+import {removeElement} from '#core/dom';
 import {getWin} from '#core/window';
 
 /** @private @const {string} */
@@ -29,20 +30,11 @@ export class Toast {
   static show(storyEl, childNodeOrText) {
     const win = getWin(storyEl);
 
-    const toast = createElementWithAttributes(
-      win.document,
-      'div',
-      /** @type {!JsonObject} */ ({
-        'class': TOAST_CLASSNAME,
-        'role': TOAST_ROLE,
-      })
+    const toast = (
+      <div class={TOAST_CLASSNAME} role={TOAST_ROLE}>
+        {childNodeOrText}
+      </div>
     );
-
-    if (typeof childNodeOrText == 'string') {
-      toast.textContent = childNodeOrText;
-    } else {
-      toast.appendChild(childNodeOrText);
-    }
 
     storyEl.appendChild(toast);
 

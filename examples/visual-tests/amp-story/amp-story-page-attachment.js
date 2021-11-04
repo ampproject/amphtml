@@ -3,7 +3,7 @@
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
-} = require('../../../build-system/tasks/visual-diff/helpers');
+} = require('../../../build-system/tasks/visual-diff/verifiers');
 
 module.exports = {
   'custom text - inline CTA pre-tap UI should display': async (page, name) => {
