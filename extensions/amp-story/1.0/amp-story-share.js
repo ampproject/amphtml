@@ -11,7 +11,6 @@ import {dict, map} from '#core/types/object';
 import {localize} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
-import {listen} from '#utils/event-helper';
 import {addAttributesToElement} from '#core/dom';
 
 /**
