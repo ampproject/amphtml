@@ -18,7 +18,7 @@ export function allowlistFormActions(win) {
 }
 
 /**
- * @typedef {!Element|Array<!Element>}
+ * @typedef {!Element|Array<!Element>|string}
  */
 let FormElementChildrenDef;
 
@@ -45,53 +45,34 @@ const createStatusChildrenByAttribute = {
 };
 
 /**
- * @param {Element} parent
- * @param {string} attr
- * @return {?Element}
- */
-function selectByAttr(parent, attr) {
-  return parent.querySelector(`[${escapeCssSelectorIdent(attr)}]`);
-}
-
-/**
  * Add a default form attribute element for each absent response attribute.
  * @param {!Element} formEl The form to which the attribute elements will be
- *     added.
- * @private
- */
-export function setupResponseAttributeElements(formEl) {
-  for (const attribute in createStatusChildrenByAttribute) {
-    const el = selectByAttr(formEl, attribute);
-    if (!el) {
-      const children = createStatusChildrenByAttribute[attribute](formEl);
-      const element = (
-        <div>
-          <div class="i-amphtml-story-page-attachment-form-submission-status">
-            {children}
-          </div>
-        </div>
-      );
-      element.setAttribute(attribute, '');
-      formEl.appendChild(element);
-    }
-  }
-}
-
-/**
- * @param {!Element} formEl The form to which the attribute elements belong.
- * @return {!Array<!Element>} The list of response attribute elements that
+ *     selected or added.
+ * @return {Array<!Element>} The list of response attribute elements that
  *     belong to the given form.
  * @private
  */
-export function getResponseAttributeElements(formEl) {
-  return Object.keys(createStatusChildrenByAttribute).map((attr) =>
-    selectByAttr(formEl, attr)
-  );
+export function setupResponseAttributeElements(formEl) {
+  return Object.keys(createStatusChildrenByAttribute).map((attr) => {
+    const selected = formEl.querySelector(`[${escapeCssSelectorIdent(attr)}]`);
+    if (selected) {
+      return selected;
+    }
+    const created = (
+      <div>
+        <div class="i-amphtml-story-page-attachment-form-submission-status">
+          {createStatusChildrenByAttribute[attr](formEl)}
+        </div>
+      </div>
+    );
+    created.setAttribute(attr, '');
+    return formEl.appendChild(created);
+  });
 }
 
 /**
- * @param {string|Node} label
- * @return {!Element}
+ * @param {!FormElementChildrenDef} label
+ * @return {!FormElementChildrenDef}
  * @private
  */
 function createFormResultChildren(label) {

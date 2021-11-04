@@ -14,7 +14,6 @@ import {getSourceOrigin} from '../../../src/url';
 import {htmlRefs} from '#core/dom/static-template';
 import {
   allowlistFormActions,
-  getResponseAttributeElements,
   setupResponseAttributeElements,
 } from './amp-story-form';
 import {removeElement} from '#core/dom';
@@ -149,9 +148,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     if (forms.length > 0) {
       allowlistFormActions(this.win);
       forms.forEach((form) => {
-        setupResponseAttributeElements(form);
         // Scroll each response attribute element into view, when displayed.
-        getResponseAttributeElements(form).forEach((el) => {
+        setupResponseAttributeElements(form).forEach((el) => {
+          // TODO(wg-stories): Share ResizeObserver for runtime performance.
           new this.win.ResizeObserver((e) => {
             if (
               this.state === DrawerState.OPEN &&
