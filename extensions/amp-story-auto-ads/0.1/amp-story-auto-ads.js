@@ -2,9 +2,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {svgFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
-import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
 
 import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {
@@ -187,19 +185,19 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (!viewer.isEmbedded()) {
       return;
     }
-    viewer./*OK*/ sendMessageAwaitResponse('playerExperiments').then((json) => {
-      if (json) {
-        const obj = tryParseJson(json);
-        const ids = obj['experimentIds'];
-        isArray(ids) &&
+    viewer
+      ./*OK*/ sendMessageAwaitResponse('playerExperiments')
+      .then((expObj) => {
+        const ids = expObj?.['experimentIds'];
+        if (ids) {
           ids.forEach((id) => {
             const relevantExp = RELEVANT_PLAYER_EXPS[id];
             if (relevantExp) {
               forceExperimentBranch(this.win, relevantExp, id);
             }
           });
-      }
-    });
+        }
+      });
   }
 
   /**
