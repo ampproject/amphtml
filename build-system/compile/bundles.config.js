@@ -209,7 +209,21 @@ exports.extensionBundles = extensionBundles;
 /**
  * Used to generate component build targets
  */
-exports.bentoBundles = bentoBundles;
+exports.bentoBundles = bentoBundles.map((bundle) => {
+  /** @type {{name: string, version: string, options?: {bento: boolean, npm: boolean}}} */
+  const b = bundle;
+  // TODO(rileyajones): Remove this once the bento build process fully seperated.
+  if (!b.options) {
+    b.options = {
+      bento: true,
+      npm: true,
+    };
+  }
+  b.options.bento = true;
+  b.options.npm = true;
+
+  return b;
+});
 
 /**
  * Used to alias a version of an extension to an older deprecated version.
@@ -239,11 +253,8 @@ function verifyBundle_(condition, field, message, name, found) {
   }
 }
 
-/**
- * @param {Array<Object>} bundles
- */
-function verifyBundles(bundles) {
-  bundles.forEach((bundle, i) => {
+exports.verifyExtensionBundles = function () {
+  extensionBundles.forEach((bundle, i) => {
     const bundleString = JSON.stringify(bundle, null, 2);
     verifyBundle_(
       'name' in bundle,
@@ -253,7 +264,7 @@ function verifyBundles(bundles) {
       bundleString
     );
     verifyBundle_(
-      i === 0 || bundle.name.localeCompare(bundles[i - 1].name) >= 0,
+      i === 0 || bundle.name.localeCompare(extensionBundles[i - 1].name) >= 0,
       'name',
       'is out of order. bundles should be alphabetically sorted by name.',
       bundle.name,
@@ -273,7 +284,7 @@ function verifyBundles(bundles) {
       bundle.name,
       bundleString
     );
-    const duplicates = bundles.filter(
+    const duplicates = extensionBundles.filter(
       (duplicate) => duplicate.name === bundle.name
     );
     verifyBundle_(
@@ -286,12 +297,31 @@ function verifyBundles(bundles) {
       JSON.stringify(duplicates, null, 2)
     );
   });
-}
-
-exports.verifyExtensionBundles = function () {
-  verifyBundles(extensionBundles);
 };
 
 exports.verifyBentoBundles = function () {
-  verifyBundles(bentoBundles);
+  bentoBundles.forEach((bundle, i) => {
+    const bundleString = JSON.stringify(bundle, null, 2);
+    verifyBundle_(
+      'name' in bundle,
+      'name',
+      'is missing from',
+      '',
+      bundleString
+    );
+    verifyBundle_(
+      i === 0 || bundle.name.localeCompare(bentoBundles[i - 1].name) >= 0,
+      'name',
+      'is out of order. bundles should be alphabetically sorted by name.',
+      bundle.name,
+      bundleString
+    );
+    verifyBundle_(
+      'version' in bundle,
+      'version',
+      'is missing from',
+      bundle.name,
+      bundleString
+    );
+  });
 };

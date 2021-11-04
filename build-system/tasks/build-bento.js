@@ -42,7 +42,8 @@ function maybeInitializeComponents(
       declareExtension(
         c.name,
         c.version,
-        c.latestVersion,
+        // TODO(rileyajones): Remove this once the bento build process fully seperated.
+        '0.1',
         c.options,
         componentsObject,
         includeLatest
@@ -94,24 +95,16 @@ function getComponentsToBuild(preBuild = false) {
  * @param {string} componentsDir
  * @param {string} name
  * @param {string} version
- * @param {string} latestVersion
  * @param {boolean} hasCss
  * @param {?Object} options
  * @return {Promise<void>}
  */
-async function watchComponent(
-  componentsDir,
-  name,
-  version,
-  latestVersion,
-  hasCss,
-  options
-) {
+async function watchComponent(componentsDir, name, version, hasCss, options) {
   /**
    * Steps to run when a watched file is modified.
    */
   function watchFunc() {
-    buildComponent(name, version, latestVersion, hasCss, {
+    buildComponent(name, version, hasCss, {
       ...options,
       continueOnError: true,
       isRebuild: true,
@@ -142,20 +135,12 @@ async function watchComponent(
  *     the components directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
- * @param {string} latestVersion Latest version of the extension.
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @param {!Array=} extraGlobs
  * @return {!Promise<void>}
  */
-async function buildComponent(
-  name,
-  version,
-  latestVersion,
-  hasCss,
-  options,
-  extraGlobs
-) {
+async function buildComponent(name, version, hasCss, options, extraGlobs) {
   options = options || {};
   options.extraGlobs = extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
@@ -163,14 +148,7 @@ async function buildComponent(
   }
   const componentsDir = `src/bento/components/${name}/${version}`;
   if (options.watch) {
-    await watchComponent(
-      componentsDir,
-      name,
-      version,
-      latestVersion,
-      hasCss,
-      options
-    );
+    await watchComponent(componentsDir, name, version, hasCss, options);
   }
 
   if (hasCss) {
@@ -218,14 +196,7 @@ async function buildComponent(
 async function doBuildComponent(components, component, options) {
   const e = components[component];
   const o = {...options, ...e};
-  await buildComponent(
-    e.name,
-    e.version,
-    e.latestVersion,
-    e.hasCss,
-    o,
-    e.extraGlobs
-  );
+  await buildComponent(e.name, e.version, e.hasCss, o, e.extraGlobs);
 }
 
 /**
