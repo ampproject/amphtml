@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {toggleAttribute} from '#core/dom';
 import {childElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
@@ -9,8 +10,6 @@ import {PreactBaseElement} from '#preact/base-element';
 import {forwardRef} from '#preact/compat';
 import {useDOMHandle} from '#preact/component';
 import {useSlotContext} from '#preact/slot';
-
-import {devAssert} from '#utils/log';
 
 import {
   BentoAccordion,
