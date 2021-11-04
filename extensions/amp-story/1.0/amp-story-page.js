@@ -1719,9 +1719,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   renderOpenAttachmentUI_() {
-    // AttachmentEl can be either amp-story-page-attachment or amp-story-page-outlink
+    // AttachmentEl can be any component that extends draggable drawer.
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink'
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
     if (!attachmentEl) {
       return;
@@ -1775,7 +1775,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   openAttachment(shouldAnimate = true) {
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink'
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
 
     if (!attachmentEl) {

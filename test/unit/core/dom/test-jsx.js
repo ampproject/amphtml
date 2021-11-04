@@ -144,6 +144,22 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     );
   });
 
+  it('renders with SVG namespace with props.xmlns', () => {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const withProp = createElement('svg', {xmlns});
+    expect(withProp.namespaceURI).to.equal(xmlns);
+    const withoutProp = createElement('svg');
+    expect(withoutProp.namespaceURI).to.not.equal(xmlns);
+  });
+
+  it('renders with SVG namespace with props.xmlns (compiled)', () => {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const withProp = <svg />;
+    expect(withProp.namespaceURI).to.equal(xmlns);
+    const withoutProp = <div />;
+    expect(withoutProp.namespaceURI).to.not.equal(xmlns);
+  });
+
   describe('unsupported JSX features', () => {
     it('does not support Fragments', () => {
       allowConsoleError(() => {
