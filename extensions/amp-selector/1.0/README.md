@@ -1,16 +1,12 @@
 # Bento Selector
 
-The Bento Selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
+An input that presents any type of content as list of options. The contents of the options aren't just limited to text. It can be configured to allow the user to select only one, or multiple options.
 
-## Usage
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style)
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/selector
@@ -21,7 +17,7 @@ import {defineElement as defineBentoSelector} from '@bentoproject/selector';
 defineBentoSelector();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
 
 ```html
 <head>
@@ -49,7 +45,7 @@ defineBentoSelector();
 </body>
 ```
 
-#### Usage notes
+### Usage notes
 
 -   A `bento-selector` can contain any arbitrary HTML elements or AMP components (e.g., `bento-carousel`, etc.).
 -   A `bento-selector` cannot contain any nested `bento-selector` controls.
@@ -60,7 +56,7 @@ defineBentoSelector();
 -   To disable the entire `bento-selector`, add the `disabled` attribute to the `bento-selector` element.
 -   When an `bento-selector` contains a `name` attribute and the `bento-selector` is inside a `form` tag, if a submit event occurs on the form, the `bento-selector`behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the `bento-selector`.
 
-#### Layout and Style
+### Layout and Style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -74,13 +70,13 @@ You may also make the light-weight pre-upgrade styles available inline:
 </style>
 ```
 
-#### Attributes on `<bento-selector>`
+### Attributes on `<bento-selector>`
 
-**disabled, form, multiple, name**
+#### disabled, form, multiple, name
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
-**keyboard-select-mode**
+#### keyboard-select-mode
 
 The `keyboard-select-mode` attribute dictates the keyboard navigation behavior for options inside `<bento-selector>`.
 
@@ -96,21 +92,22 @@ The `keyboard-select-mode` attribute dictates the keyboard navigation behavior f
   </li>
 </ul>
 
-#### Attributes on option elements
+### Attributes on option elements
 
-**option (required)**
+#### option (required)
 
 Indicates that the option is selectable. If a value is specified, the contents of the value is submitted with the form.
 
-**disabled, selected**
+#### disabled, selected
 
 The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
 
-#### Actions
+### Actions
 
 The `bento-selector` API allows you to perform the following actions:
 
-**selectBy(delta: number)**
+#### selectBy(delta: number)
+
 Closes the selector.
 
 ```js
@@ -118,7 +115,8 @@ api.selectBy(1); // Select next option in DOM sequence.
 api.selectBy(-2); // Select the option that is two previous in DOM sequence.
 ```
 
-**toggle(optionValue: string, opt_select: boolean|undefined)**
+#### toggle(optionValue: string, opt_select: boolean|undefined)
+
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
 ```js
@@ -126,11 +124,11 @@ api.toggle('a'); // Toggle the item with the attribute `option="a"`.
 api.toggle('1', true); // Select the item with the attribute `option="1"`.
 ```
 
-#### Events
+### Events
 
 The `bento-selector` API allows you to register and respond to the following events:
 
-**select**
+#### select
 
 This event is triggered when the user selects an option.
 Multi-selectors and single-selectors fire this when selecting or unselecting options.
@@ -148,13 +146,13 @@ Tapping disabled options does not trigger the `select` event.
 selector.addEventListener('select', (e) => console.log(e.data.targetOption));
 ```
 
-### Preact/React Component
+---
+
+## Preact/React Component
 
 The examples below demonstrate use of the `<BentoSelector>` as a functional component usable with the Preact or React libraries.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/selector
@@ -180,9 +178,9 @@ function App() {
 }
 ```
 
-#### Layout and Style
+### Layout and Style
 
-**Container type**
+#### Container type
 
 The `BentoSelector` component can be styled with standard CSS.
 
@@ -210,13 +208,13 @@ Or via `className`:
 }
 ```
 
-#### Props for `<BentoSelector>`
+### Props for `<BentoSelector>`
 
-**disabled, form, multiple, name**
+#### disabled, form, multiple, name
 
 The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
-**keyboardSelectMode**
+#### keyboardSelectMode
 
 The `keyboardSelectMode` attribute dictates the keyboard navigation behavior for options inside `<BentoSelector>`.
 
@@ -232,17 +230,17 @@ The `keyboardSelectMode` attribute dictates the keyboard navigation behavior for
   </li>
 </ul>
 
-#### Props for `<BentoSelectorOption>`
+### Props for `<BentoSelectorOption>`
 
-**option**
+#### option
 
 Indicates that the option is selectable. If a value is specified, the contents of the value is submitted with the form.
 
-**disabled, selected**
+#### disabled, selected
 
 The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento components are highly interactive through their API. The `BentoSelector` component API is accessible by passing a `ref`:
 
@@ -262,11 +260,12 @@ function App() {
 }
 ```
 
-#### Actions
+### Actions
 
 The `BentoSelector` API allows you to perform the following actions:
 
-**selectBy(delta: number)**
+#### selectBy(delta: number)
+
 Closes the selector.
 
 ```js
@@ -274,7 +273,8 @@ ref.current.selectBy(1); // Select next option in DOM sequence.
 ref.current.selectBy(-2); // Select the option that is two previous in DOM sequence.
 ```
 
-**toggle(optionValue: string, opt_select: boolean|undefined)**
+#### toggle(optionValue: string, opt_select: boolean|undefined)
+
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
 ```js
@@ -282,11 +282,11 @@ ref.current.toggle('1'); // Toggle the item with the attribute `option="1"`.
 ref.current.toggle('2', true); // Select the item with the attribute `option="2"`.
 ```
 
-#### Events
+### Events
 
 `BentoSelector` API allows you to register and respond to the following events:
 
-**onChange**
+#### onChange
 
 This event is triggered when a selector option is selected or deselected.
 The `onChange` prop gives you two key options:
