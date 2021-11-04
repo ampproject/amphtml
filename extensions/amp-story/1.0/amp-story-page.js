@@ -59,7 +59,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {toggle} from '#core/dom/style';
+import {px, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -213,6 +213,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?AdvancementConfig} */
     this.advancement_ = null;
+
+    /** @private {?Element} */
+    this.cssVariablesStyleEl_ = null;
 
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
@@ -610,6 +613,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           const {height, width} = layoutBox;
           state.height = height;
           state.width = width;
+          state.vh = height / 100;
         },
         mutate: (state) => {
           const {height, width} = state;
@@ -617,6 +621,15 @@ export class AmpStoryPage extends AMP.BaseElement {
             return;
           }
           this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+          if (!this.cssVariablesStyleEl_) {
+            const doc = this.win.document;
+            this.cssVariablesStyleEl_ = doc.createElement('style');
+            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
+            doc.head.appendChild(this.cssVariablesStyleEl_);
+          }
+          this.cssVariablesStyleEl_.textContent = `:root {--story-page-vh: ${px(
+            state.vh
+          )} !important}`;
         },
       },
       {}
@@ -1706,9 +1719,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   renderOpenAttachmentUI_() {
-    // AttachmentEl can be either amp-story-page-attachment or amp-story-page-outlink
+    // AttachmentEl can be any component that extends draggable drawer.
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink'
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
     if (!attachmentEl) {
       return;
@@ -1762,7 +1775,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   openAttachment(shouldAnimate = true) {
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink'
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
 
     if (!attachmentEl) {

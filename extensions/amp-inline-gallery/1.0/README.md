@@ -30,28 +30,26 @@ The example below contains a `bento-inline-gallery` consisting of three slides w
 ```html
 <head>
   <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css"
-  />
-</head>
+
+  <script async src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"></script>
+  <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css">
+
+  <script async src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"></script>
+  <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css">
 <body>
   <bento-inline-gallery id="inline-gallery">
-    <bento-inline-gallery-thumbnails
-      aspect-ratio="1.5"
-      loop
-    ></bento-inline-gallery-thumbnails>
-    <bento-base-carousel snap-align="center" visible-count="1.2" loop>
-      <img src="server.com/static/inline-examples/images/image1.jpg" />
-      <img src="server.com/static/inline-examples/images/image2.jpg" />
-      <img src="server.com/static/inline-examples/images/image3.jpg" />
+    <bento-inline-gallery-thumbnails style="height: 100px;" loop></bento-inline-gallery-thumbnails>
+
+    <bento-base-carousel style="height: 200px;" snap-align="center" visible-count="3" loop>
+      <img src="img1.jpeg" data-thumbnail-src="img1-thumbnail.jpeg" />
+      <img src="img2.jpeg" data-thumbnail-src="img2-thumbnail.jpeg" />
+      <img src="img3.jpeg" data-thumbnail-src="img3-thumbnail.jpeg" />
+      <img src="img4.jpeg" data-thumbnail-src="img4-thumbnail.jpeg" />
+      <img src="img5.jpeg" data-thumbnail-src="img5-thumbnail.jpeg" />
+      <img src="img6.jpeg" data-thumbnail-src="img6-thumbnail.jpeg" />
     </bento-base-carousel>
-    <bento-inline-gallery-pagination inset></bento-inline-gallery-pagination>
+
+    <bento-inline-gallery-pagination style="height: 20px;"></bento-inline-gallery-pagination>
   </bento-inline-gallery>
 </body>
 ```

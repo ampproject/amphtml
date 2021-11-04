@@ -8,29 +8,38 @@ const os = require('os');
 const path = require('path');
 const Percy = require('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
-const {
-  escapeHtml,
-  log,
-  sleep,
-  verifySelectorsInvisible,
-  verifySelectorsVisible,
-  waitForPageLoad,
-} = require('./helpers');
 const {
   gitBranchName,
   gitCiMainBaseline,
   gitCommitterEmail,
   shortSha,
 } = require('../../common/git');
+const {
+  PUPPETEER_CHROMIUM_REVISION,
+  launchBrowser,
+  loadBrowserFetcher,
+  newPage,
+  resetPage,
+} = require('./browser');
+const {
+  verifySelectorsInvisible,
+  verifySelectorsVisible,
+  waitForPageLoad,
+} = require('./verifiers');
+const {BASE_TEST_FUNCTION, HOST, PORT} = require('./consts');
 const {cyan, green, red, yellow} = require('kleur/colors');
+const {devMode} = require('./dev-mode');
+const {drawBoxes, log} = require('./log');
+const {escapeHtml, sleep} = require('./helpers');
 const {isCiBuild} = require('../../common/ci');
 const {isPercyEnabled} = require('@percy/sdk-utils');
 const {startServer, stopServer} = require('../serve');
+const {TestErrorDef, WebpageDef} = require('./types');
 
 // CSS injected in every page tested.
 // Normally, as in https://docs.percy.io/docs/percy-specific-css
@@ -41,26 +50,9 @@ const percyCss = [
   '.i-amphtml-new-loader * { animation: none !important; }',
 ].join('\n');
 
-// REPEATING TODO(@ampproject/wg-infra): Update this whenever the Percy backend
-// starts using a new version of Chrome to render DOM snapshots.
-//
-// Steps:
-// 1. Open a recent Percy build, and click the “ⓘ” icon
-// 2. Note the Chrome major version at the bottom
-// 3. Look up the full version at https://en.wikipedia.org/wiki/Google_Chrome_version_history
-// 4. Open https://omahaproxy.appspot.com in a browser
-// 5. Go to "Tools" -> "Version information"
-// 6. Paste the full version (add ".0" at the end) in the "Version" field and click "Lookup"
-// 7. Copy the value next to "Branch Base Position" and update the line below
-const PUPPETEER_CHROMIUM_REVISION = '870763'; // 91.0.4472.0
-
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
 };
-const VIEWPORT_WIDTH = 1400;
-const VIEWPORT_HEIGHT = 100000;
-const HOST = 'localhost';
-const PORT = 8000;
 const PERCY_AGENT_PORT = 5338;
 const WAIT_FOR_TABS_MS = 1000;
 const WAIT_FOR_AGENT_MS = 5000;
@@ -92,36 +84,6 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/snapshot-error.html'),
   'utf8'
 );
-
-/**
- * @typedef {{
- *  name: string,
- *  message: string,
- *  error: Error,
- *  consoleMessages: puppeteer.ConsoleMessage[],
- * }}
- */
-let TestErrorDef;
-
-/**
- * @typedef {{
- *  url: string,
- *  name: string,
- *  viewport: {
- *    width: number,
- *    height: number,
- *  },
- *  loading_incomplete_selectors: string[],
- *  loading_complete_selectors: string[],
- *  loading_complete_delay_ms: number,
- *  enable_percy_javascript: boolean,
- *  interactive_tests: string,
- *  no_base_test: boolean,
- *  flaky: boolean,
- *  tests_: Object<string, Function>,
- * }}
- */
-let WebpageDef;
 
 /**
  * Decode the write-only Percy token during CI builds.
@@ -177,7 +139,7 @@ function setPercyTargetCommit() {
  *
  * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
  *     manager.
- * @return {!Promise<Percy|undefined>} percy agent instance.
+ * @return {Promise<Percy|undefined>} percy agent instance.
  */
 async function launchPercyAgent(browserFetcher) {
   if (argv.percy_disabled) {
@@ -233,131 +195,6 @@ async function launchPercyAgent(browserFetcher) {
 }
 
 /**
- * Launches an AMP webserver for minified js.
- * @return {Promise<void>}
- */
-async function launchWebServer() {
-  await startServer(
-    {host: HOST, port: PORT},
-    {quiet: !argv.webserver_debug},
-    {minified: true}
-  );
-}
-
-/**
- * Launches a Puppeteer controlled browser.
- *
- * Waits until the browser is up and reachable, and ties its lifecycle to this
- * process's lifecycle.
- *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
- * @return {!Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
- */
-async function launchBrowser(browserFetcher) {
-  const browserOptions = {
-    args: [
-      '--disable-background-media-suspend',
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-extensions',
-      '--disable-gpu',
-      '--disable-renderer-backgrounding',
-      '--no-sandbox',
-      '--no-startup-window',
-    ],
-    dumpio: argv.chrome_debug,
-    headless: true,
-    executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
-      .executablePath,
-    waitForInitialPage: false,
-  };
-  return await puppeteer.launch(browserOptions);
-}
-
-/**
- * Opens a new browser tab, resizes its viewport, and returns a Page handler.
- *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {?{height: number, width: number}} viewport optional viewport size
- *     object with numeric fields `width` and `height`.
- * @return {!Promise<!puppeteer.Page>}
- */
-async function newPage(browser, viewport = null) {
-  log('verbose', 'Creating new tab');
-
-  const context = await browser.createIncognitoBrowserContext();
-  const page = await context.newPage();
-  page.setDefaultNavigationTimeout(0);
-  await page.setJavaScriptEnabled(true);
-  await page.setRequestInterception(true);
-  page.on('request', (interceptedRequest) => {
-    const requestUrl = new URL(interceptedRequest.url());
-    const mockedFilepath = path.join(
-      path.dirname(__filename),
-      'network-mocks',
-      requestUrl.hostname,
-      encodeURIComponent(
-        `${requestUrl.pathname.substr(1)}${requestUrl.search}`
-      ).replace(/%2F/g, '/')
-    );
-
-    if (
-      requestUrl.protocol === 'data:' ||
-      requestUrl.hostname === HOST ||
-      requestUrl.hostname.endsWith(`.${HOST}`)
-    ) {
-      return interceptedRequest.continue();
-    } else if (fs.existsSync(mockedFilepath)) {
-      log(
-        'verbose',
-        'Mocked network request for',
-        yellow(requestUrl.href),
-        'with file',
-        cyan(mockedFilepath)
-      );
-      return interceptedRequest.respond({
-        status: 200,
-        body: fs.readFileSync(mockedFilepath),
-      });
-    } else {
-      log(
-        'verbose',
-        'Blocked external network request for',
-        yellow(requestUrl.href)
-      );
-      return interceptedRequest.abort('blockedbyclient');
-    }
-  });
-  await resetPage(page, viewport);
-  return page;
-}
-
-/**
- * Resets the size of a tab and loads about:blank.
- *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {?{height: number, width: number}} viewport optional viewport size
- *     object with numeric fields `width` and `height`.
- * @return {Promise<void>}
- */
-async function resetPage(page, viewport = null) {
-  const width = viewport ? viewport.width : VIEWPORT_WIDTH;
-  const height = viewport ? viewport.height : VIEWPORT_HEIGHT;
-
-  log(
-    'verbose',
-    'Resetting tab to',
-    yellow('about:blank'),
-    'with size',
-    yellow(`${width}×${height}`)
-  );
-
-  await page.goto('about:blank');
-  await page.setViewport({width, height});
-}
-
-/**
  * Adds a test error and logs it if running locally (not as part of CI).
  *
  * @param {!Array<!TestErrorDef>} testErrors array of testError objects.
@@ -407,7 +244,7 @@ function logTestError(testError) {
  * set of given webpages.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!Array<WebpageDef>} webpages details about the pages to snapshot.
+ * @param {!Array<!WebpageDef>} webpages details about the pages to snapshot.
  * @return {Promise<void>}
  */
 async function runVisualTests(browser, webpages) {
@@ -438,7 +275,7 @@ async function runVisualTests(browser, webpages) {
   for (const webpage of webpages) {
     webpage.tests_ = {};
     if (!webpage.no_base_test) {
-      webpage.tests_[''] = async () => {};
+      webpage.tests_[''] = BASE_TEST_FUNCTION;
     }
     if (webpage.interactive_tests) {
       try {
@@ -479,43 +316,20 @@ async function runVisualTests(browser, webpages) {
 
   if (argv.main) {
     const page = await newPage(browser);
-    await page.goto(
-      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
-    );
+    await page.goto('about:blank');
     // @ts-ignore Type mismatch in library
     await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
 
-  log('info', 'Generating snapshots...');
-  if (!(await snapshotWebpages(browser, webpages))) {
-    log('fatal', 'Some tests have failed locally.');
+  if (argv.dev) {
+    log('info', 'Running development mode...');
+    await devMode(browser, webpages);
+  } else {
+    log('info', 'Generating snapshots...');
+    if (!(await snapshotWebpages(browser, webpages))) {
+      log('fatal', 'Some tests have failed locally.');
+    }
   }
-}
-
-/**
- * Pretty-prints the current test status of each page.
- * @param {!Array<!puppeteer.Page>} allPages
- * @param {!Array<!puppeteer.Page>} availablePages
- * @param {!puppeteer.Page} thisPage
- * @param {string} thisPageText
- * @return {string}
- */
-function drawBoxes(allPages, availablePages, thisPage, thisPageText) {
-  return (
-    '[' +
-    allPages
-      .map((page) => {
-        if (page === thisPage) {
-          return thisPageText;
-        } else if (availablePages.includes(page)) {
-          return ' ';
-        } else {
-          return yellow('█');
-        }
-      })
-      .join(' ') +
-    ']'
-  );
 }
 
 /**
@@ -524,7 +338,7 @@ function drawBoxes(allPages, availablePages, thisPage, thisPageText) {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
  *     details about the webpages to snapshot.
- * @return {!Promise<boolean>} true if all tests passed locally (does not
+ * @return {Promise<boolean>} true if all tests passed locally (does not
  *     indicate whether the tests passed on Percy).
  */
 async function snapshotWebpages(browser, webpages) {
@@ -772,12 +586,12 @@ async function createEmptyBuild(browser) {
 
 /**
  * Runs the AMP visual diff tests.
- * @return {!Promise<void>}
+ * @return {Promise<void>}
  */
 async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
-  const browserFetcher = await loadBrowserFetcher_();
+  const browserFetcher = await loadBrowserFetcher();
   decodePercyTokenForCi();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
@@ -785,6 +599,10 @@ async function visualDiff() {
 
   if (argv.grep) {
     argv.grep = RegExp(argv.grep);
+  }
+
+  if (argv.dev) {
+    argv['percy_disabled'] = true;
   }
 
   if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
@@ -813,10 +631,14 @@ async function performVisualTests(browserFetcher) {
 
   const browser = await launchBrowser(browserFetcher);
   const handlerProcess = createCtrlcHandler(
-    'visual-diff:headless-browser',
+    'visual-diff:browser',
     browser.process()?.pid
   );
-  await launchWebServer();
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.webserver_debug},
+    {minified: true}
+  );
 
   try {
     if (argv.empty) {
@@ -864,40 +686,6 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   }
 }
 
-/**
- * Loads task-specific dependencies are returns an instance of BrowserFetcher.
- *
- * @return {!Promise<!puppeteer.BrowserFetcher>}
- */
-async function loadBrowserFetcher_() {
-  // @ts-ignore Valid method in Puppeteer's nodejs interface.
-  // https://github.com/puppeteer/puppeteer/blob/main/src/node/Puppeteer.ts
-  const browserFetcher = puppeteer.createBrowserFetcher();
-  const chromiumRevisions = await browserFetcher.localRevisions();
-  if (chromiumRevisions.includes(PUPPETEER_CHROMIUM_REVISION)) {
-    log(
-      'info',
-      'Using Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION)
-    );
-  } else {
-    log(
-      'info',
-      'Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION),
-      'was not found. Downloading...'
-    );
-    await browserFetcher.download(
-      PUPPETEER_CHROMIUM_REVISION,
-      (/* downloadedBytes, totalBytes */) => {
-        // TODO(@ampproject/wg-infra): display download progress.
-        // Logging every call is too verbose.
-      }
-    );
-  }
-  return browserFetcher;
-}
-
 module.exports = {
   visualDiff,
 };
@@ -916,4 +704,5 @@ visualDiff.flags = {
   'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':
     'Disable Percy integration (for testing local changes only)',
+  'dev': 'Developer mode for creating and debugging tests',
 };
