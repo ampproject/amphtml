@@ -1,188 +1,258 @@
 {
   "2": {
-    "string": "Додирните Даље"
+    "string": "Додирните Даље",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
   },
   "3": {
-    "string": "Додирните Назад"
+    "string": "Додирните Назад",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
   },
   "4": {
-    "string": "Копирање линка у привремену меморију није успело :("
+    "string": "Копирање линка у привремену меморију није успело :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
   },
   "5": {
-    "string": "Линк је копиран!"
+    "string": "Линк је копиран!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
   },
   "6": {
-    "string": "Пошаљи преко имејла"
+    "string": "Пошаљи преко имејла",
+    "description": "Button label for the share target that shares a link via email."
   },
   "7": {
-    "string": "Facebook"
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
   },
   "8": {
-    "string": "Google+"
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
   },
   "9": {
-    "string": "Преузми линк"
+    "string": "Преузми линк",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
   },
   "10": {
-    "string": "LinkedIn"
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
   },
   "11": {
-    "string": "Pinterest"
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
   },
   "12": {
-    "string": "SMS"
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
   },
   "13": {
-    "string": "Више"
+    "string": "Више",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
   },
   "14": {
-    "string": "Tumblr"
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
   },
   "15": {
-    "string": "Twitter"
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
   },
   "16": {
-    "string": "WhatsApp"
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
   },
   "19": {
-    "string": "Морате да омогућите експеримент amp-story да бисте прегледали овај садржај."
+    "string": "Морате да омогућите експеримент amp-story да бисте прегледали овај садржај.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
   "21": {
-    "string": "Жао нам је, изгледа да ваш прегледач не подржава овај садржај"
+    "string": "Жао нам је, изгледа да ваш прегледач не подржава овај садржај",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
   "22": {
-    "string": "Прихвати"
+    "string": "Прихвати",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
   },
   "23": {
-    "string": "Одбиј"
+    "string": "Одбиј",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
   },
   "25": {
-    "string": "Преглед на првобитном домену:"
+    "string": "Преглед на првобитном домену:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
   },
   "26": {
-    "string": "Више о AMP резултатима"
+    "string": "Више о AMP резултатима",
+    "description": "Label for a link to documentation on how AMP links are handled."
   },
   "27": {
-    "string": "Ипак настави"
+    "string": "Ипак настави",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
   "31": {
-    "string": "Звук је искључен"
+    "string": "Звук је искључен",
+    "description": "Text that informs users that the sound is off after they click the mute button"
   },
   "32": {
-    "string": "Звук је укључен"
+    "string": "Звук је укључен",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
   },
   "33": {
-    "string": "Ова страница нема звук"
+    "string": "Ова страница нема звук",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
   },
   "34": {
-    "string": "Репродукуј видео"
+    "string": "Репродукуј видео",
+    "description": "Label for a button to play the video visible on the page."
   },
   "35": {
-    "string": "Превуци нагоре"
+    "string": "Превуци нагоре",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
   },
   "36": {
-    "string": "Прошири твит"
+    "string": "Прошири твит",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
   },
   "62": {
-    "string": "Подели почев од ове странице"
+    "string": "Подели почев од ове странице",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
   },
   "63": {
-    "string": "Line"
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
   },
   "64": {
-    "string": "Ажурирано"
+    "string": "Ажурирано",
+    "description": "Label that indicates that additional content has been added to a story"
   },
   "65": {
-    "string": "Репродукција видеа није успела"
+    "string": "Репродукција видеа није успела",
+    "description": "Label indicating that the video visible on the page failed to play."
   },
   "66": {
-    "string": "Искључи звук у причи"
+    "string": "Искључи звук у причи",
+    "description": "Label for the mute button that turns off the sound in the story"
   },
   "67": {
-    "string": "Укључи звук у причи"
+    "string": "Укључи звук у причи",
+    "description": "Label for the unmute button that turns the sound in the story back on"
   },
   "68": {
-    "string": "Информације о причи"
+    "string": "Информације о причи",
+    "description": "Label for the information button that pulls up relevant information about the story content"
   },
   "69": {
-    "string": "Подели причу"
+    "string": "Подели причу",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
   },
   "70": {
-    "string": "Укључи/искључи мени приче"
+    "string": "Укључи/искључи мени приче",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
   },
   "71": {
-    "string": "А"
+    "string": "А",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
   },
   "72": {
-    "string": "B"
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
   },
   "73": {
-    "string": "C"
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
   },
   "74": {
-    "string": "D"
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
   },
   "75": {
-    "string": "Савет 1 од 2"
+    "string": "Савет 1 од 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "76": {
-    "string": "Додирните за прелазак на следећи екран"
+    "string": "Додирните за прелазак на следећи екран",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "77": {
-    "string": "Даље"
+    "string": "Даље",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "78": {
-    "string": "Савет 2 од 2"
+    "string": "Савет 2 од 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "79": {
-    "string": "Превуците за прелазак на следећу причу"
+    "string": "Превуците за прелазак на следећу причу",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "80": {
-    "string": "Јасно"
+    "string": "Јасно",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "81": {
-    "string": "Савет"
+    "string": "Савет",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
   },
   "82": {
-    "string": "Претходна страница"
+    "string": "Претходна страница",
+    "description": "Label indicating that users can navigate to the previous page."
   },
   "83": {
-    "string": "Активирај"
+    "string": "Активирај",
+    "description": "Label for the activate button to ask for device orientation permission"
   },
   "84": {
-    "string": "РЕЗУЛТАТ:"
+    "string": "РЕЗУЛТАТ:",
+    "description": "Label for the results component preceding the score in percentages"
   },
   "85": {
-    "string": "Паузирај причу"
+    "string": "Паузирај причу",
+    "description": "Label for a button that pauses the media content on the story"
   },
   "86": {
-    "string": "Репродукуј причу"
+    "string": "Репродукуј причу",
+    "description": "Label for a button that plays the media content on the story"
   },
   "87": {
-    "string": "Затвори"
+    "string": "Затвори",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
   },
   "88": {
-    "string": "Пређи на следеће"
+    "string": "Пређи на следеће",
+    "description": "Label for a button that advances to the next element in the carousel"
   },
   "89": {
-    "string": "Ваш одговор ће бити послат на"
+    "string": "Ваш одговор ће бити послат на",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
   },
   "90": {
-    "string": "Следећа прича"
+    "string": "Следећа прича",
+    "description": "Label for a button that advances to the next element in the carousel."
   },
   "91": {
-    "string": "Следећа страница"
+    "string": "Следећа страница",
+    "description": "Label for a button that advances to the next page of the story."
   },
   "92": {
-    "string": "Репродукуј поново"
+    "string": "Репродукуј поново",
+    "description": "Label for a button that replays the story."
   },
   "93": {
-    "string": "Претходна страница"
+    "string": "Претходна страница",
+    "description": "Label for a button that returns the user to the previous page of the story."
   },
   "96": {
-    "string": "Истражите померањем уређаја"
+    "string": "Истражите померањем уређаја",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   },
   "97": {
-    "string": "Отварање"
+    "string": "Отварање",
+    "description": "Text displayed to users on tap of outlink button."
+  },
+  "98": {
+    "string": "Образац није послат, покушајте поново",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+  },
+  "99": {
+    "string": "Образац је успешно послат",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   }
 }

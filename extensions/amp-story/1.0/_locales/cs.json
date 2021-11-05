@@ -1,188 +1,258 @@
 {
   "2": {
-    "string": "Klepněte na Další"
+    "string": "Klepněte na Další",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
   },
   "3": {
-    "string": "Klepněte na Zpět"
+    "string": "Klepněte na Zpět",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
   },
   "4": {
-    "string": "Odkaz nelze zkopírovat do schránky :("
+    "string": "Odkaz nelze zkopírovat do schránky :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
   },
   "5": {
-    "string": "Odkaz byl zkopírován!"
+    "string": "Odkaz byl zkopírován!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
   },
   "6": {
-    "string": "E-mail"
+    "string": "E-mail",
+    "description": "Button label for the share target that shares a link via email."
   },
   "7": {
-    "string": "Facebook"
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
   },
   "8": {
-    "string": "Google+"
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
   },
   "9": {
-    "string": "Získat odkaz"
+    "string": "Získat odkaz",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
   },
   "10": {
-    "string": "LinkedIn"
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
   },
   "11": {
-    "string": "Pinterest"
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
   },
   "12": {
-    "string": "SMS"
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
   },
   "13": {
-    "string": "Více"
+    "string": "Více",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
   },
   "14": {
-    "string": "Tumblr"
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
   },
   "15": {
-    "string": "Twitter"
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
   },
   "16": {
-    "string": "WhatsApp"
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
   },
   "19": {
-    "string": "Pokud chcete zobrazit tento obsah, musíte povolit experiment s příběhem amp-story."
+    "string": "Pokud chcete zobrazit tento obsah, musíte povolit experiment s příběhem amp-story.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
   "21": {
-    "string": "Je nám líto, zdá se, že váš prohlížeč toto tento prvek nepodporuje"
+    "string": "Je nám líto, zdá se, že váš prohlížeč toto tento prvek nepodporuje",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
   "22": {
-    "string": "Přijmout"
+    "string": "Přijmout",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
   },
   "23": {
-    "string": "Odmítnout"
+    "string": "Odmítnout",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
   },
   "25": {
-    "string": "Zobrazit na původní doméně:"
+    "string": "Zobrazit na původní doméně:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
   },
   "26": {
-    "string": "Více o výsledcích AMP"
+    "string": "Více o výsledcích AMP",
+    "description": "Label for a link to documentation on how AMP links are handled."
   },
   "27": {
-    "string": "Přesto pokračovat"
+    "string": "Přesto pokračovat",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
   "31": {
-    "string": "Zvuk je vypnutý"
+    "string": "Zvuk je vypnutý",
+    "description": "Text that informs users that the sound is off after they click the mute button"
   },
   "32": {
-    "string": "Zvuk je zapnutý"
+    "string": "Zvuk je zapnutý",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
   },
   "33": {
-    "string": "Tato stránka je bez zvuku"
+    "string": "Tato stránka je bez zvuku",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
   },
   "34": {
-    "string": "Přehrát video"
+    "string": "Přehrát video",
+    "description": "Label for a button to play the video visible on the page."
   },
   "35": {
-    "string": "Potáhněte nahoru"
+    "string": "Potáhněte nahoru",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
   },
   "36": {
-    "string": "Rozbalit tweet"
+    "string": "Rozbalit tweet",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
   },
   "62": {
-    "string": "Sdílet od této stránky"
+    "string": "Sdílet od této stránky",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
   },
   "63": {
-    "string": "Line"
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
   },
   "64": {
-    "string": "Aktualizováno"
+    "string": "Aktualizováno",
+    "description": "Label that indicates that additional content has been added to a story"
   },
   "65": {
-    "string": "Video nelze přehrát"
+    "string": "Video nelze přehrát",
+    "description": "Label indicating that the video visible on the page failed to play."
   },
   "66": {
-    "string": "Ztlumit zvuk příběhu"
+    "string": "Ztlumit zvuk příběhu",
+    "description": "Label for the mute button that turns off the sound in the story"
   },
   "67": {
-    "string": "Zapnout zvuk příběhu"
+    "string": "Zapnout zvuk příběhu",
+    "description": "Label for the unmute button that turns the sound in the story back on"
   },
   "68": {
-    "string": "Informace o příběhu"
+    "string": "Informace o příběhu",
+    "description": "Label for the information button that pulls up relevant information about the story content"
   },
   "69": {
-    "string": "Sdílet příběh"
+    "string": "Sdílet příběh",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
   },
   "70": {
-    "string": "Přepnout nabídku příběhu"
+    "string": "Přepnout nabídku příběhu",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
   },
   "71": {
-    "string": "A"
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
   },
   "72": {
-    "string": "B"
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
   },
   "73": {
-    "string": "C"
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
   },
   "74": {
-    "string": "D"
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
   },
   "75": {
-    "string": "Tip 1/2"
+    "string": "Tip 1/2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "76": {
-    "string": "Klepnutím přejdete na další obrazovku"
+    "string": "Klepnutím přejdete na další obrazovku",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "77": {
-    "string": "Další"
+    "string": "Další",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "78": {
-    "string": "Tip 2/2"
+    "string": "Tip 2/2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "79": {
-    "string": "Potáhnutím přejdete na další příběh"
+    "string": "Potáhnutím přejdete na další příběh",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "80": {
-    "string": "Rozumím"
+    "string": "Rozumím",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "81": {
-    "string": "Tip"
+    "string": "Tip",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
   },
   "82": {
-    "string": "Předchozí stránka"
+    "string": "Předchozí stránka",
+    "description": "Label indicating that users can navigate to the previous page."
   },
   "83": {
-    "string": "Aktivovat"
+    "string": "Aktivovat",
+    "description": "Label for the activate button to ask for device orientation permission"
   },
   "84": {
-    "string": "SKÓRE:"
+    "string": "SKÓRE:",
+    "description": "Label for the results component preceding the score in percentages"
   },
   "85": {
-    "string": "Pozastavit příběh"
+    "string": "Pozastavit příběh",
+    "description": "Label for a button that pauses the media content on the story"
   },
   "86": {
-    "string": "Přehrát příběh"
+    "string": "Přehrát příběh",
+    "description": "Label for a button that plays the media content on the story"
   },
   "87": {
-    "string": "Zavřít"
+    "string": "Zavřít",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
   },
   "88": {
-    "string": "Přeskočit na další"
+    "string": "Přeskočit na další",
+    "description": "Label for a button that advances to the next element in the carousel"
   },
   "89": {
-    "string": "Vaši odpověď obdrží"
+    "string": "Vaši odpověď obdrží",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
   },
   "90": {
-    "string": "Další příběh"
+    "string": "Další příběh",
+    "description": "Label for a button that advances to the next element in the carousel."
   },
   "91": {
-    "string": "Další stránka"
+    "string": "Další stránka",
+    "description": "Label for a button that advances to the next page of the story."
   },
   "92": {
-    "string": "Přehrát znovu"
+    "string": "Přehrát znovu",
+    "description": "Label for a button that replays the story."
   },
   "93": {
-    "string": "Předchozí stránka"
+    "string": "Předchozí stránka",
+    "description": "Label for a button that returns the user to the previous page of the story."
   },
   "96": {
-    "string": "Pohněte zařízením a objevujte"
+    "string": "Pohněte zařízením a objevujte",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   },
   "97": {
-    "string": "Otevírání"
+    "string": "Otevírání",
+    "description": "Text displayed to users on tap of outlink button."
+  },
+  "98": {
+    "string": "Formulář nebyl odeslán, zkuste to znovu",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+  },
+  "99": {
+    "string": "Formulář byl odeslán",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   }
 }

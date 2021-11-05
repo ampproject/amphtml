@@ -1,188 +1,258 @@
 {
   "2": {
-    "string": "הקש על ״הבא״"
+    "string": "הקש על ״הבא״",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
   },
   "3": {
-    "string": "הקש על ״חזרה״"
+    "string": "הקש על ״חזרה״",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
   },
   "4": {
-    "string": "לא ניתן להעתיק את הקישור ללוח ההעתקה :("
+    "string": "לא ניתן להעתיק את הקישור ללוח ההעתקה :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
   },
   "5": {
-    "string": "הקישור הועתק!"
+    "string": "הקישור הועתק!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
   },
   "6": {
-    "string": "דוא״ל"
+    "string": "דוא״ל",
+    "description": "Button label for the share target that shares a link via email."
   },
   "7": {
-    "string": "Facebook"
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
   },
   "8": {
-    "string": "+Google"
+    "string": "+Google",
+    "description": "Button label for the share target that shares a link via Google+."
   },
   "9": {
-    "string": "קבל קישור"
+    "string": "קבל קישור",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
   },
   "10": {
-    "string": "LinkedIn"
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
   },
   "11": {
-    "string": "Pinterest"
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
   },
   "12": {
-    "string": "SMS"
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
   },
   "13": {
-    "string": "עוד"
+    "string": "עוד",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
   },
   "14": {
-    "string": "Tumblr"
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
   },
   "15": {
-    "string": "Twitter"
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
   },
   "16": {
-    "string": "WhatsApp"
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
   },
   "19": {
-    "string": "לצפייה בתוכן זה, יש להפעיל את ניסוי amp-story."
+    "string": "לצפייה בתוכן זה, יש להפעיל את ניסוי amp-story.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
   "21": {
-    "string": "אנו מצטערים, אך כנראה שהדפדפן שלך לא תומך בחוויה זו"
+    "string": "אנו מצטערים, אך כנראה שהדפדפן שלך לא תומך בחוויה זו",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
   "22": {
-    "string": "אישור"
+    "string": "אישור",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
   },
   "23": {
-    "string": "דחייה"
+    "string": "דחייה",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
   },
   "25": {
-    "string": "צפה בדומיין המקורי:"
+    "string": "צפה בדומיין המקורי:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
   },
   "26": {
-    "string": "מידע נוסף על תוצאות AMP"
+    "string": "מידע נוסף על תוצאות AMP",
+    "description": "Label for a link to documentation on how AMP links are handled."
   },
   "27": {
-    "string": "המשך בכל זאת"
+    "string": "המשך בכל זאת",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
   "31": {
-    "string": "הסאונד כבוי"
+    "string": "הסאונד כבוי",
+    "description": "Text that informs users that the sound is off after they click the mute button"
   },
   "32": {
-    "string": "הסאונד מופעל"
+    "string": "הסאונד מופעל",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
   },
   "33": {
-    "string": "בדף זה אין סאונד"
+    "string": "בדף זה אין סאונד",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
   },
   "34": {
-    "string": "הפעל סרטון"
+    "string": "הפעל סרטון",
+    "description": "Label for a button to play the video visible on the page."
   },
   "35": {
-    "string": "החלק למעלה"
+    "string": "החלק למעלה",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
   },
   "36": {
-    "string": "הרחב ציוץ"
+    "string": "הרחב ציוץ",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
   },
   "62": {
-    "string": "שתף החל מדף זה"
+    "string": "שתף החל מדף זה",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
   },
   "63": {
-    "string": "Line"
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
   },
   "64": {
-    "string": "עודכן"
+    "string": "עודכן",
+    "description": "Label that indicates that additional content has been added to a story"
   },
   "65": {
-    "string": "הפעלת הסרטון נכשלה"
+    "string": "הפעלת הסרטון נכשלה",
+    "description": "Label indicating that the video visible on the page failed to play."
   },
   "66": {
-    "string": "השתק את הסיפור"
+    "string": "השתק את הסיפור",
+    "description": "Label for the mute button that turns off the sound in the story"
   },
   "67": {
-    "string": "בטל את השתקת הסיפור"
+    "string": "בטל את השתקת הסיפור",
+    "description": "Label for the unmute button that turns the sound in the story back on"
   },
   "68": {
-    "string": "פרטי הסיפור"
+    "string": "פרטי הסיפור",
+    "description": "Label for the information button that pulls up relevant information about the story content"
   },
   "69": {
-    "string": "שתף סיפור"
+    "string": "שתף סיפור",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
   },
   "70": {
-    "string": "הצג/הסתר את תפריט הסיפור"
+    "string": "הצג/הסתר את תפריט הסיפור",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
   },
   "71": {
-    "string": "א"
+    "string": "א",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
   },
   "72": {
-    "string": "ב"
+    "string": "ב",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
   },
   "73": {
-    "string": "ג"
+    "string": "ג",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
   },
   "74": {
-    "string": "ד"
+    "string": "ד",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
   },
   "75": {
-    "string": "עצה 1 מתוך 2"
+    "string": "עצה 1 מתוך 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "76": {
-    "string": "הקש כדי לעבור למסך הבא"
+    "string": "הקש כדי לעבור למסך הבא",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "77": {
-    "string": "הבא"
+    "string": "הבא",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "78": {
-    "string": "עצה 2 מתוך 2"
+    "string": "עצה 2 מתוך 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "79": {
-    "string": "החלק כדי לעבור לסיפור הבא"
+    "string": "החלק כדי לעבור לסיפור הבא",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "80": {
-    "string": "הבנתי"
+    "string": "הבנתי",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "81": {
-    "string": "עצה"
+    "string": "עצה",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
   },
   "82": {
-    "string": "הדף הקודם"
+    "string": "הדף הקודם",
+    "description": "Label indicating that users can navigate to the previous page."
   },
   "83": {
-    "string": "הפעלה"
+    "string": "הפעלה",
+    "description": "Label for the activate button to ask for device orientation permission"
   },
   "84": {
-    "string": "ציון:"
+    "string": "ציון:",
+    "description": "Label for the results component preceding the score in percentages"
   },
   "85": {
-    "string": "השהה את הסיפור"
+    "string": "השהה את הסיפור",
+    "description": "Label for a button that pauses the media content on the story"
   },
   "86": {
-    "string": "הפעל את הסיפור"
+    "string": "הפעל את הסיפור",
+    "description": "Label for a button that plays the media content on the story"
   },
   "87": {
-    "string": "סגירה"
+    "string": "סגירה",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
   },
   "88": {
-    "string": "דלג להבא"
+    "string": "דלג להבא",
+    "description": "Label for a button that advances to the next element in the carousel"
   },
   "89": {
-    "string": "תשובתך תישלח אל"
+    "string": "תשובתך תישלח אל",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
   },
   "90": {
-    "string": "הסיפור הבא"
+    "string": "הסיפור הבא",
+    "description": "Label for a button that advances to the next element in the carousel."
   },
   "91": {
-    "string": "הדף הבא"
+    "string": "הדף הבא",
+    "description": "Label for a button that advances to the next page of the story."
   },
   "92": {
-    "string": "נגן שוב"
+    "string": "נגן שוב",
+    "description": "Label for a button that replays the story."
   },
   "93": {
-    "string": "הדף הקודם"
+    "string": "הדף הקודם",
+    "description": "Label for a button that returns the user to the previous page of the story."
   },
   "96": {
-    "string": "הזז את המכשיר לצפייה"
+    "string": "הזז את המכשיר לצפייה",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   },
   "97": {
-    "string": "מתבצעת פתיחה"
+    "string": "מתבצעת פתיחה",
+    "description": "Text displayed to users on tap of outlink button."
+  },
+  "98": {
+    "string": "הטופס לא נשלח. יש לנסות שוב",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+  },
+  "99": {
+    "string": "הטופס נשלח בהצלחה",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   }
 }

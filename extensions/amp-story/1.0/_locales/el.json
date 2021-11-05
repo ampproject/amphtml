@@ -1,188 +1,258 @@
 {
   "2": {
-    "string": "Πατήστε Επόμενο"
+    "string": "Πατήστε Επόμενο",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
   },
   "3": {
-    "string": "Πατήστε Πίσω"
+    "string": "Πατήστε Πίσω",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
   },
   "4": {
-    "string": "Δεν ήταν δυνατή η αντιγραφή του συνδέσμου στο πρόχειρο :("
+    "string": "Δεν ήταν δυνατή η αντιγραφή του συνδέσμου στο πρόχειρο :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
   },
   "5": {
-    "string": "Ο σύνδεσμος αντιγράφηκε!"
+    "string": "Ο σύνδεσμος αντιγράφηκε!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
   },
   "6": {
-    "string": "Email"
+    "string": "Email",
+    "description": "Button label for the share target that shares a link via email."
   },
   "7": {
-    "string": "Facebook"
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
   },
   "8": {
-    "string": "Google+"
+    "string": "Google+",
+    "description": "Button label for the share target that shares a link via Google+."
   },
   "9": {
-    "string": "Λήψη συνδέσμου"
+    "string": "Λήψη συνδέσμου",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
   },
   "10": {
-    "string": "LinkedIn"
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
   },
   "11": {
-    "string": "Pinterest"
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
   },
   "12": {
-    "string": "SMS"
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
   },
   "13": {
-    "string": "Περισσότερα"
+    "string": "Περισσότερα",
+    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
   },
   "14": {
-    "string": "Tumblr"
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
   },
   "15": {
-    "string": "Twitter"
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
   },
   "16": {
-    "string": "WhatsApp"
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
   },
   "19": {
-    "string": "Πρέπει να ενεργοποιήσετε το πείραμα amp-story για να δείτε αυτό το περιεχόμενο."
+    "string": "Πρέπει να ενεργοποιήσετε το πείραμα amp-story για να δείτε αυτό το περιεχόμενο.",
+    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
   "21": {
-    "string": "Λυπούμαστε, φαίνεται ότι το πρόγραμμα περιήγησής σας δεν υποστηρίζει αυτήν την εμπειρία"
+    "string": "Λυπούμαστε, φαίνεται ότι το πρόγραμμα περιήγησής σας δεν υποστηρίζει αυτήν την εμπειρία",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
   "22": {
-    "string": "Αποδοχή"
+    "string": "Αποδοχή",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
   },
   "23": {
-    "string": "Απόρριψη"
+    "string": "Απόρριψη",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
   },
   "25": {
-    "string": "Προβολή στον αρχικό τομέα:"
+    "string": "Προβολή στον αρχικό τομέα:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
   },
   "26": {
-    "string": "Περισσότερα σχετικά με τα αποτελέσματα AMP"
+    "string": "Περισσότερα σχετικά με τα αποτελέσματα AMP",
+    "description": "Label for a link to documentation on how AMP links are handled."
   },
   "27": {
-    "string": "Συνέχεια παρά ταύτα"
+    "string": "Συνέχεια παρά ταύτα",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
   "31": {
-    "string": "Χωρίς ήχο"
+    "string": "Χωρίς ήχο",
+    "description": "Text that informs users that the sound is off after they click the mute button"
   },
   "32": {
-    "string": "Με ήχο"
+    "string": "Με ήχο",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
   },
   "33": {
-    "string": "Αυτή η σελίδα δεν έχει ήχο"
+    "string": "Αυτή η σελίδα δεν έχει ήχο",
+    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
   },
   "34": {
-    "string": "Αναπαραγωγή βίντεο"
+    "string": "Αναπαραγωγή βίντεο",
+    "description": "Label for a button to play the video visible on the page."
   },
   "35": {
-    "string": "Σύρετε προς τα πάνω"
+    "string": "Σύρετε προς τα πάνω",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
   },
   "36": {
-    "string": "Ανάπτυξη Tweet"
+    "string": "Ανάπτυξη Tweet",
+    "description": "Label in the tooltip text for when a Twitter embed is expandable."
   },
   "62": {
-    "string": "Κοινοποίηση ξεκινώντας από αυτήν τη σελίδα"
+    "string": "Κοινοποίηση ξεκινώντας από αυτήν τη σελίδα",
+    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
   },
   "63": {
-    "string": "Line"
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
   },
   "64": {
-    "string": "Ενημερώθηκε"
+    "string": "Ενημερώθηκε",
+    "description": "Label that indicates that additional content has been added to a story"
   },
   "65": {
-    "string": "Η αναπαραγωγή του βίντεο απέτυχε"
+    "string": "Η αναπαραγωγή του βίντεο απέτυχε",
+    "description": "Label indicating that the video visible on the page failed to play."
   },
   "66": {
-    "string": "Σίγαση ιστορίας"
+    "string": "Σίγαση ιστορίας",
+    "description": "Label for the mute button that turns off the sound in the story"
   },
   "67": {
-    "string": "Άρση σίγασης ιστορίας"
+    "string": "Άρση σίγασης ιστορίας",
+    "description": "Label for the unmute button that turns the sound in the story back on"
   },
   "68": {
-    "string": "Πληροφορίες ιστορίας"
+    "string": "Πληροφορίες ιστορίας",
+    "description": "Label for the information button that pulls up relevant information about the story content"
   },
   "69": {
-    "string": "Κοινοποίηση ιστορίας"
+    "string": "Κοινοποίηση ιστορίας",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
   },
   "70": {
-    "string": "Ενεργοποίηση μενού ιστοριών"
+    "string": "Ενεργοποίηση μενού ιστοριών",
+    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
   },
   "71": {
-    "string": "A"
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
   },
   "72": {
-    "string": "B"
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
   },
   "73": {
-    "string": "Γ"
+    "string": "Γ",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
   },
   "74": {
-    "string": "Δ"
+    "string": "Δ",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
   },
   "75": {
-    "string": "Συμβουλή 1 από 2"
+    "string": "Συμβουλή 1 από 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "76": {
-    "string": "Πατήστε για μετάβαση στην επόμενη οθόνη"
+    "string": "Πατήστε για μετάβαση στην επόμενη οθόνη",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "77": {
-    "string": "Επόμενο"
+    "string": "Επόμενο",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "78": {
-    "string": "Συμβουλή 2 από 2"
+    "string": "Συμβουλή 2 από 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "79": {
-    "string": "Σύρετε για μετάβαση στην επόμενη ιστορία"
+    "string": "Σύρετε για μετάβαση στην επόμενη ιστορία",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "80": {
-    "string": "Το κατάλαβα"
+    "string": "Το κατάλαβα",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "81": {
-    "string": "Συμβουλή"
+    "string": "Συμβουλή",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
   },
   "82": {
-    "string": "Προηγούμενη σελίδα"
+    "string": "Προηγούμενη σελίδα",
+    "description": "Label indicating that users can navigate to the previous page."
   },
   "83": {
-    "string": "Ενεργοποίηση"
+    "string": "Ενεργοποίηση",
+    "description": "Label for the activate button to ask for device orientation permission"
   },
   "84": {
-    "string": "ΣΚΟΡ:"
+    "string": "ΣΚΟΡ:",
+    "description": "Label for the results component preceding the score in percentages"
   },
   "85": {
-    "string": "Παύση ιστορίας"
+    "string": "Παύση ιστορίας",
+    "description": "Label for a button that pauses the media content on the story"
   },
   "86": {
-    "string": "Αναπαραγωγή ιστορίας"
+    "string": "Αναπαραγωγή ιστορίας",
+    "description": "Label for a button that plays the media content on the story"
   },
   "87": {
-    "string": "Κλείσιμο"
+    "string": "Κλείσιμο",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
   },
   "88": {
-    "string": "Μετάβαση στο επόμενο"
+    "string": "Μετάβαση στο επόμενο",
+    "description": "Label for a button that advances to the next element in the carousel"
   },
   "89": {
-    "string": "Η απάντησή σας θα σταλεί στη διεύθυνση"
+    "string": "Η απάντησή σας θα σταλεί στη διεύθυνση",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
   },
   "90": {
-    "string": "Επόμενη ιστορία"
+    "string": "Επόμενη ιστορία",
+    "description": "Label for a button that advances to the next element in the carousel."
   },
   "91": {
-    "string": "Επόμενη σελίδα"
+    "string": "Επόμενη σελίδα",
+    "description": "Label for a button that advances to the next page of the story."
   },
   "92": {
-    "string": "Επανάληψη"
+    "string": "Επανάληψη",
+    "description": "Label for a button that replays the story."
   },
   "93": {
-    "string": "Προηγούμενη σελίδα"
+    "string": "Προηγούμενη σελίδα",
+    "description": "Label for a button that returns the user to the previous page of the story."
   },
   "96": {
-    "string": "Μετακινήστε τη συσκευή για εξερεύνηση"
+    "string": "Μετακινήστε τη συσκευή για εξερεύνηση",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   },
   "97": {
-    "string": "Άνοιγμα"
+    "string": "Άνοιγμα",
+    "description": "Text displayed to users on tap of outlink button."
+  },
+  "98": {
+    "string": "Η φόρμα δεν έχει υποβληθεί, δοκιμάστε ξανά",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+  },
+  "99": {
+    "string": "Η φόρμα υποβλήθηκε με επιτυχία",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   }
 }
