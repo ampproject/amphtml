@@ -1,43 +1,138 @@
 <!doctype html>
-<html amp lang="en">
+<html ⚡>
   <head>
     <meta charset="utf-8">
+    <title>Shopping</title>
+    <link rel="canonical" href="amp-story-codelab.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
-    <title>AMP Story Shopping</title>
-    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-    <link rel="canonical" href="index.html">
-    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-    <style amp-custom>
-      .i-amphtml-story-spinner-container {
-        /* Hide the spinner for loading pages, since this causes flakes */
-        display: none;
-      }
-    </style>
   </head>
-
   <body>
-    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
-        publisher-logo-src="/examples/visual-tests/photos/120.png"
-        poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
-        poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
-        poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg"
-        supports-landscape>
-      <amp-story-page id="default">
-        <amp-story-shopping-config layout='nodisplay'></amp-story-shopping-config>
+    <amp-story
+        standalone
+        title="New Story Shopping Component"
+        publisher="AMP Story Shopping"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+      <amp-story-page id="inline-light-theme">
+        <!--
+          Inline Shopping Component Config
+        -->
+        <amp-story-shopping-config layout="nodisplay">
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "product-tag-id": "hat",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Hootenanny Hat",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   },
+                   {
+                    "product-tag-id": "sunglasses",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Spectacular Spectacles",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   },
+                   {
+                    "product-tag-id": "backpack",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Beastly Backpack",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-config>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="hat" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="sunglasses" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="backpack" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
-        <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
+        <amp-story-shopping-attachment layout="nodisplay"></amp-story-shopping-attachment>
       </amp-story-page>
-
-      <amp-story-page id="dark-theme">
-        <amp-story-shopping-config layout='nodisplay'></amp-story-shopping-config>
+      <amp-story-page id="remote-dark-theme">
+        <!--
+          Example of JSON retrieved from src attribute.
+          Falls back to inline if request fails.
+        -->
+        <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "product-tag-id": "city-pop",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Plastic Love",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   },
+                   {
+                    "product-tag-id": "k-pop",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Gangnam Style",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   },
+                   {
+                    "product-tag-id": "eurodance",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Crystal King Battle",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-config>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="k-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="eurodance" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
-        <amp-story-shopping-attachment layout='nodisplay' theme="dark"></amp-story-shopping-attachment>
+        <amp-story-shopping-attachment layout="nodisplay" theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
     </amp-story>
   </body>
