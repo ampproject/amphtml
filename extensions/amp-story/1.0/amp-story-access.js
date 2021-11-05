@@ -7,11 +7,10 @@ import {
 import {Layout_Enum} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
-import {user} from '#utils/log';
+import {devAssert, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
 import {isArray, isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
-import {devAssert} from '#core/assert';
 
 /** @const {string} */
 const TAG = 'amp-story-access';

@@ -15,9 +15,8 @@ import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
-import {dev} from '#utils/log';
+import {dev, devAssert} from '#utils/log';
 import {localize} from './amp-story-localization-service';
-import {devAssert} from '#core/assert';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
