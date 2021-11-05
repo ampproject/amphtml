@@ -45,7 +45,7 @@ describes.realWin(
     });
 
     it('should process config data and set text container content if data not null', () => {
-      shoppingTag.element.setAttribute('tag-data-id', 'sunglasses');
+      shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
@@ -56,7 +56,7 @@ describes.realWin(
     });
 
     it('should not process config data and set text container content if id not found is null', () => {
-      shoppingTag.element.setAttribute('tag-data-id', 'hat');
+      shoppingTag.element.setAttribute('data-tag-id', 'hat');
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
