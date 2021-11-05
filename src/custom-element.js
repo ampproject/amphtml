@@ -172,7 +172,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?AbortController} */
       this.mountAbortController_ = null;
 
-      /** @private {!ReadyState} */
+      /** @private {!ReadyState_Enum} */
       this.readyState_ = ReadyState_Enum.UPGRADING;
 
       /** @type {boolean} */
@@ -249,7 +249,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
        * An element always starts in a unupgraded state until it's added to DOM
        * for the first time in which case it can be upgraded immediately or wait
        * for script download or `upgradeCallback`.
-       * @private {!UpgradeState}
+       * @private {!UpgradeState_Enum}
        */
       this.upgradeState_ = UpgradeState_Enum.NOT_UPGRADED;
 
@@ -297,7 +297,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       }
     }
 
-    /** @return {!ReadyState} */
+    /** @return {!ReadyState_Enum} */
     get readyState() {
       return this.readyState_;
     }
@@ -850,7 +850,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     /**
      * Update the internal ready state.
      *
-     * @param {!ReadyState} state
+     * @param {!ReadyState_Enum} state
      * @param {*=} opt_failure
      * @protected
      * @final

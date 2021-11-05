@@ -53,7 +53,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
     // VideoDocking.querySlot_() expects this guy:
     querySelectorStub.withArgs('[dock]').returns(video.element);
 
-    // VideoDocking.querySlot_() expects the VideoEvents.REGISTERED signal.
+    // VideoDocking.querySlot_() expects the VideoEvents_Enum.REGISTERED signal.
     // This is normally set by virtue of the Video service, which is not
     // tested here.
     video.signals = () => ({

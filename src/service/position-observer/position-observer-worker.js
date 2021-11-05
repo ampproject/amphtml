@@ -26,7 +26,7 @@ const LOW_FIDELITY_FRAME_COUNT = 4;
  * @typedef {{
  *  positionRect: ?../../layout-rect.LayoutRectDef,
  *  viewportRect: !../../layout-rect.LayoutRectDef,
- *  relativePos: ?../../layout-rect.RelativePositions,
+ *  relativePos: ?../../layout-rect.RelativePositions_Enum,
  * }}
  */
 export let PositionInViewportEntryDef;

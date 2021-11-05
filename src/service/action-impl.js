@@ -1185,7 +1185,7 @@ function assertActionForParser(s, context, condition, opt_message) {
  * @param {string} s
  * @param {!Element} context
  * @param {!TokenDef} tok
- * @param {Array<TokenType>} types
+ * @param {Array<TokenType_Enum>} types
  * @param {*=} opt_value
  * @return {!TokenDef}
  * @private
@@ -1217,7 +1217,7 @@ const TokenType_Enum = {
 };
 
 /**
- * @typedef {{type: TokenType, value: *}}
+ * @typedef {{type: TokenType_Enum, value: *}}
  */
 let TokenDef;
 
@@ -1271,7 +1271,7 @@ class ParserTokenizer {
 
   /**
    * @param {boolean} convertValues
-   * @return {!{type: TokenType, value: *, index: number}}
+   * @return {!{type: TokenType_Enum, value: *, index: number}}
    */
   next_(convertValues) {
     let newIndex = this.index_ + 1;

@@ -394,7 +394,7 @@ describes.realWin('form-dirtiness', {}, (env) => {
     });
   });
 
-  describe('AmpEvents.FORM_DIRTINESS_CHANGE', () => {
+  describe('AmpEvents_Enum.FORM_DIRTINESS_CHANGE', () => {
     let input;
 
     beforeEach(() => {

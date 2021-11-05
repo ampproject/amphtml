@@ -203,7 +203,7 @@ export class CookieWriter {
    * @param {string} cookieName
    * @param {string} cookieValue
    * @param {number} cookieExpireDateMs
-   * @param {!SameSite=} sameSite
+   * @param {!SameSite_Enum=} sameSite
    * @return {!Promise}
    */
   expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs, sameSite) {
@@ -232,9 +232,9 @@ export class CookieWriter {
   }
 
   /**
-   * Converts SameSite string to SameSite type.
+   * Converts SameSite string to SameSite_Enum type.
    * @param {string=} sameSite
-   * @return {SameSite|undefined}
+   * @return {SameSite_Enum|undefined}
    */
   getSameSiteType_(sameSite) {
     switch (sameSite) {

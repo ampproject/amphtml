@@ -76,7 +76,7 @@ export function startupChunk(doc, fn, opt_makesBodyVisible) {
  *
  * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {function(?IdleDeadline)} fn
- * @param {ChunkPriority} priority
+ * @param {ChunkPriority_Enum} priority
  */
 export function chunk(elementOrAmpDoc, fn, priority) {
   if (deactivated) {
@@ -168,7 +168,7 @@ class Task {
    * @param {function(?IdleDeadline)} fn
    */
   constructor(fn) {
-    /** @public {TaskState} */
+    /** @public {TaskState_Enum} */
     this.state = TaskState_Enum.NOT_RUN;
 
     /** @private @const {!function(?IdleDeadline)} */

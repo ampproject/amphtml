@@ -62,7 +62,7 @@ const LightboxControlsModes = {
   CONTROLS_HIDDEN: 0,
 };
 
-// Use S Curves for entry and exit animations
+// Use S Curves_Enum for entry and exit animations
 const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
 
 // Keep in sync with [i-amphtml-lbg-fade]'s animation duration

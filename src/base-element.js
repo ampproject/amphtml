@@ -178,7 +178,7 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LayoutPriority.CONTENT.
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
    *
    * @param {!AmpElement} unusedElement
    * @return {number}
@@ -272,7 +272,7 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LayoutPriority.CONTENT.
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
    * @return {number}
    * TODO(#31915): remove once R1 migration is complete.
    */
@@ -523,7 +523,7 @@ export class BaseElement {
    *
    * Only used for R1 elements.
    *
-   * @param {!./ready-state.ReadyState} state
+   * @param {!./ready-state.ReadyState_Enum} state
    * @param {*=} opt_failure
    * @final
    */

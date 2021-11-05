@@ -1533,7 +1533,7 @@ chromed.run('Bind', {}, function () {
           });
         });
 
-        describe('AmpEvents.FORM_VALUE_CHANGE', () => {
+        describe('AmpEvents_Enum.FORM_VALUE_CHANGE', () => {
           it('should dispatch FORM_VALUE_CHANGE on <input [value]> changes', () => {
             const element = createElement(env, container, '[value]="foo"', {
               tag: 'input',

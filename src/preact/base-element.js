@@ -502,7 +502,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {!ReadyState} state
+   * @param {!ReadyState_Enum} state
    * @param {*=} opt_failure
    * @private
    */

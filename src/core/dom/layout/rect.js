@@ -62,7 +62,7 @@ export let LayoutMarginsDef;
 export let LayoutMarginsChangeDef;
 
 /**
- * RelativePositions
+ * RelativePositions_Enum
  *
  * Describes the relative position of an element to another (whether the
  * first is inside the second, on top of the second or on the bottom
@@ -159,7 +159,7 @@ export function rectIntersection(var_args) {
  * Returns the position of r2 relative to r1
  * @param {!LayoutRectDef} r1
  * @param {!LayoutRectDef} r2
- * @return {!RelativePositions}
+ * @return {!RelativePositions_Enum}
  */
 export function layoutRectsRelativePos(r1, r2) {
   if (r1.top < r2.top) {
@@ -177,7 +177,7 @@ export function layoutRectsRelativePos(r1, r2) {
  * @param {!LayoutRectDef} layoutBox
  * @param {!ViewportInterfaceDef} viewport
  * @param {number} scrollPos
- * @return {!RelativePositions}
+ * @return {!RelativePositions_Enum}
  */
 export function layoutPositionRelativeToScrolledViewport(
   layoutBox,
