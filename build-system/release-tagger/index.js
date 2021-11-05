@@ -10,7 +10,7 @@
  */
 
 const dedent = require('dedent');
-const {action, base, channel, head, sha, time} = require('minimist')(
+const {action, base, channel, head, sha, timeParam} = require('minimist')(
   process.argv.slice(2),
   {
     string: ['head', 'base'],
@@ -29,6 +29,7 @@ const {publishRelease, rollbackRelease} = require('./update-release');
  * @return {Promise<void>}
  */
 async function _promote() {
+  const time = decodeURIComponent(timeParam);
   log(
     cyan(dedent`Release tagger triggered with inputs:
     action: ${magenta(action)}
@@ -49,7 +50,7 @@ async function _promote() {
     const {'html_url': url} = await makeRelease(head, base, channel, sha);
     log('Created release', magenta(head), 'at', cyan(url));
   } else {
-    log('Found release', magenta(head), 'at', cyan(release.url));
+    log('Found release', magenta(head), 'at', cyan(release['html_url']));
   }
 
   if (['stable', 'lts'].includes(channel)) {
