@@ -1,10 +1,10 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
 } from '#core/constants/async-input';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
 import {
@@ -355,7 +355,7 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'submit') {
@@ -415,7 +415,7 @@ export class AmpForm {
     );
 
     this.form_.addEventListener(
-      AmpEvents.FORM_VALUE_CHANGE,
+      AmpEvents_Enum.FORM_VALUE_CHANGE,
       (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
@@ -441,7 +441,7 @@ export class AmpForm {
                 this.triggerAction_(
                   FormEvents.VERIFY_ERROR,
                   errors,
-                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                  ActionTrust_Enum.DEFAULT // DEFAULT because async after gesture.
                 );
               });
             } else {
@@ -569,7 +569,7 @@ export class AmpForm {
     }
 
     // Submits caused by user input have high trust.
-    return this.submit_(ActionTrust.HIGH, event);
+    return this.submit_(ActionTrust_Enum.HIGH, event);
   }
 
   /**
@@ -593,7 +593,7 @@ export class AmpForm {
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
     const asyncInputs = this.form_.getElementsByClassName(
-      AsyncInputClasses.ASYNC_INPUT
+      AsyncInputClasses_Enum.ASYNC_INPUT
     );
 
     this.dirtinessHandler_.onSubmitting();
@@ -639,7 +639,9 @@ export class AmpForm {
     iterateCursor(asyncInputs, (asyncInput) => {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
-        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+        asyncInput.classList.contains(
+          AsyncInputClasses_Enum.ASYNC_REQUIRED_ACTION
+        )
       ) {
         requiredActionPromises.push(asyncCall);
       } else {
@@ -712,7 +714,11 @@ export class AmpForm {
       return Promise.resolve();
     }
     this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormEvents.VERIFY, /* detail */ null, ActionTrust.HIGH);
+    this.triggerAction_(
+      FormEvents.VERIFY,
+      /* detail */ null,
+      ActionTrust_Enum.HIGH
+    );
 
     return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
       this.doVerifyXhr_()
@@ -886,7 +892,7 @@ export class AmpForm {
       .getImpl()
       .then((implementation) => implementation.getValue())
       .then((value) => {
-        const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+        const name = asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME);
         let input = this.form_.querySelector(
           `input[name=${escapeCssSelectorIdent(name)}]`
         );
@@ -895,7 +901,7 @@ export class AmpForm {
             this.win_.document,
             'input',
             dict({
-              'name': asyncInput.getAttribute(AsyncInputAttributes.NAME),
+              'name': asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME),
               'hidden': 'true',
             })
           );
@@ -1280,7 +1286,7 @@ export class AmpForm {
                 container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
-                  AmpEvents.DOM_UPDATE,
+                  AmpEvents_Enum.DOM_UPDATE,
                   /* detail */ null,
                   {bubbles: true}
                 );
@@ -1643,7 +1649,7 @@ export class AmpFormService {
    * @private
    */
   installDomUpdateEventListener_(doc) {
-    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    doc.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }
@@ -1657,7 +1663,7 @@ export class AmpFormService {
     doc.addEventListener('keydown', (e) => {
       if (
         e.defaultPrevented ||
-        e.key != Keys.ENTER ||
+        e.key != Keys_Enum.ENTER ||
         !(e.ctrlKey || e.metaKey) ||
         e.target.tagName !== 'TEXTAREA'
       ) {

@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {removeElement} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyle, toggle} from '#core/dom/style';
@@ -6,7 +6,7 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {PositionObserverFidelity_Enum} from '#service/position-observer/position-observer-worker';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {dev, devAssert, user, userAssert} from '#utils/log';
@@ -217,7 +217,7 @@ export class NextPageService {
 
     /** @type {!../../../src/runtime.ShadowDoc} */
     const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
-      visibilityState: VisibilityState.PRERENDER,
+      visibilityState: VisibilityState_Enum.PRERENDER,
     });
     const ampdoc = devAssert(amp.ampdoc);
     installStylesForDoc(ampdoc, CSS, null, false, TAG);
@@ -277,12 +277,12 @@ export class NextPageService {
       this.appendPageHandler_(container).then(() => {
         this.positionObserver_.observe(
           measurer,
-          PositionObserverFidelity.LOW,
+          PositionObserverFidelity_Enum.LOW,
           (position) => this.positionUpdate_(page, position)
         );
         this.positionObserver_.observe(
           articleLinks,
-          PositionObserverFidelity.LOW,
+          PositionObserverFidelity_Enum.LOW,
           (unused) => this.articleLinksPositionUpdate_(documentRef)
         );
       });
@@ -529,10 +529,10 @@ export class NextPageService {
         this.activeDocumentRef_ = docRef;
         this.setActiveDocumentInHistory_(docRef);
         // Show the active document
-        this.setDocumentVisibility_(docRef, VisibilityState.VISIBLE);
+        this.setDocumentVisibility_(docRef, VisibilityState_Enum.VISIBLE);
       } else {
         // Hide other documents
-        this.setDocumentVisibility_(docRef, VisibilityState.HIDDEN);
+        this.setDocumentVisibility_(docRef, VisibilityState_Enum.HIDDEN);
       }
     });
 
@@ -560,7 +560,10 @@ export class NextPageService {
     }
 
     // Prevent hiding of documents that are being pre-rendered
-    if (!ampDoc.hasBeenVisible() && visibilityState == VisibilityState.HIDDEN) {
+    if (
+      !ampDoc.hasBeenVisible() &&
+      visibilityState == VisibilityState_Enum.HIDDEN
+    ) {
       return;
     }
 

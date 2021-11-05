@@ -7,7 +7,7 @@
  *
  * @enum {string}
  */
-export const Loading = {
+export const Loading_Enum = {
   /**
    * If parent is available, fallback to its loading strategy (e.g. based on
    * whether the document is visible or not).
@@ -32,14 +32,19 @@ export const Loading = {
 };
 
 /** @const {!Array<!Loading>} */
-const ORDER = [Loading.AUTO, Loading.LAZY, Loading.EAGER, Loading.UNLOAD];
+const ORDER = [
+  Loading_Enum.AUTO,
+  Loading_Enum.LAZY,
+  Loading_Enum.EAGER,
+  Loading_Enum.UNLOAD,
+];
 
 /** @const {!Object<string, number>} */
 const MAP = {
-  [Loading.AUTO]: 0,
-  [Loading.LAZY]: 1,
-  [Loading.EAGER]: 2,
-  [Loading.UNLOAD]: 3,
+  [Loading_Enum.AUTO]: 0,
+  [Loading_Enum.LAZY]: 1,
+  [Loading_Enum.EAGER]: 2,
+  [Loading_Enum.UNLOAD]: 3,
 };
 
 /**

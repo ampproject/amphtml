@@ -1,6 +1,9 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {dispatchCustomEvent} from '#core/dom';
-import {Layout, LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
 import {isArray} from '#core/types';
 import {getWin} from '#core/window';
 
@@ -182,7 +185,7 @@ export class BaseElement {
    * @nocollapse
    */
   static getBuildPriority(unusedElement) {
-    return LayoutPriority.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /**
@@ -274,7 +277,7 @@ export class BaseElement {
    * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutPriority() {
-    return LayoutPriority.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /**
@@ -361,7 +364,7 @@ export class BaseElement {
    * @public
    */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /**
@@ -667,7 +670,7 @@ export class BaseElement {
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
+  registerAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     initActionMap(this);
     this['actionMap_'][alias] = {handler, minTrust};
   }
@@ -682,7 +685,7 @@ export class BaseElement {
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.DEFAULT
+    minTrust = ActionTrust_Enum.DEFAULT
   ) {
     devAssert(
       !this['defaultActionAlias_'],

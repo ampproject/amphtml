@@ -19,7 +19,7 @@ import {
 } from '#service/extensions-impl';
 
 import {
-  LogLevel, // eslint-disable-line no-unused-vars
+  LogLevel_Enum, // eslint-disable-line no-unused-vars
   dev,
   initLogConstructor,
   overrideLogLevel,

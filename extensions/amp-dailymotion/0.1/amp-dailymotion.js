@@ -1,7 +1,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
@@ -162,10 +162,10 @@ class AmpDailymotion extends AMP.BaseElement {
     }
 
     redispatch(this.element, data['event'], {
-      [DailymotionEvents.API_READY]: VideoEvents.LOAD,
-      [DailymotionEvents.END]: [VideoEvents.ENDED, VideoEvents.PAUSE],
-      [DailymotionEvents.PAUSE]: VideoEvents.PAUSE,
-      [DailymotionEvents.PLAY]: VideoEvents.PLAYING,
+      [DailymotionEvents.API_READY]: VideoEvents_Enum.LOAD,
+      [DailymotionEvents.END]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
+      [DailymotionEvents.PAUSE]: VideoEvents_Enum.PAUSE,
+      [DailymotionEvents.PLAY]: VideoEvents_Enum.PLAYING,
     });
 
     switch (data['event']) {
@@ -290,7 +290,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.MUTED);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.MUTED);
       this.muted_ = true;
     });
   }
@@ -303,7 +303,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.UNMUTED);
       this.muted_ = false;
     });
   }

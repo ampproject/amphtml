@@ -1,9 +1,9 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {applyFillContent} from '#core/dom/layout';
@@ -237,7 +237,7 @@ class AmpLightbox extends AMP.BaseElement {
 
       element.classList.add('i-amphtml-scrollable');
 
-      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      element.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
         this.takeOwnershipOfDescendants_();
         this.updateChildrenInViewport_(this.pos_);
       });
@@ -303,9 +303,9 @@ class AmpLightbox extends AMP.BaseElement {
       // Mutations via AMP.setState() require default trust.
       if (open) {
         // This suppose that the element that trigered the open is where the focus currently is
-        this.open_(ActionTrust.DEFAULT, document.activeElement);
+        this.open_(ActionTrust_Enum.DEFAULT, document.activeElement);
       } else {
-        this.close(ActionTrust.DEFAULT);
+        this.close(ActionTrust_Enum.DEFAULT);
       }
     }
   }
@@ -506,7 +506,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnClick_() {
-    this.close(ActionTrust.HIGH);
+    this.close(ActionTrust_Enum.HIGH);
   }
 
   /**
@@ -515,10 +515,10 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.key == Keys.ESCAPE) {
+    if (event.key == Keys_Enum.ESCAPE) {
       event.preventDefault();
       // Keypress gesture is high trust.
-      this.close(ActionTrust.HIGH);
+      this.close(ActionTrust_Enum.HIGH);
     }
   }
 
@@ -529,10 +529,10 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEnter_(event) {
-    if (event.key == Keys.ENTER) {
+    if (event.key == Keys_Enum.ENTER) {
       event.preventDefault();
       // Keypress gesture is high trust.
-      this.close(ActionTrust.HIGH);
+      this.close(ActionTrust_Enum.HIGH);
     }
   }
 
@@ -649,7 +649,7 @@ class AmpLightbox extends AMP.BaseElement {
    */
   onFocusin_() {
     if (!this.hasCurrentFocus_()) {
-      this.close(ActionTrust.HIGH);
+      this.close(ActionTrust_Enum.HIGH);
     }
   }
 

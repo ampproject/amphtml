@@ -1,11 +1,11 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
-import {Keys} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
 import {isRTL, iterateCursor, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -354,7 +354,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     // NOTE: Layout.CONTAINER is only valid for mode="overlay",
     // but since element attributes are not guaranteed to be present until
     // buildCallback is called, we cannot check the mode here.
-    return isLayoutSizeDefined(layout) || layout == Layout.CONTAINER;
+    return isLayoutSizeDefined(layout) || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -1136,7 +1136,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   handleDocumentKeydown_(e) {
     if (
-      e.key == Keys.ESCAPE &&
+      e.key == Keys_Enum.ESCAPE &&
       this.mode_ == DatePickerMode.OVERLAY &&
       this.element.contains(this.document_.activeElement)
     ) {
@@ -1156,7 +1156,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (e.key == Keys.DOWN_ARROW) {
+    if (e.key == Keys_Enum.DOWN_ARROW) {
       this.updateDateFieldFocus_(target);
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_PICKER);
       if (this.mode_ === DatePickerMode.STATIC) {
@@ -1167,7 +1167,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         }
       }
       e.preventDefault();
-    } else if (e.key == Keys.ESCAPE) {
+    } else if (e.key == Keys_Enum.ESCAPE) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
     } else {
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_INPUT);
@@ -1523,7 +1523,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   triggerEvent_(name, opt_data = null) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, opt_data);
-    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+    this.action_.trigger(this.element, name, event, ActionTrust_Enum.HIGH);
   }
 
   /**
@@ -1875,7 +1875,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     } else {
       const renderedEvent = createCustomEvent(
         this.win,
-        AmpEvents.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );

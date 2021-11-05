@@ -1,7 +1,7 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
-import {ChunkPriority, chunk} from '../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {SameSite, setCookie} from '../../../src/cookies';
+import {SameSite_Enum, setCookie} from '../../../src/cookies';
 import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
 import {isCookieAllowed} from './cookie-reader';
@@ -59,7 +59,7 @@ export class CookieWriter {
         this.writeDeferred_.resolve(this.init_());
       };
       // CookieWriter is not supported in inabox ad. Always chunk
-      chunk(this.element_, task, ChunkPriority.LOW);
+      chunk(this.element_, task, ChunkPriority_Enum.LOW);
     }
     return this.writeDeferred_.promise;
   }
@@ -218,7 +218,7 @@ export class CookieWriter {
           const expireDate = Date.now() + cookieExpireDateMs;
           // SameSite=None must be secure as per
           // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
-          const secure = sameSite === SameSite.NONE;
+          const secure = sameSite === SameSite_Enum.NONE;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
             sameSite,
@@ -239,11 +239,11 @@ export class CookieWriter {
   getSameSiteType_(sameSite) {
     switch (sameSite) {
       case 'Strict':
-        return SameSite.STRICT;
+        return SameSite_Enum.STRICT;
       case 'Lax':
-        return SameSite.LAX;
+        return SameSite_Enum.LAX;
       case 'None':
-        return SameSite.NONE;
+        return SameSite_Enum.NONE;
       default:
         return;
     }

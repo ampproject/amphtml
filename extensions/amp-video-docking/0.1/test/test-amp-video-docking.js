@@ -5,7 +5,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {PlayingStates} from '../../../../src/video-interface';
+import {PlayingStates_Enum} from '../../../../src/video-interface';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -154,7 +154,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     manager = {
       getPlayingState() {
-        return PlayingStates.PLAYING_MANUAL;
+        return PlayingStates_Enum.PLAYING_MANUAL;
       },
       isMuted() {
         return false;

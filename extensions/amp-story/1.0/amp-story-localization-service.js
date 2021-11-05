@@ -2,7 +2,7 @@ import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 // eslint-disable-next-line no-unused-vars
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 /**
  * Util function to retrieve the localization service. Ensures we can retrieve

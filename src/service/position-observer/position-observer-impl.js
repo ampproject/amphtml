@@ -5,7 +5,7 @@ import {Services} from '#service';
 import {dev} from '#utils/log';
 
 import {
-  PositionObserverFidelity, // eslint-disable-line no-unused-vars
+  PositionObserverFidelity_Enum, // eslint-disable-line no-unused-vars
   PositionObserverWorker,
 } from './position-observer-worker';
 

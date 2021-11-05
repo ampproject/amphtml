@@ -9,15 +9,15 @@ import {
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Keys} from '#core/constants/key-codes';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Performance} from '#service/performance-impl';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
@@ -224,7 +224,7 @@ describes.realWin(
       });
 
       const eventObj = createEvent('keydown');
-      eventObj.key = Keys.RIGHT_ARROW;
+      eventObj.key = Keys_Enum.RIGHT_ARROW;
       eventObj.which = KEYBOARD_EVENT_WHICH_RIGHT_ARROW;
       const docEl = win.document.documentElement;
       docEl.dispatchEvent
@@ -639,7 +639,9 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -648,7 +650,9 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.NOT_ACTIVE
         );
@@ -658,7 +662,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -667,7 +671,7 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
         );
@@ -677,7 +681,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -686,7 +690,7 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
         );
@@ -696,8 +700,8 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
       });
 
@@ -706,8 +710,8 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.PLAYING
         );
@@ -718,9 +722,11 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(setStateStub.getCall(0)).to.have.been.calledWithExactly(
           PageState.PAUSED
         );
@@ -738,8 +744,8 @@ describes.realWin(
         story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -749,9 +755,11 @@ describes.realWin(
         story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -817,7 +825,7 @@ describes.realWin(
             .then(() =>
               story.activePage_.element
                 .signals()
-                .whenSignal(CommonSignals.LOAD_END)
+                .whenSignal(CommonSignals_Enum.LOAD_END)
             )
             .then(() => {
               expect(story.backgroundAudioEl_).to.exist;
@@ -1674,7 +1682,7 @@ describes.realWin(
         await story.layoutCallback();
         await story.activePage_.element
           .signals()
-          .whenSignal(CommonSignals.LOAD_END);
+          .whenSignal(CommonSignals_Enum.LOAD_END);
         expect(
           story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
         ).to.be.true;
@@ -1691,7 +1699,7 @@ describes.realWin(
         await story.layoutCallback();
         await story.activePage_.element
           .signals()
-          .whenSignal(CommonSignals.LOAD_END);
+          .whenSignal(CommonSignals_Enum.LOAD_END);
         expect(
           story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
         ).to.be.false;
@@ -1741,7 +1749,7 @@ describes.realWin(
         // Check page 1 is not loaded.
         expect(pages[1].hasAttribute('distance')).to.be.false;
 
-        signals.signal(CommonSignals.LOAD_END);
+        signals.signal(CommonSignals_Enum.LOAD_END);
         await nextTick();
 
         // Check page 1 is loaded with distance 1.

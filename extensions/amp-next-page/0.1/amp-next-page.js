@@ -1,6 +1,6 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {isJsonScriptTag, removeElement} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   childElementsByAttr,
   childElementsByTag,
@@ -35,7 +35,7 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */

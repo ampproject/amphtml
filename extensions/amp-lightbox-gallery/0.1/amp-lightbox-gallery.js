@@ -1,7 +1,7 @@
 import {prepareImageAnimation} from '@ampproject/animations';
 
-import {CommonSignals} from '#core/constants/common-signals';
-import {Keys} from '#core/constants/key-codes';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
@@ -761,7 +761,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.setupGestures_();
         this.setupEventListeners_();
 
-        return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
+        return this.carousel_.signals().whenSignal(CommonSignals_Enum.LOAD_END);
       })
       .then(() => this.openLightboxForElement_(element, expandDescription))
       .then(() => {
@@ -1026,7 +1026,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.getCurrentElement_()
       .imageViewer.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => this.transitionImgIn_(sourceElement));
   }
 
@@ -1179,13 +1179,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.ESCAPE:
+      case Keys_Enum.ESCAPE:
         this.close_();
         break;
-      case Keys.LEFT_ARROW:
+      case Keys_Enum.LEFT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ -1);
         break;
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:

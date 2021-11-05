@@ -6,7 +6,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
 import {localize} from './amp-story-localization-service';
@@ -31,7 +31,7 @@ const renderHintElement = (element) => (
           <div class="i-amphtml-story-hint-tap-button-text">
             {localize(
               element,
-              LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL
+              LocalizedStringId_Enum.AMP_STORY_HINT_UI_PREVIOUS_LABEL
             )}
           </div>
         </div>
@@ -42,7 +42,10 @@ const renderHintElement = (element) => (
             <div class="i-amphtml-story-hint-tap-button-icon" />
           </div>
           <div class="i-amphtml-story-hint-tap-button-text">
-            {localize(element, LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL)}
+            {localize(
+              element,
+              LocalizedStringId_Enum.AMP_STORY_HINT_UI_NEXT_LABEL
+            )}
           </div>
         </div>
       </div>

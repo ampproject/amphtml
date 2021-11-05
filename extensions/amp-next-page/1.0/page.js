@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 
 import {devAssert} from '#utils/log';
 
@@ -52,7 +52,7 @@ export class Page {
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
     /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.PRERENDER;
+    this.visibilityState_ = VisibilityState_Enum.PRERENDER;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
   }
@@ -135,7 +135,9 @@ export class Page {
    * @return {boolean}
    */
   isVisible() {
-    return this.isLoaded() && this.visibilityState_ === VisibilityState.VISIBLE;
+    return (
+      this.isLoaded() && this.visibilityState_ === VisibilityState_Enum.VISIBLE
+    );
   }
 
   /**
@@ -149,7 +151,7 @@ export class Page {
     //Reload the page if necessary
     if (
       this.is(PageState.PAUSED) &&
-      visibilityState === VisibilityState.VISIBLE
+      visibilityState === VisibilityState_Enum.VISIBLE
     ) {
       this.resume();
     }
@@ -179,7 +181,7 @@ export class Page {
     return this.shadowDoc_.close().then(() => {
       return this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
-        this.visibilityState_ = VisibilityState.HIDDEN;
+        this.visibilityState_ = VisibilityState_Enum.HIDDEN;
         this.state_ = PageState.PAUSED;
       });
     });
