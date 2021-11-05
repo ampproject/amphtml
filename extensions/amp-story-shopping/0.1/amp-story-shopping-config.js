@@ -36,7 +36,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.ADD_SHOPPING_STATE, productIDtoProduct);
 
-    //TODO: add call to validate config here. See validation I2I #36412 for implementation details
+    //TODO(#36412): Add call to validate config here.
   }
 
   /** @override */
@@ -47,19 +47,10 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
 
         this.storeService_ = storeService;
-
-        this.getConfig().then((storyConfig) => {
-          //if remote config is not valid, try using the inline config
-          if (storyConfig == null && this.element_.hasAttribute('src')) {
-            this.getInlineConfig_(this.element_.firstElementChild).then(
-              (storyInlineconfig) => {
-                this.dispatchConfig_(storyInlineconfig);
-              }
-            );
-          } else {
-            this.dispatchConfig_(storyConfig);
-          }
-        });
+        this.getConfig()
+          .then((storyConfig) => this.dispatchConfig_(storyConfig))
+          // If remote config fails, fall back to inline config.
+          .catch(() => this.dispatchConfig_(this.getInlineConfig_()));
       }
     );
   }
@@ -69,36 +60,29 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     return layout === Layout.NODISPLAY;
   }
 
-  /**
-   * @return {!JsonObject}
-   */
+  /** @return {!JsonObject} */
   getConfig() {
-    const configData = this.element_.hasAttribute('src')
+    return this.element_.hasAttribute('src')
       ? this.getRemoteConfig_()
-      : this.getInlineConfig_(this.element_.firstElementChild);
-
-    return configData;
+      : this.getInlineConfig_();
   }
 
-  /**
-   * @param {!Element} child
-   * @return {!JsonObject}
-   */
-  getInlineConfig_(child) {
+  /** @return {Promise<JsonObject>} */
+  getInlineConfig_() {
     userAssert(
-      child && isJsonScriptTag(child),
-      `The ${TAG} should ` +
-        'be inside a <script> tag with type="application/json"'
+      this.element_.firstElementChild &&
+        isJsonScriptTag(this.element_.firstElementChild),
+      `${TAG}: The config should be inside a <script> tag with type="application/json"`
     );
 
-    const inlineJSONConfig = parseJson(child.textContent);
+    const inlineJSONConfig = parseJson(
+      this.element_.firstElementChild.textContent
+    );
 
     return Promise.resolve(inlineJSONConfig);
   }
 
-  /**
-   * @return {!JsonObject}
-   */
+  /** @return {Promise<JsonObject>} */
   getRemoteConfig_() {
     return Services.xhrFor(this.win)
       .fetchJson(this.element_.getAttribute('src'))

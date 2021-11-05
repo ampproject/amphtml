@@ -17,12 +17,11 @@
         publisher="AMP Story Shopping"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
-      <amp-story-page id="example">
+      <amp-story-page id="src-example-inline-light-theme">
         <!--
-          This is an example of a JSON config retrieved from a source file.
-          To use the inline JSON config, remove the src attribute.
+          Inline Shopping Component Config
         -->
-        <amp-story-shopping-config layout='nodisplay' src="/examples/amp-story/shopping/remote.json" >
+        <amp-story-shopping-config layout='nodisplay'>
           <script type="application/json">
             {
                 "items" : [
@@ -73,6 +72,65 @@
           <amp-story-shopping-tag tag-data-id="hat" ></amp-story-shopping-tag>
           <amp-story-shopping-tag tag-data-id="sunglasses" ></amp-story-shopping-tag>
           <amp-story-shopping-tag tag-data-id="backpack" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="src-example-remote-dark-theme">
+        <!--
+          Example of JSON retrieved from src attribute.
+          Falls back to inline if request fails.
+        -->
+        <amp-story-shopping-config layout='nodisplay' src="/examples/amp-story/shopping/remote.json" >
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "product-tag-id": "city-pop",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Plastic Love",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   },
+                   {
+                    "product-tag-id": "k-pop",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Gangnam Style",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   },
+                   {
+                    "product-tag-id": "eurodance",
+                    "brand-label": "...",
+                    "brand-favicon": "...",
+                    "product-title": "Crystal King Battle",
+                    "product-price": "...",
+                    "product-images": "...",
+                    "product-details": "...",
+                    "reviews-page": "...",
+                    "reviews-data": "...",
+                    "cta-text": 1,
+                    "shipping-text": 1
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag tag-data-id="city-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag tag-data-id="k-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag tag-data-id="eurodance" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
       </amp-story-page>

@@ -1,10 +1,8 @@
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout} from '#core/dom/layout';
 
 import {Services} from '#service';
 
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
-
-const TAG = 'amp-story-shopping-tag';
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -18,8 +16,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.element.textContent = this.myText_;
-    applyFillContent(this.element, /* replacedContent */ true);
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         this.storeService_ = storeService;

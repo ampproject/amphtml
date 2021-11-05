@@ -1,10 +1,10 @@
 {
-  "items": [
-    {
-      "product-tag-id": "hat",
+  "items" : [
+     {
+      "product-tag-id": "city-pop",
       "brand-label": "...",
       "brand-favicon": "...",
-      "product-title": "Hootenanny Hat",
+      "product-title": "Plastic Love",
       "product-price": "...",
       "product-images": "...",
       "product-details": "...",
@@ -12,12 +12,12 @@
       "reviews-data": "...",
       "cta-text": 1,
       "shipping-text": 1
-    },
-    {
-      "product-tag-id": "sunglasses",
+     },
+     {
+      "product-tag-id": "k-pop",
       "brand-label": "...",
       "brand-favicon": "...",
-      "product-title": "Spectacular Spectacles",
+      "product-title": "Gangnam Style",
       "product-price": "...",
       "product-images": "...",
       "product-details": "...",
@@ -25,12 +25,12 @@
       "reviews-data": "...",
       "cta-text": 1,
       "shipping-text": 1
-    },
-    {
-      "product-tag-id": "backpack",
+     },
+     {
+      "product-tag-id": "eurodance",
       "brand-label": "...",
       "brand-favicon": "...",
-      "product-title": "Beastly Backpack",
+      "product-title": "Crystal King Battle",
       "product-price": "...",
       "product-images": "...",
       "product-details": "...",
@@ -38,6 +38,6 @@
       "reviews-data": "...",
       "cta-text": 1,
       "shipping-text": 1
-    }
+     }
   ]
 }
