@@ -34,11 +34,7 @@ defineBentoLightboxGallery();
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-lightbox-gallery[hidden] {
-        display: none !important;
-      }
-    </style>
+    <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css">
     <script
       type="module"
       async
@@ -51,33 +47,17 @@ defineBentoLightboxGallery();
     ></script>
   </head>
   <body>
+    <bento-lightbox-gallery></bento-lightbox-gallery>
     <figure>
-      <img
-        id="my-img"
-        width="360"
-        height="240"
-        src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
-        lightbox
-      />
+      <img id="my-img" src="img1.jpwg" lightbox />
       <figcaption>dog wearing yellow shirt.</figcaption>
     </figure>
-    <div class="buttons" style="margin-top: 8px">
-      <button id="change-img">change image</button>
-    </div>
-
-    <script>
-      (async () => {
-        const img = document.queryselector('#my-img');
-        await customelements.whendefined('img');
-        // set up button actions
-        document.queryselector('#change-img').onclick = () => {
-          img.setattribute(
-            'src',
-            'https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80'
-          );
-        };
-      })();
-    </script>
+    <figure>
+      <img src="img2.jpeg" lightbox/>
+    </figure>
+    <figure>
+      <img src="img2.jpeg" lightbox/>
+    </figure>
   </body>
 </html>
 ```
@@ -106,9 +86,6 @@ value as its description, showing "toront's cn tower was ....".
     id="hero-img"
     lightbox="toronto"
     src="https://picsum.photos/1600/900?image=1075"
-    layout="responsive"
-    width="1600"
-    height="900"
     alt="picture of cn tower."
   />
   <figcaption class="image">
@@ -126,9 +103,6 @@ its description, showing "picture of cn tower".
   id="hero-img"
   lightbox="toronto"
   src="https://picsum.photos/1600/900?image=1075"
-  layout="responsive"
-  width="1600"
-  height="900"
   alt="picture of cn tower"
 />
 ```
@@ -152,6 +126,28 @@ Opens the lightbox gallery.
 
 ```javascript
 api.open();
+```
+
+You can open a specific lightbox gallery group to a specific slide by passing in extra arguments:
+
+```javascript
+api.open(1, 'toronto') // opens gallery with images in the "toronto" group to the 2nd image
+api.open(null, 'toronto') // opens gallery with images in the "toronto" group to the 1st image
+```
+
+### Attributes
+
+#### lightbox
+
+Set `lightbox` attribute to an id to assign different images to different groups. For example, in the example below, clicking any of the `group1` images will only show `img1.jpeg`, `img3.jpeg`, and `img5.jpeg` and clicking any of the `group2` images will only show `img2.jpeg`, `img4.jpeg`, `img6.jpeg`
+
+```html
+<img src="img1.jpeg" lightbox="group1">
+<img src="img2.jpeg" lightbox="group2">
+<img src="img3.jpeg" lightbox="group1">
+<img src="img4.jpeg" lightbox="group2">
+<img src="img5.jpeg" lightbox="group1">
+<img src="img6.jpeg" lightbox="group2">
 ```
 
 ### Layout And Style
