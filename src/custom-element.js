@@ -190,7 +190,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
        */
       this.resources_ = null;
 
-      /** @private {!Layout} */
+      /** @private {!Layout_Enum} */
       this.layout_ = Layout_Enum.NODISPLAY;
 
       /** @private {number} */
@@ -1589,7 +1589,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Returns the layout of the element.
-     * @return {!Layout}
+     * @return {!Layout_Enum}
      */
     getLayout() {
       return this.layout_;

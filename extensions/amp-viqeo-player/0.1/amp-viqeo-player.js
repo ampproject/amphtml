@@ -88,7 +88,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @return {boolean}
    * @override
    */

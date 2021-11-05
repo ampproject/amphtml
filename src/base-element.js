@@ -297,7 +297,7 @@ export class BaseElement {
       .updateLayoutPriority(this.element, newLayoutPriority);
   }
 
-  /** @return {!Layout} */
+  /** @return {!Layout_Enum} */
   getLayout() {
     return this.element.getLayout();
   }
@@ -357,9 +357,9 @@ export class BaseElement {
 
   /**
    * Intended to be implemented by subclasses. Tests whether the element
-   * supports the specified layout. By default only Layout.NODISPLAY is
+   * supports the specified layout. By default only Layout_Enum.NODISPLAY is
    * supported.
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @return {boolean}
    * @public
    */

@@ -84,7 +84,7 @@ const videoPlayerTagNameRe =
 
 /**
  * @param {string} s
- * @return {!Layout|undefined} Returns undefined in case of failure to parse
+ * @return {!Layout_Enum|undefined} Returns undefined in case of failure to parse
  *   the layout string.
  */
 export function parseLayout(s) {
@@ -95,7 +95,7 @@ export function parseLayout(s) {
 }
 
 /**
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {string}
  */
 export function getLayoutClass(layout) {
@@ -104,7 +104,7 @@ export function getLayoutClass(layout) {
 
 /**
  * Whether an element with this layout inherently defines the size.
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeDefined(layout) {
@@ -121,7 +121,7 @@ export function isLayoutSizeDefined(layout) {
 
 /**
  * Whether an element with this layout has a fixed dimension.
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeFixed(layout) {

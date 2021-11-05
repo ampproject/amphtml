@@ -43,7 +43,7 @@ UsedDef.prototype.prop;
 UsedDef.prototype.subscribers;
 /** @type {T} */
 UsedDef.prototype.value;
-/** @type {!Pending} */
+/** @type {!Pending_Enum} */
 UsedDef.prototype.pending;
 /** @type {number} */
 UsedDef.prototype.counter;
