@@ -63,35 +63,54 @@ module.exports = function (babel) {
     return evaluated;
   }
 
+  /**
+   * @param {!babel.NodePath<babel.types.CallExpression>} path
+   * @param {string} filename
+   */
+  function inlineIsEnumValue(path, filename) {
+    const enumArg = path.get('arguments.0');
+    const {confident, value} = resolveImportEvaluate(enumArg, filename);
+    if (!confident) {
+      return;
+    }
+    const subject = path.node.arguments[1];
+
+    // x === 1 || x === 2 || x === 3 || ...
+    const expression = Object.values(value)
+      .map((value) =>
+        t.binaryExpression('===', t.cloneNode(subject), t.valueToNode(value))
+      )
+      .reduce((a, b) => t.logicalExpression('||', a, b));
+    path.replaceWith(expression);
+  }
+
+  /**
+   * @param {!babel.NodePath<babel.types.CallExpression>} path
+   * @param {string} filename
+   */
+  function inlineEnumValues(path, filename) {
+    const enumArg = path.get('arguments.0');
+    const {confident, value} = resolveImportEvaluate(enumArg, filename);
+    if (!confident) {
+      return;
+    }
+
+    // [1, 2, 3]
+    path.replaceWith(t.valueToNode(Object.values(value)));
+  }
+
   return {
     name: 'transform-inline-isenumvalue',
     visitor: {
       CallExpression(path, state) {
         const callee = path.get('callee');
-        if (!callee.isIdentifier({name: 'isEnumValue'})) {
-          return;
+        const {filename} = state.file.opts;
+        if (callee.isIdentifier({name: 'isEnumValue'})) {
+          inlineIsEnumValue(path, filename);
         }
-        const enumArg = path.get('arguments.0');
-        const {confident, value} = resolveImportEvaluate(
-          enumArg,
-          state.file.opts.filename
-        );
-        if (!confident) {
-          return;
+        if (callee.isIdentifier({name: 'enumValues'})) {
+          inlineEnumValues(path, filename);
         }
-        const subject = path.node.arguments[1];
-
-        // x === 1 || x === 2 || x === 3 || ...
-        const expression = Object.values(value)
-          .map((value) =>
-            t.binaryExpression(
-              '===',
-              t.cloneNode(subject),
-              t.valueToNode(value)
-            )
-          )
-          .reduce((a, b) => t.logicalExpression('||', a, b));
-        path.replaceWith(expression);
       },
     },
   };

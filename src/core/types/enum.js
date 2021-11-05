@@ -14,3 +14,14 @@ export function isEnumValue(enumObj, val) {
   }
   return false;
 }
+
+/**
+ * Returns all enum values of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @return {!Array<T>}
+ * @template T
+ */
+export function enumValues(enumObj) {
+  return Object.values(enumObj);
+}

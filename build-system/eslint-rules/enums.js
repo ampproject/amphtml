@@ -120,7 +120,7 @@ module.exports = function (context) {
         // isEnumValue(Enum, value)
         if (callee.type === 'Identifier') {
           const {name} = callee;
-          if (name === 'isEnumValue') {
+          if (name === 'isEnumValue' || name === 'enumValues') {
             return;
           }
         }
@@ -133,6 +133,7 @@ module.exports = function (context) {
         `Improper use of enum, you may only do:`,
         `- \`${node.name}.key\` get access.`,
         `- \`isEnumValue(${node.name}, someValue)\` value checks.`,
+        `- \`enumValues(${node.name}) values gathering (discouraged)\``,
       ].join('\n\t'),
     });
   }
