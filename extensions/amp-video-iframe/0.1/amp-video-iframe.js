@@ -10,6 +10,7 @@ import {measureIntersection} from '#core/dom/layout/intersection';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {once} from '#core/types/function';
 import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -77,6 +78,15 @@ function maybeAddAmpFragment(src) {
     return src;
   }
   return `${src}#amp=1`;
+}
+
+/**
+ * @param {!Node} root
+ * @return {?JsonObject}
+ */
+export function getJsonLd(root) {
+  const scriptTag = root.querySelector('script[type="application/ld+json"]');
+  return scriptTag && tryParseJson(scriptTag.textContent);
 }
 
 /** @implements {../../../src/video-interface.VideoInterface} */
@@ -160,13 +170,15 @@ class AmpVideoIframe extends AMP.BaseElement {
    */
   getMetadata_() {
     const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
-    const {documentElement, title} = this.getAmpDoc().getRootNode();
+    const rootNode = this.getAmpDoc().getRootNode();
+    const {documentElement, title} = rootNode;
 
     return dict({
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
       'title': title || null,
       'lang': documentElement?.lang || null,
+      'jsonLd': getJsonLd(rootNode),
     });
   }
 

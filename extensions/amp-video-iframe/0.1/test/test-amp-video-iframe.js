@@ -138,6 +138,42 @@ describes.realWin(
           sourceUrl,
           title,
           lang,
+          jsonLd: null,
+        });
+      });
+
+      it('sets metadata in iframe name — with jsonLd', async () => {
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
+        const title = 'My test title';
+        const lang = 'es';
+
+        env.sandbox.stub(win.document, 'title').value(title);
+        env.sandbox.stub(win.document.documentElement, 'lang').value(lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
+
+        const jsonLd = {jsonLd: 'blah'};
+        const jsonLdScript = win.document.createElement('script');
+        jsonLdScript.type = 'application/ld+json';
+        jsonLdScript.text = JSON.stringify(jsonLd);
+
+        win.document.head.appendChild(jsonLdScript);
+
+        const videoIframe = createVideoIframe();
+
+        await layoutAndLoad(videoIframe);
+
+        const iframe = videoIframe.querySelector('iframe');
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+          jsonLd,
         });
       });
 
