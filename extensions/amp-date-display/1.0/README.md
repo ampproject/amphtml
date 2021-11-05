@@ -2,7 +2,6 @@
 
 Displays time data that you can render in your page. By providing specific [attributes](#attributes) in the Bento Date Display tag, the Bento Date Display extension returns a list of time parameters, which you can pass to [an amp-mustache template](../../amp-mustache/amp-mustache.md) for rendering. Refer to the [list below for each returned time parameter](#returned-time-parameters).
 
-
 ## Web Component
 
 We don't support the web component version of `bento-date-display` since `<template>` support is still being designed. This effort can be tracked in this [issue](https://go.amp.dev/issue/36619).
