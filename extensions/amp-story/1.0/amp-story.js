@@ -402,6 +402,7 @@ export class AmpStory extends AMP.BaseElement {
     }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      !this.storeService_.get(StateProperty.CAN_ANIMATE_FIRST_PAGE) ||
       prefersReducedMotion(this.win)
     ) {
       Services.performanceFor(this.win).addEnabledExperiment(

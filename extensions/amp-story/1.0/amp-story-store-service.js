@@ -127,6 +127,7 @@ export let State;
 /** @const @enum {string} */
 export const StateProperty = {
   // Embed options.
+  CAN_ANIMATE_FIRST_PAGE: 'canAnimateFirstPage',
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
@@ -556,6 +557,7 @@ export class AmpStoryStoreService {
     // Compiler won't resolve the object keys and trigger an error for missing
     // properties, so we have to force the type.
     return /** @type {!State} */ ({
+      [StateProperty.CAN_ANIMATE_FIRST_PAGE]: true,
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
       [StateProperty.CAN_SHOW_AUDIO_UI]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
@@ -631,6 +633,7 @@ export class AmpStoryStoreService {
       case EmbedMode.PREVIEW:
         return {
           [StateProperty.PREVIEW_STATE]: true,
+          [StateProperty.CAN_ANIMATE_FIRST_PAGE]: false,
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
