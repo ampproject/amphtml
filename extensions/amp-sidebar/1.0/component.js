@@ -168,7 +168,7 @@ export {BentoSidebar};
  * @param {!BentoSidebarDef.BentoSidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
-export function BentoSidebarToolbar({
+function BentoSidebarToolbar({
   children,
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,
