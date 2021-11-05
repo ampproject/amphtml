@@ -205,10 +205,6 @@ Or via `className`:
 }
 ```
 
-<!-- TODO(wg-bento): This section was empty, fix it.
-### Props for `BentoInlineGallery`
--->
-
 ### Props for `BentoInlineGalleryPagination`
 
 In addition to the [common props](../../../docs/spec/bento-common-props.md), BentoInlineGalleryPagination supports the props below:
