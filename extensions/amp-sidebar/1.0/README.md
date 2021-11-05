@@ -1,20 +1,14 @@
 # Bento Sidebar
 
-## Usage
+Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus. The sidebar can be revealed by a button tap while the main content remains visually underneath.
 
-The Bento Sidebar provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus. The sidebar can be revealed by a button tap while the main content remains visually underneath.
-
-Use Bento Sidebar as a web component [`<bento-sidebar>`](#web-component), or a Preact/React functional component [`<BentoSidebar>`](#preactreact-component).
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
 The examples below demonstrate use of the `<bento-sidebar>` web component.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/sidebar
@@ -25,7 +19,7 @@ import {defineElement as defineBentoSidebar} from '@bentoproject/sidebar';
 defineBentoSidebar();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
 
 ```html
 <head>
@@ -70,18 +64,18 @@ defineBentoSidebar();
 </body>
 ```
 
-#### Bento Toolbar
+### Bento Toolbar
 
 You can create a Bento Toolbar element that displays in the `<body>` by specifying the `toolbar` attribute with a media query and a `toolbar-target` attribute with an element id on a `<nav>` element that is a child of `<bento-sidebar>`. The `toolbar` duplicates the `<nav>` element and its children and appends the element into the `toolbar-target` element.
 
-##### Behavior
+#### Behavior
 
 -   The sidebar may implement toolbars by adding nav elements with the `toolbar` attribute and `toolbar-target` attribute.
 -   The nav element must be a child of `<bento-sidebar>` and follow this format: `<nav toolbar="(media-query)" toolbar-target="elementID">`.
     -   For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" toolbar-target="target-element">`.
 -   Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `toolbar-target` attribute id must exist on the page for the toolbar to be applied.
 
-###### Example: Basic Toolbar
+##### Example: Basic Toolbar
 
 In the following example, we display a `toolbar` if the window width is less than or equal to 767px. The `toolbar` contains a search input element. The `toolbar` element will be appended to the `<div id="target-element">` element.
 
@@ -108,7 +102,7 @@ In the following example, we display a `toolbar` if the window width is less tha
 <div id="target-element"></div>
 ```
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-sidebar` component API is accessible by including the following script tag in your document:
 
@@ -117,32 +111,35 @@ await customElements.whenDefined('bento-sidebar');
 const api = await carousel.getApi();
 ```
 
-##### Actions
+#### Actions
 
 The `bento-sidebar` API allows you to perform the following actions:
 
-**open()**
+##### open()
+
 Opens the sidebar.
 
 ```javascript
 api.open();
 ```
 
-**close()**
+##### close()
+
 Closes the sidebar.
 
 ```javascript
 api.close();
 ```
 
-**toggle()**
+##### toggle()
+
 Toggles the sidebar open state.
 
 ```javascript
 api.toggle(0);
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -164,7 +161,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-##### Custom styles
+#### Custom styles
 
 The `bento-sidebar` component can be styled with standard CSS.
 
@@ -179,7 +176,7 @@ bento-sidebar[open] {
 }
 ```
 
-#### UX considerations
+### UX considerations
 
 When using `<bento-sidebar>`, keep in mind that your users will often view your page on mobile, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
 
@@ -190,31 +187,31 @@ For this reason, we recommend that affordances to open the sidebar are not place
 -   The width of the sidebar can be set and adjusted using CSS.
 -   `<bento-sidebar>` is _recommended_ to be be a direct child of the `<body>` to preserve a logical DOM order for accessibility as well as to avoid altering its behavior by a container element. Note that having an ancestor of `bento-sidebar` with a set `z-index` may cause the sidebar to appear below other elements (such as headers), breaking its functionality.
 
-#### Attributes
+### Attributes
 
-##### side
+#### side
 
 Indicates what side of the page the sidebar should open from, either `left` or `right`. If a `side` is not specified, the `side` value will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => `right`); if no `dir` exists, the `side` defaults to `left`.
 
-##### open
+#### open
 
 This attribute is present when the sidebar is open.
 
-##### toolbar
+#### toolbar
 
 This attribute is present on child `<nav toolbar="(media-query)" toolbar-target="elementID">` elements, and accepts a media query of when to show a toolbar. See the [Toolbar](#bento-toolbar) section for more information on using toolbars.
 
-##### toolbar-target
+#### toolbar-target
 
 This attribute is present on child `<nav toolbar="(media-query)" toolbar-target="elementID">`, and accepts an id of an element on the page. The `toolbar-target` attribute will place the toolbar into the specified id of the element on the page, without the default toolbar styling. See the [Toolbar](#bento-toolbar) section for more information on using toolbars.
 
-### Preact/React Component
+---
+
+## Preact/React Component
 
 The examples below demonstrate use of the `<BentoSidebar>` as a functional component usable with the Preact or React libraries.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/sidebar
@@ -241,18 +238,18 @@ function App() {
 }
 ```
 
-#### Bento Toolbar
+### Bento Toolbar
 
 You can create a Bento Toolbar element that displays in the `<body>` by specifying the `toolbar` prop with a media query and a `toolbarTarget` prop with an element id on a `<BentoSidebarToolbar>` component that is a child of `<BentoSidebar>`. The `toolbar` duplicates the `<BentoSidebarToolbar>` element and its children and appends the element into the `toolbarTarget` element.
 
-##### Behavior
+#### Behavior
 
 -   The sidebar may implement toolbars by adding nav elements with the `toolbar` prop and `toolbarTarget` prop.
 -   The nav element must be a child of `<BentoSidebar>` and follow this format: `<BentoSidebarToolbar toolbar="(media-query)" toolbarTarget="elementID">`.
     -   For instance, this would be a valid use of toolbar: `<BentoSidebarToolbar toolbar="(max-width: 1024px)" toolbarTarget="target-element">`.
 -   Toolbar behavior is only applied while the `toolbar` prop media-query is valid. Also, an element with the `toolbarTarget` prop id must exist on the page for the toolbar to be applied.
 
-###### Example: Basic Toolbar
+##### Example: Basic Toolbar
 
 In the following example, we display a `toolbar` if the window width is less than or equal to 767px. The `toolbar` contains a search input element. The `toolbar` element will be appended to the `<div id="target-element">` element.
 
@@ -282,7 +279,7 @@ In the following example, we display a `toolbar` if the window width is less tha
 </>
 ```
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento components are highly interactive through their API. The `BentoSidebar` component API is accessible by passing a `ref`:
 
@@ -306,32 +303,35 @@ function App() {
 }
 ```
 
-##### Actions
+#### Actions
 
 The `BentoSidebar` API allows you to perform the following actions:
 
-**open()**
+##### open()
+
 Opens the sidebar.
 
 ```javascript
 ref.current.open();
 ```
 
-**close()**
+##### close()
+
 Closes the sidebar.
 
 ```javascript
 ref.current.close();
 ```
 
-**toggle()**
+##### toggle()
+
 Toggles the sidebar open state.
 
 ```javascript
 ref.current.toggle(0);
 ```
 
-#### Layout and style
+### Layout and style
 
 The `BentoSidebar` component can be styled with standard CSS.
 
@@ -375,7 +375,7 @@ Or via `className`:
 }
 ```
 
-#### UX considerations
+### UX considerations
 
 When using `<BentoSidebar>`, keep in mind that your users will often view your page on mobile, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
 
@@ -388,14 +388,14 @@ For this reason, we recommend that affordances to open the sidebar are not place
 
 ### Props
 
-##### side
+#### side
 
 Indicates what side of the page the sidebar should open from, either `left` or `right`. If a `side` is not specified, the `side` value will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => `right`); if no `dir` exists, the `side` defaults to `left`.
 
-##### toolbar
+#### toolbar
 
 This prop is present on child `<BentoSidebarToolbar toolbar="(media-query)" toolbarTarget="elementID">` elements, and accepts a media query of when to show a toolbar. See the [Toolbar](#bento-toolbar) section for more information on using toolbars.
 
-##### toolbarTarget
+#### toolbarTarget
 
 This attribute is present on child `<BentoSidebarToolbar toolbar="(media-query)" toolbarTarget="elementID">`, and accepts an id of an element on the page. The `toolbarTarget` prop will place the toolbar into the specified id of the element on the page, without the default toolbar styling. See the [Toolbar](#bento-toolbar) section for more information on using toolbars.

@@ -11,7 +11,7 @@ import {writeScript} from '#3p/3p';
  * @param {!Object} data
  */
 export function sovrn(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global.width = data.width;
   global.height = data.height;
   global.domain = data.domain;

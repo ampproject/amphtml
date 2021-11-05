@@ -26,7 +26,7 @@ async function terserMinify(code) {
     output: {
       beautify: !!argv.pretty_print,
       comments: /\/*/,
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       keep_quoted_props: true,
     },
     sourceMap: true,

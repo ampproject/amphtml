@@ -20,7 +20,7 @@ import {Services} from '#service';
 import {loadPromise} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
-import {AutoLightboxEvents} from '../../../src/auto-lightbox';
+import {AutoLightboxEvents_Enum} from '../../../src/auto-lightbox';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -424,7 +424,7 @@ export function apply(ampdoc, element) {
       REQUIRED_EXTENSION
     );
 
-    dispatchCustomEvent(element, AutoLightboxEvents.NEWLY_SET);
+    dispatchCustomEvent(element, AutoLightboxEvents_Enum.NEWLY_SET);
 
     return element;
   });

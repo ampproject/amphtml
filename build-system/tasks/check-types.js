@@ -324,7 +324,7 @@ module.exports = {
   checkTypes,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: 'Set the number of concurrent invocations of closure',
