@@ -18,3 +18,10 @@ enumValues({
 enumValues({SINGLE_ITEM: 'single-item'});
 
 ignoreMe(enumInFile);
+
+function test() {
+  enumValues(exportedEnum);
+}
+function other() {
+  enumValues(exportedEnum);
+}

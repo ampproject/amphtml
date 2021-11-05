@@ -1,3 +1,5 @@
+import {isProd} from '#core/mode/prod';
+
 /**
  * Checks whether `val` is a valid value of `enumObj`.
  *
@@ -23,5 +25,8 @@ export function isEnumValue(enumObj, val) {
  * @template T
  */
 export function enumValues(enumObj) {
-  return Object.values(enumObj);
+  if (isProd()) {
+    return Object.values(enumObj);
+  }
+  return Object.freeze(Object.values(enumObj));
 }
