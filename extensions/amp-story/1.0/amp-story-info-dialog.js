@@ -57,7 +57,7 @@ export class InfoDialog {
     this.mutator_ = Services.mutatorForDoc(parentEl);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(this.parentEl_);
+    this.viewer_ = Services.viewerForDoc(parentEl);
   }
 
   /**
