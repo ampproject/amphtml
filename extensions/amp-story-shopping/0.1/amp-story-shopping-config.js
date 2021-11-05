@@ -14,10 +14,6 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {string} */
-    this.element_ = element;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
@@ -47,9 +43,9 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
 
         this.storeService_ = storeService;
-        this.getConfig()
+        this.getRemoteConfig_()
           .then((storyConfig) => this.dispatchConfig_(storyConfig))
-          // If remote config fails, fall back to inline config.
+          // If remote fails, fallback to inline.
           .catch(() => this.dispatchConfig_(this.getInlineConfig_()));
       }
     );
@@ -62,30 +58,31 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
 
   /** @return {!JsonObject} */
   getConfig() {
-    return this.element_.hasAttribute('src')
+    return this.element.hasAttribute('src')
       ? this.getRemoteConfig_()
       : this.getInlineConfig_();
   }
 
   /** @return {Promise<JsonObject>} */
   getInlineConfig_() {
+    const scriptChild = this.element.firstElementChild;
     userAssert(
-      this.element_.firstElementChild &&
-        isJsonScriptTag(this.element_.firstElementChild),
+      scriptChild && isJsonScriptTag(scriptChild),
       `${TAG}: The config should be inside a <script> tag with type="application/json"`
     );
 
-    const inlineJSONConfig = parseJson(
-      this.element_.firstElementChild.textContent
-    );
-
-    return Promise.resolve(inlineJSONConfig);
+    return parseJson(scriptChild.textContent);
   }
 
   /** @return {Promise<JsonObject>} */
   getRemoteConfig_() {
+    if (!this.element.hasAttribute('src')) {
+      return Promise.reject(
+        'No src attribute provided, defaulting back to inline config.'
+      );
+    }
     return Services.xhrFor(this.win)
-      .fetchJson(this.element_.getAttribute('src'))
+      .fetchJson(this.element.getAttribute('src'))
       .then((response) => response.json())
       .catch((err) => {
         user().error(
