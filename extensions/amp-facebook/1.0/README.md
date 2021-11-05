@@ -23,6 +23,8 @@ defineBentoFacebook();
 
 #### Example: Include via `<script>`
 
+##### Embed a Facebook Post
+
 ```html
 <head>
   <script src="https://cdn.ampproject.org/bento.js"></script>
@@ -46,7 +48,6 @@ defineBentoFacebook();
   </style>
 </head>
 
-<!-- Facebook Post -->
 <bento-facebook
   id="facebook-post"
   data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373"
@@ -70,7 +71,32 @@ defineBentoFacebook();
   })();
 </script>
 
-<!-- Facebook Video-->
+```
+##### Embed a Facebook Video
+
+```html
+<head>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
+  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+  <style>
+    bento-facebook {
+      display: block;
+      overflow: hidden;
+      position: relative;
+    }
+  </style>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"
+  ></script>
+  <style>
+    bento-facebook {
+      width: 375px;
+      height: 472px;
+    }
+  </style>
+</head>
+
 <bento-facebook
   id="facebook-video"
   data-embed-as="video"
@@ -94,8 +120,32 @@ defineBentoFacebook();
     };
   })();
 </script>
+```
+##### Embed a Facebook Page
 
-<!-- Facebook Page-->
+```html
+<head>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
+  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+  <style>
+    bento-facebook {
+      display: block;
+      overflow: hidden;
+      position: relative;
+    }
+  </style>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"
+  ></script>
+  <style>
+    bento-facebook {
+      width: 375px;
+      height: 472px;
+    }
+  </style>
+</head>
+
 <bento-facebook
   id="facebook-video"
   data-embed-as="video"
@@ -119,16 +169,64 @@ defineBentoFacebook();
     };
   })();
 </script>
+```
+##### Embed a Facebook Like Button
 
-<!-- Facebook Like-->
+```html
+<head>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
+  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+  <style>
+    bento-facebook {
+      display: block;
+      overflow: hidden;
+      position: relative;
+    }
+  </style>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"
+  ></script>
+  <style>
+    bento-facebook {
+      width: 375px;
+      height: 472px;
+    }
+  </style>
+</head>
+
 <bento-facebook
   id="facebook-video"
   data-embed-as="like"
   data-href="https://www.facebook.com/nasaearth/videos/10155187938052139"
 >
 </bento-facebook>
+```
+##### Embed a Facebook Comment Section
 
-<!-- Facebook Comments-->
+```html
+<head>
+  <script src="https://cdn.ampproject.org/bento.js"></script>
+  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+  <style>
+    bento-facebook {
+      display: block;
+      overflow: hidden;
+      position: relative;
+    }
+  </style>
+  <script
+    async
+    src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js"
+  ></script>
+  <style>
+    bento-facebook {
+      width: 375px;
+      height: 472px;
+    }
+  </style>
+</head>
+
 <bento-facebook
   id="facebook-comments"
   data-embed-as="comments"
