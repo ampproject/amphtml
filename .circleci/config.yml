@@ -46,6 +46,10 @@ executors:
     docker:
       - image: cimg/base:stable
     resource_class: small
+  node-docker-small:
+    docker:
+      - image: cimg/node:lts-browsers
+    resource_class: small
   node-docker-medium:
     docker:
       - image: cimg/node:lts-browsers
@@ -474,7 +478,7 @@ jobs:
       - teardown_vm
   upload_release:
     executor:
-      name: node-docker-medium
+      name: node-docker-small
     steps:
       - setup_vm
       - run:
@@ -482,6 +486,15 @@ jobs:
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
           path: /tmp/release.tar.gz
+      - teardown_vm
+  promote_nightly:
+    executor:
+      name: node-docker-small
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ Promote Nightly Release ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/promote-nightly.js
       - teardown_vm
 
 workflows:
@@ -646,3 +659,11 @@ workflows:
             - amp_release
           context:
             - release-build-uploader
+      - promote_nightly:
+          name: 'Promote Nightly Release'
+          filters:
+            branches:
+              only:
+                - nightly
+          requires:
+            - 'Upload Release'
