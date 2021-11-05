@@ -1,258 +1,194 @@
 {
   "2": {
-    "string": "Bofya Unaofuata",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+    "string": "Bofya Unaofuata"
   },
   "3": {
-    "string": "Bofya Nyuma",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+    "string": "Bofya Nyuma"
   },
   "4": {
-    "string": "Haikuweza kunakili kiungo kwenye klipubodi :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+    "string": "Haikuweza kunakili kiungo kwenye klipubodi :("
   },
   "5": {
-    "string": "Umenakili kiungo!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+    "string": "Umenakili kiungo!"
   },
   "6": {
-    "string": "Barua pepe",
-    "description": "Button label for the share target that shares a link via email."
+    "string": "Barua pepe"
   },
   "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
+    "string": "Facebook"
   },
   "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
+    "string": "Google+"
   },
   "9": {
-    "string": "Pata Kiungo",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+    "string": "Pata Kiungo"
   },
   "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
+    "string": "LinkedIn"
   },
   "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
+    "string": "Pinterest"
   },
   "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
+    "string": "SMS"
   },
   "13": {
-    "string": "Zaidi",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+    "string": "Zaidi"
   },
   "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
+    "string": "Tumblr"
   },
   "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
+    "string": "Twitter"
   },
   "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "Sharti uwezeshe jaribio la hadithi za amp ili uone maudhui haya.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+    "string": "Sharti uwezeshe jaribio la hadithi za amp ili uone maudhui haya."
   },
   "21": {
-    "string": "Samahani, inaonekana kivinjari chako hakiwezi kutumia huduma hii",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+    "string": "Samahani, inaonekana kivinjari chako hakiwezi kutumia huduma hii"
   },
   "22": {
-    "string": "Kubali",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
+    "string": "Kubali"
   },
   "23": {
-    "string": "Kataa",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+    "string": "Kataa"
   },
   "25": {
-    "string": "Angalia kwenye kikoa asili:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+    "string": "Angalia kwenye kikoa asili:"
   },
   "26": {
-    "string": "Zaidi kuhusu matokeo ya AMP",
-    "description": "Label for a link to documentation on how AMP links are handled."
+    "string": "Zaidi kuhusu matokeo ya AMP"
   },
   "27": {
-    "string": "Endelea Hata Hivyo",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+    "string": "Endelea Hata Hivyo"
   },
   "31": {
-    "string": "Sauti imezimwa",
-    "description": "Text that informs users that the sound is off after they click the mute button"
+    "string": "Sauti imezimwa"
   },
   "32": {
-    "string": "Sauti imewashwa",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+    "string": "Sauti imewashwa"
   },
   "33": {
-    "string": "Ukurasa huu hauna sauti",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+    "string": "Ukurasa huu hauna sauti"
   },
   "34": {
-    "string": "Cheza video",
-    "description": "Label for a button to play the video visible on the page."
+    "string": "Cheza video"
   },
   "35": {
-    "string": "Telezesha juu",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+    "string": "Telezesha juu"
   },
   "36": {
-    "string": "Panua Tweet",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+    "string": "Panua Tweet"
   },
   "62": {
-    "string": "Tuma kuanzia ukurasa huu",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+    "string": "Tuma kuanzia ukurasa huu"
   },
   "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
+    "string": "Line"
   },
   "64": {
-    "string": "Imesasishwa",
-    "description": "Label that indicates that additional content has been added to a story"
+    "string": "Imesasishwa"
   },
   "65": {
-    "string": "Video haikucheza",
-    "description": "Label indicating that the video visible on the page failed to play."
+    "string": "Video haikucheza"
   },
   "66": {
-    "string": "Zima sauti ya hadithi",
-    "description": "Label for the mute button that turns off the sound in the story"
+    "string": "Zima sauti ya hadithi"
   },
   "67": {
-    "string": "Washa sauti ya hadithi",
-    "description": "Label for the unmute button that turns the sound in the story back on"
+    "string": "Washa sauti ya hadithi"
   },
   "68": {
-    "string": "Maelezo ya hadithi",
-    "description": "Label for the information button that pulls up relevant information about the story content"
+    "string": "Maelezo ya hadithi"
   },
   "69": {
-    "string": "Tuma hadithi",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+    "string": "Tuma hadithi"
   },
   "70": {
-    "string": "Weka menyu ya hadithi",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+    "string": "Weka menyu ya hadithi"
   },
   "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+    "string": "A"
   },
   "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+    "string": "B"
   },
   "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+    "string": "C"
   },
   "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+    "string": "D"
   },
   "75": {
-    "string": "Kidokezo cha 1 kati ya 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Kidokezo cha 1 kati ya 2"
   },
   "76": {
-    "string": "Bofya ili uende kwenye skrini inayofuata",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Bofya ili uende kwenye skrini inayofuata"
   },
   "77": {
-    "string": "Inayofuata",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Inayofuata"
   },
   "78": {
-    "string": "Kidokezo cha 2 kati ya 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Kidokezo cha 2 kati ya 2"
   },
   "79": {
-    "string": "Telezesha ili uende kwenye hadithi inayofuata",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Telezesha ili uende kwenye hadithi inayofuata"
   },
   "80": {
-    "string": "Nimeelewa",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Nimeelewa"
   },
   "81": {
-    "string": "Kidokezo",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
+    "string": "Kidokezo"
   },
   "82": {
-    "string": "Ukurasa uliotangulia",
-    "description": "Label indicating that users can navigate to the previous page."
+    "string": "Ukurasa uliotangulia"
   },
   "83": {
-    "string": "Wezesha",
-    "description": "Label for the activate button to ask for device orientation permission"
+    "string": "Wezesha"
   },
   "84": {
-    "string": "ALAMA:",
-    "description": "Label for the results component preceding the score in percentages"
+    "string": "ALAMA:"
   },
   "85": {
-    "string": "Sitisha hadithi",
-    "description": "Label for a button that pauses the media content on the story"
+    "string": "Sitisha hadithi"
   },
   "86": {
-    "string": "Cheza hadithi",
-    "description": "Label for a button that plays the media content on the story"
+    "string": "Cheza hadithi"
   },
   "87": {
-    "string": "Funga",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+    "string": "Funga"
   },
   "88": {
-    "string": "Fungua inayofuata",
-    "description": "Label for a button that advances to the next element in the carousel"
+    "string": "Fungua inayofuata"
   },
   "89": {
-    "string": "Jibu lako litatumwa kwa",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+    "string": "Jibu lako litatumwa kwa"
   },
   "90": {
-    "string": "Hadithi inayofuata",
-    "description": "Label for a button that advances to the next element in the carousel."
+    "string": "Hadithi inayofuata"
   },
   "91": {
-    "string": "Ukurasa unaofuata",
-    "description": "Label for a button that advances to the next page of the story."
+    "string": "Ukurasa unaofuata"
   },
   "92": {
-    "string": "Cheza tena",
-    "description": "Label for a button that replays the story."
+    "string": "Cheza tena"
   },
   "93": {
-    "string": "Ukurasa uliotangulia",
-    "description": "Label for a button that returns the user to the previous page of the story."
+    "string": "Ukurasa uliotangulia"
   },
   "96": {
-    "string": "Sogeza kifaa ili ugundue zaidi",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+    "string": "Sogeza kifaa ili ugundue zaidi"
   },
   "97": {
-    "string": "Inafungua",
-    "description": "Text displayed to users on tap of outlink button."
+    "string": "Inafungua"
   },
   "98": {
-    "string": "Fomu haijatumwa, jaribu tena",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+    "string": "Fomu haijatumwa, jaribu tena"
   },
   "99": {
-    "string": "Fomu imefaulu kutumwa",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+    "string": "Fomu imefaulu kutumwa"
   }
 }

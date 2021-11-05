@@ -1,258 +1,194 @@
 {
   "2": {
-    "string": "Натисніть \"Далі\"",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+    "string": "Натисніть \"Далі\""
   },
   "3": {
-    "string": "Натисніть \"Назад\"",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+    "string": "Натисніть \"Назад\""
   },
   "4": {
-    "string": "Не вдалося скопіювати посилання в буфер обміну :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+    "string": "Не вдалося скопіювати посилання в буфер обміну :("
   },
   "5": {
-    "string": "Посилання скопійовано!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+    "string": "Посилання скопійовано!"
   },
   "6": {
-    "string": "Ел. пошта",
-    "description": "Button label for the share target that shares a link via email."
+    "string": "Ел. пошта"
   },
   "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
+    "string": "Facebook"
   },
   "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
+    "string": "Google+"
   },
   "9": {
-    "string": "Отримати посилання",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+    "string": "Отримати посилання"
   },
   "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
+    "string": "LinkedIn"
   },
   "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
+    "string": "Pinterest"
   },
   "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
+    "string": "SMS"
   },
   "13": {
-    "string": "Більше",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+    "string": "Більше"
   },
   "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
+    "string": "Tumblr"
   },
   "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
+    "string": "Twitter"
   },
   "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "Щоб переглянути цей вміст, потрібно ввімкнути експеримент amp-story.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+    "string": "Щоб переглянути цей вміст, потрібно ввімкнути експеримент amp-story."
   },
   "21": {
-    "string": "Схоже, ваш вебпереглядач не підтримує перегляд цього вмісту",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+    "string": "Схоже, ваш вебпереглядач не підтримує перегляд цього вмісту"
   },
   "22": {
-    "string": "Прийняти",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
+    "string": "Прийняти"
   },
   "23": {
-    "string": "Відхилити",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+    "string": "Відхилити"
   },
   "25": {
-    "string": "Переглянути у вихідному домені:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+    "string": "Переглянути у вихідному домені:"
   },
   "26": {
-    "string": "Більше про результати AMP",
-    "description": "Label for a link to documentation on how AMP links are handled."
+    "string": "Більше про результати AMP"
   },
   "27": {
-    "string": "Усе одно продовжити",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+    "string": "Усе одно продовжити"
   },
   "31": {
-    "string": "Звук вимкнено",
-    "description": "Text that informs users that the sound is off after they click the mute button"
+    "string": "Звук вимкнено"
   },
   "32": {
-    "string": "Звук увімкнено",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+    "string": "Звук увімкнено"
   },
   "33": {
-    "string": "На цій сторінці немає звуку",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+    "string": "На цій сторінці немає звуку"
   },
   "34": {
-    "string": "Відтворити відео",
-    "description": "Label for a button to play the video visible on the page."
+    "string": "Відтворити відео"
   },
   "35": {
-    "string": "Провести вгору",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+    "string": "Провести вгору"
   },
   "36": {
-    "string": "Розгорнути твіт",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+    "string": "Розгорнути твіт"
   },
   "62": {
-    "string": "Поділитися з цієї сторінки",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+    "string": "Поділитися з цієї сторінки"
   },
   "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
+    "string": "Line"
   },
   "64": {
-    "string": "Оновлено",
-    "description": "Label that indicates that additional content has been added to a story"
+    "string": "Оновлено"
   },
   "65": {
-    "string": "Не вдалося відтворити відео",
-    "description": "Label indicating that the video visible on the page failed to play."
+    "string": "Не вдалося відтворити відео"
   },
   "66": {
-    "string": "Вимкнути звук в історії",
-    "description": "Label for the mute button that turns off the sound in the story"
+    "string": "Вимкнути звук в історії"
   },
   "67": {
-    "string": "Увімкнути звук в історії",
-    "description": "Label for the unmute button that turns the sound in the story back on"
+    "string": "Увімкнути звук в історії"
   },
   "68": {
-    "string": "Інформація про історію",
-    "description": "Label for the information button that pulls up relevant information about the story content"
+    "string": "Інформація про історію"
   },
   "69": {
-    "string": "Поділитись історією",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+    "string": "Поділитись історією"
   },
   "70": {
-    "string": "Показати/приховати меню історії",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+    "string": "Показати/приховати меню історії"
   },
   "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+    "string": "A"
   },
   "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+    "string": "B"
   },
   "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+    "string": "C"
   },
   "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+    "string": "D"
   },
   "75": {
-    "string": "Порада 1 з 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Порада 1 з 2"
   },
   "76": {
-    "string": "Торкніться, щоб перейти до наступного екрана",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Торкніться, щоб перейти до наступного екрана"
   },
   "77": {
-    "string": "Далі",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Далі"
   },
   "78": {
-    "string": "Порада 2 з 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Порада 2 з 2"
   },
   "79": {
-    "string": "Проведіть по екрану, щоб перейти до наступної історії",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Проведіть по екрану, щоб перейти до наступної історії"
   },
   "80": {
-    "string": "Зрозуміло",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Зрозуміло"
   },
   "81": {
-    "string": "Порада",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
+    "string": "Порада"
   },
   "82": {
-    "string": "Попередня сторінка",
-    "description": "Label indicating that users can navigate to the previous page."
+    "string": "Попередня сторінка"
   },
   "83": {
-    "string": "Активувати",
-    "description": "Label for the activate button to ask for device orientation permission"
+    "string": "Активувати"
   },
   "84": {
-    "string": "ОЦІНКА:",
-    "description": "Label for the results component preceding the score in percentages"
+    "string": "ОЦІНКА:"
   },
   "85": {
-    "string": "Призупинити історію",
-    "description": "Label for a button that pauses the media content on the story"
+    "string": "Призупинити історію"
   },
   "86": {
-    "string": "Відтворити історію",
-    "description": "Label for a button that plays the media content on the story"
+    "string": "Відтворити історію"
   },
   "87": {
-    "string": "Закрити",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+    "string": "Закрити"
   },
   "88": {
-    "string": "Перейти до наступного",
-    "description": "Label for a button that advances to the next element in the carousel"
+    "string": "Перейти до наступного"
   },
   "89": {
-    "string": "Вашу відповідь буде надіслано домену",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+    "string": "Вашу відповідь буде надіслано домену"
   },
   "90": {
-    "string": "Наступна історія",
-    "description": "Label for a button that advances to the next element in the carousel."
+    "string": "Наступна історія"
   },
   "91": {
-    "string": "Наступна сторінка",
-    "description": "Label for a button that advances to the next page of the story."
+    "string": "Наступна сторінка"
   },
   "92": {
-    "string": "Повторити",
-    "description": "Label for a button that replays the story."
+    "string": "Повторити"
   },
   "93": {
-    "string": "Попередня сторінка",
-    "description": "Label for a button that returns the user to the previous page of the story."
+    "string": "Попередня сторінка"
   },
   "96": {
-    "string": "Переміщайте пристрій, щоб роздивитися навкруги",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+    "string": "Переміщайте пристрій, щоб роздивитися навкруги"
   },
   "97": {
-    "string": "Відкривається",
-    "description": "Text displayed to users on tap of outlink button."
+    "string": "Відкривається"
   },
   "98": {
-    "string": "Форму не надіслано – повторіть спробу",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+    "string": "Форму не надіслано – повторіть спробу"
   },
   "99": {
-    "string": "Форму надіслано",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+    "string": "Форму надіслано"
   }
 }

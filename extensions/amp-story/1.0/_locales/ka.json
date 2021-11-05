@@ -1,258 +1,194 @@
 {
   "2": {
-    "string": "შეხებით აირჩიეთ „გაგრძელება“",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+    "string": "შეხებით აირჩიეთ „გაგრძელება“"
   },
   "3": {
-    "string": "შეხებით აირჩიეთ „დაბრუნება“",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+    "string": "შეხებით აირჩიეთ „დაბრუნება“"
   },
   "4": {
-    "string": "გაცვლის ბუფერში ბმულის კოპირება ვერ მოხერხდა :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+    "string": "გაცვლის ბუფერში ბმულის კოპირება ვერ მოხერხდა :("
   },
   "5": {
-    "string": "ბმული დაკოპირდა!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+    "string": "ბმული დაკოპირდა!"
   },
   "6": {
-    "string": "ელფოსტა",
-    "description": "Button label for the share target that shares a link via email."
+    "string": "ელფოსტა"
   },
   "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
+    "string": "Facebook"
   },
   "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
+    "string": "Google+"
   },
   "9": {
-    "string": "ბმულის მიღება",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+    "string": "ბმულის მიღება"
   },
   "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
+    "string": "LinkedIn"
   },
   "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
+    "string": "Pinterest"
   },
   "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
+    "string": "SMS"
   },
   "13": {
-    "string": "მეტი",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+    "string": "მეტი"
   },
   "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
+    "string": "Tumblr"
   },
   "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
+    "string": "Twitter"
   },
   "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "ამ კონტენტის სანახავად თქვენ უნდა ჩართოთ amp-story-ის ექსპერიმენტი.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+    "string": "ამ კონტენტის სანახავად თქვენ უნდა ჩართოთ amp-story-ის ექსპერიმენტი."
   },
   "21": {
-    "string": "ვწუხვართ, როგორც ჩანს, თქვენს ბრაუზერს არ აქვს ამ გამოცდილების მხარდაჭერა",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+    "string": "ვწუხვართ, როგორც ჩანს, თქვენს ბრაუზერს არ აქვს ამ გამოცდილების მხარდაჭერა"
   },
   "22": {
-    "string": "მიღება",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
+    "string": "მიღება"
   },
   "23": {
-    "string": "უარყოფა",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+    "string": "უარყოფა"
   },
   "25": {
-    "string": "თავდაპირველი დომენის ნახვა:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+    "string": "თავდაპირველი დომენის ნახვა:"
   },
   "26": {
-    "string": "მეტი ინფორმაცია AMP-ის შედეგების შესახებ",
-    "description": "Label for a link to documentation on how AMP links are handled."
+    "string": "მეტი ინფორმაცია AMP-ის შედეგების შესახებ"
   },
   "27": {
-    "string": "მაინც გაგრძელება",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+    "string": "მაინც გაგრძელება"
   },
   "31": {
-    "string": "ხმა გამორთულია",
-    "description": "Text that informs users that the sound is off after they click the mute button"
+    "string": "ხმა გამორთულია"
   },
   "32": {
-    "string": "ხმა ჩართულია",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+    "string": "ხმა ჩართულია"
   },
   "33": {
-    "string": "ამ გვერდს ხმა არ აქვს",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+    "string": "ამ გვერდს ხმა არ აქვს"
   },
   "34": {
-    "string": "ვიდეოს დაკვრა",
-    "description": "Label for a button to play the video visible on the page."
+    "string": "ვიდეოს დაკვრა"
   },
   "35": {
-    "string": "აწევა",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+    "string": "აწევა"
   },
   "36": {
-    "string": "ტვიტის გაშლა",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+    "string": "ტვიტის გაშლა"
   },
   "62": {
-    "string": "გაზიარების დაწყება ამ გვერდიდან",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+    "string": "გაზიარების დაწყება ამ გვერდიდან"
   },
   "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
+    "string": "Line"
   },
   "64": {
-    "string": "განახლებულია",
-    "description": "Label that indicates that additional content has been added to a story"
+    "string": "განახლებულია"
   },
   "65": {
-    "string": "ვიდეოს დაკვრა ვერ მოხერხდა",
-    "description": "Label indicating that the video visible on the page failed to play."
+    "string": "ვიდეოს დაკვრა ვერ მოხერხდა"
   },
   "66": {
-    "string": "ამბის დადუმება",
-    "description": "Label for the mute button that turns off the sound in the story"
+    "string": "ამბის დადუმება"
   },
   "67": {
-    "string": "ამბის ხმის ჩართვა",
-    "description": "Label for the unmute button that turns the sound in the story back on"
+    "string": "ამბის ხმის ჩართვა"
   },
   "68": {
-    "string": "ინფორმაცია ამბის შესახებ",
-    "description": "Label for the information button that pulls up relevant information about the story content"
+    "string": "ინფორმაცია ამბის შესახებ"
   },
   "69": {
-    "string": "ამბის გაზიარება",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+    "string": "ამბის გაზიარება"
   },
   "70": {
-    "string": "ამბის მენიუს ჩართვა",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+    "string": "ამბის მენიუს ჩართვა"
   },
   "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+    "string": "A"
   },
   "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+    "string": "B"
   },
   "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+    "string": "C"
   },
   "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+    "string": "D"
   },
   "75": {
-    "string": "2-დან 1-ლი რჩევა",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "2-დან 1-ლი რჩევა"
   },
   "76": {
-    "string": "შეეხეთ მომდევნო ეკრანზე გადასასვლელად",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "შეეხეთ მომდევნო ეკრანზე გადასასვლელად"
   },
   "77": {
-    "string": "შემდეგი",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "შემდეგი"
   },
   "78": {
-    "string": "2-დან მე-2 რჩევა",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "2-დან მე-2 რჩევა"
   },
   "79": {
-    "string": "გადაუსვით თითი მომდევნო ამბავზე გადასასვლელად",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "გადაუსვით თითი მომდევნო ამბავზე გადასასვლელად"
   },
   "80": {
-    "string": "გავიგე",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "გავიგე"
   },
   "81": {
-    "string": "რჩევა",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
+    "string": "რჩევა"
   },
   "82": {
-    "string": "წინა გვერდი",
-    "description": "Label indicating that users can navigate to the previous page."
+    "string": "წინა გვერდი"
   },
   "83": {
-    "string": "გააქტიურება",
-    "description": "Label for the activate button to ask for device orientation permission"
+    "string": "გააქტიურება"
   },
   "84": {
-    "string": "ქულა:",
-    "description": "Label for the results component preceding the score in percentages"
+    "string": "ქულა:"
   },
   "85": {
-    "string": "ამბის დაპაუზება",
-    "description": "Label for a button that pauses the media content on the story"
+    "string": "ამბის დაპაუზება"
   },
   "86": {
-    "string": "ამბის გაშვება",
-    "description": "Label for a button that plays the media content on the story"
+    "string": "ამბის გაშვება"
   },
   "87": {
-    "string": "დახურვა",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+    "string": "დახურვა"
   },
   "88": {
-    "string": "მომდევნოზე გადასვლა",
-    "description": "Label for a button that advances to the next element in the carousel"
+    "string": "მომდევნოზე გადასვლა"
   },
   "89": {
-    "string": "თქვენი პასუხი გაეგზავნება",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+    "string": "თქვენი პასუხი გაეგზავნება"
   },
   "90": {
-    "string": "მომდევნო ამბავი",
-    "description": "Label for a button that advances to the next element in the carousel."
+    "string": "მომდევნო ამბავი"
   },
   "91": {
-    "string": "მომდევნო გვერდი",
-    "description": "Label for a button that advances to the next page of the story."
+    "string": "მომდევნო გვერდი"
   },
   "92": {
-    "string": "ხელახლა დაკვრა",
-    "description": "Label for a button that replays the story."
+    "string": "ხელახლა დაკვრა"
   },
   "93": {
-    "string": "წინა გვერდი",
-    "description": "Label for a button that returns the user to the previous page of the story."
+    "string": "წინა გვერდი"
   },
   "96": {
-    "string": "აამოძრავეთ მოწყობილობა დათვალიერების რეჟიმის ჩასართავად",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+    "string": "აამოძრავეთ მოწყობილობა დათვალიერების რეჟიმის ჩასართავად"
   },
   "97": {
-    "string": "იხსნება",
-    "description": "Text displayed to users on tap of outlink button."
+    "string": "იხსნება"
   },
   "98": {
-    "string": "ფორმა ჯერ არ გაგზავნილა, კვლავ სცადეთ",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+    "string": "ფორმა ჯერ არ გაგზავნილა, კვლავ სცადეთ"
   },
   "99": {
-    "string": "ფორმა წარმატებით გაიგზავნა",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+    "string": "ფორმა წარმატებით გაიგზავნა"
   }
 }

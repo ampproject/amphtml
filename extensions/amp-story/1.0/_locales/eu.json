@@ -1,258 +1,194 @@
 {
   "2": {
-    "string": "Sakatu Aurrera",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+    "string": "Sakatu Aurrera"
   },
   "3": {
-    "string": "Sakatu Atzera",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+    "string": "Sakatu Atzera"
   },
   "4": {
-    "string": "Ezin izan da kopiatu esteka arbelean :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+    "string": "Ezin izan da kopiatu esteka arbelean :("
   },
   "5": {
-    "string": "Kopiatu da esteka.",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+    "string": "Kopiatu da esteka."
   },
   "6": {
-    "string": "Posta elektronikoa",
-    "description": "Button label for the share target that shares a link via email."
+    "string": "Posta elektronikoa"
   },
   "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
+    "string": "Facebook"
   },
   "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
+    "string": "Google+"
   },
   "9": {
-    "string": "Lortu esteka",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+    "string": "Lortu esteka"
   },
   "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
+    "string": "LinkedIn"
   },
   "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
+    "string": "Pinterest"
   },
   "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
+    "string": "SMS"
   },
   "13": {
-    "string": "Gehiago",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+    "string": "Gehiago"
   },
   "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
+    "string": "Tumblr"
   },
   "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
+    "string": "Twitter"
   },
   "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "Eduki hau ikusteko, amp-story esperimentua gaitu behar duzu.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+    "string": "Eduki hau ikusteko, amp-story esperimentua gaitu behar duzu."
   },
   "21": {
-    "string": "Zure arakatzaileak ez du onartzen eduki hau",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+    "string": "Zure arakatzaileak ez du onartzen eduki hau"
   },
   "22": {
-    "string": "Onartu",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
+    "string": "Onartu"
   },
   "23": {
-    "string": "Baztertu",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+    "string": "Baztertu"
   },
   "25": {
-    "string": "Ikusi jatorrizko domeinuan:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+    "string": "Ikusi jatorrizko domeinuan:"
   },
   "26": {
-    "string": "Informazio gehiago AMP emaitzei buruz",
-    "description": "Label for a link to documentation on how AMP links are handled."
+    "string": "Informazio gehiago AMP emaitzei buruz"
   },
   "27": {
-    "string": "Jarraitu halere",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+    "string": "Jarraitu halere"
   },
   "31": {
-    "string": "Desaktibatu da audioa",
-    "description": "Text that informs users that the sound is off after they click the mute button"
+    "string": "Desaktibatu da audioa"
   },
   "32": {
-    "string": "Aktibatu da audioa",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+    "string": "Aktibatu da audioa"
   },
   "33": {
-    "string": "Orriak ez du audiorik",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+    "string": "Orriak ez du audiorik"
   },
   "34": {
-    "string": "Erreproduzitu bideoa",
-    "description": "Label for a button to play the video visible on the page."
+    "string": "Erreproduzitu bideoa"
   },
   "35": {
-    "string": "Pasatu hatza gora",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+    "string": "Pasatu hatza gora"
   },
   "36": {
-    "string": "Zabaldu txioa",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+    "string": "Zabaldu txioa"
   },
   "62": {
-    "string": "Partekatu orri honetatik aurrera",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+    "string": "Partekatu orri honetatik aurrera"
   },
   "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
+    "string": "Line"
   },
   "64": {
-    "string": "Eguneratuta",
-    "description": "Label that indicates that additional content has been added to a story"
+    "string": "Eguneratuta"
   },
   "65": {
-    "string": "Ezin izan da erreproduzitu bideoa",
-    "description": "Label indicating that the video visible on the page failed to play."
+    "string": "Ezin izan da erreproduzitu bideoa"
   },
   "66": {
-    "string": "Desaktibatu istorioaren audioa",
-    "description": "Label for the mute button that turns off the sound in the story"
+    "string": "Desaktibatu istorioaren audioa"
   },
   "67": {
-    "string": "Aktibatu istorioaren audioa",
-    "description": "Label for the unmute button that turns the sound in the story back on"
+    "string": "Aktibatu istorioaren audioa"
   },
   "68": {
-    "string": "Istorioari buruzko informazioa",
-    "description": "Label for the information button that pulls up relevant information about the story content"
+    "string": "Istorioari buruzko informazioa"
   },
   "69": {
-    "string": "Partekatu istorioa",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+    "string": "Partekatu istorioa"
   },
   "70": {
-    "string": "Aktibatu/Desaktibatu istorioaren menua",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+    "string": "Aktibatu/Desaktibatu istorioaren menua"
   },
   "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+    "string": "A"
   },
   "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+    "string": "B"
   },
   "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+    "string": "C"
   },
   "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+    "string": "D"
   },
   "75": {
-    "string": "1/2 aholkua",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "1/2 aholkua"
   },
   "76": {
-    "string": "Sakatu hurrengo pantailara joateko",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Sakatu hurrengo pantailara joateko"
   },
   "77": {
-    "string": "Aurrera",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Aurrera"
   },
   "78": {
-    "string": "2/2 aholkua",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "2/2 aholkua"
   },
   "79": {
-    "string": "Pasatu hatza hurrengo istoriora joateko",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Pasatu hatza hurrengo istoriora joateko"
   },
   "80": {
-    "string": "Ados",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Ados"
   },
   "81": {
-    "string": "Aholkua",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
+    "string": "Aholkua"
   },
   "82": {
-    "string": "Aurreko orria",
-    "description": "Label indicating that users can navigate to the previous page."
+    "string": "Aurreko orria"
   },
   "83": {
-    "string": "Aktibatu",
-    "description": "Label for the activate button to ask for device orientation permission"
+    "string": "Aktibatu"
   },
   "84": {
-    "string": "PUNTUAZIOA:",
-    "description": "Label for the results component preceding the score in percentages"
+    "string": "PUNTUAZIOA:"
   },
   "85": {
-    "string": "Pausatu istorioa",
-    "description": "Label for a button that pauses the media content on the story"
+    "string": "Pausatu istorioa"
   },
   "86": {
-    "string": "Erreproduzitu istorioa",
-    "description": "Label for a button that plays the media content on the story"
+    "string": "Erreproduzitu istorioa"
   },
   "87": {
-    "string": "Itxi",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+    "string": "Itxi"
   },
   "88": {
-    "string": "Saltatu hurrengora",
-    "description": "Label for a button that advances to the next element in the carousel"
+    "string": "Saltatu hurrengora"
   },
   "89": {
-    "string": "Hona bidaliko da zure erantzuna:",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+    "string": "Hona bidaliko da zure erantzuna:"
   },
   "90": {
-    "string": "Hurrengo istorioa",
-    "description": "Label for a button that advances to the next element in the carousel."
+    "string": "Hurrengo istorioa"
   },
   "91": {
-    "string": "Hurrengo orria",
-    "description": "Label for a button that advances to the next page of the story."
+    "string": "Hurrengo orria"
   },
   "92": {
-    "string": "Erreproduzitu berriro",
-    "description": "Label for a button that replays the story."
+    "string": "Erreproduzitu berriro"
   },
   "93": {
-    "string": "Aurreko orria",
-    "description": "Label for a button that returns the user to the previous page of the story."
+    "string": "Aurreko orria"
   },
   "96": {
-    "string": "Arakatzeko, mugitu gailua",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+    "string": "Arakatzeko, mugitu gailua"
   },
   "97": {
-    "string": "Irekitzen",
-    "description": "Text displayed to users on tap of outlink button."
+    "string": "Irekitzen"
   },
   "98": {
-    "string": "Inprimakia ez da bidali. Saiatu berriro.",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+    "string": "Inprimakia ez da bidali. Saiatu berriro."
   },
   "99": {
-    "string": "Bidali da inprimakia",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+    "string": "Bidali da inprimakia"
   }
 }

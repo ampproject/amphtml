@@ -1,258 +1,194 @@
 {
   "2": {
-    "string": "Trokit \"Para\"",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+    "string": "Trokit \"Para\""
   },
   "3": {
-    "string": "Trokit \"Pas\"",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+    "string": "Trokit \"Pas\""
   },
   "4": {
-    "string": "Lidhja nuk mund të kopjohej te kujtesa e fragmenteve :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+    "string": "Lidhja nuk mund të kopjohej te kujtesa e fragmenteve :("
   },
   "5": {
-    "string": "Lidhja u kopjua!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+    "string": "Lidhja u kopjua!"
   },
   "6": {
-    "string": "Email",
-    "description": "Button label for the share target that shares a link via email."
+    "string": "Email"
   },
   "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
+    "string": "Facebook"
   },
   "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
+    "string": "Google+"
   },
   "9": {
-    "string": "Merr lidhjen",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+    "string": "Merr lidhjen"
   },
   "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
+    "string": "LinkedIn"
   },
   "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
+    "string": "Pinterest"
   },
   "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
+    "string": "SMS"
   },
   "13": {
-    "string": "Të tjera",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+    "string": "Të tjera"
   },
   "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
+    "string": "Tumblr"
   },
   "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
+    "string": "Twitter"
   },
   "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "Duhet të aktivizosh eksperimentin e amp-story për ta parë këtë përmbajtje.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+    "string": "Duhet të aktivizosh eksperimentin e amp-story për ta parë këtë përmbajtje."
   },
   "21": {
-    "string": "Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë përvojë",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+    "string": "Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë përvojë"
   },
   "22": {
-    "string": "Prano",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
+    "string": "Prano"
   },
   "23": {
-    "string": "Refuzo",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+    "string": "Refuzo"
   },
   "25": {
-    "string": "Shiko në domenin origjinal:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+    "string": "Shiko në domenin origjinal:"
   },
   "26": {
-    "string": "Më shumë për \"Rezultatet në AMP\"",
-    "description": "Label for a link to documentation on how AMP links are handled."
+    "string": "Më shumë për \"Rezultatet në AMP\""
   },
   "27": {
-    "string": "Vazhdo gjithsesi",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+    "string": "Vazhdo gjithsesi"
   },
   "31": {
-    "string": "Pa zë",
-    "description": "Text that informs users that the sound is off after they click the mute button"
+    "string": "Pa zë"
   },
   "32": {
-    "string": "Me zë",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+    "string": "Me zë"
   },
   "33": {
-    "string": "Kjo faqe nuk ka zë",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+    "string": "Kjo faqe nuk ka zë"
   },
   "34": {
-    "string": "Luaj videon",
-    "description": "Label for a button to play the video visible on the page."
+    "string": "Luaj videon"
   },
   "35": {
-    "string": "Rrëshqit lart",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+    "string": "Rrëshqit lart"
   },
   "36": {
-    "string": "Zgjero tweet-in",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+    "string": "Zgjero tweet-in"
   },
   "62": {
-    "string": "Ndaj duke filluar nga kjo faqe",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+    "string": "Ndaj duke filluar nga kjo faqe"
   },
   "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
+    "string": "Line"
   },
   "64": {
-    "string": "E përditësuar",
-    "description": "Label that indicates that additional content has been added to a story"
+    "string": "E përditësuar"
   },
   "65": {
-    "string": "Videoja nuk arriti të luhej",
-    "description": "Label indicating that the video visible on the page failed to play."
+    "string": "Videoja nuk arriti të luhej"
   },
   "66": {
-    "string": "Hiq zërin e historisë",
-    "description": "Label for the mute button that turns off the sound in the story"
+    "string": "Hiq zërin e historisë"
   },
   "67": {
-    "string": "Rikthe zërin e historisë",
-    "description": "Label for the unmute button that turns the sound in the story back on"
+    "string": "Rikthe zërin e historisë"
   },
   "68": {
-    "string": "Informacioni i historisë",
-    "description": "Label for the information button that pulls up relevant information about the story content"
+    "string": "Informacioni i historisë"
   },
   "69": {
-    "string": "Ndaj historinë",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+    "string": "Ndaj historinë"
   },
   "70": {
-    "string": "Ndërro gjendjen e menysë së historisë",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+    "string": "Ndërro gjendjen e menysë së historisë"
   },
   "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+    "string": "A"
   },
   "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+    "string": "B"
   },
   "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+    "string": "C"
   },
   "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+    "string": "D"
   },
   "75": {
-    "string": "Këshilla 1 nga 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Këshilla 1 nga 2"
   },
   "76": {
-    "string": "Trokit për të shkuar tek ekrani tjetër",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Trokit për të shkuar tek ekrani tjetër"
   },
   "77": {
-    "string": "Tjetër",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Tjetër"
   },
   "78": {
-    "string": "Këshilla 2 nga 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Këshilla 2 nga 2"
   },
   "79": {
-    "string": "Rrëshqit për të shkuar te historia tjetër",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Rrëshqit për të shkuar te historia tjetër"
   },
   "80": {
-    "string": "E kuptova",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "E kuptova"
   },
   "81": {
-    "string": "Këshillë",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
+    "string": "Këshillë"
   },
   "82": {
-    "string": "Faqja e mëparshme",
-    "description": "Label indicating that users can navigate to the previous page."
+    "string": "Faqja e mëparshme"
   },
   "83": {
-    "string": "Aktivizo",
-    "description": "Label for the activate button to ask for device orientation permission"
+    "string": "Aktivizo"
   },
   "84": {
-    "string": "REZULTATI:",
-    "description": "Label for the results component preceding the score in percentages"
+    "string": "REZULTATI:"
   },
   "85": {
-    "string": "Vendos në pauzë historinë",
-    "description": "Label for a button that pauses the media content on the story"
+    "string": "Vendos në pauzë historinë"
   },
   "86": {
-    "string": "Luaj historinë",
-    "description": "Label for a button that plays the media content on the story"
+    "string": "Luaj historinë"
   },
   "87": {
-    "string": "Mbyll",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+    "string": "Mbyll"
   },
   "88": {
-    "string": "Kalo te tjetra",
-    "description": "Label for a button that advances to the next element in the carousel"
+    "string": "Kalo te tjetra"
   },
   "89": {
-    "string": "Përgjigja jote do t'i dërgohet",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+    "string": "Përgjigja jote do t'i dërgohet"
   },
   "90": {
-    "string": "Historia tjetër",
-    "description": "Label for a button that advances to the next element in the carousel."
+    "string": "Historia tjetër"
   },
   "91": {
-    "string": "Faqja tjetër",
-    "description": "Label for a button that advances to the next page of the story."
+    "string": "Faqja tjetër"
   },
   "92": {
-    "string": "Riluaj",
-    "description": "Label for a button that replays the story."
+    "string": "Riluaj"
   },
   "93": {
-    "string": "Faqja e mëparshme",
-    "description": "Label for a button that returns the user to the previous page of the story."
+    "string": "Faqja e mëparshme"
   },
   "96": {
-    "string": "Lëviz pajisjen për të eksploruar",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+    "string": "Lëviz pajisjen për të eksploruar"
   },
   "97": {
-    "string": "Duke hapur",
-    "description": "Text displayed to users on tap of outlink button."
+    "string": "Duke hapur"
   },
   "98": {
-    "string": "Formulari nuk u dorëzua, provo përsëri",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+    "string": "Formulari nuk u dorëzua, provo përsëri"
   },
   "99": {
-    "string": "Formulari u dorëzua me sukses",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+    "string": "Formulari u dorëzua me sukses"
   }
 }

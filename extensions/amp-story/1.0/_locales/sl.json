@@ -1,258 +1,194 @@
 {
   "2": {
-    "string": "Dotaknite se »Naprej«",
-    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
+    "string": "Dotaknite se »Naprej«"
   },
   "3": {
-    "string": "Dotaknite se »Nazaj«",
-    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
+    "string": "Dotaknite se »Nazaj«"
   },
   "4": {
-    "string": "Povezave ni bilo mogoče kopirati v odložišče :(",
-    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
+    "string": "Povezave ni bilo mogoče kopirati v odložišče :("
   },
   "5": {
-    "string": "Povezava kopirana!",
-    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
+    "string": "Povezava kopirana!"
   },
   "6": {
-    "string": "E-pošta",
-    "description": "Button label for the share target that shares a link via email."
+    "string": "E-pošta"
   },
   "7": {
-    "string": "Facebook",
-    "description": "Button label for the share target that shares a link via Facebook."
+    "string": "Facebook"
   },
   "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
+    "string": "Google+"
   },
   "9": {
-    "string": "Pridobi povezavo",
-    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
+    "string": "Pridobi povezavo"
   },
   "10": {
-    "string": "LinkedIn",
-    "description": "Button label for the share target that shares a link via LinkedIn."
+    "string": "LinkedIn"
   },
   "11": {
-    "string": "Pinterest",
-    "description": "Button label for the share target that shares a link via Pinterest."
+    "string": "Pinterest"
   },
   "12": {
-    "string": "SMS",
-    "description": "Button label for the share target that shares a link via SMS."
+    "string": "SMS"
   },
   "13": {
-    "string": "Več",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
+    "string": "Več"
   },
   "14": {
-    "string": "Tumblr",
-    "description": "Button label for the share target that shares a link via Tumblr."
+    "string": "Tumblr"
   },
   "15": {
-    "string": "Twitter",
-    "description": "Button label for the share target that shares a link via Twitter."
+    "string": "Twitter"
   },
   "16": {
-    "string": "WhatsApp",
-    "description": "Button label for the share target that shares a link via WhatsApp."
+    "string": "WhatsApp"
   },
   "19": {
-    "string": "Če si želite ogledati to vsebino, morate omogočiti preizkus zgodb amp-story.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
+    "string": "Če si želite ogledati to vsebino, morate omogočiti preizkus zgodb amp-story."
   },
   "21": {
-    "string": "Vaš brskalnik na žalost ne podpira te izkušnje",
-    "description": "Text for a warning screen that informs the user that their browser does not support stories."
+    "string": "Vaš brskalnik na žalost ne podpira te izkušnje"
   },
   "22": {
-    "string": "Sprejmi",
-    "description": "Label for a button that allows the user to consent to providing their cookie access."
+    "string": "Sprejmi"
   },
   "23": {
-    "string": "Zavrni",
-    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
+    "string": "Zavrni"
   },
   "25": {
-    "string": "Ogled v izvirni domeni:",
-    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
+    "string": "Ogled v izvirni domeni:"
   },
   "26": {
-    "string": "Več o rezultatih AMP",
-    "description": "Label for a link to documentation on how AMP links are handled."
+    "string": "Več o rezultatih AMP"
   },
   "27": {
-    "string": "Vseeno nadaljuj",
-    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
+    "string": "Vseeno nadaljuj"
   },
   "31": {
-    "string": "Zvok je izklopljen",
-    "description": "Text that informs users that the sound is off after they click the mute button"
+    "string": "Zvok je izklopljen"
   },
   "32": {
-    "string": "Zvok je vklopljen",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
+    "string": "Zvok je vklopljen"
   },
   "33": {
-    "string": "Na tej strani ni zvoka",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
+    "string": "Na tej strani ni zvoka"
   },
   "34": {
-    "string": "Predvajaj video",
-    "description": "Label for a button to play the video visible on the page."
+    "string": "Predvajaj video"
   },
   "35": {
-    "string": "Povleci navzgor",
-    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
+    "string": "Povleci navzgor"
   },
   "36": {
-    "string": "Razširi objavo",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
+    "string": "Razširi objavo"
   },
   "62": {
-    "string": "Začni deliti s to stranjo",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
+    "string": "Začni deliti s to stranjo"
   },
   "63": {
-    "string": "Line",
-    "description": "Button label for the share target that shares a link via Line."
+    "string": "Line"
   },
   "64": {
-    "string": "Posodobljeno",
-    "description": "Label that indicates that additional content has been added to a story"
+    "string": "Posodobljeno"
   },
   "65": {
-    "string": "Videa ni bilo mogoče predvajati",
-    "description": "Label indicating that the video visible on the page failed to play."
+    "string": "Videa ni bilo mogoče predvajati"
   },
   "66": {
-    "string": "Izklop zvoka",
-    "description": "Label for the mute button that turns off the sound in the story"
+    "string": "Izklop zvoka"
   },
   "67": {
-    "string": "Vklop zvoka",
-    "description": "Label for the unmute button that turns the sound in the story back on"
+    "string": "Vklop zvoka"
   },
   "68": {
-    "string": "Informacije o zgodbi",
-    "description": "Label for the information button that pulls up relevant information about the story content"
+    "string": "Informacije o zgodbi"
   },
   "69": {
-    "string": "Deli zgodbo",
-    "description": "Label for the share button that pulls up a panel of options for sharing the story"
+    "string": "Deli zgodbo"
   },
   "70": {
-    "string": "Prikaži/skrij meni za zgodbo",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
+    "string": "Prikaži/skrij meni za zgodbo"
   },
   "71": {
-    "string": "A",
-    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
+    "string": "A"
   },
   "72": {
-    "string": "B",
-    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
+    "string": "B"
   },
   "73": {
-    "string": "C",
-    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
+    "string": "C"
   },
   "74": {
-    "string": "D",
-    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
+    "string": "D"
   },
   "75": {
-    "string": "Namig 1 od 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Namig 1 od 2"
   },
   "76": {
-    "string": "Dotaknite se za pomik na naslednji zaslon",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Dotaknite se za pomik na naslednji zaslon"
   },
   "77": {
-    "string": "Naprej",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Naprej"
   },
   "78": {
-    "string": "Namig 2 od 2",
-    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
+    "string": "Namig 2 od 2"
   },
   "79": {
-    "string": "Povlecite za pomik na naslednjo zgodbo",
-    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
+    "string": "Povlecite za pomik na naslednjo zgodbo"
   },
   "80": {
-    "string": "Razumem",
-    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
+    "string": "Razumem"
   },
   "81": {
-    "string": "Namig",
-    "description": "Label for a hint in the context of an onboarding user education tutorial."
+    "string": "Namig"
   },
   "82": {
-    "string": "Prejšnja stran",
-    "description": "Label indicating that users can navigate to the previous page."
+    "string": "Prejšnja stran"
   },
   "83": {
-    "string": "Aktiviraj",
-    "description": "Label for the activate button to ask for device orientation permission"
+    "string": "Aktiviraj"
   },
   "84": {
-    "string": "REZULTAT:",
-    "description": "Label for the results component preceding the score in percentages"
+    "string": "REZULTAT:"
   },
   "85": {
-    "string": "Začasno ustavi zgodbo",
-    "description": "Label for a button that pauses the media content on the story"
+    "string": "Začasno ustavi zgodbo"
   },
   "86": {
-    "string": "Predvajaj zgodbo",
-    "description": "Label for a button that plays the media content on the story"
+    "string": "Predvajaj zgodbo"
   },
   "87": {
-    "string": "Zapri",
-    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
+    "string": "Zapri"
   },
   "88": {
-    "string": "Preskoči na naslednji element",
-    "description": "Label for a button that advances to the next element in the carousel"
+    "string": "Preskoči na naslednji element"
   },
   "89": {
-    "string": "Vaš odgovor bo poslan na",
-    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+    "string": "Vaš odgovor bo poslan na"
   },
   "90": {
-    "string": "Naslednja zgodba",
-    "description": "Label for a button that advances to the next element in the carousel."
+    "string": "Naslednja zgodba"
   },
   "91": {
-    "string": "Naslednja stran",
-    "description": "Label for a button that advances to the next page of the story."
+    "string": "Naslednja stran"
   },
   "92": {
-    "string": "Znova predvajaj",
-    "description": "Label for a button that replays the story."
+    "string": "Znova predvajaj"
   },
   "93": {
-    "string": "Prejšnja stran",
-    "description": "Label for a button that returns the user to the previous page of the story."
+    "string": "Prejšnja stran"
   },
   "96": {
-    "string": "Premaknite napravo za raziskovanje",
-    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
+    "string": "Premaknite napravo za raziskovanje"
   },
   "97": {
-    "string": "Odpiranje",
-    "description": "Text displayed to users on tap of outlink button."
+    "string": "Odpiranje"
   },
   "98": {
-    "string": "Obrazec ni poslan, poskusite znova",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
+    "string": "Obrazec ni poslan, poskusite znova"
   },
   "99": {
-    "string": "Obrazec je bil uspešno oddan",
-    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+    "string": "Obrazec je bil uspešno oddan"
   }
 }
