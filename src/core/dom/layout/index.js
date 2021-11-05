@@ -54,7 +54,7 @@ export let DimensionsDef;
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ENUM = {
+export const LOADING_ELEMENTS_ENABLED = {
   'AMP-AD': true,
   'AMP-ANIM': true,
   'AMP-EMBED': true,
@@ -217,14 +217,14 @@ export function getLengthNumeral(length) {
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
   return (
-    LOADING_ELEMENTS_ENUM[tagName] || isIframeVideoPlayerComponent(tagName)
+    LOADING_ELEMENTS_ENABLED[tagName] || isIframeVideoPlayerComponent(tagName)
   );
 }
 
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ENUM allowlist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ENABLED allowlist.
  * @param {string} tagName
  * @return {boolean}
  */
