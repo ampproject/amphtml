@@ -220,15 +220,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     // Use an anchor element to make this a real link in vertical rendering.
     const link = (
-      // TODO(wg-stories): Evaluate whether this link needs noopener or noreferrer.
-      // See https://lgtm.com/rules/1806963085/ and remove disabling comment below.
-      // lgtm [js/unsafe-external-link]
       <a
         class="i-amphtml-story-page-attachment-remote-content"
         target="_blank"
-        // URL will be validated and resolved based on the canonical URL if
-        // relative when navigating.
-        href={hrefAttr}
         // Navigation is handled programmatically. Disable clicks on the placeholder
         // anchor to prevent from users triggering double navigations, which has
         // side effects in native contexts opening webviews/CCTs.
@@ -255,6 +249,18 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       // trusted event, and Safari does not consider swiping up to be trusted.
       this.element.querySelector('a').setAttribute('target', '_top');
     }
+
+    // URL will be validated and resolved based on the canonical URL if relative
+    // when navigating.
+    // TODO(wg-stories): It would be much nicer if this attribute was set inline
+    // on the JSX tag above. However, that makes the LGTM analysis fail on
+    // "Potentially unsafe external link".
+    // See https://lgtm.com/rules/1806963085/
+    // We set the href imperatively here to avoid triggering the warning
+    // (an lgtm-disable comment will not work due to formatting, unfortunately.)
+    // Consider whether we can use `noopener` and/or `noreferrer` so that we
+    // can inline the attribute, and avoid the warning.
+    link.setAttribute('href', hrefAttr);
 
     const {openStringEl, urlStringEl} = htmlRefs(link);
 
