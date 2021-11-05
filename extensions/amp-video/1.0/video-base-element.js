@@ -22,7 +22,7 @@ export class VideoBaseElement extends BaseElement {
   /**
    * @param {string} alias
    * @param {function(!VideoWrapperDef.Api, !../../../src/service/action-impl.ActionInvocation)} handler
-   * @param {!../../../src/core/constants/action-constants.ActionTrust=} minTrust
+   * @param {!../../../src/core/constants/action-constants.ActionTrust_Enum=} minTrust
    * @private
    */
   registerApiAction_(alias, handler, minTrust = ActionTrust_Enum.HIGH) {

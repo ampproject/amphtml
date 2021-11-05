@@ -127,7 +127,7 @@ export const LocalizedStringId_Enum = {
 export let LocalizedStringDef;
 
 /**
- * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
+ * @typedef {!Object<!LocalizedStringId_Enum, !LocalizedStringDef>}
  */
 export let LocalizedStringBundleDef;
 
@@ -160,7 +160,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (
+    const localizedStringId = /** @type {!LocalizedStringId_Enum} */ (
       localizedStringIdAsStr
     );
     const entry = localizedStringBundle[localizedStringId];

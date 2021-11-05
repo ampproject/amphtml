@@ -532,7 +532,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Proceeds to the next slide in the desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   moveSlide(dir, animate, trust) {
     if (this.slideIndex_ !== null) {
@@ -630,7 +630,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    * @param {number=} opt_forceDir if a valid direction is given force it to
    * move 1 slide in that direction.
-   * @param {ActionTrust=} opt_trust
+   * @param {ActionTrust_Enum=} opt_trust
    * @return {!Promise}
    */
   customSnap_(currentScrollLeft, opt_forceDir, opt_trust) {
@@ -756,7 +756,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @param {ActionTrust=} opt_trust
+   * @param {ActionTrust_Enum=} opt_trust
    */
   updateOnScroll_(currentScrollLeft, opt_trust) {
     if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
@@ -777,7 +777,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Parses given value as integer and shows the slide with that index value
    * when element has been laid out.
    * @param {*} value
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   goToSlide(value, trust) {
     const index = parseInt(value, 10);
@@ -905,7 +905,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   /**
    * Shows the slide at the given index and triggers a `slideChange` event.
    * @param {number} newIndex
-   * @param {ActionTrust=} opt_trust LOW by default.
+   * @param {ActionTrust_Enum=} opt_trust LOW by default.
    * @private
    */
   showSlideAndTriggerAction_(newIndex, opt_trust = ActionTrust_Enum.LOW) {

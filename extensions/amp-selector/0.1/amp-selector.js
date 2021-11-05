@@ -401,7 +401,7 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles toggle action.
    * @param {number} index
    * @param {boolean|undefined} value
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -439,7 +439,7 @@ export class AmpSelector extends AMP.BaseElement {
    * 'targetOption' - option value of the selected or deselected element.
    * 'selectedOptions' - array of option values of selected elements.
    * @param {!Element} el The element that was selected or deslected.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   fireSelectEvent_(el, trust) {
@@ -458,7 +458,7 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles selectUp events.
    * @param {number} delta
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   select_(delta, trust) {

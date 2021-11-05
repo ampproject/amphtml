@@ -214,7 +214,7 @@ export class DevelopmentModeLog {
   }
 
   /**
-   * @param {!LogLevel} logLevel
+   * @param {!LogLevel_Enum} logLevel
    * @return {?string} The CSS class to be applied to the log entry, given the
    *     specified log level, or null if no class should be added.
    * @private

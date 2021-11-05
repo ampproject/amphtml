@@ -273,7 +273,7 @@ class AmpAccordion extends AMP.BaseElement {
    * Triggers event given name
    * @param {string} name
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   triggerEvent_(name, section, trust) {
     const event = createCustomEvent(
@@ -289,7 +289,7 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * Toggles section between expanded or collapsed.
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {(boolean|undefined)=} opt_forceExpand
    * @private
    */
@@ -364,7 +364,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -456,7 +456,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -615,7 +615,7 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * Callback function to execute when mutations are observed on "data-expand".
    * @param {!Array<!MutationRecord>} mutations
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   toggleExpandMutations_(mutations, trust) {
     mutations.forEach((mutation) => {

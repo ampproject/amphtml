@@ -3,7 +3,7 @@ import {getVendorJsPropertyName} from '#core/dom/style';
 
 /**
  * @param {!Document} doc
- * @return {!VisibilityState}
+ * @return {!VisibilityState_Enum}
  */
 export function getDocumentVisibilityState(doc) {
   // New API: `document.visibilityState` property.

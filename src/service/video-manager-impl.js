@@ -244,7 +244,7 @@ export class VideoManager {
    * @private
    */
   registerCommonActions_(video) {
-    // Only require ActionTrust.LOW for video actions to defer to platform
+    // Only require ActionTrust_Enum.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust_Enum.LOW;
 

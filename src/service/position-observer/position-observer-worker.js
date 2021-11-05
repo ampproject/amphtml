@@ -35,7 +35,7 @@ export class PositionObserverWorker {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
-   * @param {!PositionObserverFidelity} fidelity
+   * @param {!PositionObserverFidelity_Enum} fidelity
    * @param {function(?PositionInViewportEntryDef)} handler
    */
   constructor(ampdoc, element, fidelity, handler) {
@@ -45,7 +45,7 @@ export class PositionObserverWorker {
     /** @const {function(?PositionInViewportEntryDef)} */
     this.handler_ = handler;
 
-    /** @type {!PositionObserverFidelity} */
+    /** @type {!PositionObserverFidelity_Enum} */
     this.fidelity = fidelity;
 
     /** @type {number} */

@@ -26,7 +26,7 @@ export function getLocalizationService(element) {
 
 /**
  * @param {!Node} context
- * @param {LocalizedStringId} key
+ * @param {LocalizedStringId_Enum} key
  * @return {?string}
  */
 export function localize(context, key) {

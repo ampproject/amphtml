@@ -409,7 +409,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Updates the sidebar while it is animating to the opened state.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   updateForOpening_(trust) {
     toggle(this.element, /* display */ true);
@@ -434,7 +434,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Updates the sidebar for when it has finished opening.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   updateForOpened_(trust) {
@@ -462,7 +462,7 @@ export class AmpSidebar extends AMP.BaseElement {
   /**
    * Updates the sidebar for when it is animating to the closed state.
    * @param {boolean} immediate
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   updateForClosing_(immediate, trust) {
@@ -481,7 +481,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Updates the sidebar for when it has finished closing.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   updateForClosed_(trust) {
@@ -503,7 +503,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Reveals the sidebar.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {?Element} openerElement
    * @private
    */
@@ -537,7 +537,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Hides the sidebar.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
@@ -550,7 +550,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * Dismisses the sidebar.
    * @param {boolean} skipAnimation Whether sidebar should close immediately,
    *  skipping animation.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
@@ -721,7 +721,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * @param {string} name
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerEvent_(name, trust) {

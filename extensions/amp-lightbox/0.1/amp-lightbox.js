@@ -261,7 +261,7 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {?Element} openerElement
    * @private
    */
@@ -324,7 +324,7 @@ class AmpLightbox extends AMP.BaseElement {
 
   /**
    * @param {!Function} callback Called when open animation completes.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   finalizeOpen_(callback, trust) {
@@ -539,7 +539,7 @@ class AmpLightbox extends AMP.BaseElement {
   /**
    * Closes the lightbox.
    *
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   close(trust) {
     if (!this.active_) {
@@ -557,7 +557,7 @@ class AmpLightbox extends AMP.BaseElement {
   /**
    * Clean up when closing lightbox.
    *
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   finalizeClose_(trust) {
@@ -891,7 +891,7 @@ class AmpLightbox extends AMP.BaseElement {
    * Triggeres event to window.
    *
    * @param {string} name
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerEvent_(name, trust) {

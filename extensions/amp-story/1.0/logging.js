@@ -29,7 +29,7 @@ let ElementPredicate_1_0_Def; // eslint-disable-line local/camelcase
  *
  * @typedef {{
  *   message: string,
- *   level: !LogLevel,
+ *   level: !LogLevel_Enum,
  *   moreInfo: (string|undefined),
  *   selector: (string|undefined),
  *   precondition: (!ElementPredicate_1_0_Def|undefined),
@@ -47,7 +47,7 @@ let AmpStoryLogType_1_0_Def; // eslint-disable-line local/camelcase
  *   element: !Element,
  *   rootElement: !Element,
  *   message: string,
- *   level: !LogLevel,
+ *   level: !LogLevel_Enum,
  *   conforms: boolean,
  *   moreInfo: (string|undefined),
  * }}

@@ -32,7 +32,7 @@ const PARAMS_SENTINEL = '__AMP__';
  * @typedef {{
  *   params: (!Object<string, string>|undefined),
  *   signals: (?Signals|undefined),
- *   visibilityState: (?VisibilityState|undefined),
+ *   visibilityState: (?VisibilityState_Enum|undefined),
  * }}
  */
 export let AmpDocOptions;
@@ -261,7 +261,7 @@ export class AmpDoc {
         isEnumValue(VisibilityState_Enum, paramsVisibilityState)
     );
 
-    /** @private {?VisibilityState} */
+    /** @private {?VisibilityState_Enum} */
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
       paramsVisibilityState ||
@@ -270,10 +270,10 @@ export class AmpDoc {
     // Start with `null` to be updated by updateVisibilityState_ in the end
     // of the constructor to ensure the correct "update" logic and promise
     // resolution.
-    /** @private {?VisibilityState} */
+    /** @private {?VisibilityState_Enum} */
     this.visibilityState_ = null;
 
-    /** @private @const {!Observable<!VisibilityState>} */
+    /** @private @const {!Observable<!VisibilityState_Enum>} */
     this.visibilityStateHandlers_ = new Observable();
 
     /** @private {?time} */
@@ -551,7 +551,7 @@ export class AmpDoc {
   }
 
   /**
-   * @param {!VisibilityState} visibilityState
+   * @param {!VisibilityState_Enum} visibilityState
    * @restricted
    */
   overrideVisibilityState(visibilityState) {
@@ -682,7 +682,7 @@ export class AmpDoc {
   /**
    * Returns visibility state configured by the viewer.
    * See {@link isVisible}.
-   * @return {!VisibilityState}
+   * @return {!VisibilityState_Enum}
    */
   getVisibilityState() {
     return devAssert(this.visibilityState_);
@@ -713,7 +713,7 @@ export class AmpDoc {
    * Adds a "visibilitychange" event listener for viewer events. The
    * callback can check {@link isVisible} and {@link getPrefetchCount}
    * methods for more info.
-   * @param {function(!VisibilityState)} handler
+   * @param {function(!VisibilityState_Enum)} handler
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {

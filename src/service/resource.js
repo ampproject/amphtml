@@ -151,7 +151,7 @@ export class Resource {
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
-    /** @private {!ResourceState} */
+    /** @private {!ResourceState_Enum} */
     this.state_ = element.isBuilt()
       ? ResourceState_Enum.NOT_LAID_OUT
       : ResourceState_Enum.NOT_BUILT;
@@ -283,8 +283,8 @@ export class Resource {
   }
 
   /**
-   * Returns the resource's state. See {@link ResourceState} for details.
-   * @return {!ResourceState}
+   * Returns the resource's state. See {@link ResourceState_Enum} for details.
+   * @return {!ResourceState_Enum}
    */
   getState() {
     return this.state_;

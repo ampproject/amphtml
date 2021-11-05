@@ -101,7 +101,7 @@ export class MultidocManager {
 
     /**
      * Sets the document's visibility state.
-     * @param {!VisibilityState} state
+     * @param {!VisibilityState_Enum} state
      */
     amp['setVisibilityState'] = function (state) {
       ampdoc.overrideVisibilityState(state);

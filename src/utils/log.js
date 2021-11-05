@@ -46,13 +46,13 @@ export const LogLevel_Enum = {
 };
 
 /**
- * @type {!LogLevel|undefined}
+ * @type {!LogLevel_Enum|undefined}
  * @private
  */
 let levelOverride_ = undefined;
 
 /**
- * @param {!LogLevel} level
+ * @param {!LogLevel_Enum} level
  */
 export function overrideLogLevel(level) {
   levelOverride_ = level;
@@ -119,7 +119,7 @@ export class Log {
    * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
    *
    * @param {!Window} win
-   * @param {function(number, boolean):!LogLevel} levelFunc
+   * @param {function(number, boolean):!LogLevel_Enum} levelFunc
    * @param {string=} opt_suffix
    */
   constructor(win, levelFunc, opt_suffix = '') {
@@ -130,10 +130,10 @@ export class Log {
      */
     this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(number, boolean):!LogLevel} */
+    /** @private @const {function(number, boolean):!LogLevel_Enum} */
     this.levelFunc_ = levelFunc;
 
-    /** @private @const {!LogLevel} */
+    /** @private @const {!LogLevel_Enum} */
     this.level_ = this.defaultLevel_();
 
     /** @private @const {string} */
@@ -164,7 +164,7 @@ export class Log {
   }
 
   /**
-   * @return {!LogLevel}
+   * @return {!LogLevel_Enum}
    * @private
    */
   defaultLevel_() {
@@ -193,7 +193,7 @@ export class Log {
 
   /**
    * @param {!Window=} opt_win provided for testing
-   * @return {!LogLevel}
+   * @return {!LogLevel_Enum}
    * @private
    */
   defaultLevelWithFunc_(opt_win) {
@@ -203,7 +203,7 @@ export class Log {
 
   /**
    * @param {string} tag
-   * @param {!LogLevel} level
+   * @param {!LogLevel_Enum} level
    * @param {!Array} messages
    * @return {boolean} true if a the message was logged
    */
@@ -541,7 +541,7 @@ export function resetLogConstructorForTesting() {
 
 /**
  * Calls the log constructor with a given level function and suffix.
- * @param {function(number, boolean):!LogLevel} levelFunc
+ * @param {function(number, boolean):!LogLevel_Enum} levelFunc
  * @param {string=} opt_suffix
  * @return {!Log}
  */

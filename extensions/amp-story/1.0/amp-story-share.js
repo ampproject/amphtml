@@ -18,7 +18,7 @@ import {addAttributesToElement} from '#core/dom';
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!Object<string, !LocalizedStringId>}
+ * @const {!Object<string, !LocalizedStringId_Enum>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
   'system': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,

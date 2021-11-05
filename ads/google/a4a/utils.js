@@ -39,7 +39,7 @@ export const ValidAdContainerTypes = {
 };
 
 /**
- * See `VisibilityState` enum.
+ * See `VisibilityState_Enum` enum.
  * @const {!Object<string, string>}
  */
 const visibilityStateCodes = {

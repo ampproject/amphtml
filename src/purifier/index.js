@@ -464,7 +464,7 @@ const BindingType_Enum = {
 
 /**
  * @param {string} attrName
- * @return {BindingType}
+ * @return {BindingType_Enum}
  */
 function bindingTypeForAttr(attrName) {
   if (attrName[0] == '[' && attrName[attrName.length - 1] == ']') {

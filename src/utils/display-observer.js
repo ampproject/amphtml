@@ -423,7 +423,7 @@ function computeDisplay(observations, isDocDisplay) {
 }
 
 /**
- * @param {!VisibilityState} visibilityState
+ * @param {!VisibilityState_Enum} visibilityState
  * @return {boolean}
  */
 function computeDocIsDisplayed(visibilityState) {

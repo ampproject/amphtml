@@ -574,7 +574,7 @@ export class AmpForm {
 
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @param {?Event} event
    * @return {!Promise}
    * @private
@@ -666,7 +666,7 @@ export class AmpForm {
   /**
    * Handle form error for presubmit async calls.
    * @param {*} error
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {Promise}
    * @private
    */
@@ -690,7 +690,7 @@ export class AmpForm {
 
   /**
    * Handle successful presubmit tasks
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    */
   handlePresubmitSuccess_(trust) {
@@ -726,7 +726,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -749,7 +749,7 @@ export class AmpForm {
 
   /**
    * Handles the server side proxying and then rendering of the template.
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -824,7 +824,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit-success or submit-error state depending on the response status.
    * @param {!JsonObject} response
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -846,7 +846,7 @@ export class AmpForm {
 
   /**
    * Triggers the analytics and renders any template for submitting state.
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    */
   submittingWithTrust_(trust) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
@@ -963,18 +963,18 @@ export class AmpForm {
 
   /**
    * Returns the action trust for submit-success and submit-error events.
-   * @param {!ActionTrust} incomingTrust
-   * @return {!ActionTrust}
+   * @param {!ActionTrust_Enum} incomingTrust
+   * @return {!ActionTrust_Enum}
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
     // Degrade trust across form submission.
-    return /** @type {!ActionTrust} */ (incomingTrust - 1);
+    return /** @type {!ActionTrust_Enum} */ (incomingTrust - 1);
   }
 
   /**
    * @param {!Response} response
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -998,7 +998,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject} result
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
@@ -1021,7 +1021,7 @@ export class AmpForm {
 
   /**
    * @param {*} e
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -1046,7 +1046,7 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
-   * @param {!ActionTrust} incomingTrust
+   * @param {!ActionTrust_Enum} incomingTrust
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
@@ -1187,7 +1187,7 @@ export class AmpForm {
    * Triggers an action e.g. submit success/error with response data.
    * @param {!FormEvents} name
    * @param {?JsonObject|!Array<{message: string, name: string}>} detail
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerAction_(name, detail, trust) {

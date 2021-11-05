@@ -361,8 +361,8 @@ export class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
+   * Gets the ActionSource to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
    * @return {!ActionSource}
    */
   getActionSource_(trust) {

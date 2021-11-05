@@ -51,7 +51,7 @@ export class Page {
     this.content_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
-    /** @private {!VisibilityState} */
+    /** @private {!VisibilityState_Enum} */
     this.visibilityState_ = VisibilityState_Enum.PRERENDER;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
@@ -141,7 +141,7 @@ export class Page {
   }
 
   /**
-   * @param {VisibilityState} visibilityState
+   * @param {VisibilityState_Enum} visibilityState
    */
   setVisibility(visibilityState) {
     if (!this.isLoaded() || visibilityState == this.visibilityState_) {
@@ -262,7 +262,7 @@ export class HostPage extends Page {
    * @param {!./service.NextPageService} manager
    * @param {{ url: string, title: string, image: string }} meta
    * @param {!PageState} initState
-   * @param {!VisibilityState} initVisibility
+   * @param {!VisibilityState_Enum} initVisibility
    * @param {!Document} doc
    */
   constructor(manager, meta, initState, initVisibility, doc) {

@@ -14,7 +14,7 @@ describes.fakeWin('amp-story-localization-strings', {amp: true}, () => {
         expect(uniqueKeys.size).to.eql(languageKeys.length);
       });
 
-      it(languageName + ' keys should exist in LocalizedStringId', () => {
+      it(languageName + ' keys should exist in LocalizedStringId_Enum', () => {
         const localizedStringIdKeys = Object.values(LocalizedStringId_Enum);
 
         languageKeys.forEach((key) => {

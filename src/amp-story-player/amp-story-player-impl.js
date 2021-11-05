@@ -1359,7 +1359,7 @@ export class AmpStoryPlayer {
   /**
    * Gets encoded url for player usage.
    * @param {string} href
-   * @param {VisibilityState=} visibilityState
+   * @param {VisibilityState_Enum=} visibilityState
    * @return {!Location}
    * @private
    */
@@ -1402,7 +1402,7 @@ export class AmpStoryPlayer {
   /**
    * Updates the visibility state of the story inside the iframe.
    * @param {!StoryDef} story
-   * @param {!VisibilityState} visibilityState
+   * @param {!VisibilityState_Enum} visibilityState
    * @private
    */
   updateVisibilityState_(story, visibilityState) {

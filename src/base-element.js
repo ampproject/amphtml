@@ -241,7 +241,7 @@ export class BaseElement {
      * trust required to invoke the handler.
      * @private {?Object<string, {
      *   handler: function(!./service/action-impl.ActionInvocation),
-     *   minTrust: ActionTrust,
+     *   minTrust: ActionTrust_Enum,
      * }>} */
     this['actionMap_'] = null;
 
@@ -667,7 +667,7 @@ export class BaseElement {
    *
    * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
-   * @param {ActionTrust} minTrust
+   * @param {ActionTrust_Enum} minTrust
    * @public
    */
   registerAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
@@ -679,7 +679,7 @@ export class BaseElement {
    * Registers the default action for this component.
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {string=} alias
-   * @param {ActionTrust=} minTrust
+   * @param {ActionTrust_Enum=} minTrust
    * @public
    */
   registerDefaultAction(

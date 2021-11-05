@@ -1601,7 +1601,7 @@ describes.repeated(
             form,
             'submit-success',
             /* CustomEvent */ env.sandbox.match.has('detail'),
-            ActionTrust_Enum.DEFAULT // Expect: ActionTrust.HIGH - 1
+            ActionTrust_Enum.DEFAULT // Expect: ActionTrust_Enum.HIGH - 1
           );
 
           await ampForm.handleSubmitAction_({
@@ -1614,7 +1614,7 @@ describes.repeated(
             form,
             'submit-success',
             /* CustomEvent */ env.sandbox.match.has('detail'),
-            ActionTrust_Enum.LOW // Expect: ActionTrust.DEFAULT - 1
+            ActionTrust_Enum.LOW // Expect: ActionTrust_Enum.DEFAULT - 1
           );
         });
 

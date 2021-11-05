@@ -61,7 +61,7 @@ export function redispatch(element, event, events) {
  * @param {!./base-element.BaseElement} video
  * @param {string} src
  * @param {string=} opt_name
- * @param {!Array<!SandboxOptions>=} opt_sandbox
+ * @param {!Array<!SandboxOptions_Enum>=} opt_sandbox
  * @return {!Element}
  */
 export function createFrameFor(video, src, opt_name, opt_sandbox) {
