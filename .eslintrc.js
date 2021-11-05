@@ -166,6 +166,7 @@ module.exports = {
     'local/camelcase': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
+    'local/enums': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,
@@ -355,6 +356,7 @@ module.exports = {
       'rules': {
         'require-jsdoc': 0,
         'local/always-call-chai-methods': 2,
+        'local/enums': 0,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
         'local/no-function-async': 0,
