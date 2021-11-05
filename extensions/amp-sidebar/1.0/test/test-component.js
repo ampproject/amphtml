@@ -1,6 +1,5 @@
 import * as Preact from '#preact';
 import {BentoSidebar} from '../component';
-import {htmlFor} from '#core/dom/static-template';
 import {mount} from 'enzyme';
 
 describes.sandboxed('BentoSidebar preact component', {}, (env) => {
