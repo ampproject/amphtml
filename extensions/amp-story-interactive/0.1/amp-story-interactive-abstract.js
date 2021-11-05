@@ -292,7 +292,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       FontFace
     ) {
       fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
-        FontFace(family, src, {weight, style})
+        new FontFace(family, src, {weight, style})
           .load()
           .then((font) => this.win.document.fonts.add(font))
       );

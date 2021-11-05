@@ -229,7 +229,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   loadFonts_() {
     if (this.win.document.fonts && FontFace) {
       fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
-        FontFace(family, src, {weight, style})
+        new FontFace(family, src, {weight, style})
           .load()
           .then((font) => this.win.document.fonts.add(font))
       );
