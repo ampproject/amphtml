@@ -5,7 +5,7 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function digiteka(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._digiteka_amp = {
     allowed_data: ['mdtk', 'zone', 'adunit', 'params'],
     mandatory_data: ['mdtk', 'zone'],

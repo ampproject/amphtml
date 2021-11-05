@@ -1,6 +1,7 @@
 import {CommonSignals} from '#core/constants/common-signals';
 
-import {forceExperimentBranch} from '#experiments';
+import * as experiments from '#experiments';
+import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 
 import {Services} from '#service';
@@ -23,8 +24,13 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import * as storyEvents from '../../../amp-story/1.0/events';
-import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
+import {
+  AmpStoryAutoAds,
+  Attributes,
+  RELEVANT_PLAYER_EXPS,
+} from '../amp-story-auto-ads';
 import {StoryAdPage} from '../story-ad-page';
+forceExperimentBranch;
 
 const NOOP = () => {};
 
@@ -70,6 +76,60 @@ describes.realWin(
         .withArgs(StateProperty.PAGE_IDS)
         .returns(['1', '2', '3', '4', '5', '6', '7', '8']);
       storeGetterStub.callThrough();
+    });
+
+    describe('shared experiments', () => {
+      beforeEach(async () => {
+        RELEVANT_PLAYER_EXPS[123] = 'fake-exp';
+        env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
+        await autoAds.buildCallback();
+      });
+
+      it('handles null response', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve(null));
+        await autoAds.layoutCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
+
+      it('handles empty array', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: []}));
+        await autoAds.layoutCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
+
+      it('correctly ssets relevant ids', async () => {
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: [123]}));
+        await autoAds.layoutCallback();
+        expect(getExperimentBranch(win, 'fake-exp')).to.equal('123');
+      });
+
+      it('does not set random ids', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: [456]}));
+        await autoAds.layoutCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
     });
 
     describe('ad creation', () => {
