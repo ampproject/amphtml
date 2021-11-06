@@ -91,29 +91,56 @@ async function collectMangledSubstrings() {
   endBuildStep('Wrote', realCacheFilename, startTime);
 }
 
+let pattern;
+
+/**
+ * @param {string} value
+ * @param {{[string: string]: number}} count
+ */
+function countAll(value, count) {
+  if (!pattern) {
+    pattern = new RegExp(`${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9]`, 'g');
+  }
+  const matches = [
+    ...value.matchAll(pattern),
+    ...value.matchAll(specificPattern),
+  ];
+  for (const [substring] of matches) {
+    count[substring] = count[substring] || 0;
+    count[substring]++;
+  }
+}
+
+/**
+ * @param {string} filename
+ * @param {{[string: string]: number}} count
+ * @return {Promise<void>}
+ */
+async function countInFile(filename, count) {
+  const source = await readFile(filename, 'utf8');
+  if (!source.includes(prefix)) {
+    return;
+  }
+  if (!filename.endsWith('.js')) {
+    countAll(source, count);
+    return;
+  }
+  const tree = parse(source);
+  traverse(tree, (node) => {
+    if (node.type === 'Literal' && typeof node.value === 'string') {
+      countAll(node.value, count);
+    } else if (node.type === 'TemplateElement' && node.value.cooked) {
+      countAll(node.value.cooked, count);
+    }
+  });
+}
+
 /**
  * @return {Promise<[string, string][]>}
  */
 async function collect() {
+  /** @type {{[string: string]: number}} */
   const count = {};
-
-  let pattern;
-  /**
-   * @param {string} value
-   */
-  function countAll(value) {
-    if (!pattern) {
-      pattern = new RegExp(`${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9]`, 'g');
-    }
-    const matches = [
-      ...value.matchAll(pattern),
-      ...value.matchAll(specificPattern),
-    ];
-    for (const [substring] of matches) {
-      count[substring] = count[substring] || 0;
-      count[substring]++;
-    }
-  }
 
   const filenames = await globby([
     'extensions/**/*.js',
@@ -125,22 +152,7 @@ async function collect() {
   await Promise.all(
     filenames.map(async (filename) => {
       try {
-        const source = await readFile(filename, 'utf8');
-        if (!source.includes(prefix)) {
-          return;
-        }
-        if (!filename.endsWith('.js')) {
-          countAll(source);
-          return;
-        }
-        const tree = parse(source);
-        traverse(tree, (node) => {
-          if (node.type === 'Literal' && typeof node.value === 'string') {
-            countAll(node.value);
-          } else if (node.type === 'TemplateElement' && node.value.cooked) {
-            countAll(node.value.cooked);
-          }
-        });
+        await countInFile(filename, count);
       } catch (e) {
         e.message = `${filename}: ${e.message}`;
         throw e;
