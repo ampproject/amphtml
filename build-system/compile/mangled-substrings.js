@@ -20,7 +20,6 @@ const {
 const {basename} = require('path');
 const {encode, indexCharset} = require('base62/lib/custom');
 const {endBuildStep} = require('../tasks/helpers');
-const {getStdout} = require('../common/process');
 const {parse, traverse} = require('../common/acorn');
 
 /**
@@ -116,23 +115,20 @@ async function collect() {
     }
   }
 
-  const possibleFiles = globby.sync([
+  const filenames = await globby([
     'extensions/**/*.js',
     'extensions/**/*.css',
     '!**/build/**',
     '!**/test*/**',
   ]);
 
-  const filesIncludingString = getStdout(
-    `grep -irl "${prefix}" ${possibleFiles.join(' ')}`
-  )
-    .trim()
-    .split('\n');
-
   await Promise.all(
-    filesIncludingString.map(async (filename) => {
+    filenames.map(async (filename) => {
       try {
         const source = await readFile(filename, 'utf8');
+        if (!source.includes(prefix)) {
+          return;
+        }
         if (!filename.endsWith('.js')) {
           countAll(source);
           return;
