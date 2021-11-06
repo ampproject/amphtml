@@ -18,6 +18,7 @@ const {
   readJsonSync,
 } = require('fs-extra');
 const {basename} = require('path');
+const {encode, indexCharset} = require('base62/lib/custom');
 const {endBuildStep} = require('../tasks/helpers');
 const {getStdout} = require('../common/process');
 const {parse, traverse} = require('../common/acorn');
@@ -73,25 +74,8 @@ const specificPattern = new RegExp(
   'g'
 );
 
-// Use our own charset instead of base62 since HTML classsubstrings are case insensitive
-const CHARSET = '0123456789abcdefghijklmnopqrstuvwxyz_'.split('');
-
-/**
- * @param {number} int
- * @return {string}
- */
-function encode(int) {
-  if (int === 0) {
-    return CHARSET[0];
-  }
-  const {length} = CHARSET;
-  let res = '';
-  while (int > 0) {
-    res = CHARSET[int % length] + res;
-    int = Math.floor(int / length);
-  }
-  return res;
-}
+// Use our own charset instead since HTML classsubstrings are case insensitive
+const charset = indexCharset('0123456789abcdefghijklmnopqrstuvwxyz_');
 
 const realCacheFilename = `build/${basename(__filename).split('.', 1)[0]}.json`;
 
@@ -176,7 +160,7 @@ async function collect() {
       // Prioritize mangling by count, so that the most frequent are the shortest.
       .sort((a, b) => count[b] - count[a])
       .map((substring, i) => {
-        const mangled = `${outputPrefix}${encode(i)}`;
+        const mangled = `${outputPrefix}${encode(i, charset)}`;
         return /** @type {[string, string]} */ ([substring, mangled]);
       })
       // Finally, sort by longest first to prevent replacing sub-substrings.
