@@ -163,7 +163,7 @@ async function collect() {
   return (
     Object.keys(count)
       // Sort lexicographically to stabilize.
-      // Otherwise, compression would result in random bundle sizes.
+      // Otherwise, compression would result in random deltas.
       .sort()
       // Prioritize mangling by count, so that the most frequent are the shortest.
       .sort((a, b) => count[b] - count[a])
