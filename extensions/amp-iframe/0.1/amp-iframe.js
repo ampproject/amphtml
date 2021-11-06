@@ -1,5 +1,5 @@
 import {playIgnoringError} from '#core/dom/video';
-import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
+import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
 import {ActionTrust} from '#core/constants/action-constants';
 import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {
@@ -337,7 +337,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.isTrackingFrame_) {
       if (
         !this.getAmpDoc().registerSingleton(
-          AMPDOC_SINGLETON_NAME.TRACKING_IFRAME
+          AMPDOC_SINGLETON_NAME_ENUM.TRACKING_IFRAME
         )
       ) {
         console /*OK*/
