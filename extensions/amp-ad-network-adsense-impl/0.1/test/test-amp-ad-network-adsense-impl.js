@@ -5,7 +5,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {
   CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
+  CONSENT_STRING_TYPE_ENUM,
 } from '#core/constants/consent-state';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
 import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
@@ -913,7 +913,7 @@ describes.realWin(
       it('should include us_privacy, if consentStringType matches', () =>
         impl
           .getAdUrl({
-            consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+            consentStringType: CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
             consentString: 'usPrivacyString',
           })
           .then((url) => {
@@ -924,7 +924,7 @@ describes.realWin(
       it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () =>
         impl
           .getAdUrl({
-            consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+            consentStringType: CONSENT_STRING_TYPE_ENUM.TCF_V2,
             consentString: 'gdprString',
           })
           .then((url) => {

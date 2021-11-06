@@ -90,7 +90,7 @@ Similar to the consent string, AMP will always pass the local stored consent met
 
 ```
 {
-  "consentStringType": {enum} [CONSENT_STRING_TYPE.TCF_V1, CONSENT_STRING_TYPE.TCF_V2, CONSENT_STRING_TYPE.US_PRIVACY_STRING] (optional),
+  "consentStringType": {enum} [CONSENT_STRING_TYPE_ENUM.TCF_V1, CONSENT_STRING_TYPE_ENUM.TCF_V2, CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING] (optional),
   "gdprApplies": {boolean} (optional),
   "additionalConsent": {string} (optional),
   "purposeOne": {boolean} (optional)

@@ -5,7 +5,7 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {CONSENT_STRING_TYPE_ENUM} from '#core/constants/consent-state';
 import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
 import {Services} from '#service';
 import {dev} from '#utils/log';
@@ -117,13 +117,13 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         manager.updateConsentInstanceState(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test-string',
-          constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+          constructMetadata(CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING)
         );
         expect(await manager.getConsentInstanceInfo()).to.deep.equal(
           constructConsentInfo(
             CONSENT_ITEM_STATE.ACCEPTED,
             'test-string',
-            constructMetadata(CONSENT_STRING_TYPE.US_PRIVACY_STRING)
+            constructMetadata(CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING)
           )
         );
       });
@@ -345,7 +345,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             'accept',
             undefined,
             constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
               '1~1.35.41.101'
             )
           );
@@ -354,7 +354,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             CONSENT_ITEM_STATE.ACCEPTED,
             'accept',
             constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
               '1~1.35.41.101'
             )
           );
@@ -369,13 +369,13 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             CONSENT_ITEM_STATE.REJECTED,
             'reject',
             undefined,
-            constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '3~3.33.33.303')
+            constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V1, '3~3.33.33.303')
           );
           yield macroTask();
           consentInfo = constructConsentInfo(
             CONSENT_ITEM_STATE.REJECTED,
             'reject',
-            constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '3~3.33.33.303')
+            constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V1, '3~3.33.33.303')
           );
           expect(storageSetSpy).to.be.calledOnce;
           expect(storageSetSpy).to.be.calledWith(
@@ -394,7 +394,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             CONSENT_ITEM_STATE.UNKNOWN,
             'test',
             undefined,
-            constructMetadata(CONSENT_STRING_TYPE.TCF_V2)
+            constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V2)
           );
           yield macroTask();
           expect(storageSetSpy).to.not.be.called;
@@ -519,7 +519,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',
           {'purpose-a': PURPOSE_CONSENT_STATE.ACCEPTED},
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V2)
+          constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V2)
         );
         yield macroTask();
         expect(storageSetSpy).to.be.calledTwice;
@@ -527,7 +527,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',
           {'purpose-a': PURPOSE_CONSENT_STATE.ACCEPTED},
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V2)
+          constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V2)
         );
         yield macroTask();
         expect(storageSetSpy).to.be.calledTwice;
@@ -600,7 +600,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           'new',
           {'purpose-a': PURPOSE_CONSENT_STATE.ACCEPTED},
           constructMetadata(
-            CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+            CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
             '3~3.33.33.303'
           )
         );
@@ -614,7 +614,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         });
         expect(requestBody.consentMetadata).to.deep.equal(
           constructMetadata(
-            CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+            CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
             '3~3.33.33.303'
           )
         );

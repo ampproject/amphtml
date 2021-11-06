@@ -7,7 +7,7 @@ import {
 } from '../consent-info';
 import {
   CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
+  CONSENT_STRING_TYPE_ENUM,
 } from '#core/constants/consent-state';
 import {
   ConsentPolicyInstance,
@@ -75,7 +75,7 @@ describes.realWin(
         consentInfo = constructConsentInfo(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V1),
+          constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V1),
           {
             'purpose-foo': PURPOSE_CONSENT_STATE.ACCEPTED,
             'purpose-bar': PURPOSE_CONSENT_STATE.REJECTED,
@@ -89,7 +89,7 @@ describes.realWin(
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(manager.consentMetadata_).to.be.deep.equals(
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
+          constructMetadata(CONSENT_STRING_TYPE_ENUM.TCF_V1)
         );
         expect(manager.purposeConsents_).to.deep.equals({
           'purpose-foo': PURPOSE_CONSENT_STATE.ACCEPTED,
@@ -654,7 +654,11 @@ describes.realWin(
         consentInfo = constructConsentInfo(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test',
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103', false)
+          constructMetadata(
+            CONSENT_STRING_TYPE_ENUM.TCF_V2,
+            '1~1.10.14.103',
+            false
+          )
         );
       });
 
@@ -668,7 +672,11 @@ describes.realWin(
         await expect(
           manager.getConsentMetadataInfo('default')
         ).to.eventually.deep.equals(
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103', false)
+          constructMetadata(
+            CONSENT_STRING_TYPE_ENUM.TCF_V2,
+            '1~1.10.14.103',
+            false
+          )
         );
       });
     });

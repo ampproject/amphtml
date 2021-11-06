@@ -7,7 +7,7 @@ import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 
 import {
   CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
+  CONSENT_STRING_TYPE_ENUM,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
@@ -1154,7 +1154,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
-              consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              consentStringType: CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
               consentString: 'usPrivacyString',
             })
             .then((url) => {
@@ -1167,7 +1167,7 @@ for (const {config, name} of [
           impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
-              consentStringType: CONSENT_STRING_TYPE.TCF_V2,
+              consentStringType: CONSENT_STRING_TYPE_ENUM.TCF_V2,
               consentString: 'gdprString',
             })
             .then((url) => {

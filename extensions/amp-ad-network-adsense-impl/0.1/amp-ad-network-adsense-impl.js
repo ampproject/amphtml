@@ -30,7 +30,7 @@ import {
 
 import {
   CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
+  CONSENT_STRING_TYPE_ENUM,
 } from '#core/constants/consent-state';
 import {removeElement} from '#core/dom';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
@@ -385,12 +385,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent':
-        consentStringType != CONSENT_STRING_TYPE.US_PRIVACY_STRING
+        consentStringType != CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
           ? consentString
           : null,
       'addtl_consent': additionalConsent,
       'us_privacy':
-        consentStringType == CONSENT_STRING_TYPE.US_PRIVACY_STRING
+        consentStringType == CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING
           ? consentString
           : null,
       'pfx': pfx ? '1' : '0',

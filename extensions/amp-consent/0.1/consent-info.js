@@ -1,4 +1,4 @@
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {CONSENT_STRING_TYPE_ENUM} from '#core/constants/consent-state';
 import {deepEquals} from '#core/types/object/json';
 import {dev, user} from '#utils/log';
 import {hasOwn, map} from '#core/types/object';
@@ -87,7 +87,7 @@ export let ConsentInfoDef;
 /**
  * Used in ConsentInfoDef
  * @typedef {{
- *  consentStringType: (CONSENT_STRING_TYPE|undefined),
+ *  consentStringType: (CONSENT_STRING_TYPE_ENUM|undefined),
  *  additionalConsent: (string|undefined),
  *  gdprApplies: (boolean|undefined),
  *  purposeOne: (boolean|undefined),
@@ -297,7 +297,7 @@ export function constructConsentInfo(
 /**
  * Construct the consentMetadataDef object from values
  *
- * @param {CONSENT_STRING_TYPE=} opt_consentStringType
+ * @param {CONSENT_STRING_TYPE_ENUM=} opt_consentStringType
  * @param {string=} opt_additionalConsent
  * @param {boolean=} opt_gdprApplies
  * @param {boolean=} opt_purposeOne
@@ -442,7 +442,7 @@ export function assertMetadataValues(metadata) {
 
   if (
     consentStringType &&
-    !isEnumValue(CONSENT_STRING_TYPE, consentStringType)
+    !isEnumValue(CONSENT_STRING_TYPE_ENUM, consentStringType)
   ) {
     delete metadata['consentStringType'];
     errorFields.push('consentStringType');

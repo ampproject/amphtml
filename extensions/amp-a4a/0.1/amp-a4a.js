@@ -145,7 +145,7 @@ export let CreativeMetaDataDef;
 /** @typedef {{
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
-      consentStringType: (?CONSENT_STRING_TYPE|boolean),
+      consentStringType: (?CONSENT_STRING_TYPE_ENUM|boolean),
       gdprApplies: (?boolean|undefined),
       additionalConsent: (?string|undefined),
     }} */

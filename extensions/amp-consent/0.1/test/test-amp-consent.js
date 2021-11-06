@@ -8,7 +8,7 @@ import {
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {CONSENT_STRING_TYPE_ENUM} from '#core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '#utils/log';
@@ -463,7 +463,7 @@ describes.realWin(
             'consentState': CONSENT_ITEM_STATE.REJECTED,
             'consentString': 'mystring',
             'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
               '1~1.35.41.101',
               false,
               true
@@ -555,7 +555,7 @@ describes.realWin(
               [STORAGE_KEY.STRING]: 'oldstring',
               [STORAGE_KEY.METADATA]: {
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
                 [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '3~3.33.303',
               },
               [STORAGE_KEY.PURPOSE_CONSENTS]: {
@@ -629,7 +629,7 @@ describes.realWin(
               [STORAGE_KEY.STRING]: 'oldstring',
               [STORAGE_KEY.METADATA]: {
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
                 [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '3~3.33.303',
               },
             },
@@ -650,7 +650,7 @@ describes.realWin(
             'consentString': 'newstring',
             'isDirty': undefined,
             'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              CONSENT_STRING_TYPE_ENUM.US_PRIVACY_STRING,
               '1~1.35.41.101',
               true,
               true
@@ -718,7 +718,7 @@ describes.realWin(
               [STORAGE_KEY.STRING]: 'mystring',
               [STORAGE_KEY.METADATA]: {
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
               },
             },
           };
@@ -737,7 +737,9 @@ describes.realWin(
             'consentState': CONSENT_ITEM_STATE.REJECTED,
             'consentString': 'mystring',
             'isDirty': undefined,
-            'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE_ENUM.TCF_V2
+            ),
             'purposeConsents': undefined,
           });
         });
@@ -766,7 +768,7 @@ describes.realWin(
               [STORAGE_KEY.STRING]: 'mystring',
               [STORAGE_KEY.METADATA]: {
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
               },
               [STORAGE_KEY.PURPOSE_CONSENTS]: {'abc': 1},
             },
@@ -786,7 +788,9 @@ describes.realWin(
             'consentState': CONSENT_ITEM_STATE.REJECTED,
             'consentString': 'mystring',
             'isDirty': true,
-            'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE_ENUM.TCF_V2
+            ),
             'purposeConsents': {'abc': PURPOSE_CONSENT_STATE.ACCEPTED},
           });
         });
@@ -804,7 +808,7 @@ describes.realWin(
               [STORAGE_KEY.STRING]: 'mystring',
               [STORAGE_KEY.METADATA]: {
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
-                  CONSENT_STRING_TYPE.TCF_V2,
+                  CONSENT_STRING_TYPE_ENUM.TCF_V2,
               },
             },
           };
@@ -823,7 +827,9 @@ describes.realWin(
             'consentState': CONSENT_ITEM_STATE.REJECTED,
             'consentString': 'mystring',
             'isDirty': true,
-            'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE_ENUM.TCF_V2
+            ),
             'purposeConsents': undefined,
           });
         });
@@ -874,7 +880,7 @@ describes.realWin(
           /Consent metadata value "%s" is invalid./
         );
         expect(spy.args[0][2]).to.match(/consentStringType/);
-        responseMetadata['consentStringType'] = CONSENT_STRING_TYPE.TCF_V2;
+        responseMetadata['consentStringType'] = CONSENT_STRING_TYPE_ENUM.TCF_V2;
         expect(ampConsent.validateMetadata_(responseMetadata)).to.deep.equals(
           constructMetadata(2)
         );
@@ -1100,7 +1106,7 @@ describes.realWin(
           'action': 'accept',
           'info': 'accept-string',
           'consentMetadata': {
-            'consentStringType': CONSENT_STRING_TYPE.TCF_V1,
+            'consentStringType': CONSENT_STRING_TYPE_ENUM.TCF_V1,
             'additionalConsent': '1~1.35.41.101',
             'gdprApplies': true,
             'purposeOne': true,
@@ -1112,7 +1118,7 @@ describes.realWin(
           ACTION_TYPE.ACCEPT,
           'accept-string',
           constructMetadata(
-            CONSENT_STRING_TYPE.TCF_V1,
+            CONSENT_STRING_TYPE_ENUM.TCF_V1,
             '1~1.35.41.101',
             true,
             true
@@ -1190,7 +1196,9 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'accept',
           'info': 'accept-string',
-          'consentMetadata': {'consentStringType': CONSENT_STRING_TYPE.TCF_V1},
+          'consentMetadata': {
+            'consentStringType': CONSENT_STRING_TYPE_ENUM.TCF_V1,
+          },
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
@@ -1217,7 +1225,9 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'dismiss',
           'info': 'test',
-          'consentMetadata': {'consentStringType': CONSENT_STRING_TYPE.TCF_V1},
+          'consentMetadata': {
+            'consentStringType': CONSENT_STRING_TYPE_ENUM.TCF_V1,
+          },
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
