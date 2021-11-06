@@ -143,8 +143,9 @@ async function collect() {
   const count = {};
 
   const filenames = await globby([
-    'extensions/**/*.js',
-    'extensions/**/*.css',
+    // Collect only in amp-story* for speed, but later replace everywhere for safety.
+    'extensions/amp-story*/**/*.js',
+    'extensions/amp-story*/**/*.css',
     '!**/build/**',
     '!**/test*/**',
   ]);
