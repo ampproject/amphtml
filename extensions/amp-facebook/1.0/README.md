@@ -68,6 +68,7 @@ defineBentoFacebook();
 </script>
 
 ```
+
 ##### Embed a Facebook Video
 
 ```html
@@ -117,6 +118,7 @@ defineBentoFacebook();
   })();
 </script>
 ```
+
 ##### Embed a Facebook Page
 
 ```html
@@ -166,6 +168,7 @@ defineBentoFacebook();
   })();
 </script>
 ```
+
 ##### Embed a Facebook Like Button
 
 ```html
@@ -198,6 +201,7 @@ defineBentoFacebook();
 >
 </bento-facebook>
 ```
+
 ##### Embed a Facebook Comment Section
 
 ```html
