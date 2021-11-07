@@ -5,11 +5,8 @@
  * We run this as a pre-processing step since files are later processed by babel
  * in an unordered way. If we were to find mangled substrings as we go, we
  * would cause the compressed size to be unstable due to frequency of substrings.
- *
- * Additionally, this allows us to optimize the compressed output size by using
- * the shortest mangled substrings as the most frequent.
  */
-const dedent = require('dedent');
+const cssTokenize = require('postcss/lib/tokenize');
 const globby = require('globby');
 const {
   outputJson,
@@ -20,61 +17,34 @@ const {
 const {basename} = require('path');
 const {encode, indexCharset} = require('base62/lib/custom');
 const {endBuildStep} = require('../tasks/helpers');
-const {parse, traverse} = require('../common/acorn');
+const {tokenize} = require('../common/acorn');
+
+const prefix = 'i-amphtml-';
 
 /**
- * We mangle `i-amphtml-story-*` instead of all internal substrings.
+ * We mangle names found exclusively in `extensions/amp-story*`.
  * amp-story benefits particularly because it's very CSS-heavy. Mangling the
  * rest of the substrings in source would be risky and not yield much benefit.
- *
- * It's important that those creating substrings specific to amp-story use this
- * prefix as a general practice.
  */
-const prefix = 'i-amphtml-story-';
-const outputPrefix = 'i-amphtml-_';
+const exclusivelyFilenamesIncluding = 'extensions/amp-story';
 
-// TODO(alanorozco): These should be prefixed on source. They're a ~250 B delta.
-const specificPattern = new RegExp(
-  dedent(`
-    i-amphtml-tooltip-action-icon-launch
-    i-amphtml-tooltip-action-icon-expand
-    i-amphtml-embed-id
-    i-amphtml-expanded-mode
-    i-amphtml-expanded-view-close-button
-    i-amphtml-expanded-component
-    i-amphtml-tooltip-arrow-on-top
-    i-amphtml-tooltip-text
-    i-amphtml-tooltip-action-icon
-    i-amphtml-outlink-cta-background-color
-    i-amphtml-outlink-cta-text-color
-    i-amphtml-embedded-component
-    i-amphtml-orig-tabindex
-    i-amphtml-current-page-has-audio
-    i-amphtml-message-container
-    i-amphtml-paused-display
-    i-amphtml-first-page-active
-    i-amphtml-last-page-active
-    i-amphtml-overlay-container
-    i-amphtml-gear-icon
-    i-amphtml-continue-button
-    i-amphtml-advance-to
-    i-amphtml-return-to
-    i-amphtml-visited
-    i-amphtml-experiment-story-load-inactive-outside-viewport
-    i-amphtml-vertical
-    i-amphtml-animate-progress
-    i-amphtml-progress-bar-overflow
-    i-amphtml-ad-progress-exp
-  `)
-    .trim()
-    .split('\n')
-    .sort((a, b) => b.length - a.length)
-    .join('|'),
-  'g'
-);
+const sourceGlob = [
+  'css/**/*.css',
+  'extensions/**/*.js',
+  'extensions/**/*.css',
+  'src/**/*.js',
+  'src/**/*.css',
+  '3p/**/*.js',
+  '3p/**/*.css',
+  '!**/build/**',
+  '!**/test*/**',
+];
 
 // Use our own charset instead since HTML classsubstrings are case insensitive
 const charset = indexCharset('0123456789abcdefghijklmnopqrstuvwxyz_');
+
+// Add underscore at the end to prevent collisions by convention.
+const mangle = (i) => `${prefix}${encode(i, charset)}_`;
 
 const realCacheFilename = `build/${basename(__filename).split('.', 1)[0]}.json`;
 
@@ -99,15 +69,46 @@ let pattern;
  */
 function countAll(value, count) {
   if (!pattern) {
-    pattern = new RegExp(`${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9]`, 'g');
+    pattern = new RegExp(
+      // We avoid ending dashes in first match to ignore compound/generated
+      // classnames. Require end or special character after match in order to
+      // delimit an ident.
+      `(${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9])([^-a-zA-Z0-9]|$)`,
+      'g'
+    );
   }
-  const matches = [
-    ...value.matchAll(pattern),
-    ...value.matchAll(specificPattern),
-  ];
-  for (const [substring] of matches) {
+  const matches = value.matchAll(pattern);
+  for (const [, substring] of matches) {
     count[substring] = count[substring] || 0;
     count[substring]++;
+  }
+}
+
+/**
+ * @param {string} css
+ * @param {{[string: string]: number}} count
+ */
+function countInCss(css, count) {
+  const tokenized = cssTokenize({css});
+  let token;
+  while ((token = tokenized.nextToken())) {
+    const [type, value] = token;
+    if (type === 'word') {
+      countAll(value, count);
+    }
+  }
+}
+
+/**
+ * @param {string} js
+ * @param {{[string: string]: number}} count
+ */
+function countInJs(js, count) {
+  const tokens = tokenize(js);
+  for (const token of tokens) {
+    if (token.type.label === 'string' || token.type.label === 'template') {
+      countAll(token.value, count);
+    }
   }
 }
 
@@ -118,21 +119,13 @@ function countAll(value, count) {
  */
 async function countInFile(filename, count) {
   const source = await readFile(filename, 'utf8');
-  if (!source.includes(prefix)) {
-    return;
-  }
-  if (!filename.endsWith('.js')) {
-    countAll(source, count);
-    return;
-  }
-  const tree = parse(source);
-  traverse(tree, (node) => {
-    if (node.type === 'Literal' && typeof node.value === 'string') {
-      countAll(node.value, count);
-    } else if (node.type === 'TemplateElement' && node.value.cooked) {
-      countAll(node.value.cooked, count);
+  if (source.includes(prefix)) {
+    if (filename.endsWith('.css')) {
+      countInCss(source, count);
+    } else {
+      countInJs(source, count);
     }
-  });
+  }
 }
 
 /**
@@ -140,20 +133,22 @@ async function countInFile(filename, count) {
  */
 async function collect() {
   /** @type {{[string: string]: number}} */
-  const count = {};
+  const includeCount = {};
 
-  const filenames = await globby([
-    // Collect only in amp-story* for speed, but later replace everywhere for safety.
-    'extensions/amp-story*/**/*.js',
-    'extensions/amp-story*/**/*.css',
-    '!**/build/**',
-    '!**/test*/**',
-  ]);
+  /** @type {{[string: string]: number}} */
+  const excludeCount = {};
+
+  const filenames = await globby(sourceGlob);
 
   await Promise.all(
     filenames.map(async (filename) => {
       try {
-        await countInFile(filename, count);
+        await countInFile(
+          filename,
+          filename.includes(exclusivelyFilenamesIncluding)
+            ? includeCount
+            : excludeCount
+        );
       } catch (e) {
         e.message = `${filename}: ${e.message}`;
         throw e;
@@ -161,16 +156,19 @@ async function collect() {
     })
   );
 
+  for (const substring in excludeCount) {
+    delete includeCount[substring];
+  }
+
   return (
-    Object.keys(count)
+    Object.keys(includeCount)
       // Sort lexicographically to stabilize.
       // Otherwise, compression would result in random deltas.
       .sort()
       // Prioritize mangling by count, so that the most frequent are the shortest.
-      .sort((a, b) => count[b] - count[a])
+      .sort((a, b) => includeCount[b] - includeCount[a])
       .map((substring, i) => {
-        const mangled = `${outputPrefix}${encode(i, charset)}`;
-        return /** @type {[string, string]} */ ([substring, mangled]);
+        return /** @type {[string, string]} */ ([substring, mangle(i)]);
       })
       // Finally, sort by longest first to prevent replacing sub-substrings.
       .sort(([a], [b]) => b.length - a.length)
