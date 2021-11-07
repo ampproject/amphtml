@@ -3,9 +3,13 @@
  * Entry point for `bento.js`
  */
 
+import {isEsm} from '#core/mode';
+
 import {install as installCustomElements} from './polyfills/custom-elements';
 
-installCustomElements(self);
+if (!isEsm()) {
+  installCustomElements(self);
+}
 
 const BENTO = self.BENTO || [];
 
