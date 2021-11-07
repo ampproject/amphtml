@@ -1,5 +1,6 @@
-const CssSelectorTokenizer = require('css-selector-tokenizer');
+const CssWhat = require('css-what');
 const postcss = require('postcss');
+const traverse = require('traverse');
 const {getBentoName} = require('../bento-helpers');
 
 /**
@@ -7,21 +8,13 @@ const {getBentoName} = require('../bento-helpers');
  * @return {string}
  */
 function renameTagNamesInSelector(selector) {
-  const tree = CssSelectorTokenizer.parse(selector);
-  const nodes = [tree];
-  while (nodes.length > 0) {
-    const node = nodes.pop();
-    if (!node) {
-      continue;
-    }
-    if (node.type === 'element') {
+  const tree = CssWhat.parse(selector);
+  traverse(tree).forEach((node) => {
+    if (node?.type === 'tag') {
       node.name = getBentoName(node.name);
     }
-    if (Array.isArray(node.nodes)) {
-      nodes.push(...node.nodes);
-    }
-  }
-  return CssSelectorTokenizer.stringify(tree);
+  });
+  return CssWhat.stringify(tree);
 }
 
 /**

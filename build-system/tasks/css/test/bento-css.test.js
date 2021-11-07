@@ -94,8 +94,8 @@ test(
 );
 
 test(
-  'renames amp-* selectors to bento-* (preserves minification)',
+  'renames amp-* selectors to bento-* (preserves minification in content)',
   renameSelectorsToBentoTagNamesExpected,
   `amp-foo>div:not(.amp-classname){background:red}amp-whatever{color:blue}`,
-  `bento-foo>div:not(.amp-classname){background:red}bento-whatever{color:blue}`
+  `bento-foo > div:not(.amp-classname){background:red}bento-whatever{color:blue}`
 );
