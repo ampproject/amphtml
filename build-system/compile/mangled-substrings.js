@@ -50,9 +50,6 @@ const realCacheFilename = `build/${basename(__filename).split('.', 1)[0]}.json`;
  * @return {Promise}
  */
 async function collectMangledSubstrings() {
-  if (pathExistsSync(realCacheFilename)) {
-    return;
-  }
   const startTime = Date.now();
   const result = await collect();
   await outputJson(realCacheFilename, result, {spaces: 2});
