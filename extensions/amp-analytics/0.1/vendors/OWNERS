@@ -9,7 +9,7 @@
         {name: 'ampproject/wg-components'},
         {name: 'AppsFlyer'},
         {name: 'fredsh2k'},
-        {name: 'zvalmog'}
+        {name: 'zvalmog'},
       ],
     },
   ],

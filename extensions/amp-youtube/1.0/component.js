@@ -1,28 +1,14 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {dispatchCustomEvent} from '#core/dom';
+import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
+import {useRef} from '#preact';
+import {forwardRef} from '#preact/compat';
+
+import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
+import {addParamsToUrl} from '../../../src/url';
 import {VideoEvents} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '#core/types/object';
-import {dispatchCustomEvent} from '#core/dom';
-import {forwardRef} from '#preact/compat';
-import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
-import {useRef} from '#preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
@@ -80,8 +66,17 @@ function createDefaultInfo() {
  * @return {PreactDef.Renderable}
  * @template T
  */
-function YoutubeWithRef(
-  {autoplay, loop, videoid, liveChannelid, params = {}, credentials, ...rest},
+function BentoYoutubeWithRef(
+  {
+    autoplay,
+    loop,
+    videoid,
+    liveChannelid,
+    onLoad,
+    params = {},
+    credentials,
+    ...rest
+  },
   ref
 ) {
   const datasourceExists =
@@ -142,6 +137,7 @@ function YoutubeWithRef(
 
     if (event == 'initialDelivery') {
       dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      onLoad?.();
       return;
     }
 
@@ -251,6 +247,6 @@ function makeMethodMessage(method) {
   );
 }
 
-const Youtube = forwardRef(YoutubeWithRef);
-Youtube.displayName = 'Youtube'; // Make findable for tests.
-export {Youtube};
+const BentoYoutube = forwardRef(BentoYoutubeWithRef);
+BentoYoutube.displayName = 'BentoYoutube'; // Make findable for tests.
+export {BentoYoutube};

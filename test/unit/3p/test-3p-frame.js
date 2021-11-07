@@ -1,20 +1,6 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {deserializeMessage, serializeMessage} from '#core/3p-frame-messaging';
 import {DomFingerprint} from '#core/dom/fingerprint';
+import * as mode from '#core/mode';
 import {WindowInterface} from '#core/window/interface';
 
 import {toggleExperiment} from '#experiments';
@@ -32,11 +18,6 @@ import {
   resetBootstrapBaseUrlForTesting,
   resetCountForTesting,
 } from '../../../src/3p-frame';
-import {
-  deserializeMessage,
-  serializeMessage,
-} from '../../../src/3p-frame-messaging';
-import {dev} from '../../../src/log';
 
 describes.realWin('3p-frame', {amp: true}, (env) => {
   let window, document;
@@ -46,8 +27,9 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
     document = window.document;
   });
 
-  function mockMode(mode) {
-    env.sandbox.stub(window.parent, '__AMP_MODE').value(mode);
+  function mockMode(options) {
+    env.sandbox.stub(window.parent, '__AMP_MODE').value(options);
+    env.sandbox.stub(mode, 'isProd').returns(!!options.isProd);
   }
 
   describe
@@ -151,6 +133,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
 
       it('should create an iframe', () => {
         mockMode({
+          esm: false,
           localDev: true,
           development: false,
           test: false,
@@ -228,7 +211,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
               'localDev': true,
               'development': false,
               'test': false,
-              'version': '$internalRuntimeVersion$',
               'esm': false,
             },
             'canary': false,
@@ -341,7 +323,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should pick the right bootstrap unique url (prod)', () => {
-        mockMode({});
+        mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.match(
           /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/
@@ -349,7 +331,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return a stable URL in getBootstrapBaseUrl', () => {
-        mockMode({});
+        mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
         expect(getBootstrapBaseUrl(window, ampdoc)).to.equal(
           getBootstrapBaseUrl(window, ampdoc)
@@ -357,7 +339,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
-        mockMode({});
+        mockMode({isProd: true});
         expect(getDefaultBootstrapBaseUrl(window)).to.equal(
           getDefaultBootstrapBaseUrl(window)
         );
@@ -372,7 +354,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should return different values for different file names', () => {
-        mockMode({});
+        mockMode({isProd: true});
         let match =
           /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/.exec(
             getDefaultBootstrapBaseUrl(window)
@@ -419,7 +401,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should prefetch bootstrap frame and JS', () => {
-        mockMode({});
+        mockMode({isProd: true});
         const ampdoc = Services.ampdoc(window.document);
         preloadBootstrap(window, 'avendor', ampdoc, preconnect);
         // Wait for visible promise.
@@ -480,7 +462,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           .returns('http://acme.org/')
           .twice();
 
-        mockMode({});
+        mockMode({isProd: true});
         const link = document.createElement('link');
         link.setAttribute('rel', 'canonical');
         link.setAttribute('href', 'https://foo.bar/baz');
@@ -605,23 +587,18 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         });
 
         it('should return null if the input is not a json', () => {
-          const errorStub = env.sandbox.stub(dev(), 'error');
           expect(deserializeMessage('amp-other')).to.be.null;
-          expect(errorStub).to.not.be.called;
         });
 
         it('should return null if failed to parse the input', () => {
-          const errorStub = env.sandbox.stub(dev(), 'error');
+          expectAsyncConsoleError(/MESSAGING: Failed to parse message/i, 2);
           expect(deserializeMessage('amp-{"type","sentinel":"msgsentinel"}')).to
             .be.null;
-          expect(errorStub).to.be.calledOnce;
-
           expect(
             deserializeMessage(
               'amp-{"type":"msgtype"|"sentinel":"msgsentinel"}'
             )
           ).to.be.null;
-          expect(errorStub).to.be.calledTwice;
         });
       });
     });

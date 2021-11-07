@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-dailymotion';
 
 describes.realWin(
@@ -69,14 +53,21 @@ describes.realWin(
     });
 
     it('renders responsively', async () => {
-      const dailymotion = await getDailymotion('x2m8jpp', true);
+      const dailymotion = await getDailymotion(
+        'x2m8jpp',
+        /* optResponsive */ true
+      );
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
     it('renders with custom settings', async () => {
-      const dailymotion = await getDailymotion('x2m8jpp', false, true);
+      const dailymotion = await getDailymotion(
+        'x2m8jpp',
+        /* optResponsive */ false,
+        /* optCustomSettings */ true
+      );
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
@@ -85,7 +76,12 @@ describes.realWin(
     });
 
     it('renders already muted when autoplay is enabled', async () => {
-      const dailymotion = await getDailymotion('x2m8jpp', false, false, true);
+      const dailymotion = await getDailymotion(
+        'x2m8jpp',
+        /* optResponsive */ false,
+        /* optCustomSettings */ false,
+        /* optAutoplay */ true
+      );
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
@@ -94,7 +90,11 @@ describes.realWin(
     });
 
     it('renders without mute when autoplay and mute are not explicitly added', async () => {
-      const dailymotion = await getDailymotion('x2m8jpp', false, false);
+      const dailymotion = await getDailymotion(
+        'x2m8jpp',
+        /* optResponsive */ false,
+        /* optCustomSettings */ false
+      );
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(

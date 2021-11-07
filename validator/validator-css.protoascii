@@ -1,19 +1,3 @@
-#
-# Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
-
 declaration_list {
   name: "BASIC_DECLARATIONS"
   declaration: { name: "align-content" }
@@ -1123,35 +1107,10 @@ tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
 
 tags: {  # `<style amp-boilerplate>`, [AMP]
   html_format: AMP
-  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
   descriptive_name: "head > style[amp-boilerplate]"
-  mandatory: true
-  unique: true
-  mandatory_parent: "HEAD"
-  attr_lists: "nonce-attr"
-  attrs: {
-    name: "amp-boilerplate"
-    mandatory: true
-    value: ""
-    dispatch_key: NAME_VALUE_PARENT_DISPATCH
-  }
-  cdata: {
-    doc_css_bytes: false
-    # This regex allows arbitrary whitespace whenever some whitespace
-    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
-    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
-  }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
-}
-
-tags: {  # `<style amp-boilerplate>`, transformed [AMP]
-  html_format: AMP
-  enabled_by: "transformed"
-  tag_name: "STYLE"
-  spec_name: "head > style[amp-boilerplate] (transformed)"
-  descriptive_name: "head > style[amp-boilerplate]"
+  satisfies: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1175,7 +1134,7 @@ tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
   tag_name: "STYLE"
   spec_name: "head > style[amp4ads-boilerplate]"
   descriptive_name: "head > style[amp4ads-boilerplate]"
-  mandatory: true
+  satisfies: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -1200,7 +1159,7 @@ tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
   tag_name: "STYLE"
   spec_name: "head > style[amp4email-boilerplate]"
   descriptive_name: "head > style[amp4email-boilerplate]"
-  mandatory: true
+  satisfies: "style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1220,34 +1179,10 @@ tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
 
 tags: {  # `<style amp-boilerplate>`, [AMP]
   html_format: AMP
-  disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
   descriptive_name: "noscript > style[amp-boilerplate]"
-  mandatory: true
-  unique: true
-  mandatory_parent: "NOSCRIPT"
-  mandatory_ancestor: "HEAD"
-  attr_lists: "nonce-attr"
-  attrs: {
-    name: "amp-boilerplate"
-    mandatory: true
-    value: ""
-    dispatch_key: NAME_VALUE_PARENT_DISPATCH
-  }
-  cdata {
-    doc_css_bytes: false
-    cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
-  }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
-}
-
-tags: {  # `<style amp-boilerplate>`, transformed [AMP]
-  html_format: AMP
-  enabled_by: "transformed"
-  tag_name: "STYLE"
-  spec_name: "noscript > style[amp-boilerplate] (transformed)"
-  descriptive_name: "noscript > style[amp-boilerplate]"
+  satisfies: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
@@ -1401,4 +1336,113 @@ tags: {  # '<style amp-runtime>`, transformed AMP
     value_regex: "^\\d{15}|latest$"
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
+}
+
+tags: {  # <style amp-noscript>, [AMP]
+  html_format: AMP
+  tag_name: "STYLE"
+  spec_name: "style amp-noscript"
+  descriptive_name: "style amp-noscript"
+  unique: true
+  mandatory_parent: "NOSCRIPT"
+  mandatory_ancestor: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "amp-noscript"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    doc_css_bytes: true
+    max_bytes: 10000
+    max_bytes_spec_url:
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+
+    css_spec: {
+      at_rule_spec: {
+         name: 'media'
+         media_query_spec: {
+           issues_as_error: false
+           type: 'all'
+           type: 'print'
+           type: 'screen'
+           type: 'speech'
+           type: 'tty'
+           type: 'tv'
+           type: 'projection'
+           type: 'handheld'
+           type: 'braille'
+           type: 'embossesd'
+           type: 'aural'
+           feature: 'any-hover'
+           feature: 'any-pointer'
+           feature: 'aspect-ratio'
+           feature: 'color'
+           feature: 'color-gamut'
+           feature: 'color-index'
+           feature: 'device-aspect-ratio'
+           feature: 'device-height'
+           feature: 'device-width'
+           feature: 'display-mode'
+           feature: 'forced-colors'
+           feature: 'grid'
+           feature: 'height'
+           feature: 'hover'
+           feature: 'inverted-colors'
+           feature: 'light-level'
+           feature: 'max-aspect-ratio'
+           feature: 'max-color-index'
+           feature: 'max-device-aspect-ratio'
+           feature: 'max-device-height'
+           feature: 'max-device-width'
+           feature: 'max-height'
+           feature: 'max-resolution'
+           feature: 'max-width'
+           feature: 'min-aspect-ratio'
+           feature: 'min-color-index'
+           feature: 'min-device-aspect-ratio'
+           feature: 'min-device-height'
+           feature: 'min-device-width'
+           feature: 'min-height'
+           feature: 'min-resolution'
+           feature: 'min-width'
+           feature: 'monochrome'
+           feature: 'orientation'
+           feature: 'overflow-block'
+           feature: 'overflow-inline'
+           feature: 'pointer'
+           feature: 'prefers-color-scheme'
+           feature: 'prefers-contrast'
+           feature: 'prefers-reduced-motion'
+           feature: 'prefers-reduced-transparency'
+           feature: 'resolution'
+           feature: 'scan'
+           feature: 'scripting'
+           feature: 'transform-3d'
+           feature: 'update'
+           feature: 'width'
+         }
+      }
+      at_rule_spec: { name: 'page' }
+      at_rule_spec: { name: 'supports' }
+      # https://github.com/ampproject/amphtml/issues/26406
+      at_rule_spec: { name: '-moz-document' }
+    }
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex denylists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    disallowed_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://github.com/ampproject/amphtml/issues/20609"
 }

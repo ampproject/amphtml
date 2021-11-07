@@ -1,0 +1,14 @@
+{
+  "beta-opt-in": "030000000000000",
+  "beta-traffic": "030000000000000",
+  "control": "020000000000000",
+  "experimental-opt-in": "000000000000000",
+  "experimental-traffic": "000000000000000",
+  "experimentA": null,
+  "experimentB": null,
+  "experimentC": null,
+  "lts": "010000000000000",
+  "nightly": "040000000000000",
+  "nightly-control": "050000000000000",
+  "stable": "010000000000000"
+}

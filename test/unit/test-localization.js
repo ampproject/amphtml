@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Services} from '#service';
 import {
   LocalizationService,
@@ -73,11 +57,15 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         'test_string_id': {
           string: 'test string content',
         },
+        'test_string_unwrapped': 'test string in unwrapped format',
       });
 
       expect(localizationService.getLocalizedString('test_string_id')).to.equal(
         'test string content'
       );
+      expect(
+        localizationService.getLocalizedString('test_string_unwrapped')
+      ).to.equal('test string in unwrapped format');
     });
 
     it('should handle registration of uppercase locales', () => {
@@ -87,36 +75,13 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         '123': {
           string: '买票',
         },
+        'test_string_unwrapped': 'test string in unwrapped format',
       });
 
       expect(localizationService.getLocalizedString('123')).to.equal('买票');
-    });
-
-    it('should utilize fallback if string is missing', () => {
-      const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          fallback: 'test fallback content',
-        },
-      });
-
-      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
-        'test fallback content'
-      );
-    });
-
-    it('should not utilize fallback if string is present', () => {
-      const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'test string content',
-          fallback: 'test fallback content',
-        },
-      });
-
-      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
-        'test string content'
-      );
+      expect(
+        localizationService.getLocalizedString('test_string_unwrapped')
+      ).to.equal('test string in unwrapped format');
     });
 
     it('should have language fallbacks', () => {
@@ -137,13 +102,17 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should transform strings', () => {
       const originalStringBundle = {
         'test_string_id': {string: 'foo'},
+        'test_string_unwrapped': 'unwrapped',
       };
       const pseudoLocaleBundle = createPseudoLocale(
         originalStringBundle,
         (s) => `${s} ${s}`
       );
 
-      expect(pseudoLocaleBundle['test_string_id'].string).to.equal('foo foo');
+      expect(pseudoLocaleBundle['test_string_id']).to.equal('foo foo');
+      expect(pseudoLocaleBundle['test_string_unwrapped']).to.equal(
+        'unwrapped unwrapped'
+      );
     });
 
     it('should contain all string IDs from original locale', () => {

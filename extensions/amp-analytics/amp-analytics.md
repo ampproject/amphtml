@@ -8,22 +8,6 @@ teaser:
   text: Captures analytics data from an AMP document.
 ---
 
-<!---
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-analytics
 
 ## Usage
@@ -536,7 +520,7 @@ requests based on random input or at 1% based on client id.
 
 ###### Element selector <a name="element-selector"></a>
 
-Some triggers such as `click` and `visible` allow specifying a single element or
+Some triggers such as `click`, `video`, and `visible` allow specifying a single element or
 a collection of elements using the selector properties. Different triggers can
 apply different limitations and interpretations on selected elements, such as
 whether a selector applies to all matched elements or the first one, or which
@@ -558,6 +542,25 @@ The selector properties are:
     element of `amp-analytics` tag. `closest` searches for the closest ancestor
     of the `amp-analytics` tag that satisfies the given selector. The default
     value is `scope`.
+
+##### Selector Values <a name="selector-values"></a>
+
+As mentioned above, for `click`, `video`, and `visible` triggers it is possible to specify a single CSS selector or a collection of CSS selectors for the selector value.
+
+If a single string CSS selector is specified, an element that maps to that selector will be extracted - even if the CSS selector maps to more than one element.
+
+In the case where a single configuration applies to multiple elements, instead of creating separate configuration for each, it can be simplified by specifying all the selectors at once.
+To do so, specify an array of selectors that are comma separated and individually enclosed in quote marks.
+
+```javascript
+"triggers": {
+  "video-pause": {
+    "on": "video-pause",
+    "request": "event",
+    "selector": ["#Video-1", "#Video-2"]
+  },
+}
+```
 
 ##### Available triggers <a name="available-triggers"></a>
 

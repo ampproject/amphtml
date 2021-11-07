@@ -1,18 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import * as Preact from '#preact';
 import {
   Alignment,
@@ -30,8 +15,9 @@ import {WithAmpContext} from '#preact/context';
 import {forwardRef, toChildArray} from '#preact/compat';
 import {isRTL} from '#core/dom';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {
+  cloneElement,
   useCallback,
   useContext,
   useEffect,
@@ -82,7 +68,7 @@ const generateCarouselKey = sequentialIdGenerator();
  * @param {{current: ?BaseCarouselDef.CarouselApi}} ref
  * @return {PreactDef.Renderable}
  */
-function BaseCarouselWithRef(
+function BentoBaseCarouselWithRef(
   {
     advanceCount = 1,
     arrowPrevAs,
@@ -173,7 +159,7 @@ function BaseCarouselWithRef(
     if (!shouldAutoAdvance || !containRef.current) {
       return;
     }
-    const win = toWin(containRef.current.ownerDocument.defaultView);
+    const win = getWin(containRef.current);
     const interval = win.setInterval(() => {
       const autoAdvanced = autoAdvance();
       if (!autoAdvanced) {
@@ -363,7 +349,7 @@ function BaseCarouselWithRef(
               renderable={index == currentSlide}
               playable={index == currentSlide}
             >
-              {child}
+              {cloneElement(child, {...child.props, thumbnailSrc: undefined})}
             </WithAmpContext>
           );
         })}
@@ -382,6 +368,6 @@ function BaseCarouselWithRef(
   );
 }
 
-const BaseCarousel = forwardRef(BaseCarouselWithRef);
-BaseCarousel.displayName = 'BaseCarousel'; // Make findable for tests.
-export {BaseCarousel};
+const BentoBaseCarousel = forwardRef(BentoBaseCarouselWithRef);
+BentoBaseCarousel.displayName = 'BentoBaseCarousel'; // Make findable for tests.
+export {BentoBaseCarousel};

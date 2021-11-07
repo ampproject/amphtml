@@ -1,28 +1,22 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * Creates npm package files for a given component and AMP version.
  */
 
 const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const fastGlob = require('fast-glob');
+const marked = require('marked');
+const path = require('path');
+const posthtml = require('posthtml');
+const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
+const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
+const {readFile} = require('fs-extra');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
+
+const packageName = getNameWithoutComponentPrefix(extension);
+const dir = `extensions/${extension}/${extensionVersion}`;
 
 /**
  * Determines whether to skip
@@ -30,7 +24,7 @@ const {valid} = require('semver');
  */
 async function shouldSkip() {
   try {
-    await stat(`extensions/${extension}/${extensionVersion}`);
+    await stat(dir);
     return false;
   } catch {
     log(`${extension} ${extensionVersion} : skipping, does not exist`);
@@ -39,20 +33,82 @@ async function shouldSkip() {
 }
 
 /**
+ * Returns relative paths to all the extension's CSS file
+ *
+ * @return {Promise<string[]>}
+ */
+async function getStylesheets() {
+  const extDir = `${dir}/dist`.split('/').join(path.sep);
+  const files = await fastGlob(path.join(extDir, '**', '*.css'));
+  return files.map((file) => path.relative(extDir, file));
+}
+
+/**
+ * @param {string} html
+ * @return {Promise<string>}
+ */
+async function getHtmlTextContent(html) {
+  const getTextContent = (node, out = []) => {
+    if (typeof node === 'string') {
+      out.push(node);
+    } else if (Array.isArray(node)) {
+      for (const child of node) {
+        getTextContent(child, out);
+      }
+    } else if (node?.content) {
+      getTextContent(node.content, out);
+    }
+    return out;
+  };
+  const result = await posthtml([
+    (node) => getTextContent(node).join(''),
+  ]).process(html);
+  return result.html.trim();
+}
+
+/**
+ * @param {string} markdown
+ * @param {number} maxLengthChars
+ * @return {Promise<?string>}
+ */
+async function getFirstParagraphOrSentence(markdown, maxLengthChars) {
+  const token = marked.lexer(markdown).find(({type}) => type === 'paragraph');
+  if (!token) {
+    return null;
+  }
+  const html = marked.parser([token]);
+  const paragraph = await getHtmlTextContent(html);
+  if (paragraph.length <= maxLengthChars) {
+    return paragraph;
+  }
+  const [sentence] = paragraph.split('.', 1);
+  if (sentence.length < maxLengthChars) {
+    return `${sentence}.`;
+  }
+  return null;
+}
+
+/**
+ * Get package description from its README.md file, or a generic description
+ * if the file does not exist.
+ * @return {Promise<string>}
+ */
+async function getDescription() {
+  let description;
+  try {
+    const markdown = await readFile(`${dir}/README.md`, 'utf8');
+    description = await getFirstParagraphOrSentence(markdown, 200);
+  } catch {}
+  return description || `Bento ${packageName} Component`;
+}
+
+/**
  * Write package.json
  * @return {Promise<void>}
  */
 async function writePackageJson() {
-  const extensionVersionArr = extensionVersion.split('.', 2);
-  const major = extensionVersionArr[0];
-  const minor = ampVersion.slice(0, 10);
-  const patch = Number(ampVersion.slice(-3)); // npm trims leading zeroes in patch number, so mimic this in package.json
-  const version = `${major}.${minor}.${patch}`;
-  if (
-    !valid(version) ||
-    ampVersion.length != 13 ||
-    extensionVersionArr[1] !== '0'
-  ) {
+  const version = getSemver(extensionVersion, ampVersion);
+  if (!valid(version) || ampVersion.length != 13) {
     log(
       'Invalid semver version',
       version,
@@ -65,25 +121,38 @@ async function writePackageJson() {
     return;
   }
 
-  const json = {
-    name: `@ampproject/${extension}`,
-    version,
-    description: `AMP HTML ${extension} Component`,
-    author: 'The AMP HTML Authors',
-    license: 'Apache-2.0',
-    main: './dist/component-preact.js',
-    module: './dist/component-preact.module.js',
-    exports: {
-      '.': './preact',
-      './preact': {
-        import: './dist/component-preact.module.js',
-        require: './dist/component-preact.js',
-      },
-      './react': {
-        import: './dist/component-react.module.js',
-        require: './dist/component-react.js',
-      },
+  const exports = {
+    '.': {
+      import: './dist/web-component.module.js',
+      require: './dist/web-component.js',
     },
+    './web-component': {
+      import: './dist/web-component.module.js',
+      require: './dist/web-component.js',
+    },
+    './preact': {
+      import: './dist/component-preact.module.js',
+      require: './dist/component-preact.js',
+    },
+    './react': {
+      import: './dist/component-react.module.js',
+      require: './dist/component-react.js',
+    },
+  };
+
+  for (const stylesheet of await getStylesheets()) {
+    exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
+  }
+
+  const json = {
+    name: `@bentoproject/${packageName}`,
+    version,
+    description: await getDescription(),
+    author: 'Bento Authors',
+    license: 'Apache-2.0',
+    main: './dist/web-component.js',
+    module: './dist/web-component.module.js',
+    exports,
     files: ['dist/*', 'react.js'],
     repository: {
       type: 'git',
@@ -98,12 +167,9 @@ async function writePackageJson() {
   };
 
   try {
-    await writeFile(
-      `extensions/${extension}/${extensionVersion}/package.json`,
-      JSON.stringify(json, null, 2)
-    );
+    await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
     log(
-      extension,
+      json.name,
       extensionVersion,
       ': created package.json for',
       json.version
@@ -122,11 +188,8 @@ async function writePackageJson() {
 async function writeReactJs() {
   const content = "module.exports = require('./dist/component-react');";
   try {
-    await writeFile(
-      `extensions/${extension}/${extensionVersion}/react.js`,
-      content
-    );
-    log(extension, extensionVersion, ': created react.js');
+    await writeFile(`${dir}/react.js`, content);
+    log(packageName, extensionVersion, ': created react.js');
   } catch (e) {
     log(e);
     process.exitCode = 1;

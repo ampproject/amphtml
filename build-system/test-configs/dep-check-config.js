@@ -1,18 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /*eslint "max-len": 0*/
@@ -92,20 +77,18 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      '3p/**->src/log.js',
+      '3p/**->src/utils/log.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
-      '3p/**->src/3p-frame-messaging.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
-      '3p/messaging.js->src/event-helper.js',
-      '3p/bodymovinanimation.js->src/event-helper.js',
-      '3p/iframe-messaging-client.js->src/event-helper.js',
-      '3p/viqeoplayer.js->src/event-helper.js',
+      '3p/messaging.js->src/utils/event-helper.js',
+      '3p/bodymovinanimation.js->src/utils/event-helper.js',
+      '3p/iframe-messaging-client.js->src/utils/event-helper.js',
+      '3p/viqeoplayer.js->src/utils/event-helper.js',
     ],
   },
   {
@@ -117,20 +100,19 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      'ads/**->src/log.js',
+      'ads/**->src/utils/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
-      'ads/google/a4a/**->src/amp-element-helpers.js',
       'ads/google/a4a/**->src/experiments/index.js',
       'ads/google/a4a/**->src/service/index.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
-      'ads/google/ima/ima-video.js->src/event-helper.js',
+      'ads/google/ima/ima-video.js->src/utils/event-helper.js',
     ],
   },
   {
@@ -209,11 +191,12 @@ exports.rules = [
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
-      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-pagination.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/pagination-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+
       'extensions/amp-inline-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-inline-gallery/1.0/pagination.js->extensions/amp-base-carousel/1.0/carousel-context.js',
-      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/1.0/component.jss.js',
-      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
+      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
       'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/component.js',
       'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
@@ -224,12 +207,18 @@ exports.rules = [
       'extensions/amp-stream-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
       'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
 
+      // <amp-dailymotion> versions share this message API definition.
+      'extensions/amp-dailymotion/**->extensions/amp-dailymotion/dailymotion-api.js',
+
       // Autolightboxing dependencies
       'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-base-carousel/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
+
+      // <amp-date-display> versions share these date format helpers
+      'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -274,6 +263,9 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+
+      // Story Shopping
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-page-attachment.js',
 
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -370,6 +362,8 @@ exports.rules = [
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js->' +
+        'src/service/cid-impl.js',
       'extensions/amp-consent/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
@@ -435,18 +429,15 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/amp.js->src/polyfills/index.js',
       'src/polyfills/index.js->src/polyfills/abort-controller.js',
-      'src/polyfills/index.js->src/polyfills/domtokenlist.js',
       'src/polyfills/index.js->src/polyfills/document-contains.js',
       'src/polyfills/index.js->src/polyfills/fetch.js',
       'src/polyfills/index.js->src/polyfills/get-bounding-client-rect.js',
       'src/polyfills/index.js->src/polyfills/math-sign.js',
       'src/polyfills/index.js->src/polyfills/object-assign.js',
       'src/polyfills/index.js->src/polyfills/object-values.js',
-      'src/polyfills/index.js->src/polyfills/promise.js',
       'src/polyfills/index.js->src/polyfills/array-includes.js',
       'src/polyfills/index.js->src/polyfills/string-starts-with.js',
       'src/polyfills/index.js->src/polyfills/custom-elements.js',
@@ -458,7 +449,6 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
-      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/resize-observer.js',
     ],
@@ -477,7 +467,7 @@ exports.rules = [
     allowlist: [
       'src/core/assert/dev.js->src/core/assert/base.js',
       'src/core/assert/user.js->src/core/assert/base.js',
-      'src/log.js->src/core/assert/base.js',
+      'src/utils/log.js->src/core/assert/base.js',
     ],
   },
 

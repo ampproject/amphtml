@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
@@ -24,13 +8,13 @@ import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
 import {addParamToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
 import {
   dict,
   getValueForExpr,
@@ -46,11 +30,7 @@ import {tryParseJson} from '#core/types/object/json';
 import {mod} from '#core/math';
 import {once} from '#core/types/function';
 import {removeChildren, tryFocus} from '#core/dom';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
 import {toggle} from '#core/dom/style';
 import fuzzysearch from '#third_party/fuzzysearch';
 
@@ -443,7 +423,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
     this.maybeSetSrcFromInput_();
     if (this.isSsr_) {

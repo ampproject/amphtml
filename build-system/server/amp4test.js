@@ -1,18 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const app = require('express').Router();
@@ -43,7 +28,7 @@ app.use('/compose-doc', function (req, res) {
   const {body, css, experiments, extensions, spec} = req.query;
 
   const frameHtml =
-    SERVE_MODE == 'compiled'
+    SERVE_MODE == 'minified'
       ? 'dist.3p/current-min/frame.html'
       : 'dist.3p/current/frame.max.html';
 
@@ -239,7 +224,7 @@ function composeDocument(config) {
 
   const m = mode || SERVE_MODE;
   const cdn = m === 'cdn';
-  const compiled = m === 'compiled';
+  const minified = m === 'minified';
 
   const cssTag = css ? `<style amp-custom>${css}</style>` : '';
 
@@ -254,7 +239,7 @@ function composeDocument(config) {
         '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
       runtime = cdn
         ? 'https://cdn.ampproject.org/v0.js'
-        : `/dist/${compiled ? 'v0' : 'amp'}.js`;
+        : `/dist/${minified ? 'v0' : 'amp'}.js`;
       break;
     case 'amp4ads':
       canonical = '';
@@ -262,7 +247,7 @@ function composeDocument(config) {
         '<style amp4ads-boilerplate>body{visibility:hidden}</style>';
       runtime = cdn
         ? 'https://cdn.ampproject.org/amp4ads-v0.js'
-        : `/dist/${compiled ? 'amp4ads-v0' : 'amp-inabox'}.js`;
+        : `/dist/${minified ? 'amp4ads-v0' : 'amp-inabox'}.js`;
       break;
     case 'amp4email':
       canonical = '';
@@ -270,7 +255,7 @@ function composeDocument(config) {
         '<style amp4email-boilerplate>body{visibility:hidden}</style>';
       runtime = cdn
         ? 'https://cdn.ampproject.org/v0.js'
-        : `/dist/${compiled ? 'v0' : 'amp'}.js`;
+        : `/dist/${minified ? 'v0' : 'amp'}.js`;
       break;
     default:
       throw new Error('Unrecognized AMP spec: ' + spec);
@@ -287,7 +272,7 @@ function composeDocument(config) {
         const version = tuple[1] || '0.1';
         const src = cdn
           ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
-          : `/dist/v0/${name}-${version}.${compiled ? '' : 'max.'}js`;
+          : `/dist/v0/${name}-${version}.${minified ? '' : 'max.'}js`;
         const type = CUSTOM_TEMPLATES.includes(name)
           ? 'custom-template'
           : 'custom-element';

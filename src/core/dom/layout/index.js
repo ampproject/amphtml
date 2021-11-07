@@ -1,20 +1,4 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Implements element layout. See https://goo.gl/9avXuT for
  * details.
  */
@@ -61,7 +45,7 @@ export let LengthDef;
  *   height: string
  * }}
  */
-let DimensionsDef;
+export let DimensionsDef;
 
 /**
  * Elements that the progress can be shown for. This set has to be externalized
@@ -70,7 +54,7 @@ let DimensionsDef;
  * @enum {boolean}
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ = {
+export const LOADING_ELEMENTS_ENABLED = {
   'AMP-AD': true,
   'AMP-ANIM': true,
   'AMP-EMBED': true,
@@ -215,7 +199,7 @@ export function getLengthUnits(length) {
 
 /**
  * Returns the numeric value of a CSS length value.
- * @param {!LengthDef|string|null|undefined} length
+ * @param {!LengthDef|string|null|undefined|number} length
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
@@ -232,13 +216,15 @@ export function getLengthNumeral(length) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
+  return (
+    LOADING_ELEMENTS_ENABLED[tagName] || isIframeVideoPlayerComponent(tagName)
+  );
 }
 
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ allowlist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ENABLED allowlist.
  * @param {string} tagName
  * @return {boolean}
  */

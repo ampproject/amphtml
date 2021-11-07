@@ -1,76 +1,28 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {dev} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {renderAsElement} from './simple-template';
+import * as Preact from '#core/dom/jsx';
+import {dev} from '#utils/log';
 
 /** @const {string} */
 const SPINNER_ACTIVE_ATTRIBUTE = 'active';
 
-/** @private @const {!./simple-template.ElementDef} */
-const SPINNER = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-spinner',
-    'aria-hidden': 'true',
-    'aria-label': 'Loading video',
-  }),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-spinner-container',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-spinner-layer',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-spinner-circle-clipper left',
-              }),
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-spinner-circle-clipper right',
-              }),
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
+/** @return {!Element} */
+const renderSpinnerElement = () => (
+  <div class="i-amphtml-story-spinner" aria-hidden="true">
+    <div class="i-amphtml-story-spinner-container">
+      <div class="i-amphtml-story-spinner-layer">
+        <div class="i-amphtml-story-spinner-circle-clipper left" />
+        <div class="i-amphtml-story-spinner-circle-clipper right" />
+      </div>
+    </div>
+  </div>
+);
 
 /**
  * Loading spinner UI element.
  */
 export class LoadingSpinner {
   /**
-   * @param {!Document} doc
    */
-  constructor(doc) {
-    /** @private @const {!Document} */
-    this.doc_ = doc;
-
+  constructor() {
     /** @public {?Element} */
     this.root_ = null;
 
@@ -86,7 +38,7 @@ export class LoadingSpinner {
       return this.root_;
     }
 
-    this.root_ = renderAsElement(this.doc_, SPINNER);
+    this.root_ = renderSpinnerElement();
 
     return this.getRoot();
   }

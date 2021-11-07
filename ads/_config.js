@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {jsonConfiguration} from '#core/types/object/json';
 
 /**
@@ -116,7 +100,8 @@ const adConfig = jsonConfiguration({
   'adform': {},
 
   'adfox': {
-    prefetch: 'https://yastatic.net/pcode/adfox/loader.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 
@@ -188,6 +173,15 @@ const adConfig = jsonConfiguration({
   },
 
   'adservsolutions': {},
+
+  'adskeeper': {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.adskeeper.com',
+      'https://servicer.adskeeper.com',
+      'https://s-img.adskeeper.com',
+    ],
+  },
 
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
@@ -308,6 +302,15 @@ const adConfig = jsonConfiguration({
       'https://v.amoad.com',
     ],
   },
+  'amplified': {
+    preconnect: 'https://srv.clickfuse.com',
+    renderStartImplemented: true,
+  },
+
+  'andbeyond': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.andbeyond.media',
+  },
 
   'aniview': {
     renderStartImplemented: true,
@@ -331,6 +334,10 @@ const adConfig = jsonConfiguration({
 
   'atomx': {
     prefetch: 'https://s.ato.mx/p.js',
+  },
+
+  'avantisvideo': {
+    renderStartImplemented: true,
   },
 
   'beaverads': {
@@ -359,6 +366,10 @@ const adConfig = jsonConfiguration({
   'bringhub': {
     renderStartImplemented: true,
     preconnect: ['https://static.bh-cdn.com', 'https://core-api.bringhub.io'],
+  },
+
+  'broadbandy': {
+    renderStartImplemented: true,
   },
 
   'broadstreetads': {
@@ -393,6 +404,11 @@ const adConfig = jsonConfiguration({
 
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
+  },
+
+  'colombiafeed': {
+    prefetch:
+      'https://static.clmbtech.com/c1e/static/themes/js/colombiafeed-amp.js',
   },
 
   'conative': {
@@ -833,6 +849,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myua': {
+    renderStartImplemented: true,
+  },
+
   'mywidget': {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -1070,11 +1090,22 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'sabavision': {
+    renderStartImplemented: true,
+  },
+
   'sas': {
     renderStartImplemented: true,
   },
 
   'seedingalliance': {},
+
+  'seedtag': {
+    prefetch: 'https://config.seedtag.com/omid/bridge/bridge.js',
+    preconnect: ['https://s.seedtag.com'],
+    consentHandlingOverride: true,
+    renderStartImplemented: true,
+  },
 
   'sekindo': {
     renderStartImplemented: true,
@@ -1248,6 +1279,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'trafficstars': {
+    prefetch: 'https://cdn.tsyndicate.com/sdk/v1/master.spot.js',
+    renderStartImplemented: true,
+  },
+
   'triplelift': {},
 
   'trugaze': {
@@ -1281,12 +1317,6 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
-    renderStartImplemented: true,
-  },
-
-  'verizonmedia': {
-    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
-    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 
@@ -1374,7 +1404,8 @@ const adConfig = jsonConfiguration({
   },
 
   'yandex': {
-    prefetch: 'https://an.yandex.ru/system/context_amp.js',
+    prefetch: 'https://yandex.ru/ads/system/context.js',
+    preconnect: ['https://yastatic.net/'],
     renderStartImplemented: true,
   },
 

@@ -1,26 +1,19 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '#preact';
-import {SocialShare} from '../component';
-import {dict} from '#core/types/object';
 import {mount} from 'enzyme';
 
-describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
+import {dict} from '#core/types/object';
+
+import * as Preact from '#preact';
+import {Wrapper} from '#preact/component';
+
+import {BentoSocialShare} from '../component';
+
+describes.sandboxed('BentoSocialShare 1.0 preact component', {}, (env) => {
   const originalWarn = console.warn;
+  let openSpy;
+
+  beforeEach(() => {
+    openSpy = env.sandbox.stub(window, 'open');
+  });
 
   afterEach(() => (console.warn = originalWarn));
 
@@ -32,22 +25,36 @@ describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
       const mockedWarn = (output) => consoleOutput.push(output);
       console.warn = mockedWarn;
 
-      const jsx = <SocialShare {...dict({'type': 'not-configured-type'})} />;
+      const jsx = (
+        <BentoSocialShare {...dict({'type': 'not-configured-type'})} />
+      );
       const wrapper = mount(jsx);
 
       expect(wrapper.exists('div')).to.equal(false);
       expect(consoleOutput.length).to.equal(1);
       expect(consoleOutput[0]).to.equal(
-        'An endpoint is required if not using a pre-configured type. SocialShare'
+        'An endpoint is required if not using a pre-configured type. BentoSocialShare'
       );
     }
   );
 
   it('should include the button class for focus styling', () => {
-    const jsx = <SocialShare {...dict({'type': 'email'})} />;
+    const jsx = <BentoSocialShare {...dict({'type': 'email'})} />;
     const wrapper = mount(jsx);
 
     const button = wrapper.getDOMNode();
     expect(button.className.includes('button')).to.be.true;
+  });
+
+  it('should call window.open when clicked', () => {
+    const wrapper = mount(<BentoSocialShare type="twitter" />);
+
+    const button = wrapper.find(Wrapper);
+
+    expect(button.length).to.equal(1);
+
+    button.getDOMNode().dispatchEvent(new Event('click'));
+
+    expect(openSpy).called;
   });
 });

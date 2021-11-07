@@ -1,19 +1,4 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   EmbeddedComponentState,
@@ -32,21 +17,22 @@ import {EventType, dispatch} from './events';
 import {Keys} from '#core/constants/key-codes';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
-import {addAttributesToElement, tryFocus} from '#core/dom';
+import {tryFocus} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {localize} from './amp-story-localization-service';
+import {htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+import objstr from 'obj-str';
 
 /**
  * Action icons to be placed in tooltip.
@@ -210,13 +196,17 @@ export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
 
 /**
  * Builds expanded view overlay for expandable components.
- * @param {!Element} element
  * @return {!Element}
  */
-const buildExpandedViewOverlay = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
-      <button class="i-amphtml-expanded-view-close-button" aria-label="close" role="button"></button>
-    </div>`;
+const renderExpandedViewOverlay = () => (
+  <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
+    <button
+      class="i-amphtml-expanded-view-close-button"
+      aria-label="close"
+      role="button"
+    ></button>
+  </div>
+);
 
 /**
  * Updates embed's corresponding <style> element with embedData.
@@ -672,21 +662,16 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   buildAndAppendExpandedViewOverlay_() {
-    this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
+    this.expandedViewOverlay_ = renderExpandedViewOverlay();
     const closeButton = dev().assertElement(
       this.expandedViewOverlay_.querySelector(
         '.i-amphtml-expanded-view-close-button'
       )
     );
-    const localizationService = getLocalizationService(
-      devAssert(this.storyEl_)
+    closeButton.setAttribute(
+      'aria-label',
+      localize(this.storyEl_, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
     );
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      closeButton.setAttribute('aria-label', localizedCloseString);
-    }
     this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
       this.componentPage_.appendChild(this.expandedViewOverlay_)
     );
@@ -720,9 +705,7 @@ export class AmpStoryEmbeddedComponent {
   buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
 
-    this.focusedStateOverlay_ = devAssert(
-      this.buildFocusedStateTemplate_(this.win_.document)
-    );
+    this.focusedStateOverlay_ = this.renderFocusedStateElement_();
     createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
 
     this.focusedStateOverlay_.addEventListener('click', (event) =>
@@ -886,9 +869,11 @@ export class AmpStoryEmbeddedComponent {
     this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
-        [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState)
-          ? this.focusedStateOverlay_.setAttribute('desktop', '')
-          : this.focusedStateOverlay_.removeAttribute('desktop');
+        const isDesktop = [
+          UIType.DESKTOP_FULLBLEED,
+          UIType.DESKTOP_ONE_PANEL,
+        ].includes(uiState);
+        this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
       }
     );
   }
@@ -926,10 +911,9 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipBehavior_(target) {
     if (matches(target, LAUNCHABLE_COMPONENTS['a'].selector)) {
-      addAttributesToElement(
-        dev().assertElement(this.tooltip_),
-        dict({'href': this.getElementHref_(target)})
-      );
+      dev()
+        .assertElement(this.tooltip_)
+        .setAttribute('href', this.getElementHref_(target));
       return;
     }
 
@@ -1114,9 +1098,7 @@ export class AmpStoryEmbeddedComponent {
       () => {
         elId = elId ? elId : ++embedIds;
         if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
-          // First time creating <style> element for embed.
-          const html = htmlFor(pageEl);
-          const embedStyleEl = html` <style></style> `;
+          const embedStyleEl = <style></style>;
 
           element.setAttribute(EMBED_ID_ATTRIBUTE_NAME, elId);
           pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
@@ -1145,9 +1127,7 @@ export class AmpStoryEmbeddedComponent {
   updateTooltipText_(target, embedConfig) {
     const tooltipText =
       target.getAttribute('data-tooltip-text') ||
-      getLocalizationService(this.storyEl_).getLocalizedString(
-        embedConfig.localizedStringId
-      ) ||
+      localize(this.storyEl_, embedConfig.localizedStringId) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText = this.tooltip_.querySelector(
       '.i-amphtml-tooltip-text'
@@ -1373,35 +1353,43 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * Builds the focused state template.
-   * @param {!Document} doc
    * @return {!Element}
    * @private
    */
-  buildFocusedStateTemplate_(doc) {
-    const html = htmlFor(doc);
-    const tooltipOverlay = html`
+  renderFocusedStateElement_() {
+    const tooltipOverlay = (
       <section
-        class="i-amphtml-story-focused-state-layer
-            i-amphtml-story-system-reset i-amphtml-hidden"
+        class={objstr({
+          'i-amphtml-story-focused-state-layer': true,
+          'i-amphtml-story-system-reset i-amphtml-hidden': true,
+        })}
       >
         <div
-          class="i-amphtml-story-focused-state-layer-nav-button-container
-              i-amphtml-story-tooltip-nav-button-left"
+          class={objstr({
+            'i-amphtml-story-focused-state-layer-nav-button-container': true,
+            'i-amphtml-story-tooltip-nav-button-left': true,
+          })}
         >
           <button
             ref="buttonLeft"
-            class="i-amphtml-story-focused-state-layer-nav-button
-                i-amphtml-story-tooltip-nav-button-left"
+            class={objstr({
+              'i-amphtml-story-focused-state-layer-nav-button': true,
+              'i-amphtml-story-tooltip-nav-button-left': true,
+            })}
           ></button>
         </div>
         <div
-          class="i-amphtml-story-focused-state-layer-nav-button-container
-              i-amphtml-story-tooltip-nav-button-right"
+          class={objstr({
+            'i-amphtml-story-focused-state-layer-nav-button-container': true,
+            'i-amphtml-story-tooltip-nav-button-right': true,
+          })}
         >
           <button
             ref="buttonRight"
-            class="i-amphtml-story-focused-state-layer-nav-button
-                    i-amphtml-story-tooltip-nav-button-right"
+            class={objstr({
+              'i-amphtml-story-focused-state-layer-nav-button': true,
+              'i-amphtml-story-tooltip-nav-button-right': true,
+            })}
           ></button>
         </div>
         <a
@@ -1416,7 +1404,7 @@ export class AmpStoryEmbeddedComponent {
           <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>
         </a>
       </section>
-    `;
+    );
     const overlayEls = htmlRefs(tooltipOverlay);
     const {arrow, buttonLeft, buttonRight, tooltip} =
       /** @type {!tooltipElementsDef} */ (overlayEls);

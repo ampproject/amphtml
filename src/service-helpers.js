@@ -1,29 +1,13 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Registration and getter functions for AMP services.
  *
  * Invariant: Service getters never return null for registered services.
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
-import {dev, devAssert} from './log';
+import {dev, devAssert} from '#utils/log';
 
 /**
  * Holds info about a service.
@@ -317,10 +301,7 @@ export function getParentWindowFrameElement(node, opt_topWin) {
  */
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    const win = toWin(
-      /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc)
-        .defaultView
-    );
+    const win = getWin(nodeOrDoc);
     return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);

@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.1.3
+  browser-tools: circleci/browser-tools@1.2.3
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -15,6 +15,13 @@ push_builds_only: &push_builds_only
     branches:
       only:
         - main
+        - /^amp-release-.*$/
+
+release_builds_only: &release_builds_only
+  filters:
+    branches:
+      only:
+        - nightly
         - /^amp-release-.*$/
 
 pr_builds_only: &pr_builds_only
@@ -53,7 +60,7 @@ executors:
     resource_class: xlarge
   jdk-docker-xlarge:
     docker:
-      - image: cimg/openjdk:16.0-node
+      - image: cimg/openjdk:17.0-node
     resource_class: xlarge
   macos-medium:
     macos:
@@ -62,19 +69,26 @@ executors:
 
 commands:
   checkout_repo:
+    parameters:
+      save-git-cache:
+        type: boolean
+        default: false
     steps:
       - restore_cache:
           name: 'Restore Git Cache'
           keys:
-            - git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-            - git-cache-{{ arch }}-{{ .Branch }}-
-            - git-cache-{{ arch }}-
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+            - git-cache-{{ arch }}-v2-{{ .Branch }}-
+            - git-cache-{{ arch }}-v2-
       - checkout
-      - save_cache:
-          name: 'Save Git Cache'
-          key: git-cache-{{ arch }}-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .git
+      - when:
+          condition: << parameters.save-git-cache >>
+          steps:
+            - save_cache:
+                name: 'Save Git Cache'
+                key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
+                paths:
+                  - .git
   setup_node_environment:
     steps:
       - node/install:
@@ -98,7 +112,6 @@ commands:
           name: 'Configure Development Environment'
           command: |
             ./.circleci/fetch_merge_commit.sh
-            ./.circleci/check_config.sh
             ./.circleci/restore_build_output.sh
             cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - setup_node_environment
@@ -110,12 +123,21 @@ commands:
             - workspace
   install_chrome:
     steps:
+      - run:
+          name: 'Get Pinned Chrome Version'
+          command: ./.circleci/get_pinned_chrome_version.sh
       - browser-tools/install-chrome:
+          chrome-version: ${CHROME_VERSION}
           replace-existing: true
       - browser-tools/install-chromedriver
   install_firefox:
     steps:
       - browser-tools/install-firefox
+  install_edge:
+    steps:
+      - run:
+          name: 'Install Microsoft Edge'
+          command: ./.circleci/install_microsoft_edge.sh
   enable_safari_automation:
     steps:
       - run:
@@ -130,6 +152,10 @@ commands:
           path: result-reports
       - store_test_results:
           path: result-reports
+  store_filelist:
+    steps:
+      - store_artifacts:
+          path: /tmp/filelist.txt
   skip_on_push_builds:
     steps:
       - when:
@@ -147,10 +173,14 @@ jobs:
     executor:
       name: base-docker-small
     steps:
-      - checkout_repo
+      - checkout_repo:
+          save-git-cache: true
       - run:
           name: 'Initialize Repository'
           command: ./.circleci/initialize_repo.sh
+      - run:
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
       - run:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
@@ -248,7 +278,6 @@ jobs:
       name: node-docker-large
     steps:
       - setup_vm
-      - install_chrome
       - run:
           name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js
@@ -277,6 +306,7 @@ jobs:
           name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   unminified_tests:
     executor:
@@ -332,6 +362,7 @@ jobs:
           name: '⭐ End-to-End Tests ⭐'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   browser_tests_safari:
     executor:
@@ -341,7 +372,7 @@ jobs:
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
-          command: node build-system/pr-check/safari-tests.js
+          command: node build-system/pr-check/browser-tests.js --browser=safari
       - store_test_output
       - teardown_vm
   browser_tests_firefox:
@@ -352,7 +383,18 @@ jobs:
       - install_firefox
       - run:
           name: '⭐ Browser Tests (Firefox) ⭐'
-          command: node build-system/pr-check/firefox-tests.js
+          command: node build-system/pr-check/browser-tests.js --browser=firefox
+      - store_test_output
+      - teardown_vm
+  browser_tests_edge:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - install_edge
+      - run:
+          name: '⭐ Browser Tests (Edge) ⭐'
+          command: node build-system/pr-check/browser-tests.js --browser=edge
       - store_test_output
       - teardown_vm
   performance_tests:
@@ -400,9 +442,45 @@ jobs:
           name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
+      - store_filelist
+      - teardown_vm
+  amp_release:
+    executor:
+      name: node-docker-xlarge
+    parameters:
+      flavor:
+        description: 'Which of the release flavors to build'
+        type: enum
+        enum: ['base', 'experimentA', 'experimentB', 'experimentC']
+      esm:
+        description: 'Whether to build module or nomodule release'
+        type: enum
+        enum: ['no-esm', 'esm']
+    environment:
+      EXP: << parameters.flavor >>
+      FLAVOR: << parameters.flavor >>
+      ESM: << parameters.esm >>
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ amp release ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+      - teardown_vm
+  upload_release:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ Upload Release Artifacts ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
+      - store_artifacts:
+          path: /tmp/release.tar.gz
       - teardown_vm
 
 workflows:
+  version: 2
+
   'CircleCI':
     jobs:
       - initialize_repository:
@@ -506,6 +584,11 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build (Test)'
+      - browser_tests_edge:
+          name: 'Browser Tests (Edge)'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build (Test)'
       - experiment_build:
           name: 'Experiment << matrix.exp >> Build'
           matrix:
@@ -535,3 +618,25 @@ workflows:
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build (Test)'
+
+  'Release':
+    jobs:
+      - initialize_repository:
+          name: 'Initialize Repository'
+          <<: *release_builds_only
+      - amp_release:
+          name: '<< matrix.flavor >> << matrix.esm >>'
+          matrix:
+            parameters:
+              flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
+              esm: ['no-esm', 'esm']
+          <<: *release_builds_only
+          requires:
+            - 'Initialize Repository'
+      - upload_release:
+          name: 'Upload Release'
+          <<: *release_builds_only
+          requires:
+            - amp_release
+          context:
+            - release-build-uploader

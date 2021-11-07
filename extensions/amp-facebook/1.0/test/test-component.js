@@ -1,34 +1,18 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
-import {Facebook} from '../component';
+import {BentoFacebook} from '../component';
 import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {mount} from 'enzyme';
-import {serializeMessage} from '../../../../src/3p-frame-messaging';
-import {waitFor} from '#testing/test-helper';
+import {serializeMessage} from '#core/3p-frame-messaging';
+import {waitFor} from '#testing/helpers/service';
 
-describes.sandboxed('Facebook preact component', {}, (env) => {
+describes.sandboxed('BentoFacebook preact component', {}, (env) => {
   const href =
     'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/';
 
   it('should render', () => {
     const wrapper = mount(
-      <Facebook
+      <BentoFacebook
         href={href}
         style={{
           'width': '500px',
@@ -48,7 +32,7 @@ describes.sandboxed('Facebook preact component', {}, (env) => {
   it('should call given requestResize', () => {
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
-      <Facebook
+      <BentoFacebook
         href={href}
         style={{
           'width': '500px',
@@ -77,7 +61,7 @@ describes.sandboxed('Facebook preact component', {}, (env) => {
 
   it('should change height', async () => {
     const wrapper = mount(
-      <Facebook
+      <BentoFacebook
         href={href}
         style={{
           'width': '500px',
@@ -114,7 +98,7 @@ describes.sandboxed('Facebook preact component', {}, (env) => {
     const ref = createRef();
     const onReadyState = env.sandbox.spy();
     const wrapper = mount(
-      <Facebook
+      <BentoFacebook
         ref={ref}
         href={href}
         style={{
@@ -139,7 +123,7 @@ describes.sandboxed('Facebook preact component', {}, (env) => {
     const ref = createRef();
     const wrapper = mount(
       <WithAmpContext playable={true}>
-        <Facebook
+        <BentoFacebook
           ref={ref}
           href={href}
           style={{
@@ -160,7 +144,7 @@ describes.sandboxed('Facebook preact component', {}, (env) => {
   it('should not sandbox iframe', async () => {
     const ref = createRef();
     const wrapper = mount(
-      <Facebook
+      <BentoFacebook
         ref={ref}
         href={href}
         embedAs="video"
@@ -178,7 +162,7 @@ describes.sandboxed('Facebook preact component', {}, (env) => {
   it('should propagate specified locale', async () => {
     const ref = createRef();
     const wrapper = mount(
-      <Facebook
+      <BentoFacebook
         ref={ref}
         href={href}
         locale="fr_FR"

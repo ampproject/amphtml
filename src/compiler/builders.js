@@ -1,23 +1,10 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/amp-layout';
+import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/build-dom';
 
-import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/amp-fit-text';
+import {applyStaticLayout} from '#core/static-layout';
 
-const builderMap = {
+import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/build-dom';
+
+const versionedBuilderMap = {
   'v0': {
     'amp-layout': ampLayoutClassic,
   },
@@ -27,19 +14,33 @@ const builderMap = {
 };
 
 /**
- * Returns the set of component builders needed to server-render an AMP Document.
+ * Wraps a buildDom function with functionality that every component needs.
  *
- * @param {!./types.VersionsDef} versions
- * @return {Object<string, !./types.BuildDomDef>} builders
+ * @param {import('./types').BuildDom} buildDom
+ * @return {import('./types').BuildDom}
  */
-export function getBuilders(versions) {
+function wrap(buildDom) {
+  return function wrapper(element) {
+    applyStaticLayout(element);
+    buildDom(element);
+    element.setAttribute('i-amphtml-ssr', '');
+  };
+}
+
+/**
+ * Returns the set of component builders needed to server-render an AMP Document.
+ * @param {import('./types').Versions} versions
+ * @param {{[version: string]: import('./types').BuilderMap}} builderMap
+ * @return {import('./types').BuilderMap}
+ */
+export function getBuilders(versions, builderMap = versionedBuilderMap) {
+  /** @type {import('./types').BuilderMap} */
   const builders = {};
 
-  for (const tag of Object.keys(versions)) {
-    const version = versions[tag];
-    const builder = builderMap?.[version]?.[tag];
+  for (const {component, version} of versions) {
+    const builder = builderMap?.[version]?.[component];
     if (builder) {
-      builders[tag] = builder;
+      builders[component] = wrap(builder);
     }
   }
 

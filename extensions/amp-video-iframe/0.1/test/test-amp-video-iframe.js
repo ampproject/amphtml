@@ -1,27 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-video-iframe';
-import {Services} from '#service';
-import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {listenOncePromise} from '#utils/event-helper';
+
+import {macroTask} from '#testing/helpers';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {macroTask} from '#testing/yield';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-video-iframe',
@@ -150,6 +138,42 @@ describes.realWin(
           sourceUrl,
           title,
           lang,
+          jsonLd: null,
+        });
+      });
+
+      it('sets metadata in iframe name — with jsonLd', async () => {
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
+        const title = 'My test title';
+        const lang = 'es';
+
+        env.sandbox.stub(win.document, 'title').value(title);
+        env.sandbox.stub(win.document.documentElement, 'lang').value(lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
+
+        const jsonLd = {jsonLd: 'blah'};
+        const jsonLdScript = win.document.createElement('script');
+        jsonLdScript.type = 'application/ld+json';
+        jsonLdScript.text = JSON.stringify(jsonLd);
+
+        win.document.head.appendChild(jsonLdScript);
+
+        const videoIframe = createVideoIframe();
+
+        await layoutAndLoad(videoIframe);
+
+        const iframe = videoIframe.querySelector('iframe');
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+          jsonLd,
         });
       });
 

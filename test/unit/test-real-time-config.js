@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -29,8 +13,9 @@ import {
 } from '#service/real-time-config/real-time-config-impl';
 import {Xhr} from '#service/xhr-impl';
 
+import {dev, user} from '#utils/log';
+
 import {cancellation} from '../../src/error-reporting';
-import {dev, user} from '../../src/log';
 
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;
@@ -805,7 +790,13 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
 
     it('should expand globally allowed macros', async () => {
-      const url = 'https://www.foo.example/?cid=CLIENT_ID(foo)';
+      /**
+       * todo(keshavvi):
+       * This test conflicts with `should resolve element dependent vars and macros` in test-linker-manager.js
+       * Both save and retrieve to a cookie named `foo`. They should be isolated and the cookies should not be shared.
+       * But, for some reason they are. So, for now use a cookie called bar here.
+       */
+      const url = 'https://www.foo.example/?cid=CLIENT_ID(bar)';
       rtc.rtcConfig_ = {
         timeoutMillis: 1000,
       };

@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {devAssert} from '#core/assert';
 import {Loading} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
@@ -82,6 +66,9 @@ const SIZE_DEFINED_STYLE = {
   'height': '100%',
 };
 
+/** @const {string} */
+const FILL_CONTENT_CLASS = 'i-amphtml-fill-content';
+
 /**
  * This is an internal property that marks light DOM nodes that were rendered
  * by AMP/Preact bridge and thus must be ignored by the mutation observer to
@@ -147,7 +134,6 @@ export function collectProps(
   mediaQueryProps
 ) {
   const {
-    'className': className,
     'layoutSizeDefined': layoutSizeDefined,
     'lightDomTag': lightDomTag,
     'props': propDefs,
@@ -166,18 +152,13 @@ export function collectProps(
     props['as'] = lightDomTag;
   }
 
-  // Class.
-  if (className) {
-    props['className'] = className;
-  }
-
   // Common styles.
   if (layoutSizeDefined) {
     if (Ctor['usesShadowDom']) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
-      props['className'] =
-        `i-amphtml-fill-content ${className || ''}`.trim() || null;
+      // `class` is preferred to `className` for Preact
+      props['class'] = FILL_CONTENT_CLASS;
     }
   }
 

@@ -37,11 +37,13 @@ To use RTC, you must meet the following requirements:
 -   Newspassid
 -   Lotame
 -   Media.net
+-   Mediasquare
 -   OpenX
 -   PubMatic OpenWrap
 -   Purch
 -   Rubicon
 -   Salesforce
+-   [Snigel](https://www.snigel.com)
 -   T13
 -   Tail
 -   The Ozone Project

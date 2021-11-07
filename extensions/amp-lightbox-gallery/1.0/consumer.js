@@ -1,21 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 
 import * as Preact from '#preact';
-import {LightboxGalleryContext} from './context';
 import {
   cloneElement,
   useCallback,
@@ -24,8 +9,9 @@ import {
   useMemo,
   useState,
 } from '#preact';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {toChildArray} from '#preact/compat';
+
+import {BentoLightboxGalleryContext} from './context';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
@@ -47,10 +33,10 @@ const DEFAULT_ACTIVATION_PROPS = {
 const CLONE_CHILD = (child) => cloneElement(child);
 
 /**
- * @param {!LightboxGalleryDef.WithLightboxProps} props
+ * @param {!BentoLightboxGalleryDef.WithBentoLightboxGalleryProps} props
  * @return {PreactDef.Renderable}
  */
-export function WithLightbox({
+export function WithBentoLightboxGallery({
   alt,
   'aria-label': ariaLabel,
   as: Comp = 'div',
@@ -64,7 +50,7 @@ export function WithLightbox({
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
-  const {deregister, open, register} = useContext(LightboxGalleryContext);
+  const {deregister, open, register} = useContext(BentoLightboxGalleryContext);
   const render = useCallback(() => {
     if (renderProp) {
       return renderProp();

@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -32,7 +16,7 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
-import {assertDoesNotContainDisplay} from '../../../src/assert-display';
+import {assertDoesNotContainDisplay, setImportantStyles} from '#core/dom/style';
 import {
   buildInteractiveDisclaimer,
   buildInteractiveDisclaimerIcon,
@@ -43,11 +27,10 @@ import {
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
-import {setImportantStyles} from '#core/dom/style';
 import {isExperimentOn} from '#experiments/';
 
 /** @const {string} */
@@ -301,24 +284,18 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     });
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   loadFonts_() {
     if (
       !AmpStoryInteractive.loadedFonts &&
       this.win.document.fonts &&
       FontFace
     ) {
-      fontsToLoad.forEach((fontProperties) => {
-        const font = new FontFace(fontProperties.family, fontProperties.src, {
-          weight: fontProperties.weight,
-          style: 'normal',
-        });
-        font.load().then(() => {
-          this.win.document.fonts.add(font);
-        });
-      });
+      fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
+        new FontFace(family, src, {weight, style})
+          .load()
+          .then((font) => this.win.document.fonts.add(font))
+      );
     }
     AmpStoryInteractive.loadedFonts = true;
   }

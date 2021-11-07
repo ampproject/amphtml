@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
@@ -50,21 +35,15 @@ function findLocalizedString(
   languageCodes,
   localizedStringId
 ) {
-  let localizedString = null;
-
-  languageCodes.some((languageCode) => {
-    const localizedStringBundle = localizedStringBundles[languageCode];
-    if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
-      localizedString =
-        localizedStringBundle[localizedStringId].string ||
-        localizedStringBundle[localizedStringId].fallback;
-      return !!localizedString;
+  for (const code of languageCodes) {
+    const entry = localizedStringBundles[code]?.[localizedStringId];
+    if (entry != null) {
+      // In unminified builds, this is an object {"string": "foo", ...}.
+      // In minified builds, this is the actual string "foo".
+      return entry['string'] || entry;
     }
-
-    return false;
-  });
-
-  return localizedString;
+  }
+  return null;
 }
 
 /**

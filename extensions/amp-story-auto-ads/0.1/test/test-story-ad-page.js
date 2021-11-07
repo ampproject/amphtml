@@ -1,19 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals} from '#core/constants/common-signals';
 
+import {macroTask} from '#testing/helpers';
+
+import {Gestures} from '../../../../src/gesture';
 import * as openWindowDialog from '../../../../src/open-window-dialog';
 import * as service from '../../../../src/service-helpers';
 import {
@@ -21,15 +10,10 @@ import {
   UIType,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {ButtonTextFitter} from '../story-ad-button-text-fitter';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
-import {forceExperimentBranch} from '#experiments';
-import {macroTask} from '#testing/yield';
 
 const NOOP = () => {};
 
@@ -96,17 +80,6 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
 
       const glassPane = glassPaneGridLayer.firstChild;
       expect(glassPane).to.have.class('i-amphtml-glass-pane');
-    });
-
-    it('sets auto-advance if in the experiment', () => {
-      // TODO(#33969) remove when launched.
-      forceExperimentBranch(
-        win,
-        StoryAdAutoAdvance.ID,
-        StoryAdAutoAdvance.SIX_SECONDS
-      );
-      const pageElement = storyAdPage.build();
-      expect(pageElement).to.have.attribute('auto-advance-after');
     });
   });
 
