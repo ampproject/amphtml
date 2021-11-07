@@ -1,26 +1,9 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import * as Preact from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 import {lastChildElement} from '#core/dom/query';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to
@@ -52,18 +35,17 @@ export class LiveStoryManager {
    * configuration and appends it to the DOM.
    */
   build() {
-    const liveListEl = createElementWithAttributes(
-      this.ampStory_.win.document,
-      'amp-live-list',
-      dict({
-        'id': 'i-amphtml-' + this.storyEl_.id + '-dynamic-list',
-        'data-poll-interval':
-          this.storyEl_.getAttribute('data-poll-interval') || 15000,
-        'sort': 'ascending',
-        'disable-scrolling': '',
-        'disable-pagination': '',
-        'auto-insert': '',
-      })
+    const liveListEl = (
+      <amp-live-list
+        id={'i-amphtml-' + this.storyEl_.id + '-dynamic-list'}
+        data-poll-interval={
+          this.storyEl_.getAttribute('data-poll-interval') || 15000
+        }
+        sort="ascending"
+        disable-scrolling
+        disable-pagination
+        auto-insert
+      />
     );
     liveListEl[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = userAssert(
       this.storyEl_.id,

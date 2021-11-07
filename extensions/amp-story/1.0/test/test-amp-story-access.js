@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   AmpStoryStoreService,
@@ -21,6 +5,7 @@ import {
 } from '../amp-story-store-service';
 import {AmpStoryAccess, Type} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {afterRenderPromise} from '#testing/helpers';
 
 describes.realWin('amp-story-access', {amp: true}, (env) => {
   let win;
@@ -79,20 +64,16 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     expect(buttonInDrawerEl).to.exist;
   });
 
-  it('should display the access blocking paywall on state update', (done) => {
+  it('should display the access blocking paywall on state update', async () => {
     storyAccess.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_ACCESS, true);
 
-    win.requestAnimationFrame(() => {
-      expect(storyAccess.element).to.have.class(
-        'i-amphtml-story-access-visible'
-      );
-      done();
-    });
+    await afterRenderPromise(win);
+    expect(storyAccess.element).to.have.class('i-amphtml-story-access-visible');
   });
 
-  it('should show the access notification on state update', (done) => {
+  it('should show the access notification on state update', async () => {
     storyAccess.element.setAttribute('type', Type.NOTIFICATION);
     storyAccess.buildCallback();
 
@@ -101,12 +82,8 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
       index: 0,
     });
 
-    win.requestAnimationFrame(() => {
-      expect(storyAccess.element).to.have.class(
-        'i-amphtml-story-access-visible'
-      );
-      done();
-    });
+    await afterRenderPromise(win);
+    expect(storyAccess.element).to.have.class('i-amphtml-story-access-visible');
   });
 
   it('should allowlist the default <amp-access> actions', () => {

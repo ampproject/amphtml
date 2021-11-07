@@ -1,24 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-  UIType,
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
@@ -93,14 +76,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     expect(listenerSpy).to.have.been.calledWith(false);
   });
 
-  it('should toggle the desktop state when setting a UI State', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
-  });
-
   it('should update the current page id', () => {
     const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.CURRENT_PAGE_ID, listenerSpy);
@@ -127,14 +102,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_STORY_HAS_AUDIO, true);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
-  });
-
-  it('should toggle the viewport warning state', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.VIEWPORT_WARNING_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });

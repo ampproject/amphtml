@@ -1,20 +1,5 @@
 FAIL
 |  <!--
-|    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Correct image quiz, as well as 3 incorrect image quizzes
 |  -->
@@ -58,7 +43,7 @@ FAIL
 |          <!-- Invalid: Image quiz missing a option-{1/2/3/4}-correct -->
 |          <amp-story-interactive-img-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:58:8 The tag 'amp-story-interactive-img-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:43:8 The tag 'amp-story-interactive-img-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="missing-correct-img-quiz"
 |            prompt-text="Which of these structures is oldest?"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
@@ -78,7 +63,7 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:58:
 |          <!-- Invalid: Image quiz endpoint must be a valid URL -->
 |          <amp-story-interactive-img-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:76:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:61:8 Missing URL for attribute 'endpoint' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="invalid-endpoint-img-quiz"
 |            prompt-text="Which of these structures is oldest?"
 |            endpoint=""
@@ -99,13 +84,13 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:76:
 |          <!-- Invalid: Image quiz options must have alt attributes -->
 |          <amp-story-interactive-img-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The attribute 'option-3-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:80:8 The attribute 'option-3-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The attribute 'option-4-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:80:8 The attribute 'option-4-image-alt' in tag 'amp-story-interactive-img-quiz' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:80:8 The mandatory attribute 'option-1-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:80:8 The mandatory attribute 'option-2-image-alt' is missing in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="missing-alt-img-quiz"
 |            prompt-text="Which of these structures is oldest?"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
@@ -122,13 +107,13 @@ amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:
 |          <!-- Invalid: Image quiz image URL must use a valid protocol -->
 |          <amp-story-interactive-img-quiz
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:110:8 Invalid URL protocol 'nothttps:' for attribute 'option-1-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 Invalid URL protocol 'nothttps:' for attribute 'option-1-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:110:8 Invalid URL protocol 'nothttps:' for attribute 'option-2-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 Invalid URL protocol 'nothttps:' for attribute 'option-2-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:110:8 Invalid URL protocol 'nothttps:' for attribute 'option-3-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 Invalid URL protocol 'nothttps:' for attribute 'option-3-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:110:8 Invalid URL protocol 'nothttps:' for attribute 'option-4-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-img-quiz.html:95:8 Invalid URL protocol 'nothttps:' for attribute 'option-4-image' in tag 'amp-story-interactive-img-quiz'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="invalid-img-url-img-quiz"
 |            prompt-text="Which of these structures is oldest?"
 |            prompt-size="large"

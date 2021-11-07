@@ -7,22 +7,6 @@ teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
 
-<!--
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-autocomplete
 
 ## Usage
@@ -171,8 +155,7 @@ Specifies the key to the data array within the JSON response. Nested keys can be
 
 [filter formats="websites"]
 
-  <pre lang="html">
-
+```html
       <amp-autocomplete filter="prefix">
           <input type="text">
           <script type=application/json>
@@ -180,45 +163,41 @@ Specifies the key to the data array within the JSON response. Nested keys can be
            </script>
 
       </amp-autocomplete>
+```
 
-  </pre>
-  <pre lang="html">
+```html
+<amp-autocomplete filter="prefix" items="fruit">
+  <input type="text">
+  <script type=application/json>
+    { "fruit" : ["kiwis", "oranges", "watermelons"]  }
+    </script>
+</amp-autocomplete>
+```
 
-      <amp-autocomplete filter="prefix" items="fruit">
-        <input type="text">
-        <script type=application/json>
-          { "fruit" : ["kiwis", "oranges", "watermelons"]  }
-          </script>
-      </amp-autocomplete>
-
-  </pre>
 [/filter] <!-- formats="websites" -->
 
 [filter formats="email"]
 
 Note that the following data is returned by the remote `src`:
 
-  <pre lang="json">
-    { 
-      "items" : ["apples", "bananas", "pears"], 
-      "fruit" : ["kiwis", "oranges", "watermelons"] 
-    }
-  </pre>
+```json
+{
+  "items" : ["apples", "bananas", "pears"],
+  "fruit" : ["kiwis", "oranges", "watermelons"]
+}
+```
 
-  <pre lang="html">
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
+  <input type="text">
+</amp-autocomplete>
+```
 
-      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json">
-        <input type="text">
-      </amp-autocomplete>
-
-  </pre>
-  <pre lang="html">
-
-      <amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
-        <input type="text">
-      </amp-autocomplete>
-
-  </pre>
+```html
+<amp-autocomplete src="{{server_for_email}}/static/samples/json/amp-autocomplete-fruit-items.json" items="fruit">
+  <input type="text">
+</amp-autocomplete>
+```
 
 [/filter] <!-- formats="email" -->
 

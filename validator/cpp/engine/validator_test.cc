@@ -186,7 +186,7 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   // 200000 bytes in the tested document.
   {
     std::string test_case_name = StrCat(test_case.name, "[MaxBytesTest]");
-    std::string body = RepeatString(valid_body_content, /*n_times=*/9944);
+    std::string body = RepeatString(valid_body_content, /*n_times=*/9974);
     std::string test_html = TestWithDocSize(test_case.input_content, body);
     EXPECT_EQ(200000, test_html.length());
     EXPECT_EQ(
@@ -199,7 +199,7 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   {
     std::string test_case_name = StrCat(test_case.name, "[OffByOneTest]");
     std::string body =
-        StrCat(RepeatString(valid_body_content, /*n_times=*/9944), " ");
+        StrCat(RepeatString(valid_body_content, /*n_times=*/9974), " ");
     std::string test_html = TestWithDocSize(test_case.input_content, body);
     EXPECT_EQ(200001, test_html.length());
     std::string output = RenderResult(
@@ -207,7 +207,7 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":9977:6 "
+        ":9993:6 "
         "Document exceeded 200000 bytes limit. Actual size 200001 bytes. "
         "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
         "email-spec/amp-email-format/?format=email)");
@@ -257,7 +257,7 @@ TEST(ValidatorTest, TestScriptLengthAmp) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":35:2 The inline script is 10001 bytes, which exceeds the limit of "
+        ":20:2 The inline script is 10001 bytes, which exceeds the limit of "
         "10000 bytes. (see https://amp.dev/documentation/components/"
         "amp-script/#faq)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -312,7 +312,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":28:2 The author stylesheet specified in tag 'style amp-custom' is "
+        ":13:2 The author stylesheet specified in tag 'style amp-custom' is "
         "too long - document contains 75001 bytes whereas the limit is 75000 "
         "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
         "spec/amphtml/#maximum-size)");
@@ -332,7 +332,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":28:2 The author stylesheet specified in tag 'style amp-custom' is "
+        ":13:2 The author stylesheet specified in tag 'style amp-custom' is "
         "too long - document contains 75002 bytes whereas the limit is 75000 "
         "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
         "spec/amphtml/#maximum-size)");
@@ -364,7 +364,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":36:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":21:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -384,7 +384,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":7536:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":7521:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -418,7 +418,7 @@ TEST(ValidatorTest, TestCssLengthAmp) {
         amp::validator::Validate(test_html));
     std::string expected_output =
         StrCat("FAIL\n", test_case_name,
-               ":34:2 The inline style specified in tag 'div' is too long - "
+               ":19:2 The inline style specified in tag 'div' is too long - "
                "it contains 1001 bytes whereas the limit is 1000 bytes. "
                "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
                "spec/amphtml/#maximum-size)");
@@ -450,7 +450,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
-        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        ":8:0 Tag 'html' marked with attribute 'amp4email' is missing the "
         "corresponding attribute 'data-css-strict' for enabling strict "
         "CSS validation. This may become an error in the future. "
         "(see https://github.com/ampproject/amphtml/issues/32587)");
@@ -470,12 +470,12 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        ":8:0 Tag 'html' marked with attribute 'amp4email' is missing the "
         "corresponding attribute 'data-css-strict' for enabling strict "
         "CSS validation. This may become an error in the future. "
         "(see https://github.com/ampproject/amphtml/issues/32587)\n",
         test_case_name,
-        ":28:2 The author stylesheet specified in tag 'style amp-custom' "
+        ":13:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75001 bytes whereas the "
         "limit is 75000 "
         "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
@@ -494,7 +494,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
-        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        ":8:0 Tag 'html' marked with attribute 'amp4email' is missing the "
         "corresponding attribute 'data-css-strict' for enabling strict "
         "CSS validation. This may become an error in the future. "
         "(see https://github.com/ampproject/amphtml/issues/32587)");
@@ -516,12 +516,12 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     // to make the transition.
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
-        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        ":8:0 Tag 'html' marked with attribute 'amp4email' is missing the "
         "corresponding attribute 'data-css-strict' for enabling strict "
         "CSS validation. This may become an error in the future. "
         "(see https://github.com/ampproject/amphtml/issues/32587)\n",
         test_case_name,
-        ":34:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":19:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -544,12 +544,12 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     // to make the transition.
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
-        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        ":8:0 Tag 'html' marked with attribute 'amp4email' is missing the "
         "corresponding attribute 'data-css-strict' for enabling strict "
         "CSS validation. This may become an error in the future. "
         "(see https://github.com/ampproject/amphtml/issues/32587)\n",
         test_case_name,
-        ":7534:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":7519:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75014 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -568,7 +568,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
-        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        ":8:0 Tag 'html' marked with attribute 'amp4email' is missing the "
         "corresponding attribute 'data-css-strict' for enabling strict "
         "CSS validation. This may become an error in the future. "
         "(see https://github.com/ampproject/amphtml/issues/32587)");
@@ -591,12 +591,12 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     // value should be.
     std::string expected_output = StrCat(
         "PASS\n", test_case_name,
-        ":23:0 Tag 'html' marked with attribute 'amp4email' is missing the "
+        ":8:0 Tag 'html' marked with attribute 'amp4email' is missing the "
         "corresponding attribute 'data-css-strict' for enabling strict "
         "CSS validation. This may become an error in the future. "
         "(see https://github.com/ampproject/amphtml/issues/32587)\n",
         test_case_name,
-        ":32:2 The inline style specified in tag 'div' is too long - it "
+        ":17:2 The inline style specified in tag 'div' is too long - it "
         "contains 1001 bytes whereas the limit is 1000 bytes. (see "
         "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
         "amphtml/#maximum-size)");
@@ -643,7 +643,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":28:2 The author stylesheet specified in tag 'style amp-custom' "
+        ":13:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75001 bytes whereas the "
         "limit is 75000 "
         "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
@@ -675,7 +675,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":34:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":19:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -695,7 +695,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":3784:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":3769:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75014 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -729,7 +729,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output =
         StrCat("FAIL\n", test_case_name,
-               ":32:2 The inline style specified in tag 'div' is too long - it "
+               ":17:2 The inline style specified in tag 'div' is too long - it "
                "contains 1001 bytes whereas the limit is 1000 bytes. (see "
                "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
                "amphtml/#maximum-size)");
@@ -762,7 +762,7 @@ TEST(ValidatorTest, TestCssLengthAmpAds) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4ADS));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":29:2 The author stylesheet specified in tag 'style amp-custom' "
+        ":14:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 20001 bytes whereas the "
         "limit is 20000 "
         "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
@@ -846,7 +846,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":28:2 The author stylesheet specified in tag 'style amp-custom' "
+        ":13:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75010 bytes whereas the limit is "
         "75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/"
         "learn/spec/amphtml/#maximum-size)");
@@ -872,7 +872,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":28:2 The author stylesheet specified in tag 'style amp-custom' "
+        ":13:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75010 bytes whereas the limit is "
         "75000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/"
         "learn/spec/amphtml/#maximum-size)");
@@ -898,7 +898,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":28:2 The author stylesheet specified in tag 'style amp-custom' is "
+        ":13:2 The author stylesheet specified in tag 'style amp-custom' is "
         "too long - document contains 75010 bytes whereas the limit is 75000 "
         "bytes. (see https://amp.dev/documentation/guides-and-tutorials/learn/"
         "spec/amphtml/#maximum-size)");
@@ -921,7 +921,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":36:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":21:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75009 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -945,7 +945,7 @@ TEST(ValidatorTest, TestCssLengthWithUrls) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":36:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":21:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75009 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
         "documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size)");
@@ -1024,7 +1024,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":29:2 The author stylesheet specified in tag 'style amp-custom' "
+        ":14:2 The author stylesheet specified in tag 'style amp-custom' "
         "is too long - document contains 75010 bytes whereas "
         "the limit is 75000 bytes. (see "
         "https://amp.dev/documentation/guides-and-tutorials/learn/"
@@ -1066,7 +1066,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
         amp::validator::Validate(test_html));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":36:6 The author stylesheet specified in tag 'style amp-custom' "
+        ":21:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains "
         "112530 bytes whereas the limit is 112500 bytes. (see "
         "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"

@@ -1,22 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
-import {user} from '../../../src/log';
+
+import {Services} from '#service';
+
+import {user} from '#utils/log';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';
@@ -56,12 +43,22 @@ export class AnchorAdStrategy {
       return Promise.resolve(false);
     }
 
-    Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
-      this.ampdoc,
-      STICKY_AD_TAG,
-      '1.0'
-    );
-    this.placeStickyAd_();
+    if (this.baseAttributes_.sticky === 'top') {
+      Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
+        this.ampdoc,
+        'amp-ad',
+        '0.1'
+      );
+      this.placeAmpAdStickyAd_();
+    } else {
+      // TODO(powerivq@) once <amp-ad sticky=bottom> is stabilized, move this to use amp-ad sticky.
+      Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
+        this.ampdoc,
+        STICKY_AD_TAG,
+        '1.0'
+      );
+      this.placeStickyAd_();
+    }
     return Promise.resolve(true);
   }
 
@@ -70,7 +67,9 @@ export class AnchorAdStrategy {
    * @private
    */
   hasExistingStickyAd_() {
-    return !!this.ampdoc.getRootNode().querySelector('AMP-STICKY-AD');
+    return !!this.ampdoc
+      .getRootNode()
+      .querySelector('amp-sticky-ad, amp-ad[sticky]');
   }
 
   /**
@@ -81,6 +80,27 @@ export class AnchorAdStrategy {
     return user()
       .assertArray(this.configObj_['optInStatus'] || [])
       .includes(OPT_IN_STATUS_ANCHOR_ADS);
+  }
+
+  /**
+   * @private
+   */
+  placeAmpAdStickyAd_() {
+    const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        this.baseAttributes_,
+        dict({
+          'width': String(viewportWidth),
+          'height': this.baseAttributes_.height || '100',
+        })
+      )
+    );
+    const doc = this.ampdoc.win.document;
+    const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
+    const body = this.ampdoc.getBody();
+    body.insertBefore(ampAd, body.firstChild);
   }
 
   /**

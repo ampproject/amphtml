@@ -1,20 +1,5 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpSlideScroll} from '../slidescroll';
+import {CarouselControls} from '../carousel-controls';
 
 describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
   let win, doc;
@@ -26,7 +11,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
 
   let setupAutoplaySpy;
   let buildButtonsSpy;
-  let setupGesturesSpy;
   let setControlsStateSpy;
   let hintControlsSpy;
   let autoplaySpy;
@@ -44,16 +28,18 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
       AmpSlideScroll.prototype,
       'setupAutoplay_'
     );
-    buildButtonsSpy = env.sandbox.spy(AmpSlideScroll.prototype, 'buildButtons');
-    setupGesturesSpy = env.sandbox.spy(
-      AmpSlideScroll.prototype,
-      'setupGestures'
+    buildButtonsSpy = env.sandbox.spy(
+      CarouselControls.prototype,
+      'buildButtons'
     );
     setControlsStateSpy = env.sandbox.spy(
-      AmpSlideScroll.prototype,
+      CarouselControls.prototype,
       'setControlsState'
     );
-    hintControlsSpy = env.sandbox.spy(AmpSlideScroll.prototype, 'hintControls');
+    hintControlsSpy = env.sandbox.spy(
+      CarouselControls.prototype,
+      'hintControls'
+    );
     autoplaySpy = env.sandbox.spy(AmpSlideScroll.prototype, 'autoplay_');
     clearAutoplaySpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
@@ -61,7 +47,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     );
     viewportCallbackSpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
-      'viewportCallbackTemp'
+      'viewportCallback'
     );
   });
 
@@ -124,7 +110,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselLoopOnly.shouldAutoplay_).to.be.false;
     expect(setupAutoplaySpy).to.not.have.been.called;
     expect(buildButtonsSpy).to.be.calledOnce;
-    expect(setupGesturesSpy).to.be.calledOnce;
     expect(setControlsStateSpy).to.be.calledOnce;
 
     const carouselAutoplayOnly = new TestCarousel(
@@ -139,7 +124,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselAutoplayOnly.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.been.called;
     expect(buildButtonsSpy).to.have.callCount(2);
-    expect(setupGesturesSpy).to.have.callCount(2);
     expect(setControlsStateSpy).to.have.callCount(2);
 
     const carouselAutoplayWithLoop = new TestCarousel(
@@ -155,7 +139,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselAutoplayWithLoop.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.callCount(2);
     expect(buildButtonsSpy).to.have.callCount(3);
-    expect(setupGesturesSpy).to.have.callCount(3);
     expect(setControlsStateSpy).to.have.callCount(3);
   });
 
@@ -167,7 +150,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
       })
     );
 
-    carousel.viewportCallbackTemp(true);
+    carousel.viewportCallback(true);
     expect(viewportCallbackSpy).to.have.been.calledWith(true);
     expect(hintControlsSpy).to.have.been.called;
     expect(autoplaySpy).to.have.been.called;
@@ -182,7 +165,7 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
       })
     );
 
-    carousel.viewportCallbackTemp(false);
+    carousel.viewportCallback(false);
     expect(viewportCallbackSpy).to.have.been.calledWith(false);
     expect(hintControlsSpy).to.not.have.been.called;
     expect(autoplaySpy).to.not.have.been.called;

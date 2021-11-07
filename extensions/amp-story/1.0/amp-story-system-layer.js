@@ -1,18 +1,4 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as Preact from '#core/dom/jsx';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
@@ -36,16 +22,15 @@ import {
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 
-import {renderAsElement} from './simple-template';
-
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+import {localize} from './amp-story-localization-service';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -87,16 +72,10 @@ const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
-const HAS_SIDEBAR_ATTRIBUTE = 'i-amphtml-story-has-sidebar';
-
-/** @private @const {string} */
 const SHARE_CLASS = 'i-amphtml-story-share-control';
 
 /** @private @const {string} */
 const INFO_CLASS = 'i-amphtml-story-info-control';
-
-/** @private @const {string} */
-const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
@@ -107,206 +86,117 @@ const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
-/** @private @const {!./simple-template.ElementDef} */
-const TEMPLATE = {
-  tag: 'aside',
-  attrs: dict({
-    'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
-  }),
-  children: [
-    {
-      tag: 'a',
-      attrs: dict({
-        'class': ATTRIBUTION_CLASS,
-        'target': '_blank',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-logo-container',
-          }),
-          children: [
-            {
-              tag: 'img',
-              attrs: dict({
-                'alt': '',
-                'class': 'i-amphtml-story-attribution-logo',
-              }),
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-text',
-          }),
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-has-new-page-notification-container',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-has-new-page-text-wrapper',
-          }),
-          children: [
-            {
-              tag: 'span',
-              attrs: dict({
-                'class': 'i-amphtml-story-has-new-page-circle-icon',
-              }),
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-has-new-page-text',
-              }),
-              localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': INFO_CLASS + ' i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-sound-display',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({
-                'role': 'alert',
-                'class': 'i-amphtml-message-container',
-              }),
-              children: [
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-mute-text',
-                  }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-unmute-sound-text',
-                  }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT,
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-unmute-no-sound-text',
-                  }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT,
-                },
-              ],
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId:
-                LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': MUTE_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId:
-                LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-paused-display',
-          }),
-          children: [
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': PAUSE_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': PLAY_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
-            },
-          ],
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class':
-              SKIP_TO_NEXT_CLASS +
-              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
-          }),
-          localizedLabelId:
-            LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class': SHARE_CLASS + ' i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class':
-              CLOSE_CLASS +
-              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL,
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-system-layer-buttons-start-position',
-      }),
-    },
-  ],
-};
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const renderSystemLayerElement = (element) => (
+  <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
+    <a class={ATTRIBUTION_CLASS} target="_blank">
+      <div class="i-amphtml-story-attribution-logo-container">
+        <img alt="" class="i-amphtml-story-attribution-logo" />
+      </div>
+      <div class="i-amphtml-story-attribution-text" />
+    </a>
+    <div class="i-amphtml-story-has-new-page-notification-container">
+      <div class="i-amphtml-story-has-new-page-text-wrapper">
+        <span class="i-amphtml-story-has-new-page-circle-icon" />
+        <div class="i-amphtml-story-has-new-page-text">
+          {localize(element, LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT)}
+        </div>
+      </div>
+    </div>
+    <div class="i-amphtml-story-system-layer-buttons">
+      <div
+        role="button"
+        class={INFO_CLASS + ' i-amphtml-story-button'}
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL
+        )}
+      />
+      <div class="i-amphtml-story-sound-display">
+        <div role="alert" class="i-amphtml-message-container">
+          <div class="i-amphtml-story-mute-text">
+            {localize(
+              element,
+              LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
+            )}
+          </div>
+          <div class="i-amphtml-story-unmute-sound-text">
+            {localize(
+              element,
+              LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
+            )}
+          </div>
+          <div class="i-amphtml-story-unmute-no-sound-text">
+            {localize(
+              element,
+              LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
+            )}
+          </div>
+        </div>
+        <button
+          class={UNMUTE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
+          )}
+        />
+        <button
+          class={MUTE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
+          )}
+        />
+      </div>
+      <div class="i-amphtml-paused-display">
+        <button
+          class={PAUSE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL
+          )}
+        />
+        <button
+          class={PLAY_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL
+          )}
+        />
+      </div>
+      <button
+        class={
+          SKIP_TO_NEXT_CLASS +
+          ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+        }
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
+        )}
+      />
+      <button
+        class={SHARE_CLASS + ' i-amphtml-story-button'}
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL
+        )}
+      />
+      <button
+        class={
+          CLOSE_CLASS + ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+        }
+        aria-label={localize(
+          element,
+          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+      />
+    </div>
+    <div class="i-amphtml-story-system-layer-buttons-start-position" />
+  </aside>
+);
 
 /**
  * Contains the event name belonging to the viewer control.
@@ -344,7 +234,6 @@ const VIEWER_CONTROL_DEFAULTS = {
  *   - story progress bar
  *   - share button
  *   - domain info button
- *   - sidebar
  *   - story updated label (for live stories)
  *   - close (for players)
  *   - skip (for players)
@@ -420,7 +309,7 @@ export class SystemLayer {
 
     this.root_ = this.win_.document.createElement('div');
     this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.systemLayerEl_ = renderSystemLayerElement(this.parentEl_);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
@@ -462,7 +351,7 @@ export class SystemLayer {
       ? new AmpStoryViewerMessagingHandler(this.win_, this.viewer_)
       : null;
 
-    if (shouldShowStoryUrlInfo(this.viewer_)) {
+    if (shouldShowStoryUrlInfo(this.viewer_, this.storeService_)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -539,8 +428,6 @@ export class SystemLayer {
         this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
-      } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
-        this.onSidebarClick_();
       } else if (
         matches(
           target,
@@ -657,14 +544,6 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.HAS_SIDEBAR_STATE,
-      (hasSidebar) => {
-        this.onHasSidebarStateUpdate_(hasSidebar);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
@@ -708,20 +587,6 @@ export class SystemLayer {
     isAd
       ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
       : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-  }
-
-  /**
-   * Checks if the story has a sidebar in order to display the icon representing
-   * the opening of the sidebar.
-   * @param {boolean} hasSidebar
-   * @private
-   */
-  onHasSidebarStateUpdate_(hasSidebar) {
-    if (hasSidebar) {
-      this.getShadowRoot().setAttribute(HAS_SIDEBAR_ATTRIBUTE, '');
-    } else {
-      this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
-    }
   }
 
   /**
@@ -887,15 +752,10 @@ export class SystemLayer {
       const shadowRoot = this.getShadowRoot();
 
       shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
-      shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
       shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
-        case UIType.DESKTOP_PANELS:
-          shadowRoot.setAttribute('desktop', '');
-          shadowRoot.classList.add('i-amphtml-story-desktop-panels');
-          break;
         case UIType.DESKTOP_FULLBLEED:
           shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
@@ -1030,14 +890,6 @@ export class SystemLayer {
   onInfoClick_() {
     const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
     this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
-  }
-
-  /**
-   * Handles click events on the sidebar button and toggles the sidebar.
-   * @private
-   */
-  onSidebarClick_() {
-    this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
   }
 
   /**

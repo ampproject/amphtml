@@ -1,57 +1,43 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals} from '#core/constants/common-signals';
+import {toggleAttribute} from '#core/dom';
+import {svgFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {dict} from '#core/types/object';
 
+import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {
   AdvanceExpToTime,
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
 } from '#experiments/story-ad-auto-advance';
+import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+
+import {dev, devAssert, userAssert} from '#utils/log';
+
+import {getPlacementAlgo} from './algorithm-utils';
 import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
+import {StoryAdConfig} from './story-ad-config';
+import {StoryAdPageManager} from './story-ad-page-manager';
+
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
-import {CommonSignals} from '#core/constants/common-signals';
-import {EventType, dispatch} from '../../amp-story/1.0/events';
-import {Services} from '#service';
+import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
+import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {StoryAdConfig} from './story-ad-config';
-import {StoryAdPageManager} from './story-ad-page-manager';
-import {
-  StoryAdSegmentExp,
-  ViewerSetTimeToBranch,
-} from '#experiments/story-ad-progress-segment';
-import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
+import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {forceExperimentBranch, getExperimentBranch} from '#experiments';
-import {getPlacementAlgo} from './algorithm-utils';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
-import {setStyle} from '#core/dom/style';
-import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {toggleAttribute} from '#core/dom';
-import {svgFor} from '#core/dom/static-template';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads';
@@ -62,11 +48,26 @@ const AD_TAG = 'amp-ad';
 /** @const {string} */
 const MUSTACHE_TAG = 'amp-mustache';
 
+/**
+ * Map of experiment IDs that might be enabled by the player to
+ * their experiment names. Used to toggle client side experiment on.
+ * @const {Object<string, string>}
+ * @visibleForTesting
+ */
+export const RELEVANT_PLAYER_EXPS = {
+  [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.FOURTEEN_SECONDS]: StoryAdSegmentExp.ID,
+};
+
 /** @enum {string} */
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
+  DESKTOP_FULLBLEED: 'desktop-fullbleed',
   DESKTOP_ONE_PANEL: 'desktop-one-panel',
-  DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
   PAUSED: 'paused',
 };
@@ -164,6 +165,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         if (!this.placementAlgorithm_.isStoryEligible()) {
           return;
         }
+        this.askPlayerForActiveExperiments_();
         this.analytics_ = getServicePromiseForDoc(
           this.element,
           STORY_AD_ANALYTICS
@@ -172,6 +174,30 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.maybeCreateProgressBar_();
         this.initializeListeners_();
         this.initializePages_();
+      });
+  }
+
+  /**
+   * Sends message to player asking for active experiments and enables
+   * the branch for any relevant experiments.
+   */
+  askPlayerForActiveExperiments_() {
+    const viewer = Services.viewerForDoc(this.doc_);
+    if (!viewer.isEmbedded()) {
+      return;
+    }
+    viewer
+      ./*OK*/ sendMessageAwaitResponse('playerExperiments')
+      .then((expObj) => {
+        const ids = expObj?.['experimentIds'];
+        if (ids) {
+          ids.forEach((id) => {
+            const relevantExp = RELEVANT_PLAYER_EXPS[id];
+            if (relevantExp) {
+              forceExperimentBranch(this.win, relevantExp, id.toString());
+            }
+          });
+        }
       });
   }
 
@@ -323,16 +349,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_ONE_PANEL, DESKTOP_PANELS} = Attributes;
-      this.adBadgeContainer_.removeAttribute(DESKTOP_PANELS);
+      const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = Attributes;
+      this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
-      this.progressBarBackground_?.removeAttribute(DESKTOP_PANELS);
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType.DESKTOP_PANELS) {
-        this.adBadgeContainer_.setAttribute(DESKTOP_PANELS, '');
-        this.progressBarBackground_?.setAttribute(DESKTOP_PANELS, '');
+      if (uiState === UIType.DESKTOP_FULLBLEED) {
+        this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
       if (uiState === UIType.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
@@ -428,23 +452,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.win,
       StoryAdAutoAdvance.ID
     );
-    const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
-      'storyNextUp'
-    );
-    if (storyNextUpParam && ViewerSetTimeToBranch[storyNextUpParam]) {
-      // Actual progress bar creation handled in progress-bar.js.
-      forceExperimentBranch(
-        this.win,
-        StoryAdSegmentExp.ID,
-        ViewerSetTimeToBranch[storyNextUpParam]
-      );
+    if (getExperimentBranch(this.win, StoryAdSegmentExp.ID)) {
+      // In the viewer controlled experiment progress bar is created by
+      // progress-bar.js
+      return;
     } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
       this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
-    } else if (storyNextUpParam) {
-      this.createProgressBar_(storyNextUpParam);
     }
   }
 

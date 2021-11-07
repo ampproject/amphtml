@@ -1,18 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {PlayingStates} from '../../../../src/video-interface';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -26,13 +19,7 @@ import {
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
-import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {DirectionX, DirectionY} from '../def';
-import {PlayingStates} from '../../../../src/video-interface';
-import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 const slotId = 'my-slot-element';
 
@@ -1291,6 +1278,34 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       expect(viewport.animateScrollIntoView.withArgs(video.element, 'center'))
         .to.have.been.calledOnce;
+    });
+  });
+
+  describe('onViewportResize_', () => {
+    beforeEach(() => {
+      env.sandbox.stub(docking, 'trigger_');
+      env.sandbox.stub(docking, 'updateOnResize_');
+
+      const video = createVideo();
+      mockAreaWidth(400);
+
+      docking.observed_.push(video);
+      docking.setCurrentlyDocked_(
+        video,
+        /* target, irrelevant */ {},
+        /* step, irrelevant */ 1
+      );
+    });
+    it('updates dock on resize when docked and viewport width changed', () => {
+      mockAreaWidth(399);
+      docking.onViewportResize_();
+      expect(docking.updateOnResize_.withArgs()).to.have.been.calledOnce;
+    });
+
+    it('does not update dock on resize when docked and viewport width did not change', () => {
+      mockAreaWidth(400); // unchanged
+      docking.onViewportResize_();
+      expect(docking.updateOnResize_).not.to.have.been.called;
     });
   });
 

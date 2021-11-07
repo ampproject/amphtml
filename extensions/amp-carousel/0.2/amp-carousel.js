@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
@@ -26,13 +10,13 @@ import {
   realChildElements,
 } from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
-import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {createCustomEvent, getDetail, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
 /**
  * @enum {string}

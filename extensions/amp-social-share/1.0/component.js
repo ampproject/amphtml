@@ -1,42 +1,29 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys} from '#core/constants/key-codes';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 
 import * as Preact from '#preact';
-import {Keys} from '#core/constants/key-codes';
-import {SocialShareIcon} from './social-share-svgs';
 import {Wrapper} from '#preact/component';
-import {addParamsToUrl} from '../../../src/url';
-import {dict} from '#core/types/object';
-import {getSocialConfig} from './social-share-config';
-import {openWindowDialog} from '../../../src/open-window-dialog';
-import {parseQueryString} from '#core/types/string/url';
 import {useResourcesNotify} from '#preact/utils';
-import {useStyles} from './component.jss';
 
-const NAME = 'SocialShare';
+import {useStyles} from './component.jss';
+import {getSocialConfig} from './social-share-config';
+import {BentoSocialShareIcon} from './social-share-svgs';
+
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {addParamsToUrl} from '../../../src/url';
+
+const NAME = 'BentoSocialShare';
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
 const DEFAULT_TARGET = '_blank';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!SocialShareDef.Props} props
+ * @param {!BentoSocialShareDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare({
+export function BentoSocialShare({
   background,
   children,
   color,
@@ -73,7 +60,7 @@ export function SocialShare({
     <Wrapper
       {...rest}
       role="button"
-      tabindex={tabIndex}
+      tabIndex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       wrapperStyle={{
@@ -114,7 +101,7 @@ function processChildren(type, children, color, background) {
       'backgroundColor': background || typeConfig.defaultBackgroundColor,
     });
     return (
-      <SocialShareIcon
+      <BentoSocialShareIcon
         style={{
           ...iconStyle,
           width: '100%',
@@ -154,15 +141,36 @@ function checkProps(type, endpoint, target, width, height, params) {
     return null;
   }
 
+  // TODO: This logic might be duplicated in the AMP component
+  // https://github.com/ampproject/amphtml/issues/36777
+  const currentParams = Object.entries(typeConfig.defaultParams || {}).reduce(
+    (newParams, [key, value]) => {
+      if (newParams[key]) {
+        return newParams;
+      }
+      return {
+        ...newParams,
+        [key]: value
+          .replace('TITLE', document.title)
+          .replace(
+            'CANONICAL_URL',
+            document.querySelector("link[rel='canonical']")?.href ||
+              location.href
+          ),
+      };
+    },
+    params || {}
+  );
+
   // Special case when type is 'email'
   if (type === 'email' && !endpoint) {
-    baseEndpoint = `mailto:${(params && params['recipient']) || ''}`;
+    baseEndpoint = `mailto:${currentParams['recipient'] || ''}`;
   }
 
   // Add params to baseEndpoint
   const finalEndpoint = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
-    /** @type {!JsonObject} */ (params)
+    /** @type {!JsonObject} */ (currentParams)
   );
 
   // Defaults

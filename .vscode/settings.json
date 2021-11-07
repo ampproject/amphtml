@@ -20,5 +20,43 @@
   "[yaml]": {"editor.formatOnSave": true},
   "[json]": {"editor.formatOnSave": true},
   "[json5]": {"editor.formatOnSave": true},
-  "[markdown]": {"editor.formatOnSave": true}
+  "[markdown]": {"editor.formatOnSave": true},
+
+  // Validate JSON schemas on the fly. Also used by the `amp check-json-schemas`
+  // task. Do not use URLs from the web, they are unsupported by this task.
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "build-system/global-configs/canary-config.json",
+        "build-system/global-configs/prod-config.json"
+      ],
+      "url": "./build-system/json-schemas/amp-config.json"
+    },
+    {
+      "fileMatch": ["build-system/tasks/bundle-size/APPROVERS.json"],
+      "url": "./build-system/json-schemas/APPROVERS.json"
+    },
+    {
+      "fileMatch": ["build-system/global-configs/caches.json"],
+      "url": "./build-system/json-schemas/caches.json"
+    },
+    {
+      "fileMatch": [
+        "build-system/global-configs/client-side-experiments-config.json"
+      ],
+      "url": "./build-system/json-schemas/client-side-experiments-config.json"
+    },
+    {
+      "fileMatch": ["build-system/tasks/bundle-size/filesize.json"],
+      "url": "./build-system/json-schemas/filesize.json"
+    },
+    {
+      "fileMatch": ["build-system/global-configs/versioning.json"],
+      "url": "./build-system/json-schemas/versioning.json"
+    },
+    {
+      "fileMatch": ["test/visual-diff/visual-tests.jsonc"],
+      "url": "./build-system/json-schemas/visual-tests.json"
+    }
+  ]
 }

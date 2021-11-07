@@ -1,24 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
 import {deepEquals} from '#core/types/object/json';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {hasOwn} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
@@ -51,7 +35,6 @@ export const getStoreService = (win) => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI displaying previous and next pages.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
   DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
   VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
@@ -94,6 +77,7 @@ export let InteractiveReactData;
  *    canShowPaginationButtons: boolean,
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
+ *    canShowStoryUrlInfo: boolean,
  *    canShowSystemLayerButtons: boolean,
  *    viewerCustomControls: !Array<!Object>,
  *    accessState: boolean,
@@ -103,7 +87,6 @@ export let InteractiveReactData;
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
- *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    interactiveReactState: !Map<string, !InteractiveReactData>,
@@ -116,7 +99,6 @@ export let InteractiveReactData;
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
- *    sidebarState: boolean,
  *    storyHasAudioState: boolean,
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
@@ -144,6 +126,7 @@ export const StateProperty = {
   CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
+  CAN_SHOW_STORY_URL_INFO: 'canShowStoryUrlInfo',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
   VIEWER_CUSTOM_CONTROLS: 'viewerCustomControls',
 
@@ -152,10 +135,8 @@ export const StateProperty = {
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
-  DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
   GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
-  HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
@@ -170,7 +151,6 @@ export const StateProperty = {
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
-  SIDEBAR_STATE: 'sidebarState',
   SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
   // Any page has audio, or amp-story has a `background-audio` attribute.
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
@@ -180,7 +160,6 @@ export const StateProperty = {
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
-  VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
   ACTIONS_ALLOWLIST: 'actionsAllowlist',
@@ -207,7 +186,6 @@ export const Action = {
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
-  TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_KEYBOARD_ACTIVE_STATE: 'toggleKeyboardActiveState',
@@ -218,7 +196,6 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-  TOGGLE_SIDEBAR: 'toggleSidebar',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
@@ -226,7 +203,6 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
-  TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
@@ -341,8 +317,7 @@ const actions = (state, action, data) => {
           data.state === EmbeddedComponentState.EXPANDED ||
           data.state === EmbeddedComponentState.FOCUSED,
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
-          data.state !== EmbeddedComponentState.EXPANDED ||
-          state.uiState === UIType.DESKTOP_PANELS,
+          data.state !== EmbeddedComponentState.EXPANDED,
         [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
       });
     // Shows or hides the info dialog.
@@ -400,21 +375,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
       });
-    case Action.TOGGLE_SIDEBAR:
-      // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
-      if (state[StateProperty.SIDEBAR_STATE] === data) {
-        return state;
-      }
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PAUSED_STATE]: !!data,
-        [StateProperty.SIDEBAR_STATE]: !!data,
-      });
-    case Action.TOGGLE_HAS_SIDEBAR:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.HAS_SIDEBAR_STATE]: !!data,
-      });
     case Action.TOGGLE_SUPPORTED_BROWSER:
       return /** @type {!State} */ ({
         ...state,
@@ -441,18 +401,12 @@ const actions = (state, action, data) => {
       }
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
       });
     case Action.SET_GYROSCOPE_PERMISSION:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.GYROSCOPE_PERMISSION_STATE]: data,
-      });
-    case Action.TOGGLE_VIEWPORT_WARNING:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.VIEWPORT_WARNING_STATE]: !!data,
       });
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ ({
@@ -590,15 +544,14 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
+      [StateProperty.CAN_SHOW_STORY_URL_INFO]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
-      [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
-      [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
@@ -613,14 +566,12 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
-      [StateProperty.SIDEBAR_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
-      [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_ALLOWLIST]: [],
@@ -671,6 +622,7 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.CAN_SHOW_AUDIO_UI]: false,
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+          [StateProperty.CAN_SHOW_STORY_URL_INFO]: false,
         };
       default:
         return {};

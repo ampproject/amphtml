@@ -1,33 +1,22 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '#service/real-time-config/real-time-config-impl';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {Deferred} from '#core/data-structures/promise';
-import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
-import {dev} from '../../../src/log';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {getBinaryType, isExperimentOn} from '#experiments';
-import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import * as mode from '#core/mode';
 import {stringHash32} from '#core/types/string';
+import {WindowInterface} from '#core/window/interface';
+
+import {getBinaryType, isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
+
+import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
+
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-valueimpression-impl';
@@ -287,8 +276,13 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
       const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
       // If slotWidth is -1, that means its width must be determined by its
       // parent container, and so should have the same value as parentWidth.
-      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-      psz = `${parentWidth}x-1`;
+      if (this.uiHandler.isStickyAd()) {
+        msz = '0x-1';
+        psz = '0x-1';
+      } else {
+        msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+        psz = `${parentWidth}x-1`;
+      }
       fws = fwSignal ? fwSignal : '0';
 
       const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);

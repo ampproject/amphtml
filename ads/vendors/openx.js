@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {doubleclick} from '#ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '#3p/3p';
 
@@ -88,7 +72,7 @@ export function openx(global, data) {
           const oxRequest = OX();
           const oxAnchor = global.document.createElement('div');
           global.document.body.appendChild(oxAnchor);
-          /*eslint "google-camelcase/google-camelcase": 0*/
+          /*eslint "local/camelcase": 0*/
           OX._requestArgs['bc'] = 'amp';
           oxRequest.addAdUnit(data.auid);
           oxRequest.setAdSizes([data.width + 'x' + data.height]);
@@ -115,7 +99,7 @@ export function openx(global, data) {
  */
 function standardImplementation(global, jssdk, dfpData) {
   writeScript(global, jssdk, () => {
-    /*eslint "google-camelcase/google-camelcase": 0*/
+    /*eslint "local/camelcase": 0*/
     doubleclick(global, dfpData);
   });
 }

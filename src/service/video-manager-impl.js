@@ -1,25 +1,13 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {measureIntersection} from '#core/dom/layout/intersection';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {toggle} from '#core/dom/style';
-import {getInternalVideoElementFor, isAutoplaySupported} from '#core/dom/video';
+import {
+  getInternalVideoElementFor,
+  isAutoplaySupported,
+  tryPlay,
+} from '#core/dom/video';
 import {clamp} from '#core/math';
 import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
@@ -27,12 +15,18 @@ import {dict, map} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {
+  createCustomEvent,
+  getData,
+  listen,
+  listenOnce,
+} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {VideoSessionManager} from './video-session-manager';
 import {renderIcon, renderInteractionOverlay} from './video/autoplay';
 import {installAutoplayStylesForDoc} from './video/install-autoplay-styles';
 
-import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
-import {dev, devAssert, user, userAssert} from '../log';
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -45,7 +39,7 @@ import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
-  VideoAnalyticsEvents,
+  VideoAnalyticsEvents_Enum,
   VideoAttributes,
   VideoEvents,
   VideoServiceSignals,
@@ -146,7 +140,7 @@ export class VideoManager {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (entry.getPlayingState() !== PlayingStates.PAUSED) {
-        analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+        analyticsEvent(entry, VideoAnalyticsEvents_Enum.SECONDS_PLAYED);
         this.timeUpdateActionEvent_(entry);
       }
     }
@@ -249,7 +243,7 @@ export class VideoManager {
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    registerAction('play', () => video.play(/* isAutoplay */ false));
+    registerAction('play', () => tryPlay(video, /* isAutoplay */ false));
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
@@ -450,14 +444,14 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(() =>
-      analyticsEvent(this, VideoAnalyticsEvents.SESSION)
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.SESSION)
     );
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(() =>
-      analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.SESSION_VISIBLE)
     );
 
     /** @private @const {function(): !AnalyticsPercentageTracker} */
@@ -495,7 +489,7 @@ class VideoEntry {
 
     /** @private @const {function()} */
     this.boundMediasessionPlay_ = () => {
-      this.video.play(/* isAutoplay */ false);
+      tryPlay(this.video, /* isAutoplay */ false);
     };
 
     /** @private @const {function()} */
@@ -507,7 +501,7 @@ class VideoEntry {
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
       this.hasSeenPlayEvent_ = true;
-      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.PLAY);
     });
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
@@ -530,17 +524,17 @@ class VideoEntry {
 
     listen(video.element, VideoEvents.ENDED, () => {
       this.isRollingAd_ = false;
-      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.ENDED);
     });
 
     listen(video.element, VideoEvents.AD_START, () => {
       this.isRollingAd_ = true;
-      analyticsEvent(this, VideoAnalyticsEvents.AD_START);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.AD_START);
     });
 
     listen(video.element, VideoEvents.AD_END, () => {
       this.isRollingAd_ = false;
-      analyticsEvent(this, VideoAnalyticsEvents.AD_END);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.AD_END);
     });
 
     video
@@ -584,7 +578,7 @@ class VideoEntry {
       prefixedVars[`custom_${key}`] = vars[key];
     });
 
-    analyticsEvent(this, VideoAnalyticsEvents.CUSTOM, prefixedVars);
+    analyticsEvent(this, VideoAnalyticsEvents_Enum.CUSTOM, prefixedVars);
   }
 
   /** Listens for signals to delegate playback to a different module. */
@@ -678,7 +672,7 @@ class VideoEntry {
     // PLAYING. Hence we treat the PLAYING as an indication to emit the
     // Analytics PLAY event if we haven't seen PLAY.
     if (!this.hasSeenPlayEvent_) {
-      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.PLAY);
     }
   }
 
@@ -687,7 +681,7 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
+    analyticsEvent(this, VideoAnalyticsEvents_Enum.PAUSE);
     this.isPlaying_ = false;
 
     // Prevent double-trigger of session if video is autoplay and the video
@@ -917,7 +911,7 @@ class VideoEntry {
     }
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
-      this.video.play(/*autoplay*/ true);
+      tryPlay(this.video, /*autoplay*/ true);
       this.playCalledByAutoplay_ = true;
     } else {
       if (this.isPlaying_) {
@@ -1592,7 +1586,7 @@ export class AnalyticsPercentageTracker {
    * @private
    */
   analyticsEventForTesting_(normalizedPercentage) {
-    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, {
+    analyticsEvent(this.entry_, VideoAnalyticsEvents_Enum.PERCENTAGE_PLAYED, {
       'normalizedPercentage': normalizedPercentage.toString(),
     });
   }
@@ -1600,7 +1594,7 @@ export class AnalyticsPercentageTracker {
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents} eventType
+ * @param {!VideoAnalyticsEvents_Enum} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */

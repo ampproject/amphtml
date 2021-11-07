@@ -8,22 +8,6 @@ teaser:
   text: Replaces the HTML5 video tag.
 ---
 
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-video
 
 ## Usage
@@ -74,6 +58,12 @@ Alternatively, you can present a click-to-play overlay.
 
 ### autoplay
 
+[filter formats="stories"]
+
+Required for videos inside stories.
+
+[/filter]<!-- formats="stories" -->
+
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
 to be played, [which are outlined in the Video in AMP spec](../../../docs/spec/amp-video-interface.md#autoplay).
@@ -110,6 +100,13 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 
 Annotates the video as having no audio. This hides the equalizer icon that is displayed
 when the video has autoplay.
+
+[filter formats="stories"]
+
+### volume
+
+Sets the current volume of the video, where the value must be in the range [0.1, 1]. The default value is 1.
+[/filter]<!-- formats="stories" -->
 
 ### rotate-to-fullscreen
 
@@ -155,6 +152,13 @@ Indicates the album/collection the video was taken from, specified as a string.
 #### title
 
 Indicates the name/title of the video, specified as a string. If not provided, the Media Session API helper uses either the `aria-label` attribute or falls back to the page's title.
+
+[filter formats="stories"]
+
+#### cache
+
+Indicates the Google video cache should store and serve the video by adding `cache="google"`. The video cache will fetch and store the video contents periodically, reducing serving costs for videos, and generating transcodes with different quality settings that adapt the bitrate to the network conditions.
+[/filter]
 
 ## Analytics
 

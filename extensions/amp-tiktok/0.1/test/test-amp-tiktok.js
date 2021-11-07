@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-tiktok';
 import * as dom from '#core/dom';
 import {Services} from '#service';
@@ -115,6 +99,28 @@ describes.realWin(
 
       const playerIframe = player.querySelector('iframe');
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
+    });
+
+    it('should resolve messages received before load', async () => {
+      const tiktok = await getTiktokBuildOnly({height: '600'});
+      const impl = await tiktok.getImpl();
+
+      // ensure that loadPromise is never resolved
+      env.sandbox.stub(impl, 'loadPromise').returns(new Promise(() => {}));
+      impl.layoutCallback();
+
+      // ensure that resolver is set after layoutCallback
+      expect(impl.resolveReceivedFirstMessage_).to.be.ok;
+      const firstMessageStub = env.sandbox.stub(
+        impl,
+        'resolveReceivedFirstMessage_'
+      );
+      impl.handleTiktokMessages_({
+        origin: 'https://www.tiktok.com',
+        source: tiktok.querySelector('iframe').contentWindow,
+        data: JSON.stringify({height: 555}),
+      });
+      expect(firstMessageStub).to.be.calledOnce;
     });
 
     it('renders placeholder', async () => {

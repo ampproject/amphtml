@@ -142,12 +142,14 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   NewsPassID
 -   Lotame
 -   Media.net
+-   Mediasquare
 -   Nexx360.io
 -   OpenX
 -   PubMatic OpenWrap
 -   Purch
 -   Rubicon
 -   Salesforce
+-   [Snigel](https://www.snigel.com)
 -   T13
 -   Tail
 -   The Ozone Project

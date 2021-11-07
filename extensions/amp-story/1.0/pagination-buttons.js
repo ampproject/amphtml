@@ -1,35 +1,18 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
-  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
-import {dev, devAssert} from '../../../src/log';
-
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {dev, devAssert} from '#utils/log';
+import {localize} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
-let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ButtonState_1_0_Def; // eslint-disable-line local/camelcase
 
 /** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
@@ -62,28 +45,13 @@ const ForwardButtonStates = {
 };
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildPaginationButton = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-button-container">
-        <button class="i-amphtml-story-button-move"></button>
-      </div>`;
-
-/**
- * @param {!Element} hoverEl
- * @param {!Element} targetEl
- * @param {string} className
- * @return {?Array<function(!Event)>}
- */
-function setClassOnHover(hoverEl, targetEl, className) {
-  const enterListener = () => targetEl.classList.add(className);
-  const exitListener = () => targetEl.classList.remove(className);
-  hoverEl.addEventListener('mouseenter', enterListener);
-  hoverEl.addEventListener('mouseleave', exitListener);
-  return [enterListener, exitListener];
-}
+const renderPaginationButton = () => (
+  <div class="i-amphtml-story-button-container">
+    <button class="i-amphtml-story-button-move"></button>
+  </div>
+);
 
 /**
  * Desktop navigation buttons.
@@ -100,22 +68,20 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = buildPaginationButton(doc);
+    this.element = renderPaginationButton();
 
     /** @private @const {!Element} */
     this.buttonElement_ = dev().assertElement(
       this.element.querySelector('button')
     );
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(doc);
-
     this.element.classList.add(initialState.className);
-    initialState.label &&
+    if (initialState.label) {
       this.buttonElement_.setAttribute(
         'aria-label',
-        this.localizationService_.getLocalizedString(initialState.label)
+        localize(doc, initialState.label)
       );
+    }
     this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -135,7 +101,7 @@ class PaginationButton {
     state.label
       ? this.buttonElement_.setAttribute(
           'aria-label',
-          this.localizationService_.getLocalizedString(state.label)
+          localize(this.win_.document, state.label)
         )
       : this.buttonElement_.removeAttribute('aria-label');
 
@@ -216,34 +182,10 @@ export class PaginationButtons {
     /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
-    /** @private {?Array<function(!Event)>} */
-    this.hoverListeners_ = null;
-
     this.initializeListeners_();
 
     this.ampStory_.element.appendChild(this.forwardButton_.element);
     this.ampStory_.element.appendChild(this.backButton_.element);
-  }
-
-  /** @private */
-  addHoverListeners_() {
-    if (this.hoverListeners_) {
-      return;
-    }
-
-    const forwardButtonListeners = setClassOnHover(
-      this.forwardButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-next-hover'
-    );
-
-    const backButtonListeners = setClassOnHover(
-      this.backButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-prev-hover'
-    );
-
-    this.hoverListeners_ = forwardButtonListeners.concat(backButtonListeners);
   }
 
   /** @private */
@@ -271,14 +213,6 @@ export class PaginationButtons {
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
     );
   }
 
@@ -333,20 +267,6 @@ export class PaginationButtons {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
       this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
       this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
-    }
-  }
-
-  /**
-   * Reacts to UI state updates.
-   * @param {!UIType} uiState
-   * @private
-   */
-  onUIStateUpdate_(uiState) {
-    if (
-      uiState === UIType.DESKTOP_PANELS ||
-      uiState === UIType.DESKTOP_FULLBLEED
-    ) {
-      this.addHoverListeners_();
     }
   }
 }

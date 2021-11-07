@@ -1,19 +1,4 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
@@ -26,11 +11,10 @@ import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '../../../src/log';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
-import {isAmpElement} from '../../../src/amp-element-helpers';
-import {listen} from '../../../src/event-helper';
+import {dev} from '#utils/log';
+import {localize} from './amp-story-localization-service';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
+import {listen} from '#utils/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
 
 /** @const {number} */
@@ -48,26 +32,24 @@ export const DrawerState = {
 
 /**
  * Drawer's template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getTemplateEl = (element) => {
-  return htmlFor(element)`
+const renderDrawerElement = () => {
+  return (
     <div class="i-amphtml-story-draggable-drawer">
       <div class="i-amphtml-story-draggable-drawer-container">
         <div class="i-amphtml-story-draggable-drawer-content"></div>
       </div>
-    </div>`;
+    </div>
+  );
 };
 
 /**
  * Drawer's header template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getHeaderEl = (element) => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-draggable-drawer-header"></div>`;
+const renderHeaderElement = () => {
+  return <div class="i-amphtml-story-draggable-drawer-header"></div>;
 };
 
 /**
@@ -139,9 +121,9 @@ export class DraggableDrawer extends AMP.BaseElement {
   buildCallback() {
     this.element.classList.add('amp-story-draggable-drawer-root');
 
-    const templateEl = getTemplateEl(this.element);
+    const templateEl = renderDrawerElement();
     const headerShadowRootEl = this.win.document.createElement('div');
-    this.headerEl = getHeaderEl(this.element);
+    this.headerEl = renderHeaderElement();
 
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl, CSS);
 
@@ -158,13 +140,11 @@ export class DraggableDrawer extends AMP.BaseElement {
     spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
     spacerEl.classList.add('i-amphtml-story-system-reset');
     spacerEl.setAttribute('role', 'button');
-    const localizationService = getLocalizationService(devAssert(this.element));
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      spacerEl.setAttribute('aria-label', localizedCloseString);
-    }
+    const localizedCloseString = localize(
+      this.element,
+      LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+    );
+    spacerEl.setAttribute('aria-label', localizedCloseString);
     this.containerEl.insertBefore(spacerEl, this.contentEl);
     this.contentEl.appendChild(headerShadowRootEl);
 
@@ -213,13 +193,18 @@ export class DraggableDrawer extends AMP.BaseElement {
       this.close_();
     });
 
-    // For displaying sticky header on mobile.
-    new this.win.IntersectionObserver((e) => {
-      this.headerEl.classList.toggle(
-        'i-amphtml-story-draggable-drawer-header-stuck',
-        !e[0].isIntersecting
-      );
-    }).observe(spacerEl);
+    // For displaying sticky header on mobile. iOS devices & Safari are
+    // excluded because the sticky positon has more restrictive functionality
+    // on those surfaces that prevents it from behaving as intended.
+    const platform = Services.platformFor(this.win);
+    if (!platform.isSafari() && !platform.isIos()) {
+      new this.win.IntersectionObserver((e) => {
+        this.headerEl.classList.toggle(
+          'i-amphtml-story-draggable-drawer-header-stuck',
+          !e[0].isIntersecting
+        );
+      }).observe(spacerEl);
+    }
 
     // Update spacerElHeight_ on resize for drag offset.
     new this.win.ResizeObserver((e) => {
@@ -228,10 +213,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     // Reset scroll position on end of close transiton.
     this.element.addEventListener('transitionend', (e) => {
-      if (
-        e.propertyName === 'transform' &&
-        this.state_ === DrawerState.CLOSED
-      ) {
+      if (e.propertyName === 'transform' && this.state === DrawerState.CLOSED) {
         this.containerEl./*OK*/ scrollTop = 0;
       }
     });
@@ -600,6 +582,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.state = DrawerState.CLOSED;
 
     this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', true);
@@ -617,5 +600,29 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
     });
+  }
+
+  /**
+   * Handle the soft keyboard during the closing of the drawer.
+   * @private
+   */
+  handleSoftKeyboardOnDrawerClose_() {
+    // Blur the focused element in order to dismiss the soft keyboard.
+    this.win.document.activeElement?.blur();
+    // Reset the story's scroll position, which can be unintentionally altered
+    // by the opening of the soft keyboard on Android devices.
+    this.resetStoryScrollPosition_();
+  }
+
+  /**
+   * Set the story's scroll position to its default state, if necessary.
+   * @private
+   */
+  resetStoryScrollPosition_() {
+    const storyEl = closest(
+      this.element,
+      (el) => el.tagName === 'AMP-STORY-PAGE'
+    );
+    storyEl./*OK*/ scrollTo(0, 0);
   }
 }

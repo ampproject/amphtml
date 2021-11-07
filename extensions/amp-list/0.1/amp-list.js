@@ -1,29 +1,8 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionTrust} from '#core/constants/action-constants';
 import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-list-0.1.css';
-import {
-  DIFFABLE_AMP_ELEMENTS,
-  DIFF_IGNORE,
-  DIFF_KEY,
-  markElementForDiffing,
-} from '#purifier/sanitation';
 import {Deferred} from '#core/data-structures/promise';
+import {isAmp4Email} from '#core/document/format';
+import {removeChildren, tryFocus} from '#core/dom';
 import {
   Layout,
   applyFillContent,
@@ -31,37 +10,44 @@ import {
   isLayoutSizeDefined,
   parseLayout,
 } from '#core/dom/layout';
-import {LoadMoreService} from './service/load-more-service';
-import {Pass} from '../../../src/pass';
-import {Services} from '#service';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
-import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-  requestForBatchFetch,
-} from '../../../src/batched-json';
 import {
   childElementByAttr,
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '#core/types/object';
-import {getMode} from '../../../src/mode';
-import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {removeChildren, tryFocus} from '#core/dom';
-
-import {isAmp4Email} from '../../../src/format';
-import {isArray, toArray} from '#core/types/array';
-import {isExperimentOn} from '#experiments';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
-import {setDOM} from '#third_party/set-dom/set-dom';
+import {isArray, toArray} from '#core/types/array';
+import {dict, getValueForExpr} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
 import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
+  DIFFABLE_AMP_ELEMENTS,
+  DIFF_IGNORE,
+  DIFF_KEY,
+  markElementForDiffing,
+} from '#purifier/sanitation';
+
+import {Services} from '#service';
+
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
+
+import {setDOM} from '#third_party/set-dom/set-dom';
+
+import {LoadMoreService} from './service/load-more-service';
+
+import {CSS} from '../../../build/amp-list-0.1.css';
+import {
+  UrlReplacementPolicy_Enum,
+  batchFetchJsonFor,
+  requestForBatchFetch,
+} from '../../../src/batched-json';
+import {getMode} from '../../../src/mode';
+import {Pass} from '../../../src/pass';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -1634,18 +1620,18 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!UrlReplacementPolicy_Enum}
    */
   getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }

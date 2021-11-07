@@ -466,9 +466,9 @@ class AmpInstagram extends AMP.BaseElement {
   // ...
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.getWin().document.createElement('div');
+    const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    const image = this.getWin().document.createElement('amp-img');
+    const image = this.win.document.createElement('amp-img');
     // This is always the same URL that is actually used inside of the embed.
     // This lets us avoid loading the image twice and make use of browser cache.
 
@@ -516,10 +516,10 @@ Consider showing a loading indicator if your element is expected to take
 a long time to load (for example, loading a GIF, video or iframe). AMP
 has a built-in mechanism to show a loading indicator simply by
 listing your element so it's allowed to show it. You can do that inside the `layout.js`
-file in the `LOADING_ELEMENTS_` object.
+file in the `LOADING_ELEMENTS_ENABLED` object.
 
 ```javascript
-export const LOADING_ELEMENTS_ = {
+export const LOADING_ELEMENTS_ENABLED = {
   ...
   'AMP-YOUTUBE': true,
   'AMP-MY-ELEMENT': true,
