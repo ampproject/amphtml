@@ -109,7 +109,7 @@ async function getZindexJs(filename) {
     plugins: ['jsx'],
   });
 
-  types.traverse(tree, function (node, ancestors) {
+  types.traverse(tree, (node, ancestors) => {
     if (types.isObjectProperty(node)) {
       const {value} = node;
       if (!types.isStringLiteral(value) && !types.isNumericLiteral(value)) {
@@ -134,7 +134,7 @@ async function getZindexJs(filename) {
       }
     } else if (types.isCallExpression(node)) {
       const value = getCallExpressionZIndexValue(node);
-      if (value) {
+      if (value != null) {
         report.push([getNodeSource(source, node.callee), value]);
       }
     }
