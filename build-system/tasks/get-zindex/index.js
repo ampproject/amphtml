@@ -124,8 +124,9 @@ async function getZindexChainsInJs(glob, cwd = '.') {
   const resultEntries = await Promise.all(
     files.map(async (filename) => {
       logChecking(filename);
+      const relative = path.relative(cwd, filename);
       const found = await getZindexJs(filename);
-      return [filename, found];
+      return [relative, found];
     })
   );
 

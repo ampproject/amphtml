@@ -6,7 +6,7 @@ const zIndexRegExp = /^z-?index$/i;
 
 /**
  * @param {types.CallExpression} node
- * @return {string|undefined}
+ * @return {string|number|undefined}
  */
 function getCallExpressionZIndexValue(node) {
   for (let i = 1; i < node.arguments.length; i++) {
@@ -18,7 +18,7 @@ function getCallExpressionZIndexValue(node) {
       types.isStringLiteral(previous) &&
       zIndexRegExp.test(previous.value)
     ) {
-      return String(argument.value);
+      return argument.value;
     }
   }
 }
@@ -73,11 +73,10 @@ function getPropertyChain(source, ancestors) {
   }
 
   if (types.isJSXAttribute(at)) {
-    path.pop();
     const parent = path.pop();
-    if (types.isJSXIdentifier(parent)) {
-      const openingElement = getNodeSource(source, parent);
-      return `<${openingElement} />`;
+    if (types.isJSXOpeningElement(parent)) {
+      const name = getNodeSource(source, parent.name);
+      return `<${name} />`;
     }
   }
 
@@ -141,7 +140,7 @@ async function getZindexJs(filename) {
     }
   });
 
-  return report;
+  return report.sort(([a], [b]) => a.localeCompare(b));
 }
 
 module.exports = {getZindexJs};
