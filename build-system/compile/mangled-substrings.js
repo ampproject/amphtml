@@ -6,7 +6,6 @@
  * in an unordered way. If we were to find mangled substrings as we go, we
  * would cause the compressed size to be unstable due to frequency of substrings.
  */
-const cssTokenize = require('postcss/lib/tokenize');
 const globby = require('globby');
 const {
   outputJson,
@@ -17,7 +16,6 @@ const {
 const {basename} = require('path');
 const {encode, indexCharset} = require('base62/lib/custom');
 const {endBuildStep} = require('../tasks/helpers');
-const {tokenize} = require('../common/acorn');
 
 const prefix = 'i-amphtml-';
 
@@ -71,44 +69,16 @@ function countAll(value, count) {
   if (!pattern) {
     pattern = new RegExp(
       // We avoid ending dashes in first match to ignore compound/generated
-      // classnames. Require end or special character after match in order to
+      // classnames. Require end or special character around match in order to
       // delimit an ident.
-      `(${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9])([^-a-zA-Z0-9]|$)`,
+      `([^-a-zA-Z0-9]|^)(${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9])([^-a-zA-Z0-9]|$)`,
       'g'
     );
   }
   const matches = value.matchAll(pattern);
-  for (const [, substring] of matches) {
+  for (const [, , substring] of matches) {
     count[substring] = count[substring] || 0;
     count[substring]++;
-  }
-}
-
-/**
- * @param {string} css
- * @param {{[string: string]: number}} count
- */
-function countInCss(css, count) {
-  const tokenized = cssTokenize({css});
-  let token;
-  while ((token = tokenized.nextToken())) {
-    const [type, value] = token;
-    if (type === 'word') {
-      countAll(value, count);
-    }
-  }
-}
-
-/**
- * @param {string} js
- * @param {{[string: string]: number}} count
- */
-function countInJs(js, count) {
-  const tokens = tokenize(js);
-  for (const token of tokens) {
-    if (token.type.label === 'string' || token.type.label === 'template') {
-      countAll(token.value, count);
-    }
   }
 }
 
@@ -120,11 +90,7 @@ function countInJs(js, count) {
 async function countInFile(filename, count) {
   const source = await readFile(filename, 'utf8');
   if (source.includes(prefix)) {
-    if (filename.endsWith('.css')) {
-      countInCss(source, count);
-    } else {
-      countInJs(source, count);
-    }
+    countAll(source, count);
   }
 }
 
