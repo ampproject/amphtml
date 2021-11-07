@@ -66,14 +66,14 @@ function countAll(value, count) {
   if (!pattern) {
     pattern = new RegExp(
       // We avoid ending dashes in first match to ignore compound/generated
-      // classnames. Require end or special character around match in order to
+      // classnames. Require end or special character after match in order to
       // delimit an ident.
-      `([^-a-zA-Z0-9]|^)(${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9])([^-a-zA-Z0-9]|$)`,
+      `(${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9])([^-a-zA-Z0-9]|$)`,
       'g'
     );
   }
   const matches = value.matchAll(pattern);
-  for (const [, , substring] of matches) {
+  for (const [, substring] of matches) {
     count[substring] = count[substring] || 0;
     count[substring]++;
   }
