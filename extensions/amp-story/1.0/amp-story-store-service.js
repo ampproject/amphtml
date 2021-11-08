@@ -95,6 +95,7 @@ export let InteractiveReactData;
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
  *    panningMediaState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
+ *    shoppingState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
@@ -146,6 +147,7 @@ export const StateProperty = {
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PANNING_MEDIA_STATE: 'panningMediaState',
+  SHOPPING_STATE: 'shoppingState',
   PAUSED_STATE: 'pausedState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
@@ -206,6 +208,7 @@ export const Action = {
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
+  ADD_SHOPPING_STATE: 'addShoppingState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
@@ -230,6 +233,8 @@ const stateComparisonFunctions = {
     old.width !== curr.width ||
     old.height !== curr.height,
   [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
+    old === null || curr === null || !deepEquals(old, curr, 2),
+  [StateProperty.SHOPPING_STATE]: (old, curr) =>
     old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
@@ -265,6 +270,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PANNING_MEDIA_STATE]: updatedState,
+      });
+    case Action.ADD_SHOPPING_STATE:
+      const updatedShoppingState = {
+        ...state[StateProperty.SHOPPING_STATE],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SHOPPING_STATE]: updatedShoppingState,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -563,6 +577,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PANNING_MEDIA_STATE]: {},
+      [StateProperty.SHOPPING_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,

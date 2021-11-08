@@ -1,2 +1,43 @@
 amp-story-shopping-attachment {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+.amp-story-shopping-attachment-outer {
+  padding: 0 16px 16px 16px;
+}
+
+.amp-story-shopping-attachment-header {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.amp-story-shopping-attachment-cards {
+  justify-content: space-between;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.amp-story-shopping-attachment-card {
+  width: calc(50% - 8px);
+  margin-bottom: 36px;
+}
+
+.amp-story-shopping-attachment-card-image {
+  border-radius: 12px;
+  width: 100%;
+}
+
+.brand {
+  font-size: 10px;
+  font-weight: 700 !important;
+}
+
+.name {
+  font-size: 14px;
+}
+
+.price {
+  font-size: 12px;
+  /* font-weight: 700 !important; */
 }

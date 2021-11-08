@@ -286,6 +286,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /** @private {?Element} Any component that extends draggable-drawer */
+    this.attachmentEl_ = null;
   }
 
   /**
@@ -331,6 +334,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
+    this.attachmentEl_ = this.element.querySelector(
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+    );
   }
 
   /** @private */
@@ -1721,7 +1727,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   renderOpenAttachmentUI_() {
     // AttachmentEl can be any component that extends draggable drawer.
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+      '.amp-story-draggable-drawer-root'
     );
     if (!attachmentEl) {
       return;
@@ -1775,9 +1781,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   openAttachment(shouldAnimate = true) {
     const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+      '.amp-story-draggable-drawer-root'
     );
-
     if (!attachmentEl) {
       return;
     }
