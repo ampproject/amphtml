@@ -343,6 +343,7 @@ tags: {
   }
   attrs: {
     name: "amp-extension"
+    mandatory: true
     value_casei: "amp-story"
   }
 }
