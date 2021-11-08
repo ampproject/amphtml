@@ -2,14 +2,14 @@ import {Layout} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 
-import {PreactBaseElement} from '#preact/base-element';
-
 import {userAssert} from '#utils/log';
+
+import {EmbedlyKeyBaseElement} from './key-base-element';
 
 /** @const {string} */
 export const TAG = 'amp-embedly-key';
 
-export class AmpEmbedlyKey extends PreactBaseElement {
+export class AmpEmbedlyKey extends EmbedlyKeyBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
