@@ -327,8 +327,7 @@ tags: {
     name: "href"
     mandatory: true
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-story-1\\.0\\.css|"
-                 "https://cdn\\.ampproject\\.org/lts/v0/amp-story-1\\.0\\.css|"
-                 "https://cdn\\.ampproject\\.org/rtv/\\d{15}/v0/amp-story-1\\.0\\.css"
+                 "https://cdn\\.ampproject\\.org/lts/v0/amp-story-1\\.0\\.css"
   }
   attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
   attrs: { name: "media" }
