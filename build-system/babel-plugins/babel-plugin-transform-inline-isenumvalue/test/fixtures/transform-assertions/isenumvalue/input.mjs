@@ -18,3 +18,10 @@ isEnumValue({
 isEnumValue({SINGLE_ITEM: 'single-item'}, foo);
 
 ignoreMe(enumInFile, x);
+
+function test() {
+  isEnumValue(exportedEnum, x);
+}
+function other() {
+  isEnumValue(exportedEnum, x);
+}

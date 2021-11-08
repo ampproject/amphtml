@@ -447,7 +447,7 @@ export const PlayingStates = {
 };
 
 /** @enum {string} */
-export const VideoAnalyticsEvents = {
+export const VideoAnalyticsEvents_Enum = {
   /**
    * video-ended
    *
