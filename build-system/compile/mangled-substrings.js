@@ -133,14 +133,12 @@ async function collect() {
     }
     // De-opt if a superstring of a dynamic prefix
     const split = inLowerCase.split('-');
-    split.pop();
-    while (split.length) {
+    while (split.pop()) {
       const possibleDynamicPrefix = split.join('-') + '-';
       if (deletePrefixes.has(possibleDynamicPrefix)) {
         delete includeCount[substring];
         break;
       }
-      split.pop();
     }
   }
 
