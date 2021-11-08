@@ -11,7 +11,7 @@ import {dev} from '#utils/log';
  * @param {!Array<?Element>} videos
  */
 export function renderPageDescription(page, videos) {
-  const descriptionElId = `i-amphtml-story-${page.element.id}-description`;
+  const descriptionElId = `i-amphtml-semantic-${page.element.id}`;
   const descriptionEl = (
     <div class="i-amphtml-story-page-description" id={descriptionElId}></div>
   );

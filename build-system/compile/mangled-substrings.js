@@ -68,14 +68,14 @@ function countInSource(source, count) {
       // We avoid ending dashes in first match to ignore compound/generated
       // classnames. Require end or special character after match in order to
       // delimit an ident.
-      `(${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9])([^-a-zA-Z0-9]|$)`,
+      `${prefix}[a-zA-Z0-9-]+`,
       // Case-insensitive, so that we can remove both all substrings where we
       // find mixed-case uses.
       'gi'
     );
   }
   const matches = source.matchAll(pattern);
-  for (const [, substring] of matches) {
+  for (const [substring] of matches) {
     count[substring] = count[substring] || 0;
     count[substring]++;
   }
@@ -103,6 +103,18 @@ async function collect() {
     })
   );
 
+  // If we find a substring that's a dynamic suffix, by ending with `-`, we
+  // de-opt all superstrings.
+  const deletePrefixes = new Set();
+  for (const obj of [includeCount, excludeCount]) {
+    for (const substring in obj) {
+      if (substring.endsWith('-')) {
+        deletePrefixes.add(substring.toLowerCase());
+        delete obj[substring];
+      }
+    }
+  }
+
   const previouslyInLowerCase = {};
   for (const substring in includeCount) {
     // De-opts substrings found with inconsistent casing.
@@ -115,9 +127,20 @@ async function collect() {
     } else {
       previouslyInLowerCase[inLowerCase] = substring;
     }
-    // Remove if found outside exclusive directory
+    // De-opt if found outside exclusive directory
     if (substring in excludeCount) {
       delete includeCount[substring];
+    }
+    // De-opt if a superstring of a dynamic prefix
+    const split = inLowerCase.split('-');
+    split.pop();
+    while (split.length) {
+      const possibleDynamicPrefix = split.join('-') + '-';
+      if (deletePrefixes.has(possibleDynamicPrefix)) {
+        delete includeCount[substring];
+        break;
+      }
+      split.pop();
     }
   }
 
