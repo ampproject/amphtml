@@ -29,6 +29,7 @@ import {
 import {useResourcesNotify} from '#preact/utils';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
+import {setStyle} from '#core/dom/style';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
@@ -91,6 +92,7 @@ function VideoWrapperWithRef(
 
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying_] = useState(false);
+  const [initialPlay, setinitialPlay] = useState(true);
   const [metadata, setMetadata] = useState(/** @type {?MetadataDef}*/ (null));
   const [hasUserInteracted, setHasUserInteracted] = useState(!autoplay);
 
@@ -125,13 +127,18 @@ function VideoWrapperWithRef(
   const onPlayingStateRef = useValueRef(onPlayingState);
   const setPlayingState = useCallback(
     (playing) => {
+      if (initialPlay && playing) {
+        setStyle(playerRef.current, 'object-fit', 'contain');
+        setinitialPlay(false);
+      }
+
       setPlaying_(playing);
       const onPlayingState = onPlayingStateRef.current;
       if (onPlayingState) {
         onPlayingState(playing);
       }
     },
-    [onPlayingStateRef]
+    [onPlayingStateRef, initialPlay]
   );
 
   // Reset playing state when the video player is unmounted.

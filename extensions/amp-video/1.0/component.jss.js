@@ -5,6 +5,7 @@ export const fillStretch = {
   'position': 'relative',
   'width': '100%',
   'height': '100%',
+  'object-fit': 'cover',
 };
 
 export const fillContentOverlay = {
