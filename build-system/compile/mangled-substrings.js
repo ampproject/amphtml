@@ -59,10 +59,10 @@ async function collectMangledSubstrings() {
 let pattern;
 
 /**
- * @param {string} value
+ * @param {string} source
  * @param {{[string: string]: number}} count
  */
-function countAll(value, count) {
+function countInSource(source, count) {
   if (!pattern) {
     pattern = new RegExp(
       // We avoid ending dashes in first match to ignore compound/generated
@@ -74,22 +74,10 @@ function countAll(value, count) {
       'gi'
     );
   }
-  const matches = value.matchAll(pattern);
+  const matches = source.matchAll(pattern);
   for (const [, substring] of matches) {
     count[substring] = count[substring] || 0;
     count[substring]++;
-  }
-}
-
-/**
- * @param {string} filename
- * @param {{[string: string]: number}} count
- * @return {Promise<void>}
- */
-async function countInFile(filename, count) {
-  const source = await readFile(filename, 'utf8');
-  if (source.includes(prefix)) {
-    countAll(source, count);
   }
 }
 
@@ -107,24 +95,19 @@ async function collect() {
 
   await Promise.all(
     filenames.map(async (filename) => {
-      try {
-        await countInFile(
-          filename,
-          filename.includes(exclusivelyFilenamesIncluding)
-            ? includeCount
-            : excludeCount
-        );
-      } catch (e) {
-        e.message = `${filename}: ${e.message}`;
-        throw e;
-      }
+      const source = await readFile(filename, 'utf8');
+      const count = filename.includes(exclusivelyFilenamesIncluding)
+        ? includeCount
+        : excludeCount;
+      countInSource(source, count);
     })
   );
 
   const previouslyInLowerCase = {};
   for (const substring in includeCount) {
-    // De-opts substrings found with uppercase characters. We don't want to break
-    // comparisons with Element.tagName, which is uppercase.
+    // De-opts substrings found with inconsistent casing.
+    // We don't want to break comparisons with Element.tagName, which is always
+    // uppercase.
     const inLowerCase = substring.toLowerCase();
     if (previouslyInLowerCase[inLowerCase]) {
       delete includeCount[substring];
