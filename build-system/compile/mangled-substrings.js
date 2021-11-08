@@ -69,7 +69,9 @@ function countAll(value, count) {
       // classnames. Require end or special character after match in order to
       // delimit an ident.
       `(${prefix}[a-zA-Z0-9-]*[a-zA-Z0-9])([^-a-zA-Z0-9]|$)`,
-      'g'
+      // Case-insensitive, so that we can remove both all substrings where we
+      // find mixed-case uses.
+      'gi'
     );
   }
   const matches = value.matchAll(pattern);
@@ -88,6 +90,25 @@ async function countInFile(filename, count) {
   const source = await readFile(filename, 'utf8');
   if (source.includes(prefix)) {
     countAll(source, count);
+  }
+}
+
+/**
+ * De-opts substrings found with uppercase characters. We don't want to break
+ * comparisons with Element.tagName, which is uppercase.
+ * @param {{[string: string]: T}} obj
+ * @template T
+ */
+function removeKeysWithDifferentCasing(obj) {
+  for (const substring in obj) {
+    const inLowerCase = substring.toLowerCase();
+    if (inLowerCase !== substring) {
+      for (const maybeSubstringAnyCase in obj) {
+        if (maybeSubstringAnyCase.toLowerCase() === inLowerCase) {
+          delete obj[maybeSubstringAnyCase];
+        }
+      }
+    }
   }
 }
 
@@ -119,9 +140,12 @@ async function collect() {
     })
   );
 
+  // Remove substrings found outside the exclusive directory.
   for (const substring in excludeCount) {
     delete includeCount[substring];
   }
+
+  removeKeysWithDifferentCasing(includeCount);
 
   return (
     Object.keys(includeCount)
