@@ -121,28 +121,24 @@ async function collect() {
     })
   );
 
-  // Remove substrings found outside the exclusive directory.
-  for (const substring in excludeCount) {
-    delete includeCount[substring];
-  }
-
-  /**
-   * De-opts substrings found with uppercase characters. We don't want to break
-   * comparisons with Element.tagName, which is uppercase.
-   * @type {{[string: string]: number}}
-   */
-  const normal = {};
+  const keysInLowercase = new Set();
   for (const substring in includeCount) {
+    // De-opts substrings found with uppercase characters. We don't want to break
+    // comparisons with Element.tagName, which is uppercase.
     const inLowerCase = substring.toLowerCase();
-    if (inLowerCase in normal) {
-      delete normal[inLowerCase];
+    if (keysInLowercase.has(inLowerCase)) {
+      delete includeCount[substring];
     } else {
-      normal[inLowerCase] = includeCount[substring];
+      keysInLowercase.add(inLowerCase);
+    }
+    // Remove if found outside exclusive directory
+    if (substring in excludeCount) {
+      delete includeCount[substring];
     }
   }
 
   return (
-    Object.keys(normal)
+    Object.keys(includeCount)
       // Sort lexicographically to stabilize.
       // Otherwise, compression would result in random deltas.
       .sort()
