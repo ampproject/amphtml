@@ -17,7 +17,7 @@ import {
   getResponseAttributeElements,
   setupResponseAttributeElements,
 } from './amp-story-form';
-import {removeElement} from '#core/dom';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {setImportantStyles, toggle} from '#core/dom/style';
 
 import {triggerClickFromLightDom} from './utils';
@@ -511,5 +511,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   getPublisherOrigin_() {
     const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
     return publisherOrigin.replace(/^http(s)?:\/\/(www.)?/, '');
+  }
+}
+
+const key = '__AMP_STORY_PAGE_ATTACHMENT';
+export function provideAmpStoryPageAttamentAsGlobal(win) {
+  if (!self[key]) {
+    self[key] = new AmpStoryPageAttachment(win);
+    dispatchCustomEvent('amp:amp-story-page-attachment-ready');
   }
 }
