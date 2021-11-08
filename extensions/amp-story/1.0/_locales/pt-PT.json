@@ -1,4 +1,28 @@
 {
+  "2": {
+    "string": "Toque em Seguinte"
+  },
+  "3": {
+    "string": "Toque em Anterior"
+  },
+  "4": {
+    "string": "Não foi possível copiar a ligação para a área de transferência :("
+  },
+  "5": {
+    "string": "Ligação copiada!"
+  },
+  "6": {
+    "string": "E-mail"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Obter ligação"
+  },
   "10": {
     "string": "LinkedIn"
   },
@@ -23,9 +47,6 @@
   "19": {
     "string": "Deve ativar a experiência de amp-story para ver este conteúdo."
   },
-  "2": {
-    "string": "Toque em Seguinte"
-  },
   "21": {
     "string": "Pedimos desculpa, mas parece que o seu navegador não suporta esta experiência"
   },
@@ -44,9 +65,6 @@
   "27": {
     "string": "Continuar mesmo assim"
   },
-  "3": {
-    "string": "Toque em Anterior"
-  },
   "31": {
     "string": "Som desligado"
   },
@@ -64,15 +82,6 @@
   },
   "36": {
     "string": "Expandir Tweet"
-  },
-  "4": {
-    "string": "Não foi possível copiar a ligação para a área de transferência :("
-  },
-  "5": {
-    "string": "Ligação copiada!"
-  },
-  "6": {
-    "string": "E-mail"
   },
   "62": {
     "string": "Partilhar a partir desta página"
@@ -97,9 +106,6 @@
   },
   "69": {
     "string": "Partilhar história"
-  },
-  "7": {
-    "string": "Facebook"
   },
   "70": {
     "string": "Alternar menu da história"
@@ -131,9 +137,6 @@
   "79": {
     "string": "Deslize para ir para a próxima história"
   },
-  "8": {
-    "string": "Google+"
-  },
   "80": {
     "string": "Compreendi"
   },
@@ -164,9 +167,6 @@
   "89": {
     "string": "A sua resposta será enviada para"
   },
-  "9": {
-    "string": "Obter ligação"
-  },
   "90": {
     "string": "Próxima história"
   },
@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "A abrir"
+  },
+  "98": {
+    "string": "Formulário não submetido, tente novamente"
+  },
+  "99": {
+    "string": "Formulário submetido com sucesso"
   }
 }

@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Membuka"
+  },
+  "98": {
+    "string": "Borang tidak diserah, cuba lagi"
+  },
+  "99": {
+    "string": "Borang berjaya diserah"
   }
 }
