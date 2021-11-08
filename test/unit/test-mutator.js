@@ -82,7 +82,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       pause: () => {},
       unmount: () => {},
       isRelayoutNeeded: () => true,
-      /* eslint-disable google-camelcase/google-camelcase */
+      /* eslint-disable local/camelcase */
       contains: (unused_otherElement) => false,
       updateLayoutBox: () => {},
       togglePlaceholder: () => env.sandbox.spy(),
@@ -90,7 +90,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
         unused_overflown,
         unused_requestedHeight,
         unused_requestedWidth
-        /* eslint-enable google-camelcase/google-camelcase */
+        /* eslint-enable local/camelcase */
       ) => {},
       getLayoutPriority: () => LayoutPriority.CONTENT,
       signals: () => signals,

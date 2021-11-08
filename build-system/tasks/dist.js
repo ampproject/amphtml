@@ -387,7 +387,7 @@ module.exports = {
   runPreDistSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 dist.description =
   'Compile AMP production binaries and apply AMP_CONFIG to runtime files';

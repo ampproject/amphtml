@@ -27,7 +27,7 @@ import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {
@@ -927,7 +927,7 @@ export class NextPageService {
       this.ampdoc_,
       this.getHost_(),
       {
-        urlReplacement: UrlReplacementPolicy.ALL,
+        urlReplacement: UrlReplacementPolicy_Enum.ALL,
         xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
       }
     )

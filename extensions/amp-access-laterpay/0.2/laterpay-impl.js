@@ -57,7 +57,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfig_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
+let LaterpayConfig_0_2_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -86,7 +86,7 @@ let ExpiryDef;
  *   expiry: ExpiryDef,
  * }}
  */
-let PurchaseOption_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseOption_0_2_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -94,7 +94,7 @@ let PurchaseOption_0_2_Def; // eslint-disable-line google-camelcase/google-camel
  *   purchase_options: Array<PurchaseOption_0_2_Def>,
  * }}
  */
-let PurchaseConfig_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseConfig_0_2_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{

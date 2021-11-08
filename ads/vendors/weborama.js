@@ -34,7 +34,7 @@ export function weboramaDisplay(global, data) {
 
   validateData(data, mandatoryFields, optionalFields);
 
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global.weborama_display_tag = {
     // Default settings to work with AMP
     forcesecure: true,

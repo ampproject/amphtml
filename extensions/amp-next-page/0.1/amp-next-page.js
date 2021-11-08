@@ -19,7 +19,7 @@ import {NextPageService} from './next-page-service';
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -259,7 +259,7 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   fetchConfig_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
   }
 

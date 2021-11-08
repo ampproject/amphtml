@@ -64,7 +64,7 @@ module.exports = {
   runPreBuildSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 build.description = 'Build the AMP library';
 build.flags = {

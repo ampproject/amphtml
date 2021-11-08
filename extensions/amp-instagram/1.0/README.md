@@ -1,18 +1,14 @@
 # Bento Instagram
 
-The Bento Instagram component allows you embed an Instagram post.
+Embeds an Instagram post.
 
-## Usage
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
 The examples below demonstrate use of the `<bento-instagram>` web component.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/instagram
@@ -23,7 +19,7 @@ import {defineElement as defineBentoInstagram} from '@bentoproject/instagram';
 defineBentoInstagram();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
 
 ```html
 <head>
@@ -64,7 +60,7 @@ defineBentoInstagram();
 </body>
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -88,7 +84,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-**Container type**
+#### Container type
 
 The `bento-instagram` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
 
@@ -99,27 +95,27 @@ bento-instagram {
 }
 ```
 
-#### Attributes
+### Attributes
 
-##### `data-shortcode`
+#### `data-shortcode`
 
 The instagram data-shortcode is found in every instagram photo URL. For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-shortcode.
 
-##### `data-captioned`
+#### `data-captioned`
 
 Include the Instagram caption. `bento-instagram` will attempt to resize to the correct height including the caption.
 
-#### Styling
+### Styling
 
 You may use the `bento-instagram` element selector to style the component.
 
-### Preact/React Component
+---
+
+## Preact/React Component
 
 The examples below demonstrates use of the `<BentoInstagram>` as a functional component usable with the Preact or React libraries.
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/instagram
@@ -134,9 +130,9 @@ function App() {
 }
 ```
 
-#### Layout and style
+### Layout and style
 
-**Container type**
+#### Container type
 
 The `BentoInstagram` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
@@ -163,12 +159,12 @@ Or via `className`:
 }
 ```
 
-#### Props
+### Props
 
-##### `shortcode`
+#### `shortcode`
 
 The instagram shortcode is found in every instagram photo URL. For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the shortcode.
 
-##### `captioned`
+#### `captioned`
 
 Include the Instagram caption. `bento-instagram` will attempt to resize to the correct height including the caption.
