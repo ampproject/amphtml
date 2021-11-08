@@ -94,25 +94,6 @@ async function countInFile(filename, count) {
 }
 
 /**
- * De-opts substrings found with uppercase characters. We don't want to break
- * comparisons with Element.tagName, which is uppercase.
- * @param {{[string: string]: T}} obj
- * @template T
- */
-function removeKeysWithDifferentCasing(obj) {
-  for (const substring in obj) {
-    const inLowerCase = substring.toLowerCase();
-    if (inLowerCase !== substring) {
-      for (const maybeSubstringAnyCase in obj) {
-        if (maybeSubstringAnyCase.toLowerCase() === inLowerCase) {
-          delete obj[maybeSubstringAnyCase];
-        }
-      }
-    }
-  }
-}
-
-/**
  * @return {Promise<[string, string][]>}
  */
 async function collect() {
@@ -145,10 +126,23 @@ async function collect() {
     delete includeCount[substring];
   }
 
-  removeKeysWithDifferentCasing(includeCount);
+  /**
+   * De-opts substrings found with uppercase characters. We don't want to break
+   * comparisons with Element.tagName, which is uppercase.
+   * @type {{[string: string]: number}}
+   */
+  const normal = {};
+  for (const substring in includeCount) {
+    const inLowerCase = substring.toLowerCase();
+    if (inLowerCase in normal) {
+      delete normal[inLowerCase];
+    } else {
+      normal[inLowerCase] = includeCount[substring];
+    }
+  }
 
   return (
-    Object.keys(includeCount)
+    Object.keys(normal)
       // Sort lexicographically to stabilize.
       // Otherwise, compression would result in random deltas.
       .sort()
