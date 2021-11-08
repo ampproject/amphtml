@@ -44,11 +44,10 @@ function posthtmlGetAmpFormat(tree) {
 /**
  * Gets the AMP format type for the given HTML file by parsing its contents and
  * examining the root element.
- * @param {string} file
+ * @param {string} source
  * @return {Promise<string>}
  */
-async function getAmpFormat(file) {
-  const source = await readFile(file, 'utf8');
+async function getAmpFormat(source) {
   if (!formatSuffixes.some((suffix) => source.includes(suffix))) {
     return defaultFormat;
   }
@@ -65,9 +64,14 @@ async function getFileGroups(filesToCheck) {
   logLocalDev(green('Sorting HTML fixtures into format groups...'));
   const fileGroups = {AMP4ADS: [], AMP4EMAIL: [], AMP: []};
   await Promise.all(
-    filesToCheck.map(async (file) =>
-      fileGroups[await getAmpFormat(file)].push(file)
-    )
+    filesToCheck.map(async (file) => {
+      const source = await readFile(file, 'utf8');
+      if (source.includes('<!-- skip-validation -->')) {
+        return;
+      }
+
+      fileGroups[await getAmpFormat(source)].push(file);
+    })
   );
   return fileGroups;
 }
