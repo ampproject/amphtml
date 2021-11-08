@@ -219,9 +219,6 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
-    /** @private @const {!../../../src/service/owners-interface.OwnersInterface} */
-    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
-
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
@@ -237,12 +234,6 @@ export class AmpStoryEmbeddedComponent {
      * @private {?Element}
      */
     this.componentPage_ = null;
-
-    /** @private */
-    this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
-
-    /** @private */
-    this.embedsToBePaused_ = [];
 
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_COMPONENT_STATE,
@@ -265,9 +256,9 @@ export class AmpStoryEmbeddedComponent {
    * Reacts to embedded component state updates.
    * Possible state updates:
    *
-   *    HIDDEN ==> FOCUSED ==> EXPANDED
-   *      /\ _________|           |
-   *      ||______________________|
+   *    HIDDEN ==> FOCUSED
+   *      /\          |
+   *      ||__________|
    *
    * @param {!InteractiveComponentDef} component
    * @private
@@ -286,19 +277,6 @@ export class AmpStoryEmbeddedComponent {
           );
         }
         this.setState_(EmbeddedComponentState.FOCUSED, component);
-        break;
-      case EmbeddedComponentState.EXPANDED:
-        if (this.state_ === EmbeddedComponentState.FOCUSED) {
-          this.setState_(EmbeddedComponentState.EXPANDED, component);
-        } else if (this.state_ === EmbeddedComponentState.EXPANDED) {
-          this.maybeCloseExpandedView_(component.element);
-        } else {
-          dev().warn(
-            TAG,
-            `Invalid component update. Not possible to go from ${this.state_}
-               to ${component.state}`
-          );
-        }
         break;
     }
   }
@@ -371,17 +349,9 @@ export class AmpStoryEmbeddedComponent {
       this.clearTooltip_();
     }, TOOLTIP_CLOSE_ANIMATION_MS);
 
-    if (this.state_ === EmbeddedComponentState.EXPANDED) {
-      this.toggleExpandedView_(null);
-    }
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
-    this.tooltip_.removeEventListener(
-      'click',
-      this.expandComponentHandler_,
-      true /** capture */
-    );
   }
 
   /**
@@ -460,21 +430,6 @@ export class AmpStoryEmbeddedComponent {
       if (this.state_ === EmbeddedComponentState.FOCUSED) {
         this.close_();
       }
-
-      // Hide expanded view when page switch is triggered by keyboard or desktop
-      // buttons.
-      if (this.state_ === EmbeddedComponentState.EXPANDED) {
-        this.maybeCloseExpandedView_(
-          null /** target */,
-          true /** forceClose */
-        );
-      }
-
-      // Pauses content inside embeds when a page change occurs.
-      while (this.embedsToBePaused_.length > 0) {
-        const embedEl = this.embedsToBePaused_.pop();
-        this.owners_.schedulePause(this.storyEl_, embedEl);
-      }
     });
   }
 
@@ -538,21 +493,6 @@ export class AmpStoryEmbeddedComponent {
         .setAttribute('href', this.getElementHref_(target));
       return;
     }
-  }
-
-  /**
-   * Handles the event of an interactive element coming into expanded view.
-   * @param {!Event} event
-   * @private
-   */
-  onExpandComponent_(event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
-      state: EmbeddedComponentState.EXPANDED,
-      element: this.triggeringTarget_,
-    });
   }
 
   /**
@@ -813,12 +753,6 @@ export class AmpStoryEmbeddedComponent {
       );
       customIcon.className = 'i-amphtml-story-tooltip-custom-icon';
       resetStyles(customIcon, ['background-image']);
-
-      this.tooltip_.removeEventListener(
-        'click',
-        this.expandComponentHandler_,
-        true
-      );
       this.tooltip_.classList.remove(DARK_THEME_CLASS);
       this.tooltip_.removeAttribute('href');
     });

@@ -360,22 +360,6 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   left: 0 !important;
 }
 
-.i-amphtml-expanded-mode .i-amphtml-embedded-component::after {
-  height: 0px !important;
-  width: 0px !important;
-}
-
-.i-amphtml-expanded-mode amp-story-grid-layer,
-.i-amphtml-expanded-mode amp-story-grid-layer * {
-  contain: none !important;
-  z-index: auto !important;
-}
-
-.i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
-  z-index: 1 !important;
-  transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-}
-
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
