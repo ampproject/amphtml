@@ -7,11 +7,17 @@ import {
   TAG as PAGINATION_TAG,
   PaginationBaseElement,
 } from './pagination-base-element';
+import {CSS as PAGINATION_CSS} from '#build/bento-inline-gallery-pagination-1.0.css.js';
+import {CSS} from '#build/bento-inline-gallery-1.0.css.js';
 
 /**
  * Registers `<bento-inline-gallery> component to CustomElements registry
  */
 export function defineElement() {
+  const style = document.createElement('style');
+  style.textContent = CSS;
+  document.head.appendChild(style);
+
   customElements.define(TAG, BaseElement.CustomElement(BaseElement));
   defineThumbnailsElement();
   definePaginationElement();
@@ -21,6 +27,10 @@ export function defineElement() {
  * Registers `<bento-inline-gallery-pagination> component to CustomElements registry
  */
 export function definePaginationElement() {
+  const style = document.createElement('style');
+  style.textContent = PAGINATION_CSS;
+  document.head.appendChild(style);
+
   customElements.define(
     PAGINATION_TAG,
     PaginationBaseElement.CustomElement(PaginationBaseElement)

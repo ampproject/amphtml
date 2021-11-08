@@ -564,20 +564,6 @@ async function getCssForJssFile(jssFile) {
  * @return {!Promise}
  */
 async function buildExtensionCss(extDir, name, version, options) {
-  /**
-   * Writes CSS binaries
-   *
-   * @param {string} name
-   * @param {string} css
-   */
-  function writeCssBinaries(name, css) {
-    const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
-    const jsName = `build/${name}.js`;
-    const cssName = `build/css/${name}`;
-    fs.writeFileSync(jsName, jsCss, 'utf-8');
-    fs.writeFileSync(cssName, css, 'utf-8');
-  }
-
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
 
@@ -602,10 +588,16 @@ async function buildExtensionCss(extDir, name, version, options) {
   if (Array.isArray(options.cssBinaries)) {
     parallel.push(
       ...options.cssBinaries.map((name) => {
-        return jsifyCssAsync(`${extDir}/${name}.css`).then((css) => {
+        return jsifyCssAsync(`${extDir}/${name}.css`).then(async (css) => {
           writeCssBinaries(`${name}-${version}.css`, css);
+          if (options.bento) {
+            await buildBentoCss(name, version, css);
+          }
           if (isAliased) {
             writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
+            if (options.bento) {
+              await buildBentoCss(name, aliasBundle.aliasedVersion, css);
+            }
           }
         });
       })
@@ -613,6 +605,20 @@ async function buildExtensionCss(extDir, name, version, options) {
   }
 
   await Promise.all(parallel);
+}
+
+/**
+ * Writes CSS binaries
+ *
+ * @param {string} name
+ * @param {string} css
+ */
+function writeCssBinaries(name, css) {
+  const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
+  const jsName = `build/${name}.js`;
+  const cssName = `build/css/${name}`;
+  fs.writeFileSync(jsName, jsCss, 'utf-8');
+  fs.writeFileSync(cssName, css, 'utf-8');
 }
 
 /**
@@ -630,6 +636,7 @@ async function buildBentoCss(name, version, minifiedAmpCss) {
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
   await fs.outputFile(`build/${bentoName}-${version}.css`, renamedCss);
   await fs.outputFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
+  writeCssBinaries(`${bentoName}-${version}.css`, renamedCss);
 }
 
 /**
@@ -781,7 +788,7 @@ async function generateBentoEntryPointSource(name, toExport, options) {
 
   return dedent(`
     import {BaseElement} from '../base-element';
-    
+
     function defineElement() {
       const css = __css__;
       if (css) {
