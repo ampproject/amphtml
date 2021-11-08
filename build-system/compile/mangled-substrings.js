@@ -121,15 +121,16 @@ async function collect() {
     })
   );
 
-  const keysInLowercase = new Set();
+  const previouslyInLowerCase = {};
   for (const substring in includeCount) {
     // De-opts substrings found with uppercase characters. We don't want to break
     // comparisons with Element.tagName, which is uppercase.
     const inLowerCase = substring.toLowerCase();
-    if (keysInLowercase.has(inLowerCase)) {
+    if (previouslyInLowerCase[inLowerCase]) {
       delete includeCount[substring];
+      delete includeCount[previouslyInLowerCase[inLowerCase]];
     } else {
-      keysInLowercase.add(inLowerCase);
+      previouslyInLowerCase.add(inLowerCase);
     }
     // Remove if found outside exclusive directory
     if (substring in excludeCount) {
