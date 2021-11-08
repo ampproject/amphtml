@@ -732,11 +732,13 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     const dialog = buildAddDeviceDialogTemplate(this.element);
 
     // Find the sections for the different screen sizes, where chips will be attached.
-    const sections = ['mobile', 'tablet', 'desktop'].reduce((obj, section) => {
+    const sections = [
+      'i-amphtml-story-dev-tools-device-dialog-mobile',
+      'i-amphtml-story-dev-tools-device-dialog-tablet',
+      'i-amphtml-story-dev-tools-device-dialog-desktop',
+    ].reduce((obj, section) => {
       obj[section] = dialog.querySelector(
-        `.i-amphtml-story-dev-tools-device-dialog-${escapeCssSelectorIdent(
-          section
-        )}`
+        `.${escapeCssSelectorIdent(section)}`
       );
       return obj;
     }, {});
