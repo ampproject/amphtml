@@ -1,4 +1,9 @@
-import {BaseElement} from './base-element';
+import {
+  BaseElement,
+  CommentsBaseElement,
+  LikeBaseElement,
+  PageBaseElement,
+} from './base-element';
 import {createLoaderLogo} from '../0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';
 import {dict} from '#core/types/object';
@@ -55,48 +60,11 @@ class AmpFacebook extends BaseElement {
   }
 }
 
-/**
- * Checks for valid data-embed-as attribute when given.
- * @param {!Element} element
- * @return {string}
- */
-function parseEmbed(element) {
-  const embedAs = element.getAttribute('data-embed-as');
-  userAssert(
-    !embedAs ||
-      ['post', 'video', 'comment', 'comments', 'like', 'page'].indexOf(
-        embedAs
-      ) !== -1,
-    'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-      ' "post", "video", "comment", "comments", "like", or "page", but was: %s',
-    embedAs
-  );
-  return embedAs;
-}
+class AmpFacebookComments extends CommentsBaseElement {}
 
-/** @override */
-AmpFacebook['props'] = {
-  ...BaseElement['props'],
-  'embedAs': {
-    attrs: ['data-embed-as'],
-    parseAttrs: parseEmbed,
-  },
-};
+class AmpFacebookLike extends LikeBaseElement {}
 
-class AmpFacebookComments extends AmpFacebook {}
-
-/** @override */
-AmpFacebookComments['staticProps'] = {'embedAs': 'comments'};
-
-class AmpFacebookLike extends AmpFacebook {}
-
-/** @override */
-AmpFacebookLike['staticProps'] = {'embedAs': 'like'};
-
-class AmpFacebookPage extends AmpFacebook {}
-
-/** @override */
-AmpFacebookPage['staticProps'] = {'embedAs': 'page'};
+class AmpFacebookPage extends PageBaseElement {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);
