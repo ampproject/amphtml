@@ -341,6 +341,10 @@ tags: {
     name: "type"
     value_casei: "text/css"
   }
+  attrs: {
+    name: "amp-extension"
+    value_casei: "amp-story"
+  }
 }
 # Allowlisted font providers
 tags: {
