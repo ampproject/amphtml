@@ -130,7 +130,7 @@ async function collect() {
       delete includeCount[substring];
       delete includeCount[previouslyInLowerCase[inLowerCase]];
     } else {
-      previouslyInLowerCase.add(inLowerCase);
+      previouslyInLowerCase[inLowerCase] = substring;
     }
     // Remove if found outside exclusive directory
     if (substring in excludeCount) {
