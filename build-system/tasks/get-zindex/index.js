@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const Postcss = require('postcss');
 const prettier = require('prettier');
-const textTable = require('text-table');
 const {
   getJscodeshiftReport,
   jscodeshiftAsync,
@@ -18,15 +17,7 @@ const {writeDiffOrFail} = require('../../common/diff');
 /** @type {Postcss.default} */
 const postcss = /** @type {*} */ (Postcss);
 
-const tableHeaders = [
-  ['context', 'z-index', 'file'],
-  ['---', '---', '---'],
-];
-
-const tableOptions = {
-  align: ['l', 'l', 'l'],
-  hsep: '   |   ',
-};
+const tableHeaders = ['context', 'z-index', 'file'];
 
 const preamble = `
 **Run \`amp get-zindex --fix\` to generate this file.**
@@ -219,8 +210,12 @@ async function getZindex() {
   );
 
   const filename = 'css/Z_INDEX.md';
-  const rows = [...tableHeaders, ...createTable(filesData)];
-  const table = textTable(rows, tableOptions);
+  const rows = [
+    tableHeaders,
+    tableHeaders.map(() => '-'),
+    ...createTable(filesData),
+  ];
+  const table = rows.map((row) => row.join(' | ')).join('\n');
   const output = await prettierFormat(filename, `${preamble}\n\n${table}`);
 
   await writeDiffOrFail(
