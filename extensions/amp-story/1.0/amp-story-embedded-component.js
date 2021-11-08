@@ -14,7 +14,6 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {Keys} from '#core/constants/key-codes';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {tryFocus} from '#core/dom';
@@ -25,13 +24,12 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
 import {htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
-import {px, resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+import {resetStyles, setImportantStyles} from '#core/dom/style';
 import objstr from 'obj-str';
 
 /**
@@ -41,7 +39,6 @@ import objstr from 'obj-str';
  */
 const ActionIcon = {
   LAUNCH: 'i-amphtml-tooltip-action-icon-launch',
-  EXPAND: 'i-amphtml-tooltip-action-icon-expand',
 };
 
 /** @private @const {number} */
@@ -59,16 +56,6 @@ const TooltipTheme = {
 };
 
 /**
- * Since we don't know the actual width of the content inside the iframe
- * and in responsive environments the iframe takes the whole width, we
- * hardcode a limit based on what we know of how the embed behaves (only true
- * for Twitter embeds). See #22334.
- * @const {number}
- * @private
- */
-const MAX_TWEET_WIDTH_PX = 500;
-
-/**
  * Components that can be expanded.
  * @const {!Object}
  * @package
@@ -76,7 +63,7 @@ const MAX_TWEET_WIDTH_PX = 500;
 export const EXPANDABLE_COMPONENTS = {
   'amp-twitter': {
     customIconClassName: 'amp-social-share-twitter-no-background',
-    actionIcon: ActionIcon.EXPAND,
+    actionIcon: ActionIcon.LAUNCH,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
@@ -144,9 +131,6 @@ export function expandableElementsSelectors() {
 const interactiveSelectors = {
   ...getComponentSelectors(LAUNCHABLE_COMPONENTS),
   ...getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_EMBED_SELECTOR),
-  EXPANDED_VIEW_OVERLAY:
-    '.i-amphtml-story-expanded-view-overflow, ' +
-    '.i-amphtml-expanded-view-close-button',
 };
 
 /**
@@ -159,254 +143,15 @@ export function interactiveElementsSelectors() {
 }
 
 /**
- * Maps each embedded element to its corresponding style.
- * @type {!JsonObject}
- */
-const embedStyleEls = dict();
-
-/**
- * Generates ids for embedded component styles.
- * @type {number}
- */
-let embedIds = 0;
-
-/**
- * Contains metadata about embedded components, found in <style> elements.
- * @const {string}
- */
-const AMP_EMBED_DATA = '__AMP_EMBED_DATA__';
-
-/**
- * @typedef {{
- *  id: number,
- *  width: number,
- *  height: number,
- *  scaleFactor: number,
- *  transform: string,
- *  verticalMargin: number,
- *  horizontalMargin: number,
- * }}
- */
-let EmbedDataDef;
-
-/**
  * @const {string}
  */
 export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
-
-/**
- * Builds expanded view overlay for expandable components.
- * @return {!Element}
- */
-const renderExpandedViewOverlay = () => (
-  <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
-    <button
-      class="i-amphtml-expanded-view-close-button"
-      aria-label="close"
-      role="button"
-    ></button>
-  </div>
-);
-
-/**
- * Updates embed's corresponding <style> element with embedData.
- * @param {!Element} target
- * @param {!Element} embedStyleEl
- * @param {!EmbedDataDef} embedData
- */
-function updateEmbedStyleEl(target, embedStyleEl, embedData) {
-  const embedId = embedData.id;
-  embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"]
-  ${buildStringStyleFromEl(target, embedData)}`;
-}
-
-/**
- * Builds a string containing the corresponding style depending on the
- * element.
- * @param {!Element} target
- * @param {!EmbedDataDef} embedData
- * @return {string}
- */
-function buildStringStyleFromEl(target, embedData) {
-  switch (target.tagName.toLowerCase()) {
-    case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
-      return buildStringStyleForTweet(embedData);
-    default:
-      return buildDefaultStringStyle(embedData);
-  }
-}
-
-/**
- * Builds string used in the <style> element for tweets. We ignore the height
- * as its non-deterministic.
- * @param {!EmbedDataDef} embedData
- * @return {string}
- */
-function buildStringStyleForTweet(embedData) {
-  return `{
-    width: ${px(embedData.width)} !important;
-    transform: ${embedData.transform} !important;
-    margin: ${embedData.verticalMargin}px ${
-    embedData.horizontalMargin
-  }px !important;
-    }`;
-}
-
-/**
- * Builds string used in the <style> element for default embeds.
- * @param {!EmbedDataDef} embedData
- * @return {string}
- */
-function buildDefaultStringStyle(embedData) {
-  return `{
-    width: ${px(embedData.width)} !important;
-    height: ${px(embedData.height)} !important;
-    transform: ${embedData.transform} !important;
-    margin: ${embedData.verticalMargin}px ${
-    embedData.horizontalMargin
-  }px !important;
-    }`;
-}
-
-/**
- * Measures styles for a given element in preparation for its expanded animation.
- * @param {!Element} element
- * @param {!Object} state
- * @param {!DOMRect} pageRect
- * @param {!DOMRect} elRect
- * @return {!Object}
- */
-function measureStyleForEl(element, state, pageRect, elRect) {
-  switch (element.tagName.toLowerCase()) {
-    case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
-      return measureStylesForTwitter(state, pageRect, elRect);
-    default:
-      return measureDefaultStyles(state, pageRect, elRect);
-  }
-}
-
-/**
- * Since amp-twitter handles its own resize events for its height, we don't
- * resize based on its height, but rather just based on its width.
- * @param {!Object} state
- * @param {!DOMRect} pageRect
- * @param {!DOMRect} elRect
- * @return {!Object}
- */
-function measureStylesForTwitter(state, pageRect, elRect) {
-  // If screen is very wide and story has supports-landscape attribute,
-  // we don't want it to take the whole width. We take the maximum width
-  // that the tweet can actually use instead.
-  state.newWidth = Math.min(pageRect.width, MAX_TWEET_WIDTH_PX);
-
-  state.scaleFactor =
-    Math.min(elRect.width, MAX_TWEET_WIDTH_PX) / state.newWidth;
-
-  const shrinkedSize = elRect.height * state.scaleFactor;
-
-  state.verticalMargin = -1 * ((elRect.height - shrinkedSize) / 2);
-  state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
-
-  return state;
-}
-
-/**
- * Measures styles for a given element in preparation for its expanded
- * animation.
- * @param {!Object} state
- * @param {!DOMRect} pageRect
- * @param {!DOMRect} elRect
- * @return {!Object}
- */
-function measureDefaultStyles(state, pageRect, elRect) {
-  if (elRect.width >= elRect.height) {
-    state.newWidth = pageRect.width;
-    state.scaleFactor = elRect.width / state.newWidth;
-    state.newHeight = (elRect.height / elRect.width) * state.newWidth;
-  } else {
-    const maxHeight = pageRect.height - VERTICAL_PADDING;
-    state.newWidth = Math.min(
-      (elRect.width / elRect.height) * maxHeight,
-      pageRect.width
-    );
-    state.newHeight = (elRect.height / elRect.width) * state.newWidth;
-    state.scaleFactor = elRect.height / state.newHeight;
-  }
-
-  state.verticalMargin = -1 * ((state.newHeight - elRect.height) / 2);
-  state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
-
-  return state;
-}
-
-/**
- * Gets updated style object for a given element.
- * @param {!Element} element
- * @param {number} elId
- * @param {!Object} state
- * @return {!Object}
- */
-function updateStyleForEl(element, elId, state) {
-  switch (element.tagName.toLowerCase()) {
-    case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
-      return updateStylesForTwitter(elId, state);
-    default:
-      return updateDefaultStyles(elId, state);
-  }
-}
-
-/**
- * Gets style object for an embedded component, setting negative margins
- * to make up for the expanded size in preparation of the expanded animation.
- * @param {number} elId
- * @param {!Object} state
- * @return {!Object}
- */
-function updateDefaultStyles(elId, state) {
-  return {
-    id: elId,
-    width: state.newWidth,
-    height: state.newHeight,
-    scaleFactor: state.scaleFactor,
-    transform: `scale(${state.scaleFactor})`,
-    verticalMargin: state.verticalMargin,
-    horizontalMargin: state.horizontalMargin,
-  };
-}
-
-/**
- * Gets style object for twitter. Notice there is no height or vertical margin
- * since we don't know the final height of tweets even after layout, so we just
- * let the embed handle its own height.
- * @param {number} elId
- * @param {!Object} state
- * @return {!Object}
- */
-function updateStylesForTwitter(elId, state) {
-  return {
-    id: elId,
-    width: state.newWidth,
-    scaleFactor: state.scaleFactor,
-    transform: `scale(${state.scaleFactor})`,
-    horizontalMargin: state.horizontalMargin,
-    verticalMargin: state.verticalMargin,
-  };
-}
 
 /**
  * Minimum vertical space needed to position tooltip.
  * @const {number}
  */
 const MIN_VERTICAL_SPACE = 48;
-
-/**
- * Limits the amount of vertical space a component can take in a page, this
- * makes sure no component is blocking the close button at the top of the
- * expanded view.
- * @const {number}
- * @private
- */
-const VERTICAL_PADDING = 96;
 
 /**
  * Padding between tooltip and vertical edges of screen.
@@ -480,9 +225,6 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
-    /** @private {?Element} */
-    this.expandedViewOverlay_ = null;
-
     /**
      * Target producing the tooltip and going to expanded view (when
      * expandable).
@@ -509,11 +251,6 @@ export class AmpStoryEmbeddedComponent {
       }
     );
 
-    /** @type {!../../../src/service/history-impl.History} */
-    this.historyService_ = Services.historyForDoc(
-      getAmpdoc(this.win_.document)
-    );
-
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
 
@@ -522,9 +259,6 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {?Element} */
     this.buttonRight_ = null;
-
-    /** @private {number} */
-    this.historyId_ = -1;
   }
 
   /**
@@ -589,111 +323,9 @@ export class AmpStoryEmbeddedComponent {
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
         break;
-      case EmbeddedComponentState.EXPANDED:
-        this.state_ = state;
-        this.onFocusedStateUpdate_(null);
-        this.scheduleEmbedToPause_(component.element);
-        this.toggleExpandedView_(component.element);
-        this.historyService_
-          .push(() => this.close_())
-          .then((historyId) => {
-            this.historyId_ = historyId;
-          });
-        break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
-    }
-  }
-
-  /**
-   * Schedules embeds to be paused.
-   * @param {!Element} embedEl
-   * @private
-   */
-  scheduleEmbedToPause_(embedEl) {
-    // Resources that previously called `schedulePause` must also call
-    // `scheduleResume`. Calling `scheduleResume` on resources that did not
-    // previously call `schedulePause` has no effect.
-    this.owners_.scheduleResume(this.storyEl_, embedEl);
-    if (!this.embedsToBePaused_.includes(embedEl)) {
-      this.embedsToBePaused_.push(embedEl);
-    }
-  }
-
-  /**
-   * Toggles expanded view for interactive components that support it.
-   * @param {?Element} targetToExpand
-   * @private
-   */
-  toggleExpandedView_(targetToExpand) {
-    if (!targetToExpand) {
-      this.expandedViewOverlay_ &&
-        this.mutator_.mutateElement(this.expandedViewOverlay_, () => {
-          this.componentPage_.classList.toggle(
-            'i-amphtml-expanded-mode',
-            false
-          );
-          toggle(dev().assertElement(this.expandedViewOverlay_), false);
-          this.closeExpandedEl_();
-        });
-      return;
-    }
-
-    this.animateExpanded_(devAssert(targetToExpand));
-
-    this.expandedViewOverlay_ = this.componentPage_.querySelector(
-      '.i-amphtml-story-expanded-view-overflow'
-    );
-    if (!this.expandedViewOverlay_) {
-      this.buildAndAppendExpandedViewOverlay_();
-    }
-    this.mutator_.mutateElement(
-      dev().assertElement(this.expandedViewOverlay_),
-      () => {
-        toggle(dev().assertElement(this.expandedViewOverlay_), true);
-        this.componentPage_.classList.toggle('i-amphtml-expanded-mode', true);
-      }
-    );
-  }
-
-  /**
-   * Builds the expanded view overlay element and appends it to the page.
-   * @private
-   */
-  buildAndAppendExpandedViewOverlay_() {
-    this.expandedViewOverlay_ = renderExpandedViewOverlay();
-    const closeButton = dev().assertElement(
-      this.expandedViewOverlay_.querySelector(
-        '.i-amphtml-expanded-view-close-button'
-      )
-    );
-    closeButton.setAttribute(
-      'aria-label',
-      localize(this.storyEl_, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
-    );
-    this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
-      this.componentPage_.appendChild(this.expandedViewOverlay_)
-    );
-  }
-
-  /**
-   * Closes the expanded view overlay.
-   * @param {?Element} target
-   * @param {boolean=} forceClose Force closing the expanded view.
-   * @private
-   */
-  maybeCloseExpandedView_(target, forceClose = false) {
-    if (
-      (target && matches(target, '.i-amphtml-expanded-view-close-button')) ||
-      forceClose
-    ) {
-      if (this.historyId_ !== -1) {
-        this.historyService_.goBack();
-      } else {
-        // Used for visual diff testing viewer.
-        this.close_();
-      }
     }
   }
 
@@ -844,19 +476,6 @@ export class AmpStoryEmbeddedComponent {
         this.owners_.schedulePause(this.storyEl_, embedEl);
       }
     });
-
-    this.win_.addEventListener('keyup', (event) => {
-      if (
-        event.key === Keys.ESCAPE &&
-        this.state_ === EmbeddedComponentState.EXPANDED
-      ) {
-        event.preventDefault();
-        this.maybeCloseExpandedView_(
-          null /** target */,
-          true /** forceClose */
-        );
-      }
-    });
   }
 
   /**
@@ -910,19 +529,14 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipBehavior_(target) {
-    if (matches(target, LAUNCHABLE_COMPONENTS['a'].selector)) {
+    if (
+      matches(target, LAUNCHABLE_COMPONENTS['a'].selector) ||
+      matches(target, EXPANDABLE_COMPONENTS['amp-twitter'].selector)
+    ) {
       dev()
         .assertElement(this.tooltip_)
         .setAttribute('href', this.getElementHref_(target));
       return;
-    }
-
-    if (EXPANDABLE_COMPONENTS[target.tagName.toLowerCase()]) {
-      this.tooltip_.addEventListener(
-        'click',
-        this.expandComponentHandler_,
-        true
-      );
     }
   }
 
@@ -948,6 +562,11 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   getElementHref_(target) {
+    if (target.tagName.toLowerCase() == 'amp-twitter') {
+      return (
+        'https://twitter.com/_/status/' + target.getAttribute('data-tweetid')
+      );
+    }
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
@@ -970,152 +589,6 @@ export class AmpStoryEmbeddedComponent {
 
     user().error(TAG, 'No config matching provided target.');
     return null;
-  }
-
-  /**
-   * Returns expanded element back to original state.
-   * @private
-   */
-  closeExpandedEl_() {
-    this.triggeringTarget_.classList.toggle(
-      'i-amphtml-expanded-component',
-      false
-    );
-    const embedId = this.triggeringTarget_.getAttribute(
-      EMBED_ID_ATTRIBUTE_NAME
-    );
-
-    const embedStyleEl = dev().assertElement(
-      embedStyleEls[embedId],
-      `Failed to look up embed style element with ID ${embedId}`
-    );
-
-    embedStyleEl[
-      AMP_EMBED_DATA
-    ].transform = `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`;
-    updateEmbedStyleEl(
-      this.triggeringTarget_,
-      embedStyleEl,
-      embedStyleEl[AMP_EMBED_DATA]
-    );
-  }
-
-  /**
-   * Animates into expanded view. It calculates what the full-screen dimensions
-   * of the element will be, and uses them to deduce the translateX/Y values
-   * once the element reaches its full-screen size.
-   * @param {!Element} target
-   * @private
-   */
-  animateExpanded_(target) {
-    const embedId = target.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
-    const state = {};
-    const embedStyleEl = dev().assertElement(
-      embedStyleEls[embedId],
-      `Failed to look up embed style element with ID ${embedId}`
-    );
-    const embedData = embedStyleEl[AMP_EMBED_DATA];
-    this.mutator_.measureMutateElement(
-      target,
-      /** measure */
-      () => {
-        const targetRect = target./*OK*/ getBoundingClientRect();
-        // TODO(#20832): Store DOMRect for the page in the store to avoid
-        // having to call getBoundingClientRect().
-        const pageRect = this.componentPage_./*OK*/ getBoundingClientRect();
-        const realHeight = target./*OK*/ offsetHeight;
-        const maxHeight = pageRect.height - VERTICAL_PADDING;
-        state.scaleFactor = 1;
-        if (realHeight > maxHeight) {
-          state.scaleFactor = maxHeight / realHeight;
-        }
-
-        // Gap on the left of the element between full-screen size and
-        // current size.
-        const leftGap = (embedData.width - targetRect.width) / 2;
-        // Distance from left of page to what will be the left of the
-        // element in full-screen.
-        const fullScreenLeft = targetRect.left - leftGap - pageRect.left;
-        const centeredLeft = pageRect.width / 2 - embedData.width / 2;
-        state.translateX = centeredLeft - fullScreenLeft;
-
-        // Gap on the top of the element between full-screen size and
-        // current size.
-        const topGap = (realHeight * state.scaleFactor - targetRect.height) / 2;
-        // Distance from top of page to what will be the top of the element in
-        // full-screen.
-        const fullScreenTop = targetRect.top - topGap - pageRect.top;
-        const centeredTop =
-          pageRect.height / 2 - (realHeight * state.scaleFactor) / 2;
-        state.translateY = centeredTop - fullScreenTop;
-      },
-      /** mutate */
-      () => {
-        target.classList.toggle('i-amphtml-expanded-component', true);
-
-        embedData.transform = `translate3d(${state.translateX}px,
-            ${state.translateY}px, 0) scale(${state.scaleFactor})`;
-
-        updateEmbedStyleEl(target, embedStyleEl, embedData);
-      }
-    );
-  }
-
-  /**
-   * Resizes expandable element before it is expanded to full-screen, in
-   * preparation for its animation. It resizes it to its full-screen size, and
-   * scales it down to match size set by publisher, adding negative margins so
-   * that content around stays put.
-   * @param {!Element} pageEl
-   * @param {!Element} element
-   * @param {!../../../src/service/mutator-interface.MutatorInterface} mutator
-   */
-  static prepareForAnimation(pageEl, element, mutator) {
-    let elId = null;
-
-    // When a window resize happens, we must reset the styles and prepare the
-    // animation again.
-    if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
-      elId = parseInt(element.getAttribute(EMBED_ID_ATTRIBUTE_NAME), 10);
-      const embedStyleEl = dev().assertElement(
-        embedStyleEls[elId],
-        `Failed to look up embed style element with ID ${elId}`
-      );
-      embedStyleEl.textContent = '';
-      embedStyleEl[AMP_EMBED_DATA] = {};
-    }
-
-    let state = {};
-    mutator.measureMutateElement(
-      element,
-      /** measure */
-      () => {
-        const pageRect = pageEl./*OK*/ getBoundingClientRect();
-        const elRect = element./*OK*/ getBoundingClientRect();
-        state = measureStyleForEl(element, state, pageRect, elRect);
-      },
-      /** mutate */
-      () => {
-        elId = elId ? elId : ++embedIds;
-        if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
-          const embedStyleEl = <style></style>;
-
-          element.setAttribute(EMBED_ID_ATTRIBUTE_NAME, elId);
-          pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
-          embedStyleEls[elId] = embedStyleEl;
-        }
-
-        embedStyleEls[elId][AMP_EMBED_DATA] = {
-          ...updateStyleForEl(element, elId, state),
-        };
-
-        const embedStyleEl = dev().assertElement(
-          embedStyleEls[elId],
-          `Failed to look up embed style element with ID ${elId}`
-        );
-        updateEmbedStyleEl(element, embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
-      }
-    );
   }
 
   /**
