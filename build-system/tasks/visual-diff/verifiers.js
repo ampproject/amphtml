@@ -1,9 +1,8 @@
 'use strict';
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
 const {cyan} = require('kleur/colors');
 const {log} = require('./log');
-const {replaceMangledSubstrings} = require('../../compile/mangled-substrings');
 const {sleep} = require('./helpers');
 const {VisibilityDef} = require('./types');
 
@@ -150,12 +149,12 @@ async function waitForElementVisibility(
       "'visible' or 'hidden' set to true."
     );
   }
-  const mangledSelector = replaceMangledSubstrings(selector);
+
   const startTime = Date.now();
   do {
     const elementsAreVisible = [];
 
-    for (const elementHandle of await page.$$(mangledSelector)) {
+    for (const elementHandle of await page.$$(selector)) {
       const boundingBox = await elementHandle.boundingBox();
       const elementIsVisible =
         boundingBox != null && boundingBox.height > 0 && boundingBox.width > 0;
@@ -168,8 +167,7 @@ async function waitForElementVisibility(
         'Found',
         cyan(elementsAreVisible.length),
         'element(s) matching the CSS selector',
-        cyan(selector),
-        `(${mangledSelector})`
+        cyan(selector)
       );
       log(
         'verbose',
