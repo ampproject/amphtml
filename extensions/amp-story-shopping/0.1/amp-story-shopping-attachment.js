@@ -1,4 +1,3 @@
-import * as Preact from '#core/dom/jsx';
 import {Layout, applyFillContent} from '#core/dom/layout';
 import {once} from '#core/types/function';
 
@@ -35,7 +34,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   buildCallback() {
     this.getImpl_().then((impl) => {
       impl.buildCallback();
-      this.container_ = <div>{this.myText_}</div>;
+      this.container_ = this.element.ownerDocument.createElement('div');
+      this.container_.textContent = this.myText_;
       applyFillContent(this.container_);
       this.element.appendChild(this.container_);
     });
