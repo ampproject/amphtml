@@ -732,16 +732,15 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     const dialog = buildAddDeviceDialogTemplate(this.element);
 
     // Find the sections for the different screen sizes, where chips will be attached.
-    const sections = [
-      'i-amphtml-story-dev-tools-device-dialog-mobile',
-      'i-amphtml-story-dev-tools-device-dialog-tablet',
-      'i-amphtml-story-dev-tools-device-dialog-desktop',
-    ].reduce((obj, section) => {
-      obj[section] = dialog.querySelector(
-        `.${escapeCssSelectorIdent(section)}`
-      );
-      return obj;
-    }, {});
+    const sectionDesktop = dialog.querySelector(
+      '.i-amphtml-story-dev-tools-device-dialog-desktop'
+    );
+    const sectionTablet = dialog.querySelector(
+      '.i-amphtml-story-dev-tools-device-dialog-tablet'
+    );
+    const sectionMobile = dialog.querySelector(
+      '.i-amphtml-story-dev-tools-device-dialog-mobile'
+    );
 
     const currentDeviceSpaces = this.getCurrentSpacesSum_();
 
@@ -756,13 +755,13 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
           chip.setAttribute('disabled', '');
         }
       }
-      if (device.width / device.height > 1) {
-        sections['desktop'].appendChild(chip);
-      } else if (device.width / device.height > 0.75) {
-        sections['tablet'].appendChild(chip);
-      } else {
-        sections['mobile'].appendChild(chip);
-      }
+      const section =
+        device.width / device.height > 1
+          ? sectionDesktop
+          : device.width / device.height > 0.75
+          ? sectionTablet
+          : sectionMobile;
+      section.appendChild(chip);
     });
 
     this.mutateElement(() => this.element.appendChild(dialog));
