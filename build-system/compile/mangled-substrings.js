@@ -64,15 +64,9 @@ let pattern;
  */
 function countInSource(source, count) {
   if (!pattern) {
-    pattern = new RegExp(
-      // We avoid ending dashes in first match to ignore compound/generated
-      // classnames. Require end or special character after match in order to
-      // delimit an ident.
-      `${prefix}[a-zA-Z0-9-]+`,
-      // Case-insensitive, so that we can remove both all substrings where we
-      // find mixed-case uses.
-      'gi'
-    );
+    // Case-insensitive, so that we can remove both all substrings where we
+    // find mixed-case uses.
+    pattern = new RegExp(`${prefix}[a-zA-Z0-9-]+`, 'gi');
   }
   const matches = source.matchAll(pattern);
   for (const [substring] of matches) {
