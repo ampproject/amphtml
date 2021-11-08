@@ -47,8 +47,9 @@ function buildStatusIcon(element, statusPassed) {
     class="i-amphtml-story-dev-tools-log-status-icon"
   ></div>`;
   iconEl.classList.add(
-    'i-amphtml-story-dev-tools-log-status-icon-' +
-      (statusPassed ? 'passed' : 'failed')
+    statusPassed
+      ? 'i-amphtml-story-dev-tools-log-status-icon-passed'
+      : 'i-amphtml-story-dev-tools-log-status-icon-failed'
   );
   return iconEl;
 }
