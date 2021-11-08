@@ -110,6 +110,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // TODO(ccordry): properly block on this when #cap check is possible.
+    this.askPlayerForActiveExperiments_();
+
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
@@ -165,7 +168,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         if (!this.placementAlgorithm_.isStoryEligible()) {
           return;
         }
-        this.askPlayerForActiveExperiments_();
         this.analytics_ = getServicePromiseForDoc(
           this.element,
           STORY_AD_ANALYTICS
