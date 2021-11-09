@@ -250,6 +250,25 @@ describes.sandboxed('Styles', {}, () => {
           });
         });
 
+        it('should discover existing extension link[rel=stylesheet] and not overwrite it', () => {
+          const serverEl = doc.createElement('link');
+          serverEl.setAttribute('amp-extension', 'amp-ext1');
+          serverEl.setAttribute(
+            'href',
+            '/examples/amp-story/amp-story-1.0.css'
+          );
+          serverEl.setAttribute('rel', 'stylesheet');
+          head.appendChild(serverEl);
+          const promise = installStylesAsPromise('other{}', false, 'amp-ext1');
+          return promise.then((styleEl) => {
+            expect(head.__AMP_CSS_SM['amp-story']).to.not.exist;
+            expect(styleEl).to.equal(serverEl);
+            expect(
+              head.querySelectorAll('link[amp-extension=amp-ext1]')
+            ).to.have.length(1);
+          });
+        });
+
         it('should re-create extension style', () => {
           installStylesAsPromise('runtime{}', true);
           const promise = installStylesAsPromise('other{}', false, 'amp-ext1');
