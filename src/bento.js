@@ -8,7 +8,7 @@ import {isEsm} from '#core/mode';
 import {install as installCustomElements} from './polyfills/custom-elements';
 
 if (!isEsm()) {
-  installCustomElements(self);
+  installCustomElements(self, class {});
 }
 
 const BENTO = self.BENTO || [];
