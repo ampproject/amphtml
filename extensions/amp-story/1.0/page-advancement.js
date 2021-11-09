@@ -392,12 +392,7 @@ export class ManualAdvancement extends AdvancementConfig {
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     this.timeoutId_ = null;
-    if (
-      !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-      /** @type {InteractiveComponentDef} */ (
-        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
-      ).state !== EmbeddedComponentState.EXPANDED
-    ) {
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -633,15 +628,10 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const stored = /** @type {InteractiveComponentDef} */ (
-      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
-    );
-    const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
-      inExpandedMode ||
-      (matches(target, interactiveElementsSelectors()) &&
-        this.canShowTooltip_(event, pageRect))
+      matches(target, interactiveElementsSelectors()) &&
+      this.canShowTooltip_(event, pageRect)
     );
   }
 

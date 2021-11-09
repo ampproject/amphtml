@@ -188,8 +188,7 @@ export class AmpStoryEmbeddedComponent {
     this.timer_ = Services.timerFor(this.win_);
 
     /**
-     * Target producing the tooltip and going to expanded view (when
-     * expandable).
+     * Target producing the tooltip.
      * @private {?Element}
      */
     this.triggeringTarget_ = null;
