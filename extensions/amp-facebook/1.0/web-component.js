@@ -8,15 +8,11 @@ import {
   PageBaseElement,
   TAG,
 } from './base-element';
-import {CSS} from '#build/bento-facebook-1.0.css.js';
 
 /**
  *Register BentoFacebook component to CustomElements registry
  */
 export function defineElement() {
-  const style = document.createElement('style');
-  style.textContent = CSS;
-  document.head.appendChild(style);
   customElements.define(TAG, BaseElement.CustomElement(BaseElement));
 
   defineCommentsElement();
