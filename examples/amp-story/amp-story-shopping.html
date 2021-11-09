@@ -18,13 +18,13 @@
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="cover">
-        <!-- <amp-story-shopping-config layout='nodisplay'></amp-story-shopping-config>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment layout='fill'></amp-story-shopping-attachment> -->
+        <!-- 
+          An amp-story-shopping-attachment on the first page will throw an error
+          "this.attachmentEl.signals is not a function"  
+        -->
       </amp-story-page>
       
+      <!-- works on any other page than the first. -->
       <amp-story-page id="default">
         <amp-story-shopping-config layout='nodisplay'></amp-story-shopping-config>
         <amp-story-grid-layer template="vertical">
