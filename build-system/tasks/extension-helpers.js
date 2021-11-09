@@ -570,17 +570,17 @@ async function buildExtensionCss(extDir, name, version, options) {
   const versions = [version, aliasVersion].filter(Boolean);
   const bundles = await fastGlob(`${extDir}/*.css`);
 
-  const parallel = bundles.map(async (filename) => {
-    const name = path.basename(filename, '.css');
-    const css = await jsifyCssAsync(filename);
-    await writeCssBinaries(name, versions, css);
+  await Promise.all(
+    bundles.map(async (filename) => {
+      const name = path.basename(filename, '.css');
+      const css = await jsifyCssAsync(filename);
+      await writeCssBinaries(name, versions, css);
 
-    if (options.bento) {
-      await buildBentoCss(name, versions, css);
-    }
-  });
-
-  await Promise.all(parallel);
+      if (options.bento) {
+        await buildBentoCss(name, versions, css);
+      }
+    })
+  );
 }
 
 /**
