@@ -23,54 +23,60 @@ defineBentoSocialShare();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-social-share {
-      display: inline-block;
-      overflow: hidden;
-      position: relative;
-      box-sizing: border-box;
-      width: 60px;
-      height: 44px;
-    }
-  </style>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
-  ></script>
-  <style>
-    bento-social-share {
-      width: 375px;
-      height: 472px;
-    }
-  </style>
-</head>
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-social-share {
+        display: inline-block;
+        overflow: hidden;
+        position: relative;
+        box-sizing: border-box;
+        width: 60px;
+        height: 44px;
+      }
+    </style>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
+    ></script>
+    <style>
+      bento-social-share {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-social-share
+      id="my-share"
+      type="twitter"
+      aria-label="Share on Twitter"
+    ></bento-social-share>
 
-<bento-social-share
-  id="my-share"
-  type="twitter"
-  aria-label="Share on Twitter"
-></bento-social-share>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-share">Change share button</button>
+    </div>
 
-<div class="buttons" style="margin-top: 8px">
-  <button id="change-share">Change share button</button>
-</div>
+    <script>
+      (async () => {
+        const button = document.querySelector('#my-share');
+        await customElements.whenDefined('bento-social-share');
 
-<script>
-  (async () => {
-    const button = document.querySelector('#my-share');
-    await customElements.whenDefined('bento-social-share');
-
-    // set up button actions
-    document.querySelector('#change-share').onclick = () => {
-      twitter.setAttribute('type', 'linkedin');
-      twitter.setAttribute('aria-label', 'Share on LinkedIn');
-    };
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#change-share').onclick = () => {
+          twitter.setAttribute('type', 'linkedin');
+          twitter.setAttribute('aria-label', 'Share on LinkedIn');
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style

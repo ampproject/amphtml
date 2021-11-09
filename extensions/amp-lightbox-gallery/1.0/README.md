@@ -23,48 +23,54 @@ defineBentoLightboxGallery();
 
 ### Example: Import via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-lightbox-gallery[hidden] {
-      display: none !important;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
-  ></script>
-</head>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-lightbox-gallery[hidden] {
+        display: none !important;
+      }
+    </style>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <figure>
+      <img
+        id="my-img"
+        width="360"
+        height="240"
+        src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+        lightbox
+      />
+      <figcaption>dog wearing yellow shirt.</figcaption>
+    </figure>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-img">change image</button>
+    </div>
 
-<figure>
-  <img
-    id="my-img"
-    width="360"
-    height="240"
-    src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
-    lightbox
-  />
-  <figcaption>dog wearing yellow shirt.</figcaption>
-</figure>
-<div class="buttons" style="margin-top: 8px">
-  <button id="change-img">change image</button>
-</div>
-
-<script>
-  (async () => {
-    const img = document.queryselector('#my-img');
-    await customelements.whendefined('img');
-    // set up button actions
-    document.queryselector('#change-img').onclick = () => {
-      img.setattribute(
-        'src',
-        'https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80'
-      );
-    };
-  })();
-</script>
+    <script>
+      (async () => {
+        const img = document.queryselector('#my-img');
+        await customelements.whendefined('img');
+        // set up button actions
+        document.queryselector('#change-img').onclick = () => {
+          img.setattribute(
+            'src',
+            'https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80'
+          );
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section,

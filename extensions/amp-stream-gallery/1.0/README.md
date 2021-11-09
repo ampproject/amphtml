@@ -27,44 +27,51 @@ defineBentoStreamGallery();
 The example below contains an `bento-stream-gallery` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
-```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
-  />
-</head>
-<body>
-  <bento-stream-gallery>
-    <img src="img1.png" />
-    <img src="img2.png" />
-    <img src="img3.png" />
-    <img src="img4.png" />
-    <img src="img5.png" />
-    <img src="img6.png" />
-    <img src="img7.png" />
-  </bento-stream-gallery>
-  <script>
-    (async () => {
-      const streamGallery = document.querySelector('#my-stream-gallery');
-      await customElements.whenDefined('bento-stream-gallery');
-      const api = await streamGallery.getApi();
+<!--% example %-->
 
-      // programatically expand all sections
-      api.next();
-      // programatically collapse all sections
-      api.prev();
-      // programatically go to slide
-      api.goToSlide(4);
-    })();
-  </script>
-</body>
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
+    />
+  </head>
+  <body>
+    <body>
+      <bento-stream-gallery>
+        <img src="img1.png" />
+        <img src="img2.png" />
+        <img src="img3.png" />
+        <img src="img4.png" />
+        <img src="img5.png" />
+        <img src="img6.png" />
+        <img src="img7.png" />
+      </bento-stream-gallery>
+      <script>
+        (async () => {
+          const streamGallery = document.querySelector('#my-stream-gallery');
+          await customElements.whenDefined('bento-stream-gallery');
+          const api = await streamGallery.getApi();
+
+          // programatically expand all sections
+          api.next();
+          // programatically collapse all sections
+          api.prev();
+          // programatically go to slide
+          api.goToSlide(4);
+        })();
+      </script>
+    </body>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage

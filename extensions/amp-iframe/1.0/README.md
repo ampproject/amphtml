@@ -25,39 +25,46 @@ defineBentoIframe();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
-  />
-</head>
-<bento-iframe
-  id="my-iframe"
-  src="https://en.wikipedia.org/wiki/Bento"
-  style="width: 800px; height: 600px"
->
-</bento-iframe>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-iframe
+      id="my-iframe"
+      src="https://en.wikipedia.org/wiki/Bento"
+      style="width: 800px; height: 600px"
+    >
+    </bento-iframe>
 
-<button id="change-source">Change source</button>
+    <button id="change-source">Change source</button>
 
-<script>
-  (async () => {
-    const iframeEl = document.querySelector('#my-iframe');
-    await customElements.whenDefined('bento-iframe');
+    <script>
+      (async () => {
+        const iframeEl = document.querySelector('#my-iframe');
+        await customElements.whenDefined('bento-iframe');
 
-    // Reload iframe with new src
-    document.querySelector('#change-source').onclick = () => {
-      iframeEl.setAttribute('src', 'https://example.com');
-    };
-  })();
-</script>
+        // Reload iframe with new src
+        document.querySelector('#change-source').onclick = () => {
+          iframeEl.setAttribute('src', 'https://example.com');
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style

@@ -24,41 +24,48 @@ defineBentoJwplayer();
 The example below contains an `bento-jwplayer` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
-  />
-</head>
-<body>
-  <bento-jwplayer
-    id="jwplayer"
-    data-player-id="BjcwyK37"
-    data-media-id="CtaIzmFs"
-    style="width: 480px; height: 270px"
-  ></bento-jwplayer>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+    />
+  </head>
+  <body>
+    <body>
+      <bento-jwplayer
+        id="jwplayer"
+        data-player-id="BjcwyK37"
+        data-media-id="CtaIzmFs"
+        style="width: 480px; height: 270px"
+      ></bento-jwplayer>
 
-  <script>
-    (async () => {
-      const twitter = document.querySelector('#jwplayer');
-      await customElements.whenDefined('bento-twitter');
+      <script>
+        (async () => {
+          const twitter = document.querySelector('#jwplayer');
+          await customElements.whenDefined('bento-twitter');
 
-      const api = player.getApi();
-      api.play();
-      api.pause();
-      api.mute();
-      api.unmute();
-      api.requestFullscreen();
-    })();
-  </script>
-</body>
+          const api = player.getApi();
+          api.play();
+          api.pause();
+          api.mute();
+          api.unmute();
+          api.requestFullscreen();
+        })();
+      </script>
+    </body>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage

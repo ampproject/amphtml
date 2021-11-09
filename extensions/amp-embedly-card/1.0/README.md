@@ -25,64 +25,71 @@ defineBentoEmbedlyCard();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-embedly-card {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
-  ></script>
-  <style>
-    bento-embedly-card {
-      width: 375px;
-      height: 472px;
-    }
-  </style>
-</head>
-<body>
-  <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
-  </bento-embedly-key>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-embedly-card {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
+    ></script>
+    <style>
+      bento-embedly-card {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <body>
+      <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
+      </bento-embedly-key>
 
-  <bento-embedly-card
-    data-url="https://twitter.com/AMPhtml/status/986750295077040128"
-    data-card-theme="dark"
-    data-card-controls="0"
-  >
-  </bento-embedly-card>
+      <bento-embedly-card
+        data-url="https://twitter.com/AMPhtml/status/986750295077040128"
+        data-card-theme="dark"
+        data-card-controls="0"
+      >
+      </bento-embedly-card>
 
-  <bento-embedly-card
-    id="my-url"
-    data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
-  >
-  </bento-embedly-card>
+      <bento-embedly-card
+        id="my-url"
+        data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+      >
+      </bento-embedly-card>
 
-  <div class="buttons" style="margin-top: 8px">
-    <button id="change-url">Change embed</button>
-  </div>
+      <div class="buttons" style="margin-top: 8px">
+        <button id="change-url">Change embed</button>
+      </div>
 
-  <script>
-    (async () => {
-      const embedlyCard = document.querySelector('#my-url');
-      await customElements.whenDefined('bento-embedly-card');
+      <script>
+        (async () => {
+          const embedlyCard = document.querySelector('#my-url');
+          await customElements.whenDefined('bento-embedly-card');
 
-      // set up button actions
-      document.querySelector('#change-url').onclick = () => {
-        embedlyCard.setAttribute(
-          'data-url',
-          'https://www.youtube.com/watch?v=wcJSHR0US80'
-        );
-      };
-    })();
-  </script>
-</body>
+          // set up button actions
+          document.querySelector('#change-url').onclick = () => {
+            embedlyCard.setAttribute(
+              'data-url',
+              'https://www.youtube.com/watch?v=wcJSHR0US80'
+            );
+          };
+        })();
+      </script>
+    </body>
+  </body>
+</html>
 ```
 
 ### Layout and style

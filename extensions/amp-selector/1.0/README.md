@@ -19,30 +19,37 @@ defineBentoSelector();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-selector {
-      display: block;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-selector-1.0.js"
-  ></script>
-</head>
-<body>
-  <bento-selector class="sample-selector">
-    <ul>
-      <li option="1">Option 1</li>
-      <li option="2">Option 2</li>
-      <li option="3">Option 3</li>
-      <li option="4">Option 4</li>
-    </ul>
-  </bento-selector>
-</body>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-selector {
+        display: block;
+      }
+    </style>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-selector-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <body>
+      <bento-selector class="sample-selector">
+        <ul>
+          <li option="1">Option 1</li>
+          <li option="2">Option 2</li>
+          <li option="3">Option 3</li>
+          <li option="4">Option 4</li>
+        </ul>
+      </bento-selector>
+    </body>
+  </body>
+</html>
 ```
 
 ### Usage notes
