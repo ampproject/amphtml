@@ -41,7 +41,7 @@ function isSizer(el) {
   return el.tagName === 'I-AMPHTML-SIZER';
 }
 
-class AmpCarousel extends AMP.BaseElement {
+export class AmpCarousel extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
