@@ -592,7 +592,7 @@ async function buildExtensionCss(extDir, name, version, options) {
 async function writeCssBinaries(name, versions, css) {
   const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
   await writeVersions(`build/${name}`, 'js', versions, jsCss);
-  await writeVersions(`build/${name}`, 'css', versions, css);
+  await writeVersions(`build/css/${name}`, 'css', versions, css);
 }
 
 /**
