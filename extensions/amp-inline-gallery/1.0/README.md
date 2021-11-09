@@ -65,32 +65,30 @@ defineBentoInlineGallery();
     />
   </head>
   <body>
-    <body>
-      <bento-inline-gallery id="inline-gallery">
-        <bento-inline-gallery-thumbnails
-          style="height: 100px"
-          loop
-        ></bento-inline-gallery-thumbnails>
+    <bento-inline-gallery id="inline-gallery">
+      <bento-inline-gallery-thumbnails
+        style="height: 100px"
+        loop
+      ></bento-inline-gallery-thumbnails>
 
-        <bento-base-carousel
-          style="height: 200px"
-          snap-align="center"
-          visible-count="3"
-          loop
-        >
-          <img src="img1.jpeg" data-thumbnail-src="img1-thumbnail.jpeg" />
-          <img src="img2.jpeg" data-thumbnail-src="img2-thumbnail.jpeg" />
-          <img src="img3.jpeg" data-thumbnail-src="img3-thumbnail.jpeg" />
-          <img src="img4.jpeg" data-thumbnail-src="img4-thumbnail.jpeg" />
-          <img src="img5.jpeg" data-thumbnail-src="img5-thumbnail.jpeg" />
-          <img src="img6.jpeg" data-thumbnail-src="img6-thumbnail.jpeg" />
-        </bento-base-carousel>
+      <bento-base-carousel
+        style="height: 200px"
+        snap-align="center"
+        visible-count="3"
+        loop
+      >
+        <img src="img1.jpeg" data-thumbnail-src="img1-thumbnail.jpeg" />
+        <img src="img2.jpeg" data-thumbnail-src="img2-thumbnail.jpeg" />
+        <img src="img3.jpeg" data-thumbnail-src="img3-thumbnail.jpeg" />
+        <img src="img4.jpeg" data-thumbnail-src="img4-thumbnail.jpeg" />
+        <img src="img5.jpeg" data-thumbnail-src="img5-thumbnail.jpeg" />
+        <img src="img6.jpeg" data-thumbnail-src="img6-thumbnail.jpeg" />
+      </bento-base-carousel>
 
-        <bento-inline-gallery-pagination
-          style="height: 20px"
-        ></bento-inline-gallery-pagination>
-      </bento-inline-gallery>
-    </body>
+      <bento-inline-gallery-pagination
+        style="height: 20px"
+      ></bento-inline-gallery-pagination>
+    </bento-inline-gallery>
   </body>
 </html>
 ```

@@ -49,33 +49,31 @@ defineBentoSidebar();
     ></script>
   </head>
   <body>
-    <body>
-      <bento-sidebar id="sidebar1" side="right">
-        <ul>
-          <li>Nav item 1</li>
-          <li>Nav item 2</li>
-          <li>Nav item 3</li>
-          <li>Nav item 4</li>
-          <li>Nav item 5</li>
-          <li>Nav item 6</li>
-        </ul>
-      </bento-sidebar>
+    <bento-sidebar id="sidebar1" side="right">
+      <ul>
+        <li>Nav item 1</li>
+        <li>Nav item 2</li>
+        <li>Nav item 3</li>
+        <li>Nav item 4</li>
+        <li>Nav item 5</li>
+        <li>Nav item 6</li>
+      </ul>
+    </bento-sidebar>
 
-      <div class="buttons" style="margin-top: 8px">
-        <button id="open-sidebar">Open sidebar</button>
-      </div>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="open-sidebar">Open sidebar</button>
+    </div>
 
-      <script>
-        (async () => {
-          const sidebar = document.querySelector('#sidebar1');
-          await customElements.whenDefined('bento-sidebar');
-          const api = await sidebar.getApi();
+    <script>
+      (async () => {
+        const sidebar = document.querySelector('#sidebar1');
+        await customElements.whenDefined('bento-sidebar');
+        const api = await sidebar.getApi();
 
-          // set up button actions
-          document.querySelector('#open-sidebar').onclick = () => api.open();
-        })();
-      </script>
-    </body>
+        // set up button actions
+        document.querySelector('#open-sidebar').onclick = () => api.open();
+      })();
+    </script>
   </body>
 </html>
 ```

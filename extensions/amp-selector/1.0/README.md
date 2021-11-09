@@ -49,16 +49,14 @@ defineBentoSelector();
     ></script>
   </head>
   <body>
-    <body>
-      <bento-selector class="sample-selector">
-        <ul>
-          <li option="1">Option 1</li>
-          <li option="2">Option 2</li>
-          <li option="3">Option 3</li>
-          <li option="4">Option 4</li>
-        </ul>
-      </bento-selector>
-    </body>
+    <bento-selector class="sample-selector">
+      <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+      </ul>
+    </bento-selector>
   </body>
 </html>
 ```
