@@ -21,7 +21,7 @@ export type Versions = Array<{component: string; version: string}>;
 export type CompilerRequest = {
   document?: TreeProto;
   nodes?: NodeProto[];
-  versions: Versions;
+  component_versions: Versions;
 };
 
 export type CompilerResponse = {document: TreeProto} | {nodes: NodeProto[]};
