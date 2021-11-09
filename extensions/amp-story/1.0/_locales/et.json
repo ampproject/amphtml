@@ -1,4 +1,28 @@
 {
+  "2": {
+    "string": "Toksake valikut Järgmine"
+  },
+  "3": {
+    "string": "Toksake valikut Tagasi"
+  },
+  "4": {
+    "string": "Linki ei saanud lõikelauale kopeerida :("
+  },
+  "5": {
+    "string": "Link on kopeeritud!"
+  },
+  "6": {
+    "string": "E-post"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "8": {
+    "string": "Google+"
+  },
+  "9": {
+    "string": "Hangi link"
+  },
   "10": {
     "string": "LinkedIn"
   },
@@ -23,9 +47,6 @@
   "19": {
     "string": "Selle sisu vaatamiseks peate lubama amp-story kogemuse."
   },
-  "2": {
-    "string": "Toksake valikut Järgmine"
-  },
   "21": {
     "string": "Vabandame, kahjuks ei saa teie brauseris seda lugu vaadata"
   },
@@ -44,9 +65,6 @@
   "27": {
     "string": "Jätka sellegipoolest"
   },
-  "3": {
-    "string": "Toksake valikut Tagasi"
-  },
   "31": {
     "string": "Heli välja"
   },
@@ -64,15 +82,6 @@
   },
   "36": {
     "string": "Laiendage säutsu"
-  },
-  "4": {
-    "string": "Linki ei saanud lõikelauale kopeerida :("
-  },
-  "5": {
-    "string": "Link on kopeeritud!"
-  },
-  "6": {
-    "string": "E-post"
   },
   "62": {
     "string": "Jaga alates sellest lehest"
@@ -97,9 +106,6 @@
   },
   "69": {
     "string": "Jaga lugu"
-  },
-  "7": {
-    "string": "Facebook"
   },
   "70": {
     "string": "Ava/peida loo menüü"
@@ -131,9 +137,6 @@
   "79": {
     "string": "Nipsake, et liikuda järgmise loo juurde"
   },
-  "8": {
-    "string": "Google+"
-  },
   "80": {
     "string": "Sain aru"
   },
@@ -164,9 +167,6 @@
   "89": {
     "string": "Teie vastus saadetakse aadressile"
   },
-  "9": {
-    "string": "Hangi link"
-  },
   "90": {
     "string": "Järgmine lugu"
   },
@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Avamine"
+  },
+  "98": {
+    "string": "Vormi ei esitatud, proovige uuesti"
+  },
+  "99": {
+    "string": "Vorm on esitatud"
   }
 }

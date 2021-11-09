@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Pembukaan"
+  },
+  "98": {
+    "string": "Formulir belum dikirim, coba lagi"
+  },
+  "99": {
+    "string": "Formulir berhasil dikirim"
   }
 }

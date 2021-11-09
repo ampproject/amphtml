@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Notiek atvēršana"
+  },
+  "98": {
+    "string": "Veidlapa nav iesniegta, mēģiniet vēlreiz"
+  },
+  "99": {
+    "string": "Veidlapa veiksmīgi iesniegta"
   }
 }

@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Megnyitás"
+  },
+  "98": {
+    "string": "Az űrlap nincs elküldve, próbálja újra"
+  },
+  "99": {
+    "string": "Az űrlap sikeresen elküldve"
   }
 }

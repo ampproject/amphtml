@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Opnast"
+  },
+  "98": {
+    "string": "Eyðublað ekki sent inn, reyndu aftur"
+  },
+  "99": {
+    "string": "Eyðublað sent inn"
   }
 }
