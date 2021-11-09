@@ -1,0 +1,52 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hydration Test</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+      h1 {
+          text-align: center;
+      }
+      amp-fit-text {
+          left: 50%;
+          transform: translateX(-50%);
+      }
+  </style>
+</head>
+<body>
+    <!--
+        Manual test file for hydration of server-rendered components.
+        Unlike most AMPHTML pages, this file's components should all be rendered.
+    -->
+
+    <h1><code>amp-layout</code> with a 4:1 responsive ratio </h1>
+    <amp-layout layout="responsive" width="4" height="1" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive" i-amphtml-ssr="">
+        <i-amphtml-sizer slot="i-amphtml-svc" style="padding-top: 25%;"></i-amphtml-sizer>
+        <div class="i-amphtml-fill-content">
+            <svg viewBox="0 0 100 25">
+                <circle cx="50%" cy="50%" r="15%" stroke="black" stroke-width="3"></circle>
+                Sorry, your browser does not support inline SVG.
+            </svg>
+        </div>
+    </amp-layout>
+
+    <h1><code>amp-fit-text</code> with large text</h1>
+    <amp-fit-text width="111px" height="222px" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout="fixed" i-amphtml-ssr="" style="width: 111px; height: 222px;">
+        <div class="i-amphtml-fill-content i-amphtml-fit-text-content">
+            <div class="i-amphtml-fit-text-content-wrapper">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed ultrices massa. Fusce lacus magna, blandit sed suscipit at, congue mollis sem. Vestibulum molestie tortor eu dui dictum, eget pharetra orci ultricies. Donec venenatis pellentesque massa sit amet mollis. Praesent nisl metus, egestas eu turpis a, tincidunt imperdiet purus. Nulla tincidunt vulputate porta. Sed vitae lacinia ligula, in ultricies ante. Nunc ornare lacus in bibendum mattis. Cras ultricies vel eros pulvinar laoreet. Curabitur sed magna a est interdum mattis eu eget magna. Nam sit amet massa volutpat, pellentesque urna id, pretium magna. Praesent et enim ante. Vestibulum ultricies, urna ac ullamcorper scelerisque, augue est scelerisque massa, nec rhoncus orci sapien at ipsum. Fusce egestas sem non finibus euismod</div>
+        </div>
+        <div class="i-amphtml-fit-text-measurer">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed ultrices massa. Fusce lacus magna, blandit sed suscipit at, congue mollis sem. Vestibulum molestie tortor eu dui dictum, eget pharetra orci ultricies. Donec venenatis pellentesque massa sit amet mollis. Praesent nisl metus, egestas eu turpis a, tincidunt imperdiet purus. Nulla tincidunt vulputate porta. Sed vitae lacinia ligula, in ultricies ante. Nunc ornare lacus in bibendum mattis. Cras ultricies vel eros pulvinar laoreet. Curabitur sed magna a est interdum mattis eu eget magna. Nam sit amet massa volutpat, pellentesque urna id, pretium magna. Praesent et enim ante. Vestibulum ultricies, urna ac ullamcorper scelerisque, augue est scelerisque massa, nec rhoncus orci sapien at ipsum. Fusce egestas sem non finibus euismod</div>
+    </amp-fit-text>
+
+    <h1><code>amp-fit-text</code> with short text</h1>
+    <amp-fit-text width="111px" height="222px" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout="fixed" i-amphtml-ssr="" style="width: 111px; height: 222px;">
+        <div class="i-amphtml-fill-content i-amphtml-fit-text-content">
+            <div class="i-amphtml-fit-text-content-wrapper">Hello, world</div>
+        </div>
+        <div class="i-amphtml-fit-text-measurer">Hello, world</div>
+    </amp-fit-text>
+</html>
