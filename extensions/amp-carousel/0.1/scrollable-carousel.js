@@ -151,9 +151,8 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {boolean=} opt_autoplay
    */
-  go(dir, animate, opt_autoplay) {
+  go(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
     const oldPos = this.pos_;
 
@@ -413,6 +412,18 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
   /** Used by amp-lightbox-gallery */
   interactionPrev() {
     this.controls_.interactionPrev();
+  }
+
+  /**
+   * Used by amp-lightbox-gallery
+   *
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   */
+  goCallback(dir, animate) {
+    this.go(dir, animate);
   }
 
   /**
