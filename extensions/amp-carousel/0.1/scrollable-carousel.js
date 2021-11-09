@@ -95,7 +95,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
         const {args} = invocation;
         if (args) {
           const index = parseInt(args['index'], 10);
-          this.goToSlide_(index);
+          this.goToSlide(index);
         }
       },
       ActionTrust.LOW
@@ -184,10 +184,9 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
   /**
    * Scrolls to the slide at the given slide index.
    * @param {number} index
-   * @private
    * @return {*} TODO(#23582): Specify return type
    */
-  goToSlide_(index) {
+  goToSlide(index) {
     const noOfSlides = this.cells_.length;
 
     if (!isFinite(index) || index < 0 || index >= noOfSlides) {

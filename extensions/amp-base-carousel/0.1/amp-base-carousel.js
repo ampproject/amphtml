@@ -640,6 +640,21 @@ export class AmpCarousel extends AMP.BaseElement {
   attributeMutated_(name, newValue) {
     this.responsiveAttributes_.updateAttribute(name, newValue);
   }
+
+  /**
+   * Used by amp-lightbox-gallery
+   *
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   */
+  goCallback(dir) {
+    if (dir === 1) {
+      this.interactionNext();
+    } else {
+      this.interactionPrev();
+    }
+  }
 }
 
 AMP.extension('amp-base-carousel', '0.1', (AMP) => {

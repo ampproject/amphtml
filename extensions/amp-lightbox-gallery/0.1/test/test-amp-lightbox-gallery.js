@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 import {AmpCarousel as AmpBaseCarousel} from 'extensions/amp-base-carousel/0.1/amp-base-carousel';
 import {AmpScrollableCarousel} from 'extensions/amp-carousel/0.1/scrollable-carousel';
 import {AmpSlideScroll} from 'extensions/amp-carousel/0.1/slidescroll';
