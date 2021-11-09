@@ -1,32 +1,49 @@
-import {Layout, applyFillContent} from '#core/dom/layout';
+import * as Preact from '#core/dom/jsx';
+import {Layout} from '#core/dom/layout';
+import {CommonSignals} from '#core/constants/common-signals';
 
-import {AmpStoryPageAttachment} from 'extensions/amp-story/1.0/amp-story-page-attachment';
-
-const TAG = 'amp-story-shopping-attachment';
-
-export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
+export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {string} */
-    this.myText_ = TAG;
-
-    /** @private {?Element} */
-    this.container_ = null;
+    this.attachmentEl = null;
+    this.attachmentImpl = null;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
+    this.templateWrapper = <div>test</div>;
+    this.attachmentEl = (
+      <amp-story-page-attachment layout="nodisplay">
+        {this.templateWrapper}
+      </amp-story-page-attachment>
+    );
+    this.element.appendChild(this.attachmentEl);
+  }
+
+  /** @override */
+  layoutCallback() {
+    // Get reference to impl.
+    return this.attachmentEl
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => this.attachmentEl.getImpl())
+      .then((attachmentImpl) => (this.attachmentImpl = attachmentImpl));
+  }
+
+  open() {
+    this.setTemplate_();
+    this.attachmentImpl.open();
+  }
+
+  // Set template when opening
+  setTemplate_() {
+    this.templateWrapper.innerHTML = 'PLP template';
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout.FILL;
   }
 }
