@@ -262,7 +262,9 @@ describes.sandboxed('Styles', {}, () => {
           const promise = installStylesAsPromise('other{}', false, 'amp-story');
           return promise.then((styleEl) => {
             expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
-            expect(head.__AMP_CSS_SM['amp-extension=amp-story']).to.equal(serverEl);
+            expect(head.__AMP_CSS_SM['amp-extension=amp-story']).to.equal(
+              serverEl
+            );
             expect(styleEl).to.equal(serverEl);
             expect(
               head.querySelectorAll('link[amp-extension=amp-story]')
