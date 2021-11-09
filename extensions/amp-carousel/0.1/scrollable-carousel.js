@@ -405,6 +405,16 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     return this.pos_ != maxPos;
   }
 
+  /** Used by amp-lightbox-gallery */
+  interactionNext() {
+    this.controls_.interactionNext();
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionPrev() {
+    this.controls_.interactionPrev();
+  }
+
   /**
    * Cancels the touchmove events for the element so that viewer does not
    * consider the swipes in the carousel as swipes for changing AMP documents.
