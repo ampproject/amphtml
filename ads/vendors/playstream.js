@@ -8,7 +8,7 @@ const optionalParams = ['fluid'];
  * @param {!Object} data
  */
 export function playstream(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global.playstream = {
     unitData: data['id'],
     fluid: data['fluid'],

@@ -40,7 +40,7 @@ import {LoadMoreService} from './service/load-more-service';
 
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
@@ -1620,18 +1620,18 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!UrlReplacementPolicy_Enum}
    */
   getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }

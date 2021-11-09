@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Açılıyor"
+  },
+  "98": {
+    "string": "Form gönderilmedi, tekrar deneyin"
+  },
+  "99": {
+    "string": "Form başarıyla gönderildi"
   }
 }

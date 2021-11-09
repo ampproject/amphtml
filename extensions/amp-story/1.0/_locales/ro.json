@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Se deschide"
+  },
+  "98": {
+    "string": "Formularul nu a fost trimis; încercați din nou"
+  },
+  "99": {
+    "string": "Formularul a fost trimis cu succes"
   }
 }

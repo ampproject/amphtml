@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Abrindo"
+  },
+  "98": {
+    "string": "Formulario non enviado, reinténtao"
+  },
+  "99": {
+    "string": "Formulario enviado correctamente"
   }
 }

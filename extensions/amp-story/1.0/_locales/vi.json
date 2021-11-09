@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Đang mở"
+  },
+  "98": {
+    "string": "Biểu mẫu chưa được gửi đi, vui lòng thử lại"
+  },
+  "99": {
+    "string": "Biểu mẫu đã được gửi đi thành công"
   }
 }

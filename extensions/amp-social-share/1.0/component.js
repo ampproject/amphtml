@@ -141,15 +141,36 @@ function checkProps(type, endpoint, target, width, height, params) {
     return null;
   }
 
+  // TODO: This logic might be duplicated in the AMP component
+  // https://github.com/ampproject/amphtml/issues/36777
+  const currentParams = Object.entries(typeConfig.defaultParams || {}).reduce(
+    (newParams, [key, value]) => {
+      if (newParams[key]) {
+        return newParams;
+      }
+      return {
+        ...newParams,
+        [key]: value
+          .replace('TITLE', document.title)
+          .replace(
+            'CANONICAL_URL',
+            document.querySelector("link[rel='canonical']")?.href ||
+              location.href
+          ),
+      };
+    },
+    params || {}
+  );
+
   // Special case when type is 'email'
   if (type === 'email' && !endpoint) {
-    baseEndpoint = `mailto:${(params && params['recipient']) || ''}`;
+    baseEndpoint = `mailto:${currentParams['recipient'] || ''}`;
   }
 
   // Add params to baseEndpoint
   const finalEndpoint = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
-    /** @type {!JsonObject} */ (params)
+    /** @type {!JsonObject} */ (currentParams)
   );
 
   // Defaults

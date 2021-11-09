@@ -28,7 +28,7 @@ jobs:
           for CHANNEL in $(jq 'keys[]' build-system/global-configs/versioning.json --raw-output)
           do
             RTV=$(jq ".[\"${CHANNEL}\"]" build-system/global-configs/versioning.json --raw-output)
-            if [[ RTV != "null" ]]
+            if [[ "${RTV}" != "null" ]]
             then
               echo "Setting ${CHANNEL} to ${RTV}"
               wrangler kv:key put "${CHANNEL}" "${RTV}" --config .github/workflows/wrangler.toml --binding RTV

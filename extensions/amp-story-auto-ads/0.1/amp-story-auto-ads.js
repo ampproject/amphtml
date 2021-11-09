@@ -2,9 +2,7 @@ import {CommonSignals} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {svgFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
-import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
 
 import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {
@@ -54,8 +52,9 @@ const MUSTACHE_TAG = 'amp-mustache';
  * Map of experiment IDs that might be enabled by the player to
  * their experiment names. Used to toggle client side experiment on.
  * @const {Object<string, string>}
+ * @visibleForTesting
  */
-const RELEVANT_PLAYER_EXPS = {
+export const RELEVANT_PLAYER_EXPS = {
   [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
   [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
   [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
@@ -187,19 +186,19 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (!viewer.isEmbedded()) {
       return;
     }
-    viewer./*OK*/ sendMessageAwaitResponse('playerExperiments').then((json) => {
-      if (json) {
-        const obj = tryParseJson(json);
-        const ids = obj['experimentIds'];
-        isArray(ids) &&
+    viewer
+      ./*OK*/ sendMessageAwaitResponse('playerExperiments')
+      .then((expObj) => {
+        const ids = expObj?.['experimentIds'];
+        if (ids) {
           ids.forEach((id) => {
             const relevantExp = RELEVANT_PLAYER_EXPS[id];
             if (relevantExp) {
-              forceExperimentBranch(this.win, relevantExp, id);
+              forceExperimentBranch(this.win, relevantExp, id.toString());
             }
           });
-      }
-    });
+        }
+      });
   }
 
   /**

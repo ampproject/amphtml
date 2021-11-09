@@ -7,7 +7,7 @@ import {isArray} from '#core/types';
 
 import {Services} from '#service';
 
-import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
+import {AutoLightboxEvents_Enum} from '../../../../src/auto-lightbox';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -766,7 +766,7 @@ describes.realWin(
         `;
 
         const eventSpy = env.sandbox.spy();
-        element.addEventListener(AutoLightboxEvents.NEWLY_SET, eventSpy);
+        element.addEventListener(AutoLightboxEvents_Enum.NEWLY_SET, eventSpy);
 
         await apply(env.ampdoc, element);
         expect(eventSpy).to.be.calledOnce;
