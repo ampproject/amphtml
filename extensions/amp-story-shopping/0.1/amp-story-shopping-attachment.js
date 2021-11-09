@@ -13,7 +13,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.templateWrapper = <div>test</div>;
+    this.templateWrapper = <div></div>;
     this.attachmentEl = (
       <amp-story-page-attachment layout="nodisplay">
         {this.templateWrapper}
