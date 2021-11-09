@@ -62,6 +62,7 @@
     "@types/eslint": "7.28.2",
     "@types/fs-extra": "9.0.13",
     "@types/klaw": "3.0.3",
+    "@types/marked": "4.0.0",
     "@types/minimist": "1.2.2",
     "@types/mocha": "8.2.3",
     "@types/node": "14.17.32",
