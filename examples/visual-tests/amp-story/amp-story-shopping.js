@@ -6,7 +6,7 @@ const {
 
 module.exports = {
   'dark theme - shopping CTA UI should display': async (page, name) => {
-    const pageID = 'dark-theme';
+    const pageID = 'remote-dark-theme';
     const url = await page.url();
     await page.goto(`${url}#page=${pageID}`);
     await page.waitForSelector(
