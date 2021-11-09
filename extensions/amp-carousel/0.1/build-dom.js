@@ -289,46 +289,44 @@ export function buildDom(element) {
 /**
  * @param {!Element} element
  * @return {string} The default title to use for the next button.
- * @param {{index?: string, total?: string}} options - The default title to use for the pevious button.
+ * @param {{index?: string, total?: string}} options - The default title to use for the previous button.
  */
 export function getNextButtonTitle(element, options = {}) {
   const prefix =
     element.getAttribute('data-next-button-aria-label') ||
     'Next item in carousel';
-  if (isScrollable(element)) {
-    return prefix;
-  }
-
   const {index, total} = options;
-  return getVerboseButtonTitle(element, {prefix, index, total});
+  return getButtonTitle(element, {prefix, index, total});
 }
 
 /**
  * @param {!Element} element
- * @param {{index?: string, total?: string}} options - The default title to use for the pevious button.
- * @return {string} The default title to use for the pevious button.
+ * @param {{index?: string, total?: string}} options - The default title to use for the previous button.
+ * @return {string} The default title to use for the previous button.
  */
-export function getPrevButtonTitle(element, options) {
+export function getPrevButtonTitle(element, options = {}) {
   const prefix =
     element.getAttribute('data-prev-button-aria-label') ||
     'Previous item in carousel';
-  if (isScrollable(element)) {
-    return prefix;
-  }
-
   const {index, total} = options;
-  return getVerboseButtonTitle(element, {prefix, index, total});
+  return getButtonTitle(element, {prefix, index, total});
 }
 
 /**
  * Returns the title for a next or prev button.
- * Format: "Next item in carousel (X of Y)".
+ * Format:
+ * - Scrollable: "Next item in carousel"
+ * - Slides    : "Next item in carousel (X of Y)"
  *
  * @param {*} element
  * @param {{prefix: string, index: string, total:string}} param1
  * @return {string}
  */
-function getVerboseButtonTitle(element, {index, prefix, total}) {
+function getButtonTitle(element, {index, prefix, total}) {
+  if (isScrollable(element)) {
+    return prefix;
+  }
+
   /**
    * A format string for the button label. Should be a string, containing two
    * placeholders of "%s", where the index and total count will go.
@@ -342,7 +340,7 @@ function getVerboseButtonTitle(element, {index, prefix, total}) {
 }
 
 /**
- * Returns true if the carousel is a Scrollable.  *
+ * Returns true if the carousel is a Scrollable Carousel.
  * @param {!Element} element
  * @return {boolean}
  */
