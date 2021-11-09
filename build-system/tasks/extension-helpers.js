@@ -80,7 +80,6 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   version?: string,
  *   hasCss?: boolean,
  *   loadPriority?: string,
- *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
@@ -564,55 +563,51 @@ async function getCssForJssFile(jssFile) {
  * @return {!Promise}
  */
 async function buildExtensionCss(extDir, name, version, options) {
-  /**
-   * Writes CSS binaries
-   *
-   * @param {string} name
-   * @param {string} css
-   */
-  function writeCssBinaries(name, css) {
-    const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
-    const jsName = `build/${name}.js`;
-    const cssName = `build/css/${name}`;
-    fs.writeFileSync(jsName, jsCss, 'utf-8');
-    fs.writeFileSync(cssName, css, 'utf-8');
-  }
-
   const aliasBundle = extensionAliasBundles[name];
-  const isAliased = aliasBundle && aliasBundle.version == version;
+  const aliasedVersion =
+    aliasBundle?.version == version ? aliasBundle.aliasedVersion : null;
 
-  const mainCssPromise = jsifyCssAsync(`${extDir}/${name}.css`);
+  const versions = [version, aliasedVersion].filter(Boolean);
 
-  const mainCssBinaryPromise = mainCssPromise.then((mainCss) => {
-    writeCssBinaries(`${name}-${version}.css`, mainCss);
-    if (isAliased) {
-      writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
-    }
-  });
+  const bundles = await fastGlob(`${extDir}/*.css`);
 
-  const parallel = [mainCssBinaryPromise];
+  await Promise.all(
+    bundles.map(async (filename) => {
+      const name = path.basename(filename, '.css');
+      const css = await jsifyCssAsync(filename);
+      await writeCssBinaries(name, versions, css);
 
-  if (options.bento) {
-    const bentoCssPromise = mainCssPromise.then((mainCss) =>
-      buildBentoCss(name, version, mainCss)
-    );
-    parallel.push(bentoCssPromise);
+      if (options.bento) {
+        await buildBentoCss(name, versions, css);
+      }
+    })
+  );
+}
+
+/**
+ * @param {string} name
+ * @param {string[]} versions
+ * @param {string} css
+ * @return {!Promise}
+ */
+async function writeCssBinaries(name, versions, css) {
+  const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
+  await writeVersions(`build/${name}`, 'css.js', versions, jsCss);
+  await writeVersions(`build/css/${name}`, 'css', versions, css);
+}
+
+/**
+ * @param {string} prefix
+ * @param {string} fileExtension
+ * @param {string[]} versions
+ * @param {string} content
+ * @return {!Promise<void>}
+ */
+async function writeVersions(prefix, fileExtension, versions, content) {
+  for (const version of versions) {
+    const outfile = `${prefix}-${version}.${fileExtension}`;
+    await fs.outputFile(outfile, content);
   }
-
-  if (Array.isArray(options.cssBinaries)) {
-    parallel.push(
-      ...options.cssBinaries.map((name) => {
-        return jsifyCssAsync(`${extDir}/${name}.css`).then((css) => {
-          writeCssBinaries(`${name}-${version}.css`, css);
-          if (isAliased) {
-            writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
-          }
-        });
-      })
-    );
-  }
-
-  await Promise.all(parallel);
 }
 
 /**
@@ -621,15 +616,14 @@ async function buildExtensionCss(extDir, name, version, options) {
  * As a result of taking already minified code as source, this function is
  * fairly fast and not cached.
  * @param {string} name
- * @param {string} version
+ * @param {string[]} versions
  * @param {string} minifiedAmpCss
  * @return {!Promise}
  */
-async function buildBentoCss(name, version, minifiedAmpCss) {
+async function buildBentoCss(name, versions, minifiedAmpCss) {
   const bentoName = getBentoName(name);
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
-  await fs.outputFile(`build/${bentoName}-${version}.css`, renamedCss);
-  await fs.outputFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
+  await writeCssBinaries(bentoName, versions, renamedCss);
 }
 
 /**
@@ -776,7 +770,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
  */
 async function generateBentoEntryPointSource(name, toExport, options) {
   const css = options.hasCss
-    ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
+    ? await fs.readFile(`build/css/${name}-${options.version}.css`, 'utf8')
     : null;
 
   return dedent(`
