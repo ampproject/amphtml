@@ -49,7 +49,6 @@ describes.realWin(
 
     it('should build shopping tag component', () => {
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
-      expect(shoppingTag.isLayoutSupported(Layout.CONTAINER)).to.be.true;
     });
 
     it('should process config data and set text container content if data not null', () => {

@@ -57,7 +57,6 @@ describes.realWin(
 
     it('should build shopping config component', () => {
       expect(() => shoppingConfig.layoutCallback()).to.not.throw();
-      expect(shoppingConfig.isLayoutSupported(Layout.NODISPLAY)).to.be.true;
     });
 
     it('throws on no config', async () => {
@@ -87,10 +86,6 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       shoppingConfig.buildCallback().then((storyConfig) => {
-        //if remote config is not valid, it will use the inline config
-        expect(storyConfig).to.eql(null);
-        expect(element.hasAttribute('src')).to.be.true;
-        //if the above two conditions are true, then it will call inline in the conditional!
         expect(shoppingConfig.getInlineConfig_).to.be.called();
       });
     });
