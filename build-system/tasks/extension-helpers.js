@@ -564,10 +564,11 @@ async function getCssForJssFile(jssFile) {
  */
 async function buildExtensionCss(extDir, name, version, options) {
   const aliasBundle = extensionAliasBundles[name];
-  const aliasVersion =
-    aliasBundle?.version == version ? aliasBundle.version : null;
+  const aliasedVersion =
+    aliasBundle?.version == version ? aliasBundle.aliasedVersion : null;
 
-  const versions = [version, aliasVersion].filter(Boolean);
+  const versions = [version, aliasedVersion].filter(Boolean);
+
   const bundles = await fastGlob(`${extDir}/*.css`);
 
   await Promise.all(
@@ -623,7 +624,6 @@ async function buildBentoCss(name, versions, minifiedAmpCss) {
   const bentoName = getBentoName(name);
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
   await writeCssBinaries(bentoName, versions, renamedCss);
-  await writeVersions(`dist/v0/${bentoName}`, 'css', versions, renamedCss);
 }
 
 /**
@@ -770,7 +770,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
  */
 async function generateBentoEntryPointSource(name, toExport, options) {
   const css = options.hasCss
-    ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
+    ? await fs.readFile(`build/css/${name}-${options.version}.css`, 'utf8')
     : null;
 
   return dedent(`
