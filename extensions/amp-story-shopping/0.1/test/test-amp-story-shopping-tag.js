@@ -63,7 +63,7 @@ describes.realWin(
       );
     });
 
-    it('should not process config data and set text container content if id not found is null', () => {
+    it('should not process config data and set text container content if id not found', () => {
       shoppingTag.element.setAttribute('data-tag-id', 'hat');
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},

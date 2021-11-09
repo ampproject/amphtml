@@ -85,7 +85,7 @@ describes.realWin(
       const exampleURL = 'invalidRemoteURL';
       element.setAttribute('src', exampleURL);
 
-      shoppingConfig.buildCallback().then((storyConfig) => {
+      shoppingConfig.buildCallback().then(() => {
         expect(shoppingConfig.getInlineConfig_).to.be.called();
       });
     });

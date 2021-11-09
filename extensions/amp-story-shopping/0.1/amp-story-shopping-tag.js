@@ -9,7 +9,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
 
@@ -33,12 +33,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * @param {Object} shoppingState
+   * @param {!Object} shoppingState
    * @private
    */
   updateShoppingTag_(shoppingState) {
     const tagData = shoppingState[this.element.getAttribute('data-tag-id')];
-    if (tagData != null) {
+    if (tagData) {
       this.element.textContent = tagData['product-title'];
     }
   }

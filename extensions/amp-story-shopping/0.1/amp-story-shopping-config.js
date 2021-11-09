@@ -14,16 +14,16 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
 
   /**
    * Keys product data to product-ids and adds them to the store service.
-   * @private
    * @param {!JsonObject} storyConfig
+   * @private
    */
-  dispatchConfig_(storyConfig) {
+  addShoppingStateFromConfig_(storyConfig) {
     const productIDtoProduct = {};
 
     for (const item of storyConfig['items']) {
@@ -44,9 +44,11 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
 
         this.storeService_ = storeService;
         this.getRemoteConfig_()
-          .then((storyConfig) => this.dispatchConfig_(storyConfig))
+          .then((storyConfig) => this.addShoppingStateFromConfig_(storyConfig))
           // If remote fails, fallback to inline.
-          .catch(() => this.dispatchConfig_(this.getInlineConfig_()));
+          .catch(() =>
+            this.addShoppingStateFromConfig_(this.getInlineConfig_())
+          );
       }
     );
   }
@@ -56,7 +58,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     return layout === Layout.NODISPLAY;
   }
 
-  /** @return {Promise<JsonObject>} */
+  /** @return {?JsonObject} */
   getInlineConfig_() {
     const scriptChild = this.element.firstElementChild;
     userAssert(
