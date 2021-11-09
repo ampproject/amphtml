@@ -40,16 +40,16 @@ describes.realWin(
       });
 
       it('carousels must have expected functions on their prototype', () => {
-        function assertHasInteractions(klass) {
+        function assertHasFunctions(klass) {
           expect(klass.prototype.interactionNext).ok;
           expect(klass.prototype.interactionPrev).ok;
           expect(klass.prototype.goToSlide).ok;
           expect(klass.prototype.goCallback).ok;
         }
 
-        assertHasInteractions(AmpScrollableCarousel);
-        assertHasInteractions(AmpSlideScroll);
-        assertHasInteractions(AmpBaseCarousel);
+        assertHasFunctions(AmpScrollableCarousel);
+        assertHasFunctions(AmpSlideScroll);
+        assertHasFunctions(AmpBaseCarousel);
       });
     });
   }
