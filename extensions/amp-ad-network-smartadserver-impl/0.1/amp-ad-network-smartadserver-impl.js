@@ -1,4 +1,3 @@
-/* eslint-disable local/no-forbidden-terms */
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -73,28 +72,17 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         checkStillCurrent();
         const rtc = this.getBestRtcCallout_(result);
         const urlParams = {};
-        let tgt = ''; // usunąć
-        if (rtc && Object.keys(rtc).length) {
-          urlParams['hb_bid'] = rtc.hb_bidder || 'unknown';
-          urlParams['hb_cpm'] = rtc.hb_pb || 0.0;
-          urlParams['hb_ccy'] = 'USD';
-          urlParams['rtc_id'] = rtc.hb_cache_id || '';
-          urlParams['rtc_host'] = rtc.hb_cache_host || '';
-          urlParams['rtc_path'] = rtc.hb_cache_path || '';
-          urlParams['rtc_width'] = this.element.getAttribute('width');
-          urlParams['rtc_height'] = this.element.getAttribute('height');
 
-          // usunąć
-          tgt =
-            'rtc_host=' +
-            (rtc.hb_cache_host || '') +
-            ';rtc_path=' +
-            (rtc.hb_cache_path || '') +
-            ';rtc_id=' +
-            (rtc.hb_cache_id || '') +
-            ';';
+        if (rtc && Object.keys(rtc).length) {
+          urlParams['hb_bid'] = rtc.hb_bidder || '';
+          urlParams['hb_cpm'] = rtc.hb_pb;
+          urlParams['hb_ccy'] = 'USD';
+          urlParams['hb_cache_id'] = rtc.hb_cache_id || '';
+          urlParams['hb_cache_host'] = rtc.hb_cache_host || '';
+          urlParams['hb_cache_path'] = rtc.hb_cache_path || '';
+          urlParams['hb_width'] = this.element.getAttribute('width');
+          urlParams['hb_height'] = this.element.getAttribute('height');
         }
-        console.log('RTC:', rtc);
 
         const formatId = this.element.getAttribute('data-format');
         const tagId = 'sas_' + formatId;
@@ -105,9 +93,9 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'siteid': this.element.getAttribute('data-site'),
             'pgid': this.element.getAttribute('data-page'),
             'fmtid': formatId,
-            'tgt': tgt + this.element.getAttribute('data-target'), // usunąć tgt
+            'tgt': this.element.getAttribute('data-target'),
             'tag': tagId,
-            'out': 'iframe', // amp2
+            'out': 'amp-hb',
             ...urlParams,
             'gdpr_consent': consentString,
             'pgDomain': this.win.top.location.hostname,
@@ -132,7 +120,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     return super.sendXhrRequest(adUrl).then((response) => {
       return response.text().then((responseText) => {
         if (includes(responseText, SAS_NO_AD_STR)) {
-          this.collapse();
+          this./*OK*/ collapse();
         }
         return new Response(response);
       });

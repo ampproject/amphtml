@@ -43,22 +43,6 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
 
   let element, impl, win, doc;
 
-  function jsonOk() {
-    return Promise.resolve(
-      new window.Response(
-        JSON.stringify({
-          key: 'value',
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-type': 'application/json',
-          },
-        }
-      )
-    );
-  }
-
   beforeEach(() => {
     win = env.win;
     doc = win.document;
@@ -87,21 +71,30 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         'data-override-height': '260',
       };
       const json = {
-        'targeting': {'a': '123'},
+        targeting: {a: 123},
       };
 
       element = createElementWithAttributes(doc, 'amp-ad', {
-        width: macros['width'],
-        height: macros['height'],
-        type: 'smartadserver',
+        'width': macros['width'],
+        'height': macros['height'],
+        'type': 'smartadserver',
         'data-slot': 5678,
         'data-override-width': 310,
         'data-override-height': 260,
-        layout: 'fixed',
-        json: JSON.stringify(json),
+        'layout': 'fixed',
+        'json': JSON.stringify(json),
         'rtc-config': JSON.stringify(rtcConfig),
       });
       env.win.document.body.appendChild(element);
+
+      const scrollTopValue = 100;
+      const scrollHeightValue = 700;
+      env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getScrollTop: () => scrollTopValue,
+          getScrollHeight: () => scrollHeightValue,
+        };
+      });
 
       impl = new AmpAdNetworkSmartadserverImpl(element, env.win.doc, win);
       const docInfo = Services.documentInfoForDoc(element);
@@ -115,6 +108,8 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       expect(customMacros.ELEMENT_POS()).to.equal(
         element.getBoundingClientRect().top + scrollY
       );
+      expect(customMacros.SCROLL_TOP()).to.equal(scrollTopValue);
+      expect(customMacros.PAGE_HEIGHT()).to.equal(scrollHeightValue);
       expect(customMacros.BKG_STATE()).to.equal(
         impl.getAmpDoc().isVisible() ? 'visible' : 'hidden'
       );
@@ -151,15 +146,29 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
 
   describe('getAdUrl', () => {
     it('should return proper url with vendor data', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': 300,
+        'height': 250,
+        'data-site': 111,
+        'data-page': 121,
+        'data-format': 222,
+        'type': 'smartadserver',
+        'rtc-config': JSON.stringify(rtcConfig),
+      });
+      doc.body.appendChild(element);
+
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+
       const rtcResponseArray = [
         {
           response: {
-            'targeting': {
+            targeting: {
               'hb_bidder': 'appnexus',
               'hb_cache_host': 'prebid.ams1.adnxs-simple.com',
               'hb_cache_id': '0cb22b3e-aa2d-4936-9039-0ec93ff67de5',
               'hb_cache_path': '/pbc/v1/cache',
-              'hb_pb': '0.4',
+              'hb_pb': '1.7',
               'hb_size': '300x250',
             },
           },
@@ -167,36 +176,27 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         },
       ];
 
-      element = doc.createElement('amp-ad');
-      element.setAttribute('type', 'smartadserver');
-      element.setAttribute('width', 300);
-      element.setAttribute('height', 250);
-      element.setAttribute('data-site', 111);
-      element.setAttribute('data-format', 222);
-      element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
-      doc.body.appendChild(element);
-
-      impl = new AmpAdNetworkSmartadserverImpl(element);
-
-      const stub = env.sandbox.stub(window, 'fetch');
-      stub.onCall(0).returns(jsonOk());
-
-      expect(stub.notCalled).to.equal(true);
-
-      await impl.getAdUrl(
-        {consentString: 'consent-string', gdprApplies: true},
-        Promise.resolve(rtcResponseArray)
-      );
-      expect(stub.calledOnce).to.equal(true);
-      expect(stub).to.have.been.calledWithMatch(
-        /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&fmtid=222&tag=sas_222&out=amp&hb_bid=appnexus&hb_cpm=0\.4&hb_ccy=USD&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/,
-        {
-          credentials: 'include',
-        }
-      );
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, Promise.resolve(rtcResponseArray))
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+          );
+        });
     });
 
     it('should return proper url while missing some vendor data', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': 11,
+        'data-format': 23,
+        'type': 'smartadserver',
+        'rtc-config': JSON.stringify(rtcConfig),
+      });
+      doc.body.appendChild(element);
+
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+
       const rtcResponseArray = [
         {
           response: {
@@ -212,86 +212,139 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         },
       ];
 
-      element = doc.createElement('amp-ad');
-      element.setAttribute('data-site', 11);
-      element.setAttribute('data-format', '23');
-      element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, Promise.resolve(rtcResponseArray))
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+          );
+        });
+    });
+
+    it('should return proper url with default vendor data', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': 11,
+        'data-format': 23,
+        'rtc-config': JSON.stringify(rtcConfig),
+      });
       doc.body.appendChild(element);
 
-      impl = new AmpAdNetworkSmartadserverImpl(element);
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
 
-      const stub = env.sandbox.stub(window, 'fetch');
-      stub.onCall(0).returns(jsonOk());
-
-      expect(stub.notCalled).to.equal(true);
-
-      await impl.getAdUrl(
-        {consentString: 'consent-string', gdprApplies: true},
-        Promise.resolve(rtcResponseArray)
-      );
-      expect(stub.calledOnce).to.equal(true);
-      expect(stub).to.have.been.calledWithMatch(
-        /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp&hb_bid=unknown&hb_cpm=0\.4&hb_ccy=USD&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/,
+      const rtcResponseArray = [
         {
-          credentials: 'include',
-        }
-      );
+          response: {
+            'targeting': {
+              'hb_pb': '0.8',
+              'hb_size': '100x200',
+            },
+          },
+          rtcTime: 109,
+        },
+      ];
+
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, Promise.resolve(rtcResponseArray))
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+          );
+        });
     });
 
     it('should return proper url without vendor data', async () => {
-      element = doc.createElement('amp-ad');
-      element.setAttribute('type', 'smartadserver');
-      element.setAttribute('width', 100);
-      element.setAttribute('height', 50);
-      element.setAttribute('data-site', '1');
-      element.setAttribute('data-format', '33');
-      element.setAttribute('data-domain', 'https://ww7.smartadserver.com');
-
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '100',
+        'height': '50',
+        'data-site': '1',
+        'data-format': '33',
+        'data-domain': 'https://ww7.smartadserver.com',
+        'type': 'smartadserver',
+      });
       doc.body.appendChild(element);
-      impl = new AmpAdNetworkSmartadserverImpl(element);
-      const stub = env.sandbox.stub(window, 'fetch');
-      stub.onCall(0).returns(jsonOk());
-      expect(stub.notCalled).to.equal(true);
-      await impl.getAdUrl(
-        {consentString: 'consent-string', gdprApplies: true},
-        Promise.resolve([])
-      );
-      expect(stub.calledOnce).to.equal(true);
-      expect(stub).to.have.been.calledWithMatch(
-        /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/,
-        {
-          credentials: 'include',
-        }
-      );
+
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, Promise.resolve())
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+          );
+        });
     });
 
     it('should return proper url with falsy callout response', async () => {
-      element = doc.createElement('amp-ad');
-      element.setAttribute('data-site', 2);
-      element.setAttribute('data-format', 3);
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': 2,
+        'data-format': 3,
+      });
       doc.body.appendChild(element);
-      impl = new AmpAdNetworkSmartadserverImpl(element);
 
-      const stub = env.sandbox.stub(window, 'fetch');
-      stub.onCall(0).returns(jsonOk());
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, null)
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+          );
+        });
+    });
+  });
+
+  describe('sendXhrRequest', () => {
+    function mockXhrFor(response) {
+      return {
+        fetch: () =>
+          Promise.resolve({
+            text: () => Promise.resolve(response),
+          }),
+      };
+    }
+
+    it('should not collapse when ad response', async () => {
+      env.sandbox
+        .stub(Services, 'xhrFor')
+        .returns(
+          mockXhrFor('<html><body><div>advertisement</div></body></html>')
+        );
+
+      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
+      const stub = env.sandbox.stub(impl, 'collapse');
+
       expect(stub.notCalled).to.equal(true);
-      await impl.getAdUrl({}, null);
+      await impl.sendXhrRequest();
+      expect(stub.notCalled).to.equal(true);
+    });
+
+    it('should collapse when no ad response', async () => {
+      env.sandbox
+        .stub(Services, 'xhrFor')
+        .returns(mockXhrFor('<html><head></head><body></body></html>'));
+
+      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
+      const stub = env.sandbox.stub(impl, 'collapse');
+
+      expect(stub.notCalled).to.equal(true);
+      await impl.sendXhrRequest();
       expect(stub.calledOnce).to.equal(true);
-      expect(stub).to.have.been.calledWithMatch(
-        /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/,
-        {
-          credentials: 'include',
-        }
-      );
     });
   });
 
   describe('getBestRtcCallout', () => {
+    beforeEach(() => {
+      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
+    });
+
     it('should return best callout data', async () => {
       const rtcResponseArray = [
         {
-          'response': {
-            'targeting': {
+          response: {
+            targeting: {
               'hb_bidder': 'appnexus',
               'hb_bidder_appnexus': 'appnexus',
               'hb_cache_host': 'prebid.ams1.adnxs-simple.com',
@@ -306,13 +359,13 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
               'hb_size_appnexus': '300x250',
             },
           },
-          'rtcTime': 134,
-          'callout': 'prebidappnexus',
+          rtcTime: 134,
+          callout: 'prebidappnexus',
         },
         {
-          'response': {},
-          'rtcTime': 122,
-          'callout': 'criteo',
+          response: {},
+          rtcTime: 122,
+          callout: 'criteo',
         },
         {
           'response': {
@@ -329,8 +382,6 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
           'callout': 'indexexchange',
         },
       ];
-
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
 
       expect(impl.getBestRtcCallout_(rtcResponseArray)).to.deep.equal(
         rtcResponseArray[2].response.targeting
@@ -356,98 +407,15 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         },
       ];
 
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
-
       expect(impl.getBestRtcCallout_(rtcResponseArray)).to.deep.equal({});
     });
 
     it('should return empty object when empty callouts array', async () => {
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
-
       expect(impl.getBestRtcCallout_([])).to.deep.equal({});
     });
+
+    it('should return empty object when falsy argument', async () => {
+      expect(impl.getBestRtcCallout_(null)).to.deep.equal({});
+    });
   });
-
-  // describe('getRtcAd', () => {
-  //   it('should fetch creative while proper ad data', async () => {
-  //     const fetchStub = env.sandbox.stub(window, 'fetch');
-  //     element = doc.createElement('amp-ad');
-  //     impl = new AmpAdNetworkSmartadserverImpl(element);
-
-  //     fetchStub.onCall(0).returns(jsonOk());
-  //     expect(fetchStub.notCalled).to.equal(true);
-
-  //     const cache = {
-  //       id: 'my_creative-id',
-  //       host: 'callout.host.com',
-  //       path: '/my/cache/path',
-  //     };
-
-  //     await impl.getRtcAd_(cache, element);
-
-  //     expect(fetchStub).to.have.been.calledOnceWithExactly(
-  //       new Request(
-  //         'https://callout.host.com/my/cache/path?showAdm=1&uuid=my_creative-id'
-  //       )
-  //     );
-  //   });
-  // });
-
-  // describe('renderIframe', () => {
-  //   beforeEach(() => {
-  //     element = doc.createElement('amp-ad');
-  //     doc.body.appendChild(element);
-  //     impl = new AmpAdNetworkSmartadserverImpl(element);
-  //   });
-
-  //   it('should render html ad markup', async () => {
-  //     const html = '<div id="my_ad"></div>';
-  //     impl.renderIframe_(html, element);
-
-  //     expect(element.innerHTML).to.deep.equal(
-  //       '<iframe width="100%" height="100%" scrolling="no" style="border:0; margin:0"></iframe>'
-  //     );
-
-  //     const iframe = element.firstChild;
-  //     expect(iframe.contentDocument.documentElement.innerHTML).to.deep.equal(
-  //       '<head></head><body style="margin:0">' + html + '</body>'
-  //     );
-  //   });
-
-  //   it('should render script ad markup', async () => {
-  //     const script = 'const myConst = true;';
-  //     impl.renderIframe_(script, element, false);
-
-  //     expect(element.innerHTML).to.deep.equal(
-  //       '<iframe width="100%" height="100%" scrolling="no" style="border:0; margin:0"></iframe>'
-  //     );
-
-  //     const iframe = element.firstChild;
-  //     expect(iframe.contentDocument.documentElement.innerHTML).to.deep.equal(
-  //       '<head></head><body style="margin:0"><script>' +
-  //         script +
-  //         '</script></body>'
-  //     );
-  //   });
-
-  //   it('should hide fallback', async () => {
-  //     impl.fallback_ = doc.createElement('div');
-  //     impl.fallback_.setAttribute('fallback', '');
-  //     impl.element.appendChild(impl.fallback_);
-
-  //     expect(element.innerHTML).to.deep.equal('<div fallback=""></div>');
-
-  //     const html = '<h1>OK</h1>';
-  //     impl.renderIframe_(html, element);
-
-  //     expect(element.innerHTML).to.deep.equal(
-  //       '<div fallback="" hidden=""></div><iframe width="100%" height="100%" scrolling="no" style="border:0; margin:0"></iframe>'
-  //     );
-
-  //     const iframe = element.childNodes[1];
-  //     expect(iframe.contentDocument.documentElement.innerHTML).to.deep.equal(
-  //       '<head></head><body style="margin:0">' + html + '</body>'
-  //     );
-  //   });
-  // });
 });
