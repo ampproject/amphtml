@@ -95,6 +95,7 @@ const ExtensionOptionDef = {};
  *   external?: Array<string>
  *   remap?: Record<string, string>
  *   wrapper?: string,
+ *   babelCaller?: string,
  * }}
  */
 const ExtensionBinaryDef = {};
@@ -644,6 +645,7 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
       react: {
+        babelCaller: options.minify ? 'react-minified' : 'react-unminified',
         entryPoint: 'component.js',
         outfile: 'component-react.js',
         external: ['react', 'react-dom'],
@@ -681,7 +683,7 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, external, outfile, remap, wrapper} = binary;
+    const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
     return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
@@ -693,6 +695,7 @@ function buildBinaries(extDir, binaries, options) {
       externalDependencies: external,
       remapDependencies: remap,
       wrapper: wrapper ?? options.wrapper,
+      babelCaller: babelCaller ?? options.babelCaller,
     });
   });
   return Promise.all(promises);
