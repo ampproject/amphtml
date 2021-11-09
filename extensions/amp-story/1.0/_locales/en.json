@@ -107,10 +107,6 @@
     "string": "Swipe up",
     "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
   },
-  "36": {
-    "string": "Expand Tweet",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
-  },
   "62": {
     "string": "Share starting from this page",
     "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
@@ -258,5 +254,9 @@
   "100": {
     "string": "Read more",
     "description": "Label for a button to open a drawer containing additional content."
+  },
+  "101": {
+    "string": "Open Tweet",
+    "description": "Label in the tooltip text for when a Twitter embed can be opened."
   }
 }
