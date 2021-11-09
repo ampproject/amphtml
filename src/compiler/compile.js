@@ -12,7 +12,9 @@ export function compile(request) {
   // eslint-disable-next-line local/camelcase
   const {component_versions: versions, document, nodes} = request ?? {};
   if (!versions || !(document || nodes)) {
-    throw new Error('Must provide versions and either document or nodes');
+    throw new Error(
+      'Must provide component_versions and either document or nodes'
+    );
   }
 
   if (document) {
