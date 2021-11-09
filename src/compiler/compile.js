@@ -9,7 +9,6 @@ import {getBuilders} from './builders';
  * @return {import('./types').CompilerResponse}
  */
 export function compile(request) {
-  // eslint-disable-next-line local/camelcase
   const {component_versions: versions, document, nodes} = request ?? {};
   if (!versions || !(document || nodes)) {
     throw new Error(
