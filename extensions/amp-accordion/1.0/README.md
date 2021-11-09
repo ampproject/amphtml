@@ -47,20 +47,8 @@ The example below contains an `bento-accordion` with three sections. The
       async
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
-    <script
-      nomodule
-      type="module"
-      async
-      src="https://cdn.ampproject.org/bento.mjs"
-    ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"
-    ></script>
-    <script
-      nomodule
       type="module"
       async
       src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"

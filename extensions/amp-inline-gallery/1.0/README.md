@@ -36,21 +36,9 @@ The example below contains a `bento-inline-gallery` consisting of three slides w
       async
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
-    <script
-      nomodule
-      type="module"
-      async
-      src="https://cdn.ampproject.org/bento.mjs"
-    ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
 
     <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.mjs"
-    ></script>
-    <script
-      nomodule
       type="module"
       async
       src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.mjs"
@@ -66,12 +54,6 @@ The example below contains a `bento-inline-gallery` consisting of three slides w
     />
 
     <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
-    ></script>
-    <script
-      nomodule
       type="module"
       async
       src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"

@@ -36,12 +36,6 @@ defineBentoEmbedlyCard();
       async
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
-    <script
-      nomodule
-      type="module"
-      async
-      src="https://cdn.ampproject.org/bento.mjs"
-    ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style>
@@ -52,12 +46,6 @@ defineBentoEmbedlyCard();
       }
     </style>
     <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.mjs"
-    ></script>
-    <script
-      nomodule
       type="module"
       async
       src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.mjs"

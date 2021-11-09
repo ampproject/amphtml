@@ -45,20 +45,8 @@ defineBentoSocialShare();
       async
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
-    <script
-      nomodule
-      type="module"
-      async
-      src="https://cdn.ampproject.org/bento.mjs"
-    ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs"
-    ></script>
-    <script
-      nomodule
       type="module"
       async
       src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs"

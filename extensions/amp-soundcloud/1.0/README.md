@@ -32,12 +32,6 @@ defineBentoSoundcloud();
       async
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
-    <script
-      nomodule
-      type="module"
-      async
-      src="https://cdn.ampproject.org/bento.mjs"
-    ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style>
@@ -48,12 +42,6 @@ defineBentoSoundcloud();
       }
     </style>
     <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs"
-    ></script>
-    <script
-      nomodule
       type="module"
       async
       src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs"
