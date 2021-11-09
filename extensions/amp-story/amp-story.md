@@ -20,14 +20,9 @@ teaser:
 
 ## Version notes
 
-| Version | Description                                                                             |
-| ------- | --------------------------------------------------------------------------------------- |
-| 1.0     | Current version, since 2018-07-16.                                                      |
-| 0.1     | Initial implementation. This is no longer valid AMP, and will be deleted on 2019-10-01. |
-
-### Migrating from 0.1 to 1.0
-
-As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2019-10-01. This may cause minor breaking changes, as your stories will automatically be upgraded to use version 1.0. We recommend manually migrating your pages to version 1.0 before this date to ensure functionality and proper design.
+| Version | Description                        |
+| ------- | ---------------------------------- |
+| 1.0     | Current version, since 2018-07-16. |
 
 ## AMP story format
 
@@ -436,8 +431,6 @@ Example:
 We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
 
 When clicked, the component will be shown in a lightbox-like mode. Here, a user can choose to further interact with the embed, or close the lightbox and go back to the story.
-
-Example:
 
 <figure class="centered-fig">
   <span class="special-char">Example:</span>
