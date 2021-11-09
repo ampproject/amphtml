@@ -25,6 +25,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       },
       play,
       pause,
+      style: {},
       getMetadata: () => metadata,
     }));
     return <></>;
