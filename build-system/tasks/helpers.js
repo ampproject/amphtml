@@ -423,8 +423,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
-  console.log(babelCaller, srcFilename);
-
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
     /* enableCache */ true
