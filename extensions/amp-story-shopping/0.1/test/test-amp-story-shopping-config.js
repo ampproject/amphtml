@@ -2,12 +2,11 @@ import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 
 import '../amp-story-shopping';
-import {Services} from '#service';
 
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  Action,
+  StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
@@ -32,13 +31,6 @@ describes.realWin(
         return storeService;
       });
 
-      const productIDtoProduct = {};
-
-      for (const item of configData['items']) {
-        productIDtoProduct[item['product-tag-id']] = item;
-      }
-
-      storeService.dispatch(Action.ADD_SHOPPING_STATE, productIDtoProduct);
       await createAmpStoryShoppingConfig();
     });
 
@@ -71,7 +63,7 @@ describes.realWin(
     it('throws on no config', async () => {
       expectAsyncConsoleError(async () => {
         expect(async () => {
-          await shoppingConfig.getConfig();
+          await shoppingConfig.buildCallback();
         }).to.throw(
           /The amp-story-auto-ads:config should be inside a <script> tag with type=\"application\/json\"​​​/
         );
@@ -80,22 +72,21 @@ describes.realWin(
 
     it('does use remote config when src attribute is provided', async () => {
       const exampleURL = 'foo.example';
-      const xhrService = Services.xhrFor(win);
-      const fetchStub = env.sandbox.stub(xhrService, 'fetchJson').resolves({
-        json: () => Promise.resolve(configData),
-      });
       element.setAttribute('src', exampleURL);
 
-      const result = await shoppingConfig.getConfig();
-      expect(fetchStub).to.be.calledWith(exampleURL);
-      expect(result).to.eql(configData);
+      const expectedRemoteResult =
+        '{"city-pop":{"product-tag-id":"city-pop","brand-label":"...","brand-favicon":"...","product-title":"Plastic Love","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"k-pop":{"product-tag-id":"k-pop","brand-label":"...","brand-favicon":"...","product-title":"Gangnam Style","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"eurodance":{"product-tag-id":"eurodance","brand-label":"...","brand-favicon":"...","product-title":"Crystal King Battle","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1}}';
+
+      expect(
+        JSON.stringify(storeService.get(StateProperty.SHOPPING_STATE))
+      ).to.eql(expectedRemoteResult);
     });
 
     it('does use inline config when remote src is invalid', async () => {
       const exampleURL = 'invalidRemoteURL';
       element.setAttribute('src', exampleURL);
 
-      shoppingConfig.getConfig().then((storyConfig) => {
+      shoppingConfig.buildCallback().then((storyConfig) => {
         //if remote config is not valid, it will use the inline config
         expect(storyConfig).to.eql(null);
         expect(element.hasAttribute('src')).to.be.true;
@@ -109,7 +100,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
       expectAsyncConsoleError(async () => {
         expect(async () => {
-          await shoppingConfig.getConfig();
+          await shoppingConfig.buildCallback();
         }).to.throw(
           /'amp-story-auto-ads:config error determining if remote config is valid json: bad url or bad json'​​​/
         );

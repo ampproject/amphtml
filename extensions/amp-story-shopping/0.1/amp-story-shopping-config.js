@@ -56,13 +56,6 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     return layout === Layout.NODISPLAY;
   }
 
-  /** @return {!JsonObject} */
-  getConfig() {
-    return this.element.hasAttribute('src')
-      ? this.getRemoteConfig_()
-      : this.getInlineConfig_();
-  }
-
   /** @return {Promise<JsonObject>} */
   getInlineConfig_() {
     const scriptChild = this.element.firstElementChild;

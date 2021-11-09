@@ -2,7 +2,11 @@ import {createElementWithAttributes} from '#core/dom';
 import {Layout} from '#core/dom/layout';
 import '../amp-story-shopping';
 
-import {getStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {
+  Action,
+  getStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
 
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
@@ -16,11 +20,15 @@ describes.realWin(
     let win;
     let element;
     let shoppingTag;
+    let storeService;
 
     beforeEach(async () => {
       win = env.win;
 
-      getStoreService(win);
+      storeService = getStoreService(win);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
 
       await createAmpStoryShoppingTag();
     });
@@ -49,7 +57,8 @@ describes.realWin(
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
-      shoppingTag.updateShoppingTag_(shoppingState);
+      storeService.dispatch(Action.ADD_SHOPPING_STATE, shoppingState);
+      shoppingTag.buildCallback();
       expect(shoppingTag.element.textContent).to.equal(
         'Spectacular Spectacles'
       );
@@ -60,7 +69,8 @@ describes.realWin(
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
-      shoppingTag.updateShoppingTag_(shoppingState);
+      storeService.dispatch(Action.ADD_SHOPPING_STATE, shoppingState);
+      shoppingTag.buildCallback();
       expect(shoppingTag.element.textContent).to.not.equal(
         'Spectacular Spectacles'
       );
