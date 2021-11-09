@@ -89,12 +89,6 @@ commands:
                 key: git-cache-{{ arch }}-v2-{{ .Branch }}-{{ .Revision }}
                 paths:
                   - .git
-  setup_node_environment:
-    steps:
-      - node/install:
-          lts: true
-          install-npm: false
-      - node/install-packages
   setup_vm:
     parameters:
       save-git-cache:
@@ -119,7 +113,12 @@ commands:
             ./.circleci/fetch_merge_commit.sh
             ./.circleci/restore_build_output.sh
             cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
-      - setup_node_environment
+      - node/install:
+          lts: true
+          install-npm: false
+      - run:
+          name: 'Restore node_modules/'
+          command: mv /tmp/restored-workspace/node_modules/ .
   teardown_vm:
     steps:
       - persist_to_workspace:
@@ -190,6 +189,32 @@ jobs:
           name: 'Initialize Workspace'
           command: cp .circleci/maybe_gracefully_halt.sh /tmp/workspace
       - teardown_vm
+  initialize_node:
+    executor:
+      name: node-docker-large
+    steps:
+      - run:
+          name: 'Fetch package.json and required files'
+          command: |
+            mkdir -p build-system/{common,task-runner}
+            wget https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_SHA1}/package{,-lock}.json
+            wget https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_SHA1}/build-system/common/{check-package-manager,ci,logging,process}.js --directory-prefix build-system/common
+            wget https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_SHA1}/build-system/task-runner/{amp-cli-runner,install-amp-task-runner}.js --directory-prefix build-system/task-runner
+      - node/install:
+          lts: true
+          install-npm: false
+      - node/install-packages
+      - run:
+          name: 'Store node_modules/'
+          command: mkdir -p /tmp/workspace && mv node_modules/ /tmp/workspace
+      - teardown_vm
+  merge_initializers:
+    executor:
+      name: base-docker-small
+    steps:
+      - run:
+          name: '⭐ Merge ⭐'
+          command: echo "⭐ Merged ⭐" # no-op
   checks:
     executor:
       name: node-docker-medium
@@ -492,36 +517,45 @@ workflows:
       - initialize_repository:
           name: 'Initialize Repository'
           <<: *push_and_pr_builds
+      - initialize_node:
+          name: 'Initialize Node'
+          <<: *push_and_pr_builds
+      - merge_initializers:
+          name: 'Merge Initializers'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
+            - 'Initialize Node'
       - checks:
           name: 'Checks'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - unminified_build:
           name: 'Unminified Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - nomodule_build_test:
           name: 'Nomodule Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - module_build_test:
           name: 'Module Build (Test)'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - nomodule_build_prod:
           name: 'Nomodule Build (Prod)'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - module_build_prod:
           name: 'Module Build (Prod)'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - pr_deploy:
           name: 'PR Deploy'
           <<: *pr_builds_only
@@ -537,7 +571,7 @@ workflows:
           name: 'Validator Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - visual_diff_tests:
           name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
@@ -547,7 +581,7 @@ workflows:
           name: 'Local Unit Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - all_unit_tests:
           name: '⛓️ All Unit Tests'
           <<: *push_and_pr_builds
@@ -602,7 +636,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - experiment_integration_tests:
           name: 'Exp. << matrix.exp >> Integration Tests'
           matrix:
@@ -630,6 +664,15 @@ workflows:
       - initialize_repository:
           name: 'Initialize Repository'
           <<: *release_builds_only
+      - initialize_node:
+          name: 'Initialize Node'
+          <<: *release_builds_only
+      - merge_initializers:
+          name: 'Merge Initializers'
+          <<: *push_and_pr_builds
+          requires:
+            - 'Initialize Repository'
+            - 'Initialize Node'
       - amp_release:
           name: '<< matrix.flavor >> << matrix.esm >>'
           matrix:
@@ -638,7 +681,7 @@ workflows:
               esm: ['no-esm', 'esm']
           <<: *release_builds_only
           requires:
-            - 'Initialize Repository'
+            - 'Merge Initializers'
       - upload_release:
           name: 'Upload Release'
           <<: *release_builds_only
