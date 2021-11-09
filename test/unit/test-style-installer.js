@@ -241,7 +241,7 @@ describes.sandboxed('Styles', {}, () => {
           head.appendChild(serverEl);
           const promise = installStylesAsPromise('other{}', false, 'amp-ext1');
           return promise.then((styleEl) => {
-            expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
+            expect(head.__AMP_CSS_SM['amp-ext1']).to.not.exist;
             expect(styleEl).to.equal(serverEl);
             expect(styleEl.textContent).to.equal('other{}');
             expect(
@@ -261,7 +261,7 @@ describes.sandboxed('Styles', {}, () => {
           head.appendChild(serverEl);
           const promise = installStylesAsPromise('other{}', false, 'amp-ext1');
           return promise.then((styleEl) => {
-            expect(head.__AMP_CSS_SM['amp-story']).to.not.exist;
+            expect(head.__AMP_CSS_SM['amp-ext1']).to.not.exist;
             expect(styleEl).to.equal(serverEl);
             expect(
               head.querySelectorAll('link[amp-extension=amp-ext1]')
