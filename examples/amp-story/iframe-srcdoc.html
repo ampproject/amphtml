@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>iframe srcdoc (simple)</title>
+    <style>
+      body {
+        margin: 0px;
+      }
+
+      iframe {
+        border: 1px solid black;
+        height: 500px;
+        overflow: hidden;
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>before</h1>
+    <iframe srcdoc='
+      <!doctype html>
+      <html amp lang="en">
+        <head>
+          <meta charset="utf-8">
+          <script async src="https://cdn.ampproject.org/v0.js"></script>
+          <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+          <link href="https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto" rel="stylesheet" type="text/css">
+          <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+          <title>Attachments</title>
+          <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+          <link rel="canonical" href="index.html">
+          <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+          <style amp-custom>
+            body {
+              font-family: "Roboto", sans-serif;
+              color: #fff;
+              height: 100%;
+              margin: 0px !important;
+              width: 100%;
+            }
+          </style>
+        </head>
+      
+        <body>
+          <amp-story
+              standalone
+              publisher="The AMP team"
+              publisher-logo-src="/examples/visual-tests/amp-story/img/AMP-Brand-White-Icon.svg"
+              poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
+              title="Shadow AMP Investigation"
+              supports-landscape>
+            <amp-story-page id="page1">
+              <amp-story-grid-layer template="fill">
+                <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+              </amp-story-grid-layer>
+              <amp-story-grid-layer template="vertical">
+                <p>
+                  <span data-text-background-color="#00A3DB">First page</span></br></br>
+                </p>
+              </amp-story-grid-layer>
+            </amp-story-page>
+            <amp-story-page id="page2">
+              <amp-story-grid-layer template="fill">
+                <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat2.jpg"></amp-img>
+              </amp-story-grid-layer>
+              <amp-story-grid-layer template="vertical">
+                <p>
+                  <span data-text-background-color="#00A3DB">Second page</span></br></br>
+                </p>
+              </amp-story-grid-layer>
+            </amp-story-page>
+          </amp-story>
+        </body>
+      </html>
+    '></iframe>
+    <h1>after</h1>
+  </body>
+</html>
