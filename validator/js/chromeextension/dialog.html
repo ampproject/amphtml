@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<style type="text/css">
+body {
+  min-width: 100px; 
+  position: relative;
+  vertical-align:middle;
+}
+
+.label-container {
+  padding-top: 8px;
+  padding-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+}
+
+.label-title {
+  font-size: 1.17em;
+  font-weight: bold;
+  padding-right: 5px;
+}
+
+.origin-image {
+  margin-top: -2px;
+}
+
+.cache-image {
+  margin-top: -2px;
+}
+
+</style>
+
+<meta charset="UTF-8">
+<html><head><title>Signed Exchange (SXG) Validator</title></head><body>
+<div class="label-container">
+  <div class="label-title">Origin</div>
+  <div class="origin-image" id="originimg">⌛</div>
+</div>
+<table border="1" cellpadding="3" style="border-collapse:collapse;">
+  <tr>
+    <td nowrap>URL</td>
+    <td align="right"><span id="url">N/A</span></td>
+  </tr>
+  <tr>
+    <td nowrap>Content Type</td>
+    <td align="right"><span id="contenttype">N/A</span></td>
+  </tr>
+</table>
+<div class="label-container">
+  <div class="label-title">Cache</div>
+  <div class="cacheimage" id="cacheimg">⌛</div>
+</div>
+<table border="1" cellpadding="3" style="border-collapse:collapse;">
+  <tr>
+    <td nowrap>URL</td>
+    <td align="right"><span id="cacheurl">N/A</span></td>
+  </tr>
+  <tr>
+    <td nowrap>Content Type</td>
+    <td align="right"><span id="cachecontenttype">N/A</span></td>
+  </tr>
+  <tr>
+    <td nowrap>Warning Message</td>
+    <td align="right"><p id="cachewarning"></p></td>
+  </tr>
+  <tr>
+    <td nowrap>Location</td>
+    <td align="right"><span id="cachelocation">N/A</span></td>
+  </tr>
+</table>
+<script src="punycode.js"></script>
+<script src="dialog.js"></script>
+</body></html>
