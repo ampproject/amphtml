@@ -18,53 +18,62 @@ const LIKE_TAG = 'amp-facebook-like';
 const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
-class AmpFacebook extends BaseElement {
-  /** @override @nocollapse */
-  static createLoaderLogoCallback(element) {
-    return createLoaderLogo(element);
-  }
+/**
+ * Mixin to implement base amp functionality for all facebook components
+ * @param {*} clazz1
+ * @return {*} mixin
+ */
+function AmpFacebookMixin(clazz1) {
+  return class extends clazz1 {
+    /** @override @nocollapse */
+    static createLoaderLogoCallback(element) {
+      return createLoaderLogo(element);
+    }
 
-  /** @override @nocollapse */
-  static getPreconnects(element) {
-    const ampdoc = element.getAmpDoc();
-    const {win} = ampdoc;
-    const locale = element.hasAttribute('data-locale')
-      ? element.getAttribute('data-locale')
-      : dashToUnderline(window.navigator.language);
-    return [
-      // Base URL for 3p bootstrap iframes
-      getBootstrapBaseUrl(win, ampdoc),
-      // Script URL for iframe
-      getBootstrapUrl(TYPE),
-      'https://facebook.com',
-      // This domain serves the actual tweets as JSONP.
-      'https://connect.facebook.net/' + locale + '/sdk.js',
-    ];
-  }
+    /** @override @nocollapse */
+    static getPreconnects(element) {
+      const ampdoc = element.getAmpDoc();
+      const {win} = ampdoc;
+      const locale = element.hasAttribute('data-locale')
+        ? element.getAttribute('data-locale')
+        : dashToUnderline(window.navigator.language);
+      return [
+        // Base URL for 3p bootstrap iframes
+        getBootstrapBaseUrl(win, ampdoc),
+        // Script URL for iframe
+        getBootstrapUrl(TYPE),
+        'https://facebook.com',
+        // This domain serves the actual tweets as JSONP.
+        'https://connect.facebook.net/' + locale + '/sdk.js',
+      ];
+    }
 
-  /** @override */
-  init() {
-    return dict({
-      'requestResize': (height) => this.attemptChangeHeight(height),
-    });
-  }
+    /** @override */
+    init() {
+      return dict({
+        'requestResize': (height) => this.attemptChangeHeight(height),
+      });
+    }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-facebook'),
-      'expected global "bento" or specific "bento-facebook" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
-  }
+    /** @override */
+    isLayoutSupported(layout) {
+      userAssert(
+        isExperimentOn(this.win, 'bento') ||
+          isExperimentOn(this.win, 'bento-facebook'),
+        'expected global "bento" or specific "bento-facebook" experiment to be enabled'
+      );
+      return super.isLayoutSupported(layout);
+    }
+  };
 }
 
-class AmpFacebookComments extends CommentsBaseElement {}
+class AmpFacebook extends AmpFacebookMixin(BaseElement) {}
 
-class AmpFacebookLike extends LikeBaseElement {}
+class AmpFacebookComments extends AmpFacebookMixin(CommentsBaseElement) {}
 
-class AmpFacebookPage extends PageBaseElement {}
+class AmpFacebookLike extends AmpFacebookMixin(LikeBaseElement) {}
+
+class AmpFacebookPage extends AmpFacebookMixin(PageBaseElement) {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);
