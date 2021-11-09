@@ -21,7 +21,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
-import {EXPANDABLE_COMPONENTS} from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
@@ -59,6 +58,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
+import {embeddedElementsSelectors} from './amp-story-embedded-component';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -92,11 +92,6 @@ export const Selectors = {
   ALL_VIDEO: 'amp-story-grid-layer video',
   ALL_TABBABLE: 'a, amp-twitter > iframe',
 };
-
-/** @private @const {string} */
-const EMBEDDED_COMPONENTS_SELECTORS = Object.keys(EXPANDABLE_COMPONENTS).join(
-  ', '
-);
 
 /** @private @const {number} */
 const RESIZE_TIMEOUT_MS = 1000;
@@ -716,7 +711,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   addClickShieldToEmbeddedComponents_() {
     const componentEls = toArray(
-      scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
+      scopedQuerySelectorAll(this.element, embeddedElementsSelectors())
     );
 
     if (componentEls.length <= 0) {

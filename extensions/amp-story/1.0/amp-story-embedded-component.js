@@ -32,14 +32,8 @@ import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {resetStyles, setImportantStyles} from '#core/dom/style';
 import objstr from 'obj-str';
 
-/**
- * Action icons to be placed in tooltip.
- * @enum {string}
- * @private
- */
-const ActionIcon = {
-  LAUNCH: 'i-amphtml-tooltip-action-icon-launch',
-};
+/** @private @const {string} */
+const LAUNCH_ICON_CLASS = 'i-amphtml-tooltip-action-icon-launch';
 
 /** @private @const {number} */
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
@@ -55,17 +49,13 @@ const TooltipTheme = {
   DARK: 'dark',
 };
 
-/**
- * Components that can be expanded.
- * @const {!Object}
- * @package
- */
-export const EXPANDABLE_COMPONENTS = {
+/** @private @const {!Object} list of embedded components that are click shielded */
+const EMBEDDED_COMPONENTS_SELECTORS = {
   'amp-twitter': {
     customIconClassName: 'amp-social-share-twitter-no-background',
-    actionIcon: ActionIcon.LAUNCH,
+    actionIcon: LAUNCH_ICON_CLASS,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
-    selector: 'amp-twitter',
+    selector: 'amp-twitter[interactive]',
   },
 };
 
@@ -76,62 +66,37 @@ export const EXPANDABLE_COMPONENTS = {
  */
 const LAUNCHABLE_COMPONENTS = {
   'a': {
-    actionIcon: ActionIcon.LAUNCH,
+    actionIcon: LAUNCH_ICON_CLASS,
     selector: 'a[href]:not([affiliate-link-icon])',
   },
-};
-
-/**
- * Union of expandable and launchable components.
- * @private
- * @const {!Object}
- */
-const INTERACTIVE_COMPONENTS = {
-  ...EXPANDABLE_COMPONENTS,
-  ...LAUNCHABLE_COMPONENTS,
+  ...EMBEDDED_COMPONENTS_SELECTORS,
 };
 
 /**
  * Gets the list of components with their respective selectors.
  * @param {!Object} components
- * @param {string=} opt_predicate
  * @return {!Object<string, string>}
  */
-function getComponentSelectors(components, opt_predicate) {
+function getComponentSelectors(components) {
   const componentSelectors = {};
 
   Object.keys(components).forEach((componentName) => {
-    componentSelectors[componentName] = opt_predicate
-      ? components[componentName].selector + opt_predicate
-      : components[componentName].selector;
+    componentSelectors[componentName] = components[componentName].selector;
   });
 
   return componentSelectors;
 }
 
-/** @const {string} */
-const INTERACTIVE_EMBED_SELECTOR = '[interactive]';
-
 /**
- * Selectors of elements that can go into expanded view.
+ * Selectors of elements that are embedded.
  * @return {!Object}
  */
-export function expandableElementsSelectors() {
+export function embeddedElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return getComponentSelectors(
-    EXPANDABLE_COMPONENTS,
-    INTERACTIVE_EMBED_SELECTOR
-  );
+  return Object.values(
+    getComponentSelectors(EMBEDDED_COMPONENTS_SELECTORS)
+  ).join(',');
 }
-
-/**
- * Contains all interactive component CSS selectors.
- * @type {!Object}
- */
-const interactiveSelectors = {
-  ...getComponentSelectors(LAUNCHABLE_COMPONENTS),
-  ...getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_EMBED_SELECTOR),
-};
 
 /**
  * All selectors that should delegate to the AmpStoryEmbeddedComponent class.
@@ -139,7 +104,7 @@ const interactiveSelectors = {
  */
 export function interactiveElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return interactiveSelectors;
+  return Object.values(getComponentSelectors(LAUNCHABLE_COMPONENTS)).join(',');
 }
 
 /**
@@ -484,10 +449,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   updateTooltipBehavior_(target) {
-    if (
-      matches(target, LAUNCHABLE_COMPONENTS['a'].selector) ||
-      matches(target, EXPANDABLE_COMPONENTS['amp-twitter'].selector)
-    ) {
+    if (matches(target, interactiveElementsSelectors())) {
       dev()
         .assertElement(this.tooltip_)
         .setAttribute('href', this.getElementHref_(target));
@@ -522,7 +484,7 @@ export class AmpStoryEmbeddedComponent {
    * @return {?Object}
    */
   getEmbedConfigFor_(target) {
-    const config = INTERACTIVE_COMPONENTS[target.tagName.toLowerCase()];
+    const config = LAUNCHABLE_COMPONENTS[target.tagName.toLowerCase()];
     if (config && matches(target, config.selector)) {
       return config;
     }

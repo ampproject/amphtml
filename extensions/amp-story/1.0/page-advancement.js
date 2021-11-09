@@ -16,8 +16,8 @@ import {dev, user} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
-import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {listenOnce} from '#utils/event-helper';
+import {interactiveElementsSelectors} from './amp-story-embedded-component';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -58,10 +58,6 @@ const MINIMUM_TIME_BASED_AUTO_ADVANCE_MS = 500;
  * @private
  */
 const MAX_LINK_SCREEN_PERCENT = 0.8;
-
-const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
-  interactiveElementsSelectors()
-).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -644,7 +640,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
     return (
       inExpandedMode ||
-      (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
+      (matches(target, interactiveElementsSelectors()) &&
         this.canShowTooltip_(event, pageRect))
     );
   }
