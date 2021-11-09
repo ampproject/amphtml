@@ -27,63 +27,71 @@ defineBentoBaseCarousel();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-base-carousel {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
-  ></script>
-  <style>
-    bento-base-carousel,
-    bento-base-carousel > div {
-      aspect-ratio: 4/1;
-    }
-    .red {
-      background: darkred;
-    }
-    .blue {
-      background: steelblue;
-    }
-    .green {
-      background: seagreen;
-    }
-  </style>
-</head>
-<bento-base-carousel id="my-carousel">
-  <div class="red"></div>
-  <div class="blue"></div>
-  <div class="green"></div>
-</bento-base-carousel>
-<div class="buttons" style="margin-top: 8px">
-  <button id="prev-button">Go to previous slide</button>
-  <button id="next-button">Go to next slide</button>
-  <button id="go-to-button">Go to slide with green gradient</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-base-carousel {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
+    <style>
+      bento-base-carousel,
+      bento-base-carousel > div {
+        aspect-ratio: 4/1;
+      }
+      .red {
+        background: darkred;
+      }
+      .blue {
+        background: steelblue;
+      }
+      .green {
+        background: seagreen;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-base-carousel id="my-carousel">
+      <div class="red"></div>
+      <div class="blue"></div>
+      <div class="green"></div>
+    </bento-base-carousel>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="prev-button">Go to previous slide</button>
+      <button id="next-button">Go to next slide</button>
+      <button id="go-to-button">Go to slide with green gradient</button>
+    </div>
 
-<script>
-  (async () => {
-    const carousel = document.querySelector('#my-carousel');
-    await customElements.whenDefined('bento-base-carousel');
-    const api = await carousel.getApi();
+    <script>
+      (async () => {
+        const carousel = document.querySelector('#my-carousel');
+        await customElements.whenDefined('bento-base-carousel');
+        const api = await carousel.getApi();
 
-    // programatically advance to next slide
-    api.next();
+        // programatically advance to next slide
+        api.next();
 
-    // set up button actions
-    document.querySelector('#prev-button').onclick = () => api.prev();
-    document.querySelector('#next-button').onclick = () => api.next();
-    document.querySelector('#go-to-button').onclick = () => api.goToSlide(2);
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#prev-button').onclick = () => api.prev();
+        document.querySelector('#next-button').onclick = () => api.next();
+        document.querySelector('#go-to-button').onclick = () =>
+          api.goToSlide(2);
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage

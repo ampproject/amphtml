@@ -23,39 +23,50 @@ defineBentoFitText();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-fit-text {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-</head>
-<bento-fit-text id="my-fit-text">
-  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis
-  reprehendunt.
-</bento-fit-text>
-<div class="buttons" style="margin-top: 8px">
-  <button id="font-button">Change max-font-size</button>
-  <button id="content-button">Change content</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"
+    ></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-fit-text {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-fit-text id="my-fit-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
+      inermis reprehendunt.
+    </bento-fit-text>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="font-button">Change max-font-size</button>
+      <button id="content-button">Change content</button>
+    </div>
 
-<script>
-  (async () => {
-    const fitText = document.querySelector('#my-fit-text');
-    await customElements.whenDefined('bento-fit-text');
+    <script>
+      (async () => {
+        const fitText = document.querySelector('#my-fit-text');
+        await customElements.whenDefined('bento-fit-text');
 
-    // set up button actions
-    document.querySelector('#font-button').onclick = () =>
-      fitText.setAttribute('max-font-size', '40');
-    document.querySelector('#content-button').onclick = () =>
-      (fitText.textContent = 'new content');
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#font-button').onclick = () =>
+          fitText.setAttribute('max-font-size', '40');
+        document.querySelector('#content-button').onclick = () =>
+          (fitText.textContent = 'new content');
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Overflowing content

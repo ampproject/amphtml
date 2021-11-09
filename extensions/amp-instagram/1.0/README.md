@@ -21,43 +21,50 @@ defineBentoInstagram();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"
-  ></script>
-  <style>
-    bento-instagram {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-</head>
-<body>
-  <bento-instagram
-    id="my-instagram"
-    data-shortcode="CKXYAzuj7TE"
-    data-captioned
-    style="height: 800px; width: 400px;"
-  >
-  </bento-instagram>
-  <button id="change-shortcode">Change shortcode</button>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"
+    ></script>
+    <style>
+      bento-instagram {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <body>
+      <bento-instagram
+        id="my-instagram"
+        data-shortcode="CKXYAzuj7TE"
+        data-captioned
+        style="height: 800px; width: 400px"
+      >
+      </bento-instagram>
+      <button id="change-shortcode">Change shortcode</button>
 
-  <script>
-    (async () => {
-      const instagram = document.querySelector('#my-instagram');
-      await customElements.whenDefined('bento-instagram');
+      <script>
+        (async () => {
+          const instagram = document.querySelector('#my-instagram');
+          await customElements.whenDefined('bento-instagram');
 
-      // set up button actions
-      document.querySelector('#change-shortcode').onclick = () => {
-        instagram.dataset.shortcode = '1totVhIFXl';
-      };
-    })();
-  </script>
-</body>
+          // set up button actions
+          document.querySelector('#change-shortcode').onclick = () => {
+            instagram.dataset.shortcode = '1totVhIFXl';
+          };
+        })();
+      </script>
+    </body>
+  </body>
+</html>
 ```
 
 ### Layout and style

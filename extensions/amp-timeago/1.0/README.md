@@ -21,48 +21,56 @@ defineBentoTimeago();
 
 ### Example: Import via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
-  ></script>
-  <style>
-    bento-timeago {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-</head>
-<bento-timeago
-  id="my-timeago"
-  datetime="2017-04-11T00:37:33.809Z"
-  locale="en"
-  style="height: 30px">
-    Saturday 11 April 2017 00.37
-</bento-timeago>
-<div class="buttons" style="margin-top: 8px">
-  <button id="ar-button">Change locale to Arabic</button>
-  <button id="en-button">Change locale to English</button>
-  <button id="now-button">Change time to now</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
+    ></script>
+    <style>
+      bento-timeago {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-timeago
+      id="my-timeago"
+      datetime="2017-04-11T00:37:33.809Z"
+      locale="en"
+      style="height: 30px"
+    >
+      Saturday 11 April 2017 00.37
+    </bento-timeago>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="ar-button">Change locale to Arabic</button>
+      <button id="en-button">Change locale to English</button>
+      <button id="now-button">Change time to now</button>
+    </div>
 
-<script>
-  (async () => {
-    const timeago = document.querySelector('#my-timeago');
-    await customElements.whenDefined('bento-timeago');
+    <script>
+      (async () => {
+        const timeago = document.querySelector('#my-timeago');
+        await customElements.whenDefined('bento-timeago');
 
-    // set up button actions
-    document.querySelector('#ar-button').onclick = () =>
-      timeago.setAttribute('locale', 'ar');
-    document.querySelector('#en-button').onclick = () =>
-      timeago.setAttribute('locale', 'en');
-    document.querySelector('#now-button').onclick = () =>
-      timeago.setAttribute('datetime', 'now');
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#ar-button').onclick = () =>
+          timeago.setAttribute('locale', 'ar');
+        document.querySelector('#en-button').onclick = () =>
+          timeago.setAttribute('locale', 'en');
+        document.querySelector('#now-button').onclick = () =>
+          timeago.setAttribute('datetime', 'now');
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style

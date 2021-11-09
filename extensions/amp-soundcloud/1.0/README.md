@@ -21,49 +21,56 @@ defineBentoSoundcloud();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-soundcloud {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
-  ></script>
-  <style>
-    bento-soundcloud {
-      aspect-ratio: 1;
-    }
-  </style>
-</head>
-<bento-soundcloud
-  id="my-track"
-  data-trackid="243169232"
-  data-visual="true"
-></bento-soundcloud>
-<div class="buttons" style="margin-top: 8px">
-  <button id="change-track">Change track</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-soundcloud {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
+    ></script>
+    <style>
+      bento-soundcloud {
+        aspect-ratio: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-soundcloud
+      id="my-track"
+      data-trackid="243169232"
+      data-visual="true"
+    ></bento-soundcloud>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-track">Change track</button>
+    </div>
 
-<script>
-  (async () => {
-    const soundcloud = document.querySelector('#my-track');
-    await customElements.whenDefined('bento-soundcloud');
+    <script>
+      (async () => {
+        const soundcloud = document.querySelector('#my-track');
+        await customElements.whenDefined('bento-soundcloud');
 
-    // set up button actions
-    document.querySelector('#change-track').onclick = () => {
-      soundcloud.setAttribute('data-trackid', '243169232');
-      soundcloud.setAttribute('data-color', 'ff5500');
-      soundcloud.removeAttribute('data-visual');
-    };
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#change-track').onclick = () => {
+          soundcloud.setAttribute('data-trackid', '243169232');
+          soundcloud.setAttribute('data-color', 'ff5500');
+          soundcloud.removeAttribute('data-visual');
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style
