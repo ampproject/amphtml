@@ -427,8 +427,6 @@ Define a `title` attribute for the component to propagate to the underlying `<if
 
 ## Preact/React Component
 
-The examples below demonstrate use of the `<BentoFacebook>` as a functional component usable with the Preact or React libraries.
-
 ### Example: Import via npm
 
 ```sh

@@ -12,8 +12,6 @@ The carousel advances between items if the user swipes or uses the customizable 
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-base-carousel>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -382,8 +380,6 @@ example, you can recreate the default styling with the following HTML and CSS:
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoBaseCarousel>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

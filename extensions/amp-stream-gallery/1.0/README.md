@@ -9,8 +9,6 @@ Use Bento Stream Gallery as a web component ([`<bento-stream-gallery>`](#web-com
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-stream-gallery>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -23,9 +21,6 @@ defineBentoStreamGallery();
 ```
 
 ### Example: Include via `<script>`
-
-The example below contains an `bento-stream-gallery` with three sections. The
-`expanded` attribute on the third section expands it on page load.
 
 <!--% example %-->
 
@@ -219,8 +214,6 @@ freely.
 ---
 
 ## Preact/React Component
-
-The examples below demonstrates use of the `<BentoStreamGallery>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

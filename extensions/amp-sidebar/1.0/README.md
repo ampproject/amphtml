@@ -6,8 +6,6 @@ Provides a way to display meta content intended for temporary access such as nav
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-sidebar>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -169,8 +167,6 @@ This attribute is present when the sidebar is open.
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoSidebar>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

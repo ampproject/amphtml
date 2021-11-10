@@ -6,8 +6,6 @@ Displays a cloud-hosted JW Player in an iframe.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-jwplayer>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -21,7 +19,6 @@ defineBentoJwplayer();
 
 ### Example: Include via `<script>`
 
-The example below contains an `bento-jwplayer` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
 <!--% example %-->
@@ -219,8 +216,6 @@ You may use the `bento-jwplayer` element selector to style the accordion freely.
 ---
 
 ## Preact/React Component
-
-The examples below demonstrates use of the `<BentoMathml>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

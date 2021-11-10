@@ -8,8 +8,6 @@ When the user interacts with the element, a modal expands to fill the viewport u
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. As a web component
 
-The examples below demonstrate use of the `<bento-lightbox-gallery>` web component.
-
 ### Example: Import via npm
 
 ```sh

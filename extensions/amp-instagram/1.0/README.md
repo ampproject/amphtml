@@ -6,8 +6,6 @@ Embeds an Instagram post.
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-instagram>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -119,8 +117,6 @@ You may use the `bento-instagram` element selector to style the component.
 ---
 
 ## Preact/React Component
-
-The examples below demonstrates use of the `<BentoInstagram>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

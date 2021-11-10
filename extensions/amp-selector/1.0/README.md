@@ -157,8 +157,6 @@ selector.addEventListener('select', (e) => console.log(e.data.targetOption));
 
 ## Preact/React Component
 
-The examples below demonstrate use of the `<BentoSelector>` as a functional component usable with the Preact or React libraries.
-
 ### Example: Import via npm
 
 ```sh
