@@ -4,7 +4,6 @@ import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
 
-import {getRequestService} from '../../amp-story/1.0/amp-story-request-service';
 import {Action} from '../../amp-story/1.0/amp-story-store-service';
 
 export class AmpStoryShoppingConfig extends AMP.BaseElement {
@@ -15,7 +14,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     this.storeService_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = getRequestService(this.win, element);
+    this.requestService_ = null;
   }
 
   /**
@@ -38,11 +37,17 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    return Services.storyStoreServiceForOrNull(this.win)
-      .then((storeService) => {
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
         this.storeService_ = storeService;
-        return this.requestService_.loadConfigImpl_(this.element);
+      }),
+      Services.storyRequestServiceForOrNull(this.win).then((service) => {
+        this.requestService_ = service;
+      }),
+    ])
+      .then(() => {
+        return this.requestService_.loadConfigImpl(this.element);
       })
       .then((storyConfig) => this.addShoppingStateFromConfig_(storyConfig));
   }

@@ -30,7 +30,7 @@ export class AmpStoryRequestService {
     this.xhr_ = Services.xhrFor(win);
 
     /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
-    this.loadShareConfig = once(() => this.loadConfigImpl_());
+    this.loadShareConfig = once(() => this.loadConfigImpl());
   }
 
   /**
@@ -74,8 +74,9 @@ export class AmpStoryRequestService {
    * Has to be called through `loadShareConfig`.
    * @param  {!Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
+   * @public
    */
-  loadConfigImpl_(element) {
+  loadConfigImpl(element) {
     const shareConfigEl = element
       ? element
       : this.storyElement_.querySelector(

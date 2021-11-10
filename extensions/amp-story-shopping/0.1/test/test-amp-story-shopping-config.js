@@ -4,6 +4,7 @@ import '../amp-story-shopping';
 
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {
   StateProperty,
   getStoreService,
@@ -22,12 +23,18 @@ describes.realWin(
     let element;
     let shoppingConfig;
     let storeService;
+    let requestService;
 
     beforeEach(async () => {
       win = env.win;
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
+      });
+
+      requestService = getRequestService(win);
+      registerServiceBuilder(win, 'story-store', function () {
+        return requestService;
       });
 
       await createAmpStoryShoppingConfig();

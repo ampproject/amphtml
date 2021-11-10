@@ -54,7 +54,7 @@ describes.realWin(
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
-      storeService.dispatch(Action.ADD_SHOPPING_STATE, shoppingState);
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingState);
       await shoppingTag.buildCallback();
       await shoppingTag.layoutCallback();
       await nextTick();
