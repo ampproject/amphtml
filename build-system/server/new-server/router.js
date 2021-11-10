@@ -47,7 +47,8 @@ router.get('/*.md', async (req, res) => {
 router.get('/*.md.html', async (req, res) => {
   const filename = req.path.replace(/.html$/, '');
   const html = await renderMarkdownSnippet(filename, process.cwd());
-  serveHtml(req, res, html);
+  const transformedHtml = await transform(html);
+  serveHtml(req, res, transformedHtml);
 });
 
 module.exports = router;
