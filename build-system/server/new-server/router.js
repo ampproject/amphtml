@@ -1,4 +1,4 @@
-const router = require('express').Router();
+const express = require('express');
 const {
   // @ts-ignore
   renderMarkdown,
@@ -9,8 +9,8 @@ const {
 const {transform} = require('./transforms/dist/transform');
 
 /**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
+ * @param {express.Request} req
+ * @param {express.Response} res
  * @param {string} content
  */
 function serveHtml(req, res, content) {
@@ -21,6 +21,8 @@ function serveHtml(req, res, content) {
   }
   res.end(content);
 }
+
+const router = express.Router();
 
 router.get('/examples/*.html', async (req, res) => {
   let transformedHTML;
