@@ -1,4 +1,11 @@
-module.exports = {
+/**
+ * Exports an extension-version map for all of the '-latest' binaries that we
+ * should produce. This object should never be modified, as we have
+ * intentionally deprecated the concept of '-latest' binaries.
+ *
+ * See the I2D for full context: https://github.com/ampproject/amphtml/issues/36749
+ */
+module.exports = Object.freeze({
   'amp-3d-gltf': '0.1',
   'amp-3q-player': '0.1',
   'amp-access-laterpay': '0.2',
@@ -155,4 +162,4 @@ module.exports = {
   'amp-wordpress-embed': '1.0',
   'amp-yotpo': '0.1',
   'amp-youtube': '0.1',
-};
+});

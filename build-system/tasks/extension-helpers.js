@@ -323,7 +323,7 @@ function dedupe(arr) {
  */
 async function buildExtensions(options) {
   const startTime = Date.now();
-  maybeInitializeExtensions(extensions, /* includeLatest */ false);
+  maybeInitializeExtensions(extensions);
   const extensionsToBuild = getExtensionsToBuild();
   const results = [];
   for (const extension in extensions) {
