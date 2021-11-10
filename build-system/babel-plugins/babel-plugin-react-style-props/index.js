@@ -6,14 +6,35 @@
 module.exports = function (babel) {
   const {types: t} = babel;
 
+  /**
+   * @param {string} name
+   * @return {string}
+   */
+  function normalizeProperty(name) {
+    if (name === 'class') {
+      return 'className';
+    }
+    return name;
+  }
+
   return {
     name: 'react-style-props',
     visitor: {
       JSXAttribute(path) {
-        // TODO(wg-bento): This mapping is incomplete.
-        if (t.isJSXIdentifier(path.node.name, {name: 'class'})) {
-          path.node.name.name = 'className';
+        const {name} = path.node.name;
+        path.node.name.name = normalizeProperty(name);
+      },
+      CallExpression(path) {
+        if (
+          !path.get('callee').isIdentifier({name: 'normalizedJsxAttributeName'})
+        ) {
+          return;
         }
+        const arg = path.get('arguments.0');
+        if (!arg.isStringLiteral()) {
+          throw path.buildCodeFrameError('not string literal');
+        }
+        path.replaceWith(t.stringLiteral(normalizeProperty(arg.node.value)));
       },
     },
   };
