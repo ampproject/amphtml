@@ -272,6 +272,8 @@ function styleLoaded(doc, style) {
   const sheets = doc.styleSheets;
   for (let i = 0; i < sheets.length; i++) {
     const sheet = sheets[i];
+    // The `style` param here can be an instance of a `link[rel=stylesheet]` or
+    // a `style` element. Both can be an "ownerNode" of a CSSStyleSheet
     if (sheet.ownerNode == style) {
       return true;
     }
