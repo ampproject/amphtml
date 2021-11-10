@@ -8,46 +8,11 @@
       async
       src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
     ></script>
-    <style>
-      bento-accordion {
-        display: block;
-        contain: layout;
-      }
-      bento-accordion,
-      bento-accordion > section,
-      bento-accordion > section > :first-child {
-        margin: 0;
-      }
-      bento-accordion > section > * {
-        display: block;
-        float: none;
-        overflow: hidden;
-        position: relative;
-      }
-      @media (min-width: 1px) {
-        :where(bento-accordion > section) > :first-child {
-          cursor: pointer;
-          background-color: #efefef;
-          padding-right: 20px;
-          border: 1px solid #dfdfdf;
-        }
-      }
-      .i-amphtml-accordion-header {
-        cursor: pointer;
-        background-color: #efefef;
-        padding-right: 20px;
-        border: 1px solid #dfdfdf;
-      }
-      bento-accordion
-        > section:not([expanded])
-        > :last-child:not(.i-amphtml-animating),
-      bento-accordion
-        > section:not([expanded])
-        > :last-child:not(.i-amphtml-animating)
-        * {
-        display: none !important;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+    />
     <style>
       body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
