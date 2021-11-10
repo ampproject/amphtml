@@ -10,6 +10,7 @@ import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
 import {localize} from './amp-story-localization-service';
+import objStr from 'obj-str';
 
 /**
  * @param {!Element} element
@@ -17,10 +18,11 @@ import {localize} from './amp-story-localization-service';
  */
 const renderHintElement = (element) => (
   <aside
-    class={
-      'i-amphtml-story-hint-container ' +
-      'i-amphtml-story-system-reset i-amphtml-hidden'
-    }
+    class={objStr({
+      'i-amphtml-story-hint-container': true,
+      'i-amphtml-story-system-reset': true,
+      'i-amphtml-hidden': true,
+    })}
   >
     <div class="i-amphtml-story-navigation-help-overlay">
       <div class="i-amphtml-story-navigation-help-section prev-page">

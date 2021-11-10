@@ -31,6 +31,7 @@ import {getSourceOrigin} from '../../../src/url';
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {localize} from './amp-story-localization-service';
+import objstr from 'obj-str';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -92,7 +93,12 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
  */
 const renderSystemLayerElement = (element) => (
   <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
-    <a class={ATTRIBUTION_CLASS} target="_blank">
+    <a
+      class={objstr({
+        [ATTRIBUTION_CLASS]: true,
+      })}
+      target="_blank"
+    >
       <div class="i-amphtml-story-attribution-logo-container">
         <img alt="" class="i-amphtml-story-attribution-logo" />
       </div>
@@ -109,7 +115,10 @@ const renderSystemLayerElement = (element) => (
     <div class="i-amphtml-story-system-layer-buttons">
       <div
         role="button"
-        class={INFO_CLASS + ' i-amphtml-story-button'}
+        class={objstr({
+          [INFO_CLASS]: true,
+          'i-amphtml-story-button': true,
+        })}
         aria-label={localize(
           element,
           LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL
@@ -137,14 +146,20 @@ const renderSystemLayerElement = (element) => (
           </div>
         </div>
         <button
-          class={UNMUTE_CLASS + ' i-amphtml-story-button'}
+          class={objstr({
+            [UNMUTE_CLASS]: true,
+            'i-amphtml-story-button': true,
+          })}
           aria-label={localize(
             element,
             LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
           )}
         />
         <button
-          class={MUTE_CLASS + ' i-amphtml-story-button'}
+          class={objstr({
+            [MUTE_CLASS]: true,
+            'i-amphtml-story-button': true,
+          })}
           aria-label={localize(
             element,
             LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
@@ -153,14 +168,20 @@ const renderSystemLayerElement = (element) => (
       </div>
       <div class="i-amphtml-paused-display">
         <button
-          class={PAUSE_CLASS + ' i-amphtml-story-button'}
+          class={objstr({
+            [PAUSE_CLASS]: true,
+            'i-amphtml-story-button': true,
+          })}
           aria-label={localize(
             element,
             LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL
           )}
         />
         <button
-          class={PLAY_CLASS + ' i-amphtml-story-button'}
+          class={objstr({
+            [PLAY_CLASS]: true,
+            'i-amphtml-story-button': true,
+          })}
           aria-label={localize(
             element,
             LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL
@@ -168,26 +189,31 @@ const renderSystemLayerElement = (element) => (
         />
       </div>
       <button
-        class={
-          SKIP_TO_NEXT_CLASS +
-          ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
-        }
+        class={objstr({
+          [SKIP_TO_NEXT_CLASS]: true,
+          'i-amphtml-story-ui-hide-button': true,
+          'i-amphtml-story-button': true,
+        })}
         aria-label={localize(
           element,
           LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
         )}
       />
       <button
-        class={SHARE_CLASS + ' i-amphtml-story-button'}
+        class={objstr({
+          [SHARE_CLASS]: true,
+          'i-amphtml-story-button': true,
+        })}
         aria-label={localize(
           element,
           LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL
         )}
       />
       <button
-        class={
-          CLOSE_CLASS + ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
-        }
+        class={objstr({
+          [CLOSE_CLASS]: true,
+          'i-amphtml-story-ui-hide-button i-amphtml-story-button': true,
+        })}
         aria-label={localize(
           element,
           LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
