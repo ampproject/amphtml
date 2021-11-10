@@ -108,13 +108,3 @@ export const getRequestService = (win, storyEl) => {
 
   return service;
 };
-
-/**
- * Retrieves the publisher share providers.
- * Has to be called through `loadShareConfig`.
- * @param  {!Element} element
- * @return {(!Promise<!JsonObject>|!Promise<null>)}
- */
-export const loadConfigImpl = (element) => {
-  return getRequestService(window, element).loadShareConfigImpl_(element);
-};
