@@ -1,0 +1,2 @@
+propName('class');
+propName('foobarbaz');
