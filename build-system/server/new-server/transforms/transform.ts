@@ -1,5 +1,3 @@
-
-
 import fs from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
