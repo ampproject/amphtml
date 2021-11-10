@@ -385,6 +385,17 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @param {boolean} animate
    * @param {boolean=} opt_autoplay
    */
+  goCallback(dir, animate, opt_autoplay) {
+    this.go(dir, animate, opt_autoplay);
+  }
+
+  /**
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   * @param {boolean=} opt_autoplay
+   */
   go(dir, animate, opt_autoplay) {
     const trust = opt_autoplay ? ActionTrust.LOW : ActionTrust.HIGH;
     this.moveSlide(dir, animate, trust);
