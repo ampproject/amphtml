@@ -60,35 +60,33 @@ defineBentoAccordion();
     />
   </head>
   <body>
-    <body>
-      <bento-accordion id="my-accordion">
-        <section>
-          <h2>Section 1</h2>
-          <p>Content in section 1.</p>
-        </section>
-        <section>
-          <h2>Section 2</h2>
-          <div>Content in section 2.</div>
-        </section>
-        <!-- Expanded on page load due to attribute: -->
-        <section expanded>
-          <h2>Section 3</h2>
-          <div>Content in section 3.</div>
-        </section>
-      </bento-accordion>
-      <script>
-        (async () => {
-          const accordion = document.querySelector('#my-accordion');
-          await customElements.whenDefined('bento-accordion');
-          const api = await accordion.getApi();
+    <bento-accordion id="my-accordion">
+      <section>
+        <h2>Section 1</h2>
+        <div>Content in section 1.</div>
+      </section>
+      <section>
+        <h2>Section 2</h2>
+        <div>Content in section 2.</div>
+      </section>
+       <!-- Expanded on page load due to attribute: -->
+      <section expanded>
+        <h2>Section 3</h2>
+        <div>Content in section 3.</div>
+      </section>
+    </bento-accordion>
+    <script>
+      (async () => {
+        const accordion = document.querySelector('#my-accordion');
+        await customElements.whenDefined('bento-accordion');
+        const api = await accordion.getApi();
 
-          // programatically expand all sections
-          api.expand();
-          // programatically collapse all sections
-          api.collapse();
-        })();
-      </script>
-    </body>
+        // programatically expand all sections
+        api.expand();
+        // programatically collapse all sections
+        api.collapse();
+      })();
+    </script>
   </body>
 </html>
 ```
@@ -115,7 +113,7 @@ use its corresponding `id` as the value.
 <bento-accordion id="myAccordion">
   <section id="section1">
     <h2>Section 1</h2>
-    <p>Bunch of awesome content</p>
+    <div>Bunch of awesome content</div>
   </section>
   <section>
     <h2>Section 2</h2>
@@ -152,6 +150,20 @@ is already expanded, it stays expanded. When called with no arguments, it
 expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
 
 ```html
+<bento-accordion id="myAccordion">
+  <section id="section1">
+    <h2>Section 1</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+  <section>
+    <h2>Section 2</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+  <section>
+    <h2>Section 3</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+</bento-accordion>
 <button id="button1">Expand All Sections</button>
 <button id="button2">Expand Section 1</button>
 <script>
@@ -179,6 +191,20 @@ it collapses all sections of the accordion. To specify a section, add the
 `section` argument, and use its corresponding `id` as the value.
 
 ```html
+<bento-accordion id="myAccordion">
+  <section id="section1">
+    <h2>Section 1</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+  <section>
+    <h2>Section 2</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+  <section>
+    <h2>Section 3</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+</bento-accordion>
 <button id="button1">Collapse All Sections</button>
 <button id="button2">Collapse Section 1</button>
 <script>
@@ -215,6 +241,8 @@ This event is triggered when an accordion section is collapsed and is dispatched
 In the example below, `section 1` listens for the `expand` event and expands `section 2` when it is expanded. `section 2` listens for the `collapse` event and collapses `section 1` when it is collapsed.
 
 See below for example.
+
+##### Events Example
 
 ```html
 <bento-accordion id="eventsAccordion" animate>
@@ -323,7 +351,7 @@ This attribute can be configured to based on a [media query](./../../../docs/spe
 <bento-accordion animate>
   <section>
     <h2>Section 1</h2>
-    <p>Content in section 1.</p>
+    <div>Content in section 1.</div>
   </section>
   <section>
     <h2>Section 2</h2>
@@ -344,7 +372,7 @@ Apply the `expanded` attribute to a nested `<section>` to expand that section wh
 <bento-accordion>
   <section id="section1">
     <h2>Section 1</h2>
-    <p>Bunch of awesome content</p>
+    <div>Bunch of awesome content</div>
   </section>
   <section id="section2">
     <h2>Section 2</h2>
@@ -365,7 +393,7 @@ Allow only one section to expand at a time by applying the `expand-single-sectio
 <bento-accordion expand-single-section>
   <section>
     <h2>Section 1</h2>
-    <p>Content in section 1.</p>
+    <div>Content in section 1.</div>
   </section>
   <section>
     <h2>Section 2</h2>
@@ -525,7 +553,7 @@ The Bento Accordion API allows you to respond to the following events:
 
 This event is triggered on a section when an accordion section is expanded or collpased and is dispatched from the expanded section.
 
-See below for example.
+See [example](#events-example) below for example.
 
 ##### onCollapse
 
@@ -533,7 +561,9 @@ This event is triggered on a section when an accordion section is collapsed and 
 
 In the example below, `section 1` listens for the `expand` event and expands `section 2` when it is expanded. `section 2` listens for the `collapse` event and collapses `section 1` when it is collapsed.
 
-See below for example.
+See [example](#events-example) below for example.
+
+##### Events Example
 
 ```jsx
 <BentoAccordion ref={ref}>

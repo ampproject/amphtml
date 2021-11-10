@@ -48,49 +48,47 @@ defineBentoMathml();
     />
   </head>
   <body>
-    <body>
-      <h2>The Quadratic Formula</h2>
+    <h2>The Quadratic Formula</h2>
+    <bento-mathml
+      style="height: 40px"
+      data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+    ></bento-mathml>
+
+    <h2>Cauchy's Integral Formula</h2>
+    <bento-mathml
+      style="height: 41px"
+      data-formula="\[f(a) = \frac{1}{2\pi i} \oint\frac{f(z)}{z-a}dz\]"
+    ></bento-mathml>
+
+    <h2>Double angle formula for Cosines</h2>
+    <bento-mathml
+      style="height: 19px"
+      data-formula="\[cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ)\]"
+    ></bento-mathml>
+
+    <h2>Inline formula</h2>
+    <p>
+      This is an example of a formula of
       <bento-mathml
-        style="height: 40px"
+        style="height: 11px; width: 8px"
+        inline
+        data-formula="`x`"
+      ></bento-mathml
+      >,
+      <bento-mathml
+        style="height: 40px; width: 147px"
+        inline
         data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
       ></bento-mathml>
-
-      <h2>Cauchy's Integral Formula</h2>
+      placed inline in the middle of a block of text.
       <bento-mathml
-        style="height: 41px"
-        data-formula="\[f(a) = \frac{1}{2\pi i} \oint\frac{f(z)}{z-a}dz\]"
+        style="height: 19px; width: 72px"
+        inline
+        data-formula="\( \cos(θ+φ) \)"
       ></bento-mathml>
-
-      <h2>Double angle formula for Cosines</h2>
-      <bento-mathml
-        style="height: 19px"
-        data-formula="\[cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ)\]"
-      ></bento-mathml>
-
-      <h2>Inline formula</h2>
-      <p>
-        This is an example of a formula of
-        <bento-mathml
-          style="height: 11px; width: 8px"
-          inline
-          data-formula="`x`"
-        ></bento-mathml
-        >,
-        <bento-mathml
-          style="height: 40px; width: 147px"
-          inline
-          data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
-        ></bento-mathml>
-        placed inline in the middle of a block of text.
-        <bento-mathml
-          style="height: 19px; width: 72px"
-          inline
-          data-formula="\( \cos(θ+φ) \)"
-        ></bento-mathml>
-        This shows how the formula will fit inside a block of text and can be
-        styled with CSS.
-      </p>
-    </body>
+      This shows how the formula will fit inside a block of text and can be
+      styled with CSS.
+    </p>
   </body>
 </html>
 ```

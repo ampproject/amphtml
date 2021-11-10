@@ -50,28 +50,26 @@ defineBentoInstagram();
     </style>
   </head>
   <body>
-    <body>
-      <bento-instagram
-        id="my-instagram"
-        data-shortcode="CKXYAzuj7TE"
-        data-captioned
-        style="height: 800px; width: 400px"
-      >
-      </bento-instagram>
-      <button id="change-shortcode">Change shortcode</button>
+    <bento-instagram
+      id="my-instagram"
+      data-shortcode="CKXYAzuj7TE"
+      data-captioned
+      style="height: 800px; width: 400px"
+    >
+    </bento-instagram>
+    <button id="change-shortcode">Change shortcode</button>
 
-      <script>
-        (async () => {
-          const instagram = document.querySelector('#my-instagram');
-          await customElements.whenDefined('bento-instagram');
+    <script>
+      (async () => {
+        const instagram = document.querySelector('#my-instagram');
+        await customElements.whenDefined('bento-instagram');
 
-          // set up button actions
-          document.querySelector('#change-shortcode').onclick = () => {
-            instagram.dataset.shortcode = '1totVhIFXl';
-          };
-        })();
-      </script>
-    </body>
+        // set up button actions
+        document.querySelector('#change-shortcode').onclick = () => {
+          instagram.dataset.shortcode = '1totVhIFXl';
+        };
+      })();
+    </script>
   </body>
 </html>
 ```

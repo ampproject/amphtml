@@ -91,7 +91,8 @@ By default, the Bento Date Countdown component will display the [`localeString` 
 See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
 
 ```typescript
-(dateParams: DateParams) => JSXInternal.Element
+function render(dateParams: DateParams): JSXInternal.Element;
+
 interface DateParams {
   day: number;
   dayName: string;
@@ -119,7 +120,7 @@ interface DateParams {
 }
 ```
 
-### Returned Time Parameters
+## Returned Time Parameters
 
 This table lists the format you can specify in your Mustache template:
 
@@ -138,7 +139,7 @@ This table lists the format you can specify in your Mustache template:
 | minutes | internationalization string for minute or minutes |
 | seconds | internationalization string for second or seconds |
 
-#### Samples of formatted values
+### Samples of formatted values
 
 This table provides examples of formatted values specified in a Mustache template, and a sample of what the output:
 

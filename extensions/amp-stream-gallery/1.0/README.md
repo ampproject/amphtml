@@ -1,9 +1,9 @@
 # Bento Stream Gallery
 
-Displays multiple similar pieces of content at a time along a horizontal axis. To implement a more customized UX, see
-[`bento-base-carousel`](../../amp-base-carousel/1.0/README.md).
+The Bento Stream Gallery is for displaying multiple similar pieces of content at a time along a horizontal axis.
 
-Use Bento Stream Gallery as a web component ([`<bento-stream-gallery>`](#web-component)), or a Preact/React functional component ([`<BentoStreamGallery>`](#preactreact-component)).
+It is a specialization of Bento Base Carousel and uses [ResizeObservers](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver) to adjust dynamically adjust the size and number of displayed slides displayed based on the width of the container. To implement a more customized UX, see
+[`<bento-base-carousel>`](../../amp-base-carousel/1.0/README.md).
 
 ## Web Component
 
@@ -51,31 +51,29 @@ defineBentoStreamGallery();
     />
   </head>
   <body>
-    <body>
-      <bento-stream-gallery>
-        <img src="img1.png" />
-        <img src="img2.png" />
-        <img src="img3.png" />
-        <img src="img4.png" />
-        <img src="img5.png" />
-        <img src="img6.png" />
-        <img src="img7.png" />
-      </bento-stream-gallery>
-      <script>
-        (async () => {
-          const streamGallery = document.querySelector('#my-stream-gallery');
-          await customElements.whenDefined('bento-stream-gallery');
-          const api = await streamGallery.getApi();
+    <bento-stream-gallery id="my-stream-gallery" style="height: 150px;" min-item-width="75" max-item-width="100">
+      <div style="height: 100px; background: red;">A</div>
+      <div style="height: 100px; background: green;">B</div>
+      <div style="height: 100px; background: blue;">C</div>
+      <div style="height: 100px; background: yellow;">D</div>
+      <div style="height: 100px; background: purple;">E</div>
+      <div style="height: 100px; background: orange;">F</div>
+      <div style="height: 100px; background: fuchsia;">G</div>
+    </bento-stream-gallery>
+    <script>
+      (async () => {
+        const streamGallery = document.querySelector('#my-stream-gallery');
+        await customElements.whenDefined('bento-stream-gallery');
+        const api = await streamGallery.getApi();
 
-          // programatically expand all sections
-          api.next();
-          // programatically collapse all sections
-          api.prev();
-          // programatically go to slide
-          api.goToSlide(4);
-        })();
-      </script>
-    </body>
+        // programatically go to next slide
+        api.next();
+        // programatically go to prev slide
+        api.prev();
+        // programatically go to slide
+        api.goToSlide(4);
+      })();
+    </script>
   </body>
 </html>
 ```
@@ -239,7 +237,7 @@ import '@bentoproject/stream-gallery/styles.css';
 
 function App() {
   return (
-    <BentoStreamGallery>
+    <BentoStreamGallery style={{height: 150}} minItemWidth="75" maxItemWidth="100">
       <img src="img1.png" />
       <img src="img2.png" />
       <img src="img3.png" />
@@ -312,7 +310,7 @@ ref.current.goToSlide(length - 1); // Advance to last slide.
 This event is triggered when the index displayed by the carousel has changed.
 
 ```jsx
-<BentoStreamGallery onSlideChange={(index) => console.log(index)}>
+<BentoStreamGallery style={{height: 150}} onSlideChange={(index) => console.log(index)}>
   <img src="puppies.jpg" />
   <img src="kittens.jpg" />
   <img src="hamsters.jpg" />

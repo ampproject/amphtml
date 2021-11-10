@@ -19,8 +19,6 @@ defineBentoJwplayer();
 
 ### Example: Include via `<script>`
 
-`expanded` attribute on the third section expands it on page load.
-
 <!--% example %-->
 
 ```html
@@ -50,28 +48,26 @@ defineBentoJwplayer();
     />
   </head>
   <body>
-    <body>
-      <bento-jwplayer
-        id="jwplayer"
-        data-player-id="BjcwyK37"
-        data-media-id="CtaIzmFs"
-        style="width: 480px; height: 270px"
-      ></bento-jwplayer>
+    <bento-jwplayer
+      id="jwplayer"
+      data-player-id="BjcwyK37"
+      data-media-id="CtaIzmFs"
+      style="width: 480px; height: 270px"
+    ></bento-jwplayer>
 
-      <script>
-        (async () => {
-          const twitter = document.querySelector('#jwplayer');
-          await customElements.whenDefined('bento-twitter');
+    <script>
+      (async () => {
+        const player = document.querySelector('#jwplayer');
+        await customElements.whenDefined('bento-jwplayer');
 
-          const api = player.getApi();
-          api.play();
-          api.pause();
-          api.mute();
-          api.unmute();
-          api.requestFullscreen();
-        })();
-      </script>
-    </body>
+        const api = player.getApi();
+        api.play();
+        api.pause();
+        api.mute();
+        api.unmute();
+        api.requestFullscreen();
+      })();
+    </script>
   </body>
 </html>
 ```

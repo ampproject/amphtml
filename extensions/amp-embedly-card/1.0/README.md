@@ -61,42 +61,40 @@ defineBentoEmbedlyCard();
     </style>
   </head>
   <body>
-    <body>
-      <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
-      </bento-embedly-key>
+    <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
+    </bento-embedly-key>
 
-      <bento-embedly-card
-        data-url="https://twitter.com/AMPhtml/status/986750295077040128"
-        data-card-theme="dark"
-        data-card-controls="0"
-      >
-      </bento-embedly-card>
+    <bento-embedly-card
+      data-url="https://twitter.com/AMPhtml/status/986750295077040128"
+      data-card-theme="dark"
+      data-card-controls="0"
+    >
+    </bento-embedly-card>
 
-      <bento-embedly-card
-        id="my-url"
-        data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
-      >
-      </bento-embedly-card>
+    <bento-embedly-card
+      id="my-url"
+      data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+    >
+    </bento-embedly-card>
 
-      <div class="buttons" style="margin-top: 8px">
-        <button id="change-url">Change embed</button>
-      </div>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-url">Change embed</button>
+    </div>
 
-      <script>
-        (async () => {
-          const embedlyCard = document.querySelector('#my-url');
-          await customElements.whenDefined('bento-embedly-card');
+    <script>
+      (async () => {
+        const embedlyCard = document.querySelector('#my-url');
+        await customElements.whenDefined('bento-embedly-card');
 
-          // set up button actions
-          document.querySelector('#change-url').onclick = () => {
-            embedlyCard.setAttribute(
-              'data-url',
-              'https://www.youtube.com/watch?v=wcJSHR0US80'
-            );
-          };
-        })();
-      </script>
-    </body>
+        // set up button actions
+        document.querySelector('#change-url').onclick = () => {
+          embedlyCard.setAttribute(
+            'data-url',
+            'https://www.youtube.com/watch?v=wcJSHR0US80'
+          );
+        };
+      })();
+    </script>
   </body>
 </html>
 ```
