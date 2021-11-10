@@ -18,8 +18,6 @@ Displays content sections that can be collapsed and expanded. This component pro
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-accordion>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -32,9 +30,6 @@ defineBentoAccordion();
 ```
 
 ### Example: Include via `<script>`
-
-The example below contains an `bento-accordion` with three sections. The
-`expanded` attribute on the third section expands it on page load.
 
 <!--% example %-->
 
@@ -75,6 +70,7 @@ The example below contains an `bento-accordion` with three sections. The
           <h2>Section 2</h2>
           <div>Content in section 2.</div>
         </section>
+        <!-- Expanded on page load due to attribute: -->
         <section expanded>
           <h2>Section 3</h2>
           <div>Content in section 3.</div>
@@ -406,8 +402,6 @@ Keep the following points in mind when you style an amp-accordion:
 ---
 
 ## Preact/React Component
-
-The examples below demonstrates use of the `<BentoAccordion>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

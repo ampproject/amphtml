@@ -8,8 +8,6 @@ The expected content for Bento Fit Text is text or other inline content, but it 
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-fit-text>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -154,8 +152,6 @@ Specifies the maximum font size in pixels as an integer that the `bento-fit-text
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoFitText>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

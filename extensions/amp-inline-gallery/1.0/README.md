@@ -8,8 +8,6 @@ Its implementation uses a [Bento Base Carousel](https://www.npmjs.com/package/@b
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-inline-gallery>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -22,8 +20,6 @@ defineBentoInlineGallery();
 ```
 
 ### Example: Include via `<script>`
-
-The example below contains a `bento-inline-gallery` consisting of three slides with thumbnails and a pagination indicator.
 
 <!--% example %-->
 
@@ -160,8 +156,6 @@ You may use the `bento-inline-gallery`, `bento-inline-gallery-pagination`, `bent
 ---
 
 ## Preact/React Component
-
-The examples below demonstrates use of the `<BentoInlineGallery>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 
