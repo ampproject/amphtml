@@ -1,5 +1,4 @@
 import {createElementWithAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
 
 import '../amp-story-shopping';
 
