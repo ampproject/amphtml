@@ -16,8 +16,6 @@ https://github.com/ampproject/amphtml/blob/422d171e87571c4d125a2bf956e78e92444c1
 
 ## Preact/React Component
 
-The examples below demonstrates use of the `<BentoDateDisplay>` as a functional component usable with the Preact or React libraries.
-
 ### Example: Import via npm
 
 ```sh

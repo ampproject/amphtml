@@ -6,8 +6,6 @@ Embeds a [Soundcloud](https://soundcloud.com) clip.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-soundcloud>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -27,7 +25,12 @@ defineBentoSoundcloud();
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style>
       bento-soundcloud {
@@ -37,6 +40,12 @@ defineBentoSoundcloud();
       }
     </style>
     <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs"
+    ></script>
+    <script
+      nomodule
       async
       src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
     ></script>
@@ -138,8 +147,6 @@ The value for this attribute is the ID of a playlist, an integer.</td>
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoSoundcloud>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

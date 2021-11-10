@@ -10,8 +10,6 @@ If you have a paid plan, use the `<bento-embedly-key>` or `<BentoEmbedlyContext.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-embedly-card>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -31,7 +29,12 @@ defineBentoEmbedlyCard();
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style>
       bento-embedly-card {
@@ -41,6 +44,12 @@ defineBentoEmbedlyCard();
       }
     </style>
     <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.mjs"
+    ></script>
+    <script
+      nomodule
       async
       src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
     ></script>
@@ -52,42 +61,40 @@ defineBentoEmbedlyCard();
     </style>
   </head>
   <body>
-    <body>
-      <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
-      </bento-embedly-key>
+    <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
+    </bento-embedly-key>
 
-      <bento-embedly-card
-        data-url="https://twitter.com/AMPhtml/status/986750295077040128"
-        data-card-theme="dark"
-        data-card-controls="0"
-      >
-      </bento-embedly-card>
+    <bento-embedly-card
+      data-url="https://twitter.com/AMPhtml/status/986750295077040128"
+      data-card-theme="dark"
+      data-card-controls="0"
+    >
+    </bento-embedly-card>
 
-      <bento-embedly-card
-        id="my-url"
-        data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
-      >
-      </bento-embedly-card>
+    <bento-embedly-card
+      id="my-url"
+      data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+    >
+    </bento-embedly-card>
 
-      <div class="buttons" style="margin-top: 8px">
-        <button id="change-url">Change embed</button>
-      </div>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-url">Change embed</button>
+    </div>
 
-      <script>
-        (async () => {
-          const embedlyCard = document.querySelector('#my-url');
-          await customElements.whenDefined('bento-embedly-card');
+    <script>
+      (async () => {
+        const embedlyCard = document.querySelector('#my-url');
+        await customElements.whenDefined('bento-embedly-card');
 
-          // set up button actions
-          document.querySelector('#change-url').onclick = () => {
-            embedlyCard.setAttribute(
-              'data-url',
-              'https://www.youtube.com/watch?v=wcJSHR0US80'
-            );
-          };
-        })();
-      </script>
-    </body>
+        // set up button actions
+        document.querySelector('#change-url').onclick = () => {
+          embedlyCard.setAttribute(
+            'data-url',
+            'https://www.youtube.com/watch?v=wcJSHR0US80'
+          );
+        };
+      })();
+    </script>
   </body>
 </html>
 ```
@@ -187,8 +194,6 @@ Define a `title` attribute for the component to propagate to the underlying `<if
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoEmbedlyCard>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

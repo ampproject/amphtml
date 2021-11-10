@@ -84,7 +84,6 @@ describes.realWin(
         env.sandbox.stub(viewer, 'isEmbedded').returns(true);
         new MockStoryImpl(storyElement);
         addStoryAutoAdsConfig(adElement);
-        await autoAds.buildCallback();
       });
 
       it('handles null response', async () => {
@@ -95,7 +94,7 @@ describes.realWin(
         env.sandbox
           .stub(viewer, 'sendMessageAwaitResponse')
           .returns(Promise.resolve(null));
-        await autoAds.layoutCallback();
+        await autoAds.buildCallback();
         expect(forceExpStub).not.to.be.called;
       });
 
@@ -107,7 +106,7 @@ describes.realWin(
         env.sandbox
           .stub(viewer, 'sendMessageAwaitResponse')
           .returns(Promise.resolve({experimentIds: []}));
-        await autoAds.layoutCallback();
+        await autoAds.buildCallback();
         expect(forceExpStub).not.to.be.called;
       });
 
@@ -115,7 +114,7 @@ describes.realWin(
         env.sandbox
           .stub(viewer, 'sendMessageAwaitResponse')
           .returns(Promise.resolve({experimentIds: [123]}));
-        await autoAds.layoutCallback();
+        await autoAds.buildCallback();
         expect(getExperimentBranch(win, 'fake-exp')).to.equal('123');
       });
 
@@ -127,7 +126,7 @@ describes.realWin(
         env.sandbox
           .stub(viewer, 'sendMessageAwaitResponse')
           .returns(Promise.resolve({experimentIds: [456]}));
-        await autoAds.layoutCallback();
+        await autoAds.buildCallback();
         expect(forceExpStub).not.to.be.called;
       });
     });

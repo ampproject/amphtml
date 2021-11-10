@@ -1,18 +1,13 @@
 # Bento Carousel
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
-
 Each of the component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary children.
-
 The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
-
 The carousel advances between items if the user swipes or uses the customizable arrow buttons.
 
 ## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
-
-The examples below demonstrate use of the `<bento-base-carousel>` web component.
 
 ### Example: Import via npm
 
@@ -33,7 +28,12 @@ defineBentoBaseCarousel();
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style>
       bento-base-carousel {
@@ -43,6 +43,12 @@ defineBentoBaseCarousel();
       }
     </style>
     <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
+    ></script>
+    <script
+      nomodule
       async
       src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
     ></script>
@@ -382,8 +388,6 @@ example, you can recreate the default styling with the following HTML and CSS:
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoBaseCarousel>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

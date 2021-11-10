@@ -6,8 +6,6 @@ Counts up to, or away from, a specified date and time. It replaces the text node
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-timeago>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -27,8 +25,19 @@ defineBentoTimeago();
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://cdn.ampproject.org/bento.js"></script>
     <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-timeago-1.0.mjs"
+    ></script>
+    <script
+      nomodule
       async
       src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
     ></script>
@@ -162,8 +171,6 @@ Add the `cutoff` attribute to display the date specified in the `datatime` attri
 ---
 
 ## Preact/React Component
-
-The examples below demonstrates use of the `<BentoTimeago>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

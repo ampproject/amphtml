@@ -25,7 +25,12 @@ defineBentoSelector();
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
     <style>
       bento-selector {
@@ -33,28 +38,32 @@ defineBentoSelector();
       }
     </style>
     <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-selector-1.0.mjs"
+    ></script>
+    <script
+      nomodule
       async
       src="https://cdn.ampproject.org/v0/bento-selector-1.0.js"
     ></script>
   </head>
   <body>
-    <body>
-      <bento-selector class="sample-selector">
-        <ul>
-          <li option="1">Option 1</li>
-          <li option="2">Option 2</li>
-          <li option="3">Option 3</li>
-          <li option="4">Option 4</li>
-        </ul>
-      </bento-selector>
-    </body>
+    <bento-selector class="sample-selector">
+      <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+      </ul>
+    </bento-selector>
   </body>
 </html>
 ```
 
 ### Usage notes
 
--   A `bento-selector` can contain any arbitrary HTML elements or AMP components (e.g., `bento-carousel`, etc.).
+-   A `bento-selector` can contain any arbitrary HTML elements or Bento components (e.g., `bento-carousel`, etc.).
 -   A `bento-selector` cannot contain any nested `bento-selector` controls.
 -   Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option="value"></li>`).
 -   Disabled options can be set by adding the `disabled` attribute to the element (e.g., `<li option="d" disabled></li>`).
@@ -156,8 +165,6 @@ selector.addEventListener('select', (e) => console.log(e.data.targetOption));
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoSelector>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 
