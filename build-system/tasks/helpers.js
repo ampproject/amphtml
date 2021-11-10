@@ -313,6 +313,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
+
   if (options.aliasName) {
     fs.copySync(
       destPath,

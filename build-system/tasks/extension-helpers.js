@@ -4,6 +4,7 @@ const debounce = require('../common/debounce');
 const dedent = require('dedent');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
+const legacyLatestVersions = require('../compile/bundles.legacy-latest-versions');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -112,32 +113,19 @@ const adVendors = [];
 /**
  * @param {string} name
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
- * @param {string} latestVersion E.g. 0.1
  * @param {!ExtensionOptionDef|undefined} options extension options object.
  * @param {!Object} extensionsObject
- * @param {boolean} includeLatest
  */
-function declareExtension(
-  name,
-  version,
-  latestVersion,
-  options,
-  extensionsObject,
-  includeLatest
-) {
+function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
     extensionsObject[`${name}-${v}`] = {
       name,
       version: v,
-      latestVersion,
       ...defaultOptions,
       ...options,
     };
-    if (includeLatest && v == latestVersion) {
-      extensionsObject[`${name}-latest`] = extensionsObject[`${name}-${v}`];
-    }
   });
   if (name.startsWith('amp-ad-network-')) {
     // Get the ad network name. All ad network extensions are named
@@ -151,23 +139,12 @@ function declareExtension(
  * Initializes all extensions from build-system/compile/bundles.config.extensions.json
  * if not already done and populates the given extensions object.
  * @param {?Object} extensionsObject
- * @param {boolean=} includeLatest
  */
-function maybeInitializeExtensions(
-  extensionsObject = extensions,
-  includeLatest = false
-) {
+function maybeInitializeExtensions(extensionsObject = extensions) {
   if (Object.keys(extensionsObject).length === 0) {
     verifyExtensionBundles();
     extensionBundles.forEach((c) => {
-      declareExtension(
-        c.name,
-        c.version,
-        c.latestVersion,
-        c.options,
-        extensionsObject,
-        includeLatest
-      );
+      declareExtension(c.name, c.version, c.options, extensionsObject);
     });
   }
 }
@@ -378,14 +355,7 @@ async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
   let o = {...options};
   o = Object.assign(o, e);
-  await buildExtension(
-    e.name,
-    e.version,
-    e.latestVersion,
-    e.hasCss,
-    o,
-    e.extraGlobs
-  );
+  await buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs);
 }
 
 /**
@@ -395,24 +365,16 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {string} extDir
  * @param {string} name
  * @param {string} version
- * @param {string} latestVersion
  * @param {boolean} hasCss
  * @param {?Object} options
  * @return {Promise<void>}
  */
-async function watchExtension(
-  extDir,
-  name,
-  version,
-  latestVersion,
-  hasCss,
-  options
-) {
+async function watchExtension(extDir, name, version, hasCss, options) {
   /**
    * Steps to run when a watched file is modified.
    */
   function watchFunc() {
-    buildExtension(name, version, latestVersion, hasCss, {
+    buildExtension(name, version, hasCss, {
       ...options,
       continueOnError: true,
       isRebuild: true,
@@ -443,20 +405,12 @@ async function watchExtension(
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
- * @param {string} latestVersion Latest version of the extension.
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @param {!Array=} extraGlobs
  * @return {!Promise<void>}
  */
-async function buildExtension(
-  name,
-  version,
-  latestVersion,
-  hasCss,
-  options,
-  extraGlobs
-) {
+async function buildExtension(name, version, hasCss, options, extraGlobs) {
   options = options || {};
   options.extraGlobs = extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
@@ -467,7 +421,7 @@ async function buildExtension(
   // Use a separate watcher for css and jison compilation.
   // The watcher within compileJs recompiles the JS.
   if (options.watch) {
-    await watchExtension(extDir, name, version, latestVersion, hasCss, options);
+    await watchExtension(extDir, name, version, hasCss, options);
   }
 
   if (hasCss) {
@@ -791,14 +745,8 @@ function generateBentoEntryPointSource(name, toExport) {
  * @return {!Promise}
  */
 async function buildExtensionJs(dir, name, options) {
-  const {
-    latestVersion,
-    version,
-    filename = `${name}.js`,
-    wrapper = 'extension',
-  } = options;
-
-  const isLatest = version === latestVersion;
+  const isLatest = legacyLatestVersions[options.name] === options.version;
+  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {
@@ -809,7 +757,7 @@ async function buildExtensionJs(dir, name, options) {
   }
   const resolvedWrapper =
     typeof wrapperOrFn === 'function'
-      ? wrapperOrFn(name, version, isLatest, argv.esm, options.loadPriority)
+      ? wrapperOrFn(name, version, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
   await compileJs(`${dir}/`, filename, './dist/v0', {
