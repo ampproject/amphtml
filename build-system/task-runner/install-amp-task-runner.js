@@ -47,7 +47,15 @@ async function installAmpTaskRunner() {
       '⤷ Run',
       cyan('brew install bash-completion'),
       'to install it using',
-      cyan('Homebrew') + '.\n'
+      cyan('Homebrew') + '.'
+    );
+    log(
+      '⤷ Run',
+      cyan(
+        'echo "[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion" >> ~/.bash_profile'
+      ),
+      'to enable',
+      cyan('bash-completion') + '.\n'
     );
   }
 }
