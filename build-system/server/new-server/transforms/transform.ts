@@ -33,7 +33,11 @@ if (ESM) {
 
 export async function transform(fileLocation: string): Promise<string> {
   const source = await fs.promises.readFile(fileLocation, 'utf8');
-  const result = await posthtml(transforms).process(source);
+  return transformHtml(source);
+}
+
+export async function transformHtml(content: string): Promise<string> {
+  const result = await posthtml(transforms).process(content);
   return result.html;
 }
 

@@ -6,7 +6,7 @@ const {
   renderMarkdownSnippet,
 } = require('./transforms/dist/markdown');
 // @ts-ignore
-const {transform} = require('./transforms/dist/transform');
+const {transform, transformHtml} = require('./transforms/dist/transform');
 
 /**
  * @param {express.Request} req
@@ -47,7 +47,7 @@ router.get('/*.md', async (req, res) => {
 router.get('/*.md.html', async (req, res) => {
   const filename = req.path.replace(/.html$/, '');
   const html = await renderMarkdownSnippet(filename, process.cwd());
-  const transformedHtml = await transform(html);
+  const transformedHtml = await transformHtml(html);
   serveHtml(req, res, transformedHtml);
 });
 
