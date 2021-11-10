@@ -1,5 +1,6 @@
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
+import {propName} from '#preact/utils';
 
 const CONTAIN = [
   null, // 0: none
@@ -38,7 +39,6 @@ function ContainWrapperWithRef(
   {
     as: Comp = 'div',
     children,
-    'class': className,
     contentAs: ContentComp = 'div',
     contentClassName,
     contentProps,
@@ -50,6 +50,7 @@ function ContainWrapperWithRef(
     'style': style,
     wrapperClassName,
     wrapperStyle,
+    [propName('class')]: className,
     ...rest
   },
   ref
