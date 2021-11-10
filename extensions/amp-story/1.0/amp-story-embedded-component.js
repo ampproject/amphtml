@@ -93,9 +93,7 @@ function getComponentSelectors(components) {
  */
 export function embeddedElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return Object.values(
-    getComponentSelectors(EMBEDDED_COMPONENTS_SELECTORS)
-  ).join(',');
+  return Object.keys(EMBEDDED_COMPONENTS_SELECTORS).join(',');
 }
 
 /**
