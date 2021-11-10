@@ -37,38 +37,52 @@ The example below contains an `bento-accordion` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
-  />
-</head>
-<body>
-  <bento-accordion id="my-accordion">
-    <section>
-      <h2>Section 1</h2>
-      <p>Content in section 1.</p>
-    </section>
-    <section>
-      <h2>Section 2</h2>
-      <div>Content in section 2.</div>
-    </section>
-    <section expanded>
-      <h2>Section 3</h2>
-      <div>Content in section 3.</div>
-    </section>
-  </bento-accordion>
-  <script>
-    (async () => {
-      const accordion = document.querySelector('#my-accordion');
-      await customElements.whenDefined('bento-accordion');
-      const api = await accordion.getApi();
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+    />
+  </head>
+  <body>
+    <body>
+      <bento-accordion id="my-accordion">
+        <section>
+          <h2>Section 1</h2>
+          <p>Content in section 1.</p>
+        </section>
+        <section>
+          <h2>Section 2</h2>
+          <div>Content in section 2.</div>
+        </section>
+        <section expanded>
+          <h2>Section 3</h2>
+          <div>Content in section 3.</div>
+        </section>
+      </bento-accordion>
+      <script>
+        (async () => {
+          const accordion = document.querySelector('#my-accordion');
+          await customElements.whenDefined('bento-accordion');
+          const api = await accordion.getApi();
 
       // programatically expand all sections
       api.expand();

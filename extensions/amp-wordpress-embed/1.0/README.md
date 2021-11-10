@@ -22,28 +22,42 @@ defineBentoWordpressEmbed();
 ### Example: Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-wordpress-embed {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"
-  ></script>
-</head>
-<bento-wordpress-embed
-  id="my-embed"
-  data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
-></bento-wordpress-embed>
-<div class="buttons" style="margin-top: 8px">
-  <button id="switch-button">Switch embed</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-wordpress-embed {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <bento-wordpress-embed
+      id="my-embed"
+      data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+    ></bento-wordpress-embed>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="switch-button">Switch embed</button>
+    </div>
 
 <script>
   (async () => {

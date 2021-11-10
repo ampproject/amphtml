@@ -26,24 +26,38 @@ defineBentoIframe();
 ### Example: Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
-  />
-</head>
-<bento-iframe
-  id="my-iframe"
-  src="https://en.wikipedia.org/wiki/Bento"
-  style="width: 800px; height: 600px"
->
-</bento-iframe>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-iframe-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-iframe
+      id="my-iframe"
+      src="https://en.wikipedia.org/wiki/Bento"
+      style="width: 800px; height: 600px"
+    >
+    </bento-iframe>
 
 <button id="change-source">Change source</button>
 

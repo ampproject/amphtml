@@ -24,19 +24,46 @@ defineBentoLightboxGallery();
 ### Example: Import via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-lightbox-gallery[hidden] {
-      display: none !important;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
-  ></script>
-</head>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-lightbox-gallery[hidden] {
+        display: none !important;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <figure>
+      <img
+        id="my-img"
+        width="360"
+        height="240"
+        src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
+        lightbox
+      />
+      <figcaption>dog wearing yellow shirt.</figcaption>
+    </figure>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-img">change image</button>
+    </div>
 
 <figure>
   <img

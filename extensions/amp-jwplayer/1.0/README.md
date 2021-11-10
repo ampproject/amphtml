@@ -25,25 +25,39 @@ The example below contains an `bento-jwplayer` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
-  />
-</head>
-<body>
-  <bento-jwplayer
-    id="jwplayer"
-    data-player-id="BjcwyK37"
-    data-media-id="CtaIzmFs"
-    style="width: 480px; height: 270px"
-  ></bento-jwplayer>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+    />
+  </head>
+  <body>
+    <body>
+      <bento-jwplayer
+        id="jwplayer"
+        data-player-id="BjcwyK37"
+        data-media-id="CtaIzmFs"
+        style="width: 480px; height: 270px"
+      ></bento-jwplayer>
 
   <script>
     (async () => {

@@ -22,28 +22,42 @@ defineBentoLightbox();
 ### Example: Import via `<script>`
 
 ```html
-<head>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css"
-  />
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
-  ></script>
-</head>
-<bento-lightbox id="my-lightbox">
-  Lightboxed content
-  <button id="close-button">Close lightbox</button>
-</bento-lightbox>
-<button id="open-button">Open lightbox</button>
-<script>
-  (async () => {
-    const lightbox = document.querySelector('#my-lightbox');
-    await customElements.whenDefined('bento-lightbox');
-    const api = await lightbox.getApi();
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css"
+    />
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <bento-lightbox id="my-lightbox">
+      Lightboxed content
+      <button id="close-button">Close lightbox</button>
+    </bento-lightbox>
+    <button id="open-button">Open lightbox</button>
+    <script>
+      (async () => {
+        const lightbox = document.querySelector('#my-lightbox');
+        await customElements.whenDefined('bento-lightbox');
+        const api = await lightbox.getApi();
 
     // set up button actions
     document.querySelector('#open-button').onclick = () => api.open();

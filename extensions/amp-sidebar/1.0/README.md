@@ -22,30 +22,44 @@ defineBentoSidebar();
 ### Example: Include via `<script>`
 
 ```html
-<head>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-sidebar:not([open]) {
-      display: none !important;
-    }
-  </style>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"
-  ></script>
-</head>
-<body>
-  <bento-sidebar id="sidebar1" side="right">
-    <ul>
-      <li>Nav item 1</li>
-      <li>Nav item 2</li>
-      <li>Nav item 3</li>
-      <li>Nav item 4</li>
-      <li>Nav item 5</li>
-      <li>Nav item 6</li>
-    </ul>
-  </bento-sidebar>
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-sidebar:not([open]) {
+        display: none !important;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <body>
+      <bento-sidebar id="sidebar1" side="right">
+        <ul>
+          <li>Nav item 1</li>
+          <li>Nav item 2</li>
+          <li>Nav item 3</li>
+          <li>Nav item 4</li>
+          <li>Nav item 5</li>
+          <li>Nav item 6</li>
+        </ul>
+      </bento-sidebar>
 
   <div class="buttons" style="margin-top: 8px">
     <button id="open-sidebar">Open sidebar</button>

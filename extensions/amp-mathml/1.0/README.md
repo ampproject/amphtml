@@ -25,24 +25,38 @@ The example below contains an `bento-mathml` with three sections. The
 `expanded` attribute on the third section expands it on page load.
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-mathml-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-mathml-1.0.css"
-  />
-</head>
-<body>
-  <h2>The Quadratic Formula</h2>
-  <bento-mathml
-    style="height: 40px"
-    data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
-  ></bento-mathml>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-mathml-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-mathml-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-mathml-1.0.css"
+    />
+  </head>
+  <body>
+    <body>
+      <h2>The Quadratic Formula</h2>
+      <bento-mathml
+        style="height: 40px"
+        data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+      ></bento-mathml>
 
   <h2>Cauchy's Integral Formula</h2>
   <bento-mathml

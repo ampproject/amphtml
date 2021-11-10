@@ -22,29 +22,43 @@ defineBentoInstagram();
 ### Example: Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"
-  ></script>
-  <style>
-    bento-instagram {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-</head>
-<body>
-  <bento-instagram
-    id="my-instagram"
-    data-shortcode="CKXYAzuj7TE"
-    data-captioned
-    style="height: 800px; width: 400px;"
-  >
-  </bento-instagram>
-  <button id="change-shortcode">Change shortcode</button>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-instagram-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"
+    ></script>
+    <style>
+      bento-instagram {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <body>
+      <bento-instagram
+        id="my-instagram"
+        data-shortcode="CKXYAzuj7TE"
+        data-captioned
+        style="height: 800px; width: 400px"
+      >
+      </bento-instagram>
+      <button id="change-shortcode">Change shortcode</button>
 
   <script>
     (async () => {

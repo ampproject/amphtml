@@ -28,46 +28,60 @@ defineBentoBaseCarousel();
 ### Example: Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-base-carousel {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
-  ></script>
-  <style>
-    bento-base-carousel,
-    bento-base-carousel > div {
-      aspect-ratio: 4/1;
-    }
-    .red {
-      background: darkred;
-    }
-    .blue {
-      background: steelblue;
-    }
-    .green {
-      background: seagreen;
-    }
-  </style>
-</head>
-<bento-base-carousel id="my-carousel">
-  <div class="red"></div>
-  <div class="blue"></div>
-  <div class="green"></div>
-</bento-base-carousel>
-<div class="buttons" style="margin-top: 8px">
-  <button id="prev-button">Go to previous slide</button>
-  <button id="next-button">Go to next slide</button>
-  <button id="go-to-button">Go to slide with green gradient</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-base-carousel {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
+    <style>
+      bento-base-carousel,
+      bento-base-carousel > div {
+        aspect-ratio: 4/1;
+      }
+      .red {
+        background: darkred;
+      }
+      .blue {
+        background: steelblue;
+      }
+      .green {
+        background: seagreen;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-base-carousel id="my-carousel">
+      <div class="red"></div>
+      <div class="blue"></div>
+      <div class="green"></div>
+    </bento-base-carousel>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="prev-button">Go to previous slide</button>
+      <button id="next-button">Go to next slide</button>
+      <button id="go-to-button">Go to slide with green gradient</button>
+    </div>
 
 <script>
   (async () => {

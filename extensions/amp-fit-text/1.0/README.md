@@ -24,25 +24,43 @@ defineBentoFitText();
 ### Example: Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-fit-text {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-</head>
-<bento-fit-text id="my-fit-text">
-  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis
-  reprehendunt.
-</bento-fit-text>
-<div class="buttons" style="margin-top: 8px">
-  <button id="font-button">Change max-font-size</button>
-  <button id="content-button">Change content</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"
+    ></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-fit-text {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-fit-text id="my-fit-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
+      inermis reprehendunt.
+    </bento-fit-text>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="font-button">Change max-font-size</button>
+      <button id="content-button">Change content</button>
+    </div>
 
 <script>
   (async () => {

@@ -26,17 +26,53 @@ defineBentoInlineGallery();
 The example below contains a `bento-inline-gallery` consisting of three slides with thumbnails and a pagination indicator.
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
 
-  <script async src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"></script>
-  <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css">
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css"
+    />
 
-  <script async src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"></script>
-  <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css">
-<body>
-  <bento-inline-gallery id="inline-gallery">
-    <bento-inline-gallery-thumbnails style="height: 100px;" loop></bento-inline-gallery-thumbnails>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+    />
+  </head>
+  <body>
+    <body>
+      <bento-inline-gallery id="inline-gallery">
+        <bento-inline-gallery-thumbnails
+          style="height: 100px"
+          loop
+        ></bento-inline-gallery-thumbnails>
 
     <bento-base-carousel style="height: 200px;" snap-align="center" visible-count="3" loop>
       <img src="img1.jpeg" data-thumbnail-src="img1-thumbnail.jpeg" />

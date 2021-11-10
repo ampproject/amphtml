@@ -26,30 +26,44 @@ defineBentoEmbedlyCard();
 ### Example: Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-embedly-card {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
-  ></script>
-  <style>
-    bento-embedly-card {
-      width: 375px;
-      height: 472px;
-    }
-  </style>
-</head>
-<body>
-  <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
-  </bento-embedly-key>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-embedly-card {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
+    ></script>
+    <style>
+      bento-embedly-card {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <body>
+      <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
+      </bento-embedly-key>
 
   <bento-embedly-card
     data-url="https://twitter.com/AMPhtml/status/986750295077040128"
