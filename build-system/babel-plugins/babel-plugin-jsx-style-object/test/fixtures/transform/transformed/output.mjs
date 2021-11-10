@@ -21,7 +21,11 @@ const otherAttributesAreUnmodified = () => <div foo={{
   width: 100
 }} />;
 
-const modified = () => <div style={jsxStylePropertyString("color", null, true) + "background-color:red;" + jsxStylePropertyString("background-image", backgroundImage, true) + "opacity:0;width:100px;"} />;
+const modified = () => <div style={"background-color:red;" + jsxStylePropertyString("background-image", backgroundImage, true) + "opacity:0;width:100px;"} />;
+
+const emptyStringValueIsRemoved = () => <div style={{
+  background: ''
+}} />;
 
 let dynamic = 0;
 

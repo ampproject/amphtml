@@ -37,6 +37,8 @@ const modified = () => (
   />
 );
 
+const emptyStringValueIsRemoved = () => <div style={{background: ''}} />;
+
 let dynamic = 0;
 function modifyDynamicValue() {
   dynamic = 1;

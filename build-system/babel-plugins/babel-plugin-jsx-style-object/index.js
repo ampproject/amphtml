@@ -53,7 +53,7 @@ module.exports = function (babel) {
 
   /**
    * @param {babel.NodePath<import('@babel/types').ObjectProperty>} path
-   * @return {babel.Node}
+   * @return {?babel.Node}
    */
   function transformProp(path) {
     // @ts-ignore
@@ -66,11 +66,12 @@ module.exports = function (babel) {
     // If we can evaluate the value, return a composed string.
     if (evaluated.confident) {
       const {value} = evaluated;
-      if (value != null) {
-        const withUnit =
-          isDimensional && typeof value === 'number' ? `${value}px` : value;
-        return t.stringLiteral(`${cssName}:${withUnit};`);
+      if (value == null || value === '') {
+        return null;
       }
+      const withUnit =
+        isDimensional && typeof value === 'number' ? `${value}px` : value;
+      return t.stringLiteral(`${cssName}:${withUnit};`);
     }
 
     // Otherwise call the helper function to evaluate nullish and dimensional values.
@@ -92,7 +93,7 @@ module.exports = function (babel) {
   }
 
   /**
-   * @param {babel.Node[]} props
+   * @param {(babel.Node|null)[]} props
    * @return {?babel.Node}
    */
   function mergeTransformedIntoExpr(props) {
@@ -100,6 +101,9 @@ module.exports = function (babel) {
     let prev = null;
     while (props.length) {
       const part = props.shift();
+      if (!part) {
+        continue;
+      }
       // Collapse adjacent strings.
       if (t.isStringLiteral(prev) && t.isStringLiteral(part)) {
         // @ts-ignore

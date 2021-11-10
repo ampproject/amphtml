@@ -7,7 +7,7 @@
  * @return {string}
  */
 export function jsxStylePropertyString(property, value, opt_isDimensional) {
-  if (value == null) {
+  if (value == null || value === '') {
     return '';
   }
   const withUnit =

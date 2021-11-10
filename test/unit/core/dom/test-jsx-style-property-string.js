@@ -12,6 +12,17 @@ describes.sandboxed('jsxStylePropertyString', {}, () => {
     ).to.equal('');
   });
 
+  it('returns empty string with empty string', () => {
+    expect(jsxStylePropertyString('a', '')).to.equal('');
+    expect(jsxStylePropertyString('b', '')).to.equal('');
+    expect(jsxStylePropertyString('c', '', /* isDimensional */ true)).to.equal(
+      ''
+    );
+    expect(jsxStylePropertyString('d', '', /* isDimensional */ true)).to.equal(
+      ''
+    );
+  });
+
   it('returns string value', () => {
     expect(jsxStylePropertyString('background', 'red')).to.equal(
       'background:red;'
