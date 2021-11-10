@@ -198,7 +198,7 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-  ADD_SHOPPING_STATE: 'addShoppingState',
+  ADD_SHOPPING_DATA: 'addShoppingData',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
@@ -271,14 +271,14 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PANNING_MEDIA_STATE]: updatedState,
       });
-    case Action.ADD_SHOPPING_STATE:
-      const updatedShoppingState = {
+    case Action.ADD_SHOPPING_DATA:
+      const updatedShoppingData = {
         ...state[StateProperty.SHOPPING_STATE],
         ...data,
       };
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.SHOPPING_STATE]: updatedShoppingState,
+        [StateProperty.SHOPPING_STATE]: updatedShoppingData,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
