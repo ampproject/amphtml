@@ -2,6 +2,10 @@
  * @fileoverview
  * Transforms Preact-style props ("class") into React-style ("className")
  */
+const {
+  DOM_ATTRIBUTES_FLIPPED,
+  SVG_ATTRIBUTES_FLIPPED,
+} = require('../../common/dom-svg-attributes');
 
 const propNameFn = 'propName';
 
@@ -13,9 +17,10 @@ module.exports = function (babel) {
    * @return {?string}
    */
   function getReactStyle(name) {
-    // TODO(wg-bento): This mapping is incomplete.
-    if (name === 'class') {
-      return 'className';
+    if (DOM_ATTRIBUTES_FLIPPED[name]) {
+      return DOM_ATTRIBUTES_FLIPPED[name];
+    } else if (SVG_ATTRIBUTES_FLIPPED[name]) {
+      return SVG_ATTRIBUTES_FLIPPED[name];
     }
     return name;
   }
@@ -40,4 +45,4 @@ module.exports = function (babel) {
       },
     },
   };
-};
+});
