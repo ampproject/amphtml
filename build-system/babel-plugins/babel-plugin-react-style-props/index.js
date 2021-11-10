@@ -17,7 +17,7 @@ module.exports = function (babel) {
     if (name === 'class') {
       return 'className';
     }
-    return null;
+    return name;
   }
 
   return {
@@ -25,9 +25,7 @@ module.exports = function (babel) {
     visitor: {
       JSXAttribute(path) {
         const reactStyle = getReactStyle(path.node.name.name);
-        if (reactStyle) {
-          path.node.name.name = reactStyle;
-        }
+        path.node.name.name = reactStyle;
       },
       CallExpression(path) {
         if (!t.isIdentifier(path.node.callee, {name: propNameFn})) {
@@ -38,9 +36,7 @@ module.exports = function (babel) {
           throw arg.buildCodeFrameError('Should be string literal');
         }
         const reactStyle = getReactStyle(arg.node.value);
-        if (reactStyle) {
-          path.replaceWith(t.stringLiteral(reactStyle));
-        }
+        path.replaceWith(t.stringLiteral(reactStyle));
       },
     },
   };
