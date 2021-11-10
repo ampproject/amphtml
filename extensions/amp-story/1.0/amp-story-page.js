@@ -93,9 +93,6 @@ export const Selectors = {
   ALL_TABBABLE: 'a, amp-twitter > iframe',
 };
 
-/** @private @const {number} */
-const RESIZE_TIMEOUT_MS = 1000;
-
 /** @private @const {string} */
 const TAG = 'amp-story-page';
 
