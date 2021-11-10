@@ -15,6 +15,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   let playerReadyState;
   let play;
   let pause;
+  let style;
 
   let metadata;
 
@@ -25,7 +26,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       },
       play,
       pause,
-      style: {},
+      style,
       getMetadata: () => metadata,
     }));
     return <></>;
@@ -35,6 +36,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     playerReadyState = undefined;
     pause = env.sandbox.spy();
     play = env.sandbox.spy();
+    style = {};
 
     metadata = {
       'title': 'Test player title',
@@ -212,6 +214,23 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     );
     await wrapper.find(TestPlayer).invoke('onPlaying')();
     expect(onPlayingState).to.be.calledOnce.calledWith(true);
+  });
+
+  it('should add object-fit property after play', async () => {
+    const onPlayingState = env.sandbox.spy();
+    const ref = createRef();
+    const wrapper = mount(
+      <VideoWrapper
+        ref={ref}
+        component={TestPlayer}
+        sources={<div></div>}
+        onPlayingState={onPlayingState}
+      />
+    );
+
+    // onPlaying
+    await wrapper.find(TestPlayer).invoke('onPlaying')();
+    expect(style).to.deep.equal({'object-fit': 'contain'});
   });
 
   describe('MediaSession', () => {
