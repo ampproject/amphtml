@@ -758,11 +758,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = await generateBentoEntryPointSource(
-    name,
-    toExport,
-    options
-  );
+  const generatedSource = await generateBentoEntryPointSource(name, toExport);
   const generatedFilename = `build/${filename}`;
   await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
   return generatedFilename;
@@ -771,24 +767,13 @@ async function getBentoBuildFilename(dir, name, mode, options) {
 /**
  * @param {string} name
  * @param {string} toExport
- * @param {Object} options
  * @return {Promise<string>}
  */
-async function generateBentoEntryPointSource(name, toExport, options) {
-  const css = options.hasCss
-    ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
-    : null;
-
+async function generateBentoEntryPointSource(name, toExport) {
   return dedent(`
     import {BaseElement} from '../base-element';
-    
+
     function defineElement() {
-      const css = __css__;
-      if (css) {
-        const style = document.createElement('style');
-        style.textContent = css;
-        document.head.appendChild(style);
-      }
       customElements.define(
         __name__,
         BaseElement.CustomElement(BaseElement)
@@ -796,9 +781,7 @@ async function generateBentoEntryPointSource(name, toExport, options) {
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
-  `)
-    .replace('__css__', JSON.stringify(css))
-    .replace('__name__', JSON.stringify(name));
+  `).replace('__name__', JSON.stringify(name));
 }
 
 /**
