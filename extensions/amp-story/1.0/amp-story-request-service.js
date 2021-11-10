@@ -56,12 +56,16 @@ export class AmpStoryRequestService {
   /**
    * Retrieves the publisher share providers.
    * Has to be called through `loadShareConfig`.
+   * @param element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
-  loadShareConfigImpl_() {
-    const shareConfigEl = this.storyElement_.querySelector(
-      'amp-story-social-share, amp-story-bookend'
-    );
+  loadShareConfigImpl_(element) {
+    const shareConfigEl = element
+      ? element
+      : this.storyElement_.querySelector(
+          'amp-story-social-share, amp-story-bookend'
+        );
+
     if (!shareConfigEl) {
       return Promise.resolve();
     }
@@ -103,4 +107,14 @@ export const getRequestService = (win, storyEl) => {
   }
 
   return service;
+};
+
+/**
+ * Retrieves the publisher share providers.
+ * Has to be called through `loadShareConfig`.
+ * @param  {!Element} element
+ * @return {(!Promise<!JsonObject>|!Promise<null>)}
+ */
+export const loadConfigImpl = (element) => {
+  return getRequestService(window, element).loadShareConfigImpl_(element);
 };

@@ -1,14 +1,11 @@
-import {isJsonScriptTag} from '#core/dom';
 import {Layout} from '#core/dom/layout';
-import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {devAssert, user, userAssert} from '#utils/log';
+import {devAssert} from '#utils/log';
 
+import {getRequestService} from '../../amp-story/1.0/amp-story-request-service';
 import {Action} from '../../amp-story/1.0/amp-story-store-service';
-
-const TAG = 'amp-story-shopping-config';
 
 export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -16,6 +13,9 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     super(element);
     /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+
+    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = getRequestService(this.win, element);
   }
 
   /**
@@ -43,12 +43,9 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
 
         this.storeService_ = storeService;
-        this.getRemoteConfig_()
-          .then((storyConfig) => this.addShoppingStateFromConfig_(storyConfig))
-          // If remote fails, fallback to inline.
-          .catch(() =>
-            this.addShoppingStateFromConfig_(this.getInlineConfig_())
-          );
+        this.requestService_
+          .loadShareConfigImpl_(this.element)
+          .then((storyConfig) => this.addShoppingStateFromConfig_(storyConfig));
       }
     );
   }
@@ -56,35 +53,5 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.NODISPLAY;
-  }
-
-  /** @return {?JsonObject} */
-  getInlineConfig_() {
-    const scriptChild = this.element.firstElementChild;
-    userAssert(
-      scriptChild && isJsonScriptTag(scriptChild),
-      `${TAG}: The config should be inside a <script> tag with type="application/json"`
-    );
-
-    return parseJson(scriptChild.textContent);
-  }
-
-  /** @return {Promise<JsonObject>} */
-  getRemoteConfig_() {
-    if (!this.element.hasAttribute('src')) {
-      return Promise.reject(
-        'No src attribute provided, defaulting back to inline config.'
-      );
-    }
-    return Services.xhrFor(this.win)
-      .fetchJson(this.element.getAttribute('src'))
-      .then((response) => response.json())
-      .catch((err) => {
-        user().error(
-          TAG,
-          'error determining if remote config is valid json: bad url or bad json',
-          err
-        );
-      });
   }
 }

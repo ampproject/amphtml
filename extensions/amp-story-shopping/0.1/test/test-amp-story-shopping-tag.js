@@ -1,5 +1,4 @@
 import {createElementWithAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
 import '../amp-story-shopping';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -22,6 +21,9 @@ describes.realWin(
     let shoppingTag;
     let storeService;
 
+    const nextTick = () =>
+      new Promise((resolve) => win.setTimeout(resolve, 100));
+
     beforeEach(async () => {
       win = env.win;
 
@@ -41,38 +43,39 @@ describes.realWin(
         'amp-story-shopping-tag',
         {'layout': 'container'}
       );
+
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
 
       shoppingTag = await element.getImpl();
     }
 
-    it('should build shopping tag component', () => {
-      expect(() => shoppingTag.layoutCallback()).to.not.throw();
-    });
-
-    it('should process config data and set text container content if data not null', () => {
-      shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
+    async function shoppingStateHelper() {
       const shoppingState = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
       storeService.dispatch(Action.ADD_SHOPPING_STATE, shoppingState);
-      shoppingTag.buildCallback();
+      await shoppingTag.buildCallback();
+      await shoppingTag.layoutCallback();
+      await nextTick();
+    }
+
+    it('should build shopping tag component', () => {
+      expect(() => shoppingTag.layoutCallback()).to.not.throw();
+    });
+
+    it('should process config data and set text container content if data not null', async () => {
+      shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
+      await shoppingStateHelper();
       expect(shoppingTag.element.textContent).to.equal(
         'Spectacular Spectacles'
       );
     });
 
-    it('should not process config data and set text container content if id not found', () => {
+    it('should not process config data and set text container content if id not found', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'hat');
-      const shoppingState = {
-        'sunglasses': {'product-title': 'Spectacular Spectacles'},
-      };
-      storeService.dispatch(Action.ADD_SHOPPING_STATE, shoppingState);
-      shoppingTag.buildCallback();
-      expect(shoppingTag.element.textContent).to.not.equal(
-        'Spectacular Spectacles'
-      );
+      await shoppingStateHelper();
+      expect(shoppingTag.element.textContent).to.be.empty;
     });
   }
 );

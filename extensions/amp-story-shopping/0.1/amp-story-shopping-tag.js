@@ -2,6 +2,8 @@ import {Layout} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {devAssert} from '#utils/log';
+
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
@@ -15,16 +17,21 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    super.buildCallback();
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+    return Services.storyStoreServiceForOrNull(this.win).then(
+      (storeService) => {
+        devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
         this.storeService_ = storeService;
-        this.storeService_.subscribe(
-          StateProperty.SHOPPING_STATE,
-          (shoppingState) => this.updateShoppingTag_(shoppingState)
-        );
-      }),
-    ]);
+      }
+    );
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.storeService_.subscribe(
+      StateProperty.SHOPPING_STATE,
+      (shoppingState) => this.updateShoppingTag_(shoppingState),
+      true /** callToInitialize */
+    );
   }
 
   /** @override */
@@ -39,7 +46,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   updateShoppingTag_(shoppingState) {
     const tagData = shoppingState[this.element.getAttribute('data-tag-id')];
     if (tagData) {
-      this.element.textContent = tagData['product-title'];
+      this.measureElement(() => {
+        this.element.textContent = tagData['product-title'];
+      });
     }
   }
 }
