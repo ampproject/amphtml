@@ -4,7 +4,7 @@ import {parseQueryString} from '#core/types/string/url';
 
 import * as Preact from '#preact';
 import {Wrapper} from '#preact/component';
-import {useResourcesNotify} from '#preact/utils';
+import {propName, useResourcesNotify} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 import {getSocialConfig} from './social-share-config';
@@ -31,10 +31,10 @@ export function BentoSocialShare({
   height,
   params,
   style,
-  tabIndex = 0,
   target,
   type,
   width,
+  [propName('tabIndex')]: tabIndex = 0,
   ...rest
 }) {
   useResourcesNotify();

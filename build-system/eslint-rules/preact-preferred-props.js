@@ -19,8 +19,12 @@
 // <div tabindex="0" />
 // <path strokeLinecap />
 
+const propNameFn = 'propName';
+const propNameFnModule = '#preact/utils';
+
 const DOM_ATTRIBUTES = {
   className: 'class',
+  // TODO(wg-bento): Revert tabIndex with tabindex
   tabindex: 'tabIndex',
 };
 
@@ -109,6 +113,15 @@ module.exports = {
     fixable: 'code',
   },
   create(context) {
+    const attributes = {...DOM_ATTRIBUTES, ...SVG_ATTRIBUTES};
+    const preactNames = new Set(Object.values(attributes));
+
+    let lastImportDecl = null;
+    let addedImportDecl = false;
+    let program = null;
+
+    const importDecl = `import {${propNameFn}} from '${propNameFnModule}';\n`;
+
     /** @param {*} node */
     function checkProps(node) {
       if (!node.properties) {
@@ -118,42 +131,118 @@ module.exports = {
         if (!prop.key) {
           return;
         }
-        const property = prop.value.name || prop.value.left.name;
-        const preferred = DOM_ATTRIBUTES[property] || SVG_ATTRIBUTES[property];
-        if (!preferred || prop.key.value === preferred) {
+        if (prop.computed) {
           return;
         }
+        const property = prop.key.name || prop.key.value;
 
-        context.report({
-          node,
-          message: `Prefer \`${preferred}\` property access to \`${property}\`.`,
+        let preferred = attributes[property];
+        let message = `Prefer \`${preferred}\` property access to \`${property}\`.`;
 
-          fix(fixer) {
-            if (!prop.key.value) {
-              return fixer.insertTextBefore(prop, `'${preferred}': `);
-            }
-            if (prop.key.value !== preferred) {
-              return fixer.replaceText(prop.key, `'${preferred}'`);
-            }
-          },
-        });
+        if (preactNames.has(property)) {
+          preferred = property;
+          message = `Preact-style prop names \`${preferred}\` should be wrapped with \`${propNameFn}()\``;
+        }
+
+        if (preferred) {
+          context.report({
+            node: prop,
+            message,
+            fix: function* (fixer) {
+              if (!addedImportDecl) {
+                addedImportDecl = true;
+                if (lastImportDecl) {
+                  yield fixer.insertTextAfter(lastImportDecl, importDecl);
+                } else {
+                  yield fixer.insertTextBefore(program.body[0], importDecl);
+                }
+              }
+              const computed = `[${propNameFn}('${preferred}')]`;
+              if (!prop.key.value) {
+                yield fixer.insertTextBefore(prop, `${computed}: `);
+              } else {
+                yield fixer.replaceText(prop.key, computed);
+              }
+            },
+          });
+        }
       });
     }
+
     return {
+      Program(node) {
+        program = node;
+        lastImportDecl = null;
+        addedImportDecl = false;
+      },
+
+      ImportDeclaration(node) {
+        lastImportDecl = node;
+      },
+
+      ImportSpecifier(node) {
+        if (node.local.name === propNameFn) {
+          addedImportDecl = true;
+        }
+      },
+
+      'CallExpression[callee.name="propName"]': function (node) {
+        if (
+          node.arguments.length !== 1 ||
+          node.arguments[0].type !== 'Literal' ||
+          typeof node.arguments[0].value !== 'string'
+        ) {
+          context.report({
+            node,
+            message: `${node.callee.name} can only have a single string attribute.`,
+          });
+          return;
+        }
+        const name = node.arguments[0].value;
+        if (attributes[name]) {
+          context.report({
+            node,
+            message: `${node.callee.name} requires Preact-style name \`${attributes[name]}\`.`,
+            fix(fixer) {
+              return fixer.replaceText(
+                node.arguments[0],
+                `'${attributes[name]}'`
+              );
+            },
+          });
+        }
+        if (!preactNames.has(name)) {
+          context.report({
+            node,
+            message: `${node.callee.name} is not required.`,
+            fix(fixer) {
+              const replacement = `'${name}'`;
+              if (node.parent.type === 'Property') {
+                // Remove brackets around ['computed'] prop keys
+                return fixer.replaceTextRange(
+                  [node.parent.key.start - 1, node.parent.key.end + 1],
+                  replacement
+                );
+              }
+              return fixer.replaceText(node, replacement);
+            },
+          });
+        }
+      },
+
       FunctionDeclaration(node) {
         node.params.forEach(checkProps);
       },
 
       VariableDeclarator(node) {
-        if (!node.init || node.init?.name !== 'props' || !node.id) {
+        if (!node.init || node.init.name !== 'props' || !node.id) {
           return;
         }
         checkProps(node.id);
       },
 
       JSXAttribute(node) {
-        const alternative =
-          DOM_ATTRIBUTES[node.name.name] || SVG_ATTRIBUTES[node.name.name];
+        const alternative = attributes[node.name.name];
         if (!alternative) {
           return;
         }

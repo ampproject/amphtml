@@ -10,6 +10,7 @@ import {
   useState,
 } from '#preact';
 import {useStyles} from './thumbnails.jss';
+import {propName} from '#preact/utils';
 
 /**
  * @param {!BentoInlineGalleryDef.BentoThumbnailProps} props
@@ -18,8 +19,8 @@ import {useStyles} from './thumbnails.jss';
 export function BentoInlineGalleryThumbnails({
   aspectRatio,
   children,
-  'class': className = '',
   loop = false,
+  [propName('class')]: className = '',
   ...rest
 }) {
   const classes = useStyles();

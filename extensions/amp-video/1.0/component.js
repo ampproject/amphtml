@@ -26,7 +26,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useResourcesNotify} from '#preact/utils';
+import {propName, useResourcesNotify} from '#preact/utils';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
@@ -67,7 +67,6 @@ const getMetadata = (player, props) =>
 function VideoWrapperWithRef(
   {
     autoplay = false,
-    'class': className,
     component: Component = 'video',
     controls = false,
     loading: loadingProp,
@@ -80,6 +79,7 @@ function VideoWrapperWithRef(
     sources,
     src,
     style,
+    [propName('class')]: className,
     ...rest
   },
   ref
