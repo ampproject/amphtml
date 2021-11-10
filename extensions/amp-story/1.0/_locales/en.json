@@ -254,9 +254,5 @@
   "100": {
     "string": "Read more",
     "description": "Label for a button to open a drawer containing additional content."
-  },
-  "101": {
-    "string": "Open Tweet",
-    "description": "Label in the tooltip text for when a Twitter embed can be opened."
   }
 }

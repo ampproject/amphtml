@@ -531,9 +531,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.backgroundAudioDeferred_.resolve();
 
     this.muteAllMedia();
-    this.getViewport().onResize(
-      debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
-    );
 
     this.renderOpenAttachmentUI_();
 
