@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Wordt geopend"
+  },
+  "98": {
+    "string": "Formulier niet verzonden, probeer het opnieuw"
+  },
+  "99": {
+    "string": "Formulier verzonden"
   }
 }

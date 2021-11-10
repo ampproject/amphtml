@@ -462,6 +462,8 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
+        // Prevents navigation when clicking inside of draggable drawer elements,
+        // such as <amp-story-page-attachment> and <amp-story-page-outlink>.
         if (el.classList.contains('amp-story-draggable-drawer-root')) {
           shouldHandleEvent = false;
           return true;

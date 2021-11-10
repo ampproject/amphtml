@@ -8,7 +8,7 @@ import {Layout} from '#core/dom/layout';
 import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
@@ -423,7 +423,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
     this.maybeSetSrcFromInput_();
     if (this.isSsr_) {

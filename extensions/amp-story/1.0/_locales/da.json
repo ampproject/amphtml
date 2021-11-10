@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Åbner"
+  },
+  "98": {
+    "string": "Formularen blev ikke indsendt. Prøv igen"
+  },
+  "99": {
+    "string": "Formularen blev indsendt"
   }
 }

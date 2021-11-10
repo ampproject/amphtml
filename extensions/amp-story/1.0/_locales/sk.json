@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Otvára sa"
+  },
+  "98": {
+    "string": "Formulár nebol odoslaný, skúste to znova"
+  },
+  "99": {
+    "string": "Formulár bol úspešne odoslaný"
   }
 }

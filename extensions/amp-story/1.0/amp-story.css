@@ -197,7 +197,6 @@ amp-story .amp-video-eq:not(.amp-video-eq-play), .i-amphtml-story-no-audio-ui .a
 }
 
 /** Page level */
-.i-amphtml-story-media-query-matcher,
 amp-story-page {
   bottom: 0 !important;
   height: auto !important;
@@ -210,13 +209,6 @@ amp-story-page {
   touch-action: none !important;
   transition: none !important;
   z-index: 0 !important;
-}
-
-.i-amphtml-story-media-query-matcher {
-  height: inherit !important;
-  width: inherit !important;
-  border: 0 !important;
-  z-index: -1 !important;
 }
 
 amp-story-page[active] {

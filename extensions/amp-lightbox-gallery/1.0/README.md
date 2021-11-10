@@ -1,20 +1,14 @@
 # Bento Lightbox Gallery
 
-# Usage
+Provides a modal "lightbox" experience for images.
 
-The Bento Lightbox Gallery component provides a "lightbox" experience for other components (e.g., HTML images, Bento carousel). When the user interacts with the element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported.
-
-Use Bento Lightbox Gallery as a web component [`<bento-lightbox-gallery>`](#web-component), or a Preact/React functional component [`<BentoLightboxGallery>`](#preact/react-Component).
+When the user interacts with the element, a modal expands to fill the viewport until it is closed by the user.
 
 ## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. As a web component
 
-The examples below demonstrate use of the `<bento-lightbox-gallery>` web component.
-
 ### Example: Import via npm
-
-Install via npm:
 
 ```sh
 npm install @bentoproject/lightbox-gallery
@@ -27,56 +21,51 @@ defineBentoLightboxGallery();
 
 ### Example: Import via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-lightbox-gallery[hidden] {
-      display: none !important;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
-  ></script>
-</head>
-
-<figure>
-  <img
-    id="my-img"
-    width="360"
-    height="240"
-    src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
-    lightbox
-  />
-  <figcaption>dog wearing yellow shirt.</figcaption>
-</figure>
-<div class="buttons" style="margin-top: 8px">
-  <button id="change-img">change image</button>
-</div>
-
-<script>
-  (async () => {
-    const img = document.queryselector('#my-img');
-    await customelements.whendefined('img');
-    // set up button actions
-    document.queryselector('#change-img').onclick = () => {
-      img.setattribute(
-        'src',
-        'https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80'
-      );
-    };
-  })();
-</script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css">
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <bento-lightbox-gallery></bento-lightbox-gallery>
+    <figure>
+      <img id="my-img" src="img1.jpwg" lightbox />
+      <figcaption>dog wearing yellow shirt.</figcaption>
+    </figure>
+    <figure>
+      <img src="img2.jpeg" lightbox/>
+    </figure>
+    <figure>
+      <img src="img2.jpeg" lightbox/>
+    </figure>
+  </body>
+</html>
 ```
-
-### Usage
 
 To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section,
 then add the `lightbox` attribute on an `<img>` or `<bento-carousel>` element.
 
-#### Add Captions
+### Add Captions
 
 Optionally, you can specify a caption for each element in the lightbox. these
 fields are automatically read and displayed by the `<bento-lightbox-gallery>` in
@@ -97,9 +86,6 @@ value as its description, showing "toront's cn tower was ....".
     id="hero-img"
     lightbox="toronto"
     src="https://picsum.photos/1600/900?image=1075"
-    layout="responsive"
-    width="1600"
-    height="900"
     alt="picture of cn tower."
   />
   <figcaption class="image">
@@ -117,14 +103,11 @@ its description, showing "picture of cn tower".
   id="hero-img"
   lightbox="toronto"
   src="https://picsum.photos/1600/900?image=1075"
-  layout="responsive"
-  width="1600"
-  height="900"
   alt="picture of cn tower"
 />
 ```
 
-### Interactivity and API usage
+## Interactivity and API usage
 
 Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
 
@@ -137,12 +120,34 @@ const api = await lightboxGallery.getApi();
 
 The `bento-lightbox-gallery` API allows you to perform the following action:
 
-### `open`
+#### `open`
 
 Opens the lightbox gallery.
 
 ```javascript
 api.open();
+```
+
+You can open a specific lightbox gallery group to a specific slide by passing in extra arguments:
+
+```javascript
+api.open(1, 'toronto') // opens gallery with images in the "toronto" group to the 2nd image
+api.open(null, 'toronto') // opens gallery with images in the "toronto" group to the 1st image
+```
+
+### Attributes
+
+#### lightbox
+
+Set `lightbox` attribute to an id to assign different images to different groups. For example, in the example below, clicking any of the `group1` images will only show `img1.jpeg`, `img3.jpeg`, and `img5.jpeg` and clicking any of the `group2` images will only show `img2.jpeg`, `img4.jpeg`, `img6.jpeg`
+
+```html
+<img src="img1.jpeg" lightbox="group1">
+<img src="img2.jpeg" lightbox="group2">
+<img src="img3.jpeg" lightbox="group1">
+<img src="img4.jpeg" lightbox="group2">
+<img src="img5.jpeg" lightbox="group1">
+<img src="img6.jpeg" lightbox="group2">
 ```
 
 ### Layout And Style
@@ -156,6 +161,8 @@ Each bento component has a small css library you must include to guarantee prope
   href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css"
 />
 ```
+
+---
 
 ## Preact/React Component
 
@@ -185,7 +192,7 @@ function App() {
 }
 ```
 
-#### Example Using BentoBaseCarousel
+### Example Using BentoBaseCarousel
 
 `<BentoLightboxGallery>` can be used with a `<BentoBaseCarousel>` child in order to lightbox all of the carousel's children. As you navigate throught the carousel items in the lightbox, the original carousel slides are synchronised so that when the lightbox is closed, the user ends up on the same slide as they were originally on.
 
@@ -213,34 +220,34 @@ function App() {
 
 For further examples of how to use the BentoLightboxGallery please check the storybook example found in (Basic.js)[./storybook/Basic.js].
 
-### Props for BentoLightboxGalleryProvider
+### Props for `BentoLightboxGalleryProvider`
 
-#### **onBeforeOpen**
+#### onBeforeOpen
 
 A prop which takes a function which is executed before the lightbox is opened.
 
-#### **onAfterOpen**
+#### onAfterOpen
 
 A prop which takes a function which is executed after the lightbox is opened.
 
-#### **onAfterClose**
+#### onAfterClose
 
 A prop which takes a function which is executed after the lightbox is closed.
 
-##### **onViewGrid**
+##### onViewGrid
 
 A prop which takes a function which is executed when the user enters the grid view.
 
-#### **onToggleCaption**
+#### onToggleCaption
 
 A prop which takes a function which is executed when the captions are toggled.
 
-### Props for WithBentoLightboxGallery
+### Props for `WithBentoLightboxGallery`
 
-#### **enableActivation**
+#### enableActivation
 
 A boolean prop which defaults to true which lets the child image activate the lightbox experience.
 
-#### **onClick**
+#### onClick
 
 A prop which takes a functhion which is executed when the image is clicked.

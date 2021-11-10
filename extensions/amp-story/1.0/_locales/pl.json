@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Otwieranie"
+  },
+  "98": {
+    "string": "Formularz nie został przesłany, spróbuj ponownie"
+  },
+  "99": {
+    "string": "Formularz został przesłany"
   }
 }

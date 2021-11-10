@@ -316,7 +316,9 @@ async function runVisualTests(browser, webpages) {
 
   if (argv.main) {
     const page = await newPage(browser);
-    await page.goto('about:blank');
+    await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
+    );
     // @ts-ignore Type mismatch in library
     await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
@@ -573,7 +575,9 @@ async function createEmptyBuild(browser) {
   const page = await newPage(browser);
 
   try {
-    await page.goto('about:blank');
+    await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
+    );
   } catch {
     // Ignore failures
   }

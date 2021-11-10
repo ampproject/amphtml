@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Wird geöffnet"
+  },
+  "98": {
+    "string": "Formular nicht abgeschickt, versuche es erneut"
+  },
+  "99": {
+    "string": "Formular erfolgreich abgeschickt"
   }
 }

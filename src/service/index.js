@@ -493,17 +493,6 @@ export const Services = {
   },
 
   /**
-   * @param {!Window} win
-   * @return {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService}
-   */
-  storyMediaQueryService: (win) => {
-    return (
-      /** @type {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService} */
-      (getExistingServiceOrNull(win, 'story-media-query'))
-    );
-  },
-
-  /**
    * Get promise with story request service
    * @param {!Window} win
    * @return {?Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>}

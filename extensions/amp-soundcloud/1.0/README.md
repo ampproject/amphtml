@@ -1,18 +1,12 @@
 # Bento Soundcloud
 
-The Bento Soundcloud component allows you to embed a Soundcloud clip.
+Embeds a [Soundcloud](https://soundcloud.com) clip.
 
-## Usage
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-soundcloud>` web component.
-
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/soundcloud
@@ -23,54 +17,72 @@ import {defineElement as defineBentoSoundcloud} from '@bentoproject/soundcloud';
 defineBentoSoundcloud();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
+
+<!--% example %-->
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-soundcloud {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
-  ></script>
-  <style>
-    bento-soundcloud {
-      aspect-ratio: 1;
-    }
-  </style>
-</head>
-<bento-soundcloud
-  id="my-track"
-  data-trackid="243169232"
-  data-visual="true"
-></bento-soundcloud>
-<div class="buttons" style="margin-top: 8px">
-  <button id="change-track">Change track</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-soundcloud {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
+    ></script>
+    <style>
+      bento-soundcloud {
+        aspect-ratio: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-soundcloud
+      id="my-track"
+      data-trackid="243169232"
+      data-visual="true"
+    ></bento-soundcloud>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-track">Change track</button>
+    </div>
 
-<script>
-  (async () => {
-    const soundcloud = document.querySelector('#my-track');
-    await customElements.whenDefined('bento-soundcloud');
+    <script>
+      (async () => {
+        const soundcloud = document.querySelector('#my-track');
+        await customElements.whenDefined('bento-soundcloud');
 
-    // set up button actions
-    document.querySelector('#change-track').onclick = () => {
-      soundcloud.setAttribute('data-trackid', '243169232');
-      soundcloud.setAttribute('data-color', 'ff5500');
-      soundcloud.removeAttribute('data-visual');
-    };
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#change-track').onclick = () => {
+          soundcloud.setAttribute('data-trackid', '243169232');
+          soundcloud.setAttribute('data-color', 'ff5500');
+          soundcloud.removeAttribute('data-visual');
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -94,7 +106,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-**Container type**
+#### Container type
 
 The `bento-soundcloud` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
 
@@ -105,7 +117,7 @@ bento-soundcloud {
 }
 ```
 
-#### Attributes
+### Attributes
 
 <table>
   <tr>
@@ -132,13 +144,11 @@ The value for this attribute is the ID of a playlist, an integer.</td>
   </tr>
 </table>
 
-### Preact/React Component
+---
 
-The examples below demonstrate use of the `<BentoSoundcloud>` as a functional component usable with the Preact or React libraries.
+## Preact/React Component
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/soundcloud
@@ -154,9 +164,9 @@ function App() {
 }
 ```
 
-#### Layout and style
+### Layout and style
 
-**Container type**
+#### Container type
 
 The `BentoSoundcloud` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 

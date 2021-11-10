@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert/dev';
 import {
   createElementWithAttributes,
   toggleAttribute,
@@ -10,8 +11,6 @@ import {dict} from '#core/types/object';
 import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
-
-import {devAssert} from '#utils/log';
 
 import {BentoSelector, BentoSelectorOption} from './component';
 

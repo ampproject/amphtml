@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Abriendo..."
+  },
+  "98": {
+    "string": "No se envió el formulario, intenta de nuevo"
+  },
+  "99": {
+    "string": "El formulario se envió correctamente"
   }
 }

@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Apertura in corso"
+  },
+  "98": {
+    "string": "Invio del modulo non riuscito, riprova"
+  },
+  "99": {
+    "string": "Invio del modulo riuscito"
   }
 }

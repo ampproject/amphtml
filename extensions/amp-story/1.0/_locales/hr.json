@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Otvaram"
+  },
+  "98": {
+    "string": "Obrazac nije poslan, pokušajte ponovno"
+  },
+  "99": {
+    "string": "Obrazac je uspješno poslan"
   }
 }

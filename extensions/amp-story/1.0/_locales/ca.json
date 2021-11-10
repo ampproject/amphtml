@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "S'està obrint"
+  },
+  "98": {
+    "string": "El formulari no s'ha enviat, torna-ho a provar"
+  },
+  "99": {
+    "string": "El formulari s'ha enviat correctament"
   }
 }

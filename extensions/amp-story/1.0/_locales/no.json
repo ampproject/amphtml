@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Åpner"
+  },
+  "98": {
+    "string": "Skjema ikke sendt inn. Prøv igjen"
+  },
+  "99": {
+    "string": "Skjema sendt inn"
   }
 }

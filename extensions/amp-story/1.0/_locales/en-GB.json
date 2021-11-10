@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Opening"
+  },
+  "98": {
+    "string": "Form not submitted. Please try again"
+  },
+  "99": {
+    "string": "Form successfully submitted"
   }
 }

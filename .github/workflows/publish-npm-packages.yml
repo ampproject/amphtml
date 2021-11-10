@@ -45,9 +45,8 @@ jobs:
           ref: ${{ github.events.inputs.ampversion }}
       - uses: actions/setup-node@v2
         with:
-          check-latest: true
           registry-url: https://registry.npmjs.org
-          node-version: lts/*
+          node-version: 16
       - name: Install dependencies
         run: bash ./.github/workflows/install_dependencies.sh
       - name: Get latest scripts

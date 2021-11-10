@@ -368,6 +368,27 @@ export class AmpSlideScroll extends AMP.BaseElement {
     }
   }
 
+  /** Used by amp-lightbox-gallery */
+  interactionNext() {
+    this.controls_.interactionNext();
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionPrev() {
+    this.controls_.interactionPrev();
+  }
+
+  /**
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   * @param {boolean=} opt_autoplay
+   */
+  goCallback(dir, animate, opt_autoplay) {
+    this.go(dir, animate, opt_autoplay);
+  }
+
   /**
    * Does all the work needed to proceed to next
    * desired direction.

@@ -184,5 +184,11 @@
   },
   "97": {
     "string": "Avataan"
+  },
+  "98": {
+    "string": "Lomaketta ei lähetetty, yritä uudelleen"
+  },
+  "99": {
+    "string": "Lomake lähetettiin"
   }
 }
