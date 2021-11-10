@@ -1,18 +1,13 @@
 # Bento Carousel
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
-
 Each of the component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary children.
-
 The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
-
 The carousel advances between items if the user swipes or uses the customizable arrow buttons.
 
 ## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
-
-The examples below demonstrate use of the `<bento-base-carousel>` web component.
 
 ### Example: Import via npm
 
@@ -27,63 +22,82 @@ defineBentoBaseCarousel();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-base-carousel {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
-  ></script>
-  <style>
-    bento-base-carousel,
-    bento-base-carousel > div {
-      aspect-ratio: 4/1;
-    }
-    .red {
-      background: darkred;
-    }
-    .blue {
-      background: steelblue;
-    }
-    .green {
-      background: seagreen;
-    }
-  </style>
-</head>
-<bento-base-carousel id="my-carousel">
-  <div class="red"></div>
-  <div class="blue"></div>
-  <div class="green"></div>
-</bento-base-carousel>
-<div class="buttons" style="margin-top: 8px">
-  <button id="prev-button">Go to previous slide</button>
-  <button id="next-button">Go to next slide</button>
-  <button id="go-to-button">Go to slide with green gradient</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-base-carousel {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
+    <style>
+      bento-base-carousel,
+      bento-base-carousel > div {
+        aspect-ratio: 4/1;
+      }
+      .red {
+        background: darkred;
+      }
+      .blue {
+        background: steelblue;
+      }
+      .green {
+        background: seagreen;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-base-carousel id="my-carousel">
+      <div class="red"></div>
+      <div class="blue"></div>
+      <div class="green"></div>
+    </bento-base-carousel>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="prev-button">Go to previous slide</button>
+      <button id="next-button">Go to next slide</button>
+      <button id="go-to-button">Go to slide with green gradient</button>
+    </div>
 
-<script>
-  (async () => {
-    const carousel = document.querySelector('#my-carousel');
-    await customElements.whenDefined('bento-base-carousel');
-    const api = await carousel.getApi();
+    <script>
+      (async () => {
+        const carousel = document.querySelector('#my-carousel');
+        await customElements.whenDefined('bento-base-carousel');
+        const api = await carousel.getApi();
 
-    // programatically advance to next slide
-    api.next();
+        // programatically advance to next slide
+        api.next();
 
-    // set up button actions
-    document.querySelector('#prev-button').onclick = () => api.prev();
-    document.querySelector('#next-button').onclick = () => api.next();
-    document.querySelector('#go-to-button').onclick = () => api.goToSlide(2);
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#prev-button').onclick = () => api.prev();
+        document.querySelector('#next-button').onclick = () => api.next();
+        document.querySelector('#go-to-button').onclick = () =>
+          api.goToSlide(2);
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage
@@ -374,8 +388,6 @@ example, you can recreate the default styling with the following HTML and CSS:
 ---
 
 ## Preact/React Component
-
-The examples below demonstrate use of the `<BentoBaseCarousel>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 

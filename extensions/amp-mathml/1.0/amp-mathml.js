@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
 
 import {userAssert} from '#utils/log';
@@ -25,15 +23,6 @@ class AmpMathml extends BaseElement {
       getBootstrapUrl(TYPE),
     ];
     return urls;
-  }
-
-  /** @override */
-  init() {
-    return dict({
-      'requestResize': ({height, width}) => {
-        return this.attemptChangeSize(height, width);
-      },
-    });
   }
 
   /** @override */

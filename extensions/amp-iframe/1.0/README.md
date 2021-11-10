@@ -10,8 +10,6 @@ Renders an iframe that reports its position in the host document to the child wi
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-iframe>` web component.
-
 ### Example: Import via npm
 
 ```sh
@@ -25,39 +23,57 @@ defineBentoIframe();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
-  />
-</head>
-<bento-iframe
-  id="my-iframe"
-  src="https://en.wikipedia.org/wiki/Bento"
-  style="width: 800px; height: 600px"
->
-</bento-iframe>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-iframe-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-iframe
+      id="my-iframe"
+      src="https://en.wikipedia.org/wiki/Bento"
+      style="width: 800px; height: 600px"
+    >
+    </bento-iframe>
 
-<button id="change-source">Change source</button>
+    <button id="change-source">Change source</button>
 
-<script>
-  (async () => {
-    const iframeEl = document.querySelector('#my-iframe');
-    await customElements.whenDefined('bento-iframe');
+    <script>
+      (async () => {
+        const iframeEl = document.querySelector('#my-iframe');
+        await customElements.whenDefined('bento-iframe');
 
-    // Reload iframe with new src
-    document.querySelector('#change-source').onclick = () => {
-      iframeEl.setAttribute('src', 'https://example.com');
-    };
-  })();
-</script>
+        // Reload iframe with new src
+        document.querySelector('#change-source').onclick = () => {
+          iframeEl.setAttribute('src', 'https://example.com');
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style
@@ -135,8 +151,6 @@ You may use the `bento-iframe` element selector to style the component.
 ---
 
 ## Preact/React Component
-
-The examples below demonstrates use of the `<BentoIframe>` as a functional component usable with the Preact or React libraries.
 
 ### Example: Import via npm
 
