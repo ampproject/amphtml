@@ -68,7 +68,7 @@ export function wrapTextBody(body: string, title: string): string {
             line-height: 1.4;
             margin: 0;
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 14px;
           }
           pre {
             color: #444;
