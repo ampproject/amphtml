@@ -72,11 +72,13 @@ async function getHtmlTextContent(html) {
  * @return {Promise<?string>}
  */
 async function getFirstParagraphOrSentence(markdown, maxLengthChars) {
-  const token = marked.lexer(markdown).find(({type}) => type === 'paragraph');
+  const token = marked.Lexer.lex(markdown).find(
+    ({type}) => type === 'paragraph'
+  );
   if (!token) {
     return null;
   }
-  const html = marked.parser([token]);
+  const html = marked.Parser.parse([token]);
   const paragraph = await getHtmlTextContent(html);
   if (paragraph.length <= maxLengthChars) {
     return paragraph;
