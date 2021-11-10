@@ -27,6 +27,8 @@ const babelTransforms = new Map([
   ['@babel/eslint-parser', 'getEslintConfig'],
   ['is-enum-value', 'getEmptyConfig'],
   ['import-resolver', 'getEmptyConfig'],
+  ['react-minified', 'getReactMinifiedConfig'],
+  ['react-unminified', 'getReactUnminifiedConfig'],
 ]);
 
 /**
