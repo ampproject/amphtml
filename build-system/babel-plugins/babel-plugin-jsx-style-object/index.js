@@ -8,9 +8,11 @@
  * This transform takes that responsibility instead.
  */
 
+const {addNamed} = require('@babel/helper-module-imports');
+
 const baseModule = 'core/dom/jsx';
-const helperModule = 'core/dom/jsx-style-property-string';
-const helperFn = 'jsxStylePropertyString';
+const helperModule = '#core/dom/jsx-style-property-string';
+const helperFnName = 'jsxStylePropertyString';
 
 // All values from here, converted to dash-case:
 // https://github.com/facebook/react/blob/a7c5726/packages/react-dom/src/shared/CSSProperty.js
@@ -69,8 +71,6 @@ module.exports = function (babel) {
     camelCase.replace(/[A-Z]/g, '-$&').toLowerCase();
 
   let hasBaseModule = false;
-  let hasHelperModule = false;
-  let programPath = null;
 
   /**
    * @param {babel.NodePath<babel.types.ObjectProperty>} path
@@ -96,46 +96,28 @@ module.exports = function (babel) {
     }
 
     // Otherwise call the helper function to evaluate nullish and dimensional values.
-    if (!hasHelperModule && programPath) {
-      hasHelperModule = true;
-      programPath.unshiftContainer(
-        'body',
-        t.importDeclaration(
-          [t.importSpecifier(t.identifier(helperFn), t.identifier(helperFn))],
-          t.stringLiteral(helperModule)
-        )
-      );
-    }
+    const helperFn = addNamed(path, helperFnName, helperModule);
     const args = [t.stringLiteral(cssName), value.node];
     if (isDimensional) {
       args.push(t.booleanLiteral(true));
     }
-    return t.callExpression(t.identifier(helperFn), args);
+    return t.callExpression(helperFn, args);
   }
 
   /**
    * @param {(babel.Node|null)[]} props
    * @return {?babel.Node}
    */
-  function mergeTransformedIntoExpr(props) {
+  function mergeBinaryConcat(props) {
     let expr = null;
-    let prev = null;
     while (props.length) {
       const part = props.shift();
-      if (!part) {
-        continue;
-      }
-      // Collapse adjacent strings.
-      if (t.isStringLiteral(prev) && t.isStringLiteral(part)) {
-        // @ts-ignore
-        prev.value += part.value;
-      } else {
+      if (part) {
         if (!expr) {
           expr = part;
         } else {
           expr = t.binaryExpression('+', expr, part);
         }
-        prev = part;
       }
     }
     return expr;
@@ -146,20 +128,12 @@ module.exports = function (babel) {
     visitor: {
       Program: {
         enter(path) {
-          programPath = path;
           hasBaseModule = false;
-          hasHelperModule = false;
           path.traverse({
             ImportDeclaration(path) {
-              if (path.node.source.value.endsWith(helperModule)) {
-                hasHelperModule = true;
-              } else if (path.node.source.value.endsWith(baseModule)) {
+              if (path.node.source.value.endsWith(baseModule)) {
                 hasBaseModule = true;
-              }
-              if (hasHelperModule && hasBaseModule) {
                 path.stop();
-              } else {
-                path.skip();
               }
             },
           });
@@ -176,8 +150,7 @@ module.exports = function (babel) {
         if (!objectExpression.isObjectExpression()) {
           return;
         }
-        const props = objectExpression.node.properties.map((_, i) => {
-          const prop = objectExpression.get(`properties.${i}`);
+        const props = objectExpression.get('properties').map((prop) => {
           if (prop.isSpreadElement()) {
             throw prop.buildCodeFrameError(
               'You should not use spread properties in style object expressions.'
@@ -192,10 +165,8 @@ module.exports = function (babel) {
           }
           return transformProp(prop);
         });
-        const merged = mergeTransformedIntoExpr(props);
-        if (merged) {
-          objectExpression.replaceWith(merged);
-        }
+        const merged = mergeBinaryConcat(props);
+        objectExpression.replaceWith(merged || t.stringLiteral(''));
       },
     },
   };

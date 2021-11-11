@@ -46,7 +46,7 @@ function modifyDynamicValue() {
 
 let backgroundColor = 'blue';
 
-const constantsAreCollapsed = () => (
+const constants = () => (
   <div
     style={{
       backgroundColor,
@@ -57,36 +57,11 @@ const constantsAreCollapsed = () => (
   />
 );
 
-const dimensional = () => <div style={{width: 100, height}} />;
-
-const flex = 1;
-const nonDimensional = () => (
-  <div>
-    <div style={{animationIterationCount}} />
-    <div style={{boxFlex}} />
-    <div style={{boxFlexGroup}} />
-    <div style={{boxOrdinalGroup}} />
-    <div style={{columnCount}} />
-    <div style={{fillOpacity: 0}} />
-    <div style={{flex}} />
-    <div style={{flexGrow}} />
-    <div style={{flexPositive}} />
-    <div style={{flexShrink}} />
-    <div style={{flexNegative}} />
-    <div style={{flexOrder}} />
-    <div style={{fontWeight}} />
-    <div style={{lineClamp}} />
-    <div style={{lineHeight}} />
-    <div style={{opacity: 0.5}} />
-    <div style={{order}} />
-    <div style={{orphans}} />
-    <div style={{stopOpacity}} />
-    <div style={{strokeDashoffset}} />
-    <div style={{strokeOpacity}} />
-    <div style={{strokeWidth}} />
-    <div style={{tabSize}} />
-    <div style={{widows}} />
-    <div style={{zIndex}} />
-    <div style={{zoom}} />
-  </div>
+const empty = () => (
+  <div
+    style={{
+      background: '',
+      color: null,
+    }}
+  />
 );
