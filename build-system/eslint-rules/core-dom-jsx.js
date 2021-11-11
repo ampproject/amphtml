@@ -1,6 +1,7 @@
 /**
  * @fileoverview Lints JSX features not supported by core/dom/jsx
  */
+const astUtils = require('eslint/lib/rules/utils/ast-utils');
 
 module.exports = function (context) {
   let isCoreDomJsx = false;
@@ -61,12 +62,66 @@ module.exports = function (context) {
       if (!isCoreDomJsx) {
         return;
       }
-      if (node.name.name === 'foreignObject') {
+      const {name} = node;
+      if (name.name === 'foreignObject') {
         context.report({
           node: node.name,
           message: `<${node.name.name}> is not supported.`,
         });
       }
+
+      if (name.type === 'JSXMemberExpression') {
+        return context.report({
+          node,
+          message: [
+            'Static JSX Templates are required to use regular DOM nodes or Imported Components',
+            'This prevents an issue with `<json.type />` accidentally creating a <script> node.',
+          ].join('\n\t'),
+        });
+      }
+
+      if (name.name && /^[a-z]/.test(name.name)) {
+        return;
+      }
+
+      const variable = astUtils.getVariableByName(
+        context.getScope(),
+        name.name
+      );
+
+      if (!variable || variable.defs.length === 0) {
+        return context.report({
+          node,
+          message: `Could not find ${name.name} in the lexcial scope`,
+        });
+      }
+
+      for (const def of variable.defs) {
+        if (def.type === 'ImportBinding' || def.type === 'FunctionName') {
+          continue;
+        }
+
+        context.report({
+          node,
+          message: [
+            'Static JSX Templates are required to use regular DOM nodes or Imported Components',
+            'This prevents an issue with `<UserProvidedType />` accidentally creating a <script> node.',
+          ].join('\n\t'),
+        });
+      }
+    },
+    JSXSpreadAttribute(node) {
+      if (!isCoreDomJsx) {
+        return;
+      }
+
+      context.report({
+        node,
+        message: [
+          'Static JSX Templates are required to use static attribute definitions',
+          'This prevents an issue with spread attributes accidentally overriding a "safe" attribute with user-provided data.',
+        ].join('\n\t'),
+      });
     },
     JSXAttribute(node) {
       if (!isCoreDomJsx) {
