@@ -26,6 +26,7 @@ module.exports = function (context) {
           isValidStyleOrClassValue(node.right, isClass)
         );
       }
+    } else if (node?.type === 'LogicalExpression') {
       // Any left falsy is okay
       if (node.operator === '&&') {
         return isValidStyleOrClassValue(node.right, isClass);
