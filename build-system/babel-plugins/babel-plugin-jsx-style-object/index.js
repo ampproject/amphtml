@@ -123,6 +123,43 @@ module.exports = function (babel) {
     return expr;
   }
 
+  /** @param {babel.NodePath} path */
+  function replaceExpression(path) {
+    if (path.isLogicalExpression()) {
+      if (path.node.operator === '&&' || path.node.operator === '||') {
+        replaceExpression(path.get('right'));
+      }
+      return;
+    }
+    if (path.isConditionalExpression()) {
+      replaceExpression(path.get('consequent'));
+      replaceExpression(path.get('alternate'));
+      return;
+    }
+    if (!path.isObjectExpression()) {
+      return;
+    }
+    path = /** @type {babel.NodePath<babel.types.ObjectExpression>} */ (path);
+    // @ts-ignore - expects NodePath|NodePath[] but it's always NodePath[]
+    const props = path.get('properties').map((prop) => {
+      if (prop.isSpreadElement()) {
+        throw prop.buildCodeFrameError(
+          'You should not use spread properties in style object expressions.'
+        );
+      }
+      if (prop.node.computed) {
+        throw prop
+          .get('key')
+          .buildCodeFrameError(
+            'You should not use computed props in style object expressions. Instead, use multiple properties directly. They can be "null" when unwanted.'
+          );
+      }
+      return transformProp(prop);
+    });
+    const merged = mergeBinaryConcat(props);
+    path.replaceWith(merged || t.stringLiteral(''));
+  }
+
   return {
     name: 'jsx-style-object',
     visitor: {
@@ -146,27 +183,8 @@ module.exports = function (babel) {
         if (!t.isJSXIdentifier(path.node.name, {name: 'style'})) {
           return;
         }
-        const objectExpression = path.get('value.expression');
-        if (!objectExpression.isObjectExpression()) {
-          return;
-        }
-        const props = objectExpression.get('properties').map((prop) => {
-          if (prop.isSpreadElement()) {
-            throw prop.buildCodeFrameError(
-              'You should not use spread properties in style object expressions.'
-            );
-          }
-          if (prop.node.computed) {
-            throw prop
-              .get('key')
-              .buildCodeFrameError(
-                'You should not use computed props in style object expressions. Instead, use multiple properties directly. They can be "null" when unwanted.'
-              );
-          }
-          return transformProp(prop);
-        });
-        const merged = mergeBinaryConcat(props);
-        objectExpression.replaceWith(merged || t.stringLiteral(''));
+        const expression = path.get('value.expression');
+        replaceExpression(expression);
       },
     },
   };
