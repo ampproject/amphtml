@@ -106,7 +106,9 @@ api.prev();
 
 ##### goToSlide(index: number)
 
-Moves the carousel to the slide specified by the `index` argument. Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
+Moves the carousel to the slide specified by the `index` argument.
+
+Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
 ```js
 api.goToSlide(0); // Advance to first slide.

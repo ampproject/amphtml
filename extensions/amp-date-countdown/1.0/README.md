@@ -83,7 +83,9 @@ Include this prop to reverse the direction of the countdown to count up instead.
 
 #### `render`
 
-Optional callback that should render a template. The callback will be provided an object with properties/values related to the date expressed in `datetime`. By default, the Bento Date Countdown component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption. See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
+Optional callback that should render a template. The callback will be provided an object with properties/values related to the date expressed in `datetime`.
+
+By default, the Bento Date Countdown component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption. See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
 
 ```typescript
 function render(dateParams: DateParams): JSXInternal.Element;

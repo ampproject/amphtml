@@ -611,21 +611,29 @@ Or via `className`:
 
 ##### animate
 
-If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse of each section Default: `false`
+If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse of each section.
+
+Default: `false`
 
 ##### expandSingleSection
 
-If true, then expanding 1 section will automatically collapse all other sections: Default: `false`
+If true, then expanding 1 section will automatically collapse all other sections.
+
+Default: `false`
 
 #### BentoAccordionSection
 
 ##### animate
 
-If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse the section Default: `false`
+If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse the section.
+
+Default: `false`
 
 ##### expanded
 
-If true, expands the section. Default: `false`
+If true, expands the section.
+
+Default: `false`
 
 ##### onExpandStateChange
 
