@@ -1,18 +1,17 @@
-# Cuts a new nightly branch on a schedule.
+# Promotes the current Beta/Experimental opt-in channel to Beta/Experimental traffic on a schedule.
 
-name: Cut Nightly Branch
+name: Promote Beta/Experimental traffic Channels
 
 on:
   schedule:
-    # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
-    # Half an hour before promote-nightly.yml.
-    - cron: '0 8 * * 2-6'
+    # 1:30 a.m. PST / 12:30 a.m. PDT, Wednesdays.
+    - cron: '30 1 * * 3'
 
 jobs:
-  cut-nightly:
+  promote-beta-experimental-traffic:
     environment: release_tagger
     if: github.repository == 'ampproject/amphtml'
-    name: Cut Nightly Branch
+    name: Promote Beta/Experimental traffic Channel
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +31,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: ⭐ Cut Nightly Branch ⭐
-        run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+      - name: ⭐ Promote Beta/Experimental traffic Channel ⭐
+        run: node --unhandled-rejections=strict build-system/release-workflows/promote-beta-experimental-traffic.js
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

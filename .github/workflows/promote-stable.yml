@@ -1,18 +1,17 @@
-# Cuts a new nightly branch on a schedule.
+# Promotes the current Beta/Experimental opt-in channel to Stable on a schedule.
 
-name: Cut Nightly Branch
+name: Promote Stable Channels
 
 on:
   schedule:
-    # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
-    # Half an hour before promote-nightly.yml.
-    - cron: '0 8 * * 2-6'
+    # 1:30 a.m. PST / 12:30 a.m. PDT, Tuesdays.
+    - cron: '30 1 * * 2'
 
 jobs:
-  cut-nightly:
+  promote-stable:
     environment: release_tagger
     if: github.repository == 'ampproject/amphtml'
-    name: Cut Nightly Branch
+    name: Promote Stable Channel
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +31,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: ⭐ Cut Nightly Branch ⭐
-        run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+      - name: ⭐ Promote Stable Channel ⭐
+        run: node --unhandled-rejections=strict build-system/release-workflows/promote-stable.js
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

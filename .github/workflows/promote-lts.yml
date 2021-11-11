@@ -1,18 +1,19 @@
-# Cuts a new nightly branch on a schedule.
+# Promotes the current Stable traffic channel to LTS on a schedule.
 
-name: Cut Nightly Branch
+name: Promote LTS Channel
 
 on:
   schedule:
-    # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
-    # Half an hour before promote-nightly.yml.
-    - cron: '0 8 * * 2-6'
+    # 1:30 a.m. PST / 12:30 a.m. PDT, Mondays.
+    # Note that the job itself ensures it is running on the 2nd Monday of the
+    # month, since crontab does not support this condition.
+    - cron: '30 1 * * 1'
 
 jobs:
-  cut-nightly:
+  promote-lts:
     environment: release_tagger
     if: github.repository == 'ampproject/amphtml'
-    name: Cut Nightly Branch
+    name: Promote LTS Channel
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +33,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: ⭐ Cut Nightly Branch ⭐
-        run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+      - name: ⭐ Promote LTS Channel ⭐
+        run: node --unhandled-rejections=strict build-system/release-workflows/promote-lts.js
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
