@@ -76,28 +76,19 @@ export class DevelopmentModeLogButtonSet {
   build(logButtonActionFn) {
     this.errorButton_ = createButton(
       this.win_,
-      objstr({
-        'i-amphtml-story-error-button': true,
-        'i-amphtml-story-dev-logs-button': true,
-      }),
+      'i-amphtml-story-error-button i-amphtml-story-dev-logs-button',
       () => logButtonActionFn()
     );
 
     this.warningButton_ = createButton(
       this.win_,
-      objstr({
-        'i-amphtml-story-warning-button': true,
-        'i-amphtml-story-dev-logs-button': true,
-      }),
+      'i-amphtml-story-warning-button i-amphtml-story-dev-logs-button',
       () => logButtonActionFn()
     );
 
     this.successButton_ = createButton(
       this.win_,
-      objstr({
-        'i-amphtml-story-success-button': true,
-        'i-amphtml-story-dev-logs-button': true,
-      }),
+      'i-amphtml-story-success-button i-amphtml-story-dev-logs-button',
       () => logButtonActionFn()
     );
 
