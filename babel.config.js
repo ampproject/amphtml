@@ -20,7 +20,7 @@ const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
   ['post-closure', 'getPostClosureConfig'],
   ['pre-closure', 'getPreClosureConfig'],
-  ['bento-element-closure', 'getBentoElementPreClosureConfig'],
+  ['bento-element-pre-closure', 'getBentoElementPreClosureConfig'],
   ['bento-element-minified', 'getBentoElementMinifiedConfig'],
   ['bento-element-unminified', 'getBentoElementUnminifiedConfig'],
   ['test', 'getTestConfig'],
