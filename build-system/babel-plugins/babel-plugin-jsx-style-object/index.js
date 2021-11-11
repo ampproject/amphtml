@@ -73,7 +73,7 @@ module.exports = function (babel) {
   let programPath = null;
 
   /**
-   * @param {babel.NodePath<import('@babel/types').ObjectProperty>} path
+   * @param {babel.NodePath<babel.types.ObjectProperty>} path
    * @return {?babel.Node}
    */
   function transformProp(path) {
