@@ -2,10 +2,7 @@
  * @fileoverview
  * Transforms Preact-style props ("class") into React-style ("className")
  */
-const {
-  DOM_ATTRIBUTES_FLIPPED,
-  SVG_ATTRIBUTES_FLIPPED,
-} = require('../../common/dom-svg-attributes');
+const {ATTRIBUTES_PREACT_TO_PREACT} = require('../../common/preact-prop-names');
 
 const propNameFn = 'propName';
 
@@ -17,10 +14,8 @@ module.exports = function (babel) {
    * @return {?string}
    */
   function getReactStyle(name) {
-    if (DOM_ATTRIBUTES_FLIPPED[name]) {
-      return DOM_ATTRIBUTES_FLIPPED[name];
-    } else if (SVG_ATTRIBUTES_FLIPPED[name]) {
-      return SVG_ATTRIBUTES_FLIPPED[name];
+    if (ATTRIBUTES_PREACT_TO_PREACT[name]) {
+      return ATTRIBUTES_PREACT_TO_PREACT[name];
     }
     return name;
   }

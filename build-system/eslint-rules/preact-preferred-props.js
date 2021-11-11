@@ -20,9 +20,9 @@
 // <path strokeLinecap />
 
 const {
-  DOM_ATTRIBUTES,
-  SVG_ATTRIBUTES,
-} = require('../common/dom-svg-attributes');
+  DOM_ATTRIBUTES_REACT_TO_PREACT: DOM_ATTRIBUTES,
+  SVG_ATTRIBUTES_REACT_TO_PREACT: SVG_ATTRIBUTES,
+} = require('../common/preact-prop-names');
 
 const propNameFn = 'propName';
 const propNameFnModule = '#preact/utils';
