@@ -148,21 +148,23 @@ module.exports = {
           context.report({
             node: prop,
             message,
-            fix: function* (fixer) {
+            fix(fixer) {
+              const fixes = [];
               if (!addedImportDecl) {
                 addedImportDecl = true;
-                if (lastImportDecl) {
-                  yield fixer.insertTextAfter(lastImportDecl, importDecl);
-                } else {
-                  yield fixer.insertTextBefore(program.body[0], importDecl);
-                }
+                fixes.push(
+                  lastImportDecl
+                    ? fixer.insertTextAfter(lastImportDecl, importDecl)
+                    : fixer.insertTextBefore(program.body[0], importDecl)
+                );
               }
               const computed = `[${propNameFn}('${preferred}')]`;
-              if (!prop.key.value) {
-                yield fixer.insertTextBefore(prop, `${computed}: `);
-              } else {
-                yield fixer.replaceText(prop.key, computed);
-              }
+              fixes.push(
+                !prop.key.value
+                  ? fixer.insertTextBefore(prop, `${computed}: `)
+                  : fixer.replaceText(prop.key, computed)
+              );
+              return fixes;
             },
           });
         }
