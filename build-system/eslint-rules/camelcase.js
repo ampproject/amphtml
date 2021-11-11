@@ -47,9 +47,12 @@ module.exports = function (context) {
       }
 
       // Permit object destructuring, since that is similar to membership access.
+      // Requires that the key is immediately renamed to a conforming value.
       if (
         parent.type === 'Property' &&
-        parent.parent.type === 'ObjectPattern'
+        parent.parent.type === 'ObjectPattern' &&
+        parent.key?.name !== parent?.value?.name &&
+        !parent?.value?.name.includes('_')
       ) {
         return;
       }
