@@ -2,7 +2,7 @@
  * @fileoverview
  * Transforms Preact-style props ("class") into React-style ("className")
  */
-const {ATTRIBUTES_PREACT_TO_PREACT} = require('../../common/preact-prop-names');
+const {ATTRIBUTES_PREACT_TO_REACT} = require('../../common/preact-prop-names');
 
 const propNameFn = 'propName';
 
@@ -14,10 +14,7 @@ module.exports = function (babel) {
    * @return {?string}
    */
   function getReactStyle(name) {
-    if (ATTRIBUTES_PREACT_TO_PREACT[name]) {
-      return ATTRIBUTES_PREACT_TO_PREACT[name];
-    }
-    return name;
+    return ATTRIBUTES_PREACT_TO_REACT[name] ?? name;
   }
 
   return {
