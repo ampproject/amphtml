@@ -2,7 +2,7 @@
 
 const defaultNamespace = {
   // We expect the compiler to output to this namespace by default.
-  // As such, we insert a /** @jsx */ annotation only when using different names.
+  // As such, we insert a @jsx annotation only when using different names.
   name: 'Preact',
   from: '#core/dom/preact',
 };
@@ -37,7 +37,7 @@ module.exports = {
       }
       warned = true;
 
-      const [{name, from} = defaultNamespace] = context.options;
+      const [{from, name} = defaultNamespace] = context.options;
 
       const comment =
         name !== defaultNamespace.name
