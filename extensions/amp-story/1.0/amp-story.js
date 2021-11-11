@@ -1367,6 +1367,12 @@ export class AmpStory extends AMP.BaseElement {
         if (oldPage) {
           oldPage.setState(PageState.NOT_ACTIVE);
 
+          // Indication to know where to display the page on the desktop
+          // ribbon-like animation.
+          this.getPageIndex(oldPage) < pageIndex
+            ? setAttributeInMutate(oldPage, Attributes.VISITED)
+            : removeAttributeInMutate(oldPage, Attributes.VISITED);
+
           if (oldPage.isAd()) {
             this.storeService_.dispatch(
               Action.SET_ADVANCEMENT_MODE,
