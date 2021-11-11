@@ -11,6 +11,13 @@ module.exports = function (context) {
    * @return {boolean}
    */
   function isValidStyleOrClassValue(node, isClass = false) {
+    if (node?.type === 'ConditionalExpression') {
+      // Both possible outcomes of a ternary must be valid
+      return (
+        isValidStyleOrClassValue(node.consequent, isClass) &&
+        isValidStyleOrClassValue(node.alternate, isClass)
+      );
+    }
     if (node?.type === 'BinaryExpression') {
       // Concatenating anything to a string is valid
       if (node.operator === '+') {
@@ -82,7 +89,7 @@ module.exports = function (context) {
           context.report({
             node: node.value,
             message: [
-              `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in either of objstr() or String().`,
+              `The inline result of \`${name}\` must resolve to a "string", a \`template \${literal}\`, or a call to either objstr() or String().`,
               `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
             ].join('\n - '),
           });
@@ -92,7 +99,7 @@ module.exports = function (context) {
           context.report({
             node: node.value,
             message: [
-              `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in String()`,
+              `The inline result of \`${name}\` must resolve to a "string", a \`template \${literal}\`, or a call to String().`,
               `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
             ].join('\n - '),
           });
