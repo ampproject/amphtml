@@ -51,8 +51,8 @@ module.exports = function (context) {
       if (
         parent.type === 'Property' &&
         parent.parent.type === 'ObjectPattern' &&
-        parent.key?.name !== parent?.value?.name &&
-        !parent?.value?.name.includes('_')
+        parent.key?.name !== parent.value?.name &&
+        !parent.value?.name.includes('_')
       ) {
         return;
       }
