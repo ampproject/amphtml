@@ -55,24 +55,20 @@ export class AmpStoryRequestService {
 
   /**
    * Retrieves the publisher share providers.
-   * Has to be called through `loadShareConfig`.
    * @param  {!Element} shareConfigEl
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
   getInlineConfig(shareConfigEl) {
-    // Fallback. Check for an inline json config.
-    let config = null;
     try {
-      config = getChildJsonConfig(shareConfigEl);
-    } catch (err) {}
-
-    return Promise.resolve(config);
+      return Promise.resolve(getChildJsonConfig(shareConfigEl));
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   /**
    * Retrieves the publisher share providers.
-   * Has to be called through `loadShareConfig`.
-   * @param  {!Element} element
+   * @param  {?Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    * @public
    */
@@ -95,9 +91,7 @@ export class AmpStoryRequestService {
       return this.executeRequest(
         rawUrl,
         credentials ? {credentials} : {}
-      ).catch(() => {
-        return this.getInlineConfig(shareConfigEl);
-      });
+      ).catch(() => this.getInlineConfig(shareConfigEl));
     }
 
     return this.getInlineConfig(shareConfigEl);

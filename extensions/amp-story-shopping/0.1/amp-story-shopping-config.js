@@ -13,7 +13,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    /** @private @const {?./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
   }
 
@@ -22,7 +22,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
    * @param {!JsonObject} storyConfig
    * @private
    */
-  addShoppingStateFromConfig_(storyConfig) {
+  addShoppingDataFromConfig_(storyConfig) {
     const productIDtoProduct = {};
 
     for (const item of storyConfig['items']) {
@@ -42,13 +42,14 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
         this.storeService_ = storeService;
       }),
-      Services.storyRequestServiceForOrNull(this.win).then((service) => {
-        this.requestService_ = service;
+      Services.storyRequestServiceForOrNull(this.win).then((requestService) => {
+        devAssert(requestService, 'Could not retrieve AmpStoryRequestService');
+        this.requestService_ = requestService;
       }),
     ])
       .then(() => this.requestService_.loadConfigImpl(this.element))
       .then((storyConfig) => {
-        this.addShoppingStateFromConfig_(storyConfig);
+        this.addShoppingDataFromConfig_(storyConfig);
         return Promise.resolve();
       });
   }

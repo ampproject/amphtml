@@ -60,7 +60,7 @@ describes.realWin(
       await nextTick();
     }
 
-    it('should build shopping tag component', () => {
+    it('should build and layout shopping tag component', () => {
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
     });
 
