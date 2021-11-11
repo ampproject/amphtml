@@ -139,7 +139,8 @@ const Attributes = {
   RETURN_TO: 'i-amphtml-return-to',
   STANDALONE: 'standalone',
   SUPPORTS_LANDSCAPE: 'supports-landscape',
-  VISITED: 'i-amphtml-visited',
+  // Attributes that desktop css looks for to decide where pages will be placed
+  VISITED: 'i-amphtml-visited', // stacked offscreen to left
 };
 
 /**
@@ -350,7 +351,6 @@ export class AmpStory extends AMP.BaseElement {
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
       );
       page.setAttribute('active', '');
-      page.setAttribute('i-amphtml-initial', '');
     }
 
     this.initializeListeners_();
@@ -1420,10 +1420,6 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.setDeveloperLogContextString(
           this.activePage_.element.id
         );
-
-        if (oldPage) {
-          setAttributeInMutate(oldPage, Attributes.VISITED);
-        }
       },
     ];
 
@@ -2333,7 +2329,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   replay_() {
     this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, []);
-    this.switchTo_(
+    const switchPromise = this.switchTo_(
       dev().assertElement(this.pages_[0].element).id,
       NavigationDirection.NEXT
     );
@@ -2342,6 +2338,14 @@ export class AmpStory extends AMP.BaseElement {
       this.pages_[0].setState(PageState.NOT_ACTIVE);
       this.pages_[0].setState(PageState.PLAYING);
     }
+
+    // Reset all pages so that they are offscreen to right instead of left in
+    // desktop view.
+    switchPromise.then(() => {
+      this.pages_.forEach((page) =>
+        removeAttributeInMutate(page, Attributes.VISITED)
+      );
+    });
   }
 
   /**

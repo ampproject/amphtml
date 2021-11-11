@@ -1616,19 +1616,6 @@ describes.realWin(
         expect(story.activePage_.element.id).to.equal('cover');
       });
 
-      it('should mark the first active page as initial', async () => {
-        win.location.hash = 'page=page-1';
-        const pages = await createStoryWithPages(4, [
-          'cover',
-          'page-1',
-          'page-2',
-          'page-3',
-        ]);
-
-        await story.layoutCallback();
-        expect(pages[1]).to.have.attribute('i-amphtml-initial');
-      });
-
       it('should update browser history with the story navigation path', async () => {
         const pageCount = 2;
         await createStoryWithPages(pageCount, ['cover', 'page-1']);
