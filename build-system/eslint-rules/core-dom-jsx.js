@@ -27,6 +27,12 @@ module.exports = function (context) {
         );
       }
     } else if (node?.type === 'LogicalExpression') {
+      if (node.operator === '||' || node.operator === '??') {
+        return (
+          isValidStyleOrClassValue(node.left, isClass) &&
+          isValidStyleOrClassValue(node.right, isClass)
+        );
+      }
       // Any left falsy is okay
       if (node.operator === '&&') {
         return isValidStyleOrClassValue(node.right, isClass);
@@ -136,7 +142,7 @@ module.exports = function (context) {
         return;
       }
       const {value} = node;
-      if (!value || isValidStyleOrClassValue(value)) {
+      if (!value || value.type === 'Literal') {
         return;
       }
       if (name === 'class') {
