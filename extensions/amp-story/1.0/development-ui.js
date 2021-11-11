@@ -206,7 +206,8 @@ export class DevelopmentModeLog {
       </div>
     );
 
-    this.clear(); // ???
+    this.clear();
+
     return this.root_;
   }
 
