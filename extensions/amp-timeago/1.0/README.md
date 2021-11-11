@@ -41,13 +41,11 @@ defineBentoTimeago();
       async
       src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
     ></script>
-    <style>
-      bento-timeago {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css"
+    />
   </head>
   <body>
     <bento-timeago

@@ -17,14 +17,11 @@
       async
       src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"
     ></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-fit-text {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-fit-text-1.0.css"
+    />
   </head>
   <body>
     <bento-fit-text id="my-fit-text">
