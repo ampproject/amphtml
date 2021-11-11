@@ -18,8 +18,7 @@ module.exports = function (context) {
         isValidStyleOrClassValue(node.consequent, isClass) &&
         isValidStyleOrClassValue(node.alternate, isClass)
       );
-    }
-    if (node?.type === 'BinaryExpression') {
+    } else if (node?.type === 'BinaryExpression') {
       // Concatenating anything to a string is valid
       if (node.operator === '+') {
         return (
