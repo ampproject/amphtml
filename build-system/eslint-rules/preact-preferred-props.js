@@ -19,10 +19,7 @@
 // <div tabindex="0" />
 // <path strokeLinecap />
 
-const {
-  DOM_ATTRIBUTES_REACT_TO_PREACT,
-  SVG_ATTRIBUTES_REACT_TO_PREACT,
-} = require('../common/preact-prop-names');
+const {ATTRIBUTES_REACT_TO_PREACT} = require('../common/preact-prop-names');
 
 const propNameFn = 'propName';
 const propNameFnModule = '#preact/utils';
@@ -33,8 +30,7 @@ module.exports = {
   },
   create(context) {
     const attributes = {
-      ...DOM_ATTRIBUTES_REACT_TO_PREACT,
-      ...SVG_ATTRIBUTES_REACT_TO_PREACT,
+      ...ATTRIBUTES_REACT_TO_PREACT,
     };
     const preactNames = new Set(Object.values(attributes));
 
