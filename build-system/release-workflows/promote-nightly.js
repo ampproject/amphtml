@@ -1,9 +1,7 @@
 'use strict';
 
-const fs = require('fs-extra');
-const {createPullRequest} = require('octokit-plugin-create-pull-request');
 const {log} = require('../common/logging');
-const {Octokit: BaseOctokit} = require('@octokit/rest');
+const {Octokit} = require('@octokit/rest');
 const {runReleaseJob} = require('./release-job');
 const {VERSION} = require('../compile/internal-version');
 
@@ -13,27 +11,41 @@ const {VERSION} = require('../compile/internal-version');
 
 const jobName = 'promote-nightly.js';
 
-const Octokit = BaseOctokit.plugin(createPullRequest);
 const octokit = new Octokit({auth: process.env.GITHUB_TOKEN});
 
 const versioningJsonFile = 'build-system/global-configs/versioning.json';
 const params = {owner: 'ampproject', repo: 'amphtml'};
-// TODO(danielrozenberg): change to @ampproject/release-on-duty after testing is done.
-const releaseOnDuty = '@ampproject/wg-infra';
 
 runReleaseJob(jobName, async () => {
-  const versioning = await fs.readJson(versioningJsonFile, 'utf8');
-  versioning.nightly = `04${VERSION}`;
-
-  const pullRequest = await octokit.createPullRequest({
+  const getContentResponse = await octokit.repos.getContent({
     ...params,
-    title: `⏫🌙 Promoting release ${VERSION} to Nightly channel`,
-    body: `Promoting release ${VERSION} to Nightly channel\n\n${releaseOnDuty}`,
-    head: `amp-promote-${VERSION}-nightly`,
-    changes: [
+    path: versioningJsonFile,
+    ref: 'main',
+  });
+  if (!('content' in getContentResponse.data)) {
+    throw new Error(`Failed to fetch ${versioningJsonFile}`);
+  }
+
+  const versioning = Object.assign(
+    JSON.parse(
+      Buffer.from(getContentResponse.data.content, 'base64').toString('utf8')
+    ),
+    {nightly: `04${VERSION}`}
+  );
+
+  const updateFileResponse = await octokit.repos.createOrUpdateFileContents({
+    ...params,
+    content: Buffer.from(JSON.stringify(versioning, undefined, 2)).toString(
+      'base64'
+    ),
+    path: versioningJsonFile,
+    message: `⏫🌙 Promoting release ${VERSION} to Nightly channel`,
+    sha: getContentResponse.data.sha,
+    branch: 'main',
+    a: [
       {
         files: {
-          [versioningJsonFile]: JSON.stringify(versioning, 2),
+          [versioningJsonFile]: JSON.stringify(versioning, undefined, 2),
         },
         commit: `Promoting release ${VERSION} to Nightly channel`,
       },
@@ -41,9 +53,13 @@ runReleaseJob(jobName, async () => {
     createWhenEmpty: false,
   });
 
-  if (pullRequest) {
-    log('Pull request', pullRequest.data.number, 'created');
-  } else {
-    log('Pull request not created');
+  if (updateFileResponse.status !== 200) {
+    throw new Error(`Failed to commit an update to ${versioningJsonFile}`);
   }
+
+  log(
+    versioningJsonFile,
+    'updated in commit',
+    updateFileResponse.data.commit.sha
+  );
 });

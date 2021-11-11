@@ -1,18 +1,18 @@
-# Cuts a new nightly branch on a schedule.
+# Promotes a new build to the Nightly channel on a schedule.
 
-name: Cut Nightly Branch
+name: Promote Nightly Channel
 
 on:
   schedule:
-    # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
-    # Half an hour before promote-nightly.yml.
-    - cron: '0 8 * * 2-6'
+    # 1:30 a.m. PST / 12:30 a.m. PDT, Tuesdays through Saturdays.
+    # Half an hour after cut-nightly.yml.
+    - cron: '30 8 * * 2-6'
 
 jobs:
   cut-nightly:
     environment: release_tagger
     if: github.repository == 'ampproject/amphtml'
-    name: Cut Nightly Branch
+    name: Promote Nightly Channel
     runs-on: ubuntu-latest
 
     steps:
@@ -33,6 +33,6 @@ jobs:
         run: npm ci
 
       - name: ⭐ Cut Nightly Branch ⭐
-        run: node --unhandled-rejections=strict build-system/release-workflows/cut-nightly.js
+        run: node --unhandled-rejections=strict build-system/release-workflows/promote-nightly.js
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
