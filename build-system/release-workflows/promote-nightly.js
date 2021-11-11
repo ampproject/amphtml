@@ -17,6 +17,8 @@ const versioningJsonFile = 'build-system/global-configs/versioning.json';
 const params = {owner: 'ampproject', repo: 'amphtml'};
 
 runReleaseJob(jobName, async () => {
+  // TODO(danielrozenberg): add safety check that this version exists on the CDN.
+
   const getContentResponse = await octokit.repos.getContent({
     ...params,
     path: versioningJsonFile,
