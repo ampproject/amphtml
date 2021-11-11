@@ -41,6 +41,9 @@ module.exports = function (context) {
       // Calls to functions that return a string
       const {name} = node.callee;
       return name === 'String' || (isClass && name?.toLowerCase() === 'objstr');
+    } else if (node?.type === 'ObjectExpression') {
+      // Style attributes can be objects
+      return !isClass;
     }
     return node?.type === 'Literal' || node?.type === 'TemplateLiteral';
   }
@@ -160,7 +163,7 @@ module.exports = function (context) {
           context.report({
             node: node.value,
             message: [
-              `The inline result of \`${name}\` must resolve to a "string", a \`template \${literal}\`, or a call to String().`,
+              `The inline result of \`${name}\` must resolve to an {objectExpression: ''}, a "string", a \`template \${literal}\`, or a call to String().`,
               `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
             ].join('\n - '),
           });
