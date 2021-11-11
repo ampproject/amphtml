@@ -4,6 +4,33 @@
 
 module.exports = function (context) {
   let isCoreDomJsx = false;
+
+  /**
+   * @param {import('eslint').Node} node
+   * @param {boolean} isClass
+   * @return {boolean}
+   */
+  function isValidStyleOrClassValue(node, isClass = false) {
+    if (node?.type === 'BinaryExpression') {
+      // Concatenating anything to a string is valid
+      if (node.operator === '+') {
+        return (
+          isValidStyleOrClassValue(node.left, isClass) ||
+          isValidStyleOrClassValue(node.right, isClass)
+        );
+      }
+      // Any left falsy is okay
+      if (node.operator === '&&') {
+        return isValidStyleOrClassValue(node.right, isClass);
+      }
+    } else if (node?.type === 'CallExpression') {
+      // Calls to functions that return a string
+      const {name} = node.callee;
+      return name === 'String' || (isClass && name?.toLowerCase() === 'objstr');
+    }
+    return node?.type === 'Literal' || node?.type === 'TemplateLiteral';
+  }
+
   return {
     Program() {
       isCoreDomJsx = false;
@@ -38,45 +65,39 @@ module.exports = function (context) {
       if (!isCoreDomJsx) {
         return;
       }
-      if (node.name.name === 'dangerouslySetInnerHTML') {
+      const {name} = node.name;
+      if (name === 'dangerouslySetInnerHTML') {
         context.report({
           node: node.name,
-          message: `\`<${node.name.name}>\` is not supported.`,
+          message: `\`<${name}>\` is not supported.`,
         });
         return;
       }
-      if (
-        !node.value ||
-        node.value.type === 'Literal' ||
-        node.value.expression?.type === 'Literal' ||
-        node.value.expression?.type === 'TemplateLiteral'
-      ) {
+      const {value} = node;
+      if (!value || isValidStyleOrClassValue(value)) {
         return;
       }
-      if (node.name.name === 'class') {
-        if (
-          node.value.expression?.callee?.name !== 'String' &&
-          node.value.expression?.callee?.name?.toLowerCase() !== 'objstr'
-        ) {
-          context.report({
-            node: node.value,
-            message: [
-              `Value of prop \`${node.name.name}\` must be a "string", a \`template \${literal}\`, or wrapped in either of objstr() or String().`,
-              `objstr() is preferred: https://git.io/JXPfq`,
-              `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
-            ].join('\n - '),
-          });
-        }
-      } else if (node.name.name === 'style') {
-        if (node.value.expression?.callee?.name !== 'String') {
-          context.report({
-            node: node.value,
-            message: [
-              `Value of prop \`${node.name.name}\` must be a "string", a \`template \${literal}\`, or wrapped in String()`,
-              `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
-            ].join('\n - '),
-          });
-        }
+      if (
+        name === 'class' &&
+        !isValidStyleOrClassValue(value.expression, /* isClass */ true)
+      ) {
+        context.report({
+          node: node.value,
+          message: [
+            `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in either of objstr() or String().`,
+            `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
+          ].join('\n - '),
+        });
+        return;
+      }
+      if (name === 'style' && !isValidStyleOrClassValue(value.expression)) {
+        context.report({
+          node: node.value,
+          message: [
+            `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in String()`,
+            `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
+          ].join('\n - '),
+        });
       }
     },
   };
