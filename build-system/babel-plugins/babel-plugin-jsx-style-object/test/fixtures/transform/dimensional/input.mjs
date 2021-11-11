@@ -1,21 +1,8 @@
 import * as jsx from 'ANYWHERE_LEADING_TO/core/dom/jsx';
 
-const cannotBeDimensional = () => (
-  <div
-    style={{
-      backgroundImage: `url(${url})`,
-      height: height + 'px',
-      font: serif ? 'serif' : getSansFont(),
-      'font-size': large ? '2em' : '1em',
-    }}
-  />
-);
+const dimensional = () => <div style={{width: 100, height}} />;
 
-const dimensional = () => (
-  <div style={{width: 100, height, fontSize: large ? 30 : 15}} />
-);
-
-const neverDimensional = () => (
+const nonDimensional = () => (
   <div>
     <div style={{animationIterationCount}} />
     <div style={{'animation-iteration-count': 5}} />

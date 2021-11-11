@@ -1,5 +1,3 @@
-import { jsxStylePropertyString as _jsxStylePropertyString4 } from "#core/dom/jsx-style-property-string";
-import { jsxStylePropertyString as _jsxStylePropertyString3 } from "#core/dom/jsx-style-property-string";
 import { jsxStylePropertyString as _jsxStylePropertyString2 } from "#core/dom/jsx-style-property-string";
 import { jsxStylePropertyString as _jsxStylePropertyString } from "#core/dom/jsx-style-property-string";
 import * as jsx from 'ANYWHERE_LEADING_TO/core/dom/jsx';
@@ -24,11 +22,7 @@ const otherAttributesAreUnmodified = () => <div foo={{
   width: 100
 }} />;
 
-const modified = () => <div style={"background-color:red;" + ('background-image:' + `url(${url})` + ';') + "opacity:0;" + "width:100px;" + ('height:' + height + 'px' + ';') + _jsxStylePropertyString("font", serif ? 'serif' : getSansFont(), true) + ('font-size:' + large ? '2em' : '1em' + ';')} />;
-
-const cannotBeDimensional = () => <div style={"background-color:red;" + ('background-image:' + `url(${url})` + ';') + "opacity:0;" + "width:100px;" + ('height:' + height + 'px' + ';') + _jsxStylePropertyString2("font", serif ? 'serif' : getSansFont(), true) + ('font-size:' + large ? '2em' : '1em' + ';')} />;
-
-const couldBeDimensional = () => <span style={_jsxStylePropertyString3("font-size", large ? 30 : 15, true)}></span>;
+const modified = () => <div style={"background-color:red;" + _jsxStylePropertyString("background-image", backgroundImage, true) + "opacity:0;" + "width:100px;"} />;
 
 const emptyStringValueIsRemoved = () => <div style={""} />;
 
@@ -40,6 +34,6 @@ function modifyDynamicValue() {
 
 let backgroundColor = 'blue';
 
-const constants = () => <div style={"background-color:blue;" + "width:100px;" + "color:white;" + _jsxStylePropertyString4("opacity", dynamic)} />;
+const constants = () => <div style={"background-color:blue;" + "width:100px;" + "color:white;" + _jsxStylePropertyString2("opacity", dynamic)} />;
 
 const empty = () => <div style={""} />;
