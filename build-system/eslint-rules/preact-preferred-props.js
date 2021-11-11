@@ -188,7 +188,7 @@ module.exports = {
         }
       },
 
-      'CallExpression[callee.name="propName"]': function (node) {
+      `CallExpression[callee.name="${propNameFn}"]`: function (node) {
         if (
           node.arguments.length !== 1 ||
           node.arguments[0].type !== 'Literal' ||
