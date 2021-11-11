@@ -39,6 +39,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  *  noAddDeps?: boolean,
  *  continueOnError?: boolean,
  *  errored?: boolean,
+ *  babelCaller?: string,
  * }}
  */
 let OptionsDef;

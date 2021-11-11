@@ -449,7 +449,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   const babelCaller =
     options.babelCaller ??
-    (options.bento ? 'bento-' : '') +
+    (options.bento ? 'bento-element-' : '') +
       (options.minify ? 'minified' : 'unminified');
 
   const babelPlugin = getEsbuildBabelPlugin(
