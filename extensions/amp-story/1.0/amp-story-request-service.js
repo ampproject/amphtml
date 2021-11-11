@@ -1,7 +1,6 @@
 import {Services} from '#service';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
-import {once} from '#core/types/function';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 import {user, userAssert} from '#utils/log';
 
@@ -28,9 +27,6 @@ export class AmpStoryRequestService {
 
     /** @private @const {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(win);
-
-    /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
-    this.loadShareConfig = once(() => this.loadConfigImpl());
   }
 
   /**
@@ -62,7 +58,7 @@ export class AmpStoryRequestService {
     try {
       return Promise.resolve(getChildJsonConfig(shareConfigEl));
     } catch (err) {
-      return Promise.reject(err);
+      return Promise.resolve(err);
     }
   }
 
@@ -73,28 +69,20 @@ export class AmpStoryRequestService {
    * @public
    */
   loadConfigImpl(element) {
-    const shareConfigEl = element
-      ? element
-      : this.storyElement_.querySelector(
-          'amp-story-social-share, amp-story-bookend'
-        );
-
-    if (!shareConfigEl) {
+    if (!element) {
       return Promise.resolve();
     }
 
-    if (shareConfigEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
-      const rawUrl = shareConfigEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
-      const credentials = shareConfigEl.getAttribute(
-        CREDENTIALS_ATTRIBUTE_NAME
-      );
+    if (element.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
+      const rawUrl = element.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
+      const credentials = element.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
       return this.executeRequest(
         rawUrl,
         credentials ? {credentials} : {}
-      ).catch(() => this.getInlineConfig(shareConfigEl));
+      ).catch(() => this.getInlineConfig(element));
     }
 
-    return this.getInlineConfig(shareConfigEl);
+    return this.getInlineConfig(element);
   }
 }
 

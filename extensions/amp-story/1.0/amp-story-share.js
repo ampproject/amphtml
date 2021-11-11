@@ -294,7 +294,11 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    this.requestService_.loadShareConfig().then((config) => {
+    const shareEl = this.storyEl.querySelector(
+      'amp-story-social-share, amp-story-bookend'
+    );
+
+    this.requestService_.loadConfigImpl(shareEl).then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
