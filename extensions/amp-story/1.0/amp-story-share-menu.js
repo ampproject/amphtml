@@ -64,7 +64,11 @@ const renderAmpSocialShareSystemElement = () => {
   return (
     <amp-social-share
       type="system"
-      style="visibility: hidden; pointer-events: none; z-index: -1;"
+      style={{
+        visibility: 'hidden',
+        pointerEvents: 'none',
+        zIndex: -1,
+      }}
     ></amp-social-share>
   );
 };

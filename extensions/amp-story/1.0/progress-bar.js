@@ -462,7 +462,7 @@ export class ProgressBar {
     const adSegment = (
       <div
         class="i-amphtml-story-ad-progress-value"
-        style={`animation-duration: ${animationDuration}`}
+        style={{animationDuration}}
       ></div>
     );
     this.currentAdSegment_ = adSegment;

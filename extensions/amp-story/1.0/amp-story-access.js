@@ -187,9 +187,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
           <div class="i-amphtml-story-access-header">
             <div
               class="i-amphtml-story-access-logo"
-              style={
-                logoSrc ? `background-image: url(${logoSrc}) !important;` : null
-              }
+              style={logoSrc && {backgroundImage: `url(${logoSrc}) !important`}}
             ></div>
           </div>
         );

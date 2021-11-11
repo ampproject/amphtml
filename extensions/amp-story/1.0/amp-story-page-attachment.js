@@ -211,7 +211,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       openImgAttr && openImgAttr !== 'none' ? (
         <div
           class="i-amphtml-story-page-attachment-remote-img"
-          style={'background-image: url(' + openImgAttr + ') !important;'}
+          style={{backgroundImage: `url(${openImgAttr}) !important`}}
         ></div>
       ) : (
         // Attach link icon SVG by default.
