@@ -1,18 +1,12 @@
 # Bento Twitter
 
-The Bento Twitter component allows you to embed a Tweet or Moment.
+Embeds [Twitter](https://twitter.com) content like a Tweet or a Moment.
 
-## Usage
-
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-twitter>` web component.
-
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/twitter
@@ -23,49 +17,68 @@ import {defineElement as defineBentoTwitters} from '@bentoproject/twitter';
 defineBentoTwitters();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
+
+<!--% example %-->
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-twitter {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
-  ></script>
-  <style>
-    bento-twitter {
-      width: 375px;
-      height: 472px;
-    }
-  </style>
-</head>
-<bento-twitter id="my-tweet" data-tweetid="885634330868850689"> </bento-twitter>
-<div class="buttons" style="margin-top: 8px">
-  <button id="change-tweet">Change tweet</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <style>
+      bento-twitter {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
+    ></script>
+    <style>
+      bento-twitter {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-twitter id="my-tweet" data-tweetid="885634330868850689">
+    </bento-twitter>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-tweet">Change tweet</button>
+    </div>
 
-<script>
-  (async () => {
-    const twitter = document.querySelector('#my-tweet');
-    await customElements.whenDefined('bento-twitter');
+    <script>
+      (async () => {
+        const twitter = document.querySelector('#my-tweet');
+        await customElements.whenDefined('bento-twitter');
 
-    // set up button actions
-    document.querySelector('#change-tweet').onclick = () => {
-      twitter.setAttribute('data-tweetid', '495719809695621121');
-    };
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#change-tweet').onclick = () => {
+          twitter.setAttribute('data-tweetid', '495719809695621121');
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -89,7 +102,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-**Container type**
+#### Container type
 
 The `bento-twitter` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
 
@@ -100,7 +113,7 @@ bento-twitter {
 }
 ```
 
-#### Attributes
+### Attributes
 
 <table>
   <tr>
@@ -126,13 +139,11 @@ For details on the available options, see Twitter's docs <a href="https://develo
   </tr>
 </table>
 
-### Preact/React Component
+---
 
-The examples below demonstrate use of the `<BentoTwitter>` as a functional component usable with the Preact or React libraries.
+## Preact/React Component
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/twitter
@@ -148,9 +159,9 @@ function App() {
 }
 ```
 
-#### Layout and style
+### Layout and style
 
-**Container type**
+#### Container type
 
 The `BentoTwitter` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
@@ -177,7 +188,7 @@ Or via `className`:
 }
 ```
 
-### Props
+## Props
 
 <table>
   <tr>

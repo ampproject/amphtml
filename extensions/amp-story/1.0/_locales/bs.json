@@ -80,9 +80,6 @@
   "35": {
     "string": "Pređite prstom nagore"
   },
-  "36": {
-    "string": "Proširi tweet"
-  },
   "62": {
     "string": "Podijeli počevši od ove stranice"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Otvaranje"
+  },
+  "98": {
+    "string": "Formular nije poslan, pokušajte ponovo"
+  },
+  "99": {
+    "string": "Formular uspješno poslan"
   }
 }

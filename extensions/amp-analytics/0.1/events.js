@@ -3,9 +3,10 @@ import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
 import {
   PlayingStates,
-  VideoAnalyticsEvents,
+  VideoAnalyticsEvents_Enum,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
+import {enumValues} from '#core/types/enum';
 import {deepMerge, dict, hasOwn} from '#core/types/object';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getData} from '#utils/event-helper';
@@ -1364,18 +1365,16 @@ export class VideoEventTracker extends EventTracker {
       this.sessionObservable_
     );
 
-    Object.keys(VideoAnalyticsEvents).forEach((key) => {
-      this.root
-        .getRoot()
-        .addEventListener(VideoAnalyticsEvents[key], this.boundOnSession_);
+    enumValues(VideoAnalyticsEvents_Enum).forEach((value) => {
+      this.root.getRoot().addEventListener(value, this.boundOnSession_);
     });
   }
 
   /** @override */
   dispose() {
     const root = this.root.getRoot();
-    Object.keys(VideoAnalyticsEvents).forEach((key) => {
-      root.removeEventListener(VideoAnalyticsEvents[key], this.boundOnSession_);
+    enumValues(VideoAnalyticsEvents_Enum).forEach((value) => {
+      root.removeEventListener(value, this.boundOnSession_);
     });
     this.boundOnSession_ = null;
     this.sessionObservable_ = null;
@@ -1419,7 +1418,10 @@ export class VideoEventTracker extends EventTracker {
         return;
       }
 
-      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
+      if (
+        normalizedType === VideoAnalyticsEvents_Enum.SECONDS_PLAYED &&
+        !interval
+      ) {
         user().error(
           TAG,
           'video-seconds-played requires interval spec with non-zero value'
@@ -1427,14 +1429,14 @@ export class VideoEventTracker extends EventTracker {
         return;
       }
 
-      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED) {
+      if (normalizedType === VideoAnalyticsEvents_Enum.SECONDS_PLAYED) {
         intervalCounter++;
         if (intervalCounter % interval !== 0) {
           return;
         }
       }
 
-      if (normalizedType === VideoAnalyticsEvents.PERCENTAGE_PLAYED) {
+      if (normalizedType === VideoAnalyticsEvents_Enum.PERCENTAGE_PLAYED) {
         if (!percentages) {
           user().error(
             TAG,
@@ -1481,7 +1483,7 @@ export class VideoEventTracker extends EventTracker {
       }
 
       if (
-        type === VideoAnalyticsEvents.SESSION_VISIBLE &&
+        type === VideoAnalyticsEvents_Enum.SESSION_VISIBLE &&
         !endSessionWhenInvisible
       ) {
         return;
@@ -1519,13 +1521,13 @@ export class VideoEventTracker extends EventTracker {
  * @return {string}
  */
 function normalizeVideoEventType(type, details) {
-  if (type == VideoAnalyticsEvents.SESSION_VISIBLE) {
-    return VideoAnalyticsEvents.SESSION;
+  if (type == VideoAnalyticsEvents_Enum.SESSION_VISIBLE) {
+    return VideoAnalyticsEvents_Enum.SESSION;
   }
 
   // Custom video analytics events are listened to from one signal type,
   // but they're configured by user with their custom name.
-  if (type == VideoAnalyticsEvents.CUSTOM) {
+  if (type == VideoAnalyticsEvents_Enum.CUSTOM) {
     return dev().assertString(details[videoAnalyticsCustomEventTypeKey]);
   }
 

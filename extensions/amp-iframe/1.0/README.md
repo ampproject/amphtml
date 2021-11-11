@@ -1,21 +1,16 @@
 # Bento Iframe
 
-The Bento Iframe component is used to display an iframe. However, it has other important differences from vanilla iframes:
+Renders an iframe that reports its position in the host document to the child window. It also allows the embedded document to resize it.
 
 1. Allows dynamic resizing when the component is outside to the viewport. This is to avoid content shifts.
-1. Bento Iframe can be set up to receive `IntersectionObserver` style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
 
-## Usage
+1. Can be set up so that the child window receives `IntersectionObserver` style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
 
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-iframe>` web component.
-
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/iframe
@@ -26,44 +21,62 @@ import {defineElement as defineBentoIframe} from '@bentoproject/iframe';
 defineBentoIframe();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
+
+<!--% example %-->
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
-  />
-</head>
-<bento-iframe
-  id="my-iframe"
-  src="https://en.wikipedia.org/wiki/Bento"
-  style="width: 800px; height: 600px"
->
-</bento-iframe>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-iframe-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-iframe
+      id="my-iframe"
+      src="https://en.wikipedia.org/wiki/Bento"
+      style="width: 800px; height: 600px"
+    >
+    </bento-iframe>
 
-<button id="change-source">Change source</button>
+    <button id="change-source">Change source</button>
 
-<script>
-  (async () => {
-    const iframeEl = document.querySelector('#my-iframe');
-    await customElements.whenDefined('bento-iframe');
+    <script>
+      (async () => {
+        const iframeEl = document.querySelector('#my-iframe');
+        await customElements.whenDefined('bento-iframe');
 
-    // Reload iframe with new src
-    document.querySelector('#change-source').onclick = () => {
-      iframeEl.setAttribute('src', 'https://example.com');
-    };
-  })();
-</script>
+        // Reload iframe with new src
+        document.querySelector('#change-source').onclick = () => {
+          iframeEl.setAttribute('src', 'https://example.com');
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -87,29 +100,29 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-#### Attributes
+### Attributes
 
-##### `src`
+#### `src`
 
 The URL of the page to embed.
 
-##### `srcdoc`
+#### `srcdoc`
 
 Inline HTML to embed. Only one of `src` or `srcdoc` is required. If both are specified, `srcdoc` overrides `src`.
 
-##### `height`
+#### `height`
 
 Height of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% height.
 
-##### `width`
+#### `width`
 
 Width of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% width.
 
-##### `allowfullscreen`, `allowpaymentrequest`, and `referrerpolicy` (optional)
+#### `allowfullscreen`, `allowpaymentrequest`, and `referrerpolicy` (optional)
 
 These attributes should all behave like they do on standard iframes.
 
-##### `sandbox` (optional) <a name="sandbox"></a>
+#### `sandbox` (optional) <a name="sandbox"></a>
 
 Iframes created by `bento-iframe` always have the `sandbox` attribute defined on
 them. By default, the value is empty, which means that they are "maximum
@@ -131,17 +144,15 @@ new windows. This is likely most of the time what you want and expect.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 
-#### Styling
+### Styling
 
 You may use the `bento-iframe` element selector to style the component.
 
-### Preact/React Component
+---
 
-The examples below demonstrates use of the `<BentoIframe>` as a functional component usable with the Preact or React libraries.
+## Preact/React Component
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/iframe
@@ -163,21 +174,21 @@ function App() {
 }
 ```
 
-#### Props
+### Props
 
-##### `src`
+#### `src`
 
 The URL of the page to embed.
 
-##### `srcdoc`
+#### `srcdoc`
 
 Inline HTML to embed. Only one of `src` or `srcdoc` is required. If both are specified, `srcdoc` overrides `src`.
 
-##### `allowFullScreen`, `allowPaymentRequest`, and `referrerPolicy` (optional)
+#### `allowFullScreen`, `allowPaymentRequest`, and `referrerPolicy` (optional)
 
 These attributes all behave like they do on standard iframes.
 
-##### `sandbox` (optional) <a name="sandbox"></a>
+#### `sandbox` (optional) <a name="sandbox"></a>
 
 Iframes created by `<BentoIframe>` always have the `sandbox` attribute defined on
 them. By default, the value is empty, which means that they are "maximum
@@ -189,14 +200,14 @@ make non-CORS XHRs, and read/write cookies.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 
-##### `iframeStyle` (optional)
+#### `iframeStyle` (optional)
 
 Styles to apply to the `iframe` element, specified as JSON.
 
-##### `height`
+#### `height`
 
 Height of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% height.
 
-##### `width`
+#### `width`
 
 Width of the iframe in pixels. Note: this is applied to the parent container and the `iframe` element is set to 100% width.

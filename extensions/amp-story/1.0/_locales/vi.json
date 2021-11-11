@@ -80,9 +80,6 @@
   "35": {
     "string": "Vuốt lên"
   },
-  "36": {
-    "string": "Mở rộng Tweet"
-  },
   "62": {
     "string": "Bắt đầu chia sẻ từ trang này"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Đang mở"
+  },
+  "98": {
+    "string": "Biểu mẫu chưa được gửi đi, vui lòng thử lại"
+  },
+  "99": {
+    "string": "Biểu mẫu đã được gửi đi thành công"
   }
 }

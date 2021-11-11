@@ -1,6 +1,9 @@
 import {dispatchCustomEvent} from '#core/dom/index';
 import * as Preact from '#core/dom/jsx';
 
+// We test invalid uses, so we disable the lint rule.
+/* eslint-disable local/core-dom-jsx */
+
 const {createElement} = Preact;
 
 describes.sandboxed('#core/dom/jsx', {}, (env) => {
@@ -142,6 +145,22 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     expect(element.outerHTML).to.equal(
       '<div data-dangerous="&quot;><script src=&quot;foo.js"></div>'
     );
+  });
+
+  it('renders with SVG namespace with props.xmlns', () => {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const withProp = createElement('svg', {xmlns});
+    expect(withProp.namespaceURI).to.equal(xmlns);
+    const withoutProp = createElement('svg');
+    expect(withoutProp.namespaceURI).to.not.equal(xmlns);
+  });
+
+  it('renders with SVG namespace with props.xmlns (compiled)', () => {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const withProp = <svg />;
+    expect(withProp.namespaceURI).to.equal(xmlns);
+    const withoutProp = <div />;
+    expect(withoutProp.namespaceURI).to.not.equal(xmlns);
   });
 
   describe('unsupported JSX features', () => {

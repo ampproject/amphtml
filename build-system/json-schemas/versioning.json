@@ -3,9 +3,11 @@
   "description": "Versioning (RTV) information",
   "type": "object",
   "required": [
-    "beta",
+    "beta-opt-in",
+    "beta-traffic",
     "control",
-    "experimental",
+    "experimental-opt-in",
+    "experimental-traffic",
     "experimentA",
     "experimentB",
     "experimentC",
@@ -15,17 +17,9 @@
     "stable"
   ],
   "properties": {
-    "beta": {
-      "type": "string",
-      "pattern": "03\\d{13}"
-    },
     "control": {
       "type": "string",
       "pattern": "02\\d{13}"
-    },
-    "experimental": {
-      "type": "string",
-      "pattern": "00\\d{13}"
     },
     "experimentA": {
       "type": [
@@ -48,10 +42,6 @@
       ],
       "pattern": "12\\d{13}"
     },
-    "lts": {
-      "type": "string",
-      "pattern": "01\\d{13}"
-    },
     "nightly": {
       "type": "string",
       "pattern": "04\\d{13}"
@@ -59,8 +49,18 @@
     "nightly-control": {
       "type": "string",
       "pattern": "05\\d{13}"
+    }
+  },
+  "patternProperties": {
+    "beta-(opt-in|traffic)": {
+      "type": "string",
+      "pattern": "03\\d{13}"
     },
-    "stable": {
+    "experimental-(opt-in|traffic)": {
+      "type": "string",
+      "pattern": "00\\d{13}"
+    },
+    "(stable|lts)": {
       "type": "string",
       "pattern": "01\\d{13}"
     }

@@ -25,12 +25,14 @@ function getPreClosureConfig() {
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
     'optimize-objstr',
+    './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
     argv.esm || argv.sxg
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'

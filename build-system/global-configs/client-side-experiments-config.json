@@ -27,6 +27,10 @@
     {
       "name": "story-ad-page-outlink",
       "percentage": 0.02
+    },
+    {
+      "name": "amp-sticky-ad-to-amp-ad-v4",
+      "percentage": 0.05
     }
   ]
 }

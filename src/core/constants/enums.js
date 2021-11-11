@@ -2,7 +2,7 @@
  * Registred singleton on AMP doc.
  * @enum {number}
  */
-export const AMPDOC_SINGLETON_NAME = {
+export const AMPDOC_SINGLETON_NAME_ENUM = {
   TRACKING_IFRAME: 1,
   LINKER: 2,
 };

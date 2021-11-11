@@ -1,4 +1,4 @@
-import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
+import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority} from '#service/navigation';
 import {Services} from '#service';
@@ -214,7 +214,7 @@ export class LinkerManager {
       return false;
     }
 
-    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME.LINKER);
+    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME_ENUM.LINKER);
   }
 
   /**

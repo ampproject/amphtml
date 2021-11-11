@@ -80,9 +80,6 @@
   "35": {
     "string": "Mag-swipe pataas"
   },
-  "36": {
-    "string": "I-expand ang Tweet"
-  },
   "62": {
     "string": "Ibahagi simula sa page na ito"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Binubuksan"
+  },
+  "98": {
+    "string": "Hindi naisumite ang form, subukan ulit"
+  },
+  "99": {
+    "string": "Matagumpay na naisumite ang form"
   }
 }

@@ -237,7 +237,7 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME, boolean>} */
+    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME_ENUM, boolean>} */
     this.registeredSingleton_ = map();
 
     /** @public @const {?AmpDoc} */
@@ -712,7 +712,7 @@ export class AmpDoc {
   /**
    * Attempt to register a singleton for each ampdoc.
    * Caller need to handle user error when registration returns false.
-   * @param {!../enums.AMPDOC_SINGLETON_NAME} name
+   * @param {!../enums.AMPDOC_SINGLETON_NAME_ENUM} name
    * @return {boolean}
    */
   registerSingleton(name) {

@@ -53,6 +53,7 @@ function getTestConfig() {
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-classes',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
   const testPresets = [presetEnv];

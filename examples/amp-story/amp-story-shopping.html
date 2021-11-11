@@ -17,12 +17,20 @@
         publisher="AMP Story Shopping"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
-      <amp-story-page id="example">
+      <amp-story-page id="default">
         <amp-story-shopping-config layout='nodisplay'></amp-story-shopping-config>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="dark-theme">
+        <amp-story-shopping-config layout='nodisplay'></amp-story-shopping-config>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment layout='nodisplay' theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
     </amp-story>
   </body>

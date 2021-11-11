@@ -78,7 +78,6 @@ import {findIndex, lastItem, toArray} from '#core/types/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '#utils/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
-import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
@@ -293,6 +292,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?UIType} */
     this.uiState_ = null;
+
+    /** @private {boolean} whether the styles were rewritten */
+    this.didRewriteStyles_ = false;
   }
 
   /** @override */
@@ -351,7 +353,6 @@ export class AmpStory extends AMP.BaseElement {
       page.setAttribute('i-amphtml-initial', '');
     }
 
-    this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
@@ -472,47 +473,6 @@ export class AmpStory extends AMP.BaseElement {
     this.onResize();
   }
 
-  /** @private */
-  initializeStyles_() {
-    const mediaQueryEls = this.element.querySelectorAll('media-query');
-
-    if (mediaQueryEls.length) {
-      this.initializeMediaQueries_(mediaQueryEls);
-    }
-
-    const styleEl = this.win.document.querySelector('style[amp-custom]');
-
-    if (styleEl) {
-      this.rewriteStyles_(styleEl);
-    }
-  }
-
-  /**
-   * Registers the media queries
-   * @param {!NodeList<!Element>} mediaQueryEls
-   * @private
-   */
-  initializeMediaQueries_(mediaQueryEls) {
-    const service = getMediaQueryService(this.win);
-
-    const onMediaQueryMatch = (matches, className) => {
-      this.mutateElement(() => {
-        this.element.classList.toggle(className, matches);
-      });
-    };
-
-    toArray(mediaQueryEls).forEach((el) => {
-      const className = el.getAttribute('class-name');
-      const media = el.getAttribute('media');
-
-      if (className && media) {
-        service.onMediaQueryMatch(media, (matches) =>
-          onMediaQueryMatch(matches, className)
-        );
-      }
-    });
-  }
-
   /**
    * Initializes page ids by deduplicating them.
    * @private
@@ -535,19 +495,22 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Element} styleEl
    * @private
    */
-  rewriteStyles_(styleEl) {
+  rewriteStyles_() {
     // TODO(#15955): Update this to use CssContext from
     // ../../../extensions/amp-animation/0.1/web-animations.js
-    this.mutateElement(() => {
-      styleEl.textContent = styleEl.textContent
-        .replace(/(-?[\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
-        .replace(/(-?[\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
-        .replace(/(-?[\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
-        .replace(/(-?[\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
-    });
+    if (this.didRewriteStyles_) {
+      return;
+    }
+    this.didRewriteStyles_ = true;
+    const styleEl = this.win.document.querySelector('style[amp-custom]');
+    if (styleEl) {
+      styleEl.textContent = styleEl.textContent.replace(
+        /(-?[\d.]+)v(w|h|min|max)/gim,
+        'calc($1 * var(--story-page-v$2))'
+      );
+    }
   }
 
   /**
@@ -1653,6 +1616,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
         this.vsync_.mutate(() => {
+          this.rewriteStyles_();
           this.win.document.documentElement.removeAttribute(
             'i-amphtml-story-mobile'
           );
@@ -1680,6 +1644,7 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         this.vsync_.mutate(() => {
+          this.rewriteStyles_();
           this.element.setAttribute('i-amphtml-vertical', '');
           this.win.document.documentElement.classList.add(
             'i-amphtml-story-vertical'
