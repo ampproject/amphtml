@@ -77,27 +77,26 @@ module.exports = function (context) {
       if (!value || isValidStyleOrClassValue(value)) {
         return;
       }
-      if (
-        name === 'class' &&
-        !isValidStyleOrClassValue(value.expression, /* isClass */ true)
-      ) {
-        context.report({
-          node: node.value,
-          message: [
-            `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in either of objstr() or String().`,
-            `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
-          ].join('\n - '),
-        });
-        return;
-      }
-      if (name === 'style' && !isValidStyleOrClassValue(value.expression)) {
-        context.report({
-          node: node.value,
-          message: [
-            `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in String()`,
-            `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
-          ].join('\n - '),
-        });
+      if (name === 'class') {
+        if (!isValidStyleOrClassValue(value.expression, /* isClass */ true)) {
+          context.report({
+            node: node.value,
+            message: [
+              `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in either of objstr() or String().`,
+              `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
+            ].join('\n - '),
+          });
+        }
+      } else if (name === 'style') {
+        if (!isValidStyleOrClassValue(value.expression)) {
+          context.report({
+            node: node.value,
+            message: [
+              `Value of prop \`${name}\` must be a "string", a \`template \${literal}\`, or wrapped in String()`,
+              `Take caution when wrapping boolean or nullish values in String(). Do \`String(foo || '')\``,
+            ].join('\n - '),
+          });
+        }
       }
     },
   };
