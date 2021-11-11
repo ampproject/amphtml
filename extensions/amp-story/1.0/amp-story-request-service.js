@@ -51,12 +51,12 @@ export class AmpStoryRequestService {
 
   /**
    * Retrieves the publisher share providers.
-   * @param  {!Element} shareConfigEl
+   * @param  {!Element} configEl
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
-  getInlineConfig(shareConfigEl) {
+  getInlineConfig(configEl) {
     try {
-      return Promise.resolve(getChildJsonConfig(shareConfigEl));
+      return Promise.resolve(getChildJsonConfig(configEl));
     } catch (err) {
       return Promise.resolve(err);
     }
@@ -66,7 +66,6 @@ export class AmpStoryRequestService {
    * Retrieves the publisher share providers.
    * @param  {?Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @public
    */
   loadConfigImpl(element) {
     if (!element) {
