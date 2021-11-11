@@ -30,11 +30,33 @@ const modified = () => (
     style={{
       color: null,
       'background-color': red,
-      backgroundImage,
+      backgroundImage: `url(${url})`,
       opacity: 0,
       width: 100,
+      height: height + 'px',
+      font: serif ? 'serif' : getSansFont(),
+      'font-size': large ? '2em' : '1em',
     }}
   />
+);
+
+const cannotBeDimensional = () => (
+  <div
+    style={{
+      color: null,
+      'background-color': red,
+      backgroundImage: `url(${url})`,
+      opacity: 0,
+      width: 100,
+      height: height + 'px',
+      font: serif ? 'serif' : getSansFont(),
+      'font-size': large ? '2em' : '1em',
+    }}
+  />
+);
+
+const couldBeDimensional = () => (
+  <span style={{fontSize: large ? 30 : 15}}></span>
 );
 
 const emptyStringValueIsRemoved = () => <div style={{background: ''}} />;

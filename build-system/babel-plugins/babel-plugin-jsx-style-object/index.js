@@ -9,6 +9,7 @@
  */
 
 const {addNamed} = require('@babel/helper-module-imports');
+const {template} = require('@babel/core');
 
 const baseModule = 'core/dom/jsx';
 const helperModule = '#core/dom/jsx-style-property-string';
@@ -73,6 +74,29 @@ module.exports = function (babel) {
   let hasBaseModule = false;
 
   /**
+   * @param {babel.Node} node
+   * @return {boolean}
+   */
+  function couldBeDimensionalValue(node) {
+    if (t.isBinaryExpression(node)) {
+      node = /** @type {babel.types.BinaryExpression} */ (node);
+      return (
+        node.operator === '+' &&
+        couldBeDimensionalValue(node.left) &&
+        couldBeDimensionalValue(node.right)
+      );
+    }
+    if (t.isConditionalExpression(node)) {
+      node = /** @type {babel.types.ConditionalExpression} */ (node);
+      return (
+        couldBeDimensionalValue(node.consequent) ||
+        couldBeDimensionalValue(node.alternate)
+      );
+    }
+    return !t.isStringLiteral(node) && !t.isTemplateLiteral(node);
+  }
+
+  /**
    * @param {babel.NodePath<babel.types.ObjectProperty>} path
    * @return {?babel.Node}
    */
@@ -93,6 +117,11 @@ module.exports = function (babel) {
       const withUnit =
         isDimensional && typeof value === 'number' ? `${value}px` : value;
       return t.stringLiteral(`${cssName}:${withUnit};`);
+    }
+
+    // If the value cannot result in a number, return a string expression.
+    if (!couldBeDimensionalValue(value.node)) {
+      return template.expression(`'${cssName}:' + ${value} + ';'`)();
     }
 
     // Otherwise call the helper function to evaluate nullish and dimensional values.
