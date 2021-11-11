@@ -126,7 +126,11 @@ module.exports = function (babel) {
   /** @param {babel.NodePath} path */
   function replaceExpression(path) {
     if (path.isLogicalExpression()) {
-      if (path.node.operator === '&&' || path.node.operator === '||') {
+      if (
+        path.node.operator === '&&' ||
+        path.node.operator === '||' ||
+        path.node.operator === '??'
+      ) {
         replaceExpression(path.get('right'));
       }
       return;
