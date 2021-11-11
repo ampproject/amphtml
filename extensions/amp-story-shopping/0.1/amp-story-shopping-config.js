@@ -49,7 +49,10 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       .then(() => {
         return this.requestService_.loadConfigImpl(this.element);
       })
-      .then((storyConfig) => this.addShoppingStateFromConfig_(storyConfig));
+      .then((storyConfig) => {
+        this.addShoppingStateFromConfig_(storyConfig);
+        return Promise.resolve();
+      });
   }
 
   /** @override */
