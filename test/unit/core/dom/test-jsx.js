@@ -1,10 +1,11 @@
+/** @jsx JsxStaticTree.createElement */
 import {dispatchCustomEvent} from '#core/dom/index';
-import * as Preact from '#core/dom/jsx';
+import * as JsxStaticTree from '#core/dom/jsx';
 
 // We test invalid uses, so we disable the lint rule.
 /* eslint-disable local/core-dom-jsx */
 
-const {createElement} = Preact;
+const {createElement} = JsxStaticTree;
 
 describes.sandboxed('#core/dom/jsx', {}, (env) => {
   it('renders without attributes', () => {

@@ -1,10 +1,11 @@
 /**
  * @fileoverview
  * Minimal implementation of JSX that outputs DOM nodes.
- *
- * Usage:
- *   import * as Preact from '#core/dom/jsx';
- *
+ */
+// Usage:
+//   /** @jsx JsxStaticTree.createElement */
+//   import * as JsxStaticTree from '#core/dom/jsx';
+/*
  * This library is nicer than templates in bundles that do not include Preact,
  * but it does not attempt to implement JSX fully.
  *

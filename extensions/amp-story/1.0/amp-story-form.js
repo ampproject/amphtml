@@ -1,4 +1,5 @@
-import * as Preact from '#core/dom/jsx';
+/** @jsx JsxStaticTree.createElement */
+import * as JsxStaticTree from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId_Enum} from '#service/localization/strings';

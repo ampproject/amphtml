@@ -1,4 +1,5 @@
-import * as Preact from '#core/dom/jsx';
+/** @jsx JsxStaticTree.createElement */
+import * as JsxStaticTree from '#core/dom/jsx';
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */

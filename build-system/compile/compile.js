@@ -310,7 +310,8 @@ async function generateCompilerOptions(outputFilename, options) {
     // These are type-check errors / warnings by default, but cannot be.
     compilerOptions.jscomp_off.push(
       'moduleLoad', // Breaks type-only modules: google/closure-compiler#3041
-      'unknownDefines' // Closure complains about VERSION
+      'unknownDefines', // Closure complains about VERSION
+      'nonStandardJsDocs' // Complains about @jsx pragma comment
     );
     compilerOptions.conformance_configs =
       'build-system/test-configs/conformance-config.textproto';

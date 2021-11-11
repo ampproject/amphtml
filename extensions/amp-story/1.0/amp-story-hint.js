@@ -1,4 +1,5 @@
-import * as Preact from '#core/dom/jsx';
+/** @jsx JsxStaticTree.createElement */
+import * as JsxStaticTree from '#core/dom/jsx';
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {
   EmbeddedComponentState,

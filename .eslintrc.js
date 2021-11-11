@@ -204,7 +204,7 @@ module.exports = {
     'local/no-swallow-return-from-allow-console-error': 2,
     'local/no-unload-listener': 2,
     'local/objstr-literal': 2,
-    'local/preact': 2,
+    'local/jsx-namespace': 2,
     'local/prefer-deferred-promise': 0,
     'local/prefer-destructuring': 2,
     'local/prefer-spread-props': 2,
@@ -468,7 +468,15 @@ module.exports = {
         // Extensions whose version is lower than 1.0 do not use Preact
         'extensions/*/0.*/**',
       ],
-      'rules': {'local/preact': [2, '#core/dom/jsx']},
+      'rules': {
+        'local/jsx-namespace': [
+          2,
+          {
+            name: 'JsxStaticTree',
+            from: '#core/dom/jsx',
+          },
+        ],
+      },
     },
   ],
 };

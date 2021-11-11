@@ -1,4 +1,5 @@
-import * as Preact from '#core/dom/jsx';
+/** @jsx JsxStaticTree.createElement */
+import * as JsxStaticTree from '#core/dom/jsx';
 /**
  * @fileoverview Embeds a single page in a story
  *

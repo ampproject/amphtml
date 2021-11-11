@@ -1,4 +1,5 @@
-import * as Preact from '#core/dom/jsx';
+/** @jsx JsxStaticTree.createElement */
+import * as JsxStaticTree from '#core/dom/jsx';
 import {Services} from '#service';
 import {dev} from '#utils/log';
 import {includes} from '#core/types/string';

@@ -1,4 +1,5 @@
-import * as Preact from '#core/dom/jsx';
+/** @jsx JsxStaticTree.createElement */
+import * as JsxStaticTree from '#core/dom/jsx';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
