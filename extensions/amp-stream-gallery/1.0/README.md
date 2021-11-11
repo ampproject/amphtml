@@ -2,8 +2,7 @@
 
 The Bento Stream Gallery is for displaying multiple similar pieces of content at a time along a horizontal axis.
 
-It is a specialization of Bento Base Carousel and uses [ResizeObservers](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver) to adjust dynamically adjust the size and number of displayed slides displayed based on the width of the container. To implement a more customized UX, see
-[`<bento-base-carousel>`](../../amp-base-carousel/1.0/README.md).
+It is a specialization of Bento Base Carousel and uses [ResizeObservers](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver) to adjust dynamically adjust the size and number of displayed slides displayed based on the width of the container. To implement a more customized UX, see [`<bento-base-carousel>`](../../amp-base-carousel/1.0/README.md).
 
 ## Web Component
 
@@ -107,8 +106,7 @@ api.prev();
 
 ##### goToSlide(index: number)
 
-Moves the carousel to the slide specified by the `index` argument.
-Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
+Moves the carousel to the slide specified by the `index` argument. Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
 ```js
 api.goToSlide(0); // Advance to first slide.
@@ -121,8 +119,7 @@ The Bento Stream Gallery component allows you to register and respond to the fol
 
 ##### slideChange
 
-This event is triggered when the index displayed by the carousel has changed.
-The new index is available via `event.data.index`.
+This event is triggered when the index displayed by the carousel has changed. The new index is available via `event.data.index`.
 
 ```js
 streamGallery.addEventListener('slideChange', (e) => console.log(e.data.index));
@@ -170,9 +167,7 @@ Either `"around"` or undefined. This determines how extra space is allocated aft
 
 ##### `loop`
 
-Either `true` or `false`, defaults to `true`. When true, the carousel will allow
-the user to move from the first item back to the last item and visa versa. There
-must be at least three slides present for looping to occur.
+Either `true` or `false`, defaults to `true`. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three slides present for looping to occur.
 
 ##### `outset-arrows`
 
@@ -186,8 +181,7 @@ A number, defaults to `0`. This determines how much of an additional slide to sh
 
 ##### `min-visible-count`
 
-A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s)
-visible.
+A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s) visible.
 
 ##### `max-visible-count`
 
@@ -205,20 +199,15 @@ A number, defaults to [`Number.MAX_VALUE`](https://developer.mozilla.org/en-US/d
 
 ##### `slide-align`
 
-Either `start` or `center`. When start aligning, the start of a slide (e.g. the
-left edge, when horizontal aligning) is aligned with the start of a carousel.
-When center aligning, the center of a slide is aligned with the center of a
-carousel.
+Either `start` or `center`. When start aligning, the start of a slide (e.g. the left edge, when horizontal aligning) is aligned with the start of a carousel. When center aligning, the center of a slide is aligned with the center of a carousel.
 
 ##### `snap`
 
-Either `true` or `false`, defaults to `true`. Determines whether or not the
-carousel should snap on slides when scrolling.
+Either `true` or `false`, defaults to `true`. Determines whether or not the carousel should snap on slides when scrolling.
 
 ### Styling
 
-You may use the `bento-stream-gallery` element selector to style the streamGallery
-freely.
+You may use the `bento-stream-gallery` element selector to style the streamGallery freely.
 
 ---
 
@@ -295,8 +284,7 @@ ref.current.prev();
 
 ##### goToSlide(index: number)
 
-Moves the carousel to the slide specified by the `index` argument.
-Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
+Moves the carousel to the slide specified by the `index` argument. Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
 ```javascript
 ref.current.goToSlide(0); // Advance to first slide.
@@ -361,9 +349,7 @@ Either `"around"` or undefined. This determines how extra space is allocated aft
 
 ##### `loop`
 
-Either `true` or `false`, defaults to `true`. When true, the carousel will allow
-the user to move from the first item back to the last item and visa versa. There
-must be at least three slides present for looping to occur.
+Either `true` or `false`, defaults to `true`. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three slides present for looping to occur.
 
 ##### `outsetArrows`
 
@@ -377,8 +363,7 @@ A number, defaults to `0`. This determines how much of an additional slide to sh
 
 ##### `minVisibleCount`
 
-A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s)
-visible.
+A number, defaults to `1`. Determines the minimum number of slides that should be shown at a given time. Fractional values can be used to make part of a(n) additional slide(s) visible.
 
 ##### `maxVisibleCount`
 
@@ -396,12 +381,8 @@ A number, defaults to [`Number.MAX_VALUE`](https://developer.mozilla.org/en-US/d
 
 ##### `slideAlign`
 
-Either `start` or `center`. When start aligning, the start of a slide (e.g. the
-left edge, when horizontal aligning) is aligned with the start of a carousel.
-When center aligning, the center of a slide is aligned with the center of a
-carousel.
+Either `start` or `center`. When start aligning, the start of a slide (e.g. the left edge, when horizontal aligning) is aligned with the start of a carousel. When center aligning, the center of a slide is aligned with the center of a carousel.
 
 ##### `snap`
 
-Either `true` or `false`, defaults to `true`. Determines whether or not the
-carousel should snap on slides when scrolling.
+Either `true` or `false`, defaults to `true`. Determines whether or not the carousel should snap on slides when scrolling.

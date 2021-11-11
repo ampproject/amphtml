@@ -80,8 +80,7 @@ defineBentoFitText();
 
 ### Overflowing content
 
-If the content of the `bento-fit-text` overflows the available space, even with a
-`min-font-size` specified, the overflowing content is cut off and hidden. WebKit and Blink-based browsers show ellipsis for overflowing content.
+If the content of the `bento-fit-text` overflows the available space, even with a `min-font-size` specified, the overflowing content is cut off and hidden. WebKit and Blink-based browsers show ellipsis for overflowing content.
 
 In the following example, we specified a `min-font-size` of `40`, and added more content inside the `bento-fit-text` element. This causes the content to exceed the size of its fixed block parent, so the text is truncated to fit the container.
 
@@ -138,8 +137,7 @@ While overflowing content is _visually_ truncated to fit the container, note tha
 
 #### Media Queries
 
-The attributes for `<bento-fit-text>` can be configured to use different
-options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
+The attributes for `<bento-fit-text>` can be configured to use different options based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
 #### `min-font-size`
 

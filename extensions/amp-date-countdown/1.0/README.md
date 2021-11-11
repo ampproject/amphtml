@@ -60,8 +60,7 @@ The Bento Date Countdown Preact/React component allows consumers to render their
 
 #### `datetime`
 
-Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a
-standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
+Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
 
 #### `locale`
 
@@ -73,9 +72,7 @@ Specifies whether to stop the timer when it reaches 0 seconds. The value can be 
 
 #### `biggestUnit`
 
-Allows the `bento-date-countdown` component to calculate the time difference based
-on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays
-`1210 hours` left.
+Allows the `bento-date-countdown` component to calculate the time difference based on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays `1210 hours` left.
 
 -   Supported values: `days`, `hours`, `minutes`, `seconds`
 -   Default: `days`
@@ -86,9 +83,7 @@ Include this prop to reverse the direction of the countdown to count up instead.
 
 #### `render`
 
-Optional callback that should render a template. The callback will be provided an object with properties/values related to the date expressed in `datetime`.
-By default, the Bento Date Countdown component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption.
-See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
+Optional callback that should render a template. The callback will be provided an object with properties/values related to the date expressed in `datetime`. By default, the Bento Date Countdown component will display the [`localeString` form of the Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString) for the given locale and localeOption. See the [Returned Time Parameters section](#returned-time-parameters) for more details on how each property will be displayed.
 
 ```typescript
 function render(dateParams: DateParams): JSXInternal.Element;

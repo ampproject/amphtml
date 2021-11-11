@@ -153,14 +153,11 @@ Must be present when the lightbox is closed and the contents should not be displ
 
 #### `animation`
 
-Defines the style of animation for opening the lightbox. By default, this will
-be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
-`fly-in-top`.
+Defines the style of animation for opening the lightbox. By default, this will be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and `fly-in-top`.
 
 #### `scrollable`
 
-When the `scrollable` attribute is present, the content of the lightbox can
-scroll when overflowing the height of the lightbox.
+When the `scrollable` attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
 
 ---
 

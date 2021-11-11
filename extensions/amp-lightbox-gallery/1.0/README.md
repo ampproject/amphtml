@@ -62,14 +62,11 @@ defineBentoLightboxGallery();
 </html>
 ```
 
-To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section,
-then add the `lightbox` attribute on an `<img>` or `<bento-carousel>` element.
+To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section, then add the `lightbox` attribute on an `<img>` or `<bento-carousel>` element.
 
 ### Add Captions
 
-Optionally, you can specify a caption for each element in the lightbox. these
-fields are automatically read and displayed by the `<bento-lightbox-gallery>` in
-the following order of priority:
+Optionally, you can specify a caption for each element in the lightbox. these fields are automatically read and displayed by the `<bento-lightbox-gallery>` in the following order of priority:
 
 -   `figcaption` (if the lightboxed element is the child of a figure)
 -   `aria-describedby`
@@ -77,8 +74,7 @@ the following order of priority:
 -   `aria-label`
 -   `aria-labelledby`
 
-In the following example, `<bento-lightbox-gallery>` displays the `figcaption`
-value as its description, showing "toront's cn tower was ....".
+In the following example, `<bento-lightbox-gallery>` displays the `figcaption` value as its description, showing "toront's cn tower was ....".
 
 ```html
 <figure>
@@ -95,8 +91,7 @@ value as its description, showing "toront's cn tower was ....".
 </figure>
 ```
 
-In the following example, `<bento-lightbox-gallery>` displays the `alt` value as
-its description, showing "picture of cn tower".
+In the following example, `<bento-lightbox-gallery>` displays the `alt` value as its description, showing "picture of cn tower".
 
 ```html
 <img
