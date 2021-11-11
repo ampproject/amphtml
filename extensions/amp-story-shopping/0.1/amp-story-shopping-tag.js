@@ -28,7 +28,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.storeService_.subscribe(
-      StateProperty.SHOPPING_STATE,
+      StateProperty.SHOPPING_DATA,
       (shoppingState) => this.updateShoppingTag_(shoppingState),
       true /** callToInitialize */
     );

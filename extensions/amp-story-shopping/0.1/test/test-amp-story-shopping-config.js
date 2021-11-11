@@ -83,7 +83,7 @@ describes.realWin(
         '{"city-pop":{"product-tag-id":"city-pop","brand-label":"...","brand-favicon":"...","product-title":"Plastic Love","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"k-pop":{"product-tag-id":"k-pop","brand-label":"...","brand-favicon":"...","product-title":"Gangnam Style","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"eurodance":{"product-tag-id":"eurodance","brand-label":"...","brand-favicon":"...","product-title":"Crystal King Battle","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1}}';
 
       expect(
-        JSON.stringify(storeService.get(StateProperty.SHOPPING_STATE))
+        JSON.stringify(storeService.get(StateProperty.SHOPPING_DATA))
       ).to.eql(expectedRemoteResult);
     });
 
