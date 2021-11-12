@@ -65,7 +65,7 @@ export class AmpStoryRequestService {
 
   /**
    * Retrieves the config from and determines if
-   * src (remote) or inline config will be used.
+   * a remote or inline config will be used.
    * @param  {?Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
