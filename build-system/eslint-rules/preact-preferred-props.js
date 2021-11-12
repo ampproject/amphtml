@@ -29,10 +29,7 @@ module.exports = {
     fixable: 'code',
   },
   create(context) {
-    const attributes = {
-      ...ATTRIBUTES_REACT_TO_PREACT,
-    };
-    const preactNames = new Set(Object.values(attributes));
+    const preactNames = new Set(Object.values(ATTRIBUTES_REACT_TO_PREACT));
 
     let lastImportDecl = null;
     let addedImportDecl = false;
@@ -54,7 +51,7 @@ module.exports = {
         }
         const property = prop.key.name || prop.key.value;
 
-        let preferred = attributes[property];
+        let preferred = ATTRIBUTES_REACT_TO_PREACT[property];
         let message = `Prefer \`${preferred}\` property access to \`${property}\`.`;
 
         if (preactNames.has(property)) {
@@ -119,14 +116,14 @@ module.exports = {
           return;
         }
         const name = node.arguments[0].value;
-        if (attributes[name]) {
+        if (ATTRIBUTES_REACT_TO_PREACT[name]) {
           context.report({
             node,
-            message: `${node.callee.name} requires Preact-style name \`${attributes[name]}\`.`,
+            message: `${node.callee.name} requires Preact-style name \`${ATTRIBUTES_REACT_TO_PREACT[name]}\`.`,
             fix(fixer) {
               return fixer.replaceText(
                 node.arguments[0],
-                `'${attributes[name]}'`
+                `'${ATTRIBUTES_REACT_TO_PREACT[name]}'`
               );
             },
           });
@@ -162,7 +159,7 @@ module.exports = {
       },
 
       JSXAttribute(node) {
-        const alternative = attributes[node.name.name];
+        const alternative = ATTRIBUTES_REACT_TO_PREACT[node.name.name];
         if (!alternative) {
           return;
         }
