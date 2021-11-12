@@ -20,7 +20,6 @@ export class FakeWindow {
    */
   constructor(opt_spec) {
     const spec = opt_spec || {};
-    const _this = this;
 
     /**
      * This value is reflected on this.document.readyState.
@@ -211,14 +210,8 @@ export class FakeWindow {
     /** @const */
     this.Date = window.Date;
 
-    this.performance = {
-      now() {
-        return _this.Date.now();
-      },
-      get timeOrigin() {
-        return 1;
-      },
-    };
+    /** @const */
+    this.performance = new FakePerformance(this);
 
     /** polyfill setTimeout. */
     this.setTimeout = function () {
@@ -758,6 +751,21 @@ export class FakeMutationObserver {
       this.scheduled_ = null;
       this.callback_(this.takeRecords_());
     }));
+  }
+}
+
+export class FakePerformance {
+  constructor(win) {
+    /** @const */
+    this.win_ = win;
+  }
+
+  get timeOrigin() {
+    return 1;
+  }
+
+  now() {
+    return this.win_.Date.now();
   }
 }
 
