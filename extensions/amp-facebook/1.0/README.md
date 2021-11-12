@@ -6,7 +6,7 @@ Embeds a [Facebook](https://facebook.com) post, a Facebook video, or a comment o
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/facebook
@@ -449,7 +449,7 @@ Define a `title` attribute for the component to propagate to the underlying `<if
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/facebook

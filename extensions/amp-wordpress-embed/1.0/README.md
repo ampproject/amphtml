@@ -6,7 +6,7 @@ An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/ne
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/wordpress-embed
@@ -121,7 +121,7 @@ The URL of the post to embed.
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/wordpress-embed

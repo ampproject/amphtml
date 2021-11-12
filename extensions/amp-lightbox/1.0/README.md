@@ -6,7 +6,7 @@ Displays any content in a full-viewport "lightbox" modal.
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox
@@ -17,7 +17,7 @@ import {defineElement as defineBentoLightbox} from '@bentoproject/lightbox';
 defineBentoLightbox();
 ```
 
-### Example: Import via `<script>`
+### Import via `<script>`
 
 <!--% example %-->
 
@@ -163,7 +163,7 @@ When the `scrollable` attribute is present, the content of the lightbox can scro
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox
