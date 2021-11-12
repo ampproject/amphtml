@@ -10,11 +10,12 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
 
     /** @private @const {?./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
+
+    /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
   }
 
   /**
@@ -38,16 +39,27 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   buildCallback() {
     super.buildCallback();
     return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-        devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
-        this.storeService_ = storeService;
-      }),
-      Services.storyRequestServiceForOrNull(this.win).then((requestService) => {
-        devAssert(requestService, 'Could not retrieve AmpStoryRequestService');
-        this.requestService_ = requestService;
-      }),
+      Services.storyStoreServiceForOrNull(this.win),
+      Services.storyRequestServiceForOrNull(this.win),
     ])
-      .then(() => this.requestService_.loadConfigImpl(this.element))
+      .then((services) => {
+        services[0]; // storeService
+        services[1]; // requestService
+
+        this.storeService_ = services[0];
+        this.requestService_ = services[1];
+
+        devAssert(
+          this.storeService_,
+          'Could not retrieve AmpStoryStoreService'
+        );
+        devAssert(
+          this.requestService_,
+          'Could not retrieve AmpStoryRequestService'
+        );
+
+        return this.requestService_.loadConfig(this.element);
+      })
       .then((storyConfig) => this.addShoppingDataFromConfig_(storyConfig));
   }
 

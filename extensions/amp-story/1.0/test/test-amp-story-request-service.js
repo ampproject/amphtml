@@ -18,6 +18,16 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     xhrMock = env.sandbox.mock(requestService.xhr_);
   });
 
+  it('should not load the config if no src or inline is set', async () => {
+    xhrMock.expects('fetchJson').never();
+
+    const config = await requestService.loadConfig(shareElement);
+
+    expect(JSON.stringify(config)).to.equal('{}');
+
+    xhrMock.verify();
+  });
+
   it('should fall back to inline config if no src is set', async () => {
     xhrMock.expects('fetchJson').never();
 
@@ -29,7 +39,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     </script>
     `;
 
-    const config = await requestService.loadConfigImpl(shareElement);
+    const config = await requestService.loadConfig(shareElement);
 
     expect(JSON.stringify(config)).to.equal(JSON.stringify(configData));
     xhrMock.verify();
@@ -50,7 +60,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadConfigImpl(shareElement);
+    await requestService.loadConfig(shareElement);
     xhrMock.verify();
   });
 
@@ -69,7 +79,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadConfigImpl(shareElement);
+    const config = await requestService.loadConfig(shareElement);
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
@@ -88,7 +98,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadConfigImpl(shareElement);
+    await requestService.loadConfig(shareElement);
     xhrMock.verify();
   });
 
@@ -107,7 +117,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadConfigImpl(shareElement);
+    const config = await requestService.loadConfig(shareElement);
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });

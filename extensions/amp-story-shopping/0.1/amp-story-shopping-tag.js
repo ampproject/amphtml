@@ -45,10 +45,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   updateShoppingTag_(shoppingState) {
     const tagData = shoppingState[this.element.getAttribute('data-tag-id')];
-    if (tagData) {
-      this.mutateElement(() => {
-        this.element.textContent = tagData['product-title'];
-      });
+    if (!tagData) {
+      return;
     }
+    this.mutateElement(() => {
+      this.element.textContent = tagData['product-title'];
+    });
   }
 }

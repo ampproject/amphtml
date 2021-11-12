@@ -151,7 +151,6 @@ export const StateProperty = {
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
-  // Shopping Data
   SHOPPING_DATA: 'shoppingData',
   SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
   // Any page has audio, or amp-story has a `background-audio` attribute.

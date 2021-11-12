@@ -1,3 +1,6 @@
 amp-story-shopping-tag {
+    /**
+    * This enables layoutCallback to be called.
+    */ 
     min-height: 20px;
 }

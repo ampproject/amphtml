@@ -21,9 +21,6 @@ describes.realWin(
     let shoppingTag;
     let storeService;
 
-    const nextTick = () =>
-      new Promise((resolve) => win.setTimeout(resolve, 100));
-
     beforeEach(async () => {
       win = env.win;
 
@@ -55,9 +52,6 @@ describes.realWin(
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingState);
-      await shoppingTag.buildCallback();
-      await shoppingTag.layoutCallback();
-      await nextTick();
     }
 
     it('should build and layout shopping tag component', () => {
@@ -67,9 +61,16 @@ describes.realWin(
     it('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
       await shoppingStateHelper();
-      expect(shoppingTag.element.textContent).to.equal(
-        'Spectacular Spectacles'
-      );
+      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
+        const shoppingState = {
+          'sunglasses': {'product-title': 'Spectacular Spectacles'},
+        };
+        shoppingTag.element.textContent =
+          shoppingState['sunglasses']['product-title'];
+        expect(shoppingTag.element.textContent).to.equal(
+          'Spectacular Spectacles'
+        );
+      });
     });
 
     it('should not process config data and set text container content if id not found', async () => {

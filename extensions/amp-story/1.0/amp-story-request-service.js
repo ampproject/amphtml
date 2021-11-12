@@ -52,12 +52,13 @@ export class AmpStoryRequestService {
   /**
    * Retrieves the inline config - will be called if
    * src attribute is invalid or not present.
-   * @param  {!Element} configEl
+   * @param  {!Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
+   * @private
    */
-  getInlineConfig(configEl) {
+  getInlineConfig_(element) {
     try {
-      return Promise.resolve(getChildJsonConfig(configEl));
+      return Promise.resolve(getChildJsonConfig(element));
     } catch (err) {
       return Promise.resolve(err);
     }
@@ -69,7 +70,7 @@ export class AmpStoryRequestService {
    * @param  {?Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
-  loadConfigImpl(element) {
+  loadConfig(element) {
     if (!element) {
       return Promise.resolve();
     }
@@ -80,10 +81,10 @@ export class AmpStoryRequestService {
       return this.executeRequest(
         rawUrl,
         credentials ? {credentials} : {}
-      ).catch(() => this.getInlineConfig(element));
+      ).catch(() => this.getInlineConfig_(element));
     }
 
-    return this.getInlineConfig(element);
+    return this.getInlineConfig_(element);
   }
 }
 
