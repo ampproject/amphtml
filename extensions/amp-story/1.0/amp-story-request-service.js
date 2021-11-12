@@ -50,7 +50,8 @@ export class AmpStoryRequestService {
   }
 
   /**
-   * Retrieves the publisher share providers.
+   * Retrieves the inline config - will be called if
+   * src attribute is invalid or not present.
    * @param  {!Element} configEl
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
@@ -63,7 +64,8 @@ export class AmpStoryRequestService {
   }
 
   /**
-   * Retrieves the publisher share providers.
+   * Retrieves the config from and determines if
+   * src (remote) or inline config will be used.
    * @param  {?Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
