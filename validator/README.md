@@ -131,7 +131,7 @@ you can use docker to reproduce the test errors.
 
 1. Start an interactive docker container
     ```bash
-    docker run -it node:lts-buster bash
+    docker run -it -u root cimg/openjdk:17.0-node bash
     ```
 1. Run following commands in the container. Note that you are already the `root` user inside the docker container.
     ```bash
