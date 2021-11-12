@@ -1,6 +1,5 @@
 import {CommonSignals} from '#core/constants/common-signals';
 import {Layout} from '#core/dom/layout';
-import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {realChildElements, realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 
