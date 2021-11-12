@@ -2,6 +2,7 @@
  * @fileoverview
  * Transforms Preact-style props ("class") into React-style ("className")
  */
+const {ATTRIBUTES_PREACT_TO_REACT} = require('../../common/preact-prop-names');
 
 const propNameFn = 'propName';
 
@@ -13,11 +14,7 @@ module.exports = function (babel) {
    * @return {?string}
    */
   function getReactStyle(name) {
-    // TODO(wg-bento): This mapping is incomplete.
-    if (name === 'class') {
-      return 'className';
-    }
-    return name;
+    return ATTRIBUTES_PREACT_TO_REACT[name] ?? name;
   }
 
   return {
