@@ -37,7 +37,8 @@ module.exports = {
       }
       warned = true;
 
-      const [{from, name} = defaultNamespace] = context.options;
+      const [namespace = defaultNamespace] = context.options;
+      const {from, name} = namespace;
 
       const comment =
         name !== defaultNamespace.name
@@ -84,7 +85,8 @@ module.exports = {
       },
 
       ImportNamespaceSpecifier(node) {
-        const [{name} = defaultNamespace] = context.options;
+        const [namespace = defaultNamespace] = context.options;
+        const {name} = namespace;
         if (node.local.name === name) {
           imported = true;
         }
