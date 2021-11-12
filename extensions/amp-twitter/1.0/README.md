@@ -214,17 +214,15 @@ Valid timeline source types include <code>profile</code>, <code>likes</code>, <c
     <td width="40%"><strong>options (optional)</strong></td>
     <td>You can specify options for the Tweet, Moment, or Timeline appearance by passing in an object to the <code>options</code> prop.
 For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>. Note: When passing in the `options` prop, make sure to optimize or memoize the object:
-<code>
-const TWITTER_OPTIONS = {
+<pre><code>const TWITTER_OPTIONS = {
   // make sure to define these once globally!
 };
-
 function MyComponent() {
-// etc
-return (
-<Twitter optionsProps={TWITTER_OPTIONS} />
-);
-}</code></td>
+  // etc
+  return (
+    &ltTwitter optionsProps={TWITTER_OPTIONS} /&gt;
+  );
+}</code></pre></td>
 
   </tr>
    <tr>

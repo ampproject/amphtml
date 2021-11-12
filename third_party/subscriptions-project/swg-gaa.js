@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.192 */
+/** Version: 0.1.22.193 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -162,6 +162,61 @@ const I18N_STRINGS = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
+ */
+
+/**
+ * Simple wrapper around JSON.parse that casts the return value
+ * to JsonObject.
+ * Create a new wrapper if an array return value is desired.
+ * @param {*} json JSON string to parse
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function parseJson(json) {
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /** @enum {number} */
 const AnalyticsEvent = {
   UNKNOWN: 0,
@@ -191,6 +246,12 @@ const AnalyticsEvent = {
   IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT: 24,
   IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT: 25,
   IMPRESSION_CONTRIBUTION_OFFERS: 26,
+  IMPRESSION_TWG_COUNTER: 27,
+  IMPRESSION_TWG_SITE_SUPPORTER_WALL: 28,
+  IMPRESSION_TWG_PUBLICATION: 29,
+  IMPRESSION_TWG_STATIC_BUTTON: 30,
+  IMPRESSION_TWG_DYNAMIC_BUTTON: 31,
+  IMPRESSION_TWG_STICKER_SELECTION_SCREEN: 32,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -230,6 +291,20 @@ const AnalyticsEvent = {
   ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
   ACTION_SUBSCRIPTION_OFFERS_CLOSED: 1037,
   ACTION_CONTRIBUTION_OFFERS_CLOSED: 1038,
+  ACTION_TWG_STATIC_CTA_CLICK: 1039,
+  ACTION_TWG_DYNAMIC_CTA_CLICK: 1040,
+  ACTION_TWG_SITE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1041,
+  ACTION_TWG_DIALOG_SUPPORTER_WALL_CTA_CLICK: 1042,
+  ACTION_TWG_COUNTER_CLICK: 1043,
+  ACTION_TWG_SITE_SUPPORTER_WALL_ALL_THANKS_CLICK: 1044,
+  ACTION_TWG_PAID_STICKER_SELECTED_SCREEN_CLOSE_CLICK: 1045,
+  ACTION_TWG_PAID_STICKER_SELECTION_CLICK: 1046,
+  ACTION_TWG_FREE_STICKER_SELECTION_CLICK: 1047,
+  ACTION_TWG_MINI_SUPPORTER_WALL_CLICK: 1048,
+  ACTION_TWG_CREATOR_BENEFIT_CLICK: 1049,
+  ACTION_TWG_FREE_TRANSACTION_START_NEXT_BUTTON_CLICK: 1050,
+  ACTION_TWG_PAID_TRANSACTION_START_NEXT_BUTTON_CLICK: 1051,
+  ACTION_TWG_STICKER_SELECTION_SCREEN_CLOSE_CLICK: 1052,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -246,6 +321,14 @@ const AnalyticsEvent = {
   EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_INELIGIBLE_PAYWALL: 3013,
   EVENT_UNLOCKED_FOR_CRAWLER: 3014,
+  EVENT_TWG_COUNTER_VIEW: 3015,
+  EVENT_TWG_SITE_SUPPORTER_WALL_VIEW: 3016,
+  EVENT_TWG_STATIC_BUTTON_VIEW: 3017,
+  EVENT_TWG_DYNAMIC_BUTTON_VIEW: 3018,
+  EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PRIVATE: 3019,
+  EVENT_TWG_POST_TRANSACTION_SETTING_PRIVATE: 3020,
+  EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PUBLIC: 3021,
+  EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -258,29 +341,6 @@ const EventOriginator = {
   PUBLISHER_CLIENT: 5,
   SHOWCASE_CLIENT: 6,
 };
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param  {...*} var_args [description]
- */
-function warn(var_args) {
-  console.warn.apply(console, arguments);
-}
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -336,38 +396,6 @@ function findInArray(array, predicate) {
     }
   }
   return null;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @fileoverview This module declares JSON types as defined in the
- * {@link http://json.org/}.
- */
-
-/**
- * Simple wrapper around JSON.parse that casts the return value
- * to JsonObject.
- * Create a new wrapper if an array return value is desired.
- * @param {*} json JSON string to parse
- * @return {?JsonObject|undefined} May be extend to parse arrays.
- */
-function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -1220,14 +1248,17 @@ function queryStringHasFreshGaaParams(
 /** Renders Google Article Access (GAA) Metering Regwall. */
 class GaaMeteringRegwall {
   /**
-   * Returns a promise for a Google Sign-In user object.
-   * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
+   * Returns a promise for a Google user object.
+   * The user object will be a:
+   * - GaaUserDef, if you use the GaaGoogleSignInButton
+   * - GoogleIdentityV1, if you use the GaaSignInWithGoogleButton
+   * - Custom object, if you use the GaaGoogle3pSignInButton
    *
    * This method opens a metering regwall dialog,
    * where users can sign in with Google.
    * @nocollapse
    * @param {{ iframeUrl: string, caslUrl: string }} params
-   * @return {!Promise<!GaaUserDef>}
+   * @return {!Promise<!GaaUserDef|!GoogleIdentityV1|!Object>}
    */
   static show({iframeUrl, caslUrl}) {
     const queryString = GaaUtils.getQueryString();

@@ -142,15 +142,11 @@ The URL to retrieve embedding information.
 
 #### `data-card-embed`
 
-The URL to a video or rich media. Use with static embeds like articles, instead
-of using the static page content in the card, the card will embed the video or
-rich media.
+The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.
 
 #### `data-card-image`
 
-The URL to an image. Specifies which image to use in article cards when
-`data-url` points to an article. Not all image URLs are supported, if the image
-is not loaded, try a different image or domain.
+The URL to an image. Specifies which image to use in article cards when `data-url` points to an article. Not all image URLs are supported, if the image is not loaded, try a different image or domain.
 
 #### `data-card-controls`
 
@@ -163,13 +159,11 @@ The default is `1`.
 
 #### `data-card-align`
 
-Aligns the card. The possible values are `left`, `center` and `right`. The
-default value is `center`.
+Aligns the card. The possible values are `left`, `center` and `right`. The default value is `center`.
 
 #### `data-card-recommend`
 
-When recommendations are supported, it disables embedly recommendations on video
-and rich cards. These are recommendations created by embedly.
+When recommendations are supported, it disables embedly recommendations on video and rich cards. These are recommendations created by embedly.
 
 -   `0`: Disables embedly recommendations.
 -   `1`: Enables embedly recommendations.
@@ -182,10 +176,7 @@ Specifies the via content in the card. This is a great way to do attribution.
 
 #### `data-card-theme` (optional)
 
-Allows settings the `dark` theme which changes the background color of the main
-card container. Use `dark` to set this theme. For dark backgrounds it's better
-to specify this. The default is `light`, which sets no background color of the
-main card container.
+Allows settings the `dark` theme which changes the background color of the main card container. Use `dark` to set this theme. For dark backgrounds it's better to specify this. The default is `light`, which sets no background color of the main card container.
 
 #### title (optional)
 
@@ -253,15 +244,11 @@ The URL to retrieve embedding information.
 
 #### `cardEmbed`
 
-The URL to a video or rich media. Use with static embeds like articles, instead
-of using the static page content in the card, the card will embed the video or
-rich media.
+The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.
 
 #### `cardImage`
 
-The URL to an image. Specifies which image to use in article cards when
-`data-url` points to an article. Not all image URLs are supported, if the image
-is not loaded, try a different image or domain.
+The URL to an image. Specifies which image to use in article cards when `data-url` points to an article. Not all image URLs are supported, if the image is not loaded, try a different image or domain.
 
 #### `cardControls`
 
@@ -274,13 +261,11 @@ The default is `1`.
 
 #### `cardAlign`
 
-Aligns the card. The possible values are `left`, `center` and `right`. The
-default value is `center`.
+Aligns the card. The possible values are `left`, `center` and `right`. The default value is `center`.
 
 #### `cardRecommend`
 
-When recommendations are supported, it disables embedly recommendations on video
-and rich cards. These are recommendations created by embedly.
+When recommendations are supported, it disables embedly recommendations on video and rich cards. These are recommendations created by embedly.
 
 -   `0`: Disables embedly recommendations.
 -   `1`: Enables embedly recommendations.
@@ -293,10 +278,7 @@ Specifies the via content in the card. This is a great way to do attribution.
 
 #### `cardTheme` (optional)
 
-Allows settings the `dark` theme which changes the background color of the main
-card container. Use `dark` to set this theme. For dark backgrounds it's better
-to specify this. The default is `light`, which sets no background color of the
-main card container.
+Allows settings the `dark` theme which changes the background color of the main card container. Use `dark` to set this theme. For dark backgrounds it's better to specify this. The default is `light`, which sets no background color of the main card container.
 
 #### title (optional)
 

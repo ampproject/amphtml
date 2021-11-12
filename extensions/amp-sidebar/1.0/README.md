@@ -25,12 +25,6 @@ defineBentoSidebar();
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-sidebar:not([open]) {
-        display: none !important;
-      }
-    </style>
     <script
       type="module"
       async
@@ -47,6 +41,11 @@ defineBentoSidebar();
       async
       src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css"
+    />
   </head>
   <body>
     <bento-sidebar id="sidebar1" side="right">

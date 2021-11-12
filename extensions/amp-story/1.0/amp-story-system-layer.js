@@ -92,7 +92,7 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
  */
 const renderSystemLayerElement = (element) => (
   <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
-    <a class={ATTRIBUTION_CLASS} target="_blank">
+    <a class={String(ATTRIBUTION_CLASS)} target="_blank">
       <div class="i-amphtml-story-attribution-logo-container">
         <img alt="" class="i-amphtml-story-attribution-logo" />
       </div>

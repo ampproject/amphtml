@@ -124,23 +124,11 @@ These attributes should all behave like they do on standard iframes.
 
 #### `sandbox` (optional) <a name="sandbox"></a>
 
-Iframes created by `bento-iframe` always have the `sandbox` attribute defined on
-them. By default, the value is empty, which means that they are "maximum
-sandboxed". By setting `sandbox` values, one can opt the iframe into being less
-sandboxed. All values supported by browsers are allowed. For example, setting
-`sandbox="allow-scripts"` allows the iframe to run JavaScript, or
-`sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript,
-make non-CORS XHRs, and read/write cookies.
+Iframes created by `bento-iframe` always have the `sandbox` attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting `sandbox` values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
 
-If you are iframing a document that was not specifically created with sandboxing
-in mind, you will most likely need to add `allow-scripts allow-same-origin` to
-the `sandbox` attribute and you might need to allow additional capabilities.
+If you are iframing a document that was not specifically created with sandboxing in mind, you will most likely need to add `allow-scripts allow-same-origin` to the `sandbox` attribute and you might need to allow additional capabilities.
 
-Note also, that the sandbox applies to all windows opened from a sandboxed
-iframe. This includes new windows created by a link with `target=_blank` (add
-`allow-popups` to allow this to happen). Adding `allow-popups-to-escape-sandbox`
-to the `sandbox` attribute, makes those new windows behave like non-sandboxed
-new windows. This is likely most of the time what you want and expect.
+Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with `target=_blank` (add `allow-popups` to allow this to happen). Adding `allow-popups-to-escape-sandbox` to the `sandbox` attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 
@@ -190,13 +178,7 @@ These attributes all behave like they do on standard iframes.
 
 #### `sandbox` (optional) <a name="sandbox"></a>
 
-Iframes created by `<BentoIframe>` always have the `sandbox` attribute defined on
-them. By default, the value is empty, which means that they are "maximum
-sandboxed". By setting `sandbox` values, one can opt the iframe into being less
-sandboxed. All values supported by browsers are allowed. For example, setting
-`sandbox="allow-scripts"` allows the iframe to run JavaScript, or
-`sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript,
-make non-CORS XHRs, and read/write cookies.
+Iframes created by `<BentoIframe>` always have the `sandbox` attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting `sandbox` values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 
