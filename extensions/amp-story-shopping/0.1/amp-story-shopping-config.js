@@ -43,9 +43,6 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       Services.storyRequestServiceForOrNull(this.win),
     ])
       .then((services) => {
-        services[0]; // storeService
-        services[1]; // requestService
-
         this.storeService_ = services[0];
         this.requestService_ = services[1];
 
