@@ -29,7 +29,7 @@ import {
 } from '#core/dom/query';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 import {isExperimentOn} from '#experiments';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {isPreviewMode} from './embed-mode';
 
 const TAG = 'AMP-STORY';
 
@@ -546,15 +546,15 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
-    const storeService = getStoreService(this.ampdoc_.win);
-    const animationDisabled =
+    const firstPageAnimationDisabled =
       isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
-      !storeService.get(StateProperty.CAN_ANIMATE_FIRST_PAGE);
+      isPreviewMode(ampdoc.win);
 
     /** @private @const {bool} */
     this.skipAnimations_ =
       prefersReducedMotion(ampdoc.win) ||
-      (animationDisabled && matches(page, 'amp-story-page:first-of-type'));
+      (firstPageAnimationDisabled &&
+        matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */
     this.runners_ = null;
