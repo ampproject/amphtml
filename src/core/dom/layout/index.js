@@ -89,7 +89,7 @@ const videoPlayerTagNameRe =
  */
 export function parseLayout(s) {
   if (isEnumValue(Layout_Enum, s)) {
-    return s;
+    return /** @type {!Layout_Enum} */ (s);
   }
   return undefined;
 }
