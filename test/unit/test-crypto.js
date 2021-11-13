@@ -132,8 +132,9 @@ describes.realWin('crypto-impl', {}, (env) => {
   }
 
   testSuite('with native crypto API');
-  testSuite('with crypto lib', {});
+  testSuite('with crypto lib', {...win, crypto: null});
   testSuite('with native crypto API rejects', {
+    ...win,
     crypto: {
       subtle: {
         digest: () => Promise.reject('Operation not supported'),
@@ -143,6 +144,7 @@ describes.realWin('crypto-impl', {}, (env) => {
   testSuite(
     'with native crypto API throws',
     {
+      ...win,
       crypto: {
         subtle: {
           digest: () => {
@@ -155,9 +157,10 @@ describes.realWin('crypto-impl', {}, (env) => {
   );
 
   it('native API result should exactly equal to crypto lib result', () => {
+    const fakeWin = {...win, crypto: null};
     return Promise.all([
       createCrypto(win).sha384('abc'),
-      createCrypto({}).sha384('abc'),
+      createCrypto(fakeWin).sha384('abc'),
     ]).then((results) => {
       expect(results[0]).to.jsonEqual(results[1]);
     });
