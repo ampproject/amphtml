@@ -1,8 +1,8 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
 import {
-  PlayingStates,
+  PlayingStates_Enum,
   VideoAnalyticsEvents_Enum,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
@@ -958,8 +958,8 @@ export class IniLoadTracker extends EventTracker {
     }
     const signals = element.signals();
     return Promise.race([
-      signals.whenSignal(CommonSignals.INI_LOAD),
-      signals.whenSignal(CommonSignals.LOAD_END),
+      signals.whenSignal(CommonSignals_Enum.INI_LOAD),
+      signals.whenSignal(CommonSignals_Enum.LOAD_END),
     ]);
   }
 }
@@ -1489,7 +1489,10 @@ export class VideoEventTracker extends EventTracker {
         return;
       }
 
-      if (excludeAutoplay && details['state'] === PlayingStates.PLAYING_AUTO) {
+      if (
+        excludeAutoplay &&
+        details['state'] === PlayingStates_Enum.PLAYING_AUTO
+      ) {
         return;
       }
 

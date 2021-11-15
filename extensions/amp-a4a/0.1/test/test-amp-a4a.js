@@ -9,7 +9,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
 
 import {toggleExperiment} from '#experiments';
@@ -163,7 +163,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     expect(fie.contentDocument.body.textContent).to.contain.string(
       'Hello, world.'
     );
-    expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
+    expect(prioritySpy).to.be.calledWith(LayoutPriority_Enum.CONTENT);
   });
 
   it('should not throw on polyfill scripts', async () => {
@@ -1652,7 +1652,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         .calledOnce;
       expect(updateLayoutPriorityStub).to.be.calledOnce;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LayoutPriority_Enum.CONTENT
       );
     });
 
@@ -1789,7 +1789,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         'renderNonAmpCreative_ called exactly once'
       ).to.be.true;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LayoutPriority_Enum.CONTENT
       );
       expect(is3pThrottled(a4a.win)).to.be.false;
     });
@@ -1994,7 +1994,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           .calledOnce;
         expect(updateLayoutPriorityStub).to.be.calledOnce;
         expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-          LayoutPriority.CONTENT
+          LayoutPriority_Enum.CONTENT
         );
       } else {
         expect(iframe.getAttribute('srcdoc')).to.be.null;
@@ -2702,7 +2702,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+          expect(a4a.getLayoutPriority()).to.equal(
+            LayoutPriority_Enum.METADATA
+          );
         });
       }
     );
@@ -2719,7 +2721,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
         });
       }
     );

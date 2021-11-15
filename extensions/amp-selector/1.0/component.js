@@ -1,6 +1,6 @@
 import objstr from 'obj-str';
 
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 import {mod} from '#core/math';
 
@@ -212,12 +212,12 @@ function SelectorWithRef(
       const {key} = e;
       let dir;
       switch (key) {
-        case Keys.LEFT_ARROW: // Fallthrough.
-        case Keys.UP_ARROW:
+        case Keys_Enum.LEFT_ARROW: // Fallthrough.
+        case Keys_Enum.UP_ARROW:
           dir = -1;
           break;
-        case Keys.RIGHT_ARROW: // Fallthrough.
-        case Keys.DOWN_ARROW:
+        case Keys_Enum.RIGHT_ARROW: // Fallthrough.
+        case Keys_Enum.DOWN_ARROW:
           dir = 1;
           break;
         default:
@@ -334,7 +334,7 @@ export function BentoSelectorOption({
 
   const onKeyDown = useCallback(
     (e) => {
-      if (e.key === Keys.ENTER || e.key === Keys.SPACE) {
+      if (e.key === Keys_Enum.ENTER || e.key === Keys_Enum.SPACE) {
         trySelect();
       }
     },

@@ -2,7 +2,7 @@
  * Visibility state of the AMP document.
  * @enum {string}
  */
-export const VisibilityState = {
+export const VisibilityState_Enum = {
   /**
    * The AMP document is being pre-rendered before being shown.
    */

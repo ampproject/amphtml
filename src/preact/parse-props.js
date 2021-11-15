@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {Loading} from '#core/constants/loading-instructions';
+import {Loading_Enum} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {parseBooleanAttribute} from '#core/dom';
 import {matches, realChildNodes} from '#core/dom/query';
@@ -252,14 +252,14 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = [<Slot loading={Loading.LAZY} />];
+      value = [<Slot loading={Loading_Enum.LAZY} />];
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
       value = realChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
-        : [<Slot loading={Loading.LAZY} />];
+        : [<Slot loading={Loading_Enum.LAZY} />];
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {

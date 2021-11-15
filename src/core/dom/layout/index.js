@@ -10,7 +10,7 @@ import {isEnumValue} from '#core/types/enum';
 /**
  * @enum {string}
  */
-export const Layout = {
+export const Layout_Enum = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   FIXED_HEIGHT: 'fixed-height',
@@ -27,7 +27,7 @@ export const Layout = {
  * BaseElement#updateLayoutPriority().
  * @enum {number}
  */
-export const LayoutPriority = {
+export const LayoutPriority_Enum = {
   CONTENT: 0,
   METADATA: 1,
   ADS: 2,
@@ -84,20 +84,18 @@ const videoPlayerTagNameRe =
 
 /**
  * @param {string} s
- * @return {!Layout|undefined} Returns undefined in case of failure to parse
+ * @return {!Layout_Enum|undefined} Returns undefined in case of failure to parse
  *   the layout string.
  */
 export function parseLayout(s) {
-  for (const k in Layout) {
-    if (Layout[k] == s) {
-      return Layout[k];
-    }
+  if (isEnumValue(Layout_Enum, s)) {
+    return /** @type {!Layout_Enum} */ (s);
   }
   return undefined;
 }
 
 /**
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {string}
  */
 export function getLayoutClass(layout) {
@@ -106,28 +104,28 @@ export function getLayoutClass(layout) {
 
 /**
  * Whether an element with this layout inherently defines the size.
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeDefined(layout) {
   return (
-    layout == Layout.FIXED ||
-    layout == Layout.FIXED_HEIGHT ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.FILL ||
-    layout == Layout.FLEX_ITEM ||
-    layout == Layout.FLUID ||
-    layout == Layout.INTRINSIC
+    layout == Layout_Enum.FIXED ||
+    layout == Layout_Enum.FIXED_HEIGHT ||
+    layout == Layout_Enum.RESPONSIVE ||
+    layout == Layout_Enum.FILL ||
+    layout == Layout_Enum.FLEX_ITEM ||
+    layout == Layout_Enum.FLUID ||
+    layout == Layout_Enum.INTRINSIC
   );
 }
 
 /**
  * Whether an element with this layout has a fixed dimension.
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeFixed(layout) {
-  return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+  return layout == Layout_Enum.FIXED || layout == Layout_Enum.FIXED_HEIGHT;
 }
 
 /**
