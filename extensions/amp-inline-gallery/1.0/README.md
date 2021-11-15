@@ -8,9 +8,7 @@ Its implementation uses a [Bento Base Carousel](https://www.npmjs.com/package/@b
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-inline-gallery>` web component.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/inline-gallery
@@ -23,33 +21,76 @@ defineBentoInlineGallery();
 
 ### Example: Include via `<script>`
 
-The example below contains a `bento-inline-gallery` consisting of three slides with thumbnails and a pagination indicator.
+<!--% example %-->
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
 
-  <script async src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"></script>
-  <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css">
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css"
+    />
 
-  <script async src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"></script>
-  <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css">
-<body>
-  <bento-inline-gallery id="inline-gallery">
-    <bento-inline-gallery-thumbnails style="height: 100px;" loop></bento-inline-gallery-thumbnails>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-inline-gallery id="inline-gallery">
+      <bento-inline-gallery-thumbnails
+        style="height: 100px"
+        loop
+      ></bento-inline-gallery-thumbnails>
 
-    <bento-base-carousel style="height: 200px;" snap-align="center" visible-count="3" loop>
-      <img src="img1.jpeg" data-thumbnail-src="img1-thumbnail.jpeg" />
-      <img src="img2.jpeg" data-thumbnail-src="img2-thumbnail.jpeg" />
-      <img src="img3.jpeg" data-thumbnail-src="img3-thumbnail.jpeg" />
-      <img src="img4.jpeg" data-thumbnail-src="img4-thumbnail.jpeg" />
-      <img src="img5.jpeg" data-thumbnail-src="img5-thumbnail.jpeg" />
-      <img src="img6.jpeg" data-thumbnail-src="img6-thumbnail.jpeg" />
-    </bento-base-carousel>
+      <bento-base-carousel
+        style="height: 200px"
+        snap-align="center"
+        visible-count="3"
+        loop
+      >
+        <img src="img1.jpeg" data-thumbnail-src="img1-thumbnail.jpeg" />
+        <img src="img2.jpeg" data-thumbnail-src="img2-thumbnail.jpeg" />
+        <img src="img3.jpeg" data-thumbnail-src="img3-thumbnail.jpeg" />
+        <img src="img4.jpeg" data-thumbnail-src="img4-thumbnail.jpeg" />
+        <img src="img5.jpeg" data-thumbnail-src="img5-thumbnail.jpeg" />
+        <img src="img6.jpeg" data-thumbnail-src="img6-thumbnail.jpeg" />
+      </bento-base-carousel>
 
-    <bento-inline-gallery-pagination style="height: 20px;"></bento-inline-gallery-pagination>
-  </bento-inline-gallery>
-</body>
+      <bento-inline-gallery-pagination
+        style="height: 20px"
+      ></bento-inline-gallery-pagination>
+    </bento-inline-gallery>
+  </body>
+</html>
 ```
 
 ### Layout and style
@@ -114,9 +155,7 @@ You may use the `bento-inline-gallery`, `bento-inline-gallery-pagination`, `bent
 
 ## Preact/React Component
 
-The examples below demonstrates use of the `<BentoInlineGallery>` as a functional component usable with the Preact or React libraries.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/inline-gallery
@@ -163,10 +202,6 @@ Or via `className`:
   background-color: red;
 }
 ```
-
-<!-- TODO(wg-bento): This section was empty, fix it.
-### Props for `BentoInlineGallery`
--->
 
 ### Props for `BentoInlineGalleryPagination`
 

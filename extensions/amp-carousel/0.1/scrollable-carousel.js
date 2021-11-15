@@ -1,7 +1,7 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Animation} from '#utils/animation';
 import {CarouselControls} from './carousel-controls';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {dev} from '#utils/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
@@ -95,10 +95,10 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
         const {args} = invocation;
         if (args) {
           const index = parseInt(args['index'], 10);
-          this.goToSlide_(index);
+          this.goToSlide(index);
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     /** If the element is in an email document, allow its `goToSlide` action. */
     Services.actionServiceForDoc(this.element).addToAllowlist(
@@ -151,9 +151,8 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {boolean=} opt_autoplay
    */
-  go(dir, animate, opt_autoplay) {
+  go(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
     const oldPos = this.pos_;
 
@@ -185,10 +184,9 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
   /**
    * Scrolls to the slide at the given slide index.
    * @param {number} index
-   * @private
    * @return {*} TODO(#23582): Specify return type
    */
-  goToSlide_(index) {
+  goToSlide(index) {
     const noOfSlides = this.cells_.length;
 
     if (!isFinite(index) || index < 0 || index >= noOfSlides) {
@@ -260,7 +258,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    */
   keydownHandler_(event) {
     const {key} = event;
-    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+    if (key == Keys_Enum.LEFT_ARROW || key == Keys_Enum.RIGHT_ARROW) {
       event.stopPropagation();
     }
   }
@@ -403,6 +401,28 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionNext() {
+    this.controls_.interactionNext();
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionPrev() {
+    this.controls_.interactionPrev();
+  }
+
+  /**
+   * Used by amp-lightbox-gallery
+   *
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   */
+  goCallback(dir, animate) {
+    this.go(dir, animate);
   }
 
   /**

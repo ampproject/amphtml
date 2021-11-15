@@ -591,6 +591,12 @@ async function createEmptyBuild(browser) {
  * @return {Promise<void>}
  */
 async function visualDiff() {
+  if (!PUPPETEER_CHROMIUM_REVISION) {
+    throw new Error(
+      `${cyan('amp visual-diff')} is only available on Linux, Mac, and Windows`
+    );
+  }
+
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
   const browserFetcher = await loadBrowserFetcher();

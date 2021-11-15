@@ -1,4 +1,4 @@
-import {LogLevel, devAssert} from '#utils/log';
+import {LogLevel_Enum, devAssert} from '#utils/log';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {tryResolve} from '#core/data-structures/promise';
 
@@ -29,7 +29,7 @@ let ElementPredicate_1_0_Def; // eslint-disable-line local/camelcase
  *
  * @typedef {{
  *   message: string,
- *   level: !LogLevel,
+ *   level: !LogLevel_Enum,
  *   moreInfo: (string|undefined),
  *   selector: (string|undefined),
  *   precondition: (!ElementPredicate_1_0_Def|undefined),
@@ -47,7 +47,7 @@ let AmpStoryLogType_1_0_Def; // eslint-disable-line local/camelcase
  *   element: !Element,
  *   rootElement: !Element,
  *   message: string,
- *   level: !LogLevel,
+ *   level: !LogLevel_Enum,
  *   conforms: boolean,
  *   moreInfo: (string|undefined),
  * }}
@@ -77,7 +77,7 @@ const LogType = {
     message: 'Videos should specify a poster image.',
     moreInfo: AMPPROJECT_DOCS + '/reference/components/amp-video#poster',
     selector: 'video:not([poster])',
-    level: LogLevel.ERROR,
+    level: LogLevel_Enum.ERROR,
   },
 
   /** Warnings */
@@ -88,28 +88,28 @@ const LogType = {
     moreInfo: AMPPROJECT_DOCS + '/guides/responsive/art_direction#srcset',
     selector: 'img:not([srcset])',
     predicate: (el) => el.naturalWidth <= 720 && el.naturalHeight <= 1280,
-    level: LogLevel.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   IMAGES_PORTRAIT: {
     message: 'Full-bleed images should be in portrait orientation.',
     selector: 'amp-story-grid-layer[template="fill"] > amp-img > img',
     predicate: (el) => el.naturalWidth < el.naturalHeight,
-    level: LogLevel.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEOS_MAX_720P: {
     message: 'Videos should not be larger than 720p.',
     selector: 'video',
     predicate: (el) => el.videoWidth <= 720 && el.videoHeight <= 1280,
-    level: LogLevel.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEOS_PORTRAIT: {
     message: 'Full-bleed videos should be in portrait orientation.',
     selector: 'amp-story-grid-layer[template="fill"] > amp-video > video',
     predicate: (el) => el.videoWidth < el.videoHeight,
-    level: LogLevel.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEO_POSTER_MAX_720P: {
@@ -119,7 +119,7 @@ const LogType = {
       getPosterFromVideo(el).then((poster) => {
         return poster.naturalWidth <= 720 && poster.naturalHeight <= 1280;
       }),
-    level: LogLevel.WARN,
+    level: LogLevel_Enum.WARN,
   },
 
   VIDEO_POSTER_POTRAIT: {
@@ -132,7 +132,7 @@ const LogType = {
       getPosterFromVideo(el).then(
         (poster) => poster.naturalWidth < poster.naturalHeight
       ),
-    level: LogLevel.WARN,
+    level: LogLevel_Enum.WARN,
   },
 };
 
