@@ -25,6 +25,7 @@ function getPreClosureConfig() {
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
     'optimize-objstr',
+    './build-system/babel-plugins/babel-plugin-mangle-object-values',
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
