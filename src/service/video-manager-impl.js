@@ -39,7 +39,7 @@ import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   PlayingStates,
-  VideoAnalyticsEvents,
+  VideoAnalyticsEvents_Enum,
   VideoAttributes,
   VideoEvents,
   VideoServiceSignals,
@@ -140,7 +140,7 @@ export class VideoManager {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (entry.getPlayingState() !== PlayingStates.PAUSED) {
-        analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+        analyticsEvent(entry, VideoAnalyticsEvents_Enum.SECONDS_PLAYED);
         this.timeUpdateActionEvent_(entry);
       }
     }
@@ -444,14 +444,14 @@ class VideoEntry {
     this.actionSessionManager_ = new VideoSessionManager();
 
     this.actionSessionManager_.onSessionEnd(() =>
-      analyticsEvent(this, VideoAnalyticsEvents.SESSION)
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.SESSION)
     );
 
     /** @private @const */
     this.visibilitySessionManager_ = new VideoSessionManager();
 
     this.visibilitySessionManager_.onSessionEnd(() =>
-      analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE)
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.SESSION_VISIBLE)
     );
 
     /** @private @const {function(): !AnalyticsPercentageTracker} */
@@ -501,7 +501,7 @@ class VideoEntry {
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAY, () => {
       this.hasSeenPlayEvent_ = true;
-      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.PLAY);
     });
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
@@ -524,17 +524,17 @@ class VideoEntry {
 
     listen(video.element, VideoEvents.ENDED, () => {
       this.isRollingAd_ = false;
-      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.ENDED);
     });
 
     listen(video.element, VideoEvents.AD_START, () => {
       this.isRollingAd_ = true;
-      analyticsEvent(this, VideoAnalyticsEvents.AD_START);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.AD_START);
     });
 
     listen(video.element, VideoEvents.AD_END, () => {
       this.isRollingAd_ = false;
-      analyticsEvent(this, VideoAnalyticsEvents.AD_END);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.AD_END);
     });
 
     video
@@ -578,7 +578,7 @@ class VideoEntry {
       prefixedVars[`custom_${key}`] = vars[key];
     });
 
-    analyticsEvent(this, VideoAnalyticsEvents.CUSTOM, prefixedVars);
+    analyticsEvent(this, VideoAnalyticsEvents_Enum.CUSTOM, prefixedVars);
   }
 
   /** Listens for signals to delegate playback to a different module. */
@@ -672,7 +672,7 @@ class VideoEntry {
     // PLAYING. Hence we treat the PLAYING as an indication to emit the
     // Analytics PLAY event if we haven't seen PLAY.
     if (!this.hasSeenPlayEvent_) {
-      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+      analyticsEvent(this, VideoAnalyticsEvents_Enum.PLAY);
     }
   }
 
@@ -681,7 +681,7 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
+    analyticsEvent(this, VideoAnalyticsEvents_Enum.PAUSE);
     this.isPlaying_ = false;
 
     // Prevent double-trigger of session if video is autoplay and the video
@@ -1586,7 +1586,7 @@ export class AnalyticsPercentageTracker {
    * @private
    */
   analyticsEventForTesting_(normalizedPercentage) {
-    analyticsEvent(this.entry_, VideoAnalyticsEvents.PERCENTAGE_PLAYED, {
+    analyticsEvent(this.entry_, VideoAnalyticsEvents_Enum.PERCENTAGE_PLAYED, {
       'normalizedPercentage': normalizedPercentage.toString(),
     });
   }
@@ -1594,7 +1594,7 @@ export class AnalyticsPercentageTracker {
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents} eventType
+ * @param {!VideoAnalyticsEvents_Enum} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */

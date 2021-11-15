@@ -148,7 +148,7 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    doBuildJs(jsBundles, 'custom-elements-polyfill.js', options),
+    doBuildJs(jsBundles, 'bento.js', options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -313,16 +313,16 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   const destPath = path.join(destDir, minifiedName);
   combineWithCompiledFile(srcFilename, destPath, options);
-  if (options.latestName) {
+  if (options.aliasName) {
     fs.copySync(
       destPath,
-      path.join(destDir, maybeToEsmName(options.latestName))
+      path.join(destDir, maybeToEsmName(options.aliasName))
     );
   }
 
   let name = minifiedName;
-  if (options.latestName) {
-    name += ` → ${maybeToEsmName(options.latestName)}`;
+  if (options.aliasName) {
+    name += ` → ${maybeToEsmName(options.aliasName)}`;
   }
   endBuildStep('Minified', name, timeInfo.startTime);
 }
@@ -359,17 +359,17 @@ function handleBundleError(err, continueOnError, destFilename) {
  */
 async function finishBundle(destDir, destFilename, options, startTime) {
   const logPrefix = options.minify ? 'Minified' : 'Compiled';
-  let {latestName} = options;
-  if (latestName) {
+  let {aliasName} = options;
+  if (aliasName) {
     if (!options.minify) {
-      latestName = latestName.replace(/\.js$/, '.max.js');
+      aliasName = aliasName.replace(/\.js$/, '.max.js');
     }
-    latestName = maybeToEsmName(latestName);
+    aliasName = maybeToEsmName(aliasName);
     fs.copySync(
       path.join(destDir, destFilename),
-      path.join(destDir, latestName)
+      path.join(destDir, aliasName)
     );
-    endBuildStep(logPrefix, `${destFilename} → ${latestName}`, startTime);
+    endBuildStep(logPrefix, `${destFilename} → ${aliasName}`, startTime);
   } else {
     const loggingName =
       options.npm && !destFilename.startsWith('amp-')
@@ -420,8 +420,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
+  const babelCaller =
+    options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
+
   const babelPlugin = getEsbuildBabelPlugin(
-    options.minify ? 'minified' : 'unminified',
+    babelCaller,
     /* enableCache */ true
   );
   const plugins = [babelPlugin];
@@ -521,8 +524,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
 /**
  * Name cache to help terser perform cross-binary property mangling.
- *
- * TODO: ensure this is actually necessary.
  */
 const nameCache = {};
 
@@ -538,7 +539,7 @@ async function minify(code, map) {
     mangle: {
       properties: {
         regex: '_AMP_PRIVATE_$',
-        // eslint-disable-next-line google-camelcase/google-camelcase
+        // eslint-disable-next-line local/camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
       },
     },
@@ -549,14 +550,17 @@ async function minify(code, map) {
     },
     output: {
       beautify: !!argv.pretty_print,
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       keep_quoted_props: true,
     },
     sourceMap: {content: map},
+    toplevel: true,
     module: !!argv.esm,
     nameCache,
   };
-  // TS complains if defined inline, since it sees type `string` but needs type ("strict" | boolean).
+  // Remove the local variable name cache which should not be reused between binaries.
+  // See https://github.com/ampproject/amphtml/issues/36476
+  /** @type {any}*/ (nameCache).vars = {};
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};

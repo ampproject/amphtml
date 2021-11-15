@@ -14,7 +14,7 @@ import {
 } from '#testing/iframe';
 
 import {
-  VideoAnalyticsEvents,
+  VideoAnalyticsEvents_Enum,
   VideoEvents,
   VideoInterface,
 } from '../../src/video-interface';
@@ -158,7 +158,10 @@ export function runVideoPlayerIntegrationTests(
             return promise;
           })
           .then(() => {
-            const promise = listenOncePromise(video, VideoAnalyticsEvents.PLAY);
+            const promise = listenOncePromise(
+              video,
+              VideoAnalyticsEvents_Enum.PLAY
+            );
             playButton.click();
             return promise;
           });
@@ -179,7 +182,7 @@ export function runVideoPlayerIntegrationTests(
           .then(() => {
             const promise = listenOncePromise(
               video,
-              VideoAnalyticsEvents.PAUSE
+              VideoAnalyticsEvents_Enum.PAUSE
             );
             pauseButton.click();
             return promise;
@@ -202,7 +205,7 @@ export function runVideoPlayerIntegrationTests(
           .then(() => {
             const promise = listenOncePromise(
               video,
-              VideoAnalyticsEvents.PAUSE
+              VideoAnalyticsEvents_Enum.PAUSE
             );
             pauseButton.click();
             return promise;
@@ -229,7 +232,7 @@ export function runVideoPlayerIntegrationTests(
             viewport.setScrollTop(0);
             return listenOncePromise(
               video,
-              VideoAnalyticsEvents.SESSION_VISIBLE
+              VideoAnalyticsEvents_Enum.SESSION_VISIBLE
             );
           });
       });
@@ -256,7 +259,7 @@ export function runVideoPlayerIntegrationTests(
         });
         it('when the video ends', function () {
           video = player.video;
-          return listenOncePromise(video, VideoAnalyticsEvents.ENDED);
+          return listenOncePromise(video, VideoAnalyticsEvents_Enum.ENDED);
         });
       });
 
@@ -282,7 +285,7 @@ export function runVideoPlayerIntegrationTests(
           })
           .then(() => {
             pauseButton.click();
-            return listenOncePromise(video, VideoAnalyticsEvents.PAUSE);
+            return listenOncePromise(video, VideoAnalyticsEvents_Enum.PAUSE);
           })
           .then((event) => {
             const details = getData(event);
@@ -317,7 +320,7 @@ export function runVideoPlayerIntegrationTests(
             return Promise.race([
               listenOncePromise(
                 video,
-                VideoAnalyticsEvents.SECONDS_PLAYED
+                VideoAnalyticsEvents_Enum.SECONDS_PLAYED
               ).then(() => Promise.reject('Triggered video-seconds-played')),
               timer.promise(2000),
             ]);
@@ -328,7 +331,7 @@ export function runVideoPlayerIntegrationTests(
             viewport.scrollIntoView(video);
             return listenOncePromise(
               video,
-              VideoAnalyticsEvents.SECONDS_PLAYED
+              VideoAnalyticsEvents_Enum.SECONDS_PLAYED
             );
           })
           .then(() => {
@@ -339,7 +342,7 @@ export function runVideoPlayerIntegrationTests(
             return Promise.race([
               listenOncePromise(
                 video,
-                VideoAnalyticsEvents.SECONDS_PLAYED
+                VideoAnalyticsEvents_Enum.SECONDS_PLAYED
               ).then(() => Promise.reject('Triggered video-seconds-played')),
               timer.promise(2000),
             ]);
@@ -351,7 +354,7 @@ export function runVideoPlayerIntegrationTests(
           .then(() => {
             return listenOncePromise(
               video,
-              VideoAnalyticsEvents.SECONDS_PLAYED
+              VideoAnalyticsEvents_Enum.SECONDS_PLAYED
             );
           });
       });

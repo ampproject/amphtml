@@ -35,21 +35,15 @@ function findLocalizedString(
   languageCodes,
   localizedStringId
 ) {
-  let localizedString = null;
-
-  languageCodes.some((languageCode) => {
-    const localizedStringBundle = localizedStringBundles[languageCode];
-    if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
-      localizedString =
-        localizedStringBundle[localizedStringId].string ||
-        localizedStringBundle[localizedStringId].fallback;
-      return !!localizedString;
+  for (const code of languageCodes) {
+    const entry = localizedStringBundles[code]?.[localizedStringId];
+    if (entry != null) {
+      // In unminified builds, this is an object {"string": "foo", ...}.
+      // In minified builds, this is the actual string "foo".
+      return entry['string'] || entry;
     }
-
-    return false;
-  });
-
-  return localizedString;
+  }
+  return null;
 }
 
 /**

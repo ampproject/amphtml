@@ -59,4 +59,16 @@ describes.realWin('amp-layout', {amp: true}, (env) => {
 
     expect(layout1.outerHTML).to.equal(layout2.outerHTML);
   });
+
+  it('buildDom does not modify server rendered elements', () => {
+    const layout = createElementWithAttributes(env.win.document, 'amp-layout');
+    buildDom(layout);
+    layout.setAttribute('i-amphtml-ssr', '');
+
+    const before = layout.outerHTML;
+    buildDom(layout);
+    const after = layout.outerHTML;
+
+    expect(before).to.equal(after);
+  });
 });

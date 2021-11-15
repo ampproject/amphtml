@@ -5,7 +5,7 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function smartclip(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._smartclip_amp = {
     allowed_data: ['extra'],
     mandatory_data: ['plc', 'sz'],

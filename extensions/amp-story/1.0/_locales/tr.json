@@ -80,9 +80,6 @@
   "35": {
     "string": "Yukarı kaydır"
   },
-  "36": {
-    "string": "Tweet'i genişlet"
-  },
   "62": {
     "string": "Bu sayfadan başlayarak paylaşın"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Açılıyor"
+  },
+  "98": {
+    "string": "Form gönderilmedi, tekrar deneyin"
+  },
+  "99": {
+    "string": "Form başarıyla gönderildi"
   }
 }

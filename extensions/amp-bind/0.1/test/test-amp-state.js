@@ -3,7 +3,7 @@ import {ActionTrust} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 
-import {UrlReplacementPolicy} from '../../../../src/batched-json';
+import {UrlReplacementPolicy_Enum} from '../../../../src/batched-json';
 
 describes.realWin(
   'AmpState',
@@ -82,7 +82,7 @@ describes.realWin(
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
         /* ampdoc */ env.sandbox.match.any,
-        UrlReplacementPolicy.ALL,
+        UrlReplacementPolicy_Enum.ALL,
         /* refresh */ env.sandbox.match.falsy
       );
 

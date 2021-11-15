@@ -1,4 +1,5 @@
 import {AmpSlideScroll} from '../slidescroll';
+import {CarouselControls} from '../carousel-controls';
 
 describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
   let win, doc;
@@ -10,7 +11,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
 
   let setupAutoplaySpy;
   let buildButtonsSpy;
-  let setupGesturesSpy;
   let setControlsStateSpy;
   let hintControlsSpy;
   let autoplaySpy;
@@ -28,16 +28,18 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
       AmpSlideScroll.prototype,
       'setupAutoplay_'
     );
-    buildButtonsSpy = env.sandbox.spy(AmpSlideScroll.prototype, 'buildButtons');
-    setupGesturesSpy = env.sandbox.spy(
-      AmpSlideScroll.prototype,
-      'setupGestures'
+    buildButtonsSpy = env.sandbox.spy(
+      CarouselControls.prototype,
+      'buildButtons'
     );
     setControlsStateSpy = env.sandbox.spy(
-      AmpSlideScroll.prototype,
+      CarouselControls.prototype,
       'setControlsState'
     );
-    hintControlsSpy = env.sandbox.spy(AmpSlideScroll.prototype, 'hintControls');
+    hintControlsSpy = env.sandbox.spy(
+      CarouselControls.prototype,
+      'hintControls'
+    );
     autoplaySpy = env.sandbox.spy(AmpSlideScroll.prototype, 'autoplay_');
     clearAutoplaySpy = env.sandbox.spy(
       AmpSlideScroll.prototype,
@@ -108,7 +110,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselLoopOnly.shouldAutoplay_).to.be.false;
     expect(setupAutoplaySpy).to.not.have.been.called;
     expect(buildButtonsSpy).to.be.calledOnce;
-    expect(setupGesturesSpy).to.be.calledOnce;
     expect(setControlsStateSpy).to.be.calledOnce;
 
     const carouselAutoplayOnly = new TestCarousel(
@@ -123,7 +124,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselAutoplayOnly.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.been.called;
     expect(buildButtonsSpy).to.have.callCount(2);
-    expect(setupGesturesSpy).to.have.callCount(2);
     expect(setControlsStateSpy).to.have.callCount(2);
 
     const carouselAutoplayWithLoop = new TestCarousel(
@@ -139,7 +139,6 @@ describes.fakeWin('AmpSlideScroll', {amp: true}, (env) => {
     expect(carouselAutoplayWithLoop.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.callCount(2);
     expect(buildButtonsSpy).to.have.callCount(3);
-    expect(setupGesturesSpy).to.have.callCount(3);
     expect(setControlsStateSpy).to.have.callCount(3);
   });
 

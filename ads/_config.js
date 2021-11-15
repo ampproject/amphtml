@@ -174,6 +174,15 @@ const adConfig = jsonConfiguration({
 
   'adservsolutions': {},
 
+  'adskeeper': {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://jsc.adskeeper.com',
+      'https://servicer.adskeeper.com',
+      'https://s-img.adskeeper.com',
+    ],
+  },
+
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
   },
@@ -395,6 +404,11 @@ const adConfig = jsonConfiguration({
 
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
+  },
+
+  'colombiafeed': {
+    prefetch:
+      'https://static.clmbtech.com/c1e/static/themes/js/colombiafeed-amp.js',
   },
 
   'conative': {
@@ -1303,12 +1317,6 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
-    renderStartImplemented: true,
-  },
-
-  'verizonmedia': {
-    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
-    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 

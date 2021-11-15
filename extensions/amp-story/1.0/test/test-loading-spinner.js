@@ -1,12 +1,10 @@
 import {LoadingSpinner} from '../loading-spinner';
 
-describes.realWin('loading-spinner', {}, (env) => {
-  let win;
+describes.realWin('loading-spinner', {}, () => {
   let loadingSpinner;
 
   beforeEach(() => {
-    win = env.win;
-    loadingSpinner = new LoadingSpinner(win.document);
+    loadingSpinner = new LoadingSpinner();
   });
 
   it('should build the loading spinner', () => {

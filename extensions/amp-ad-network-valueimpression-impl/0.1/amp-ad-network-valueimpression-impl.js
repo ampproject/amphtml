@@ -276,8 +276,13 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
       const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
       // If slotWidth is -1, that means its width must be determined by its
       // parent container, and so should have the same value as parentWidth.
-      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-      psz = `${parentWidth}x-1`;
+      if (this.uiHandler.isStickyAd()) {
+        msz = '0x-1';
+        psz = '0x-1';
+      } else {
+        msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+        psz = `${parentWidth}x-1`;
+      }
       fws = fwSignal ? fwSignal : '0';
 
       const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
