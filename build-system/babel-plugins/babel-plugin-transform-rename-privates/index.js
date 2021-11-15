@@ -18,6 +18,14 @@ module.exports = function (babel) {
   }
 
   /**
+   * @param {babel.types.Identifier} id
+   * @return {boolean}
+   */
+  function isEnum(id) {
+    return /_E(NUM|num)$/.test(id.name);
+  }
+
+  /**
    * Adds trailing AMP_PRIVATE_ suffix to private identifiers.
    * @param {string} field
    * @param {*} path
@@ -88,7 +96,7 @@ module.exports = function (babel) {
     if (!obj.isIdentifier()) {
       return;
     }
-    if (!obj.node.name.endsWith('_Enum')) {
+    if (!isEnum(obj.node)) {
       return;
     }
     renameEnum('property', path);
@@ -120,7 +128,7 @@ module.exports = function (babel) {
           if (!init.isObjectExpression()) {
             return;
           }
-          if (!id.node.name.endsWith('_Enum')) {
+          if (!isEnum(id.node)) {
             return;
           }
           renameEnumKeys(path.get('init'));
@@ -130,7 +138,7 @@ module.exports = function (babel) {
           if (!init.isIdentifier()) {
             return;
           }
-          if (!init.node.name.endsWith('_Enum')) {
+          if (!isEnum(init.node)) {
             return;
           }
           renameEnumKeys(id);
