@@ -4,7 +4,17 @@ import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
 
-import {Action} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  Action,
+  ShoppingConfigDataDef,
+} from '../../amp-story/1.0/amp-story-store-service';
+
+/**
+ * @typedef {{
+ *  items: !Array<!ShoppingConfigDataDef>,
+ * }}
+ */
+let ShoppingConfigDef;
 
 export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -20,7 +30,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
 
   /**
    * Keys product data to product-ids and adds them to the store service.
-   * @param {!JsonObject} storyConfig
+   * @param {!ShoppingConfigDef} storyConfig
    * @private
    */
   addShoppingDataFromConfig_(storyConfig) {

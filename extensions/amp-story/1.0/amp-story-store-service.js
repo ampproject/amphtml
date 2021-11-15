@@ -71,6 +71,23 @@ export let InteractiveReactData;
 
 /**
  * @typedef {{
+ *   brand-favicon: ?string,
+ *   brand-label: string,
+ *   cta-text: ?number,
+ *   product-details: string,
+ *   product-images: string,
+ *   product-price: string,
+ *   product-tag-id: string,
+ *   product-title: string,
+ *   reviews-data: ?string,
+ *   reviews-page: string,
+ *   shipping-text: ?number,
+ * }}
+ */
+export let ShoppingConfigDataDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,

@@ -4,7 +4,17 @@ import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
 
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  ShoppingConfigDataDef,
+  StateProperty,
+} from '../../amp-story/1.0/amp-story-store-service';
+
+/**
+ * @typedef {{
+ *  items: !Map<string, !ShoppingConfigDataDef>,
+ * }}
+ */
+let ShoppingDataDef;
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -29,7 +39,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   layoutCallback() {
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingState) => this.updateShoppingTag_(shoppingState),
+      (shoppingData) => this.updateShoppingTag_(shoppingData),
       true /** callToInitialize */
     );
   }
@@ -40,11 +50,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Object} shoppingState
+   * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  updateShoppingTag_(shoppingState) {
-    const tagData = shoppingState[this.element.getAttribute('data-tag-id')];
+  updateShoppingTag_(shoppingData) {
+    const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
     if (!tagData) {
       return;
     }
