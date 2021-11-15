@@ -41,6 +41,18 @@ The `<amp-story-page-outlink>` element must be the last child of `<amp-story-pag
 Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and [`amp-story-page-attachment`](amp-story-page-attachment.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
 [/tip]
 
+## `Custom Text` (optional)
+
+Text within the child anchor element will display in the CTA. The default is "Swipe up".
+
+![amp-story-page-outlink-cta-text](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-outlink-cta-text.jpg)
+
+```html
+<amp-story-page-outlink layout="nodisplay">
+    <a href="https://www.google.com">Call To Action</a>
+</amp-story-page-outlink>
+```
+
 ## Attributes
 
 When no attributes are set, the default UI will render:
