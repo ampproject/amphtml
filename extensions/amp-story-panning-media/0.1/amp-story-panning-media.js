@@ -94,9 +94,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => {
-        this.storeService_ = storeService;
-      }
+      (storeService) => (this.storeService_ = storeService)
     );
   }
 
@@ -151,12 +149,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
-    const callback = (mutationsList) => {
-      this.pageDistance_ = parseInt(
+    const callback = (mutationsList) =>
+      (this.pageDistance_ = parseInt(
         mutationsList[0].target.getAttribute('distance'),
         10
-      );
-    };
+      ));
     const observer = new MutationObserver(callback);
     this.getPage_() && observer.observe(this.getPage_(), config);
   }
