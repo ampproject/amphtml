@@ -80,9 +80,6 @@
   "35": {
     "string": "Potiahnite nahor"
   },
-  "36": {
-    "string": "Rozbaliť tweet"
-  },
   "62": {
     "string": "Zdieľanie začína z tejto stránky"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Otvára sa"
+  },
+  "98": {
+    "string": "Formulár nebol odoslaný, skúste to znova"
+  },
+  "99": {
+    "string": "Formulár bol úspešne odoslaný"
   }
 }

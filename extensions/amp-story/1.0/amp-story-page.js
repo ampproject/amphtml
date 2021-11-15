@@ -21,13 +21,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
-import {AmpEvents} from '#core/constants/amp-events';
-import {
-  AmpStoryEmbeddedComponent,
-  EMBED_ID_ATTRIBUTE_NAME,
-  EXPANDABLE_COMPONENTS,
-  expandableElementsSelectors,
-} from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
 import {CommonSignals} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
@@ -48,7 +41,6 @@ import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '#core/types/function';
 import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
-import {getAmpdoc} from '../../../src/service-helpers';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {localize} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
@@ -66,6 +58,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
+import {embeddedElementsSelectors} from './amp-story-embedded-component';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -99,19 +92,6 @@ export const Selectors = {
   ALL_VIDEO: 'amp-story-grid-layer video',
   ALL_TABBABLE: 'a, amp-twitter > iframe',
 };
-
-/** @private @const {string} */
-const EMBEDDED_COMPONENTS_SELECTORS = Object.keys(EXPANDABLE_COMPONENTS).join(
-  ', '
-);
-
-/** @private @const {string} */
-const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
-  expandableElementsSelectors()
-).join(',');
-
-/** @private @const {number} */
-const RESIZE_TIMEOUT_MS = 1000;
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
@@ -168,33 +148,6 @@ export const NavigationDirection = {
 };
 
 /**
- * Prepares an embed for its expanded mode animation. Since this requires
- * calculating the size of the embed, we debounce after each resize event to
- * make sure we have the final size before doing the calculation for the
- * animation.
- * @param {!Window} win
- * @param {!Element} page
- * @param {!../../../src/service/mutator-interface.MutatorInterface} mutator
- * @return {function(!Element, ?UnlistenDef)}
- */
-function debounceEmbedResize(win, page, mutator) {
-  return debounce(
-    win,
-    (el, unlisten) => {
-      AmpStoryEmbeddedComponent.prepareForAnimation(
-        page,
-        dev().assertElement(el),
-        mutator
-      );
-      if (unlisten) {
-        unlisten();
-      }
-    },
-    RESIZE_TIMEOUT_MS
-  );
-}
-
-/**
  * The <amp-story-page> custom element, which represents a single page of
  * an <amp-story>.
  */
@@ -235,9 +188,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
-
-    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     const deferred = new Deferred();
 
@@ -578,9 +528,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.backgroundAudioDeferred_.resolve();
 
     this.muteAllMedia();
-    this.getViewport().onResize(
-      debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
-    );
 
     this.renderOpenAttachmentUI_();
 
@@ -634,13 +581,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       },
       {}
     );
-  }
-
-  /**
-   * @private
-   */
-  onResize_() {
-    this.findAndPrepareEmbeddedComponents_(true /* forceResize */);
   }
 
   /**
@@ -751,12 +691,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Finds embedded components in page and prepares them.
-   * @param {boolean=} forceResize
    * @private
    */
-  findAndPrepareEmbeddedComponents_(forceResize = false) {
+  findAndPrepareEmbeddedComponents_() {
     this.addClickShieldToEmbeddedComponents_();
-    this.resizeInteractiveEmbeddedComponents_(forceResize);
     this.buildAffiliateLinks_();
   }
 
@@ -767,7 +705,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   addClickShieldToEmbeddedComponents_() {
     const componentEls = toArray(
-      scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
+      scopedQuerySelectorAll(this.element, embeddedElementsSelectors())
     );
 
     if (componentEls.length <= 0) {
@@ -778,37 +716,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       componentEls.forEach((el) => {
         el.classList.add('i-amphtml-embedded-component');
       });
-    });
-  }
-
-  /**
-   * Resizes interactive embeds to prepare them for their expanded animation.
-   * @param {boolean} forceResize
-   * @private
-   */
-  resizeInteractiveEmbeddedComponents_(forceResize) {
-    toArray(
-      scopedQuerySelectorAll(
-        this.element,
-        INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS
-      )
-    ).forEach((el) => {
-      const debouncePrepareForAnimation = debounceEmbedResize(
-        this.win,
-        this.element,
-        this.mutator_
-      );
-
-      if (forceResize) {
-        debouncePrepareForAnimation(el, null /* unlisten */);
-      } else if (!el.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
-        // Element has not been prepared for its animation yet.
-        const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
-          debouncePrepareForAnimation(el, unlisten);
-        });
-        // Run in case target never changes size.
-        debouncePrepareForAnimation(el, null /* unlisten */);
-      }
     });
   }
 

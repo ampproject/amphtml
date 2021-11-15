@@ -80,9 +80,6 @@
   "35": {
     "string": "Swipe up"
   },
-  "36": {
-    "string": "Expand Tweet"
-  },
   "62": {
     "string": "Share starting from this page"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Opening"
+  },
+  "98": {
+    "string": "Form not submitted. Please try again"
+  },
+  "99": {
+    "string": "Form successfully submitted"
   }
 }

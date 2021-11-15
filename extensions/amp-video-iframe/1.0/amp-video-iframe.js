@@ -75,7 +75,7 @@ function onMessage(e) {
   }
   if (event === 'analytics') {
     // TODO(alanorozco): In classic AMP, this is an indirect chain of:
-    // VideoEvents.CUSTOM_TICK -> VideoAnalyticsEvents.CUSTOM.
+    // VideoEvents.CUSTOM_TICK -> VideoAnalyticsEvents_Enum.CUSTOM.
     // VideoManager "massages" the data for this event, adding a prefix.
     // Whatever the VideoManager does, needs to be refactored.
     return;

@@ -6,7 +6,7 @@ import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
-  ELEMENT_TYPE,
+  ELEMENT_TYPE_ENUM,
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
@@ -1118,15 +1118,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       );
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.image,
+        delta: ELEMENT_TYPE_ENUM.image,
       });
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.carousel,
+        delta: ELEMENT_TYPE_ENUM.carousel,
       });
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.text,
+        delta: ELEMENT_TYPE_ENUM.text,
       });
     });
   });

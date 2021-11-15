@@ -41,7 +41,7 @@ function isSizer(el) {
   return el.tagName === 'I-AMPHTML-SIZER';
 }
 
-class AmpCarousel extends AMP.BaseElement {
+export class AmpCarousel extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
@@ -639,6 +639,21 @@ class AmpCarousel extends AMP.BaseElement {
    */
   attributeMutated_(name, newValue) {
     this.responsiveAttributes_.updateAttribute(name, newValue);
+  }
+
+  /**
+   * Used by amp-lightbox-gallery
+   *
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   */
+  goCallback(dir) {
+    if (dir === 1) {
+      this.interactionNext();
+    } else {
+      this.interactionPrev();
+    }
   }
 }
 

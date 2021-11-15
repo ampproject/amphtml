@@ -143,7 +143,26 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this.children_
     );
     this.observeNewChildren_();
+    this.forceClipDraw_();
     return Promise.resolve();
+  }
+
+  /**
+   * Something causes browsers to forget to redraw the content of the container when they become visible.
+   * @private
+   */
+  forceClipDraw_() {
+    const inob = new this.win.IntersectionObserver(
+      (entries) => {
+        const last = entries[entries.length - 1];
+        this.container_.classList.toggle(
+          'i-amphtml-fx-flying-carpet-container-fix',
+          last.isIntersecting
+        );
+      },
+      {threshold: 0.01}
+    );
+    inob.observe(this.element);
   }
 
   /**

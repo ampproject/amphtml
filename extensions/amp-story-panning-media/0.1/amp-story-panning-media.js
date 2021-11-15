@@ -63,9 +63,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
-    this.element_ = element;
-
     /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = null;
 
@@ -105,12 +102,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.ampImgEl_ = dev().assertElement(
-      this.element_.querySelector('amp-img')
-    );
+    this.ampImgEl_ = dev().assertElement(this.element.querySelector('amp-img'));
 
     this.groupId_ =
-      this.element_.getAttribute('group-id') ||
+      this.element.getAttribute('group-id') ||
       this.ampImgEl_.getAttribute('src');
 
     this.initializeListeners_();
@@ -118,7 +113,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
-        const imgEl = dev().assertElement(this.element_.querySelector('img'));
+        const imgEl = dev().assertElement(this.element.querySelector('img'));
         // Remove layout="fill" classes so image is not clipped.
         imgEl.classList = '';
         this.setImageCenteringStyles_();
@@ -132,8 +127,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       StateProperty.PAGE_SIZE,
       () => {
         this.elementSize_ = {
-          width: this.element_./*OK*/ offsetWidth,
-          height: this.element_./*OK*/ offsetHeight,
+          width: this.element./*OK*/ offsetWidth,
+          height: this.element./*OK*/ offsetHeight,
         };
         this.setImageCenteringStyles_();
         this.setAnimateTo_();
@@ -168,10 +163,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   setAnimateTo_() {
-    const x = parseFloat(this.element_.getAttribute('data-x') || 0);
-    const y = parseFloat(this.element_.getAttribute('data-y') || 0);
-    const zoom = parseFloat(this.element_.getAttribute('data-zoom') || 1);
-    const lockBounds = this.element_.hasAttribute('lock-bounds');
+    const x = parseFloat(this.element.getAttribute('data-x') || 0);
+    const y = parseFloat(this.element.getAttribute('data-y') || 0);
+    const zoom = parseFloat(this.element.getAttribute('data-zoom') || 1);
+    const lockBounds = this.element.hasAttribute('lock-bounds');
 
     if (lockBounds) {
       // Zoom must be set to calculate maxBounds.
@@ -278,7 +273,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   setImageCenteringStyles_() {
-    const imgEl = this.element_.querySelector('img');
+    const imgEl = this.element.querySelector('img');
     if (!imgEl) {
       return;
     }

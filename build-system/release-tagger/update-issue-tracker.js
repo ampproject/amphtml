@@ -5,6 +5,8 @@
 
 const dedent = require('dedent');
 const {createIssue, getIssue, updateIssue} = require('./utils');
+const {cyan, magenta} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 const CHANNEL_NAMES = {
   'beta-opt-in': 'Experimental and Beta (opt-in) channels',
@@ -133,10 +135,18 @@ async function createOrUpdateTracker(head, base, channel, time) {
     tracker.checkTask(channel, time);
     const {footer, header, label, main, title} = tracker;
     const body = `${header}\n\n${main}\n\n${footer}`;
-    return await createIssue(body, label, title);
+    const newIssue = await createIssue(body, label, title);
+    log(
+      'Created issue tracker',
+      magenta(newIssue.title),
+      'at',
+      cyan(newIssue['html_url'])
+    );
+    return;
   }
 
   // check task
+  log('Found issue tracker', magenta(issue.title), 'at', cyan(issue.url));
   const tracker = new IssueTracker(head, base, issue.body, issue.number);
   if (isCherrypick) {
     tracker.addCherrypickTasks(channel);

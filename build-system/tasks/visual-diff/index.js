@@ -316,7 +316,9 @@ async function runVisualTests(browser, webpages) {
 
   if (argv.main) {
     const page = await newPage(browser);
-    await page.goto('about:blank');
+    await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
+    );
     // @ts-ignore Type mismatch in library
     await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
@@ -589,6 +591,12 @@ async function createEmptyBuild(browser) {
  * @return {Promise<void>}
  */
 async function visualDiff() {
+  if (!PUPPETEER_CHROMIUM_REVISION) {
+    throw new Error(
+      `${cyan('amp visual-diff')} is only available on Linux, Mac, and Windows`
+    );
+  }
+
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
   const browserFetcher = await loadBrowserFetcher();
