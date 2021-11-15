@@ -318,7 +318,7 @@ describes.sandboxed('Viewer', {}, (env) => {
     return promise;
   });
 
-  it.only('should initialize firstVisibleTime when doc becomes visible', () => {
+  it('should initialize firstVisibleTime when doc becomes visible', () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
     // We don't live during the unix epoch, so time is always positive.
