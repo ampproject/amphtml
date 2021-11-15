@@ -306,9 +306,8 @@
   display: block !important;
 }
 
-.i-amphtml-story-system-layer-buttons button[disabled] {
-  opacity: 0.3 !important;
-  cursor: initial !important;
+.i-amphtml-story-system-layer-buttons button[disabled][disabled] {
+  display: none !important;
 }
 
 .i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
