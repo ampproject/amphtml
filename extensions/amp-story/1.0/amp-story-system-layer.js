@@ -45,6 +45,15 @@ const PAUSED_ATTRIBUTE = 'paused';
 const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
 
 /** @private @const {string} */
+const CAPTIONS_CLASS = 'i-amphtml-story-captions-control';
+
+/** @private @const {string} */
+const NOCAPTIONS_CLASS = 'i-amphtml-story-nocaptions-control';
+
+/** @private @const {string} */
+const PAGE_HAS_CAPTIONS = 'i-amphtml-page-has-captions';
+
+/** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 /** @private @const {string} */
@@ -115,6 +124,16 @@ const renderSystemLayerElement = (element) => (
           LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL
         )}
       />
+      <div class="i-amphtml-captions-display">
+        <button
+          class={CAPTIONS_CLASS + ' i-amphtml-story-button'}
+          aria-label="Captions on"
+        />
+        <button
+          class={NOCAPTIONS_CLASS + ' i-amphtml-story-button'}
+          aria-label="Captions off"
+        />
+      </div>
       <div class="i-amphtml-story-sound-display">
         <div role="alert" class="i-amphtml-message-container">
           <div class="i-amphtml-story-mute-text">
@@ -559,6 +578,18 @@ export class SystemLayer {
       (config) => this.onViewerCustomControls_(config),
       true /* callToInitialize */
     );
+
+    this.storeService_.subscribe(
+      StateProperty.CAPTIONS_STATE,
+      (config) => this.onCaptionsState_(config),
+      true /* callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_CAPTIONS_STATE,
+      (config) => this.onPageHasCaptionsState_(config),
+      true /* callToInitialize */
+    );
   }
 
   /**
@@ -978,6 +1009,22 @@ export class SystemLayer {
 
       element[VIEWER_CONTROL_EVENT_NAME] = `amp-story-player-${control.name}`;
     });
+  }
+
+  /**
+   * Toggles whether the captions are active or not.
+   * @param {boolean} captions
+   */
+  onCaptionsState_(captions) {
+    this.systemLayerEl_.toggleAttribute('captions-on', captions);
+  }
+
+  /**
+   * Toggles whether the active page has captions or not.
+   * @param {boolean} hasCaptions
+   */
+  onPageHasCaptionsState_(hasCaptions) {
+    this.systemLayerEl_.classList.toggle(PAGE_HAS_CAPTIONS, hasCaptions);
   }
 
   /**
