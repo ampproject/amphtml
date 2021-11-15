@@ -4,6 +4,8 @@ import {Crypto} from '#service/crypto-impl';
 import {installExtensionsService} from '#service/extensions-impl';
 import {Platform} from '#service/platform-impl';
 
+import {FakePerformance} from '#testing/fake-dom';
+
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 
 describes.realWin('crypto-impl', {}, (env) => {
@@ -106,9 +108,10 @@ describes.realWin('crypto-impl', {}, (env) => {
   }
 
   function createCrypto(win) {
-    if (win && !win.document) {
+    if (!win.document) {
       win.document = env.win.document;
     }
+    win.performance = new FakePerformance(win);
     installDocService(win, /* isSingleDoc */ true);
     installExtensionsService(win);
     const extensions = Services.extensionsFor(win);

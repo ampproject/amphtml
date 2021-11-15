@@ -2151,7 +2151,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         ElementClass = createAmpElementForTesting(win, TestElement);
         win.customElements.define('amp-test-loader', ElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;
-        LOADING_ELEMENTS_ENUM.AMP_TEST_LOADER = 'amp-test-loader';
+        LOADING_ELEMENTS_ENUM.AMP_TEST_LOADER = 'AMP-TEST-LOADER';
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
         resourcesMock = env.sandbox.mock(resources);
