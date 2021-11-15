@@ -796,13 +796,7 @@ export class Performance {
    * @param {string} label
    */
   mark(label) {
-    if (
-      this.win.performance &&
-      this.win.performance.mark &&
-      arguments.length == 1
-    ) {
-      this.win.performance.mark(label);
-    }
+    this.win.performance.mark?.(label);
   }
 
   /**

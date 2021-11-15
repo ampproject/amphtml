@@ -614,14 +614,25 @@ export class AmpDoc {
     }
 
     if (this.visibilityState_ != visibilityState) {
-      this.visibilityState_ = visibilityState;
       if (visibilityState == VisibilityState.VISIBLE) {
-        this.lastVisibleTime_ = Date.now();
-        this.signals_.signal(AmpDocSignals.FIRST_VISIBLE);
-        this.signals_.signal(AmpDocSignals.NEXT_VISIBLE);
+        let visibleTime;
+        const {performance} = this.win;
+        if (this.visibilityState_ == null) {
+          // If the doc was initialized in the visible state, then prefer the
+          // timeOrigin of the document over when the JS actually initializes.
+          visibleTime = Math.floor(
+            performance.timeOrigin ?? performance.timing.navigationStart
+          );
+        } else {
+          visibleTime = Math.floor(performance.now());
+        }
+        this.lastVisibleTime_ = visibleTime;
+        this.signals_.signal(AmpDocSignals.FIRST_VISIBLE, visibleTime);
+        this.signals_.signal(AmpDocSignals.NEXT_VISIBLE, visibleTime);
       } else {
         this.signals_.reset(AmpDocSignals.NEXT_VISIBLE);
       }
+      this.visibilityState_ = visibilityState;
       this.visibilityStateHandlers_.fire();
     }
   }
