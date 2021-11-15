@@ -32,7 +32,7 @@ module.exports = function (context) {
       // Excuse membership access, unless we're in the LHS of an assignment.
       // This attempts to prevent us from defining new properties with underscores,
       // while allowing access to external objects that already have them.
-      // This mirros google-camelcase's logic.
+      // This mirrors google-camelcase's logic.
       const {parent} = node;
       if (parent.type === 'MemberExpression' && parent.property === node) {
         const grandParent = parent.parent;
@@ -44,6 +44,16 @@ module.exports = function (context) {
         ) {
           return;
         }
+      }
+
+      // Permit object destructuring, since that is similar to membership access.
+      // Requires that the key is immediately renamed to a conforming value.
+      if (
+        parent.type === 'Property' &&
+        parent.parent.type === 'ObjectPattern' &&
+        parent.key === node
+      ) {
+        return;
       }
 
       context.report({
