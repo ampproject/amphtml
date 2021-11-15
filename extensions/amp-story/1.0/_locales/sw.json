@@ -80,9 +80,6 @@
   "35": {
     "string": "Telezesha juu"
   },
-  "36": {
-    "string": "Panua Tweet"
-  },
   "62": {
     "string": "Tuma kuanzia ukurasa huu"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Inafungua"
+  },
+  "98": {
+    "string": "Fomu haijatumwa, jaribu tena"
+  },
+  "99": {
+    "string": "Fomu imefaulu kutumwa"
   }
 }

@@ -420,8 +420,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
+  const babelCaller =
+    options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
+
   const babelPlugin = getEsbuildBabelPlugin(
-    options.minify ? 'minified' : 'unminified',
+    babelCaller,
     /* enableCache */ true
   );
   const plugins = [babelPlugin];
@@ -536,7 +539,7 @@ async function minify(code, map) {
     mangle: {
       properties: {
         regex: '_AMP_PRIVATE_$',
-        // eslint-disable-next-line google-camelcase/google-camelcase
+        // eslint-disable-next-line local/camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
       },
     },
@@ -547,10 +550,11 @@ async function minify(code, map) {
     },
     output: {
       beautify: !!argv.pretty_print,
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       keep_quoted_props: true,
     },
     sourceMap: {content: map},
+    toplevel: true,
     module: !!argv.esm,
     nameCache,
   };

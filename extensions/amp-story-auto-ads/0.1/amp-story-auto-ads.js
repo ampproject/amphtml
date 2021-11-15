@@ -10,12 +10,8 @@ import {
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
 } from '#experiments/story-ad-auto-advance';
-import {divertStoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {
-  StoryAdSegmentExp,
-  ViewerSetTimeToBranch,
-} from '#experiments/story-ad-progress-segment';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 
@@ -51,6 +47,21 @@ const AD_TAG = 'amp-ad';
 
 /** @const {string} */
 const MUSTACHE_TAG = 'amp-mustache';
+
+/**
+ * Map of experiment IDs that might be enabled by the player to
+ * their experiment names. Used to toggle client side experiment on.
+ * @const {Object<string, string>}
+ * @visibleForTesting
+ */
+export const RELEVANT_PLAYER_EXPS = {
+  [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.FOURTEEN_SECONDS]: StoryAdSegmentExp.ID,
+};
 
 /** @enum {string} */
 export const Attributes = {
@@ -99,6 +110,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // TODO(ccordry): properly block on this when #cap check is possible.
+    this.askPlayerForActiveExperiments_();
+
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
@@ -144,7 +158,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
-        divertStoryAdPageOutlink(this.win);
         divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
@@ -163,6 +176,30 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.maybeCreateProgressBar_();
         this.initializeListeners_();
         this.initializePages_();
+      });
+  }
+
+  /**
+   * Sends message to player asking for active experiments and enables
+   * the branch for any relevant experiments.
+   */
+  askPlayerForActiveExperiments_() {
+    const viewer = Services.viewerForDoc(this.doc_);
+    if (!viewer.isEmbedded()) {
+      return;
+    }
+    viewer
+      ./*OK*/ sendMessageAwaitResponse('playerExperiments')
+      .then((expObj) => {
+        const ids = expObj?.['experimentIds'];
+        if (ids) {
+          ids.forEach((id) => {
+            const relevantExp = RELEVANT_PLAYER_EXPS[id];
+            if (relevantExp) {
+              forceExperimentBranch(this.win, relevantExp, id.toString());
+            }
+          });
+        }
       });
   }
 
@@ -417,23 +454,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.win,
       StoryAdAutoAdvance.ID
     );
-    const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
-      'storyNextUp'
-    );
-    if (storyNextUpParam && ViewerSetTimeToBranch[storyNextUpParam]) {
-      // Actual progress bar creation handled in progress-bar.js.
-      forceExperimentBranch(
-        this.win,
-        StoryAdSegmentExp.ID,
-        ViewerSetTimeToBranch[storyNextUpParam]
-      );
+    if (getExperimentBranch(this.win, StoryAdSegmentExp.ID)) {
+      // In the viewer controlled experiment progress bar is created by
+      // progress-bar.js
+      return;
     } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
       this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
-    } else if (storyNextUpParam) {
-      this.createProgressBar_(storyNextUpParam);
     }
   }
 

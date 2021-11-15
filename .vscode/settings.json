@@ -51,6 +51,10 @@
       "url": "./build-system/json-schemas/filesize.json"
     },
     {
+      "fileMatch": ["build-system/global-configs/versioning.json"],
+      "url": "./build-system/json-schemas/versioning.json"
+    },
+    {
       "fileMatch": ["test/visual-diff/visual-tests.jsonc"],
       "url": "./build-system/json-schemas/visual-tests.json"
     }

@@ -19,96 +19,24 @@
 // <div tabindex="0" />
 // <path strokeLinecap />
 
-const DOM_ATTRIBUTES = {
-  className: 'class',
-  tabindex: 'tabIndex',
-};
+const {ATTRIBUTES_REACT_TO_PREACT} = require('../common/preact-prop-names');
 
-/**
- * This list derives all hyphenated attributes from
- * https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
- */
-const SVG_ATTRIBUTES = {
-  accentHeight: 'accent-height',
-  alignmentBaseline: 'alignment-baseline',
-  arabicForm: 'arabic-form',
-  baselineShift: 'baseline-shift',
-  capHeight: 'cap-height',
-  clipPath: 'clip-path',
-  clipRule: 'clip-rule',
-  colorInterpolation: 'color-interpolation',
-  colorInterpolationFilters: 'color-interpolation-filters',
-  colorProfile: 'color-profile',
-  colorRendering: 'color-rendering',
-  dominantBaseline: 'dominant-baseline',
-  enableBackground: 'enable-background',
-  fillOpacity: 'fill-opacity',
-  fillRule: 'fill-rule',
-  floodColor: 'flood-color',
-  floodOpacity: 'flood-opacity',
-  fontFamily: 'font-family',
-  fontSize: 'font-size',
-  fontSizeAdjust: 'font-size-adjust',
-  fontStretch: 'font-stretch',
-  fontStyle: 'font-style',
-  fontVariant: 'font-variant',
-  fontWeight: 'font-weight',
-  glyphName: 'glyph-name',
-  glyphOrientationHorizontal: 'glyph-orientation-horizontal',
-  glyphOrientationVertical: 'glyph-orientation-vertical',
-  horizAdvX: 'horiz-adv-x',
-  horizOriginX: 'horiz-origin-x',
-  imageRendering: 'image-rendering',
-  letterSpacing: 'letter-spacing',
-  lightingColor: 'lighting-color',
-  markerEnd: 'marker-end',
-  markerMid: 'marker-mid',
-  markerStart: 'marker-start',
-  overlinePosition: 'overline-position',
-  overlineThickness: 'overline-thickness',
-  paintOrder: 'paint-order',
-  panose1: 'panose-1',
-  pointerEvents: 'pointer-events',
-  renderingIntent: 'rendering-intent',
-  shapeRendering: 'shape-rendering',
-  stopColor: 'stop-color',
-  stopOpacity: 'stop-opacity',
-  strikethroughPosition: 'strikethrough-position',
-  strikethroughThickness: 'strikethrough-thickness',
-  strokeDasharray: 'stroke-dasharray',
-  strokeDashoffset: 'stroke-dashoffset',
-  strokeLinecap: 'stroke-linecap',
-  strokeLinejoin: 'stroke-linejoin',
-  strokeMiterlimit: 'stroke-miterlimit',
-  strokeOpacity: 'stroke-opacity',
-  strokeWidth: 'stroke-width',
-  textAnchor: 'text-anchor',
-  textDecoration: 'text-decoration',
-  textRendering: 'text-rendering',
-  transformOrigin: 'transform-origin',
-  underlinePosition: 'underline-position',
-  underlineThickness: 'underline-thickness',
-  unicodeBidi: 'unicode-bidi',
-  unicodeRange: 'unicode-range',
-  unitsPerEm: 'units-per-em',
-  vAlphabetic: 'v-alphabetic',
-  vHanging: 'v-hanging',
-  vIdeographic: 'v-ideographic',
-  vMathematical: 'v-mathematical',
-  vectorEffect: 'vector-effect',
-  vertAdvY: 'vert-adv-y',
-  vertOriginX: 'vert-origin-x',
-  vertOriginY: 'vert-origin-y',
-  wordSpacing: 'word-spacing',
-  writingMode: 'writing-mode',
-  xHeight: 'x-height',
-};
+const propNameFn = 'propName';
+const propNameFnModule = '#preact/utils';
 
 module.exports = {
   meta: {
     fixable: 'code',
   },
   create(context) {
+    const preactNames = new Set(Object.values(ATTRIBUTES_REACT_TO_PREACT));
+
+    let lastImportDecl = null;
+    let addedImportDecl = false;
+    let program = null;
+
+    const importDecl = `import {${propNameFn}} from '${propNameFnModule}';\n`;
+
     /** @param {*} node */
     function checkProps(node) {
       if (!node.properties) {
@@ -118,42 +46,120 @@ module.exports = {
         if (!prop.key) {
           return;
         }
-        const property = prop.value.name || prop.value.left.name;
-        const preferred = DOM_ATTRIBUTES[property] || SVG_ATTRIBUTES[property];
-        if (!preferred || prop.key.value === preferred) {
+        if (prop.computed) {
           return;
         }
+        const property = prop.key.name || prop.key.value;
 
-        context.report({
-          node,
-          message: `Prefer \`${preferred}\` property access to \`${property}\`.`,
+        let preferred = ATTRIBUTES_REACT_TO_PREACT[property];
+        let message = `Prefer \`${preferred}\` property access to \`${property}\`.`;
 
-          fix(fixer) {
-            if (!prop.key.value) {
-              return fixer.insertTextBefore(prop, `'${preferred}': `);
-            }
-            if (prop.key.value !== preferred) {
-              return fixer.replaceText(prop.key, `'${preferred}'`);
-            }
-          },
-        });
+        if (preactNames.has(property)) {
+          preferred = property;
+          message = `Preact-style prop names \`${preferred}\` should be wrapped with \`${propNameFn}()\``;
+        }
+
+        if (preferred) {
+          context.report({
+            node: prop,
+            message,
+            fix(fixer) {
+              const fixes = [];
+              if (!addedImportDecl) {
+                addedImportDecl = true;
+                fixes.push(
+                  lastImportDecl
+                    ? fixer.insertTextAfter(lastImportDecl, importDecl)
+                    : fixer.insertTextBefore(program.body[0], importDecl)
+                );
+              }
+              const computed = `[${propNameFn}('${preferred}')]`;
+              fixes.push(
+                !prop.key.value
+                  ? fixer.insertTextBefore(prop, `${computed}: `)
+                  : fixer.replaceText(prop.key, computed)
+              );
+              return fixes;
+            },
+          });
+        }
       });
     }
+
     return {
+      Program(node) {
+        program = node;
+        lastImportDecl = null;
+        addedImportDecl = false;
+      },
+
+      ImportDeclaration(node) {
+        lastImportDecl = node;
+      },
+
+      ImportSpecifier(node) {
+        if (node.local.name === propNameFn) {
+          addedImportDecl = true;
+        }
+      },
+
+      [`CallExpression[callee.name="${propNameFn}"]`]: function (node) {
+        if (
+          node.arguments.length !== 1 ||
+          node.arguments[0].type !== 'Literal' ||
+          typeof node.arguments[0].value !== 'string'
+        ) {
+          context.report({
+            node,
+            message: `${node.callee.name} can only have a single string attribute.`,
+          });
+          return;
+        }
+        const name = node.arguments[0].value;
+        if (ATTRIBUTES_REACT_TO_PREACT[name]) {
+          context.report({
+            node,
+            message: `${node.callee.name} requires Preact-style name \`${ATTRIBUTES_REACT_TO_PREACT[name]}\`.`,
+            fix(fixer) {
+              return fixer.replaceText(
+                node.arguments[0],
+                `'${ATTRIBUTES_REACT_TO_PREACT[name]}'`
+              );
+            },
+          });
+        }
+        if (!preactNames.has(name)) {
+          context.report({
+            node,
+            message: `${node.callee.name} is not required.`,
+            fix(fixer) {
+              const replacement = `'${name}'`;
+              if (node.parent.type === 'Property') {
+                // Remove brackets around ['computed'] prop keys
+                return fixer.replaceTextRange(
+                  [node.parent.key.start - 1, node.parent.key.end + 1],
+                  replacement
+                );
+              }
+              return fixer.replaceText(node, replacement);
+            },
+          });
+        }
+      },
+
       FunctionDeclaration(node) {
         node.params.forEach(checkProps);
       },
 
       VariableDeclarator(node) {
-        if (!node.init || node.init?.name !== 'props' || !node.id) {
+        if (!node.init || node.init.name !== 'props' || !node.id) {
           return;
         }
         checkProps(node.id);
       },
 
       JSXAttribute(node) {
-        const alternative =
-          DOM_ATTRIBUTES[node.name.name] || SVG_ATTRIBUTES[node.name.name];
+        const alternative = ATTRIBUTES_REACT_TO_PREACT[node.name.name];
         if (!alternative) {
           return;
         }

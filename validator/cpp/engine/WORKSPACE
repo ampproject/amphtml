@@ -17,10 +17,10 @@ http_archive(
 
 http_archive(
     name = "com_googlesource_code_re2",
-    sha256 = "bd268762e4f624c930668e19c3cbb79fe178b0b488f688239ea734b680a31bff",
-    strip_prefix = "re2-e90569de09a9a3dd1f2dec189f77b52d17e4faea",
+    sha256 = "57b9d6e4742e3feeb3a74c3b00e440edaa8d4e2a77e4a68eb7f7f005eb217ec7",
+    strip_prefix = "re2-9262284a7edc1b83e7172f4ec2d7967d695e7420",
     urls = [
-        "https://github.com/google/re2/archive/e90569de09a9a3dd1f2dec189f77b52d17e4faea.tar.gz",
+        "https://github.com/google/re2/archive/9262284a7edc1b83e7172f4ec2d7967d695e7420.tar.gz",
     ],
 )
 
