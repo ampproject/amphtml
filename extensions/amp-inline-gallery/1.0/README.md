@@ -211,6 +211,6 @@ In addition to the [common props](../../../docs/spec/bento-common-props.md), Ben
 
 A Number defining the ratio of width to height that slides should be displayed in (this is optional).
 
-#### `loop` 
+#### `loop`
 
 Boolean attribute indicating whether thumbnails should loop. Default is `false`.
