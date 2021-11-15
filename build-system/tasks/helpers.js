@@ -160,6 +160,7 @@ async function compileAllJs(options) {
     doBuildJs(jsBundles, 'amp-story-player.js', options),
     doBuildJs(jsBundles, 'amp-inabox-host.js', options),
     doBuildJs(jsBundles, 'amp-shadow.js', options),
+    doBuildJs(jsBundles, 'story.js', options),
     doBuildJs(jsBundles, 'amp-inabox.js', options),
   ]);
   await compileCoreRuntime(options);

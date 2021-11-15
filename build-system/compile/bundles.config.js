@@ -164,6 +164,19 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  // Currently: 60.99 + 69.26 --> 130.25 (559.88 uncompressed)
+  // Single binary: 123.91 kb (547.19 uncompressed)
+  'story.js': {
+    srcDir: './src/',
+    srcFilename: 'story.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      minifiedName: 'story-v0.js',
+      includePolyfills: true,
+      wrapper: wrappers.mainBinary,
+    },
+  },
   'amp.js': {
     srcDir: './src/',
     srcFilename: 'amp.js',
