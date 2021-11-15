@@ -5,6 +5,7 @@
 
 import {userAssert} from '#core/assert';
 import {isFiniteNumber} from '#core/types';
+import {isEnumValue} from '#core/types/enum';
 
 /**
  * @enum {string}
@@ -51,26 +52,26 @@ export let DimensionsDef;
  * Elements that the progress can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
  * This list does not include video players which are found via regex later.
- * @enum {boolean}
+ * @enum {string}
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ENABLED = {
-  'AMP-AD': true,
-  'AMP-ANIM': true,
-  'AMP-EMBED': true,
-  'AMP-FACEBOOK': true,
-  'AMP-FACEBOOK-COMMENTS': true,
-  'AMP-FACEBOOK-PAGE': true,
-  'AMP-GOOGLE-DOCUMENT-EMBED': true,
-  'AMP-IFRAME': true,
-  'AMP-IMG': true,
-  'AMP-INSTAGRAM': true,
-  'AMP-LIST': true,
-  'AMP-PINTEREST': true,
-  'AMP-PLAYBUZZ': true,
-  'AMP-RENDER': true,
-  'AMP-TIKTOK': true,
-  'AMP-TWITTER': true,
+export const LOADING_ELEMENTS_ENUM = {
+  AMP_AD: 'AMP-AD',
+  AMP_ANIM: 'AMP-ANIM',
+  AMP_EMBED: 'AMP-EMBED',
+  AMP_FACEBOOK: 'AMP-FACEBOOK',
+  AMP_FACEBOOK_COMMENTS: 'AMP-FACEBOOK-COMMENTS',
+  AMP_FACEBOOK_PAGE: 'AMP-FACEBOOK-PAGE',
+  AMP_GOOGLE_DOCUMENT_EMBED: 'AMP-GOOGLE-DOCUMENT-EMBED',
+  AMP_IFRAME: 'AMP-IFRAME',
+  AMP_IMG: 'AMP-IMG',
+  AMP_INSTAGRAM: 'AMP-INSTAGRAM',
+  AMP_LIST: 'AMP-LIST',
+  AMP_PINTEREST: 'AMP-PINTEREST',
+  AMP_PLAYBUZZ: 'AMP-PLAYBUZZ',
+  AMP_RENDER: 'AMP-RENDER',
+  AMP_TIKTOK: 'AMP-TIKTOK',
+  AMP_TWITTER: 'AMP-TWITTER',
 };
 /**
  * All video player components must either have a) "video" or b) "player" in
@@ -217,14 +218,15 @@ export function getLengthNumeral(length) {
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
   return (
-    LOADING_ELEMENTS_ENABLED[tagName] || isIframeVideoPlayerComponent(tagName)
+    isEnumValue(LOADING_ELEMENTS_ENUM, tagName) ||
+    isIframeVideoPlayerComponent(tagName)
   );
 }
 
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ENABLED allowlist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ENUM allowlist.
  * @param {string} tagName
  * @return {boolean}
  */

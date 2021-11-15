@@ -9,9 +9,11 @@ import {getBuilders} from './builders';
  * @return {import('./types').CompilerResponse}
  */
 export function compile(request) {
-  const {document, nodes, versions} = request ?? {};
+  const {component_versions: versions, document, nodes} = request ?? {};
   if (!versions || !(document || nodes)) {
-    throw new Error('Must provide versions and either document or nodes');
+    throw new Error(
+      'Must provide component_versions and either document or nodes'
+    );
   }
 
   if (document) {

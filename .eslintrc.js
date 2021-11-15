@@ -165,6 +165,7 @@ module.exports = {
     'local/await-expect': 2,
     'local/camelcase': 2,
     'local/closure-type-primitives': 2,
+    'local/core-dom-jsx': 2,
     'local/dict-string-keys': 2,
     'local/enums': 2,
     'local/get-mode-usage': 2,

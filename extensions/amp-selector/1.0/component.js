@@ -16,6 +16,7 @@ import {
   useState,
 } from '#preact';
 import {forwardRef} from '#preact/compat';
+import {propName} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 
@@ -51,7 +52,7 @@ function SelectorWithRef(
     name,
     onChange,
     role = 'listbox',
-    tabIndex,
+    [propName('tabIndex')]: tabIndex,
     children,
     ...rest
   },
@@ -267,13 +268,13 @@ export {BentoSelector};
  */
 export function BentoSelectorOption({
   as: Comp = 'div',
-  'class': className = '',
   disabled = false,
   focus: customFocus,
   index,
   option,
   role = 'option',
-  tabIndex,
+  [propName('class')]: className = '',
+  [propName('tabIndex')]: tabIndex,
   ...rest
 }) {
   const classes = useStyles();
