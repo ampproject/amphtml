@@ -814,7 +814,7 @@ function massageSourcemaps(sourcemapsFile, options) {
  * @param {Object} options
  * @return {boolean}
  */
-function shouldUseClosure(options) {
+function shouldUseClosure(options = {}) {
   if (options.bento) {
     return false;
   }
