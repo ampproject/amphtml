@@ -620,7 +620,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    */
   async function doCompileJs(options) {
     const buildResult =
-      options.minify && shouldUseClosure()
+      options.minify && shouldUseClosure(options)
         ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
         : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
@@ -811,9 +811,14 @@ function massageSourcemaps(sourcemapsFile, options) {
 
 /**
  * Returns whether or not we should compile with Closure Compiler.
+ * @param {Object} options
  * @return {boolean}
  */
-function shouldUseClosure() {
+function shouldUseClosure(options) {
+  if (options.bento) {
+    return false;
+  }
+
   // Normally setting this server-side experiment flag would be handled by
   // the release process automatically. Since this experiment is actually on the build system
   // itself instead of runtime, it is never run through babel (where the replacements usually happen).
