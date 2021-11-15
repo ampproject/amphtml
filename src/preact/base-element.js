@@ -109,11 +109,6 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  */
 export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */
-  static R1() {
-    return true;
-  }
-
-  /** @override @nocollapse */
   static requiresShadowDom() {
     // eslint-disable-next-line local/no-static-this
     return this['usesShadowDom'];
@@ -403,24 +398,6 @@ export class PreactBaseElement extends BaseElement {
    */
   api() {
     return devAssert(this.currentRef_);
-  }
-
-  /**
-   * Register an action for AMP documents to execute an API handler.
-   *
-   * This has no effect on Bento documents, since they lack an Actions system.
-   * Instead, they should use `(await element.getApi()).action()`
-   * @param {string} alias
-   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ActionTrust_Enum} minTrust
-   * @protected
-   */
-  registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
-    this.registerAction?.(
-      alias,
-      (invocation) => handler(this.api(), invocation),
-      minTrust
-    );
   }
 
   /**
@@ -837,6 +814,40 @@ export class PreactBaseElement extends BaseElement {
   updateIsPlaying_(isPlaying) {
     this.pauseHelper_.updatePlaying(isPlaying);
   }
+}
+
+/**
+ * Used to mix AMP-specific methods into PreactBaseElement
+ *
+ * Allows Bento components to elide unnecessary AMP methods
+ * @param {typeof AMP.BaseElement} clazz
+ * @return {*} class with amp-specific decorations
+ */
+export function MixInAmp(clazz) {
+  return class extends clazz {
+    /** @override @nocollapse */
+    static R1() {
+      return true;
+    }
+
+    /**
+     * Register an action for AMP documents to execute an API handler.
+     *
+     * This has no effect on Bento documents, since they lack an Actions system.
+     * Instead, they should use `(await element.getApi()).action()`
+     * @param {string} alias
+     * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
+     * @param {../action-constants.ActionTrust} minTrust
+     * @protected
+     */
+    registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
+      this.registerAction(
+        alias,
+        (invocation) => handler(this.api(), invocation),
+        minTrust
+      );
+    }
+  };
 }
 
 /**
