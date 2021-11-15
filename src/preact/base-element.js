@@ -108,24 +108,6 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * @template API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
-  /** @override @nocollapse */
-  static requiresShadowDom() {
-    // eslint-disable-next-line local/no-static-this
-    return this['usesShadowDom'];
-  }
-
-  /** @override @nocollapse */
-  static usesLoading() {
-    // eslint-disable-next-line local/no-static-this
-    return this['loadable'];
-  }
-
-  /** @override @nocollapse */
-  static prerenderAllowed() {
-    // eslint-disable-next-line local/no-static-this
-    return !this.usesLoading();
-  }
-
   /** @param {!Element} element */
   constructor(element) {
     super(element);
@@ -828,6 +810,24 @@ export function MixInAmp(clazz) {
     /** @override @nocollapse */
     static R1() {
       return true;
+    }
+
+    /** @override @nocollapse */
+    static requiresShadowDom() {
+      // eslint-disable-next-line local/no-static-this
+      return this['usesShadowDom'];
+    }
+
+    /** @override @nocollapse */
+    static usesLoading() {
+      // eslint-disable-next-line local/no-static-this
+      return this['loadable'];
+    }
+
+    /** @override @nocollapse */
+    static prerenderAllowed() {
+      // eslint-disable-next-line local/no-static-this
+      return !this.usesLoading();
     }
 
     /**

@@ -2,6 +2,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -9,7 +11,7 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-wordpress-embed';
 
-class AmpWordPressEmbed extends BaseElement {
+class AmpWordPressEmbed extends MixInAmp(BaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

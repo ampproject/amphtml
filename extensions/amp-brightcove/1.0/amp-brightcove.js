@@ -7,13 +7,14 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-brightcove-1.0.css';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 import {Services} from '#service';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';
 
-class AmpBrightcove extends BaseElement {
+class AmpBrightcove extends MixInAmp(BaseElement) {
   /** @override @nocollapse */
   static getPreconnects() {
     return ['https://players.brightcove.net'];

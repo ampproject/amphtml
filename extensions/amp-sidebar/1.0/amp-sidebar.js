@@ -1,13 +1,14 @@
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 import {Services} from '#service/';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
-class AmpSidebar extends BaseElement {
+class AmpSidebar extends MixInAmp(BaseElement) {
   /** @override */
   constructor(element) {
     super(element);

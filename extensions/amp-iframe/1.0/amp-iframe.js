@@ -1,5 +1,6 @@
 import {BaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {measureIntersection} from '#core/dom/layout/intersection';
@@ -11,7 +12,7 @@ const MINIMUM_DISTANCE_FROM_TOP_PX = 600;
 /** @const {number} */
 const MINIMUM_VIEWPORT_PROPORTION = 0.75;
 
-class AmpIframe extends BaseElement {
+class AmpIframe extends MixInAmp(BaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

@@ -1,12 +1,13 @@
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-fit-text-1.0.css';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends BaseElement {
+class AmpFitText extends MixInAmp(BaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

@@ -1,11 +1,14 @@
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 import {PaginationBaseElement} from './pagination-base-element';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-pagination';
 
-export class AmpInlineGalleryPagination extends PaginationBaseElement {
+export class AmpInlineGalleryPagination extends MixInAmp(
+  PaginationBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

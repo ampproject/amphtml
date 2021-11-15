@@ -9,6 +9,7 @@ import {dashToUnderline} from '#core/types/string';
 import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */
@@ -67,13 +68,15 @@ function AmpFacebookMixin(clazz1) {
   };
 }
 
-class AmpFacebook extends AmpFacebookMixin(BaseElement) {}
+class AmpFacebook extends MixInAmp(AmpFacebookMixin(BaseElement)) {}
 
-class AmpFacebookComments extends AmpFacebookMixin(CommentsBaseElement) {}
+class AmpFacebookComments extends MixInAmp(
+  AmpFacebookMixin(CommentsBaseElement)
+) {}
 
-class AmpFacebookLike extends AmpFacebookMixin(LikeBaseElement) {}
+class AmpFacebookLike extends MixInAmp(AmpFacebookMixin(LikeBaseElement)) {}
 
-class AmpFacebookPage extends AmpFacebookMixin(PageBaseElement) {}
+class AmpFacebookPage extends MixInAmp(AmpFacebookMixin(PageBaseElement)) {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);

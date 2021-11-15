@@ -1,5 +1,7 @@
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -9,7 +11,7 @@ import {CSS} from '../../../build/amp-vimeo-1.0.css';
 /** @const {string} */
 const TAG = 'amp-vimeo';
 
-class AmpVimeo extends BaseElement {
+class AmpVimeo extends MixInAmp(BaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

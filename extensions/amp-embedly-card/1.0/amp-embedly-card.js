@@ -3,6 +3,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {userAssert} from '#utils/log';
 
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
@@ -11,7 +13,7 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-embedly-card';
 
-class AmpEmbedlyCard extends BaseElement {
+class AmpEmbedlyCard extends MixInAmp(BaseElement) {
   /** @override */
   init() {
     return dict({

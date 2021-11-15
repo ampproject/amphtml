@@ -2,6 +2,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
@@ -11,7 +13,7 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-date-display';
 
-class AmpDateDisplay extends BaseElement {
+class AmpDateDisplay extends MixInAmp(BaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

@@ -7,6 +7,7 @@ import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
 
@@ -14,7 +15,7 @@ import {userAssert} from '#utils/log';
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends BaseElement {
+class AmpLightbox extends MixInAmp(BaseElement) {
   /** @override */
   constructor(element) {
     super(element);

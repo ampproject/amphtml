@@ -2,6 +2,8 @@ import {Layout_Enum} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {userAssert} from '#utils/log';
 
 import {EmbedlyKeyBaseElement} from './key-base-element';
@@ -9,7 +11,7 @@ import {EmbedlyKeyBaseElement} from './key-base-element';
 /** @const {string} */
 export const TAG = 'amp-embedly-key';
 
-export class AmpEmbedlyKey extends EmbedlyKeyBaseElement {
+export class AmpEmbedlyKey extends MixInAmp(EmbedlyKeyBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

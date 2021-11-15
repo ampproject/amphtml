@@ -3,13 +3,14 @@ import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#core/assert';
 
 /** @const {string} */
 const TAG = 'amp-twitter';
 const TYPE = 'twitter';
 
-class AmpTwitter extends BaseElement {
+class AmpTwitter extends MixInAmp(BaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

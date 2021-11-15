@@ -1,11 +1,14 @@
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 import {ThumbnailsBaseElement} from './thumbnails-base-element';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';
 
-export class AmpInlineGalleryThumbnails extends ThumbnailsBaseElement {
+export class AmpInlineGalleryThumbnails extends MixInAmp(
+  ThumbnailsBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

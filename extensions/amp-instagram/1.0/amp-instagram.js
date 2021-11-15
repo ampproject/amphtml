@@ -2,6 +2,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -11,7 +13,7 @@ import {CSS} from '../../../build/amp-instagram-1.0.css';
 /** @const {string} */
 const TAG = 'amp-instagram';
 
-class AmpInstagram extends BaseElement {
+class AmpInstagram extends MixInAmp(BaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

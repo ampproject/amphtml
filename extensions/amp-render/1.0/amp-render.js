@@ -11,6 +11,7 @@ import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
 import {toArray} from '#core/types/array';
+import {MixInAmp} from '#preact/base-element';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -113,7 +114,7 @@ function getTemplateNonEmptyNodeCount(doc, template) {
   );
 }
 
-export class AmpRender extends BaseElement {
+export class AmpRender extends MixInAmp(BaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

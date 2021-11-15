@@ -4,6 +4,7 @@ import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
 
@@ -11,7 +12,7 @@ import {userAssert} from '#utils/log';
 const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
-class AmpBaseCarousel extends BaseElement {
+class AmpBaseCarousel extends MixInAmp(BaseElement) {
   /** @override */
   init() {
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust_Enum.LOW);

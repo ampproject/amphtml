@@ -10,12 +10,13 @@ import {BaseElement} from './base-element';
 import {Layout_Enum} from '#core/dom/layout';
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 import {isExperimentOn} from '#experiments';
+import {MixInAmp} from '#preact/base-element';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-inline-gallery';
 
-class AmpInlineGallery extends BaseElement {
+class AmpInlineGallery extends MixInAmp(BaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

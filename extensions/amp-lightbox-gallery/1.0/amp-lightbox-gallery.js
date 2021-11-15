@@ -7,6 +7,8 @@ import {elementByTag} from '#core/dom/query';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {Services} from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
@@ -22,7 +24,7 @@ const TAG = 'amp-lightbox-gallery';
 /** @const {string} */
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
-class AmpLightboxGallery extends BaseElement {
+class AmpLightboxGallery extends MixInAmp(BaseElement) {
   /** @override */
   constructor(element) {
     super(element);

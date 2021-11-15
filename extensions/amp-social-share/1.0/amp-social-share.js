@@ -7,6 +7,8 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
@@ -115,7 +117,7 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   return typeConfig;
 };
 
-class AmpSocialShare extends BaseElement {
+class AmpSocialShare extends MixInAmp(BaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

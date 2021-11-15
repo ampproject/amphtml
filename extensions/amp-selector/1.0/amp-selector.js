@@ -4,6 +4,8 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
@@ -16,7 +18,7 @@ import {CSS} from '../../../build/amp-selector-1.0.css';
 /** @const {string} */
 const TAG = 'amp-selector';
 
-class AmpSelector extends BaseElement {
+class AmpSelector extends MixInAmp(BaseElement) {
   /** @override */
   init() {
     // Set up API

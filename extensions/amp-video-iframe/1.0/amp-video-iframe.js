@@ -3,6 +3,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {MixInAmp} from '#preact/base-element';
+
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
@@ -30,7 +32,7 @@ function getIntersectionRatioMinAutoplay(element) {
   );
 }
 
-class AmpVideoIframe extends BaseElement {
+class AmpVideoIframe extends MixInAmp(BaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
