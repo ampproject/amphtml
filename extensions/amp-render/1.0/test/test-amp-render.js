@@ -493,7 +493,7 @@ describes.realWin(
       expect(text).to.equal('Biden, Joe');
       const options = fetchJsonStub.getCall(0).args[2];
       expect(options.urlReplacement).to.equal(
-        BatchedJsonModule.UrlReplacementPolicy.ALL
+        BatchedJsonModule.UrlReplacementPolicy_Enum.ALL
       );
     });
 

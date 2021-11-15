@@ -5,7 +5,7 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function sunmedia(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._sunmedia_amp = {
     allowed_data: ['cskp', 'crst', 'cdb', 'cid'],
     mandatory_data: ['cid'],

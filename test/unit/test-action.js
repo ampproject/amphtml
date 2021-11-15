@@ -17,6 +17,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 
 import {createCustomEvent} from '#utils/event-helper';
 
+import {FakePerformance} from '#testing/fake-dom';
 import {whenCalled} from '#testing/helpers/service';
 
 /**
@@ -35,6 +36,7 @@ function actionService() {
     __AMP_SERVICES: {
       vsync: {obj: {}, ctor: Object},
     },
+    performance: new FakePerformance(window),
   };
   return new ActionService(new AmpDocSingle(win), document);
 }

@@ -12,6 +12,7 @@ import {
 } from '#preact';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
+import {propName} from '#preact/utils';
 
 const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
@@ -26,7 +27,7 @@ function BentoStreamGalleryWithRef(props, ref) {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
     children,
-    'class': className,
+    [propName('class')]: className,
     extraSpace,
     maxItemWidth = Number.MAX_VALUE,
     minItemWidth = 1,
@@ -130,10 +131,10 @@ export {BentoStreamGallery};
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  'class': className,
   disabled,
   onClick,
   outsetArrows,
+  [propName('class')]: className,
 }) {
   const classes = useStyles();
   return (

@@ -15,7 +15,7 @@ test('create', async (t) => {
       '{"query":"query {' +
         'search(query:\\"repo:ampproject/amphtml ' +
         'in:title Release 2109080123000\\", type: ISSUE, first: 1) ' +
-        '{ nodes { ... on Issue { number title body }}}}"}'
+        '{ nodes { ... on Issue { number title body url }}}}"}'
     )
     .reply(200, {data: {search: {}}});
 
@@ -57,7 +57,7 @@ test('mark task complete', async (t) => {
       '{"query":"query {' +
         'search(query:\\"repo:ampproject/amphtml ' +
         'in:title Release 2109080123000\\", type: ISSUE, first: 1) ' +
-        '{ nodes { ... on Issue { number title body }}}}"}'
+        '{ nodes { ... on Issue { number title body url }}}}"}'
     )
     .reply(200, {
       data: {
@@ -89,7 +89,7 @@ test('mark task complete', async (t) => {
       '{"query":"query {' +
         'search(query:\\"repo:ampproject/amphtml ' +
         'in:title Release 2109010123000\\", type: ISSUE, first: 1) ' +
-        '{ nodes { ... on Issue { number title body }}}}"}'
+        '{ nodes { ... on Issue { number title body url }}}}"}'
     )
     .reply(200, {
       data: {
@@ -150,7 +150,7 @@ test('add cherrypick tasks', async (t) => {
       '{"query":"query {' +
         'search(query:\\"repo:ampproject/amphtml ' +
         'in:title Release 2109080123002\\", type: ISSUE, first: 1) ' +
-        '{ nodes { ... on Issue { number title body }}}}"}'
+        '{ nodes { ... on Issue { number title body url }}}}"}'
     )
     .reply(200, {data: {search: {}}})
     .post(
@@ -158,7 +158,7 @@ test('add cherrypick tasks', async (t) => {
       '{"query":"query {' +
         'search(query:\\"repo:ampproject/amphtml ' +
         'in:title Release 2109080123001\\", type: ISSUE, first: 1) ' +
-        '{ nodes { ... on Issue { number title body }}}}"}'
+        '{ nodes { ... on Issue { number title body url }}}}"}'
     )
     .reply(200, {data: {search: {}}})
     .post(
@@ -166,7 +166,7 @@ test('add cherrypick tasks', async (t) => {
       '{"query":"query {' +
         'search(query:\\"repo:ampproject/amphtml ' +
         'in:title Release 2109080123000\\", type: ISSUE, first: 1) ' +
-        '{ nodes { ... on Issue { number title body }}}}"}'
+        '{ nodes { ... on Issue { number title body url }}}}"}'
     )
     .reply(200, {
       data: {

@@ -80,9 +80,6 @@
   "35": {
     "string": "Usap ke atas"
   },
-  "36": {
-    "string": "Perluas Tweet"
-  },
   "62": {
     "string": "Bagikan mulai dari halaman ini"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Pembukaan"
+  },
+  "98": {
+    "string": "Formulir belum dikirim, coba lagi"
+  },
+  "99": {
+    "string": "Formulir berhasil dikirim"
   }
 }

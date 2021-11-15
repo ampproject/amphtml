@@ -1,18 +1,12 @@
 # Bento Jwplayer
 
-## Usage
-
 Displays a cloud-hosted JW Player in an iframe.
 
-### Web Component
+## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-jwplayer>` web component.
-
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/jwplayer
@@ -23,49 +17,62 @@ import {defineElement as defineBentoJwplayer} from '@bentoproject/jwplayer';
 defineBentoJwplayer();
 ```
 
-#### Example: Include via `<script>`
+### Example: Include via `<script>`
 
-The example below contains an `bento-jwplayer` with three sections. The
-`expanded` attribute on the third section expands it on page load.
+<!--% example %-->
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
-  />
-</head>
-<body>
-  <bento-jwplayer
-    id="jwplayer"
-    data-player-id="BjcwyK37"
-    data-media-id="CtaIzmFs"
-    style="width: 480px; height: 270px"
-  ></bento-jwplayer>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-jwplayer
+      id="jwplayer"
+      data-player-id="BjcwyK37"
+      data-media-id="CtaIzmFs"
+      style="width: 480px; height: 270px"
+    ></bento-jwplayer>
 
-  <script>
-    (async () => {
-      const twitter = document.querySelector('#jwplayer');
-      await customElements.whenDefined('bento-twitter');
+    <script>
+      (async () => {
+        const player = document.querySelector('#jwplayer');
+        await customElements.whenDefined('bento-jwplayer');
 
-      const api = player.getApi();
-      api.play();
-      api.pause();
-      api.mute();
-      api.unmute();
-      api.requestFullscreen();
-    })();
-  </script>
-</body>
+        const api = player.getApi();
+        api.play();
+        api.pause();
+        api.mute();
+        api.unmute();
+        api.requestFullscreen();
+      })();
+    </script>
+  </body>
+</html>
 ```
 
-#### Interactivity and API usage
+### Interactivity and API usage
 
 Bento enabled components in standalone use are highly interactive through their API. The `bento-jwplayer` component API is accessible by including the following script tag in your document:
 
@@ -74,7 +81,7 @@ await customElements.whenDefined('bento-accordion');
 const api = await document.querySelector('bento-accordion').getApi();
 ```
 
-#### Layout and style
+### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
@@ -105,7 +112,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
-#### Attributes
+### Attributes
 
 <table>
   <tr>
@@ -209,17 +216,15 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
   </tr>
 </table>
 
-#### Styling
+### Styling
 
 You may use the `bento-jwplayer` element selector to style the accordion freely.
 
-### Preact/React Component
+---
 
-The examples below demonstrates use of the `<BentoMathml>` as a functional component usable with the Preact or React libraries.
+## Preact/React Component
 
-#### Example: Import via npm
-
-Install via npm:
+### Example: Import via npm
 
 ```sh
 npm install @bentoproject/jwplayer
@@ -242,9 +247,9 @@ function App() {
 }
 ```
 
-#### Layout and style
+### Layout and style
 
-**Container type**
+#### Container type
 
 The `BentoMathml` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties). These can be applied inline:
 
@@ -266,7 +271,7 @@ Or via `className`:
 }
 ```
 
-#### Props
+### Props
 
 <table>
   <tr>

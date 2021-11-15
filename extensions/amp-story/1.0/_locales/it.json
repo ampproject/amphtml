@@ -80,9 +80,6 @@
   "35": {
     "string": "Scorri verso l'alto"
   },
-  "36": {
-    "string": "Espandi Tweet"
-  },
   "62": {
     "string": "Condividi a partire da questa pagina"
   },
@@ -184,5 +181,11 @@
   },
   "97": {
     "string": "Apertura in corso"
+  },
+  "98": {
+    "string": "Invio del modulo non riuscito, riprova"
+  },
+  "99": {
+    "string": "Invio del modulo riuscito"
   }
 }

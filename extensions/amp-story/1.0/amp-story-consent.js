@@ -60,7 +60,7 @@ const renderElement = (element, config, consentId, logoSrc) => (
           <div
             class="i-amphtml-story-consent-logo"
             style={
-              logoSrc ? `background-image: url('${logoSrc}') !important;` : ''
+              logoSrc ? {backgroundImage: `url('${logoSrc}') !important`} : ''
             }
           />
         </div>

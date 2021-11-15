@@ -20,8 +20,22 @@ const {log} = require('./log');
 // 4. Open https://omahaproxy.appspot.com in a browser
 // 5. Go to "Tools" -> "Version information"
 // 6. Paste the full version (add ".0" at the end) in the "Version" field and click "Lookup"
-// 7. Copy the value next to "Branch Base Position" and update the line below
-const PUPPETEER_CHROMIUM_REVISION = '870763'; // 91.0.4472.0
+// 7. Copy the value next to "Branch Base Position"
+// 8. Clone the Puppeteer repository: `git clone https://github.com/puppeteer/puppeteer`
+// 9. Run `npm ci` in the cloned directory
+// 10. `node utils/check_availability.js ${branchBasePosition} ${branchBasePosition + 1000}`
+//     (e.g., `node utils/check_availability.js 870763 871763)
+// 10. Find the first available value for each platform and update the value below:
+const PUPPETEER_CHROMIUM_REVISION = // 91.0.4472.x
+  process.platform === 'linux'
+    ? '870763'
+    : process.platform === 'darwin' // ('mac' in check_availability.js output)
+    ? '870776'
+    : process.platform === 'win32' && process.arch === 'x32' // ('win32' in check_availability.js output)
+    ? '870768'
+    : process.platform === 'win32' && process.arch === 'x64' // ('win64' in check_availability.js output)
+    ? '870781'
+    : '';
 
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;

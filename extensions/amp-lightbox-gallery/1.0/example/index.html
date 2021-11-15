@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css">
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <bento-lightbox-gallery></bento-lightbox-gallery>
+    <figure>
+      <img id="my-img" src="img1.jpwg" lightbox />
+      <figcaption>dog wearing yellow shirt.</figcaption>
+    </figure>
+    <figure>
+      <img src="img2.jpeg" lightbox/>
+    </figure>
+    <figure>
+      <img src="img2.jpeg" lightbox/>
+    </figure>
+  </body>
+</html>

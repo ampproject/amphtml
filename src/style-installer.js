@@ -95,8 +95,13 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   // Check if it has already been created or discovered.
   if (key) {
     const existing = getExistingStyleElement(cssRoot, styleMap, key);
+    // If we find a `link[rel=stylesheet]` to an extensions css, it is
+    // prioritized and not overwritten as the document would most likely
+    // be a transformed document and that the extension will also most likely
+    // be an extension without a CSS to install for optimization.
     if (existing) {
-      if (existing.textContent !== cssText) {
+      // Only overwrite the textContent if it is a `style` tag.
+      if (existing.tagName == 'STYLE' && existing.textContent !== cssText) {
         existing.textContent = cssText;
       }
       return existing;
@@ -142,7 +147,7 @@ function getExistingStyleElement(cssRoot, styleMap, key) {
     return styleMap[key];
   }
   // Check if the style has already been added by the server layout.
-  const existing = cssRoot./*OK*/ querySelector(`style[${key}]`);
+  const existing = cssRoot./*OK*/ querySelector(`style[${key}], link[${key}]`);
   if (existing) {
     styleMap[key] = existing;
     return existing;
@@ -267,6 +272,8 @@ function styleLoaded(doc, style) {
   const sheets = doc.styleSheets;
   for (let i = 0; i < sheets.length; i++) {
     const sheet = sheets[i];
+    // The `style` param here can be an instance of a `link[rel=stylesheet]` or
+    // a `style` element. Both can be an "ownerNode" of a CSSStyleSheet
     if (sheet.ownerNode == style) {
       return true;
     }
