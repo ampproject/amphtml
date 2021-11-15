@@ -5,11 +5,11 @@
 
 import {isEsm} from '#core/mode';
 
-import {install as installCustomElements} from './polyfills/custom-elements';
+// import {install as installCustomElements} from './polyfills/custom-elements';
 
-if (!isEsm()) {
-  installCustomElements(self, class {});
-}
+// if (!isEsm()) {
+//   installCustomElements(self, class {});
+// }
 
 const BENTO = self.BENTO || [];
 
