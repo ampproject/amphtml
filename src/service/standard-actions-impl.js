@@ -64,6 +64,8 @@ export class StandardActions {
     // Explicitly not setting `Action` as a member to scope installation to one
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
+
+    this.initThemeMode();
   }
 
   /**
@@ -101,6 +103,23 @@ export class StandardActions {
       'toggleChecked',
       this.handleToggleChecked_.bind(this)
     );
+  }
+
+  /**
+   * Handles initiliazing the theme mode.
+   *
+   * This methode needs to be called on page load to set the `amp-dark-mode`
+   * class on the body if the user prefers the dark mode.
+   */
+  initThemeMode() {
+    const themeMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
+    const prefersDarkScheme = this.ampdoc.win.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+
+    if ((null === themeMode && prefersDarkScheme) || 'yes' === themeMode) {
+      this.ampdoc.getBody().classList.add('amp-dark-mode');
+    }
   }
 
   /**
@@ -160,6 +179,9 @@ export class StandardActions {
           .catch((reason) => {
             dev().error(TAG, 'Failed to opt out of CID', reason);
           });
+      case 'toggleTheme':
+        this.handleToggleTheme();
+        return null;
     }
     throw user().createError('Unknown AMP action ', method);
   }
@@ -196,6 +218,23 @@ export class StandardActions {
         user().error(TAG, e);
       }
     );
+  }
+
+  /**
+   * Handles the `toggleTheme` action.
+   *
+   * This action sets the `amp-dark-mode` class on the body element and stores the the preference for dark mode in localstorage.
+   */
+  handleToggleTheme() {
+    this.ampdoc.waitForBodyOpen().then((body) => {
+      if ('no' === this.ampdoc.win.localStorage.getItem('amp-dark-mode')) {
+        body.classList.add('amp-dark-mode');
+        this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
+      } else {
+        body.classList.remove('amp-dark-mode');
+        this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'no');
+      }
+    });
   }
 
   /**
