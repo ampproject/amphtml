@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Tabs with bento-selector</title>
+    <meta charset="utf-8" />
+    <title>Bento Selector</title>
+    <meta name="viewport" content="width=device-width" />
     <script
       type="module"
       async
@@ -26,57 +28,64 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
           'Segoe UI Symbol';
+        margin: 2rem;
+        background: #ecf1f3;
       }
-
-      /* Styles for the flex layout based tabs */
-      bento-selector[role='tablist'] {
-        display: flex;
-        flex-wrap: wrap;
+      .image-selector {
+        display: grid;
+        grid-template-columns: 160px 160px;
+        grid-gap: 10px;
+        margin: 2rem 0;
       }
-      bento-selector[role='tablist'] [role='tab'] {
-        flex-grow: 1;
-        /* custom styling, feel free to change */
-        text-align: center;
-        padding: var(--space-1);
+      .image-selector [option][selected] {
+        outline: 4px solid #269da3;
       }
-      bento-selector[role='tablist'] [role='tab'][selected] {
-        outline: none;
-        /* custom styling, feel free to change */
+      input[type='submit'] {
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        color: #269da3;
+        background: white;
+        font-size: 18px;
         font-weight: bold;
-        border-radius: var(--space-1);
-        background-color: #269da3;
-        color: white;
-      }
-      bento-selector[role='tablist'] [role='tabpanel'] {
-        display: none;
-        width: 100%;
-        order: 1; /* must be greater than the order of the tab buttons to flex to the next line */
-        /* custom styling, feel free to change */
-        padding: var(--space-4);
-      }
-      bento-selector[role='tablist']
-        [role='tab'][selected]
-        + [role='tabpanel'] {
-        display: block;
+        margin-right: 1rem;
       }
     </style>
   </head>
   <body>
-    <bento-selector role="tablist" keyboard-select-mode="focus">
-      <div id="tab1" role="tab" aria-controls="tabpanel1" option selected>
-        Tab one
-      </div>
-      <div id="tabpanel1" role="tabpanel" aria-labelledby="tab1">
-        Tab one content...
-      </div>
-      <div id="tab2" role="tab" aria-controls="tabpanel2" option>Tab two</div>
-      <div id="tabpanel2" role="tabpanel" aria-labelledby="tab2">
-        Tab two content...
-      </div>
-      <div id="tab3" role="tab" aria-controls="tabpanel3" option>Tab three</div>
-      <div id="tabpanel3" role="tabpanel" aria-labelledby="tab3">
-        Tab three content...
-      </div>
-    </bento-selector>
+    <form action="https://example.com" method="get">
+      <bento-selector class="image-selector" name="example-selector">
+        <img
+          src="https://picsum.photos/160/107?1"
+          width="160"
+          height="107"
+          alt="example image 1"
+          option="1"
+        />
+        <img
+          src="https://picsum.photos/160/107?2"
+          width="160"
+          height="107"
+          alt="example image 2"
+          disabled
+          option="2"
+        />
+        <img
+          src="https://picsum.photos/160/107?3"
+          width="160"
+          height="107"
+          alt="example image 3"
+          option="3"
+        />
+        <img
+          src="https://picsum.photos/160/107?4"
+          width="160"
+          height="107"
+          alt="example image 4"
+          option="4"
+        />
+      </bento-selector>
+      <input type="submit" value="Submit" />
+    </form>
   </body>
 </html>
