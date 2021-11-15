@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>iframe srcdoc (simple)</title>
+    <title>iframe nameframe (simple)</title>
     <style>
       body {
         margin: 0px;
@@ -19,7 +19,9 @@
   </head>
   <body>
     <h1>before</h1>
-    <iframe srcdoc='
+
+    <!-- The name attribute contains the same content as in attachment.html -->
+    <iframe src='iframe-nameframe-script.html' name='
       <!doctype html>
       <html amp lang="en">
         <head>
@@ -74,7 +76,9 @@
           </amp-story>
         </body>
       </html>
-    '></iframe>
+    '>
+    </iframe>
+
     <h1>after</h1>
   </body>
 </html>
