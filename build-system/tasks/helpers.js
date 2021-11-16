@@ -133,29 +133,20 @@ async function compileCoreRuntime(options) {
 }
 
 /**
- * @return {!Promise<void>}
- */
-async function writeGeneratedBentoRuntime() {
-  // TODO(#35264): We define this function separate from compileBentoRuntime()
-  // in order to generate this file early, so that it can be consumed by the
-  // pre-closure-babel step.
-  // If we stop relying on Closure, esbuild will run babel as part of each
-  // build and we won't have to generate this file early. Thus, we'd be able to
-  // move the contents of this function into compileBentoRuntime(), and remove
-  // writeGeneratedBentoRuntime() from its call-sites in runPreBuildSteps() and
-  // runPreDistSteps().
-  const {srcDir, srcFilename} = jsBundles['bento.js'];
-  const filename = `${srcDir}/${srcFilename}`;
-  const fileSource = generateBentoRuntime();
-  await fs.outputFile(filename, fileSource);
-}
-
-/**
  * @param {!Object} options
  * @return {Promise<void>}
  */
 async function compileBentoRuntime(options) {
-  await doBuildJs(jsBundles, 'bento.js', options);
+  const {srcDir, srcFilename} = jsBundles['bento.js'];
+  const filename = `${srcDir}/${srcFilename}`;
+  const fileSource = generateBentoRuntime();
+  await fs.outputFile(filename, fileSource);
+  await doBuildJs(jsBundles, 'bento.js', {
+    ...options,
+    // The pre-closure babel step wants the entry file to be generated earlier.
+    // Much simpler to generate it here and use esbuild instead.
+    esbuild: true,
+  });
 }
 
 /**
