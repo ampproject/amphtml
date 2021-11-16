@@ -1371,16 +1371,24 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any audio.
+   * Checks if the page has any captions and toggles them.
    * @private
    */
   checkPageHasCaptions_() {
-    const pageHasCaptions = !!this.element.querySelector('track');
+    const pageHasCaptions = !!this.element.querySelector(
+      'track, amp-story-captions'
+    );
 
     this.storeService_.dispatch(
       Action.TOGGLE_PAGE_HAS_CAPTIONS,
       pageHasCaptions
     );
+
+    if (pageHasCaptions) {
+      this.toggleCaptions_(
+        this.storeService_.get(StateProperty.CAPTIONS_STATE)
+      );
+    }
   }
 
   /**
@@ -1809,19 +1817,36 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Listens for changes on captions if there are tracks on videos.
+   * Listens for changes on captions if there are tracks on videos and page is active.
    * @private
    */
   initializeCaptionsListener_() {
     if (!this.element.querySelector('track')) {
       return;
     }
-    this.storeService_.subscribe(StateProperty.CAPTIONS_STATE, (captions) => {
-      this.element.querySelectorAll('video').forEach((video) => {
-        toArray(video.textTracks).forEach((track) => {
-          track.mode = captions ? 'showing' : 'disabled'
-        });
+    this.storeService_.subscribe(
+      StateProperty.CAPTIONS_STATE,
+      (captionsOn) => {
+        if (this.isActive()) {
+          this.toggleCaptions_(captionsOn);
+        }
+      },
+      true
+    );
+  }
+
+  /**
+   * Shows or hides the captions for all elements that implement toggleCaptions.
+   * @param {boolean} captionsOn
+   * @return {!Promise}
+   */
+  toggleCaptions_(captionsOn) {
+    return this.getAllAmpVideos_().map((ampVideo) =>
+      ampVideo.getImpl().then((impl) => {
+        if (impl.toggleCaptions) {
+          impl.toggleCaptions(captionsOn);
+        }
       })
-    }, true);
+    );
   }
 }

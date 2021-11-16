@@ -143,6 +143,9 @@ export class AmpVideo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?AmpStoryCaptions} */
+    this.captions_ = null;
+
     /** @private {?Element} */
     this.video_ = null;
 
@@ -767,10 +770,26 @@ export class AmpVideo extends AMP.BaseElement {
       return;
     }
     captionsElement.getImpl().then((impl) => {
+      this.captions_ = impl;
       if (impl.setVideoElement) {
         impl.setVideoElement(this.video_);
       }
     });
+  }
+
+  /**
+   * Shows or hides the captions.
+   * @param {boolean} captionsOn
+   * @public
+   */
+  toggleCaptions(captionsOn) {
+    if (this.captions_?.toggleCaptions) {
+      this.captions_?.toggleCaptions(captionsOn);
+    } else if (!!this.element.querySelector('track')) {
+      toArray(this.element.querySelectorAll('track')).forEach((track) => {
+        track.mode = captionsOn ? 'showing' : 'hidden';
+      });
+    }
   }
 
   /** @private */
