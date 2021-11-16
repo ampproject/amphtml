@@ -50,9 +50,7 @@
     <script>
       (async () => {
         const lightboxElement = document.querySelector('#my-lightbox');
-        console.log('defined');
         await customElements.whenDefined('bento-lightbox');
-        console.log('defined');
         const lightbox = await lightboxElement.getApi();
 
         // set up button actions
