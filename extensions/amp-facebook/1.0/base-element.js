@@ -23,6 +23,7 @@ BaseElement['props'] = {
     attr: 'data-locale',
     default: dashToUnderline(window.navigator.language),
   },
+  'loading': {attr: 'data-loading'},
   // amp-facebook
   'allowFullScreen': {attr: 'data-allowfullscreen'},
   'embedAs': {attrs: ['data-embed-as'], parseAttrs: parseEmbed},
