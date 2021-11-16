@@ -105,20 +105,6 @@ const IS_EMPTY_TEXT_NODE = (node) =>
   node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0;
 
 /**
- * @param {null|string} attributeName
- * @param {string|undefined} attributePrefix
- * @return {boolean}
- */
-function matchesAttrPrefix(attributeName, attributePrefix) {
-  return (
-    attributeName !== null &&
-    attributePrefix !== undefined &&
-    attributeName.startsWith(attributePrefix) &&
-    attributeName !== attributePrefix
-  );
-}
-
-/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
  * @param {{current: ?}} ref
@@ -329,11 +315,11 @@ function matchChild(element, defs) {
 /**
  * Maps multiple attributes with the same prefix to a single prop object.
  * The prefix cannot equal the attribute name.
- * @param {string} attrPrefix
+ * @param {string} prefix
  * @return {{attrMatches: function(string):boolean, parseAttrs: function(!Element):(undefined|Object<string, string>)}}
  */
-export function createParseAttrsWithPrefix(attrPrefix) {
-  const attrMatches = (name) => matchesAttrPrefix(name, attrPrefix);
+export function createParseAttrsWithPrefix(prefix) {
+  const attrMatches = (name) => name?.startsWith(prefix) && name !== prefix;
   const parseAttrs = (element) => {
     let currObj;
     const attrs = element.attributes;
@@ -343,7 +329,7 @@ export function createParseAttrsWithPrefix(attrPrefix) {
         if (!currObj) {
           currObj = {};
         }
-        currObj[dashToCamelCase(attrib.name.slice(attrPrefix.length))] =
+        currObj[dashToCamelCase(attrib.name.slice(prefix.length))] =
           attrib.value;
       }
     }
