@@ -1,6 +1,6 @@
 /**
  * @fileoverview
- * This are the packages, and their exports that are included in `bento.js`
+ * These are the packages, and their exports that are included in `bento.js`
  * Extension `bento-*.js` binaries will use these exports as provided by
  * `bento.js` from the `BENTO` global.
  *
