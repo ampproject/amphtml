@@ -316,7 +316,7 @@ function matchChild(element, defs) {
  * Maps multiple attributes with the same prefix to a single prop object.
  * The prefix cannot equal the attribute name.
  * @param {string} prefix
- * @return {{attrMatches: function(string):boolean, parseAttrs: function(!Element):(undefined|Object<string, string>)}}
+ * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(undefined|Object<string, string>)}}
  */
 export function createParseAttrsWithPrefix(prefix) {
   const attrMatches = (name) => name?.startsWith(prefix) && name !== prefix;
