@@ -69,8 +69,6 @@ export let InteractiveComponentDef;
  */
 export let InteractiveReactData;
 
-export let ShoppingConfigDataDef;
-
 /**
  * @typedef {{
  *   brand-favicon: ?string,
