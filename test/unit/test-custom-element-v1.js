@@ -1,5 +1,5 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {LayoutPriority} from '#core/dom/layout';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 import {getSchedulerForDoc} from '#service/scheduler';
@@ -79,7 +79,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.isUpgraded()).to.be.false;
       expect(getImplClassSyncForTesting(element)).to.equal(TestElement);
       expect(getImplSyncForTesting(element)).to.be.null;
-      expect(element.getBuildPriority()).equal(LayoutPriority.CONTENT);
+      expect(element.getBuildPriority()).equal(LayoutPriority_Enum.CONTENT);
 
       doc.body.appendChild(element);
 
@@ -88,7 +88,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.isUpgraded()).to.be.false;
       expect(element.readyState).to.equal('building');
       expect(element.isBuilt()).to.be.false;
-      expect(element.getBuildPriority()).equal(LayoutPriority.CONTENT);
+      expect(element.getBuildPriority()).equal(LayoutPriority_Enum.CONTENT);
       expect(removeSpy).to.have.been.calledWith(
         'amp-unresolved',
         'i-amphtml-unresolved'
@@ -103,7 +103,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.isUpgraded()).to.be.false;
       expect(getImplClassSyncForTesting(element)).to.be.null;
       expect(getImplSyncForTesting(element)).to.be.null;
-      expect(element.getBuildPriority()).equal(LayoutPriority.BACKGROUND);
+      expect(element.getBuildPriority()).equal(LayoutPriority_Enum.BACKGROUND);
 
       doc.body.appendChild(element);
       element.upgrade(TestElement);
@@ -113,7 +113,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.isUpgraded()).to.be.false;
       expect(element.readyState).to.equal('building');
       expect(element.isBuilt()).to.be.false;
-      expect(element.getBuildPriority()).equal(LayoutPriority.CONTENT);
+      expect(element.getBuildPriority()).equal(LayoutPriority_Enum.CONTENT);
     });
 
     it('should reschedule build when re-attached', () => {
@@ -263,7 +263,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.have.class('i-amphtml-notbuilt');
       expect(element).to.have.class('amp-notbuilt');
       expect(element).to.not.have.class('i-amphtml-built');
-      expect(element.signals().get(CommonSignals.BUILT)).to.be.null;
+      expect(element.signals().get(CommonSignals_Enum.BUILT)).to.be.null;
       expect(attachedCallbackStub).to.not.be.called;
       expect(getSizerStub).to.be.calledOnce;
 
@@ -276,7 +276,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.not.have.class('i-amphtml-notbuilt');
       expect(element).to.not.have.class('amp-notbuilt');
       expect(element).to.have.class('i-amphtml-built');
-      expect(element.signals().get(CommonSignals.BUILT)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.BUILT)).to.exist;
       expect(attachedCallbackStub).to.be.calledOnce;
     });
 
@@ -299,7 +299,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.have.class('i-amphtml-notbuilt');
       expect(element).to.have.class('amp-notbuilt');
       expect(element).to.not.have.class('i-amphtml-built');
-      expect(element.signals().get(CommonSignals.BUILT)).to.be.null;
+      expect(element.signals().get(CommonSignals_Enum.BUILT)).to.be.null;
       expect(attachedCallbackStub).to.not.be.called;
       expect(getSizerStub).to.be.calledOnce;
 
@@ -312,7 +312,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.not.have.class('i-amphtml-notbuilt');
       expect(element).to.not.have.class('amp-notbuilt');
       expect(element).to.have.class('i-amphtml-built');
-      expect(element.signals().get(CommonSignals.BUILT)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.BUILT)).to.exist;
       expect(attachedCallbackStub).to.be.calledOnce;
     });
 
@@ -345,7 +345,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.not.have.class('i-amphtml-notbuilt');
       expect(element).to.not.have.class('amp-notbuilt');
       expect(element).to.have.class('i-amphtml-built');
-      expect(element.signals().get(CommonSignals.BUILT)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.BUILT)).to.exist;
       expect(attachedCallbackStub).to.be.calledOnce;
     });
 
@@ -378,7 +378,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element).to.not.have.class('i-amphtml-notbuilt');
       expect(element).to.not.have.class('amp-notbuilt');
       expect(element).to.have.class('i-amphtml-built');
-      expect(element.signals().get(CommonSignals.BUILT)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.BUILT)).to.exist;
       expect(attachedCallbackStub).to.be.calledOnce;
     });
 
@@ -450,10 +450,10 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
         expect(e.toString()).to.match(/intentional/);
       }
       expect(element.readyState).to.equal('error');
-      expect(element.signals().get(CommonSignals.BUILT)).to.exist;
-      expect(element.signals().get(CommonSignals.BUILT).toString()).to.match(
-        /intentional/
-      );
+      expect(element.signals().get(CommonSignals_Enum.BUILT)).to.exist;
+      expect(
+        element.signals().get(CommonSignals_Enum.BUILT).toString()
+      ).to.match(/intentional/);
     });
 
     it('should set the failing state if buildCallback rejects', async () => {
@@ -486,10 +486,10 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
         expect(e.toString()).to.match(/intentional/);
       }
       expect(element.readyState).to.equal('error');
-      expect(element.signals().get(CommonSignals.MOUNTED)).to.exist;
-      expect(element.signals().get(CommonSignals.MOUNTED).toString()).to.match(
-        /intentional/
-      );
+      expect(element.signals().get(CommonSignals_Enum.MOUNTED)).to.exist;
+      expect(
+        element.signals().get(CommonSignals_Enum.MOUNTED).toString()
+      ).to.match(/intentional/);
     });
 
     it('should only execute build once', async () => {
@@ -989,16 +989,16 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     it('should update loading state', () => {
       expect(element.readyState).equal('other');
       expect(element.toggleLoading).to.not.be.called;
-      expect(element.signals().get(CommonSignals.LOAD_START)).to.be.null;
-      element.signals().signal(CommonSignals.UNLOAD);
+      expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.be.null;
+      element.signals().signal(CommonSignals_Enum.UNLOAD);
       element.classList.remove('i-amphtml-layout');
 
       element.setReadyStateInternal('loading');
       expect(element.readyState).equal('loading');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(true);
-      expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
-      expect(element.signals().get(CommonSignals.UNLOAD)).to.be.null;
-      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.UNLOAD)).to.be.null;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
       expect(element).to.have.class('i-amphtml-layout');
     });
 
@@ -1008,15 +1008,15 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
       expect(element.readyState).equal('other');
       expect(element.toggleLoading).to.not.be.called;
-      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
       element.classList.remove('i-amphtml-layout');
 
       element.setReadyStateInternal('complete');
       expect(element.readyState).equal('complete');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(false);
-      expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
-      expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
-      expect(element.signals().get(CommonSignals.UNLOAD)).to.not.exist;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.UNLOAD)).to.not.exist;
       expect(element).to.have.class('i-amphtml-layout');
       expect(loadEventSpy).to.be.calledOnce;
       expect(loadEventSpy.firstCall.firstArg.bubbles).to.be.false;
@@ -1028,13 +1028,15 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
       expect(element.readyState).equal('other');
       expect(element.toggleLoading).to.not.be.called;
-      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
 
       const error = new Error();
       element.setReadyStateInternal('error', error);
       expect(element.readyState).equal('error');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(false);
-      expect(element.signals().get(CommonSignals.LOAD_END)).to.equal(error);
+      expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.equal(
+        error
+      );
       expect(errorEventSpy).to.be.calledOnce;
       expect(errorEventSpy.firstCall.firstArg.bubbles).to.be.false;
     });
@@ -1054,13 +1056,13 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     it('should return back to loading after complete', () => {
       element.setReadyStateInternal('complete');
       expect(element.readyState).equal('complete');
-      expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.exist;
 
-      element.signals().reset(CommonSignals.LOAD_START);
+      element.signals().reset(CommonSignals_Enum.LOAD_START);
       element.setReadyStateInternal('loading');
       expect(element.readyState).equal('loading');
-      expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
-      expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
+      expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.exist;
     });
   });
 

@@ -6,7 +6,7 @@
  * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
  */
 
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
@@ -78,7 +78,7 @@ export function buildInteractiveDisclaimer(interactive, attrs = {}) {
     linkEl.remove();
   }
   noteEl.textContent = interactive.localizationService.getLocalizedString(
-    LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+    LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
   );
 
   // Set the described-by for a11y.

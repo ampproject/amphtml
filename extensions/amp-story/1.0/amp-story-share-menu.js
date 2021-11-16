@@ -11,8 +11,8 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {Keys} from '#core/constants/key-codes';
-import {LocalizedStringId} from '#service/localization/strings';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '#core/dom/query';
@@ -166,7 +166,10 @@ export class ShareMenu {
     );
     this.closeButton_.setAttribute(
       'aria-label',
-      localize(this.parentEl_, LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL)
+      localize(
+        this.parentEl_,
+        LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+      )
     );
 
     this.initializeListeners_();
@@ -210,7 +213,7 @@ export class ShareMenu {
       );
 
       this.win_.addEventListener('keyup', (event) => {
-        if (event.key == Keys.ESCAPE) {
+        if (event.key == Keys_Enum.ESCAPE) {
           event.preventDefault();
           this.close_();
         }

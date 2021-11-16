@@ -1,7 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {createShadowRootWithStyle} from './utils';
 import {removeElement} from '#core/dom';
 import {localize} from './amp-story-localization-service';
@@ -21,7 +21,7 @@ const renderUnsuportedBrowserLayerElement = (element) => (
       <div class="i-amphtml-story-overlay-text">
         {localize(
           element,
-          LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
+          LocalizedStringId_Enum.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
         )}
       </div>
       <button
@@ -32,7 +32,7 @@ const renderUnsuportedBrowserLayerElement = (element) => (
       >
         {localize(
           element,
-          LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
+          LocalizedStringId_Enum.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL
         )}
       </button>
     </div>

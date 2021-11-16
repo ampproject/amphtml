@@ -6,7 +6,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/base-carousel
@@ -31,14 +31,11 @@ defineBentoBaseCarousel();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-base-carousel {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+    />
     <script
       type="module"
       async
@@ -345,7 +342,7 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/base-carousel

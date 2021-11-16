@@ -62,13 +62,13 @@ export let LayoutMarginsDef;
 export let LayoutMarginsChangeDef;
 
 /**
- * RelativePositions
+ * RelativePositions_Enum
  *
  * Describes the relative position of an element to another (whether the
  * first is inside the second, on top of the second or on the bottom
  * @enum {string}
  */
-export const RelativePositions = {
+export const RelativePositions_Enum = {
   INSIDE: 'inside',
   TOP: 'top',
   BOTTOM: 'bottom',
@@ -159,15 +159,15 @@ export function rectIntersection(var_args) {
  * Returns the position of r2 relative to r1
  * @param {!LayoutRectDef} r1
  * @param {!LayoutRectDef} r2
- * @return {!RelativePositions}
+ * @return {!RelativePositions_Enum}
  */
 export function layoutRectsRelativePos(r1, r2) {
   if (r1.top < r2.top) {
-    return RelativePositions.TOP;
+    return RelativePositions_Enum.TOP;
   } else if (r1.bottom > r2.bottom) {
-    return RelativePositions.BOTTOM;
+    return RelativePositions_Enum.BOTTOM;
   } else {
-    return RelativePositions.INSIDE;
+    return RelativePositions_Enum.INSIDE;
   }
 }
 
@@ -177,7 +177,7 @@ export function layoutRectsRelativePos(r1, r2) {
  * @param {!LayoutRectDef} layoutBox
  * @param {!ViewportInterfaceDef} viewport
  * @param {number} scrollPos
- * @return {!RelativePositions}
+ * @return {!RelativePositions_Enum}
  */
 export function layoutPositionRelativeToScrolledViewport(
   layoutBox,
@@ -193,7 +193,7 @@ export function layoutPositionRelativeToScrolledViewport(
     })
   );
   if (rectsOverlap(layoutBox, scrollLayoutBox)) {
-    return RelativePositions.INSIDE;
+    return RelativePositions_Enum.INSIDE;
   } else {
     return layoutRectsRelativePos(layoutBox, scrollLayoutBox);
   }

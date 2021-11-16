@@ -1,4 +1,4 @@
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
@@ -262,7 +262,7 @@ function isIos() {
  */
 function handleKeyPress(event, finalEndpoint, target) {
   const {key} = event;
-  if (key == Keys.SPACE || key == Keys.ENTER) {
+  if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
     event.preventDefault();
     handleActivation(finalEndpoint, target);
   }

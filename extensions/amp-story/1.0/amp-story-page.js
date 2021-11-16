@@ -22,16 +22,16 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {EventType, dispatch} from './events';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {MediaPool} from './media-pool';
 import {Services} from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
-import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
+import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
 import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
@@ -341,7 +341,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           this.maybeUpdateAutoAdvanceTime_(videoDuration);
           return;
         }
-        listenOnce(video, VideoEvents.LOADEDMETADATA, () => {
+        listenOnce(video, VideoEvents_Enum.LOADEDMETADATA, () => {
           this.maybeUpdateAutoAdvanceTime_(videoImpl.getDuration());
         });
       });
@@ -416,7 +416,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /**
@@ -492,7 +492,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       registerAllPromise.then(() => {
         this.signals()
-          .whenSignal(CommonSignals.LOAD_END)
+          .whenSignal(CommonSignals_Enum.LOAD_END)
           .then(() => {
             if (this.state_ == PageState.PLAYING) {
               this.advancement_.start();
@@ -624,7 +624,9 @@ export class AmpStoryPage extends AMP.BaseElement {
             }
 
             whenUpgradedToCustomElement(mediaEl)
-              .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
+              .then((el) =>
+                el.signals().whenSignal(CommonSignals_Enum.LOAD_END)
+              )
               .then(resolve, resolve);
             break;
           case 'amp-audio':
@@ -666,9 +668,9 @@ export class AmpStoryPage extends AMP.BaseElement {
           case 'amp-audio':
           case 'amp-video':
             const signal =
-              mediaEl.getAttribute('layout') === Layout.NODISPLAY
-                ? CommonSignals.BUILT
-                : CommonSignals.LOAD_END;
+              mediaEl.getAttribute('layout') === Layout_Enum.NODISPLAY
+                ? CommonSignals_Enum.BUILT
+                : CommonSignals_Enum.LOAD_END;
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(signal))
@@ -1100,7 +1102,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
     this.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => this.animationManager_.applyLastFrame());
   }
 
@@ -1544,7 +1546,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     labelEl.textContent = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO
+      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
     );
 
     this.playMessageEl_.addEventListener('click', () => {
@@ -1592,7 +1594,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     labelEl.textContent = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO
     );
 
     this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));

@@ -3,14 +3,14 @@
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {listenOncePromise} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';
@@ -554,7 +554,7 @@ export class AmpStory360 extends AMP.BaseElement {
         discoveryTemplate.querySelector(
           '.i-amphtml-story-360-discovery-text'
         ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_DISCOVERY_DIALOG_TEXT
+          LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
         );
       });
       this.mutateElement(() => page.appendChild(discoveryTemplate));
@@ -594,7 +594,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.activateButton_.querySelector(
       '.i-amphtml-story-360-activate-text'
     ).textContent = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
+      LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
     );
 
     this.activateButton_.addEventListener('click', () =>
@@ -712,7 +712,7 @@ export class AmpStory360 extends AMP.BaseElement {
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
-      .then(() => ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() => ampImgEl.signals().whenSignal(CommonSignals_Enum.LOAD_END))
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
@@ -734,7 +734,9 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   setupAmpVideoRenderer_() {
     return whenUpgradedToCustomElement(dev().assertElement(this.ampVideoEl_))
-      .then(() => this.ampVideoEl_.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() =>
+        this.ampVideoEl_.signals().whenSignal(CommonSignals_Enum.LOAD_END)
+      )
       .then(() => {
         const alreadyHasData =
           dev().assertElement(this.ampVideoEl_.querySelector('video'))

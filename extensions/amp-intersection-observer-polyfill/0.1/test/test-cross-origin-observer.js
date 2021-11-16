@@ -1,4 +1,4 @@
-import {MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {WindowInterface} from '#core/window/interface';
 
@@ -80,8 +80,8 @@ describes.realWin('maybeSetupCrossOriginObserver', {amp: false}, (env) => {
       iframeClient = {
         makeRequest(message, type, callback) {
           if (
-            message == MessageType.SEND_POSITIONS &&
-            type == MessageType.POSITION
+            message == MessageType_Enum.SEND_POSITIONS &&
+            type == MessageType_Enum.POSITION
           ) {
             sendMessageCallback = callback;
           }

@@ -16,7 +16,7 @@ https://github.com/ampproject/amphtml/blob/422d171e87571c4d125a2bf956e78e92444c1
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/date-display

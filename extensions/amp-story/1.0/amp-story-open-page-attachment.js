@@ -3,7 +3,7 @@ import * as Preact from '#core/dom/jsx';
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
 import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {dev} from '#utils/log';
 import {localize} from './amp-story-localization-service';
@@ -151,11 +151,15 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   // Append text & aria-label.
   const openLabelAttr =
     anchorChild?.textContent ||
+    // For legacy support of amp-story-page-attachment with a src and cta-text attribute.
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
     ? openLabelAttr.trim()
-    : localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+    : localize(
+        pageEl,
+        LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      );
   ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
@@ -199,7 +203,10 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
-    localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+    localize(
+      pageEl,
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    );
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   if (openLabel !== 'none') {
