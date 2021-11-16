@@ -37,13 +37,11 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
     import {isEsm} from '#core/mode';
     import {install as installCustomElements} from '#polyfills/custom-elements';
 
+    ${imports.join(';\n\n')};
+
     if (!isEsm()) {
       installCustomElements(self, class {});
     }
-    
-    ${imports.join(';\n\n')};
-
-    installCustomElements(self);
 
     const bento = self.BENTO || [];
 

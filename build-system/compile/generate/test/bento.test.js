@@ -10,7 +10,8 @@ test('generateBentoRuntime', (t) => {
     }),
     dedent(`
       import {dict} from '#core/types/object';
-      import {install as installCustomElements} from '#polyfills/custom-elements.js';
+      import {isEsm} from '#core/mode';
+      import {install as installCustomElements} from '#polyfills/custom-elements';
 
       import {
       bar as _foo_bar,
@@ -21,7 +22,9 @@ test('generateBentoRuntime', (t) => {
       car as _baz_bar_car,
       } from '#baz/bar';
 
-      installCustomElements(self);
+      if (!isEsm()) {
+        installCustomElements(self, class {});
+      }
 
       const bento = self.BENTO || [];
 
