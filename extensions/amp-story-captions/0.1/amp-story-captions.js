@@ -1,5 +1,4 @@
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
 import {listen} from '#utils/event-helper';
@@ -57,14 +56,6 @@ export class AmpStoryCaptions extends AMP.BaseElement {
         this.updateTracks_();
       }
     );
-  }
-
-  /**
-   * Shows or hides the captions.
-   * @param {boolean} captionsOn
-   */
-  toggleCaptions(captionsOn) {
-    setStyle(this.element, 'visibility', captionsOn ? 'visible' : 'hidden');
   }
 
   /** Creates new track renderers for current textTracks. */

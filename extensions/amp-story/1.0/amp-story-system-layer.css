@@ -4,14 +4,14 @@
 
 
 .i-amphtml-story-system-layer {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.32), transparent) !important;
+  background: linear-gradient(180deg, #0004, #0002 33%, #0001 67%, #0000) !important;
   position: absolute !important;
   display: flex !important;
   justify-content: space-between !important;
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  height: 54px !important;
+  height: calc(var(--story-page-vh) * 15) !important;
   z-index: 100000 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   pointer-events: none !important;

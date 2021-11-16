@@ -143,9 +143,6 @@ export class AmpVideo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?AmpStoryCaptions} */
-    this.captions_ = null;
-
     /** @private {?Element} */
     this.video_ = null;
 
@@ -783,13 +780,9 @@ export class AmpVideo extends AMP.BaseElement {
    * @public
    */
   toggleCaptions(captionsOn) {
-    if (this.captions_?.toggleCaptions) {
-      this.captions_?.toggleCaptions(captionsOn);
-    } else if (!!this.element.querySelector('track')) {
-      toArray(this.element.querySelectorAll('track')).forEach((track) => {
-        track.mode = captionsOn ? 'showing' : 'hidden';
-      });
-    }
+    toArray(this.video_.textTracks).forEach((track) => {
+      track.mode = captionsOn ? 'showing' : 'disabled';
+    });
   }
 
   /** @private */
