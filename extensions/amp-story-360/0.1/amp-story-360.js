@@ -3,11 +3,11 @@
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
+import * as Preact from '#core/dom/jsx';
 import {CommonSignals} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
-import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 import {LocalizedStringId} from '#service/localization/strings';
@@ -46,50 +46,49 @@ const CENTER_OFFSET = 90;
 const MIN_WEBGL_DISTANCE = 2;
 
 /**
- * Generates the template for the permission button.
- *
+ * Renders the template for the permission button.
  * @param {!Element} element
  * @return {!Element}
  */
-const buildActivateButtonTemplate = (element) => htmlFor(element)`
-    <button class="i-amphtml-story-360-activate-button" role="button">
-      <span class="i-amphtml-story-360-activate-text"></span>
-      <span class="i-amphtml-story-360-activate-button-icon"
-        >360°
-        <svg
-          class="i-amphtml-story-360-activate-button-icon-svg"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <defs>
-            <linearGradient id="i-amphtml-story-360-activate-gradient">
-              <stop stop-color="white" stop-opacity=".3"></stop>
-              <stop offset="1" stop-color="white"></stop>
-            </linearGradient>
-            <ellipse
-              id="i-amphtml-story-360-activate-ellipse"
-              ry="11.5"
-              rx="7.5"
-              cy="12"
-              cx="12"
-              stroke="url(#i-amphtml-story-360-activate-gradient)"
-            ></ellipse>
-          </defs>
-          <use xlink:href="#i-amphtml-story-360-activate-ellipse"></use>
-          <use
-            xlink:href="#i-amphtml-story-360-activate-ellipse"
-            transform="rotate(90, 12, 12)"
-          ></use>
-        </svg>
-      </span>
-    </button>
-  `;
+const renderActivateButtonTemplate = () => (
+  <button class="i-amphtml-story-360-activate-button" role="button">
+    <span class="i-amphtml-story-360-activate-text"></span>
+    <span class="i-amphtml-story-360-activate-button-icon">
+      360°
+      <svg
+        class="i-amphtml-story-360-activate-button-icon-svg"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+      >
+        <defs>
+          <linearGradient id="i-amphtml-story-360-activate-gradient">
+            <stop stop-color="white" stop-opacity=".3"></stop>
+            <stop offset="1" stop-color="white"></stop>
+          </linearGradient>
+          <ellipse
+            id="i-amphtml-story-360-activate-ellipse"
+            ry="11.5"
+            rx="7.5"
+            cy="12"
+            cx="12"
+            stroke="url(#i-amphtml-story-360-activate-gradient)"
+          ></ellipse>
+        </defs>
+        <use href="#i-amphtml-story-360-activate-ellipse"></use>
+        <use
+          href="#i-amphtml-story-360-activate-ellipse"
+          transform="rotate(90, 12, 12)"
+        ></use>
+      </svg>
+    </span>
+  </button>
+);
 
 /**
- * Generates the template for the gyroscope feature discovery animation.
+ * Renders the template for the gyroscope feature discovery animation.
  *
  * NOTE: i-amphtml-story-360-discovery is used in maybeShowDiscoveryAnimation_
  * and must be changed in both places if updated.
@@ -97,12 +96,12 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
  * @param {!Element} element
  * @return {!Element}
  */
-const buildDiscoveryTemplate = (element) => htmlFor(element)`
-    <div class="i-amphtml-story-360-discovery" aria-live="polite">
-      <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-discovery-text"></span>
-    </div>
-  `;
+const renderDiscoveryTemplate = () => (
+  <div class="i-amphtml-story-360-discovery" aria-live="polite">
+    <div class="i-amphtml-story-360-discovery-animation"></div>
+    <span class="i-amphtml-story-360-discovery-text"></span>
+  </div>
+);
 
 /**
  * @param {number} deg
@@ -548,7 +547,7 @@ export class AmpStory360 extends AMP.BaseElement {
       )
     ) {
       const page = this.getPage_();
-      const discoveryTemplate = page && buildDiscoveryTemplate(page);
+      const discoveryTemplate = page && renderDiscoveryTemplate(page);
       // Support translation of discovery dialogue text.
       this.mutateElement(() => {
         discoveryTemplate.querySelector(
@@ -589,7 +588,7 @@ export class AmpStory360 extends AMP.BaseElement {
   renderActivateButton_() {
     const ampStoryPage = this.getPage_();
     this.activateButton_ =
-      ampStoryPage && buildActivateButtonTemplate(ampStoryPage);
+      ampStoryPage && renderActivateButtonTemplate(ampStoryPage);
 
     this.activateButton_.querySelector(
       '.i-amphtml-story-360-activate-text'
