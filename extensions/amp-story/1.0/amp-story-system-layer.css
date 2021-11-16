@@ -88,7 +88,7 @@
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;
-  padding-top: 6px !important;
+  padding: 6px 4px !important;
   box-sizing: border-box !important;
 }
 
