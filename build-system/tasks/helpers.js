@@ -566,6 +566,7 @@ async function minify(code, map) {
     },
     output: {
       beautify: !!argv.pretty_print,
+      comments: false,
       // eslint-disable-next-line local/camelcase
       keep_quoted_props: true,
     },
