@@ -714,6 +714,7 @@ async function buildBentoExtensionJs(dir, name, options) {
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
+    esbuild: true,
     wrapper: 'bento',
     filename: await getBentoBuildFilename(
       dir,

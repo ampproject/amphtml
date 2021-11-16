@@ -656,7 +656,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    */
   async function doCompileJs(options) {
     const buildResult =
-      options.minify && shouldUseClosure()
+      options.minify && !options.esbuild && shouldUseClosure()
         ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
         : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
