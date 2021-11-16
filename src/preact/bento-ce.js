@@ -33,7 +33,6 @@ let BaseElement;
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
-  const ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
   class CeBaseElement {
     /**
      * @param {!Element} element
@@ -44,39 +43,6 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 
       /** @const {!Window} */
       this.win = getWin(element);
-    }
-
-    /**
-     * @param {typeof CeBaseElement} BaseElement
-     * @return {typeof HTMLElement}
-     */
-    static 'CustomElement'(BaseElement) {
-      return class CustomElement extends ExtendableHTMLElement {
-        /** */
-        constructor() {
-          super();
-
-          /** @const {!CeBaseElement} */
-          this.implementation = new BaseElement(this);
-        }
-
-        /** */
-        connectedCallback() {
-          this.classList.add('i-amphtml-built');
-          this.implementation.mountCallback();
-          this.implementation.buildCallback();
-        }
-
-        /** */
-        disconnectedCallback() {
-          this.implementation.unmountCallback();
-        }
-
-        /** @return {Promise<*>} */
-        getApi() {
-          return this.implementation.getApi();
-        }
-      };
     }
 
     /**
@@ -105,3 +71,49 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 }
 
 export {BaseElement};
+
+let ExtendableHTMLElement;
+
+/**
+ * @param {typeof CeBaseElement} BaseElement
+ * @return {typeof HTMLElement}
+ */
+function createBentoCustomElement(BaseElement) {
+  if (!ExtendableHTMLElement) {
+    ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
+  }
+  return class CustomElement extends ExtendableHTMLElement {
+    /** */
+    constructor() {
+      super();
+
+      /** @const {!CeBaseElement} */
+      this.implementation = new BaseElement(this);
+    }
+
+    /** */
+    connectedCallback() {
+      this.classList.add('i-amphtml-built');
+      this.implementation.mountCallback();
+      this.implementation.buildCallback();
+    }
+
+    /** */
+    disconnectedCallback() {
+      this.implementation.unmountCallback();
+    }
+
+    /** @return {Promise<*>} */
+    getApi() {
+      return this.implementation.getApi();
+    }
+  };
+}
+
+/**
+ * @param {string} tag
+ * @param {typeof BaseElement} BaseElement
+ */
+export function defineBentoElement(tag, BaseElement) {
+  customElements.define(tag, createBentoCustomElement(BaseElement));
+}

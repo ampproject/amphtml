@@ -8,11 +8,13 @@ import {
   PaginationBaseElement,
 } from './pagination-base-element';
 
+import {defineBentoElement} from '#preact/bento-ce';
+
 /**
  * Registers `<bento-inline-gallery> component to CustomElements registry
  */
 export function defineElement() {
-  customElements.define(TAG, BaseElement.CustomElement(BaseElement));
+  defineBentoElement(TAG, BaseElement);
   defineThumbnailsElement();
   definePaginationElement();
 }
@@ -21,18 +23,12 @@ export function defineElement() {
  * Registers `<bento-inline-gallery-pagination> component to CustomElements registry
  */
 export function definePaginationElement() {
-  customElements.define(
-    PAGINATION_TAG,
-    PaginationBaseElement.CustomElement(PaginationBaseElement)
-  );
+  defineBentoElement(PAGINATION_TAG, PaginationBaseElement);
 }
 
 /**
  * Registers `<bento-inline-gallery-thumbnails> component to CustomElements registry
  */
 export function defineThumbnailsElement() {
-  customElements.define(
-    THUMBNAIL_TAG,
-    ThumbnailsBaseElement.CustomElement(ThumbnailsBaseElement)
-  );
+  defineBentoElement(THUMBNAIL_TAG, ThumbnailsBaseElement);
 }
