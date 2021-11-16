@@ -143,6 +143,9 @@ export class AmpVideo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {boolean} */
+    this.captionsAreDelegated_ = false;
+
     /** @private {?Element} */
     this.video_ = null;
 
@@ -766,8 +769,8 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsElement) {
       return;
     }
+    this.captionsAreDelegated_ = true;
     captionsElement.getImpl().then((impl) => {
-      this.captions_ = impl;
       if (impl.setVideoElement) {
         impl.setVideoElement(this.video_);
       }
@@ -781,7 +784,12 @@ export class AmpVideo extends AMP.BaseElement {
    */
   toggleCaptions(captionsOn) {
     toArray(this.video_.textTracks).forEach((track) => {
-      track.mode = captionsOn ? 'showing' : 'disabled';
+      if (captionsOn) {
+        // If captions are delegated, hide instead of show.
+        track.mode = this.captionsAreDelegated_ ? 'hidden' : 'showing';
+      } else {
+        track.mode = 'disabled';
+      }
     });
   }
 
