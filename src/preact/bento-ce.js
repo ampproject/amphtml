@@ -27,81 +27,66 @@ function maybeWrapNativeSuper(klass) {
   return Object.setPrototypeOf(Wrapper, klass);
 }
 
-/** @type {typeof AMP.BaseElement} */
-let BaseElement;
+const ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
 
-if (typeof AMP !== 'undefined' && AMP.BaseElement) {
-  BaseElement = AMP.BaseElement;
-} else {
-  const ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
-  class CeBaseElement {
-    /**
-     * @param {!Element} element
-     */
-    constructor(element) {
-      /** @const {!Element} */
-      this.element = element;
+BENTO.BaseElement = class CeBaseElement {
+  /**
+   * @param {!Element} element
+   */
+  constructor(element) {
+    /** @const {!Element} */
+    this.element = element;
 
-      /** @const {!Window} */
-      this.win = getWin(element);
-    }
-
-    /**
-     * @param {typeof CeBaseElement} BaseElement
-     * @return {typeof HTMLElement}
-     */
-    static 'CustomElement'(BaseElement) {
-      return class CustomElement extends ExtendableHTMLElement {
-        /** */
-        constructor() {
-          super();
-
-          /** @const {!CeBaseElement} */
-          this.implementation = new BaseElement(this);
-        }
-
-        /** */
-        connectedCallback() {
-          this.classList.add('i-amphtml-built');
-          this.implementation.mountCallback();
-          this.implementation.buildCallback();
-        }
-
-        /** */
-        disconnectedCallback() {
-          this.implementation.unmountCallback();
-        }
-
-        /** @return {Promise<*>} */
-        getApi() {
-          return this.implementation.getApi();
-        }
-      };
-    }
-
-    /**
-     * @param {function():undefined} cb
-     */
-    mutateElement(cb) {
-      Promise.resolve().then(cb);
-    }
-
-    /** @return {boolean} */
-    isLayoutSupported() {
-      return true;
-    }
-
-    /** */
-    mountCallback() {}
-
-    /** */
-    unmountCallback() {}
-
-    /** */
-    buildCallback() {}
+    /** @const {!Window} */
+    this.win = getWin(element);
   }
 
-  BaseElement = /** @type {typeof AMP.BaseElement} */ (CeBaseElement);
-}
+  /**
+   * @param {typeof CeBaseElement} BaseElement
+   * @return {typeof HTMLElement}
+   */
+  static 'CustomElement'(BaseElement) {
+    return class CustomElement extends ExtendableHTMLElement {
+      /** */
+      constructor() {
+        super();
 
-export {BaseElement};
+        /** @const {!CeBaseElement} */
+        this.implementation = new BaseElement(this);
+      }
+
+      /** */
+      connectedCallback() {
+        this.classList.add('i-amphtml-built');
+        this.implementation.mountCallback();
+        this.implementation.buildCallback();
+      }
+
+      /** */
+      disconnectedCallback() {
+        this.implementation.unmountCallback();
+      }
+
+      /** @return {Promise<*>} */
+      getApi() {
+        return this.implementation.getApi();
+      }
+    };
+  }
+
+  /**
+   * @param {function():undefined} cb
+   */
+  mutateElement(cb) {
+    Promise.resolve().then(cb);
+  }
+
+  /** */
+  mountCallback() {}
+
+  /** */
+  unmountCallback() {}
+
+  /** */
+  buildCallback() {}
+};
