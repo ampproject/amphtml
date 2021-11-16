@@ -1,3 +1,5 @@
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
+
 import {PreactBaseElement} from './bento-base-element';
 
 export class AmpPreactBaseElement extends PreactBaseElement {

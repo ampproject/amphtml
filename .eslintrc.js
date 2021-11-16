@@ -58,6 +58,7 @@ module.exports = {
     'IS_PROD': 'readonly',
     'INTERNAL_RUNTIME_VERSION': 'readonly',
     'AMP': 'readonly',
+    'BENTO': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
     'globalThis': 'readonly',

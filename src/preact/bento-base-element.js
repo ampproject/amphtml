@@ -12,11 +12,7 @@ import {
 } from '#core/context';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
-import {
-  Layout_Enum,
-  applyFillContent,
-  isLayoutSizeDefined,
-} from '#core/dom/layout';
+import {applyFillContent} from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {PauseHelper} from '#core/dom/video/pause-helper';
