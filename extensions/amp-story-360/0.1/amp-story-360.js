@@ -721,9 +721,7 @@ export class AmpStory360 extends AMP.BaseElement {
           );
           this.initRenderer_();
         },
-        () => {
-          user().error(TAG, 'Failed to load the amp-img.');
-        }
+        () => user().error(TAG, 'Failed to load the amp-img.')
       );
   }
 
@@ -749,9 +747,7 @@ export class AmpStory360 extends AMP.BaseElement {
           this.setupGlContextListeners_();
           this.initRenderer_();
         },
-        () => {
-          user().error(TAG, 'Failed to load the amp-video.');
-        }
+        () => user().error(TAG, 'Failed to load the amp-video.')
       );
   }
 
