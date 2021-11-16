@@ -1,3 +1,5 @@
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
+
 import {BentoYoutube} from './component';
 
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
@@ -16,7 +18,7 @@ BaseElement['props'] = {
   'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock', media: true},
   'credentials': {attr: 'credentials'},
-  'params': {attrPrefix: 'data-param-'},
+  'params': createParseAttrsWithPrefix('data-param-'),
 };
 
 /** @override */

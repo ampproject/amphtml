@@ -1,5 +1,6 @@
 import {BentoBrightcove} from './component';
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 export class BaseElement extends VideoBaseElement {}
 
@@ -20,7 +21,7 @@ BaseElement['props'] = {
   },
   'playlistId': {attr: 'data-playlist-id', type: 'string'},
   'referrer': {attr: 'data-referrer', type: 'string'},
-  'urlParams': {attrPrefix: 'data-param-', type: 'string'},
+  'urlParams': createParseAttrsWithPrefix('data-param-'),
   'videoId': {attr: 'data-video-id', type: 'string'},
   // TODO(wg-bento): These props have no internal implementation yet.
   'dock': {attr: 'dock', media: true},

@@ -4,6 +4,7 @@ import {omit} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
 import {Slot} from '#preact/slot';
 
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
@@ -115,8 +116,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           parseAttrs: (e) =>
             `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
         },
-        'params': {attrPrefix: 'data-param-'},
-        'prefix': {attrPrefix: 'prefix'},
+        'params': createParseAttrsWithPrefix('data-param-'),
+        'prefix': createParseAttrsWithPrefix('prefix'),
       };
       element = html`
         <amp-preact
@@ -600,8 +601,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
               parseAttrs: (e) =>
                 `${e.getAttribute('part-a')}+${e.getAttribute('part-b')}`,
             },
-            'params': {attrPrefix: 'data-param-'},
-            'prefix': {attrPrefix: 'prefix'},
+            'params': createParseAttrsWithPrefix('data-param-'),
+            'prefix': createParseAttrsWithPrefix('prefix'),
           },
           selector: '*', // This should be last as catch-all.
           single: false,
