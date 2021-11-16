@@ -38,6 +38,7 @@ BaseElement['props'] = {
   'controlslist': {attr: 'controlslist'},
   'crossorigin': {attr: 'crossorigin'},
   'disableremoteplayback': {attr: 'disableremoteplayback'},
+  'loading': {attr: 'data-loading'},
   'loop': {attr: 'loop', type: 'boolean'},
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},

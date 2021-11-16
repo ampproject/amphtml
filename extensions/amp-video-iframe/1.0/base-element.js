@@ -15,6 +15,7 @@ BaseElement['props'] = {
   'poster': {attr: 'poster'},
   'src': {attr: 'src'},
   'controls': {attr: 'controls', type: 'boolean'},
+  'loading': {attr: 'data-loading'},
 
   // TODO(alanorozco): These props have no internal implementation yet.
   'dock': {attr: 'dock'},
