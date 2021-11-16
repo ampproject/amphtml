@@ -31,14 +31,6 @@ defineBentoWordpressEmbed();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-wordpress-embed {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
     <script
       type="module"
       async
@@ -49,6 +41,11 @@ defineBentoWordpressEmbed();
       async
       src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.css"
+    />
   </head>
   <body>
     <bento-wordpress-embed

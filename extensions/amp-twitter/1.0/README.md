@@ -31,14 +31,6 @@ defineBentoTwitters();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-twitter {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
     <script
       type="module"
       async
@@ -49,6 +41,11 @@ defineBentoTwitters();
       async
       src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+    />
     <style>
       bento-twitter {
         width: 375px;
