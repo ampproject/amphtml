@@ -9,6 +9,7 @@ BaseElement['Component'] = BentoTwitter;
 /** @override */
 BaseElement['props'] = {
   'title': {attr: 'title'}, // Needed for Preact component
+  'loading': {attr: 'data-loading'},
   'options': {attrPrefix: 'data-'}, // Needed to render component upon mutation
 };
 

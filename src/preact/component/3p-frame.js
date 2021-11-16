@@ -160,7 +160,6 @@ function ProxyIframeEmbedWithRef(
       src={src}
       title={title}
       {...rest}
-      loading={options.loading ?? 'lazy'}
     />
   );
 }

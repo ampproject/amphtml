@@ -62,7 +62,6 @@ const AmpVideoIframeLike = ({unloadOnPause, ...rest}) => {
       allow="autoplay" // this is not safe for a generic frame
       onMessage={onMessage}
       makeMethodMessage={makeMethodMessage}
-      data-loading="lazy"
     />
   );
 };
