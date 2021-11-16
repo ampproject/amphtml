@@ -6,7 +6,7 @@ Displays any content in a full-viewport "lightbox" modal.
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox
@@ -17,7 +17,7 @@ import {defineElement as defineBentoLightbox} from '@bentoproject/lightbox';
 defineBentoLightbox();
 ```
 
-### Example: Import via `<script>`
+### Import via `<script>`
 
 <!--% example %-->
 
@@ -153,20 +153,17 @@ Must be present when the lightbox is closed and the contents should not be displ
 
 #### `animation`
 
-Defines the style of animation for opening the lightbox. By default, this will
-be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
-`fly-in-top`.
+Defines the style of animation for opening the lightbox. By default, this will be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and `fly-in-top`.
 
 #### `scrollable`
 
-When the `scrollable` attribute is present, the content of the lightbox can
-scroll when overflowing the height of the lightbox.
+When the `scrollable` attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
 
 ---
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox

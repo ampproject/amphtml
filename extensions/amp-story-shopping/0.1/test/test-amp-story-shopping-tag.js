@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
 import '../amp-story-shopping';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -72,6 +73,7 @@ describes.realWin(
       shoppingTag.element.setAttribute('data-tag-id', 'hat');
       await shoppingDataDispatchStoreService();
       expect(shoppingTag.element.textContent).to.be.empty;
+      expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
     });
   }
 );

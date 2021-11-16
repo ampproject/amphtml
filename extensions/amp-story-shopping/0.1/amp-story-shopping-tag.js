@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -46,7 +46,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.CONTAINER;
+    return layout === Layout_Enum.CONTAINER;
   }
 
   /**

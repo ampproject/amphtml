@@ -6,7 +6,7 @@ Provides a way to display meta content intended for temporary access such as nav
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/sidebar
@@ -25,12 +25,6 @@ defineBentoSidebar();
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-sidebar:not([open]) {
-        display: none !important;
-      }
-    </style>
     <script
       type="module"
       async
@@ -47,6 +41,11 @@ defineBentoSidebar();
       async
       src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css"
+    />
   </head>
   <body>
     <bento-sidebar id="sidebar1" side="right">
@@ -177,7 +176,7 @@ This attribute is present when the sidebar is open.
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/sidebar

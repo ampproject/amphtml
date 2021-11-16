@@ -1,5 +1,5 @@
 import '../amp-bind';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 
@@ -113,7 +113,7 @@ describes.realWin(
         element,
         'fetch-error',
         /* event */ null,
-        ActionTrust.LOW
+        ActionTrust_Enum.LOW
       );
     });
 

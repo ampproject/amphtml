@@ -1,5 +1,5 @@
 import * as Preact from '#core/dom/jsx';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
 import {
@@ -18,20 +18,20 @@ import {addAttributesToElement} from '#core/dom';
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!Object<string, !LocalizedStringId>}
+ * @const {!Object<string, !LocalizedStringId_Enum>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
-  'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
-  'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
-  'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
-  'line': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
-  'linkedin': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
-  'pinterest': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
-  'gplus': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
-  'tumblr': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
-  'twitter': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
-  'whatsapp': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
-  'sms': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
+  'system': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
+  'email': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
+  'facebook': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'line': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
+  'linkedin': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
+  'pinterest': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
+  'gplus': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
+  'tumblr': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
+  'twitter': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
+  'whatsapp': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
+  'sms': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
 
 /**
@@ -75,11 +75,14 @@ function renderLinkShareButtonElement(el) {
       role="button"
       aria-label={localize(
         el,
-        LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+        LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
       )}
     >
       <span class="i-amphtml-story-share-label">
-        {localize(el, LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK)}
+        {localize(
+          el,
+          LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+        )}
       </span>
     </div>
   );
@@ -142,7 +145,7 @@ function buildCopySuccessfulToast(doc, url) {
       <div>
         {localize(
           doc,
-          LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+          LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
         )}
       </div>
       <div class="i-amphtml-story-copy-url">{url}</div>
@@ -243,7 +246,7 @@ export class ShareWidget {
     if (!copyTextToClipboard(this.win, url)) {
       const failureString = localize(
         this.storyEl,
-        LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+        LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl, dev().assertString(failureString));
       return;

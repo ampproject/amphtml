@@ -1,5 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
-
+import {Layout_Enum} from '#core/dom/layout';
 import '../amp-story-shopping';
 
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
@@ -107,6 +107,8 @@ describes.realWin(
           /'amp-story-auto-ads:config error determining if remote config is valid json: bad url or bad json'​​​/
         );
       });
+      expect(shoppingConfig.isLayoutSupported(Layout_Enum.NODISPLAY)).to.be
+        .true;
     });
   }
 );

@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {svgFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
@@ -150,7 +150,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
     return this.ampStory_
       .signals()
-      .whenSignal(CommonSignals.INI_LOAD)
+      .whenSignal(CommonSignals_Enum.INI_LOAD)
       .then(() => this.handleConfig_())
       .then(() => {
         this.adPageManager_ = new StoryAdPageManager(
