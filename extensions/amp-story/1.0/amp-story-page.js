@@ -51,7 +51,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {px, toggle} from '#core/dom/style';
+import {px, setImportantStyles, toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -166,9 +166,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?AdvancementConfig} */
     this.advancement_ = null;
-
-    /** @private {?Element} */
-    this.cssVariablesStyleEl_ = null;
 
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
@@ -568,15 +565,9 @@ export class AmpStoryPage extends AMP.BaseElement {
             return;
           }
           this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
-          if (!this.cssVariablesStyleEl_) {
-            const doc = this.win.document;
-            this.cssVariablesStyleEl_ = doc.createElement('style');
-            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
-            doc.head.appendChild(this.cssVariablesStyleEl_);
-          }
-          this.cssVariablesStyleEl_.textContent = `:root {--story-dvh: ${px(
-            state.vh
-          )} !important}`;
+          setImportantStyles(this.win.document.documentElement, {
+            '--story-dvh': state.vh,
+          });
         },
       },
       {}
