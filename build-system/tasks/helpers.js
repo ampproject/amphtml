@@ -448,9 +448,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   banner.js = config + banner.js + compiledFile;
 
   const babelCaller =
-    options.babelCaller ??
-    (options.bento ? 'bento-element-' : '') +
-      (options.minify ? 'minified' : 'unminified');
+    options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,

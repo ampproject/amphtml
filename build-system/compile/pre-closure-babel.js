@@ -79,11 +79,7 @@ async function preClosureBabel(file, outputFilename, options) {
   if (!filesToTransform) {
     filesToTransform = getFilesToTransform();
   }
-  const transformedFile = path.join(
-    outputDir,
-    options.bento ? 'bento' : '',
-    file
-  );
+  const transformedFile = path.join(outputDir, file);
   if (!filesToTransform.includes(file)) {
     if (!(await fs.pathExists(transformedFile))) {
       await fs.copy(file, transformedFile);

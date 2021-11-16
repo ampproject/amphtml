@@ -716,6 +716,9 @@ async function buildBentoExtensionJs(dir, name, options) {
     ...options,
     esbuild: true,
     wrapper: 'bento',
+    babelCaller: options.minify
+      ? 'bento-element-minified'
+      : 'bento-element-unminified',
     filename: await getBentoBuildFilename(
       dir,
       bentoName,

@@ -1,5 +1,4 @@
 const {getMinifiedConfig} = require('./minified-config');
-const {getPreClosureConfig} = require('./pre-closure-config');
 const {getUnminifiedConfig} = require('./unminified-config');
 
 /**
@@ -19,13 +18,6 @@ function mergeWithConfig(config) {
 /**
  * @return {!Object}
  */
-function getBentoElementPreClosureConfig() {
-  return mergeWithConfig(getPreClosureConfig());
-}
-
-/**
- * @return {!Object}
- */
 function getBentoElementUnminifiedConfig() {
   return mergeWithConfig(getUnminifiedConfig());
 }
@@ -38,7 +30,6 @@ function getBentoElementMinifiedConfig() {
 }
 
 module.exports = {
-  getBentoElementPreClosureConfig,
   getBentoElementUnminifiedConfig,
   getBentoElementMinifiedConfig,
 };
