@@ -14,7 +14,7 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {tryFocus} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
@@ -54,7 +54,7 @@ const EMBEDDED_COMPONENTS_SELECTORS = {
   'amp-twitter': {
     customIconClassName: 'amp-social-share-twitter-no-background',
     actionIcon: LAUNCH_ICON_CLASS,
-    localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
+    localizedStringId: LocalizedStringId_Enum.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter[interactive]',
   },
 };

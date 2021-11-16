@@ -6,8 +6,8 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
+import {Layout_Enum} from '#core/dom/layout';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
@@ -114,7 +114,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.NODISPLAY;
+    return layout === Layout_Enum.NODISPLAY;
   }
 
   /** @override */
@@ -142,7 +142,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     spacerEl.setAttribute('role', 'button');
     const localizedCloseString = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
     );
     spacerEl.setAttribute('aria-label', localizedCloseString);
     this.containerEl.insertBefore(spacerEl, this.contentEl);

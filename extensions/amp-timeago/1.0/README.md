@@ -6,7 +6,7 @@ Counts up to, or away from, a specified date and time. It replaces the text node
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/timeago
@@ -17,7 +17,7 @@ import {defineElement as defineBentoTimeago} from '@bentoproject/timeago';
 defineBentoTimeago();
 ```
 
-### Example: Import via `<script>`
+### Import via `<script>`
 
 <!--% example %-->
 
@@ -170,7 +170,7 @@ Add the `cutoff` attribute to display the date specified in the `datatime` attri
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/timeago

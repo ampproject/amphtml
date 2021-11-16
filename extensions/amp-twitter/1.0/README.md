@@ -6,7 +6,7 @@ Embeds [Twitter](https://twitter.com) content like a Tweet or a Moment.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/twitter
@@ -143,7 +143,7 @@ For details on the available options, see Twitter's docs <a href="https://develo
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/twitter

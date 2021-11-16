@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Side} from './sidebar-config';
 import {forwardRef} from '#preact/compat';
 import {isRTL} from '#core/dom';
@@ -108,7 +108,7 @@ function BentoSidebarWithRef(
       return;
     }
     const keydownCallback = (event) => {
-      if (event.key === Keys.ESCAPE) {
+      if (event.key === Keys_Enum.ESCAPE) {
         event.stopImmediatePropagation();
         event.preventDefault();
         close();
