@@ -1,11 +1,10 @@
 /**
  * @fileoverview
- * Replaces `import` statements of listed modules with `const` statements.
- * These reference the global `BENTO` which is meant to provide the contents of
- * these listed modules.
+ * Replaces `import` statements of listed module specifiers with a different
+ * module.
+ * This is similar to `module-resolver`, except that it preserves specifiers to
+ * the original package if a specific name is not listed.
  */
-
-const bentoRuntimePackages = require('../../compile/generate/metadata/bento-runtime-packages');
 
 module.exports = function (babel) {
   const {types: t} = babel;
@@ -27,32 +26,22 @@ module.exports = function (babel) {
 
   const visitor = {
     ImportDeclaration(path, state) {
-      // Options for tests
-      const packages = state.opts.packages || bentoRuntimePackages;
+      const {packages} = state.opts;
 
       const source = path.node.source.value;
-      const names = packages[source];
-      if (!names) {
+      const def = packages[source];
+      if (!def) {
         return;
       }
 
+      const {names, pkg} = def;
       const preservedSpecifiers = [];
       const statements = path.node.specifiers.map((node) => {
-        // Full object reference for namespace imports
-        // - import * as p from 'package';
-        // + const p = {'x': BENTO['package']['x'], ...}
         if (t.isImportNamespaceSpecifier(node)) {
-          const properties = names
-            .map((name) => `'${name}': PKG['${name}']`)
-            .join(',');
-          return `const ${node.local.name} = {${properties}}`;
+          return `import * as ${node.local.name} from '${pkg}';`;
         }
-        // One statement per named import
-        // - import {z, y} from 'package';
-        // + const z = BENTO['package']['z'];
-        // + const y = BENTO['package']['y'];
         if (t.isImportSpecifier(node) && names.includes(node.imported.name)) {
-          return `const ${node.local.name} = PKG['${node.imported.name}']`;
+          return `import {${node.imported.name} as ${node.local.name}} from '${pkg}';`;
         }
         preservedSpecifiers.push(node);
       });
@@ -62,13 +51,8 @@ module.exports = function (babel) {
         return;
       }
 
-      const template = statements.filter(Boolean).join(';\n');
-
-      const declaration = babel.template(template)({
-        // We need to specify a placeholder key because babel's `template` will
-        // fail with unspecified UPPERCASE identifiers.
-        'PKG': `BENTO[${JSON.stringify(source)}]`,
-      });
+      const template = statements.filter(Boolean).join('\n');
+      const declaration = babel.template(template)();
 
       // Insert below this sequence of ImportDeclarations
       getLastInSequenceOfType(path).insertAfter(declaration);

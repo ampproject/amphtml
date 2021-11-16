@@ -59,6 +59,18 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
   `);
 }
 
+/**
+ * @param {string} original
+ * @param {string[]} names
+ * @return {?string}
+ */
+function generateIntermediatePackage(original, names) {
+  return names
+    .map((name) => `export const ${name} = BENTO['${original}'].${name};`)
+    .join('\n');
+}
+
 module.exports = {
   generateBentoRuntime,
+  generateIntermediatePackage,
 };

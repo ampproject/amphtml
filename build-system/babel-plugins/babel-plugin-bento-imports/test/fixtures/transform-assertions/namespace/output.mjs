@@ -1,5 +1,1 @@
-const foo = {
-  'a': BENTO["~foo"]['a'],
-  'b': BENTO["~foo"]['b'],
-  'c': BENTO["~foo"]['c']
-};
+import * as foo from '#build/overridden_foo';

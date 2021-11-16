@@ -1,0 +1,25 @@
+{
+  "plugins": [
+    [
+      "../../..",
+      {
+        "packages": {
+          "~foo": {
+            "pkg": "#build/overridden_foo",
+            "names": [
+              "a",
+              "b",
+              "c"
+            ]
+          },
+          "~bar/baz": {
+            "pkg": "#build/overridden_bar_baz",
+            "names": [
+              "fooBar"
+            ]
+          }
+        }
+      }
+    ]
+  ]
+}
