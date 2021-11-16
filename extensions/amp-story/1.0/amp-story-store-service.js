@@ -5,6 +5,7 @@ import {deepEquals} from '#core/types/object/json';
 import {dev} from '#utils/log';
 import {hasOwn} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
+import {mangleObjectValues} from '#core/types/enum';
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -69,16 +70,6 @@ export let InteractiveComponentDef;
 export let InteractiveReactData;
 
 /**
- * No effect on runtime. Merely an annotation for the compiler to shorten the
- * property values of large, common enums during production.
- * See babel-plugin-mangle-object-values.
- * @param {T} obj
- * @return {T}
- * @template T
- */
-const mangleObjectValues = (obj) => obj;
-
-/**
  * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowAudioUi: boolean,
@@ -126,10 +117,8 @@ const mangleObjectValues = (obj) => obj;
  */
 export let State;
 
-/** @const @enum {string} */
-// mangleObjectValues() is compiled out so it does not cause side effects.
-// eslint-disable-next-line local/no-export-side-effect
-export const StateProperty = mangleObjectValues({
+/** @const @enum {string|number} */
+const StateProperty = mangleObjectValues({
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
@@ -184,10 +173,10 @@ export const StateProperty = mangleObjectValues({
   PAGE_SIZE: 'pageSize',
 });
 
-/** @const @enum {string} */
-// mangleObjectValues() is compiled out so it does not cause side effects.
-// eslint-disable-next-line local/no-export-side-effect
-export const Action = mangleObjectValues({
+export {StateProperty};
+
+/** @const @enum {string|number} */
+const Action = mangleObjectValues({
   ADD_INTERACTIVE_REACT: 'addInteractiveReact',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
@@ -221,6 +210,8 @@ export const Action = mangleObjectValues({
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 });
+
+export {Action};
 
 /**
  * Functions to compare a data structure from the previous to the new state and
