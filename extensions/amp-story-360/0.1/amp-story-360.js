@@ -585,8 +585,7 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   renderActivateButton_() {
     const ampStoryPage = this.getPage_();
-    this.activateButton_ =
-      ampStoryPage && renderActivateButtonTemplate();
+    this.activateButton_ = ampStoryPage && renderActivateButtonTemplate();
 
     this.activateButton_.querySelector(
       '.i-amphtml-story-360-activate-text'
