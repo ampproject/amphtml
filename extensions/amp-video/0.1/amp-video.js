@@ -143,7 +143,7 @@ export class AmpVideo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {boolean} */
+    /** @private {boolean} whether another element is in charge of the captions.*/
     this.captionsAreDelegated_ = false;
 
     /** @private {?Element} */
