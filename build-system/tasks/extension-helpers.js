@@ -714,6 +714,8 @@ async function buildBentoExtensionJs(dir, name, options) {
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
+    // Use esbuild since Closure does not use a different babel config for
+    // Bento elements.
     esbuild: true,
     wrapper: 'bento',
     babelCaller: options.minify
