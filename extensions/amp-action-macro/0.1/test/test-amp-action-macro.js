@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {Services} from '#service';
 import {ActionInvocation} from '#service/action-impl';
@@ -95,7 +95,7 @@ describes.realWin(
           button,
           button,
           {},
-          ActionTrust.HIGH,
+          ActionTrust_Enum.HIGH,
           'tap',
           'AMP-ACTION-MACRO'
         );
@@ -118,7 +118,7 @@ describes.realWin(
           button,
           button,
           {},
-          ActionTrust.HIGH,
+          ActionTrust_Enum.HIGH,
           'tap',
           'AMP-ACTION-MACRO'
         );
@@ -138,7 +138,7 @@ describes.realWin(
           callingMacroElement,
           callingMacroElement,
           {},
-          ActionTrust.HIGH,
+          ActionTrust_Enum.HIGH,
           'tap',
           'AMP-ACTION-MACRO'
         );
@@ -160,7 +160,7 @@ describes.realWin(
           referrableMacroElement,
           callingMacroElement,
           {},
-          ActionTrust.HIGH,
+          ActionTrust_Enum.HIGH,
           'tap',
           'AMP-ACTION-MACRO'
         );
@@ -181,7 +181,7 @@ describes.realWin(
           unreferrableMacroElement,
           callingMacroElement,
           {},
-          ActionTrust.HIGH,
+          ActionTrust_Enum.HIGH,
           'tap',
           'AMP-ACTION-MACRO'
         );

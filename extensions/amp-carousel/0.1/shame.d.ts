@@ -28,7 +28,7 @@ declare module '#utils/analytics' {
 // TODO: everything below are core stubs, which we can remove once Core has been
 // converted to TS.
 declare module '#core/constants/key-codes' {
-  export var Keys: any;
+  export var Keys_Enum: any;
 }
 
 declare module '#core/document/format' {
@@ -54,7 +54,7 @@ declare module '#core/dom/query' {
 }
 
 declare module '#core/constants/action-constants' {
-  export var ActionTrust: any;
+  export var ActionTrust_Enum: any;
 }
 
 declare module '#core/dom/layout' {

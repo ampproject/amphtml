@@ -1,14 +1,12 @@
 # Bento Inline Gallery
 
-Displays slides, with optional pagination dots and thumbnails.
-
-Its implementation uses a [Bento Base Carousel](https://www.npmjs.com/package/@bentoproject/base-carousel). Both components must be properly installed for the environment (Web Component vs Preact).
+Displays slides, with optional pagination dots and thumbnails. Its implementation uses a [Bento Base Carousel](https://www.npmjs.com/package/@bentoproject/base-carousel). Both components must be properly installed for the environment (Web Component vs Preact).
 
 ## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/inline-gallery
@@ -129,23 +127,17 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 
 #### `inset`
 
-Default: `false`
-
-Boolean attribute indicating whether to display the pagination indicator as inset (overlaying the carousel itself)
+Boolean attribute indicating whether to display the pagination indicator as inset (overlaying the carousel itself). Default is `false`.
 
 ### Attributes on `<bento-inline-gallery-thumbnails>`
 
 #### `aspect-ratio`
 
-Optional
-
-Number: ratio of width to height that slides should be displayed in.
+A Number defining the ratio of width to height that slides should be displayed in. This value is optional.
 
 #### `loop`
 
-Default: `false`
-
-Boolean attribute indicating whether thumbnails should loop.
+Boolean attribute indicating whether thumbnails should loop. The default is `false`.
 
 ### Styling
 
@@ -155,7 +147,7 @@ You may use the `bento-inline-gallery`, `bento-inline-gallery-pagination`, `bent
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/inline-gallery
@@ -209,9 +201,7 @@ In addition to the [common props](../../../docs/spec/bento-common-props.md), Ben
 
 #### `inset`
 
-Default: `false`
-
-Boolean attribute indicating whether to display the pagination indicator as inset (overlaying the carousel itself)
+Boolean attribute indicating whether to display the pagination indicator as inset (overlaying the carousel itself). Default is `false`.
 
 ### Props for `BentoInlineGalleryThumbnails`
 
@@ -219,12 +209,8 @@ In addition to the [common props](../../../docs/spec/bento-common-props.md), Ben
 
 #### `aspectRatio`
 
-Optional
-
-Number: ratio of width to height that slides should be displayed in.
+A Number defining the ratio of width to height that slides should be displayed in (this is optional).
 
 #### `loop`
 
-Default: `false`
-
-Boolean attribute indicating whether thumbnails should loop.
+Boolean attribute indicating whether thumbnails should loop. Default is `false`.

@@ -6,7 +6,7 @@ Embeds [Twitter](https://twitter.com) content like a Tweet or a Moment.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/twitter
@@ -31,14 +31,6 @@ defineBentoTwitters();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-twitter {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
     <script
       type="module"
       async
@@ -49,6 +41,11 @@ defineBentoTwitters();
       async
       src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+    />
     <style>
       bento-twitter {
         width: 375px;
@@ -143,7 +140,7 @@ For details on the available options, see Twitter's docs <a href="https://develo
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/twitter
