@@ -516,7 +516,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(lightDom.querySelector(':scope > #component')).to.be.ok;
       expect(lightDom.className).to.equal('i-amphtml-fill-content');
       expect(lightDom.hasAttribute('i-amphtml-rendered')).to.be.true;
-      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.class).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
         () => updateEventSpy.callCount > 0,
@@ -536,7 +536,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(element.querySelector(':scope > time')).to.equal(existing);
       expect(existing.querySelector(':scope > #component')).to.be.ok;
       expect(existing.className).to.equal('i-amphtml-fill-content');
-      expect(lastProps.className).to.equal('i-amphtml-fill-content');
+      expect(lastProps.class).to.equal('i-amphtml-fill-content');
       expect(lastProps.as).to.equal('time');
       await waitFor(
         () => updateEventSpy.callCount > 0,
