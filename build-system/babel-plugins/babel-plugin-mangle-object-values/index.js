@@ -15,17 +15,20 @@ module.exports = function (babel) {
 
   /**
    * @param {number} i
-   * @return {string}
+   * @return {string|number}
    */
   function mangle(i) {
+    // 1..99 are smaller as numbers than strings. Skip 0 because it's falsy
+    if (i <= 98) {
+      return i + 1;
+    }
     if (!charset) {
-      // Letters first since they allow unbracketed syntax when used as keys:
-      // (foo.a0 vs. foo['0a'])
+      // Only letters to prevent collisions when 0-99 are used as keys.
       charset = indexCharset(
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
       );
     }
-    return encode(i, charset);
+    return encode(i - 99, charset);
   }
 
   return {
@@ -44,15 +47,16 @@ module.exports = function (babel) {
           );
         }
         const objectExpression = args[0];
+        const seen = {};
         for (const [i, prop] of objectExpression.properties.entries()) {
-          // Allowing string values in order to preserve /** @enum {string} */
-          // regardless of the application of this transform.
           if (!t.isStringLiteral(prop.value)) {
             throw path.buildCodeFrameError(
               `${name}() should only be used on object expressions with string values.`
             );
           }
-          prop.value = t.stringLiteral(mangle(i));
+          const {value} = prop.value;
+          const mangled = (seen[value] = seen[value] || mangle(i));
+          prop.value = t.valueToNode(mangled);
         }
         path.replaceWith(objectExpression);
       },
