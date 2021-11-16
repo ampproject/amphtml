@@ -3,35 +3,12 @@ import {dict} from '#core/types/object';
 
 import {BentoJwplayer} from './component';
 
-import {
-  getConsentMetadata,
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {
   /** @override */
   init() {
     super.init();
-
-    const consentPolicy = this.getConsentPolicy();
-    if (consentPolicy) {
-      this.getConsentInfo().then((consentInfo) => {
-        const policyState = consentInfo[0];
-        const policyInfo = consentInfo[1];
-        const policyMetadata = consentInfo[2];
-        this.mutateProps(
-          dict({
-            'consentParams': {
-              'policyState': policyState,
-              'policyInfo': policyInfo,
-              'policyMetadata': policyMetadata,
-            },
-          })
-        );
-      });
-    }
 
     return dict({
       'queryParams': this.mergeQueryParams(
@@ -42,18 +19,6 @@ export class BaseElement extends VideoBaseElement {
         this.element.getAttribute('data-content-search')
       ),
     });
-  }
-
-  /**
-   * @param {string} policy
-   * @return {Promise}
-   */
-  getConsentInfo(policy) {
-    return Promise.all([
-      getConsentPolicyState(this.element, policy),
-      getConsentPolicyInfo(this.element, policy),
-      getConsentMetadata(this.element, policy),
-    ]);
   }
 
   /**
