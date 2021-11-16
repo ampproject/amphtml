@@ -3,9 +3,9 @@
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
-import * as Preact from '#core/dom/jsx';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import * as Preact from '#core/dom/jsx';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 
@@ -47,7 +47,6 @@ const MIN_WEBGL_DISTANCE = 2;
 
 /**
  * Renders the template for the permission button.
- * @param {!Element} element
  * @return {!Element}
  */
 const renderActivateButtonTemplate = () => (
@@ -93,7 +92,6 @@ const renderActivateButtonTemplate = () => (
  * NOTE: i-amphtml-story-360-discovery is used in maybeShowDiscoveryAnimation_
  * and must be changed in both places if updated.
  *
- * @param {!Element} element
  * @return {!Element}
  */
 const renderDiscoveryTemplate = () => (
