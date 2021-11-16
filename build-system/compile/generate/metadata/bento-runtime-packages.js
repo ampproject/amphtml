@@ -27,6 +27,6 @@ module.exports = {
     'useImperativeHandle',
   ],
   '#preact/component': ['ContainWrapper', 'Wrapper'],
-  '#preact/compat': ['forwardRef', 'createPortal', 'toChildArray'],
+  '#preact/compat': ['forwardRef', 'toChildArray'],
   '#preact/base-element': ['PreactBaseElement'],
 };
