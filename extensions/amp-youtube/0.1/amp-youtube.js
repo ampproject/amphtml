@@ -32,7 +32,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-youtube';
 
@@ -247,7 +247,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    // Listening for VideoEvents.LOAD in AutoFullscreenManager.register may
+    // Listening for VideoEvents_Enum.LOAD in AutoFullscreenManager.register may
     // introduce race conditions which may break elements e.g. amp-ima-video
     Services.videoManagerForDoc(this.element).register(this);
 
@@ -260,7 +260,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.isLoop_ && !this.isPlaylist_) {
       this.unlistenLooping_ = listen(
         this.element,
-        VideoEvents.ENDED,
+        VideoEvents_Enum.ENDED,
         (unusedEvent) => this.play(false /** unusedIsAutoplay */)
       );
     }
@@ -277,7 +277,7 @@ class AmpYoutube extends AMP.BaseElement {
       .then(() => {
         // Tell YT that we want to receive messages
         this.listenToFrame_();
-        dispatchCustomEvent(this.element, VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
       });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -422,10 +422,10 @@ class AmpYoutube extends AMP.BaseElement {
       }
 
       redispatch(element, playerState.toString(), {
-        [PlayerStates.PLAYING]: VideoEvents.PLAYING,
-        [PlayerStates.PAUSED]: VideoEvents.PAUSE,
+        [PlayerStates.PLAYING]: VideoEvents_Enum.PLAYING,
+        [PlayerStates.PAUSED]: VideoEvents_Enum.PAUSE,
         // YT does not fire pause and ended together.
-        [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+        [PlayerStates.ENDED]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
       });
       return;
     }
@@ -442,7 +442,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
-      dispatchCustomEvent(element, VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(element, VideoEvents_Enum.LOADEDMETADATA);
       return;
     }
 

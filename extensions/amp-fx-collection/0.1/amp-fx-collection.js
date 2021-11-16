@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 import {tryCallback} from '#core/error';
 
@@ -39,7 +39,7 @@ export class AmpFxCollection {
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
-      listen(root, AmpEvents.DOM_UPDATE, () => this.scan_());
+      listen(root, AmpEvents_Enum.DOM_UPDATE, () => this.scan_());
     });
   }
 

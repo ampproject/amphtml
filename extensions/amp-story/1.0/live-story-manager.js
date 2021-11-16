@@ -1,6 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Services} from '#service';
 import {lastChildElement} from '#core/dom/query';
 import {userAssert} from '#utils/log';
@@ -54,7 +54,7 @@ export class LiveStoryManager {
 
     this.ampStory_.element
       .signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => {
         Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
           this.ampdoc_,

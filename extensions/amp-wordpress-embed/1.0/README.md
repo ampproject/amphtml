@@ -6,9 +6,7 @@ An iframe displaying the [excerpt](https://make.wordpress.org/core/2015/10/28/ne
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-wordpress-embed>` web component.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/wordpress-embed
@@ -21,43 +19,58 @@ defineBentoWordpressEmbed();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-wordpress-embed {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"
-  ></script>
-</head>
-<bento-wordpress-embed
-  id="my-embed"
-  data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
-></bento-wordpress-embed>
-<div class="buttons" style="margin-top: 8px">
-  <button id="switch-button">Switch embed</button>
-</div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-wordpress-embed
+      id="my-embed"
+      data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+    ></bento-wordpress-embed>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="switch-button">Switch embed</button>
+    </div>
 
-<script>
-  (async () => {
-    const embed = document.querySelector('#my-embed');
-    await customElements.whenDefined('bento-wordpress-embed');
+    <script>
+      (async () => {
+        const embed = document.querySelector('#my-embed');
+        await customElements.whenDefined('bento-wordpress-embed');
 
-    // set up button actions
-    document.querySelector('#switch-button').onclick = () =>
-      embed.setAttribute(
-        'data-url',
-        'https://make.wordpress.org/core/2021/09/09/core-editor-improvement-cascading-impact-of-improvements-to-featured-images/'
-      );
-  })();
-</script>
+        // set up button actions
+        document.querySelector('#switch-button').onclick = () =>
+          embed.setAttribute(
+            'data-url',
+            'https://make.wordpress.org/core/2021/09/09/core-editor-improvement-cascading-impact-of-improvements-to-featured-images/'
+          );
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style
@@ -105,9 +118,7 @@ The URL of the post to embed.
 
 ## Preact/React Component
 
-The examples below demonstrate use of the `<BentoWordPressEmbed>` as a functional component usable with the Preact or React libraries.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/wordpress-embed

@@ -8,7 +8,7 @@ import {LayoutSizeDef} from './rect';
 /** @typedef {!LayoutSizeDef|!ResizeObserverSize} TargetSize */
 
 /** @enum {number} */
-const Type = {
+const Type_Enum = {
   /**
    * Mapped to the `ResizeObserverEntry.contentRect` and returns a
    * `LayoutSizeDef` value.
@@ -28,7 +28,7 @@ const observers = /* #__PURE__ */ new WeakMap();
 
 /**
  * @const {!WeakMap<!Element, !Array<{
- *   type: !Type,
+ *   type: !Type_Enum,
  *   callback: (function(!LayoutSizeDef)|function(!ResizeObserverSize))
  * }>>}
  */
@@ -42,7 +42,7 @@ const targetEntryMap = /* #__PURE__ */ new WeakMap();
  * @param {function(!LayoutSizeDef)} callback
  */
 export function observeContentSize(element, callback) {
-  observeSize(element, Type.CONTENT, callback);
+  observeSize(element, Type_Enum.CONTENT, callback);
 }
 
 /**
@@ -50,7 +50,7 @@ export function observeContentSize(element, callback) {
  * @param {function(!LayoutSizeDef)} callback
  */
 export function unobserveContentSize(element, callback) {
-  unobserveSize(element, Type.CONTENT, callback);
+  unobserveSize(element, Type_Enum.CONTENT, callback);
 }
 
 /**
@@ -73,7 +73,7 @@ export function measureContentSize(element) {
  * @param {function(!ResizeObserverSize)} callback
  */
 export function observeBorderBoxSize(element, callback) {
-  observeSize(element, Type.BORDER_BOX, callback);
+  observeSize(element, Type_Enum.BORDER_BOX, callback);
 }
 
 /**
@@ -82,7 +82,7 @@ export function observeBorderBoxSize(element, callback) {
  * @param {function(!ResizeObserverSize)} callback
  */
 export function unobserveBorderBoxSize(element, callback) {
-  unobserveSize(element, Type.BORDER_BOX, callback);
+  unobserveSize(element, Type_Enum.BORDER_BOX, callback);
 }
 
 /**
@@ -102,7 +102,7 @@ export function measureBorderBoxSize(element) {
 
 /**
  * @param {!Element} element
- * @param {!Type} type
+ * @param {!Type_Enum} type
  * @param {function(!LayoutSizeDef)|function(!ResizeObserverSize)} callback
  */
 function observeSize(element, type, callback) {
@@ -130,7 +130,7 @@ function observeSize(element, type, callback) {
 
 /**
  * @param {!Element} element
- * @param {!Type} type
+ * @param {!Type_Enum} type
  * @param {function(!LayoutSizeDef)|function(!ResizeObserverSize)} callback
  */
 function unobserveSize(element, type, callback) {
@@ -187,18 +187,18 @@ function processEntries(entries) {
 }
 
 /**
- * @param {Type} type
+ * @param {Type_Enum} type
  * @param {function(!LayoutSizeDef)|function(!ResizeObserverSize)} callback
  * @param {!ResizeObserverEntry} entry
  */
 function computeAndCall(type, callback, entry) {
-  if (type == Type.CONTENT) {
+  if (type == Type_Enum.CONTENT) {
     const {contentRect} = entry;
     const {height, width} = contentRect;
     /** @type {!LayoutSizeDef} */
     const size = {width, height};
     tryCallback(callback, size);
-  } else if (type == Type.BORDER_BOX) {
+  } else if (type == Type_Enum.BORDER_BOX) {
     const {borderBoxSize: borderBoxSizeArray} = entry;
     /** @type {!ResizeObserverSize} */
     let borderBoxSize;

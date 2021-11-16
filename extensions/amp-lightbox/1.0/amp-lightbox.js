@@ -1,4 +1,7 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '#service';
@@ -30,10 +33,10 @@ class AmpLightbox extends BaseElement {
     this.registerApiAction(
       DEFAULT_ACTION,
       (api) => api.open(),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
-    this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
-    this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
+    this.registerApiAction('open', (api) => api.open(), ActionTrust_Enum.LOW);
+    this.registerApiAction('close', (api) => api.close(), ActionTrust_Enum.LOW);
 
     return super.init();
   }
@@ -49,7 +52,7 @@ class AmpLightbox extends BaseElement {
       element,
       eventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(element, eventName, detail);

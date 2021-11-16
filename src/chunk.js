@@ -76,7 +76,7 @@ export function startupChunk(doc, fn, opt_makesBodyVisible) {
  *
  * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {function(?IdleDeadline)} fn
- * @param {ChunkPriority} priority
+ * @param {ChunkPriority_Enum} priority
  */
 export function chunk(elementOrAmpDoc, fn, priority) {
   if (deactivated) {
@@ -147,14 +147,14 @@ export function runChunksForTesting(elementOrAmpDoc) {
  * The priority of a chunk task. Higher priority tasks have higher values.
  * @enum {number}
  */
-export const ChunkPriority = {
+export const ChunkPriority_Enum = {
   HIGH: 20,
   LOW: 10,
   BACKGROUND: 0,
 };
 
 /** @enum {string} */
-const TaskState = {
+const TaskState_Enum = {
   NOT_RUN: 'not_run',
   RUN: 'run',
 };
@@ -168,8 +168,8 @@ class Task {
    * @param {function(?IdleDeadline)} fn
    */
   constructor(fn) {
-    /** @public {TaskState} */
-    this.state = TaskState.NOT_RUN;
+    /** @public {TaskState_Enum} */
+    this.state = TaskState_Enum.NOT_RUN;
 
     /** @private @const {!function(?IdleDeadline)} */
     this.fn_ = fn;
@@ -182,10 +182,10 @@ class Task {
    * @protected
    */
   runTask_(idleDeadline) {
-    if (this.state == TaskState.RUN) {
+    if (this.state == TaskState_Enum.RUN) {
       return;
     }
-    this.state = TaskState.RUN;
+    this.state = TaskState_Enum.RUN;
     try {
       this.fn_(idleDeadline);
     } catch (e) {
@@ -378,7 +378,7 @@ class Chunks {
   nextTask_(opt_dequeue) {
     let t = this.tasks_.peek();
     // Dequeue tasks until we find one that hasn't been run yet.
-    while (t && t.state !== TaskState.NOT_RUN) {
+    while (t && t.state !== TaskState_Enum.NOT_RUN) {
       this.tasks_.dequeue();
       t = this.tasks_.peek();
     }
