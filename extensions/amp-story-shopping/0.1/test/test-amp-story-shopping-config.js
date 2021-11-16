@@ -79,12 +79,13 @@ describes.realWin(
       const exampleURL = 'foo.example';
       element.setAttribute('src', exampleURL);
 
-      const expectedRemoteResult =
-        '{"city-pop":{"product-tag-id":"city-pop","brand-label":"...","brand-favicon":"...","product-title":"Plastic Love","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"k-pop":{"product-tag-id":"k-pop","brand-label":"...","brand-favicon":"...","product-title":"Gangnam Style","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"eurodance":{"product-tag-id":"eurodance","brand-label":"...","brand-favicon":"...","product-title":"Crystal King Battle","product-price":"...","product-images":"...","product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1}}';
+      const expectedRemoteResult = JSON.parse(
+        '{"city-pop":{"product-tag-id":"city-pop","brand-label":"...","brand-favicon":"...","product-title":"Plastic Love","product-price":"...","product-images":["..."],"product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"k-pop":{"product-tag-id":"k-pop","brand-label":"...","brand-favicon":"...","product-title":"Gangnam Style","product-price":"...","product-images":["..."],"product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"eurodance":{"product-tag-id":"eurodance","brand-label":"...","brand-favicon":"...","product-title":"Crystal King Battle","product-price":"...","product-images":["..."],"product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1}}'
+      );
 
-      expect(
-        JSON.stringify(storeService.get(StateProperty.SHOPPING_DATA))
-      ).to.eql(expectedRemoteResult);
+      expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(
+        expectedRemoteResult
+      );
     });
 
     it('does use inline config when remote src is invalid', async () => {

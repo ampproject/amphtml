@@ -62,11 +62,6 @@ describes.realWin(
       shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
-        const shoppingData = {
-          'sunglasses': {'product-title': 'Spectacular Spectacles'},
-        };
-        shoppingTag.element.textContent =
-          shoppingData['sunglasses']['product-title'];
         expect(shoppingTag.element.textContent).to.equal(
           'Spectacular Spectacles'
         );

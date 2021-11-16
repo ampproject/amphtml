@@ -69,13 +69,15 @@ export let InteractiveComponentDef;
  */
 export let InteractiveReactData;
 
+export let ShoppingConfigDataDef;
+
 /**
  * @typedef {{
  *   brand-favicon: ?string,
  *   brand-label: string,
  *   cta-text: ?number,
  *   product-details: string,
- *   product-images: string,
+ *   product-images: Array<string>,
  *   product-price: string,
  *   product-tag-id: string,
  *   product-title: string,
