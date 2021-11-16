@@ -312,7 +312,6 @@ Each Bento component has a small CSS library you must include to guarantee prope
 <link
   rel="stylesheet"
   type="text/css"
-  type="text/css"
   href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css"
 />
 ```
