@@ -843,21 +843,13 @@ async function buildExtensionJs(dir, name, options) {
     const dest = maybeToEsmName(
       `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
-    try {
-      fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
-      fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
-    } catch (_) {
-      console./*OK*/ log(_);
-    }
+    fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
+    fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
 
   if (name === 'amp-script') {
-    try {
-      await copyWorkerDomResources(version);
-      await buildSandboxedProxyIframe(options.minify);
-    } catch (_) {
-      console./*OK*/ log(_);
-    }
+    await copyWorkerDomResources(version);
+    await buildSandboxedProxyIframe(options.minify);
   }
 }
 
