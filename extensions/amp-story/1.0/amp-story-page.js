@@ -574,7 +574,7 @@ export class AmpStoryPage extends AMP.BaseElement {
             this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
             doc.head.appendChild(this.cssVariablesStyleEl_);
           }
-          this.cssVariablesStyleEl_.textContent = `:root {--story-page-vh: ${px(
+          this.cssVariablesStyleEl_.textContent = `:root {--story-dvh: ${px(
             state.vh
           )} !important}`;
         },
