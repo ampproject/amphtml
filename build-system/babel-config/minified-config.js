@@ -75,9 +75,28 @@ function getMinifiedConfig() {
     presets: [presetEnv],
     retainLines: true,
     assumptions: {
+      arrayLikeIsIterable: true,
+      constantReexports: true,
       constantSuper: true,
+      enumerableModuleMeta: true,
+      // TODO: determine if ignoreFunctionLength can be enabled
+      // https://babeljs.io/docs/en/assumptions#ignorefunctionlength
+      ignoreFunctionLength: false,
+      ignoreToPrimitiveHint: true,
+      iterableIsArray: false,
+      mutableTemplateObject: false,
       noClassCalls: true,
+      noDocumentAll: true,
+      noIncompleteNsImportDetection: true,
+      noNewArrows: true,
+      objectRestNoSymbols: true,
+      privateFieldsAsProperties: false,
+      pureGetters: true,
       setClassMethods: true,
+      setComputedProperties: true,
+      setPublicClassFields: true,
+      setSpreadProperties: true,
+      skipForOfIteratorClosing: true,
     },
   };
 }
