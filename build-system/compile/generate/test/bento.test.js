@@ -1,6 +1,6 @@
 const dedent = require('dedent');
 const test = require('ava');
-const {generateBentoRuntime} = require('../bento');
+const {generateBentoRuntime, generateIntermediatePackage} = require('../bento');
 
 test('generateBentoRuntime', (t) => {
   t.is(
@@ -46,6 +46,17 @@ test('generateBentoRuntime', (t) => {
       for (const fn of bento) {
         bento.push(fn);
       }
+    `)
+  );
+});
+
+test('generateIntermediatePackage', (t) => {
+  t.is(
+    generateIntermediatePackage('some/package', ['foo', 'bar', 'baz']),
+    dedent(`
+      export const foo = BENTO['some/package'].foo;
+      export const bar = BENTO['some/package'].bar;
+      export const baz = BENTO['some/package'].baz;
     `)
   );
 });

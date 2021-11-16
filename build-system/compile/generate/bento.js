@@ -62,7 +62,7 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
 /**
  * @param {string} original
  * @param {string[]} names
- * @return {?string}
+ * @return {string}
  */
 function generateIntermediatePackage(original, names) {
   return names
