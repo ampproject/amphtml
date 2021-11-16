@@ -27,17 +27,6 @@ defineBentoSocialShare();
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-social-share {
-        display: inline-block;
-        overflow: hidden;
-        position: relative;
-        box-sizing: border-box;
-        width: 60px;
-        height: 44px;
-      }
-    </style>
     <script
       type="module"
       async
@@ -54,6 +43,11 @@ defineBentoSocialShare();
       async
       src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+    />
     <style>
       bento-social-share {
         width: 375px;
