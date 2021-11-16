@@ -35,6 +35,7 @@ import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
+  scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
@@ -511,6 +512,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
+      this.checkPageHasCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -648,7 +650,10 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
+    return Promise.all(mediaPromises).then(() => {
+      this.markPageAsLoaded_();
+      this.initializeCaptionsListener_();
+    });
   }
 
   /**
@@ -1366,6 +1371,19 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Checks if the page has any audio.
+   * @private
+   */
+  checkPageHasCaptions_() {
+    const pageHasCaptions = !!this.element.querySelector('track');
+
+    this.storeService_.dispatch(
+      Action.TOGGLE_PAGE_HAS_CAPTIONS,
+      pageHasCaptions
+    );
+  }
+
+  /**
    * Checks if the page has any videos with audio.
    * @return {boolean}
    * @private
@@ -1788,5 +1806,22 @@ export class AmpStoryPage extends AMP.BaseElement {
         toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
       );
     });
+  }
+
+  /**
+   * Listens for changes on captions if there are tracks on videos.
+   * @private
+   */
+  initializeCaptionsListener_() {
+    if (!this.element.querySelector('track')) {
+      return;
+    }
+    this.storeService_.subscribe(StateProperty.CAPTIONS_STATE, (captions) => {
+      this.element.querySelectorAll('video').forEach((video) => {
+        toArray(video.textTracks).forEach((track) => {
+          track.mode = captions ? 'showing' : 'disabled'
+        });
+      })
+    }, true);
   }
 }

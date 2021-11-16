@@ -445,6 +445,12 @@ export class SystemLayer {
         this.onPausedClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_(event);
+      } else if (matches(target, `.${CAPTIONS_CLASS}, .${CAPTIONS_CLASS} *`)) {
+        this.onCaptionsClick_(false);
+      } else if (
+        matches(target, `.${NOCAPTIONS_CLASS}, .${NOCAPTIONS_CLASS} *`)
+      ) {
+        this.onCaptionsClick_(true);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
       } else if (
@@ -894,6 +900,15 @@ export class SystemLayer {
 
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+  }
+
+  /**
+   * Toggles the captions.
+   * @param {boolean} toggleCaptions
+   * @private
+   */
+  onCaptionsClick_(toggleCaptions) {
+    this.storeService_.dispatch(Action.TOGGLE_CAPTIONS, toggleCaptions);
   }
 
   /**

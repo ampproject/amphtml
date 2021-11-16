@@ -198,6 +198,7 @@ export const Action = {
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
+  TOGGLE_CAPTIONS: 'toggleCaptions',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
@@ -366,6 +367,16 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    case Action.TOGGLE_PAGE_HAS_CAPTIONS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_HAS_CAPTIONS_STATE]: !!data,
+      });
+    case Action.TOGGLE_CAPTIONS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CAPTIONS_STATE]: !!data,
       });
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ ({
@@ -563,9 +574,11 @@ export class AmpStoryStoreService {
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty.PAGE_HAS_CAPTIONS_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PANNING_MEDIA_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.CAPTIONS_STATE]: true,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
