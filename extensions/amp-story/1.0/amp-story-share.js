@@ -1,5 +1,4 @@
 import * as Preact from '#core/dom/jsx';
-import {once} from '#core/types/function';
 import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
@@ -298,18 +297,16 @@ export class ShareWidget {
     const shareEl = this.storyEl.querySelector(
       'amp-story-social-share, amp-story-bookend'
     );
-    once(
-      this.requestService_.loadConfig(shareEl).then((config) => {
-        const providers =
-          config &&
-          (config[SHARE_PROVIDERS_KEY] ||
-            config[DEPRECATED_SHARE_PROVIDERS_KEY]);
-        if (!providers) {
-          return;
-        }
-        this.setProviders_(providers);
-      })
-    );
+
+    this.requestService_.loadConfig(shareEl).then((config) => {
+      const providers =
+        config &&
+        (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
+      if (!providers) {
+        return;
+      }
+      this.setProviders_(providers);
+    });
   }
 
   /**

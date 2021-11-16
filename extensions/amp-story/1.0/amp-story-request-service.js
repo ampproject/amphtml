@@ -1,4 +1,5 @@
 import {Services} from '#service';
+import {once} from '#core/types/function';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service-helpers';
@@ -27,6 +28,9 @@ export class AmpStoryRequestService {
 
     /** @private @const {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(win);
+
+    /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
+    this.loadShareConfig = once((element) => this.loadConfig(element));
   }
 
   /**
@@ -74,7 +78,6 @@ export class AmpStoryRequestService {
     if (!element) {
       return Promise.resolve();
     }
-
     if (element.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
       const rawUrl = element.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
       const credentials = element.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);

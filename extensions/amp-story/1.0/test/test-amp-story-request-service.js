@@ -98,7 +98,8 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadConfig(shareElement);
+    await requestService.loadShareConfig(shareElement);
+    await requestService.loadShareConfig(shareElement);
     xhrMock.verify();
   });
 

@@ -52,19 +52,9 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       Services.storyStoreServiceForOrNull(this.win),
       Services.storyRequestServiceForOrNull(this.win),
     ])
-      .then((services) => {
-        this.storeService_ = services[0];
-        this.requestService_ = services[1];
-
-        devAssert(
-          this.storeService_,
-          'Could not retrieve AmpStoryStoreService'
-        );
-        devAssert(
-          this.requestService_,
-          'Could not retrieve AmpStoryRequestService'
-        );
-
+      .then(([storeService, requestService]) => {
+        this.storeService_ = storeService;
+        this.requestService_ = requestService;
         return this.requestService_.loadConfig(this.element);
       })
       .then((storyConfig) => this.addShoppingDataFromConfig_(storyConfig));

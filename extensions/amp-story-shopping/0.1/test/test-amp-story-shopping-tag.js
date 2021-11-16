@@ -47,11 +47,11 @@ describes.realWin(
       shoppingTag = await element.getImpl();
     }
 
-    async function shoppingStateHelper() {
-      const shoppingState = {
+    async function shoppingDataDispatchStoreService() {
+      const shoppingData = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
-      storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingState);
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
     it('should build and layout shopping tag component', () => {
@@ -60,13 +60,13 @@ describes.realWin(
 
     it('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
-      await shoppingStateHelper();
+      await shoppingDataDispatchStoreService();
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
-        const shoppingState = {
+        const shoppingData = {
           'sunglasses': {'product-title': 'Spectacular Spectacles'},
         };
         shoppingTag.element.textContent =
-          shoppingState['sunglasses']['product-title'];
+          shoppingData['sunglasses']['product-title'];
         expect(shoppingTag.element.textContent).to.equal(
           'Spectacular Spectacles'
         );
@@ -75,7 +75,7 @@ describes.realWin(
 
     it('should not process config data and set text container content if id not found', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'hat');
-      await shoppingStateHelper();
+      await shoppingDataDispatchStoreService();
       expect(shoppingTag.element.textContent).to.be.empty;
     });
   }
