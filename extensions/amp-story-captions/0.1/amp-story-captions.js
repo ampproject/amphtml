@@ -49,12 +49,8 @@ export class AmpStoryCaptions extends AMP.BaseElement {
     this.video_ = video;
 
     this.updateTracks_();
-    this.textTracksChangeUnlistener_ = listen(
-      video.textTracks,
-      'change',
-      () => {
-        this.updateTracks_();
-      }
+    this.textTracksChangeUnlistener_ = listen(video.textTracks, 'change', () =>
+      this.updateTracks_()
     );
   }
 
