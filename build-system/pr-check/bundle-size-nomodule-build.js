@@ -18,7 +18,7 @@ const jobName = 'bundle-size-nomodule-build.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp dist --noconfig');
+  timedExecOrDie('amp dist --noconfig --version_override 0000000000000');
   storeNomoduleBuildToWorkspace();
 }
 
