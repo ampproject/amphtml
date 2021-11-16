@@ -21,8 +21,7 @@
 
 @supports (height: 1dvh) {
   :root {
-    --story-page-vh: 1dvh !important;
-    --story-page-100vh: 100dvh !important;
+    --story-dvh: 1dvh !important;
   }
 }
 
