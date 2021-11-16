@@ -25,8 +25,9 @@ module.exports = {
     'useMemo',
     'useCallback',
     'useImperativeHandle',
+    'toChildArray',
   ],
   '#preact/component': ['ContainWrapper', 'Wrapper'],
-  '#preact/compat': ['forwardRef', 'toChildArray'],
+  '#preact/compat': ['forwardRef'],
   '#preact/base-element': ['PreactBaseElement'],
 };
