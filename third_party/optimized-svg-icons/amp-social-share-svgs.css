@@ -16,10 +16,6 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5-18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5 18.9 0 34.2 15.5 34.2 34.5zm-5 58.9h-57.8v186.8h57.8V201.3zm92.4 0h-55.4v186.8h55.4v-98c0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9v98H398V269.8c0-50-28.3-74.2-68-74.2-39.6 0-56.3 30.9-56.3 30.9v-25.2h.1z"/></svg>');
 }
 
-.amp-social-share-gplus {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M180 238v46h77c-3 20-24 59-77 59-47 0-84-39-84-86s37-86 84-86c26 0 44 11 54 21l37-35c-24-23-55-36-91-36a136 136 0 0 0 0 272c78 0 130-55 130-133l-2-22H180Zm288-1h-39v-39h-38v39h-39v38h39v39h38v-39h39"/></svg>');
-}
-
 .amp-social-share-email {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M101 142v229h310V142H101zm275 26-120 91-120-91h240zm-248 26 64 49-64 64V194zm0 150 85-85 43 33 43-33 85 85H128zm256-36-64-65 64-49v114z"/></svg>');
 }
