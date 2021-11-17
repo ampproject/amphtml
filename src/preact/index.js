@@ -145,5 +145,3 @@ export function useCallback(cb, opt_deps) {
 export function useImperativeHandle(ref, create, opt_deps) {
   return hooks.useImperativeHandle(ref, create, opt_deps);
 }
-
-export {toChildArray} from 'preact';

@@ -1,6 +1,8 @@
 import {getDataParamsFromAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
+
 import {BentoJwplayer} from './component';
 
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
@@ -71,8 +73,8 @@ BaseElement['props'] = {
   'contentRecency': {attr: 'data-content-recency'},
   'contentBackfill': {attr: 'data-content-backfill', type: 'boolean'},
   'adCustParams': {attr: 'data-ad-cust-params'},
-  'adMacros': {attrPrefix: 'data-ad-macro-'},
-  'config': {attrPrefix: 'data-config-'},
+  'adMacros': createParseAttrsWithPrefix('data-ad-macro-'),
+  'config': createParseAttrsWithPrefix('data-config-'),
   'autoplay': {attr: 'autoplay', type: 'boolean'},
   // TODO(wg-bento): These props have no internal implementation yet.
   'dock': {attr: 'dock', media: true},
