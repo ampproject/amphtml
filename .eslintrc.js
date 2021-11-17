@@ -222,7 +222,6 @@ module.exports = {
           'loadable',
           'mutateElement',
           'mutateProps',
-          'registerApiAction',
           'triggerEvent',
           'usesLoading',
           'usesShadowDom',

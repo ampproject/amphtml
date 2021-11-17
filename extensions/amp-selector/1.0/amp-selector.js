@@ -20,29 +20,29 @@ class AmpSelector extends BaseElement {
   /** @override */
   init() {
     // Set up API
-    this.registerApiAction('clear', (api) => {
-      api./*OK*/ clear();
+    this.registerActoin('clear', () => {
+      this.api()./*OK*/ clear();
       this.mutateProps(dict({'value': []}));
     });
 
-    this.registerApiAction('selectUp', (api, invocation) => {
+    this.registerActoin('selectUp', (invocation) => {
       const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-      api./*OK*/ selectBy(delta);
+      this.api()./*OK*/ selectBy(delta);
     });
-    this.registerApiAction('selectDown', (api, invocation) => {
+    this.registerActoin('selectDown', (invocation) => {
       const {args} = invocation;
       const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-      api./*OK*/ selectBy(delta);
+      this.api()./*OK*/ selectBy(delta);
     });
 
-    this.registerApiAction('toggle', (api, invocation) => {
+    this.registerActoin('toggle', (invocation) => {
       const {args} = invocation;
       const {'index': index, 'value': opt_select} = args;
       userAssert(typeof index === 'number', "'index' must be specified");
       const option = this.optionState[index];
       if (option) {
-        api./*OK */ toggle(option, opt_select);
+        this.api()./*OK */ toggle(option, opt_select);
       }
     });
 

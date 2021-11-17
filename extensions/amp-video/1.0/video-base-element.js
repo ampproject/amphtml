@@ -26,9 +26,10 @@ export class VideoBaseElement extends BaseElement {
    * @private
    */
   registerApiAction_(alias, handler, minTrust = ActionTrust_Enum.HIGH) {
-    this.registerApiAction(
+    this.registerAction(
       alias,
-      (api, invocation) => {
+      (invocation) => {
+        const api = this.api();
         if (invocation.trust >= ActionTrust_Enum.HIGH) {
           // TODO(alanorozco): There may be a better solution that doesn't
           // require this method which is not standard in HTMLMediaElement, like

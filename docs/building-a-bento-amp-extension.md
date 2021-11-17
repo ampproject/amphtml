@@ -285,10 +285,16 @@ actionServiceForDoc(doc.documentElement).trigger(
 );
 ```
 
-And to expose actions use `registerApiAction` method that your element inherits from `PreactBaseElement`. Note, this should correspond directly with the API exposed in the corresponding Preact compnent via [`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle), and the component should be defined using a [`forwardRef`](https://preactjs.com/guide/v10/switching-to-preact/#forwardref) accordingly.
+#### Defining Actions
+
+To define actions, use the `registerAction` method that your element inherits from `AMP.BaseElement`.
+
+You may call the corresponding Preact component by using the API exposed by [`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle).
+
+> For `useImperativeHandle` to work correctly, you should wrap your component in [`forwardRef`](https://preactjs.com/guide/v10/switching-to-preact/#forwardref).
 
 ```javascript
-this.registerApiAction('close', (api) => api.close());
+this.registerAction('close', () => this.api().close());
 ```
 
 Your element can choose to override the default `activate` method inherited from BaseElement. For example `amp-lightbox` overrides `activate` to define the `open` default case.
@@ -375,7 +381,7 @@ class AmpMyElement extends BaseElement {
     // Perform any additional processing of prop values that are not
     // straightforward attribute passthroughs, as well as AMP-specific
     // work such as registering actions and events.
-    this.registerApiAction('close', (api) => api.close());
+    this.registerAction('close', () => this.api().close());
 
     const processedProp = parseInt(element.getAttribute('data-binary'), 2);
     return dict({

@@ -14,13 +14,13 @@ const TAG = 'amp-base-carousel';
 class AmpBaseCarousel extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction('prev', (api) => api.prev(), ActionTrust_Enum.LOW);
-    this.registerApiAction('next', (api) => api.next(), ActionTrust_Enum.LOW);
-    this.registerApiAction(
+    this.registerAction('prev', () => this.api().prev(), ActionTrust_Enum.LOW);
+    this.registerAction('next', () => this.api().next(), ActionTrust_Enum.LOW);
+    this.registerAction(
       'goToSlide',
-      (api, invocation) => {
+      (invocation) => {
         const {args} = invocation;
-        api.goToSlide(args['index'] || -1);
+        this.api().goToSlide(args['index'] || -1);
       },
       ActionTrust_Enum.LOW
     );

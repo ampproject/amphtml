@@ -254,7 +254,7 @@ export class AmpRender extends BaseElement {
       this.element.setAttribute('aria-live', 'polite');
     }
 
-    this.registerApiAction('refresh', (api) => {
+    this.registerAction('refresh', () => {
       const src = this.element.getAttribute('src');
       // There is an alternative way to do this using `mutationObserverCallback` while using a boolean
       // variable `canRefresh`. See https://github.com/ampproject/amphtml/pull/33776#discussion_r614087734
@@ -263,7 +263,7 @@ export class AmpRender extends BaseElement {
       if (!src || isAmpStateSrc(src) || isAmpScriptUri(src)) {
         return;
       }
-      api.refresh();
+      this.api().refresh();
     });
 
     this.registerAction('resizeToContents', () => {

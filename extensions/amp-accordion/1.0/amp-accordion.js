@@ -19,14 +19,14 @@ const TAG = 'amp-accordion';
 class AmpAccordion extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction('toggle', (api, invocation) =>
-      api./*OK*/ toggle(invocation.args && invocation.args['section'])
+    this.registerAction('toggle', (invocation) =>
+      this.api()./*OK*/ toggle(invocation.args?.['section'])
     );
-    this.registerApiAction('expand', (api, invocation) =>
-      api./*OK*/ expand(invocation.args && invocation.args['section'])
+    this.registerAction('expand', (invocation) =>
+      this.api()./*OK*/ expand(invocation.args?.['section'])
     );
-    this.registerApiAction('collapse', (api, invocation) =>
-      api./*OK*/ collapse(invocation.args && invocation.args['section'])
+    this.registerAction('collapse', (invocation) =>
+      this.api()./*OK*/ collapse(invocation.args?.['section'])
     );
 
     return super.init();

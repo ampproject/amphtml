@@ -30,13 +30,17 @@ class AmpLightbox extends BaseElement {
   init() {
     this.history_ = Services.historyForDoc(this.getAmpDoc());
 
-    this.registerApiAction(
+    this.registerAction(
       DEFAULT_ACTION,
-      (api) => api.open(),
+      () => this.api().open(),
       ActionTrust_Enum.LOW
     );
-    this.registerApiAction('open', (api) => api.open(), ActionTrust_Enum.LOW);
-    this.registerApiAction('close', (api) => api.close(), ActionTrust_Enum.LOW);
+    this.registerAction('open', () => this.api().open(), ActionTrust_Enum.LOW);
+    this.registerAction(
+      'close',
+      () => this.api().close(),
+      ActionTrust_Enum.LOW
+    );
 
     return super.init();
   }

@@ -23,9 +23,9 @@ class AmpSidebar extends BaseElement {
   init() {
     this.history_ = Services.historyForDoc(this.getAmpDoc());
 
-    this.registerApiAction('toggle', (api) => api./*OK*/ toggle());
-    this.registerApiAction('open', (api) => api./*OK*/ open());
-    this.registerApiAction('close', (api) => api./*OK*/ close());
+    this.registerAction('toggle', () => this.api()./*OK*/ toggle());
+    this.registerAction('open', () => this.api()./*OK*/ open());
+    this.registerAction('close', () => this.api()./*OK*/ close());
 
     return super.init();
   }

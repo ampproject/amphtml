@@ -11,7 +11,9 @@ class Amp__component_name_pascalcase__ extends BaseElement {
   /** @override */
   init() {
     // __do_not_submit__: This is example code only.
-    this.registerApiAction('exampleToggle', (api) => api./*OK*/exampleToggle());
+    this.registerAction('exampleToggle', () => {
+      this.api()./*OK*/exampleToggle();
+    });
 
     return dict({
       // Extra props passed by wrapper AMP component

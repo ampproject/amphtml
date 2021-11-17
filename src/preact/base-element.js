@@ -406,24 +406,6 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * Register an action for AMP documents to execute an API handler.
-   *
-   * This has no effect on Bento documents, since they lack an Actions system.
-   * Instead, they should use `(await element.getApi()).action()`
-   * @param {string} alias
-   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ActionTrust_Enum} minTrust
-   * @protected
-   */
-  registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
-    this.registerAction?.(
-      alias,
-      (invocation) => handler(this.api(), invocation),
-      minTrust
-    );
-  }
-
-  /**
    * A callback called immediately after mutations have been observed on a
    * component. This differs from `checkPropsPostMutations` in that it is
    * called in all cases of mutation.
