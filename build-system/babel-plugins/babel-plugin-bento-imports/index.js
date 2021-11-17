@@ -26,15 +26,13 @@ module.exports = function (babel) {
 
   const visitor = {
     ImportDeclaration(path, state) {
-      const {packages} = state.opts;
-
+      const {pkg, replacements} = state.opts;
       const source = path.node.source.value;
-      const def = packages[source];
-      if (!def) {
+      const names = replacements[source];
+      if (!names) {
         return;
       }
 
-      const {names, pkg} = def;
       const preservedSpecifiers = [];
       const statements = path.node.specifiers.map((node) => {
         if (t.isImportNamespaceSpecifier(node)) {

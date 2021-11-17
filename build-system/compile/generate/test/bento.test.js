@@ -13,14 +13,8 @@ test('generateBentoRuntime', (t) => {
       import {isEsm} from '#core/mode';
       import {install as installCustomElements} from '#polyfills/custom-elements';
 
-      import {
-      bar as _foo_bar,
-      baz as _foo_baz,
-      } from '#foo';
-
-      import {
-      car as _baz_bar_car,
-      } from '#baz/bar';
+      import {bar, baz} from '#foo';
+      import {car} from '#baz/bar';
 
       if (!isEsm()) {
         installCustomElements(self, class {});
@@ -28,13 +22,10 @@ test('generateBentoRuntime', (t) => {
 
       const bento = self.BENTO || [];
 
-      bento['#foo'] = dict({
-      'bar': _foo_bar,
-      'baz': _foo_baz,
-      });
-
-      bento['#baz/bar'] = dict({
-      'car': _baz_bar_car,
+      bento['_'] = dict({
+      'bar': bar,
+      'baz': baz,
+      'car': car,
       });
 
       bento.push = (fn) => {
@@ -52,11 +43,12 @@ test('generateBentoRuntime', (t) => {
 
 test('generateIntermediatePackage', (t) => {
   t.is(
-    generateIntermediatePackage('some/package', ['foo', 'bar', 'baz']),
+    generateIntermediatePackage({x: ['foo', 'bar'], y: ['baz']}),
     dedent(`
-      export const foo = BENTO['some/package'].foo;
-      export const bar = BENTO['some/package'].bar;
-      export const baz = BENTO['some/package'].baz;
+      const _ = (name) => self.BENTO['_'][name];
+      export const foo = /*#__PURE__*/ _('foo');
+      export const bar = /*#__PURE__*/ _('bar');
+      export const baz = /*#__PURE__*/ _('baz');
     `)
   );
 });

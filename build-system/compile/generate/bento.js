@@ -9,35 +9,19 @@
 const bentoRuntimePackages = require('./metadata/bento-runtime-packages');
 const dedent = require('dedent');
 
-const getPackageImportId = (pkg, name) =>
-  `${pkg}_${name}`.replace(/[^a-z0-9]/gi, '_');
-
 /**
  * @param {Object<string, string[]>} packages
  * @return {string}
  */
 function generateBentoRuntime(packages = bentoRuntimePackages) {
-  const packagesEntries = Object.entries(packages);
-  const imports = packagesEntries.map(([pkg, names]) => {
-    const specifiers = names.map((name) => {
-      const id = getPackageImportId(pkg, name);
-      return `${name} as ${id},`;
-    });
-    return [`import {`, ...specifiers, `} from '${pkg}'`].join('\n');
-  });
-  const globals = packagesEntries.map(([pkg, names]) => {
-    const properties = names.map((name) => {
-      const id = getPackageImportId(pkg, name);
-      return `'${name}': ${id},`;
-    });
-    return [`bento['${pkg}'] = dict({`, ...properties, `})`].join('\n');
-  });
   return dedent(`
     import {dict} from '#core/types/object';
     import {isEsm} from '#core/mode';
     import {install as installCustomElements} from '#polyfills/custom-elements';
 
-    ${imports.join(';\n\n')};
+    ${Object.entries(packages)
+      .map(([pkg, names]) => `import {${names.join(', ')}} from '${pkg}';`)
+      .join('\n')}
 
     if (!isEsm()) {
       installCustomElements(self, class {});
@@ -45,7 +29,11 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
 
     const bento = self.BENTO || [];
 
-    ${globals.join(';\n\n')};
+    bento['_'] = dict({
+    ${getNamesNoDupes(packages)
+      .map((name) => `'${name}': ${name},`)
+      .join('\n')}
+    });
 
     bento.push = (fn) => {
       fn();
@@ -60,14 +48,30 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
 }
 
 /**
- * @param {string} original
- * @param {string[]} names
+ * @param {Object<string, string[]>} packages
  * @return {string}
  */
-function generateIntermediatePackage(original, names) {
-  return names
-    .map((name) => `export const ${name} = BENTO['${original}'].${name};`)
-    .join('\n');
+function generateIntermediatePackage(packages = bentoRuntimePackages) {
+  return [
+    "const _ = (name) => self.BENTO['_'][name];",
+    ...getNamesNoDupes(packages).map(
+      (name) => `export const ${name} = /*#__PURE__*/ _('${name}');`
+    ),
+  ].join('\n');
+}
+
+/**
+ * @param {Object<string, string[]>} packages
+ * @return {string[]}
+ */
+function getNamesNoDupes(packages = bentoRuntimePackages) {
+  const names = Object.values(packages).flat();
+  if (Array.from(new Set(names)).length !== names.length) {
+    throw new Error(
+      'bento-runtime-packages should not contain duplicate leaf names'
+    );
+  }
+  return names;
 }
 
 module.exports = {

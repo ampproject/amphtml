@@ -5,33 +5,29 @@ const {getUnminifiedConfig} = require('./unminified-config');
 const {outputFileSync, pathExistsSync} = require('fs-extra');
 
 /**
- * @param {string} original
- * @param {string[]} names
+ * @param {{[name: string]: string[]}} packages
  * @return {string}
  */
-function writeIntermediatePackage(original, names) {
-  const basename = original.replace(/[^a-z0-9]/g, '_');
-  const filePath = `build/bento-package/${basename}.js`;
+function writeIntermediatePackage(packages) {
+  const filePath = `build/bento-shared.js`;
   if (!pathExistsSync(filePath)) {
-    outputFileSync(filePath, generateIntermediatePackage(original, names));
+    outputFileSync(filePath, generateIntermediatePackage(packages));
   }
   // #build is an alias to the root build/
   return `#${filePath}`;
 }
 
 /**
- * @return {[string, {packages: {[original: string]: {pkg: string, names: string[]}}}]}
+ * @param {{[name: string]: string[]}} packages
+ * @return {[string, {pkg: string, replacements: {[original: string]: string[]}}]}
  */
-function getImportPlugin() {
-  const packages = Object.fromEntries(
-    Object.entries(bentoRuntimePackages).map(([original, names]) => {
-      const pkg = writeIntermediatePackage(original, names);
-      return [original, {pkg, names}];
-    })
-  );
+function getImportPlugin(packages) {
   return [
     './build-system/babel-plugins/babel-plugin-bento-imports',
-    {packages},
+    {
+      pkg: writeIntermediatePackage(packages),
+      replacements: packages,
+    },
   ];
 }
 
@@ -42,7 +38,7 @@ function getImportPlugin() {
 function mergeWithConfig(config) {
   return {
     ...config,
-    plugins: [getImportPlugin(), ...config.plugins],
+    plugins: [getImportPlugin(bentoRuntimePackages), ...config.plugins],
   };
 }
 
