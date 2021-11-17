@@ -10,7 +10,7 @@ import {
 import {AdvancementMode} from './story-analytics';
 import {Services} from '#service';
 import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {closest, matches} from '#core/dom/query';
 import {dev, user} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -1080,9 +1080,14 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     this.element_.querySelector('video').removeAttribute('loop');
 
     this.unlistenFns_.push(
-      listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
-        capture: true,
-      })
+      listenOnce(
+        this.element_,
+        VideoEvents_Enum.ENDED,
+        () => this.onAdvance(),
+        {
+          capture: true,
+        }
+      )
     );
 
     this.onProgressUpdate();

@@ -1,5 +1,5 @@
 import {
-  Layout,
+  Layout_Enum,
   assertLength,
   assertLengthOrPercent,
   getLengthNumeral,
@@ -221,7 +221,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=nodisplay', () => {
     div.setAttribute('layout', 'nodisplay');
-    expect(applyStaticLayout(div)).to.equal(Layout.NODISPLAY);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.NODISPLAY);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     document.body.appendChild(div);
@@ -236,7 +236,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'fixed');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-fixed');
@@ -247,7 +247,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fixed - default with width/height', () => {
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
   });
@@ -264,7 +264,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fixed-height', () => {
     div.setAttribute('layout', 'fixed-height');
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-fixed-height');
@@ -276,7 +276,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'fixed-height');
     div.setAttribute('height', 200);
     div.setAttribute('width', 'auto');
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-fixed-height');
@@ -297,7 +297,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=fixed-height - default with height', () => {
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.height).to.equal('200px');
     expect(div.style.width).to.equal('');
   });
@@ -305,7 +305,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fixed-height - default with height and width=auto', () => {
     div.setAttribute('height', 200);
     div.setAttribute('width', 'auto');
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.height).to.equal('200px');
     expect(div.style.width).to.equal('');
   });
@@ -323,7 +323,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'responsive');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-responsive');
@@ -338,7 +338,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('sizes', '50vw');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-responsive');
@@ -353,7 +353,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'intrinsic');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.INTRINSIC);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-intrinsic');
@@ -373,7 +373,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('sizes', '50vw');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.INTRINSIC);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-intrinsic');
@@ -390,7 +390,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=fill', () => {
     div.setAttribute('layout', 'fill');
-    expect(applyStaticLayout(div)).to.equal(Layout.FILL);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FILL);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-fill');
@@ -400,7 +400,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=container', () => {
     div.setAttribute('layout', 'container');
-    expect(applyStaticLayout(div)).to.equal(Layout.CONTAINER);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.CONTAINER);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-container');
@@ -412,7 +412,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'flex-item');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FLEX_ITEM);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLEX_ITEM);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-flex-item');
@@ -424,7 +424,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('height', 'fluid');
     const parentDiv = document.createElement('div');
     parentDiv.appendChild(div);
-    expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLUID);
     expect(div).to.have.class('i-amphtml-layout-awaiting-size');
     expect(div.children.length).to.equal(0);
   });
@@ -432,7 +432,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fluid - default with width', () => {
     div.setAttribute('height', 'fluid');
     div.setAttribute('width', 300);
-    expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLUID);
     expect(div).to.have.class('i-amphtml-layout-awaiting-size');
     expect(div.style.width).to.equal('300px');
     expect(div.children.length).to.equal(0);
@@ -449,7 +449,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('should configure natural dimensions; default layout', () => {
     const pixel = document.createElement('amp-pixel');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('0px');
   });
@@ -457,7 +457,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; default layout; with width', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('width', '11');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('11px');
     expect(pixel.style.height).to.equal('0px');
   });
@@ -465,7 +465,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; default layout; with height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('height', '11');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('11px');
   });
@@ -473,7 +473,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; layout=fixed', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('0px');
   });
@@ -481,7 +481,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; layout=fixed-height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed-height');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(pixel.style.height).to.equal('0px');
     expect(pixel.style.width).to.equal('');
   });
@@ -536,7 +536,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.className = 'other';
     div.style.width = '111px';
     div.style.height = '112px';
-    expect(applyStaticLayout(div)).to.equal(Layout.FLEX_ITEM);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLEX_ITEM);
     // No other attributes are read or changed.
     expect(div.style.width).to.equal('111px');
     expect(div.style.height).to.equal('112px');
@@ -549,14 +549,14 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('i-amphtml-layout', 'responsive');
     const sizer = document.createElement('i-amphtml-sizer');
     div.appendChild(sizer);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.sizerElement).to.equal(sizer);
     expect(div.sizerElement.getAttribute('slot')).to.equal('i-amphtml-svc');
   });
 
   it('should allow sizer to be missing', () => {
     div.setAttribute('i-amphtml-layout', 'responsive');
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.sizerElement).to.be.undefined;
   });
 
@@ -564,7 +564,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('i-amphtml-layout', 'responsive');
     const other = document.createElement('div');
     div.appendChild(other);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.sizerElement).to.be.undefined;
   });
 
@@ -579,9 +579,9 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'responsive');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     const clone = div.cloneNode(true);
-    expect(applyStaticLayout(clone)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(clone)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
     expect(clone.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
   });
@@ -614,7 +614,7 @@ describes.realWin('ampshared.css', {amp: true}, function (env) {
       element.setAttribute('layout', 'responsive');
       element.setAttribute('width', 100);
       element.setAttribute('height', 100);
-      expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
+      expect(applyStaticLayout(element)).to.equal(Layout_Enum.RESPONSIVE);
 
       expect(element.offsetWidth).to.equal(element.offsetHeight);
       expect(overflow.offsetHeight).to.equal(20);
@@ -624,7 +624,7 @@ describes.realWin('ampshared.css', {amp: true}, function (env) {
     it('should allow overflow element to distort container layout', () => {
       element.setAttribute('layout', 'container');
       overflow.text = 'test';
-      expect(applyStaticLayout(element)).to.equal(Layout.CONTAINER);
+      expect(applyStaticLayout(element)).to.equal(Layout_Enum.CONTAINER);
 
       expect(element.offsetHeight).to.equal(overflow.offsetHeight);
       expect(win.getComputedStyle(overflow).position).to.equal('relative');

@@ -1,4 +1,4 @@
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 
 /**
  * The <amp-bind-macro> element is used to define an expression macro that can
@@ -8,7 +8,7 @@ export class AmpBindMacro extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return LayoutPriority.METADATA;
+    return LayoutPriority_Enum.METADATA;
   }
 
   /** @override */

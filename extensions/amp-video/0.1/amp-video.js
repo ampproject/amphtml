@@ -2,8 +2,8 @@ import {tryPlay} from '#core/dom/video';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VideoEvents_Enum} from '../../../src/video-interface';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {addParamsToUrl} from '../../../src/url';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
@@ -335,7 +335,7 @@ export class AmpVideo extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
     if (mutations['src']) {
-      dispatchCustomEvent(element, VideoEvents.RELOAD);
+      dispatchCustomEvent(element, VideoEvents_Enum.RELOAD);
     }
     if (mutations['artwork'] || mutations['poster']) {
       const artwork = element.getAttribute('artwork');
@@ -384,7 +384,9 @@ export class AmpVideo extends AMP.BaseElement {
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
     let pendingOriginPromise;
-    if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
+    if (
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER
+    ) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
@@ -689,12 +691,12 @@ export class AmpVideo extends AMP.BaseElement {
     this.unlisteners_.push(
       this.forwardEvents(
         [
-          VideoEvents.ENDED,
-          VideoEvents.LOADEDMETADATA,
-          VideoEvents.LOADEDDATA,
-          VideoEvents.PAUSE,
-          VideoEvents.PLAYING,
-          VideoEvents.PLAY,
+          VideoEvents_Enum.ENDED,
+          VideoEvents_Enum.LOADEDMETADATA,
+          VideoEvents_Enum.LOADEDDATA,
+          VideoEvents_Enum.PAUSE,
+          VideoEvents_Enum.PLAYING,
+          VideoEvents_Enum.PLAY,
         ],
         video
       )
@@ -795,7 +797,7 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
-    dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
   }
 
   /** @override */

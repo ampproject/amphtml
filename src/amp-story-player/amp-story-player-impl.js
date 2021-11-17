@@ -3,7 +3,7 @@ import {Messaging} from '@ampproject/viewer-messaging';
 
 // Source for this constant is css/amp-story-player-shadow.css
 import {devAssertElement} from '#core/assert';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, tryFocus} from '#core/dom';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
@@ -366,7 +366,7 @@ export class AmpStoryPlayer {
 
     this.updateVisibilityState_(
       currentStory,
-      paused ? VisibilityState.PAUSED : VisibilityState.VISIBLE
+      paused ? VisibilityState_Enum.PAUSED : VisibilityState_Enum.VISIBLE
     );
   }
 
@@ -1239,11 +1239,11 @@ export class AmpStoryPlayer {
           // 4. Update the visibility state of the story.
           .then(() => {
             if (story.distance === 0 && this.playing_) {
-              this.updateVisibilityState_(story, VisibilityState.VISIBLE);
+              this.updateVisibilityState_(story, VisibilityState_Enum.VISIBLE);
             }
 
             if (oldDistance === 0 && story.distance === 1) {
-              this.updateVisibilityState_(story, VisibilityState.INACTIVE);
+              this.updateVisibilityState_(story, VisibilityState_Enum.INACTIVE);
             }
           })
           // 5. Finally update the story position.
@@ -1297,7 +1297,10 @@ export class AmpStoryPlayer {
    */
   setSrc_(story, url) {
     const {iframe} = story;
-    const {href} = this.getEncodedLocation_(url, VisibilityState.PRERENDER);
+    const {href} = this.getEncodedLocation_(
+      url,
+      VisibilityState_Enum.PRERENDER
+    );
 
     iframe.setAttribute('src', href);
     if (story.title) {
@@ -1356,11 +1359,11 @@ export class AmpStoryPlayer {
   /**
    * Gets encoded url for player usage.
    * @param {string} href
-   * @param {VisibilityState=} visibilityState
+   * @param {VisibilityState_Enum=} visibilityState
    * @return {!Location}
    * @private
    */
-  getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
+  getEncodedLocation_(href, visibilityState = VisibilityState_Enum.INACTIVE) {
     const playerFragmentParams = {
       'visibilityState': visibilityState,
       'origin': this.win_.origin,
@@ -1399,7 +1402,7 @@ export class AmpStoryPlayer {
   /**
    * Updates the visibility state of the story inside the iframe.
    * @param {!StoryDef} story
-   * @param {!VisibilityState} visibilityState
+   * @param {!VisibilityState_Enum} visibilityState
    * @private
    */
   updateVisibilityState_(story, visibilityState) {

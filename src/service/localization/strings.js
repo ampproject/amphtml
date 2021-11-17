@@ -13,7 +13,7 @@ import {parseJson} from '#core/types/object/json';
  *
  * @const @enum {string}
  */
-export const LocalizedStringId = {
+export const LocalizedStringId_Enum = {
   // amp-story
   AMP_STORY_ACTIVATE_BUTTON_TEXT: '83',
   AMP_STORY_AUDIO_MUTE_BUTTON_LABEL: '66',
@@ -127,7 +127,7 @@ export const LocalizedStringId = {
 export let LocalizedStringDef;
 
 /**
- * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
+ * @typedef {!Object<!LocalizedStringId_Enum, !LocalizedStringDef>}
  */
 export let LocalizedStringBundleDef;
 
@@ -160,7 +160,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (
+    const localizedStringId = /** @type {!LocalizedStringId_Enum} */ (
       localizedStringIdAsStr
     );
     const entry = localizedStringBundle[localizedStringId];

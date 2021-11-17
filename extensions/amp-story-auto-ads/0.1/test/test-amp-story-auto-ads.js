@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
 import * as experiments from '#experiments';
 import {forceExperimentBranch, getExperimentBranch} from '#experiments';
@@ -330,8 +330,8 @@ describes.realWin(
         addStoryAutoAdsConfig(adElement);
         await story.buildCallback();
         // Fire these events so that story ads thinks the parent story is ready.
-        story.signals().signal(CommonSignals.BUILT);
-        story.signals().signal(CommonSignals.INI_LOAD);
+        story.signals().signal(CommonSignals_Enum.BUILT);
+        story.signals().signal(CommonSignals_Enum.INI_LOAD);
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
       });
@@ -497,7 +497,7 @@ describes.realWin(
         const dispatchStub = env.sandbox.spy(storyEvents, 'dispatch');
 
         const ampAd = doc.querySelector('amp-ad');
-        ampAd.signals().signal(CommonSignals.INI_LOAD);
+        ampAd.signals().signal(CommonSignals_Enum.INI_LOAD);
         await macroTask();
 
         expect(insertSpy).calledWith('story-page-0', 'i-amphtml-ad-page-1');

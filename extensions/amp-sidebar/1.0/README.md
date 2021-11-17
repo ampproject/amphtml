@@ -6,7 +6,7 @@ Provides a way to display meta content intended for temporary access such as nav
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/sidebar
@@ -176,7 +176,7 @@ This attribute is present when the sidebar is open.
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/sidebar

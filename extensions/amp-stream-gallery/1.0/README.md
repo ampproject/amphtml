@@ -8,7 +8,7 @@ It is a specialization of Bento Base Carousel and uses [ResizeObservers](https:/
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/stream-gallery
@@ -215,7 +215,7 @@ You may use the `bento-stream-gallery` element selector to style the streamGalle
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/stream-gallery

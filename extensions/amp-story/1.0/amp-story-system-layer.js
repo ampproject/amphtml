@@ -12,7 +12,7 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '#service';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
@@ -111,7 +111,10 @@ const renderSystemLayerElement = (element) => (
       <div class="i-amphtml-story-has-new-page-text-wrapper">
         <span class="i-amphtml-story-has-new-page-circle-icon" />
         <div class="i-amphtml-story-has-new-page-text">
-          {localize(element, LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT)}
+          {localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
+          )}
         </div>
       </div>
     </div>
@@ -121,7 +124,7 @@ const renderSystemLayerElement = (element) => (
         class={INFO_CLASS + ' i-amphtml-story-button'}
         aria-label={localize(
           element,
-          LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL
+          LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
         )}
       />
       <div class="i-amphtml-captions-display">
@@ -139,19 +142,19 @@ const renderSystemLayerElement = (element) => (
           <div class="i-amphtml-story-mute-text">
             {localize(
               element,
-              LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
+              LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
             )}
           </div>
           <div class="i-amphtml-story-unmute-sound-text">
             {localize(
               element,
-              LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
+              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
             )}
           </div>
           <div class="i-amphtml-story-unmute-no-sound-text">
             {localize(
               element,
-              LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
+              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
             )}
           </div>
         </div>
@@ -159,14 +162,14 @@ const renderSystemLayerElement = (element) => (
           class={UNMUTE_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
             element,
-            LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
           )}
         />
         <button
           class={MUTE_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
             element,
-            LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
           )}
         />
       </div>
@@ -175,14 +178,14 @@ const renderSystemLayerElement = (element) => (
           class={PAUSE_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
             element,
-            LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_PAUSE_BUTTON_LABEL
           )}
         />
         <button
           class={PLAY_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
             element,
-            LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_PLAY_BUTTON_LABEL
           )}
         />
       </div>
@@ -193,14 +196,14 @@ const renderSystemLayerElement = (element) => (
         }
         aria-label={localize(
           element,
-          LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
+          LocalizedStringId_Enum.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
         )}
       />
       <button
         class={SHARE_CLASS + ' i-amphtml-story-button'}
         aria-label={localize(
           element,
-          LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL
+          LocalizedStringId_Enum.AMP_STORY_SHARE_BUTTON_LABEL
         )}
       />
       <button
@@ -209,7 +212,7 @@ const renderSystemLayerElement = (element) => (
         }
         aria-label={localize(
           element,
-          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
         )}
       />
     </div>
