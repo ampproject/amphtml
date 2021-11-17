@@ -79,8 +79,7 @@ const RENDERED_PROP = '__AMP_RENDERED';
 const childIdGenerator = sequentialIdGenerator();
 
 const ONE_OF_ERROR_MESSAGE =
-  'Only one of "attr", "attrs", "attrMatches", "attrPrefix", "passthrough", ' +
-  '"passthroughNonEmpty", or "selector" must be given';
+  'Only one of "attr", "attrs", "attrMatches", "passthrough", "passthroughNonEmpty", or "selector" must be given';
 
 /**
  * @param {!Object<string, !AmpElementPropDef>} propDefs
