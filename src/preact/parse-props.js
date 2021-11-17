@@ -312,7 +312,7 @@ function matchChild(element, defs) {
 /**
  * @param {string} name
  * @param {function(string): T} parse
- * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(?T|undefined)}}
+ * @return {{attrs: Array<string>, parseAttrs: function(!Element):(?T|undefined)}}
  * @template T
  */
 export function createParseAttr(name, parse) {
