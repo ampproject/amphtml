@@ -110,13 +110,14 @@ function buildProviderParams(opt_params) {
  * @param {!Document} doc
  * @param {string} shareType
  * @param {!JsonObject=} opt_params
- * @return {!Element}
+ * @return {?Element}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = devAssert(
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-    `No localized string to display name for share type ${shareType}.`
-  );
+  const shareProviderLocalizedStringId =
+    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
+  if (!shareProviderLocalizedStringId) {
+    return;
+  }
 
   const social = (
     <amp-social-share
