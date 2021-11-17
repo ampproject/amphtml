@@ -5,6 +5,7 @@ import {deepEquals} from '#core/types/object/json';
 import {dev} from '#utils/log';
 import {hasOwn} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
+import {mangleObjectValues} from '#core/types/enum';
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -116,8 +117,8 @@ export let InteractiveReactData;
  */
 export let State;
 
-/** @const @enum {string} */
-export const StateProperty = {
+/** @const @enum {string|number} */
+const StateProperty = mangleObjectValues({
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
@@ -170,10 +171,12 @@ export const StateProperty = {
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
   PAGE_IDS: 'pageIds',
   PAGE_SIZE: 'pageSize',
-};
+});
 
-/** @const @enum {string} */
-export const Action = {
+export {StateProperty};
+
+/** @const @enum {string|number} */
+const Action = mangleObjectValues({
   ADD_INTERACTIVE_REACT: 'addInteractiveReact',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
@@ -206,7 +209,9 @@ export const Action = {
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
-};
+});
+
+export {Action};
 
 /**
  * Functions to compare a data structure from the previous to the new state and
