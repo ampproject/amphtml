@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {dev} from '#utils/log';
 
-import {ChunkPriority, chunk} from './chunk';
+import {ChunkPriority_Enum, chunk} from './chunk';
 import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */
@@ -44,7 +44,7 @@ export function installAutoLightboxExtension(ampdoc) {
         );
       });
     },
-    ChunkPriority.LOW
+    ChunkPriority_Enum.LOW
   );
 }
 

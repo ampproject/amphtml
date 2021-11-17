@@ -37,7 +37,7 @@ export function setReportError(fn) {
 /**
  * @enum {number}
  */
-export const LogLevel = {
+export const LogLevel_Enum = {
   OFF: 0,
   ERROR: 1,
   WARN: 2,
@@ -46,13 +46,13 @@ export const LogLevel = {
 };
 
 /**
- * @type {!LogLevel|undefined}
+ * @type {!LogLevel_Enum|undefined}
  * @private
  */
 let levelOverride_ = undefined;
 
 /**
- * @param {!LogLevel} level
+ * @param {!LogLevel_Enum} level
  */
 export function overrideLogLevel(level) {
   levelOverride_ = level;
@@ -119,7 +119,7 @@ export class Log {
    * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
    *
    * @param {!Window} win
-   * @param {function(number, boolean):!LogLevel} levelFunc
+   * @param {function(number, boolean):!LogLevel_Enum} levelFunc
    * @param {string=} opt_suffix
    */
   constructor(win, levelFunc, opt_suffix = '') {
@@ -130,10 +130,10 @@ export class Log {
      */
     this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(number, boolean):!LogLevel} */
+    /** @private @const {function(number, boolean):!LogLevel_Enum} */
     this.levelFunc_ = levelFunc;
 
-    /** @private @const {!LogLevel} */
+    /** @private @const {!LogLevel_Enum} */
     this.level_ = this.defaultLevel_();
 
     /** @private @const {string} */
@@ -164,7 +164,7 @@ export class Log {
   }
 
   /**
-   * @return {!LogLevel}
+   * @return {!LogLevel_Enum}
    * @private
    */
   defaultLevel_() {
@@ -175,17 +175,17 @@ export class Log {
       // Logging has been explicitly disabled.
       logHashParam(win) == 0
     ) {
-      return LogLevel.OFF;
+      return LogLevel_Enum.OFF;
     }
 
     // Logging is enabled for tests directly.
     if (getMode().test && win.ENABLE_LOG) {
-      return LogLevel.FINE;
+      return LogLevel_Enum.FINE;
     }
 
     // LocalDev by default allows INFO level, unless overriden by `#log`.
     if (getMode().localDev) {
-      return LogLevel.INFO;
+      return LogLevel_Enum.INFO;
     }
 
     return this.defaultLevelWithFunc_();
@@ -193,7 +193,7 @@ export class Log {
 
   /**
    * @param {!Window=} opt_win provided for testing
-   * @return {!LogLevel}
+   * @return {!LogLevel_Enum}
    * @private
    */
   defaultLevelWithFunc_(opt_win) {
@@ -203,7 +203,7 @@ export class Log {
 
   /**
    * @param {string} tag
-   * @param {!LogLevel} level
+   * @param {!LogLevel_Enum} level
    * @param {!Array} messages
    * @return {boolean} true if a the message was logged
    */
@@ -215,9 +215,9 @@ export class Log {
     const cs = this.win.console;
     const fn =
       {
-        [LogLevel.ERROR]: cs.error,
-        [LogLevel.INFO]: cs.info,
-        [LogLevel.WARN]: cs.warn,
+        [LogLevel_Enum.ERROR]: cs.error,
+        [LogLevel_Enum.INFO]: cs.info,
+        [LogLevel_Enum.WARN]: cs.warn,
       }[level] ?? cs.log;
 
     const args = this.maybeExpandMessageArgs_(messages);
@@ -240,7 +240,7 @@ export class Log {
    * @param {...*} args
    */
   fine(tag, ...args) {
-    this.msg_(tag, LogLevel.FINE, args);
+    this.msg_(tag, LogLevel_Enum.FINE, args);
   }
 
   /**
@@ -249,7 +249,7 @@ export class Log {
    * @param {...*} args
    */
   info(tag, ...args) {
-    this.msg_(tag, LogLevel.INFO, args);
+    this.msg_(tag, LogLevel_Enum.INFO, args);
   }
 
   /**
@@ -258,7 +258,7 @@ export class Log {
    * @param {...*} args
    */
   warn(tag, ...args) {
-    this.msg_(tag, LogLevel.WARN, args);
+    this.msg_(tag, LogLevel_Enum.WARN, args);
   }
 
   /**
@@ -267,7 +267,7 @@ export class Log {
    * @param {...*} args
    */
   error(tag, ...args) {
-    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+    if (!this.msg_(tag, LogLevel_Enum.ERROR, args)) {
       const error = this.createError.apply(this, args);
       error.name = tag || error.name;
       self.__AMP_REPORT_ERROR?.(error);
@@ -281,7 +281,7 @@ export class Log {
    * @param {...*} args
    */
   expectedError(tag, ...args) {
-    if (!this.msg_(tag, LogLevel.ERROR, args)) {
+    if (!this.msg_(tag, LogLevel_Enum.ERROR, args)) {
       self.__AMP_REPORT_ERROR?.(this.createExpectedError.apply(this, args));
     }
   }
@@ -541,7 +541,7 @@ export function resetLogConstructorForTesting() {
 
 /**
  * Calls the log constructor with a given level function and suffix.
- * @param {function(number, boolean):!LogLevel} levelFunc
+ * @param {function(number, boolean):!LogLevel_Enum} levelFunc
  * @param {string=} opt_suffix
  * @return {!Log}
  */
@@ -587,7 +587,7 @@ export function user(opt_element) {
 function getUserLogger(suffix) {
   return callLogConstructor(
     (logNum, development) =>
-      development || logNum >= 1 ? LogLevel.FINE : LogLevel.WARN,
+      development || logNum >= 1 ? LogLevel_Enum.FINE : LogLevel_Enum.WARN,
     suffix
   );
 }
@@ -608,7 +608,11 @@ export function dev() {
   return (
     logs.dev ||
     (logs.dev = callLogConstructor((logNum) =>
-      logNum >= 3 ? LogLevel.FINE : logNum >= 2 ? LogLevel.INFO : LogLevel.OFF
+      logNum >= 3
+        ? LogLevel_Enum.FINE
+        : logNum >= 2
+        ? LogLevel_Enum.INFO
+        : LogLevel_Enum.OFF
     ))
   );
 }

@@ -1,5 +1,5 @@
 import '../amp-o2-player';
-import {MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
 import * as iframeHelper from '../../../../src/iframe-helper';
@@ -166,7 +166,7 @@ describes.realWin(
       };
       const resData = {
         sentinel: 'amp',
-        type: MessageType.CONSENT_DATA,
+        type: MessageType_Enum.CONSENT_DATA,
       };
 
       it('sends a consent-data CONSENT_POLICY_STATE.SUFFICIENT message', async function () {
@@ -190,7 +190,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 
@@ -232,7 +232,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 
@@ -277,7 +277,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 

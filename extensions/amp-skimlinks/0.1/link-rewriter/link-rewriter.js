@@ -6,7 +6,7 @@ import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';
 import {TwoStepsResponse} from './two-steps-response';
 
-import {ChunkPriority, chunk} from '../../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../../src/chunk';
 
 /** @typedef {!Array<{anchor: !HTMLElement, replacementUrl: ?string}>}} */
 export let AnchorReplacementList;
@@ -147,7 +147,7 @@ export class LinkRewriter {
           ? this.rootNode_.documentElement
           : this.rootNode_
       );
-      chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
+      chunk(elementOrShadowRoot, task, ChunkPriority_Enum.LOW);
     });
   }
 

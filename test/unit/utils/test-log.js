@@ -6,7 +6,7 @@ import {
 
 import {
   Log,
-  LogLevel,
+  LogLevel_Enum,
   dev,
   devAssert,
   setReportError,
@@ -15,11 +15,11 @@ import {
 } from '#utils/log';
 
 describes.sandboxed('Logging', {}, (env) => {
-  const RETURNS_FINE = () => LogLevel.FINE;
-  const RETURNS_INFO = () => LogLevel.INFO;
-  const RETURNS_WARN = () => LogLevel.WARN;
-  const RETURNS_ERROR = () => LogLevel.ERROR;
-  const RETURNS_OFF = () => LogLevel.OFF;
+  const RETURNS_FINE = () => LogLevel_Enum.FINE;
+  const RETURNS_INFO = () => LogLevel_Enum.INFO;
+  const RETURNS_WARN = () => LogLevel_Enum.WARN;
+  const RETURNS_ERROR = () => LogLevel_Enum.ERROR;
+  const RETURNS_OFF = () => LogLevel_Enum.OFF;
 
   let mode;
   let win;
@@ -51,42 +51,42 @@ describes.sandboxed('Logging', {}, (env) => {
 
   describe('Level', () => {
     it('should be enabled when directly allowed', () => {
-      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.FINE);
+      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel_Enum.FINE);
     });
 
     it('should be disabled when directly disallowed', () => {
-      expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel.OFF);
+      expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel_Enum.OFF);
     });
 
     it('should be disabled with no console', () => {
       win.console.log = null;
-      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.OFF);
+      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel_Enum.OFF);
 
       win.console = null;
-      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.OFF);
+      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel_Enum.OFF);
     });
 
     it('should be disabled with hash param log=0', () => {
       win.location.hash = '#log=0';
-      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.OFF);
+      expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel_Enum.OFF);
     });
 
     it('should be enabled when forced for tests', () => {
       mode.test = true;
       win.ENABLE_LOG = true;
-      expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel.FINE);
+      expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel_Enum.FINE);
     });
 
     it('should be enabled as INFO when forced for localDev', () => {
       mode.localDev = true;
-      expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel.INFO);
+      expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel_Enum.INFO);
     });
   });
 
   describe('Level messages', () => {
     it('should log correctly for FINE', () => {
       const log = new Log(win, RETURNS_FINE);
-      expect(log.level_).to.equal(LogLevel.FINE);
+      expect(log.level_).to.equal(LogLevel_Enum.FINE);
 
       log.fine('test-log', 'fine');
       log.info('test-log', 'info');
@@ -103,7 +103,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should log correctly for INFO', () => {
       const log = new Log(win, RETURNS_INFO);
-      expect(log.level_).to.equal(LogLevel.INFO);
+      expect(log.level_).to.equal(LogLevel_Enum.INFO);
 
       log.fine('test-log', 'fine');
       log.info('test-log', 'info');
@@ -119,7 +119,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should log correctly for WARN', () => {
       const log = new Log(win, RETURNS_WARN);
-      expect(log.level_).to.equal(LogLevel.WARN);
+      expect(log.level_).to.equal(LogLevel_Enum.WARN);
 
       log.fine('test-log', 'fine');
       log.info('test-log', 'info');
@@ -134,7 +134,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should log correctly for ERROR', () => {
       const log = new Log(win, RETURNS_ERROR);
-      expect(log.level_).to.equal(LogLevel.ERROR);
+      expect(log.level_).to.equal(LogLevel_Enum.ERROR);
 
       log.fine('test-log', 'fine');
       log.info('test-log', 'info');
@@ -148,7 +148,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should report ERROR even when OFF and coallesce messages', () => {
       const log = new Log(win, RETURNS_OFF);
-      expect(log.level_).to.equal(LogLevel.OFF);
+      expect(log.level_).to.equal(LogLevel_Enum.OFF);
       let reportedError;
       setReportError(function (e) {
         reportedError = e;
@@ -164,7 +164,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should report ERROR and mark with expected flag', () => {
       const log = new Log(win, RETURNS_OFF);
-      expect(log.level_).to.equal(LogLevel.OFF);
+      expect(log.level_).to.equal(LogLevel_Enum.OFF);
       let reportedError;
       setReportError(function (e) {
         reportedError = e;
@@ -179,7 +179,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should report ERROR when OFF from a single message', () => {
       const log = new Log(win, RETURNS_OFF);
-      expect(log.level_).to.equal(LogLevel.OFF);
+      expect(log.level_).to.equal(LogLevel_Enum.OFF);
       let reportedError;
       setReportError(function (e) {
         reportedError = e;
@@ -194,7 +194,7 @@ describes.sandboxed('Logging', {}, (env) => {
 
     it('should report ERROR when OFF from a single error object', () => {
       const log = new Log(win, RETURNS_OFF);
-      expect(log.level_).to.equal(LogLevel.OFF);
+      expect(log.level_).to.equal(LogLevel_Enum.OFF);
       let reportedError;
       setReportError(function (e) {
         reportedError = e;
@@ -210,28 +210,28 @@ describes.sandboxed('Logging', {}, (env) => {
 
   describe('UserLog', () => {
     it('should be WARN by default', () => {
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.WARN);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel_Enum.WARN);
     });
 
     it('should be enabled in development mode', () => {
       mode.development = true;
-      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_()).to.equal(LogLevel_Enum.FINE);
     });
 
     it('should be enabled with log=1', () => {
       win.location.hash = '#log=1';
-      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel_Enum.FINE);
     });
 
     it('should be enabled with log>1', () => {
       win.location.hash = '#log=2';
-      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel_Enum.FINE);
 
       win.location.hash = '#log=3';
-      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel_Enum.FINE);
 
       win.location.hash = '#log=4';
-      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
+      expect(user().defaultLevelWithFunc_(win)).to.equal(LogLevel_Enum.FINE);
     });
 
     it('should be configured with USER suffix', () => {
@@ -241,27 +241,27 @@ describes.sandboxed('Logging', {}, (env) => {
 
   describe('DevLog', () => {
     it('should be disabled by default', () => {
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel_Enum.OFF);
     });
 
     it('should NOT be enabled in development mode', () => {
       mode.development = true;
-      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_()).to.equal(LogLevel_Enum.OFF);
     });
 
     it('should NOT be enabled with log=1', () => {
       win.location.hash = '#log=1';
-      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.OFF);
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel_Enum.OFF);
     });
 
     it('should be enabled as INFO with log=2', () => {
       win.location.hash = '#log=2';
-      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.INFO);
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel_Enum.INFO);
     });
 
     it('should be enabled as FINE with log=3', () => {
       win.location.hash = '#log=3';
-      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel.FINE);
+      expect(dev().defaultLevelWithFunc_(win)).to.equal(LogLevel_Enum.FINE);
     });
 
     it('should be configured with no suffix', () => {

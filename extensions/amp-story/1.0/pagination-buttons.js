@@ -6,7 +6,7 @@ import {
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
 import {localize} from './amp-story-localization-service';
@@ -20,7 +20,7 @@ const BackButtonStates = {
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
-    label: LocalizedStringId.AMP_STORY_PREVIOUS_PAGE,
+    label: LocalizedStringId_Enum.AMP_STORY_PREVIOUS_PAGE,
   },
 };
 
@@ -30,17 +30,17 @@ const ForwardButtonStates = {
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_PAGE,
+    label: LocalizedStringId_Enum.AMP_STORY_NEXT_PAGE,
   },
   NEXT_STORY: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_STORY,
+    label: LocalizedStringId_Enum.AMP_STORY_NEXT_STORY,
   },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
-    label: LocalizedStringId.AMP_STORY_REPLAY,
+    label: LocalizedStringId_Enum.AMP_STORY_REPLAY,
   },
 };
 

@@ -1,6 +1,6 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {closest} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
@@ -94,9 +94,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => {
-        this.storeService_ = storeService;
-      }
+      (storeService) => (this.storeService_ = storeService)
     );
   }
 
@@ -111,7 +109,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.initializeListeners_();
 
     return whenUpgradedToCustomElement(this.ampImgEl_)
-      .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() =>
+        this.ampImgEl_.signals().whenSignal(CommonSignals_Enum.LOAD_END)
+      )
       .then(() => {
         const imgEl = dev().assertElement(this.element.querySelector('img'));
         // Remove layout="fill" classes so image is not clipped.
@@ -151,12 +151,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
-    const callback = (mutationsList) => {
-      this.pageDistance_ = parseInt(
+    const callback = (mutationsList) =>
+      (this.pageDistance_ = parseInt(
         mutationsList[0].target.getAttribute('distance'),
         10
-      );
-    };
+      ));
     const observer = new MutationObserver(callback);
     this.getPage_() && observer.observe(this.getPage_(), config);
   }
@@ -379,7 +378,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FILL;
+    return layout == Layout_Enum.FILL;
   }
 }
 
