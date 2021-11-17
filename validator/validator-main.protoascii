@@ -3492,6 +3492,28 @@ tags: {
   }
 }
 
+# Fixes a visual bug when amp-story-1.0.css is Server Side Rendered.
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "script amp-story-dvh-fix"
+  descriptive_name: "script amp-story-dvh-fix"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-story-dvh-fix"
+    value: ""
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    # Only valid if contents are exactly either of these:
+    # "use strict";if(!self.CSS||!CSS.supports||!CSS.supports("height:1dvh")){function e(){document.documentElement.style.setProperty("--story-dvh",innerHeight/100+"px","important")}addEventListener("resize",e,{passive:!0}),e()}
+    cdata_regex: "\"use strict\";if\\(!self\\.CSS\\|\\|!CSS\\.supports\\|\\|!CSS\\.supports\\(\"height:1dvh\"\\)\\)\\{function e\\(\\)\\{document\\.documentElement\\.style\\.setProperty\\(\"--story-dvh\",innerHeight/100\\+\"px\",\"important\"\\)\\}addEventListener\\(\"resize\",e,\\{passive:!0\\}\\),e\\(\\)\\}"
+  }
+}
+
 # Enables early styling on fast failure to load v0.js. See GitHub #22543.
 tags: {
   html_format: AMP
