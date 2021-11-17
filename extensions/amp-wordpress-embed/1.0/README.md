@@ -50,6 +50,7 @@ defineBentoWordpressEmbed();
   <body>
     <bento-wordpress-embed
       id="my-embed"
+      style="width: 300px; height: 400px"
       data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
     ></bento-wordpress-embed>
     <div class="buttons" style="margin-top: 8px">
