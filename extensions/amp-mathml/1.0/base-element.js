@@ -10,7 +10,7 @@ BaseElement['Component'] = BentoMathml;
 
 /** @override */
 BaseElement['props'] = {
-  'inline': {attr: 'inline', type: 'boolean'},
+  'inline': {attr: 'inline', type: 'boolean', default: false},
   'formula': {attr: 'data-formula'},
   'title': {attr: 'title'},
 };

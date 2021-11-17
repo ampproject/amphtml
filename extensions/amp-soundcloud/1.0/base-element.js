@@ -19,7 +19,7 @@ BaseElement['props'] = {
   'playlistId': {attr: 'data-playlistid'},
   'secretToken': {attr: 'data-secret-token'},
   'trackId': {attr: 'data-trackid'},
-  'visual': {attr: 'data-visual', type: 'boolean'},
+  'visual': {attr: 'data-visual', type: 'boolean', default: false},
 };
 
 /** @override */
