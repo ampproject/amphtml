@@ -264,8 +264,6 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
           ? parseFloat(value)
           : def.type == 'boolean'
           ? parseBooleanAttribute(/** @type {string} */ (value))
-          : def.type == 'date'
-          ? getDate(value)
           : value;
       props[name] = v;
     }
@@ -309,6 +307,32 @@ function matchChild(element, defs) {
     }
   }
   return null;
+}
+
+/**
+ * @param {string} name
+ * @param {function(string): T} parse
+ * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(?T|undefined)}}
+ * @template T
+ */
+export function createParseAttr(name, parse) {
+  const attrs = [name];
+  const parseAttrs = (element) => {
+    const attr = element.getAttribute(name);
+    return attr && parse(attr);
+  };
+  return {
+    'attrs': attrs,
+    'parseAttrs': parseAttrs,
+  };
+}
+
+/**
+ * @param {string} name
+ * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(?number|undefined)}}
+ */
+export function createParseDateAttr(name) {
+  return createParseAttr(name, getDate);
 }
 
 /**

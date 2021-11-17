@@ -4,7 +4,10 @@ import {omit} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
-import {createParseAttrsWithPrefix} from '#preact/parse-props';
+import {
+  createParseAttrsWithPrefix,
+  createParseDateAttr,
+} from '#preact/parse-props';
 import {Slot} from '#preact/slot';
 
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
@@ -107,7 +110,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
         'propA': {attr: 'prop-a'},
         'minFontSize': {attr: 'min-font-size', type: 'number'},
-        'aDate': {attr: 'a-date', type: 'date'},
+        'aDate': createParseDateAttr('a-date'),
         'disabled': {attr: 'disabled', type: 'boolean'},
         'enabled': {attr: 'enabled', type: 'boolean'},
         'boolDefTrue': {attr: 'bool-def-true', type: 'boolean', default: true},
@@ -565,7 +568,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
             'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
             'propA': {attr: 'prop-a'},
             'minFontSize': {attr: 'min-font-size', type: 'number'},
-            'aDate': {attr: 'a-date', type: 'date'},
+            'aDate': createParseDateAttr('a-date'),
             'disabled': {attr: 'disabled', type: 'boolean'},
             'enabled': {attr: 'enabled', type: 'boolean'},
           },
@@ -1152,7 +1155,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
             'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
             'propA': {attr: 'prop-a'},
             'minFontSize': {attr: 'min-font-size', type: 'number'},
-            'aDate': {attr: 'a-date', type: 'date'},
+            'aDate': createParseDateAttr('a-date'),
             'disabled': {attr: 'disabled', type: 'boolean'},
             'enabled': {attr: 'enabled', type: 'boolean'},
           },
