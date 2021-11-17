@@ -10,9 +10,7 @@ If you have a paid plan, use the `<bento-embedly-key>` or `<BentoEmbedlyContext.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-embedly-card>` web component.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/embedly-card
@@ -25,64 +23,77 @@ defineBentoEmbedlyCard();
 
 ### Example: Include via `<script>`
 
+<!--% example %-->
+
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-embedly-card {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
-  ></script>
-  <style>
-    bento-embedly-card {
-      width: 375px;
-      height: 472px;
-    }
-  </style>
-</head>
-<body>
-  <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
-  </bento-embedly-key>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.css"
+    />
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
+    ></script>
+    <style>
+      bento-embedly-card {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
+    </bento-embedly-key>
 
-  <bento-embedly-card
-    data-url="https://twitter.com/AMPhtml/status/986750295077040128"
-    data-card-theme="dark"
-    data-card-controls="0"
-  >
-  </bento-embedly-card>
+    <bento-embedly-card
+      data-url="https://twitter.com/AMPhtml/status/986750295077040128"
+      data-card-theme="dark"
+      data-card-controls="0"
+    >
+    </bento-embedly-card>
 
-  <bento-embedly-card
-    id="my-url"
-    data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
-  >
-  </bento-embedly-card>
+    <bento-embedly-card
+      id="my-url"
+      data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+    >
+    </bento-embedly-card>
 
-  <div class="buttons" style="margin-top: 8px">
-    <button id="change-url">Change embed</button>
-  </div>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-url">Change embed</button>
+    </div>
 
-  <script>
-    (async () => {
-      const embedlyCard = document.querySelector('#my-url');
-      await customElements.whenDefined('bento-embedly-card');
+    <script>
+      (async () => {
+        const embedlyCard = document.querySelector('#my-url');
+        await customElements.whenDefined('bento-embedly-card');
 
-      // set up button actions
-      document.querySelector('#change-url').onclick = () => {
-        embedlyCard.setAttribute(
-          'data-url',
-          'https://www.youtube.com/watch?v=wcJSHR0US80'
-        );
-      };
-    })();
-  </script>
-</body>
+        // set up button actions
+        document.querySelector('#change-url').onclick = () => {
+          embedlyCard.setAttribute(
+            'data-url',
+            'https://www.youtube.com/watch?v=wcJSHR0US80'
+          );
+        };
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style
@@ -128,15 +139,11 @@ The URL to retrieve embedding information.
 
 #### `data-card-embed`
 
-The URL to a video or rich media. Use with static embeds like articles, instead
-of using the static page content in the card, the card will embed the video or
-rich media.
+The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.
 
 #### `data-card-image`
 
-The URL to an image. Specifies which image to use in article cards when
-`data-url` points to an article. Not all image URLs are supported, if the image
-is not loaded, try a different image or domain.
+The URL to an image. Specifies which image to use in article cards when `data-url` points to an article. Not all image URLs are supported, if the image is not loaded, try a different image or domain.
 
 #### `data-card-controls`
 
@@ -149,13 +156,11 @@ The default is `1`.
 
 #### `data-card-align`
 
-Aligns the card. The possible values are `left`, `center` and `right`. The
-default value is `center`.
+Aligns the card. The possible values are `left`, `center` and `right`. The default value is `center`.
 
 #### `data-card-recommend`
 
-When recommendations are supported, it disables embedly recommendations on video
-and rich cards. These are recommendations created by embedly.
+When recommendations are supported, it disables embedly recommendations on video and rich cards. These are recommendations created by embedly.
 
 -   `0`: Disables embedly recommendations.
 -   `1`: Enables embedly recommendations.
@@ -168,10 +173,7 @@ Specifies the via content in the card. This is a great way to do attribution.
 
 #### `data-card-theme` (optional)
 
-Allows settings the `dark` theme which changes the background color of the main
-card container. Use `dark` to set this theme. For dark backgrounds it's better
-to specify this. The default is `light`, which sets no background color of the
-main card container.
+Allows settings the `dark` theme which changes the background color of the main card container. Use `dark` to set this theme. For dark backgrounds it's better to specify this. The default is `light`, which sets no background color of the main card container.
 
 #### title (optional)
 
@@ -181,9 +183,7 @@ Define a `title` attribute for the component to propagate to the underlying `<if
 
 ## Preact/React Component
 
-The examples below demonstrate use of the `<BentoEmbedlyCard>` as a functional component usable with the Preact or React libraries.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/embedly-card
@@ -241,15 +241,11 @@ The URL to retrieve embedding information.
 
 #### `cardEmbed`
 
-The URL to a video or rich media. Use with static embeds like articles, instead
-of using the static page content in the card, the card will embed the video or
-rich media.
+The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.
 
 #### `cardImage`
 
-The URL to an image. Specifies which image to use in article cards when
-`data-url` points to an article. Not all image URLs are supported, if the image
-is not loaded, try a different image or domain.
+The URL to an image. Specifies which image to use in article cards when `data-url` points to an article. Not all image URLs are supported, if the image is not loaded, try a different image or domain.
 
 #### `cardControls`
 
@@ -262,13 +258,11 @@ The default is `1`.
 
 #### `cardAlign`
 
-Aligns the card. The possible values are `left`, `center` and `right`. The
-default value is `center`.
+Aligns the card. The possible values are `left`, `center` and `right`. The default value is `center`.
 
 #### `cardRecommend`
 
-When recommendations are supported, it disables embedly recommendations on video
-and rich cards. These are recommendations created by embedly.
+When recommendations are supported, it disables embedly recommendations on video and rich cards. These are recommendations created by embedly.
 
 -   `0`: Disables embedly recommendations.
 -   `1`: Enables embedly recommendations.
@@ -281,10 +275,7 @@ Specifies the via content in the card. This is a great way to do attribution.
 
 #### `cardTheme` (optional)
 
-Allows settings the `dark` theme which changes the background color of the main
-card container. Use `dark` to set this theme. For dark backgrounds it's better
-to specify this. The default is `light`, which sets no background color of the
-main card container.
+Allows settings the `dark` theme which changes the background color of the main card container. Use `dark` to set this theme. For dark backgrounds it's better to specify this. The default is `light`, which sets no background color of the main card container.
 
 #### title (optional)
 

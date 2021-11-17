@@ -1,7 +1,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {createElementWithAttributes} from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 import {Scheduler} from '#service/scheduler';
@@ -58,7 +58,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     element.deferredMount = () => options.deferredMount || false;
     element.prerenderAllowed = () => options.prerenderAllowed || false;
     element.getBuildPriority = () =>
-      options.buildPriority || LayoutPriority.CONTENT;
+      options.buildPriority || LayoutPriority_Enum.CONTENT;
     element.mountInternal = env.sandbox.stub();
     return element;
   }
@@ -375,7 +375,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     it('should run deferred METADATA at low priority', () => {
       const element = createAmpElement({
         deferredMount: true,
-        buildPriority: LayoutPriority.METADATA,
+        buildPriority: LayoutPriority_Enum.METADATA,
       });
       scheduler.schedule(element);
       intersectionObserverStub.notifySync({
@@ -392,7 +392,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     it('should run non-deferred METADATA at low priority', () => {
       const element = createAmpElement({
         deferredMount: false,
-        buildPriority: LayoutPriority.METADATA,
+        buildPriority: LayoutPriority_Enum.METADATA,
       });
       scheduler.schedule(element);
       clock.tick(1);
@@ -405,7 +405,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     it('should run asap METADATA at high priority', () => {
       const element = createAmpElement({
         deferredMount: false,
-        buildPriority: LayoutPriority.METADATA,
+        buildPriority: LayoutPriority_Enum.METADATA,
       });
       scheduler.scheduleAsap(element);
       clock.tick(1);

@@ -420,8 +420,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
+  const babelCaller =
+    options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
+
   const babelPlugin = getEsbuildBabelPlugin(
-    options.minify ? 'minified' : 'unminified',
+    babelCaller,
     /* enableCache */ true
   );
   const plugins = [babelPlugin];
@@ -538,6 +541,22 @@ async function minify(code, map) {
         regex: '_AMP_PRIVATE_$',
         // eslint-disable-next-line local/camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
+      },
+      // eslint-disable-next-line local/camelcase
+      nth_identifier: {
+        get(num) {
+          const leading =
+            '$ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+          const all = leading + '0123456789';
+          let charset = leading;
+          let id = '';
+          do {
+            id += charset[num % charset.length];
+            num = Math.floor(num / charset.length);
+            charset = all;
+          } while (num > 0);
+          return id;
+        },
       },
     },
     compress: {

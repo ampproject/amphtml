@@ -19,14 +19,14 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
@@ -40,14 +40,14 @@ import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handl
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {BackgroundBlur} from './background-blur';
 import {CSS} from '../../../build/amp-story-1.0.css';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
-import {Keys} from '#core/constants/key-codes';
-import {Layout} from '#core/dom/layout';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {Layout_Enum} from '#core/dom/layout';
 import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
@@ -56,7 +56,7 @@ import {ShareMenu} from './amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {
   childElement,
   childElementByTag,
@@ -440,7 +440,9 @@ export class AmpStory extends AMP.BaseElement {
       this.pauseBackgroundAudio_();
     }
     // If viewer has navigated to the next document, reset the active page.
-    if (this.getAmpDoc().getVisibilityState() === VisibilityState.INACTIVE) {
+    if (
+      this.getAmpDoc().getVisibilityState() === VisibilityState_Enum.INACTIVE
+    ) {
       this.activePage_.setState(PageState.NOT_ACTIVE);
       this.activePage_.element.setAttribute('active', '');
     }
@@ -978,7 +980,7 @@ export class AmpStory extends AMP.BaseElement {
         {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
       ]);
 
-      this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.element.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
         this.liveStoryManager_.update();
         this.initializePages_().then(() => this.preloadPagesByDistance_());
       });
@@ -1037,7 +1039,7 @@ export class AmpStory extends AMP.BaseElement {
     );
     const storyLoadPromise = whenUpgradedToCustomElement(initialPageEl).then(
       () => {
-        return initialPageEl.signals().whenSignal(CommonSignals.LOAD_END);
+        return initialPageEl.signals().whenSignal(CommonSignals_Enum.LOAD_END);
       }
     );
 
@@ -1060,7 +1062,7 @@ export class AmpStory extends AMP.BaseElement {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.STORY_CONTENT_LOADED
     );
-    this.signals().signal(CommonSignals.INI_LOAD);
+    this.signals().signal(CommonSignals_Enum.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
     });
@@ -1181,7 +1183,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /** @private */
@@ -1482,7 +1484,7 @@ export class AmpStory extends AMP.BaseElement {
       this.activePage_.element,
       'active',
       /* event */ null,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
   }
 
@@ -1526,10 +1528,10 @@ export class AmpStory extends AMP.BaseElement {
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
     switch (e.key) {
-      case Keys.LEFT_ARROW:
+      case Keys_Enum.LEFT_ARROW:
         rtlState ? this.next_() : this.previous_();
         break;
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.RIGHT_ARROW:
         rtlState ? this.previous_() : this.next_();
         break;
     }
@@ -1671,7 +1673,7 @@ export class AmpStory extends AMP.BaseElement {
         });
 
         this.signals()
-          .whenSignal(CommonSignals.LOAD_END)
+          .whenSignal(CommonSignals_Enum.LOAD_END)
           .then(() => {
             this.vsync_.mutate(() => {
               this.pages_.forEach((page) =>
@@ -1958,7 +1960,7 @@ export class AmpStory extends AMP.BaseElement {
       new Promise((res, rej) => {
         const page = this.getPageById(activePageId);
         page.setDistance(0);
-        page.signals().whenSignal(CommonSignals.LOAD_END).then(res);
+        page.signals().whenSignal(CommonSignals_Enum.LOAD_END).then(res);
         // Don't call preload if user navigates before page loads, since the navigation will call preload properly.
         this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
       }).then(
@@ -1984,7 +1986,7 @@ export class AmpStory extends AMP.BaseElement {
     // it programmatically later.
     this.activePage_.element
       .signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => {
         backgroundAudioEl = /** @type {!HTMLMediaElement} */ (
           backgroundAudioEl
@@ -2247,7 +2249,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   onRewind_() {
     this.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => this.replay_());
   }
 

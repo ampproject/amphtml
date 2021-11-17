@@ -5,11 +5,12 @@
 
 import {userAssert} from '#core/assert';
 import {isFiniteNumber} from '#core/types';
+import {isEnumValue} from '#core/types/enum';
 
 /**
  * @enum {string}
  */
-export const Layout = {
+export const Layout_Enum = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   FIXED_HEIGHT: 'fixed-height',
@@ -26,7 +27,7 @@ export const Layout = {
  * BaseElement#updateLayoutPriority().
  * @enum {number}
  */
-export const LayoutPriority = {
+export const LayoutPriority_Enum = {
   CONTENT: 0,
   METADATA: 1,
   ADS: 2,
@@ -51,26 +52,26 @@ export let DimensionsDef;
  * Elements that the progress can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
  * This list does not include video players which are found via regex later.
- * @enum {boolean}
+ * @enum {string}
  * @private  Visible for testing only!
  */
-export const LOADING_ELEMENTS_ENABLED = {
-  'AMP-AD': true,
-  'AMP-ANIM': true,
-  'AMP-EMBED': true,
-  'AMP-FACEBOOK': true,
-  'AMP-FACEBOOK-COMMENTS': true,
-  'AMP-FACEBOOK-PAGE': true,
-  'AMP-GOOGLE-DOCUMENT-EMBED': true,
-  'AMP-IFRAME': true,
-  'AMP-IMG': true,
-  'AMP-INSTAGRAM': true,
-  'AMP-LIST': true,
-  'AMP-PINTEREST': true,
-  'AMP-PLAYBUZZ': true,
-  'AMP-RENDER': true,
-  'AMP-TIKTOK': true,
-  'AMP-TWITTER': true,
+export const LOADING_ELEMENTS_ENUM = {
+  AMP_AD: 'AMP-AD',
+  AMP_ANIM: 'AMP-ANIM',
+  AMP_EMBED: 'AMP-EMBED',
+  AMP_FACEBOOK: 'AMP-FACEBOOK',
+  AMP_FACEBOOK_COMMENTS: 'AMP-FACEBOOK-COMMENTS',
+  AMP_FACEBOOK_PAGE: 'AMP-FACEBOOK-PAGE',
+  AMP_GOOGLE_DOCUMENT_EMBED: 'AMP-GOOGLE-DOCUMENT-EMBED',
+  AMP_IFRAME: 'AMP-IFRAME',
+  AMP_IMG: 'AMP-IMG',
+  AMP_INSTAGRAM: 'AMP-INSTAGRAM',
+  AMP_LIST: 'AMP-LIST',
+  AMP_PINTEREST: 'AMP-PINTEREST',
+  AMP_PLAYBUZZ: 'AMP-PLAYBUZZ',
+  AMP_RENDER: 'AMP-RENDER',
+  AMP_TIKTOK: 'AMP-TIKTOK',
+  AMP_TWITTER: 'AMP-TWITTER',
 };
 /**
  * All video player components must either have a) "video" or b) "player" in
@@ -83,20 +84,18 @@ const videoPlayerTagNameRe =
 
 /**
  * @param {string} s
- * @return {!Layout|undefined} Returns undefined in case of failure to parse
+ * @return {!Layout_Enum|undefined} Returns undefined in case of failure to parse
  *   the layout string.
  */
 export function parseLayout(s) {
-  for (const k in Layout) {
-    if (Layout[k] == s) {
-      return Layout[k];
-    }
+  if (isEnumValue(Layout_Enum, s)) {
+    return /** @type {!Layout_Enum} */ (s);
   }
   return undefined;
 }
 
 /**
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {string}
  */
 export function getLayoutClass(layout) {
@@ -105,28 +104,28 @@ export function getLayoutClass(layout) {
 
 /**
  * Whether an element with this layout inherently defines the size.
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeDefined(layout) {
   return (
-    layout == Layout.FIXED ||
-    layout == Layout.FIXED_HEIGHT ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.FILL ||
-    layout == Layout.FLEX_ITEM ||
-    layout == Layout.FLUID ||
-    layout == Layout.INTRINSIC
+    layout == Layout_Enum.FIXED ||
+    layout == Layout_Enum.FIXED_HEIGHT ||
+    layout == Layout_Enum.RESPONSIVE ||
+    layout == Layout_Enum.FILL ||
+    layout == Layout_Enum.FLEX_ITEM ||
+    layout == Layout_Enum.FLUID ||
+    layout == Layout_Enum.INTRINSIC
   );
 }
 
 /**
  * Whether an element with this layout has a fixed dimension.
- * @param {!Layout} layout
+ * @param {!Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeFixed(layout) {
-  return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+  return layout == Layout_Enum.FIXED || layout == Layout_Enum.FIXED_HEIGHT;
 }
 
 /**
@@ -217,14 +216,15 @@ export function getLengthNumeral(length) {
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
   return (
-    LOADING_ELEMENTS_ENABLED[tagName] || isIframeVideoPlayerComponent(tagName)
+    isEnumValue(LOADING_ELEMENTS_ENUM, tagName) ||
+    isIframeVideoPlayerComponent(tagName)
   );
 }
 
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ENABLED allowlist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ENUM allowlist.
  * @param {string} tagName
  * @return {boolean}
  */

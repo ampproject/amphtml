@@ -25,10 +25,14 @@ declare module '#utils/analytics' {
   export var triggerAnalyticsEvent: any;
 }
 
+declare module '#core/dom/css-selectors' {
+  export var escapeCssSelectorIdent: (s: string) => string;
+}
+
 // TODO: everything below are core stubs, which we can remove once Core has been
 // converted to TS.
 declare module '#core/constants/key-codes' {
-  export var Keys: any;
+  export var Keys_Enum: any;
 }
 
 declare module '#core/document/format' {
@@ -42,6 +46,7 @@ declare module '#core/dom/layout/viewport-observer' {
 declare module '#core/dom' {
   export var toggleAttribute: any;
   export var dispatchCustomEvent: any;
+  export var isServerRendered: (el: Element) => boolean;
 }
 
 declare module '#core/window' {
@@ -54,7 +59,7 @@ declare module '#core/dom/query' {
 }
 
 declare module '#core/constants/action-constants' {
-  export var ActionTrust: any;
+  export var ActionTrust_Enum: any;
 }
 
 declare module '#core/dom/layout' {

@@ -1,6 +1,6 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -41,7 +41,7 @@ export class PremiumadsNetworkConfig {
     return dict({
       'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'layout': data.layout || Layout.FIXED,
+      'layout': data.layout || Layout_Enum.FIXED,
       'style':
         data['style'] ||
         'margin: 15px auto; position: relative !important; display: block !important;',
