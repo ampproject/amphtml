@@ -1,5 +1,4 @@
 import {devAssert} from '#core/assert';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Loading_Enum} from '#core/constants/loading-instructions';
 import {ReadyState_Enum} from '#core/constants/ready-state';
