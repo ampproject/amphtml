@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.193 */
+/** Version: 0.1.22.194 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -945,8 +945,7 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--description,
   .gaa-metering-regwall--description strong,
   .gaa-metering-regwall--iframe,
-  .gaa-metering-regwall--casl,
-  .gaa-metering-regwall--publisher-no-thanks-button {
+  .gaa-metering-regwall--casl {
     all: initial !important;
     box-sizing: border-box !important;
     font-family: Roboto, arial, sans-serif !important;
@@ -1033,20 +1032,12 @@ const REGWALL_HTML = `
     margin: 0 0 24px !important;
   }
 
-  .gaa-metering-regwall--publisher-sign-in-button,
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    color: #1967d2 !important;
-    display: block !important;
-    cursor: pointer !important;
-    font-size: 12px !important;
-  }
-
   .gaa-metering-regwall--publisher-sign-in-button {
-  }
-
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    display: none !important;
-    float: right !important;
+    color: #1967d2 !important;
+    cursor: pointer !important;
+    display: block !important;
+    font-size: 12px !important;
+    text-decoration: underline !important;
   }
 
   .gaa-metering-regwall--google-sign-in-button {
@@ -1525,8 +1516,8 @@ class GaaMeteringRegwall {
       self.addEventListener('message', (e) => {
         if (e.data.stamp === POST_MESSAGE_STAMP) {
           if (e.data.command === POST_MESSAGE_COMMAND_USER) {
-            // Pass along GAA user.
-            resolve(e.data.gaaUser);
+            // Pass along user details.
+            resolve(e.data.gaaUser || e.data.jwtPayload);
           }
 
           if (e.data.command === POST_MESSAGE_COMMAND_ERROR) {

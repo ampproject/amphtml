@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.193 */
+/** Version: 0.1.22.194 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4839,7 +4839,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.193',
+    '_client': 'SwG 0.1.22.194',
   });
 }
 
@@ -6143,7 +6143,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.193',
+        '_client': 'SwG 0.1.22.194',
         'supportsEventManager': true,
       },
       args || {}
@@ -7022,7 +7022,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.193');
+    context.setClientVersion('SwG 0.1.22.194');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -9832,7 +9832,10 @@ class Dialog {
         },
         300,
         'ease-out'
-      );
+      ).then(() => {
+        // Focus the dialog contents, per WAI-ARIA best practices.
+        this.getElement().focus();
+      });
     });
     this.hidden_ = false;
   }
@@ -9867,10 +9870,16 @@ class Dialog {
             return Promise.resolve();
           }
 
-          setImportantStyles$1(this.getElement(), {
+          const immediateStyles = {
             'height': `${newHeight}px`,
-            'transform': `translateY(${newHeight - oldHeight}px)`,
-          });
+          };
+          if (!this.shouldPositionCenter_()) {
+            immediateStyles['transform'] = `translateY(${
+              newHeight - oldHeight
+            }px)`;
+          }
+          setImportantStyles$1(this.getElement(), immediateStyles);
+
           return transition$1(
             this.getElement(),
             {
@@ -9888,7 +9897,9 @@ class Dialog {
             : transition$1(
                 this.getElement(),
                 {
-                  'transform': `translateY(${oldHeight - newHeight}px)`,
+                  'transform': this.shouldPositionCenter_()
+                    ? this.getDefaultTranslateY_()
+                    : `translateY(${oldHeight - newHeight}px)`,
                 },
                 300,
                 'ease-out'
@@ -9963,7 +9974,7 @@ class Dialog {
    * @private
    */
   updatePaddingToHtml_(newHeight) {
-    if (this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches) {
+    if (this.shouldPositionCenter_()) {
       // For centered dialogs, there should be no bottom padding.
       this.removePaddingToHtml_();
       return;
@@ -9992,12 +10003,21 @@ class Dialog {
   }
 
   /**
+   * Returns whether or not the dialog should have position 'CENTER'.
+   * @return {boolean}
+   * @private
+   */
+  shouldPositionCenter_() {
+    return this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches;
+  }
+
+  /**
    * Returns the styles required to postion the dialog.
    * @return {!Object<string, string|number>}
    * @private
    */
   getPositionStyle_() {
-    if (this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches) {
+    if (this.shouldPositionCenter_()) {
       return {
         'top': '50%',
         'bottom': 0,
@@ -10017,7 +10037,7 @@ class Dialog {
    * @private
    */
   getDefaultTranslateY_() {
-    if (this.positionCenterOnDesktop_ && this.desktopMediaQuery_.matches) {
+    if (this.shouldPositionCenter_()) {
       return 'translateY(-50%)';
     }
     return 'translateY(0px)';
