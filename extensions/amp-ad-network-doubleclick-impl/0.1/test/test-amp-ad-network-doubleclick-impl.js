@@ -18,6 +18,8 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import {AdFormatType} from 'extensions/amp-ad/0.1/ad-format';
+
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
   AmpA4A,
@@ -649,6 +651,7 @@ for (const {config, name} of [
           element.setAttribute('height', '50');
           doc.body.appendChild(element);
           impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           // Temporary fix for local test failure.
           env.sandbox
             .stub(impl, 'getIntersectionElementLayoutBox')
@@ -679,7 +682,7 @@ for (const {config, name} of [
             .returns(Promise.resolve('http://fake.example/?foo=bar'));
 
           const impl = new AmpAdNetworkDoubleclickImpl(element);
-          impl.uiHandler = {isStickyAd: () => false};
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           const impl2 = new AmpAdNetworkDoubleclickImpl(element);
           impl.setPageviewStateToken('abc');
           impl2.setPageviewStateToken('def');
@@ -730,8 +733,8 @@ for (const {config, name} of [
 
         it('includes psts param when there are pageview tokens', () => {
           const impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           const impl2 = new AmpAdNetworkDoubleclickImpl(element);
-          impl.uiHandler = {isStickyAd: () => false};
           impl.setPageviewStateToken('abc');
           impl2.setPageviewStateToken('def');
           return impl.getAdUrl().then((url) => {
@@ -744,8 +747,8 @@ for (const {config, name} of [
 
         it('does not include psts param when there are no pageview tokens', () => {
           const impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           new AmpAdNetworkDoubleclickImpl(element);
-          impl.uiHandler = {isStickyAd: () => false};
           impl.setPageviewStateToken('abc');
           return impl.getAdUrl().then((url) => {
             expect(url).to.not.match(
@@ -756,6 +759,7 @@ for (const {config, name} of [
 
         it('handles Single Page Story Ad parameter', () => {
           const impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           impl.isSinglePageStoryAd_ = true;
           const urlPromise = impl.getAdUrl();
           expect(urlPromise).to.eventually.match(/(\?|&)spsa=\d+x\d+(&|$)/);
@@ -763,26 +767,30 @@ for (const {config, name} of [
         });
 
         it('handles tagForChildDirectedTreatment', () => {
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
           new AmpAd(element).upgradeCallback();
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl().then((url) => {
             expect(url).to.match(/&tfcd=1&/);
           });
         });
 
         describe('data-force-safeframe', () => {
+          beforeEach(() => {
+            impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
+          });
+
           const fsfRegexp = /(\?|&)fsf=1(&|$)/;
           it('handles default', () => {
             const impl = new AmpAdNetworkDoubleclickImpl(element);
-            impl.uiHandler = {isStickyAd: () => false};
+            impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
             return expect(impl.getAdUrl()).to.eventually.not.match(fsfRegexp);
           });
 
           it('case insensitive attribute name', () => {
             element.setAttribute('data-FORCE-SafeFraMe', '1');
             const impl = new AmpAdNetworkDoubleclickImpl(element);
-            impl.uiHandler = {isStickyAd: () => false};
+            impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
             return expect(impl.getAdUrl()).to.eventually.match(fsfRegexp);
           });
 
@@ -790,7 +798,7 @@ for (const {config, name} of [
             it(`valid attribute: ${val}`, () => {
               element.setAttribute('data-force-safeframe', val);
               const impl = new AmpAdNetworkDoubleclickImpl(element);
-              impl.uiHandler = {isStickyAd: () => false};
+              impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
               return expect(impl.getAdUrl()).to.eventually.match(fsfRegexp);
             });
           });
@@ -810,22 +818,23 @@ for (const {config, name} of [
             it(`invalid attribute: ${val}`, () => {
               element.setAttribute('data-force-safeframe', val);
               const impl = new AmpAdNetworkDoubleclickImpl(element);
-              impl.uiHandler = {isStickyAd: () => false};
+              impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
               return expect(impl.getAdUrl()).to.eventually.not.match(fsfRegexp);
             });
           });
         });
 
         it('handles categoryExclusions without targeting', () => {
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           element.setAttribute('json', '{"categoryExclusions": "sports"}');
           new AmpAd(element).upgradeCallback();
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl().then((url) => {
             expect(url).to.match(/&scp=excl_cat%3Dsports&/);
           });
         });
 
         it('expands CLIENT_ID in targeting', () => {
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           element.setAttribute(
             'json',
             `{
@@ -835,13 +844,13 @@ for (const {config, name} of [
         }`
           );
           new AmpAd(element).upgradeCallback();
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl().then((url) => {
             expect(url).to.match(/&scp=cid%3Damp-[\w-]+&/);
           });
         });
 
         it('expands CLIENT_ID in targeting inside array', () => {
+          impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
           element.setAttribute(
             'json',
             `{
@@ -851,7 +860,6 @@ for (const {config, name} of [
         }`
           );
           new AmpAd(element).upgradeCallback();
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl().then((url) => {
             expect(url).to.match(/&scp=arr%3Dcats%2Camp-[\w-]+&/);
           });
@@ -935,7 +943,6 @@ for (const {config, name} of [
           env.sandbox
             .stub(AmpA4A.prototype, 'tearDownSlot')
             .callsFake(() => {});
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl().then((url1) => {
             expect(url1).to.match(/ifi=1/);
             impl.tearDownSlot();
@@ -1034,7 +1041,6 @@ for (const {config, name} of [
 
         it('should include npa=1 if unknown consent & explicit npa', () => {
           impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
             .then((url) => {
@@ -1043,7 +1049,6 @@ for (const {config, name} of [
         });
 
         it('should include npa=1 if insufficient consent', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({consentState: CONSENT_POLICY_STATE.INSUFFICIENT})
             .then((url) => {
@@ -1052,7 +1057,6 @@ for (const {config, name} of [
         });
 
         it('should not include npa, if sufficient consent', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({consentState: CONSENT_POLICY_STATE.SUFFICIENT})
             .then((url) => {
@@ -1061,7 +1065,6 @@ for (const {config, name} of [
         });
 
         it('should not include npa, if not required consent', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED})
             .then((url) => {
@@ -1070,7 +1073,6 @@ for (const {config, name} of [
         });
 
         it('should save opt_serveNpaSignal', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl(
               {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
@@ -1083,7 +1085,6 @@ for (const {config, name} of [
         });
 
         it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl(
               {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
@@ -1096,7 +1097,6 @@ for (const {config, name} of [
         });
 
         it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl(
               {consentState: CONSENT_POLICY_STATE.INSUFFICIENT},
@@ -1109,49 +1109,42 @@ for (const {config, name} of [
         });
 
         it('should include gdpr_consent, if TC String is provided', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
             expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
           });
         });
 
         it('should include gdpr=1, if gdprApplies is true', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl({gdprApplies: true}).then((url) => {
             expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
           });
         });
 
         it('should include gdpr=0, if gdprApplies is false', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl({gdprApplies: false}).then((url) => {
             expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
           });
         });
 
         it('should not include gdpr, if gdprApplies is missing', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl({}).then((url) => {
             expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
           });
         });
 
         it('should include addtl_consent', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl({additionalConsent: 'abc123'}).then((url) => {
             expect(url).to.match(/(\?|&)addtl_consent=abc123(&|$)/);
           });
         });
 
         it('should not include addtl_consent, if additionalConsent is missing', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl({}).then((url) => {
             expect(url).to.not.match(/(\?|&)addtl_consent=/);
           });
         });
 
         it('should include us_privacy, if consentStringType matches', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
               consentStringType: CONSENT_STRING_TYPE.US_PRIVACY_STRING,
@@ -1164,7 +1157,6 @@ for (const {config, name} of [
         });
 
         it('should include gdpr_consent, if consentStringType is not US_PRIVACY_STRING', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
               consentStringType: CONSENT_STRING_TYPE.TCF_V2,
@@ -1177,7 +1169,6 @@ for (const {config, name} of [
         });
 
         it('should include gdpr_consent, if consentStringType is undefined', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl
             .getAdUrl({
               consentStringType: undefined,
@@ -1193,7 +1184,6 @@ for (const {config, name} of [
           env.sandbox
             .stub(impl, 'randomlySelectUnsetExperiments_')
             .returns({flexAdSlots: '21063173'});
-          impl.uiHandler = {isStickyAd: () => false};
           impl.setPageLevelExperiments();
           return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
@@ -1204,7 +1194,6 @@ for (const {config, name} of [
         });
 
         it('should include msz/psz by default', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
             expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
@@ -1214,14 +1203,12 @@ for (const {config, name} of [
         });
 
         it('sets ptt parameter', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)ptt=13(&|$)/
           );
         });
 
         it('should set ppid parameter if set in json', () => {
-          impl.uiHandler = {isStickyAd: () => false};
           element.setAttribute('json', '{"ppid": "testId"}');
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)ppid=testId(&|$)/
@@ -1441,7 +1428,6 @@ for (const {config, name} of [
 
           impl = new AmpAdNetworkDoubleclickImpl(element);
           impl.initialSize_ = {width: 200, height: 50};
-          impl.uiHandler = {isStickyAd: () => false};
 
           // Boilerplate stubbing
           env.sandbox

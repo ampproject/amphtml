@@ -181,36 +181,28 @@ amp-ad[interstitial] {
   visibility: hidden;
   z-index: 11;
   position: fixed;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  width: 100% !important;
-  height: 100% !important;
-  left: 0px;
-  top: 0px;
-  padding: 0 0 0 0;
-}
-
-amp-ad[interstitial] iframe {
-  left: 50%;
-  top: 50%;
+  width: auto !important;
+  height: auto !important;
+  left: 50vw;
+  top: 50vh;
   transform: translate(-50%, -50%);
-}
-
-.amp-ad-interstitial-wrapper {
-  position: absolute;
-  display: block;
+  padding: 0 0 0 0;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0px 8px 12px rgb(60 64 67 / 15%), 0px 4px 4px rgb(60 64 67 / 30%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-170px, -200px);
-  height: 420px;
-  color: #555;
-  font-family: Arial;
-  font-size: large;
-  z-index: -1;
+}
+
+amp-ad[interstitial] iframe {
+  padding: 50px 20px 20px 20px !important;
+}
+
+amp-ad[interstitial].i-amphtml-interstitial-ad-fullscreen iframe {
+  width: calc(100vw - 40px);
+  width: -moz-calc(100vw - 40px);
+  width: -webkit-calc(100vw - 40px);
+  height: calc(100vh - 70px);
+  height: -moz-calc(100vh - 70px);
+  height: -webkit-calc(100vh - 70px);
 }
 
 .amp-ad-interstitial-wrapper .interstitial-title {
@@ -228,7 +220,6 @@ amp-ad[interstitial] iframe {
 }
 
 .amp-ad-interstitial-wrapper .btn {
-  width: 140px;
   height: 40px;
   bottom: 15px;
   position: absolute;
@@ -253,12 +244,14 @@ amp-ad[interstitial] iframe {
   content: 'Close';
 }
 
-.amp-ad-interstitial-wrapper .open {
-  margin-left: 180px;
-  background-color: #0088ff;
-  color: #fff;
-}
-
-.amp-ad-interstitial-wrapper .open span::after {
-  content: 'Open';
+amp-ad-interstitial-overlay {
+  z-index: 10;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background: hsla(0, 0%, 100%, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }

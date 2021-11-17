@@ -341,7 +341,7 @@ describes.realWin(
         }
         allowConsoleError(() => {
           expect(() => {
-            uiHandler.validateStickyAd();
+            uiHandler.validateAd();
           }).to.throw();
         });
       });

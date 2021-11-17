@@ -7,6 +7,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
+import {AdFormatType} from 'extensions/amp-ad/0.1/ad-format';
+
 import {AmpAdNetworkValueimpressionImpl} from '../amp-ad-network-valueimpression-impl';
 
 /**
@@ -160,7 +162,7 @@ describes.realWin(
           .returns(Promise.resolve('http://example.com/?foo=bar'));
 
         const impl = new AmpAdNetworkValueimpressionImpl(element);
-        impl.uiHandler = {isStickyAd: () => false};
+        impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
         return impl
           .getAdUrl(
             {consentString: 'user_consent_string', gdprApplies: true},

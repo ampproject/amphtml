@@ -445,6 +445,7 @@ const forbiddenTermsGlobal = {
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/service/index.js',
       'src/service/cid-impl.js',
+      'extensions/amp-ad/0.1/web-interstitial-ad.js',
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
       'extensions/amp-analytics/0.1/session-manager.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',

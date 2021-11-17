@@ -2,7 +2,9 @@ import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '#ads/google/utils';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {AmpAdUIHandler} from './amp-ad-ui';
+import {AdFormatType} from './ad-format';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
@@ -188,12 +190,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     userAssert(this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
-    this.uiHandler.validateStickyAd();
+    this.uiHandler.adFormatHandler.validate();
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
+    }
+    if (this.uiHandler.adFormatHandler.shouldForceLayout()) {
+      chunk(this.element, () => this.layoutCallback(), ChunkPriority_Enum.LOW);
     }
   }
 
@@ -335,7 +340,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.layoutPromise_;
     }
     userAssert(
-      !this.isInFixedContainer_ || this.uiHandler.isStickyAd(),
+      !this.isInFixedContainer_ ||
+        this.uiHandler.getAdFormat() == AdFormatType.STICKY,
       '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s unless it has sticky attribute',
       this.element
@@ -357,7 +363,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     ).pageViewId64;
 
     // For sticky ad only: must wait for scrolling event before loading the ad
-    const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
+    const scrollPromise = this.uiHandler.adFormatHandler.getScrollPromise();
 
     this.layoutPromise_ = Promise.all([
       getAdCid(this),
@@ -369,7 +375,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       pageViewId64Promise,
     ])
       .then((consents) => {
-        this.uiHandler.maybeInitStickyAd();
+        this.uiHandler.adFormatHandler.onAdPromiseResolved();
 
         // Use JsonObject to preserve field names so that ampContext can access
         // values with name

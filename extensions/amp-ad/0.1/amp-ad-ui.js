@@ -1,37 +1,12 @@
 import {Services} from '#service';
-import {
-  ancestorElementsByTag,
-  closestAncestorElementBySelector,
-} from '#core/dom/query';
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {dict} from '#core/types/object';
-import {user, userAssert} from '#utils/log';
+import {ancestorElementsByTag} from '#core/dom/query';
 
 import {getAdContainer} from '../../../src/ad-helper';
-import {listen} from '#utils/event-helper';
-import {setStyle, setStyles} from '#core/dom/style';
-
-const TAG = 'amp-ad-ui';
-
-const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
-const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
-
-const TOP_STICKY_AD_CLOSE_THRESHOLD = 50;
-const TOP_STICKY_AD_TRIGGER_THRESHOLD = 200;
-
-/**
- * Permissible sticky ad options.
- * @const @enum {string}
- */
-const StickyAdPositions = {
-  TOP: 'top',
-  BOTTOM: 'bottom',
-  LEFT: 'left',
-  RIGHT: 'right',
-  BOTTOM_RIGHT: 'bottom-right',
-};
-
-const STICKY_AD_PROP = 'sticky';
+import {setStyles} from '#core/dom/style';
+import {AdFormatType} from './ad-format';
+import {StickyAd} from './sticky-ad';
+import {WebInterstitialyAd} from './web-interstitial-ad';
+import {RegularAd} from './regular-ad';
 
 export class AmpAdUIHandler {
   /**
@@ -49,59 +24,16 @@ export class AmpAdUIHandler {
 
     this.containerElement_ = null;
 
-    /**
-     * If this is a sticky ad unit, the sticky position option.
-     * @private {?StickyAdPositions}
-     */
-    this.stickyAdPosition_ = null;
-    if (this.element_.hasAttribute(STICKY_AD_PROP)) {
-      // TODO(powerivq@) Kargo is currently running an experiment using empty sticky attribute, so
-      // we default the position to bottom right. Remove this default afterwards.
-      if (!this.element_.getAttribute(STICKY_AD_PROP)) {
-        user().error(
-          TAG,
-          'amp-ad sticky is deprecating empty attribute value, please use <amp-ad sticky="bottom" instead'
-        );
-      }
-
-      this.stickyAdPosition_ =
-        this.element_.getAttribute(STICKY_AD_PROP) ||
-        StickyAdPositions.BOTTOM_RIGHT;
-      this.element_.setAttribute(STICKY_AD_PROP, this.stickyAdPosition_);
-
-      if (!Object.values(StickyAdPositions).includes(this.stickyAdPosition_)) {
-        user().error(TAG, `Invalid sticky ad type: ${this.stickyAdPosition_}`);
-        this.stickyAdPosition_ = null;
-      }
+    if (this.element_.hasAttribute('sticky')) {
+      this.adFormatType_ = AdFormatType.STICKY;
+      this.adFormatHandler = new StickyAd(baseInstance);
+    } else if (this.element_.hasAttribute('interstitial')) {
+      this.adFormatType_ = AdFormatType.WEB_INTERSTITIAL;
+      this.adFormatHandler = new WebInterstitialyAd(baseInstance);
+    } else {
+      this.adFormatType_ = AdFormatType.REGULAR;
+      this.adFormatHandler = new RegularAd(baseInstance);
     }
-
-    /**
-     * Whether the web interstitial ads has been rendered.
-     */
-    this.webInterstitialRendered_ = false;
-
-    /**
-     * Web interstitial next URL.
-     */
-    this.webInterstitialNextUrl_ = undefined;
-
-    /**
-     * Whether the close button has been rendered for a sticky ad unit.
-     */
-    this.closeButtonRendered_ = false;
-
-    /**
-     * For top sticky ads, we close the ads when scrolled to the top.
-     * @private {!Function}
-     */
-    this.topStickyAdScrollListener_ = undefined;
-
-    /**
-     * For top sticky ads, we waited until scrolling down before activating
-     * the closing ads listener.
-     * @private {boolean}
-     */
-    this.topStickyAdCloserAcitve_ = false;
 
     /**
      * Unlisteners to be unsubscribed after destroying.
@@ -222,259 +154,10 @@ export class AmpAdUIHandler {
   }
 
   /**
-   * Verify that the limits for sticky ads are not exceeded
+   * @return {AdFormatType}
    */
-  validateStickyAd() {
-    userAssert(
-      this.doc_.querySelectorAll(
-        'amp-sticky-ad.i-amphtml-built, amp-ad[sticky].i-amphtml-built'
-      ).length <= 1,
-      'At most one sticky ad can be loaded per page'
-    );
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isStickyAd() {
-    return this.stickyAdPosition_ !== null;
-  }
-
-  /**
-   * Initialize sticky ad related features
-   */
-  maybeInitStickyAd() {
-    if (this.isStickyAd()) {
-      setStyle(this.element_, 'visibility', 'visible');
-
-      if (this.stickyAdPosition_ == StickyAdPositions.TOP) {
-        const doc = this.element_.getAmpDoc();
-
-        // Let the top sticky ad be below the viewer top.
-        const paddingTop = Services.viewportForDoc(doc).getPaddingTop();
-        setStyle(this.element_, 'top', `${paddingTop}px`);
-
-        this.topStickyAdScrollListener_ = Services.viewportForDoc(doc).onScroll(
-          () => {
-            const scrollPos = doc.win./*OK*/ scrollY;
-            if (scrollPos > TOP_STICKY_AD_TRIGGER_THRESHOLD) {
-              this.topStickyAdCloserAcitve_ = true;
-            }
-
-            // When the scroll position is close to the top, we close the
-            // top sticky ad in order not to have the ads overlap the
-            // content.
-            if (
-              this.topStickyAdCloserAcitve_ &&
-              scrollPos < TOP_STICKY_AD_CLOSE_THRESHOLD
-            ) {
-              this.closeStickyAd_();
-            }
-          }
-        );
-        this.unlisteners_.push(this.topStickyAdScrollListener_);
-      }
-
-      this.adjustPadding();
-      if (!this.closeButtonRendered_) {
-        this.addCloseButton_();
-        this.closeButtonRendered_ = true;
-      }
-    }
-  }
-
-  /**
-   * Scroll promise for sticky ad
-   * @return {Promise}
-   */
-  getScrollPromiseForStickyAd() {
-    if (this.isStickyAd()) {
-      return new Promise((resolve) => {
-        const unlisten = Services.viewportForDoc(
-          this.element_.getAmpDoc()
-        ).onScroll(() => {
-          resolve();
-          unlisten();
-        });
-      });
-    }
-    return Promise.resolve(null);
-  }
-
-  /**
-   * Adjust the padding-bottom when resized to prevent overlaying on top of content
-   * @return {boolean}
-   */
-  isInterstitialAd() {
-    return this.element_.hasAttribute('interstitial');
-  }
-
-  /**
-   * maybeInitInterstitialAd
-   */
-  maybeInitInterstitialAd() {
-    if (this.isInterstitialAd()) {
-      closestAncestorElementBySelector(this.element_, 'BODY')
-        .querySelectorAll('a:not([amp-interstitial-opt-out])')
-        .forEach((a) =>
-          a.addEventListener(
-            'click',
-            this.interstitialLinkClickCallback_.bind(this)
-          )
-        );
-    }
-  }
-
-  /**
-   * Signal that the web interstitial ad is eligible to be rendered.
-   * Insert the interstitial UI elements.
-   * @param {{data: !JsonObject}} info
-   */
-  onWebInterstitialRenderStart(info) {
-    this.webInterstitialRendered_ = true;
-
-    if (!info['interstitial-with-close-button']) {
-    }
-  }
-
-  /**
-   * Callback for link clicked
-   * @param {*} e
-   */
-  interstitialLinkClickCallback_(e) {
-    if (!this.webInterstitialRendered_) {
-      return;
-    }
-
-    this.webInterstitialNextUrl_ = e.target.href;
-    setStyle(this.element_, 'visibility', 'visible');
-    e.preventDefault();
-  }
-
-  /**
-   * The function that add a close button to the web interstitial ad
-   * @param {*} target
-   */
-  addForwardButton_(target) {
-    const header = createElementWithAttributes(
-      /** @type {!Document} */ (this.element_.ownerDocument),
-      'div'
-    );
-    setStyle(header, 'width', '340px');
-    header.classList.add('amp-ad-interstitial-wrapper');
-
-    listen(header, 'click', (e) => e.stopPropagation());
-
-    const title = createElementWithAttributes(
-      /** @type {!Document} */ (this.element_.ownerDocument),
-      'div',
-      dict()
-    );
-    title.classList.add('interstitial-title');
-
-    const closeBtn = createElementWithAttributes(
-      /** @type {!Document} */ (this.element_.ownerDocument),
-      'div',
-      dict({'aria-label': 'Close ad'})
-    );
-    closeBtn.classList.add('close');
-    closeBtn.classList.add('btn');
-
-    const closeBtnSpan = createElementWithAttributes(
-      /** @type {!Document} */ (this.element_.ownerDocument),
-      'span',
-      dict()
-    );
-
-    listen(closeBtn, 'click', () => {
-      window.location.href = target.href;
-    });
-
-    closeBtn.appendChild(closeBtnSpan);
-
-    const openBtn = createElementWithAttributes(
-      /** @type {!Document} */ (this.element_.ownerDocument),
-      'div',
-      dict({'aria-label': 'Open ad'})
-    );
-    openBtn.classList.add('open');
-    openBtn.classList.add('btn');
-
-    const openBtnSpan = createElementWithAttributes(
-      /** @type {!Document} */ (this.element_.ownerDocument),
-      'span',
-      dict()
-    );
-
-    listen(openBtn, 'click', () => {
-      window.location.href =
-        'https://www.googleadservices.com/pagead/aclk?sa=L&ai=CUw0AKCa1W-yME9SUpgOY8qhwhPWs6VG_9eT3swiBuLGbzAgQASCc9MAtYMn2-IaAgKAZiAEBoAHL4uKEA8gBBuACAKgDAcgDCqoEhgJP0OHwOs-pZUTpUv7xVVS5jfprFiowesg50-Sy3NZO0n7-4RtT68Xp1hAno5-nssTlbQ-LYcPYA1BDDHRM928ig_unrTa_S3IweztuH4PClGB3hGik4vzrfHEGQ8i7g1m-0kx6dEnFlhcq8ICaB8V3et1IdWru66QxcvmftaawPE8Vh2PtwzNPkqxAIrHNDsL-mJPVoeFrqKzVeyCI-YmQfxoQku8EBN4pAjbLygfhskcwvPTxlCdse7lB_uhqMmcrxAukYeKYzDAqlLivkBuNLq-c-g3AG5K1HC2F87AFgX2mIn8L6TksOnK6G45Ok122YY04u9XPuYT6C7-LWsrJrlKT7vs84AQBkAYBoAY3gAednZ17iAcBkAcCqAeOzhuoB9XJG6gHugaoB9nLG6gHz8wbqAemvhvYBwHSCAYIABACGAGxCVoZJTDTxjKLgAoD2BMC&num=1&cid=CAMSeQClSFh3fjxWIixa9MkpWwHy-PKoXt7C5IoKfHkZjCffkfO7UTqaTqPn_9MxZ_vu3hU82Z8-cdsQ6XLJDv-V_8fRF3hs7aYgIX1KYr9OKo4Zjtfzu2GBslxbVKMZ3H6Vdj5gSsbtUxBwC__repXOJ6k6LMOmT6xnoRs&sig=AOD64_0qNiLnSl3w5y9ewNd2TPGu2Ihapw&client=ca-pub-2640472772368642&nx=CLICK_X&ny=CLICK_Y&nb=9&adurl=https://cleanmymac.macpaw.com/27%3Fcampaign%3Ddisplay_cmmx_brand_responsads_asgood_inmarket_us%26ci%3D1071931606%26adgroupid%3D53050287032%26adpos%3Dnone%26ck%3D%26targetid%3D%26match%3D%26gnetwork%3Dd%26creative%3D293998038630%26placement%3Dnative-ads-preview.weebly.com%26placecat%3D%26accname%3Dcmm';
-    });
-
-    openBtn.appendChild(openBtnSpan);
-
-    header.appendChild(title);
-    header.appendChild(closeBtn);
-    header.appendChild(openBtn);
-    this.element_.appendChild(header);
-
-    listen(this.element_, 'click', (e) => {
-      window.location.href = target.href;
-      e.preventDefault();
-    });
-  }
-
-  /**
-   * When a sticky ad is shown, the close button should be rendered at the same time.
-   */
-  adjustPadding() {
-    if (
-      this.stickyAdPosition_ == StickyAdPositions.BOTTOM ||
-      this.stickyAdPosition_ == StickyAdPositions.BOTTOM_RIGHT
-    ) {
-      const borderBottom = this.element_./*OK*/ offsetHeight;
-      Services.viewportForDoc(this.element_.getAmpDoc()).updatePaddingBottom(
-        borderBottom
-      );
-    }
-  }
-
-  /**
-   * Close the sticky ad
-   */
-  closeStickyAd_() {
-    Services.vsyncFor(this.baseInstance_.win).mutate(() => {
-      const viewport = Services.viewportForDoc(this.element_.getAmpDoc());
-      viewport.removeFromFixedLayer(this.element);
-      removeElement(this.element_);
-      viewport.updatePaddingBottom(0);
-    });
-
-    if (this.topStickyAdScrollListener_) {
-      this.topStickyAdScrollListener_();
-    }
-  }
-
-  /**
-   * The function that add a close button to sticky ad
-   */
-  addCloseButton_() {
-    const closeButton = createElementWithAttributes(
-      /** @type {!Document} */ (this.element_.ownerDocument),
-      'button',
-      dict({
-        'aria-label':
-          this.element_.getAttribute('data-close-button-aria-label') ||
-          'Close this ad',
-      })
-    );
-
-    this.unlisteners_.push(
-      listen(closeButton, 'click', this.closeStickyAd_.bind(this))
-    );
-
-    closeButton.classList.add('amp-ad-close-button');
-    this.element_.appendChild(closeButton);
+  getAdFormat() {
+    return this.adFormatType_;
   }
 
   /**
@@ -522,24 +205,16 @@ export class AmpAdUIHandler {
     }
 
     // Special case: for sticky ads, we enforce 20% size limit and 50% height limit
-    if (this.isStickyAd()) {
-      const viewport = this.baseInstance_.getViewport();
-      if (
-        height * width >
-          STICKY_AD_MAX_SIZE_LIMIT *
-            viewport.getHeight() *
-            viewport.getWidth() ||
-        newHeight > STICKY_AD_MAX_HEIGHT_LIMIT * viewport.getHeight()
-      ) {
-        resizeInfo.success = false;
-        return Promise.resolve(resizeInfo);
-      }
+    if (!this.adFormatHandler.shouldAllowResizing(newWidth, newHeight)) {
+      resizeInfo.success = false;
+      return Promise.resolve(resizeInfo);
     }
     return this.baseInstance_
       .attemptChangeSize(newHeight, newWidth, event)
       .then(
         () => {
           this.setSize_(this.element_.querySelector('iframe'), height, width);
+          this.adFormatHandler.onResize();
           return resizeInfo;
         },
         () => {
@@ -568,6 +243,7 @@ export class AmpAdUIHandler {
   cleanup() {
     this.unlisteners_.forEach((unlistener) => unlistener());
     this.unlisteners_.length = 0;
+    this.adFormatHandler.cleanUp();
   }
 }
 

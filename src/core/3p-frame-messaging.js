@@ -28,7 +28,8 @@ export const MessageType_Enum = {
   NO_CONTENT: 'no-content',
   GET_HTML: 'get-html',
   GET_CONSENT_STATE: 'get-consent-state',
-  SIGNAL_INTERACTIVE: 'signal-interactive',
+  INTERSTITIAL_OPEN_AD: 'interstitial-open-ad',
+  INTERSTITIAL_CLOSE_AD: 'interstitial-close-ad',
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',

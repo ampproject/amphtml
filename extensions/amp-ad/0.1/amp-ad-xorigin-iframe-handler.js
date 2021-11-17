@@ -20,6 +20,7 @@ import {removeElement} from '#core/dom';
 import {reportErrorToAnalytics} from '../../../src/error-reporting';
 import {setStyle} from '#core/dom/style';
 import {throttle} from '#core/types/function';
+import {AdFormatType} from './ad-format';
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -97,7 +98,7 @@ export class AmpAdXOriginIframeHandler {
     devAssert(!this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
-    if (!this.uiHandler_.isStickyAd() && !this.uiHandler_.isInterstitialAd()) {
+    if (this.uiHandler_.getAdFormat() == AdFormatType.REGULAR) {
       applyFillContent(this.iframe);
     }
     const timer = Services.timerFor(this.baseInstance_.win);
@@ -161,7 +162,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       listenFor(
         this.iframe,
-        MessageType.EMBED_SIZE,
+        MessageType_Enum.EMBED_SIZE,
         (data, source, origin, event) => {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
@@ -194,6 +195,18 @@ export class AmpAdXOriginIframeHandler {
         true
       )
     );
+
+    // Install web interstitial ads closing API
+    if (this.uiHandler_.getAdFormat() == AdFormatType.WEB_INTERSTITIAL) {
+      listenForOncePromise(
+        this.iframe,
+        [
+          MessageType_Enum.INTERSTITIAL_CLOSE_AD,
+          MessageType_Enum.INTERSTITIAL_OPEN_AD,
+        ],
+        true
+      ).then(() => this.uiHandler_.adFormatHandler.onAdNavigate());
+    }
 
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
@@ -235,7 +248,7 @@ export class AmpAdXOriginIframeHandler {
       new Deferred();
 
     if (
-      this.uiHandler_.isInterstitialAd() ||
+      this.uiHandler_.getAdFormat() == AdFormatType.WEB_INTERSTITIAL ||
       (this.baseInstance_.config &&
         this.baseInstance_.config.renderStartImplemented)
     ) {
@@ -376,9 +389,7 @@ export class AmpAdXOriginIframeHandler {
       info['origin'],
       info['event']
     );
-    if (this.uiHandler_.isInterstitialAd()) {
-      this.uiHandler_.onWebInterstitialRenderStart(info);
-    }
+    this.uiHandler_.adFormatHandler.onRenderStart(info);
   }
 
   /**
@@ -463,7 +474,6 @@ export class AmpAdXOriginIframeHandler {
             } else {
               this.lastRejectedResizeTime_ = 0;
             }
-            this.uiHandler_.adjustPadding();
             this.sendEmbedSizeResponse_(
               info.success,
               id,

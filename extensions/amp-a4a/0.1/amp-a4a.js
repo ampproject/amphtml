@@ -49,7 +49,7 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {ChunkPriority, chunk} from '../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -65,6 +65,7 @@ import {
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
+import {AdFormatType} from '../../amp-ad/0.1/ad-format';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -408,7 +409,7 @@ export class AmpA4A extends AMP.BaseElement {
     );
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
-    this.uiHandler.validateStickyAd();
+    this.uiHandler.adFormatHandler.validate();
 
     // Disable crypto key fetching if we are not going to use it in no-signing path.
     // TODO(ccordry): clean up with no-signing launch.
@@ -436,16 +437,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     this.isSinglePageStoryAd = this.element.hasAttribute('amp-story');
 
-    if (this.uiHandler.isInterstitialAd()) {
-      chunk(
-        this.element,
-        () => {
-          this.initiateAdRequest();
-          this.layoutCallback();
-          this.uiHandler.maybeInitInterstitialAd();
-        },
-        ChunkPriority.HIGH
-      );
+    Services.ownersForDoc(this.getAmpDoc())./*OK*/ requireLayout(this.element);
+    if (this.uiHandler.adFormatHandler.shouldForceLayout()) {
+      chunk(this.element, () => this.layoutCallback(), ChunkPriority_Enum.LOW);
     }
   }
 
@@ -610,10 +604,11 @@ export class AmpA4A extends AMP.BaseElement {
       this.getLayout() != Layout_Enum.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);
     if (
-      fixedSizeZeroHeightOrWidth ||
-      this.element.hasAttribute('hidden') ||
-      // TODO(levitzky): May need additional checks for other display:hidden cases.
-      this.element.classList.contains('i-amphtml-hidden-by-media-query')
+      this.uiHandler.getAdFormat() == AdFormatType.REGULAR &&
+      (fixedSizeZeroHeightOrWidth ||
+        this.element.hasAttribute('hidden') ||
+        // TODO(levitzky): May need additional checks for other display:hidden cases.
+        this.element.classList.contains('i-amphtml-hidden-by-media-query'))
     ) {
       dev().fine(
         TAG,
@@ -623,8 +618,7 @@ export class AmpA4A extends AMP.BaseElement {
       return false;
     }
     if (
-      !this.uiHandler.isStickyAd() &&
-      !this.uiHandler.isInterstitialAd() &&
+      this.uiHandler.getAdFormat() == AdFormatType.REGULAR &&
       !isAdPositionAllowed(this.element, this.win)
     ) {
       user().warn(
@@ -1357,12 +1351,12 @@ export class AmpA4A extends AMP.BaseElement {
 
     return Promise.all([
       this.adPromise_,
-      this.uiHandler.getScrollPromiseForStickyAd(),
+      this.uiHandler.adFormatHandler.getScrollPromise(),
     ])
       .then((values) => {
         checkStillCurrent();
 
-        this.uiHandler.maybeInitStickyAd();
+        this.uiHandler.adFormatHandler.onAdPromiseResolved();
         const creativeMetaData = values[0];
         if (this.isCollapsed_) {
           return Promise.resolve();
@@ -1814,7 +1808,7 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    if (!this.uiHandler.isStickyAd() && !this.uiHandler.isInterstitialAd()) {
+    if (this.uiHandler.getAdFormat() == AdFormatType.REGULAR) {
       applyFillContent(this.iframe);
     }
 
@@ -1908,7 +1902,7 @@ export class AmpA4A extends AMP.BaseElement {
         })
       )
     );
-    if (!this.uiHandler.isStickyAd() && !this.uiHandler.isInterstitialAd()) {
+    if (this.uiHandler.getAdFormat() == AdFormatType.REGULAR) {
       applyFillContent(this.iframe);
     }
     const fontsArray = [];

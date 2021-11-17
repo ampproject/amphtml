@@ -26,6 +26,8 @@ import {dev, user} from '#utils/log';
 import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
 
+import {AdFormatType} from 'extensions/amp-ad/0.1/ad-format';
+
 import {FetchMock, networkFailure} from './fetch-mock';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -1777,9 +1779,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         .stub(a4a, 'maybeValidateAmpCreative')
         .returns(Promise.resolve());
       a4a.uiHandler = {
-        getScrollPromiseForStickyAd: () => Promise.resolve(null),
-        isStickyAd: () => false,
-        maybeInitStickyAd: () => {},
+        getAdFormat: () => AdFormatType.REGULAR,
       };
       a4a.onLayoutMeasure();
       await a4a.buildCallback();
@@ -1856,7 +1856,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       a4aElement.className = 'fixed';
       const a4a = new MockA4AImpl(a4aElement);
       a4a.uiHandler = {
-        isStickyAd: () => false,
+        getAdFormat: () => AdFormatType.REGULAR,
       };
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.not.be.ok;
@@ -2217,14 +2217,14 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           applyUnlayoutUI: () => {
             unlayoutUISpy();
           },
-          getScrollPromiseForStickyAd: () => Promise.resolve(null),
-          isStickyAd: () => false,
-          maybeInitStickyAd: () => {},
           cleanup: () => {},
         };
         env.sandbox
           .stub(a4a, 'getLayoutSize')
           .returns({width: 123, height: 456});
+        a4a.uiHandler = {
+          getAdFormat: () => AdFormatType.REGULAR,
+        };
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         await a4a.adPromise_;

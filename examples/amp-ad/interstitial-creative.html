@@ -1,0 +1,18 @@
+<!doctype html><html lang="en">
+<head><meta charset=utf-8>
+<meta content=width=device-width,minimum-scale=1,initial-scale=1 name=viewport>
+<body>
+<a href=https://www.google.com target="_blank">
+    <img sid=container alt="AMP Ad" height=200 src=https://upload.wikimedia.org/wikipedia/commons/2/24/Ad-MediumRectangle-300x250.jpg width=300></img>
+</a>
+
+<button id="close">Close Ad</button>
+
+<script src=/dist.3p/current/ampcontext-lib.js></script>
+<script>
+window.context.renderStart({height: -1, width: -1, interstitialCloseBtn: true});
+document.querySelector('#close').onclick = function() {
+    window.context.interstitialCloseAd();
+}
+</script>
+</body></html>

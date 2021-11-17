@@ -121,6 +121,7 @@ exports.rules = [
     allowlist: [
       // See todo note in ads/_a4a-config.js
       'ads/google/a4a/utils.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
+      'ads/google/a4a/utils.js->extensions/amp-ad/0.1/ad-format.js',
     ],
   },
   // Rules for extensions and main src.
@@ -157,7 +158,7 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
 
-      // And a few mrore things depend on a4a.
+      // And a few more things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/name-frame-renderer.js',
@@ -168,6 +169,11 @@ exports.rules = [
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-utils.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
+
+      // Allow fast fetch extensions access to ads type
+      'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-ad/0.1/ad-format.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-ad/0.1/ad-format.js',
+      'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-ad/0.1/ad-format.js',
 
       // AMP access depends on AMP access
       'extensions/amp-access-scroll/0.1/scroll-impl.js->extensions/amp-access/0.1/amp-access-client.js',

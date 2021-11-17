@@ -190,6 +190,8 @@ const htmlFixtureGlobs = [
   '!examples/viewer-iframe-poll.html',
   '!examples/viewer-webview.html',
   '!examples/viewer.html',
+  '!examples/amp-ad/interstitial-creative.html',
+  '!examples/amp-ad/sticky-creative.html',
 
   // The following are folders where amp docs have the extension .amp.html.
   '!examples/amp-story/**/!(*.amp.html)',
@@ -212,8 +214,8 @@ const htmlFixtureGlobs = [
   '!examples/amp-ad/doubleclick-rtc.amp.html',
   '!examples/amp-ad/doubleclick-safeframe.html',
   '!examples/amp-ad/doubleclick-vanilla.amp.html',
-  '!examples/amp-ad/sticky-creative.html',
   '!examples/amp-ad/sticky.html',
+  '!examples/amp-ad/web-interstitial.html',
   '!examples/amp-autocomplete-testing.html',
   '!examples/amp-autocomplete.ssr.html',
   '!examples/amp-consent/amp-consent-3p-postmessage.html',

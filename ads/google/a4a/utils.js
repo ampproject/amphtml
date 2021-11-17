@@ -16,6 +16,7 @@ import * as mode from '#core/mode';
 import {parseJson} from '#core/types/object/json';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {createElementWithAttributes} from '#core/dom';
+import {AdFormatType} from '../../../extensions/amp-ad/0.1/ad-format';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -204,7 +205,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
   if (
-    a4a.uiHandler.isStickyAd() &&
+    a4a.uiHandler.getAdFormat() == AdFormatType.STICKY &&
     !enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD'])
   ) {
     enclosingContainers.push(ValidAdContainerTypes['AMP-STICKY-AD']);

@@ -17,6 +17,7 @@ import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
+import {AdFormatType} from '../../amp-ad/0.1/ad-format';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-valueimpression-impl';
@@ -276,7 +277,7 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
       const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
       // If slotWidth is -1, that means its width must be determined by its
       // parent container, and so should have the same value as parentWidth.
-      if (this.uiHandler.isStickyAd()) {
+      if (this.uiHandler.getAdFormat() == AdFormatType.STICKY) {
         msz = '0x-1';
         psz = '0x-1';
       } else {

@@ -306,10 +306,16 @@ export class AbstractAmpContext {
   }
 
   /**
-   *  Make the ad interactive.
+   * @param {!JsonObject=} opt_data Fields: width, height, interstitialCloseBtn
    */
-  signalInteractive() {
-    this.client_.sendMessage(MessageType_Enum.SIGNAL_INTERACTIVE);
+  renderStart(opt_data) {
+    this.client_.sendMessage('render-start', opt_data);
+  }
+
+  /**
+   */
+  interstitialCloseAd() {
+    this.client_.sendMessage('interstitial-close-ad', {});
   }
 
   /**

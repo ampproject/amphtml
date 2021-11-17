@@ -6,6 +6,7 @@ import {Signals} from '#core/data-structures/signals';
 import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {toggleExperiment} from '#experiments';
+import {RegularAd} from '../regular-ad';
 
 describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
   let ampdoc;
@@ -43,7 +44,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
     };
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
-    adImpl.uiHandler.adjustPadding = env.sandbox.spy();
+    adImpl.uiHandler.adFormatHandler = new RegularAd(adElement);
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
     testIndex++;
 
@@ -445,7 +446,6 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.adjustPadding).to.be.called;
         });
     });
 
@@ -471,7 +471,6 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.adjustPadding).to.be.called;
         });
     });
 

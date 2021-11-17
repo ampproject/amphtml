@@ -105,6 +105,7 @@ import {
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {AdFormatType} from '../../amp-ad/0.1/ad-format';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -686,7 +687,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // parent container, and so should have the same value as parentWidth.
 
     // For amp-sticky-ad, it returns 0, so we follow them for amp-ad sticky ads here.
-    if (this.uiHandler.isStickyAd()) {
+    if (this.uiHandler.getAdFormat() == AdFormatType.STICKY) {
       msz = '0x-1';
       psz = '0x-1';
     } else {

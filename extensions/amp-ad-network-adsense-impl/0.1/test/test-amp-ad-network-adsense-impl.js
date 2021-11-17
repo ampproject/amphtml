@@ -16,6 +16,8 @@ import * as experiments from '#experiments';
 
 import {Services} from '#service';
 
+import {AdFormatType} from 'extensions/amp-ad/0.1/ad-format';
+
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
@@ -553,7 +555,7 @@ describes.realWin(
     describe('#getAdUrl', () => {
       beforeEach(() => {
         resetSharedState();
-        impl.uiHandler = {isStickyAd: () => false};
+        impl.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
       });
 
       afterEach(() => {
@@ -768,10 +770,10 @@ describes.realWin(
         const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
+        impl1.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
+        impl2.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
+        impl3.uiHandler = {getAdFormat: () => AdFormatType.REGULAR};
 
-        impl1.uiHandler = {isStickyAd: () => false};
-        impl2.uiHandler = {isStickyAd: () => false};
-        impl3.uiHandler = {isStickyAd: () => false};
         return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);
