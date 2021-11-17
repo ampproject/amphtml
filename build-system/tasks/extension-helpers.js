@@ -764,7 +764,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
 /**
  * @param {string} name
  * @param {string} toExport
- * @return {Promise<string>}
+ * @return {string}
  */
 function generateBentoEntryPointSource(name, toExport) {
   return dedent(`
