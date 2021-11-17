@@ -130,7 +130,7 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 [dir=rtl] .i-amphtml-story-fwd-next > .i-amphtml-story-button-move,
 .i-amphtml-story-fwd-next > .i-amphtml-story-button-move,
 [dir=rtl] .prev-container > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="49" height="49" fill="none"><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="m22.5 16.6 7.7 7.7M22.5 32.1l7.7-7.7"/></svg>')!important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="m21.52 16.22 7.75 7.75M21.52 31.75 29.27 24"/></svg>')!important;
 }
 
 .prev-container > .i-amphtml-story-button-move,
@@ -151,7 +151,7 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 }
 
 .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M16.15 19.84a9.1 9.1 0 1 1-1.29 3.94"/><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M15.6 15.54v4.59M20 20.15h-4.4"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M16.15 19.4a9.1 9.1 0 1 1-1.29 3.95"/><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M15.6 15.1v4.61M20 19.71h-4.4"/></svg>') !important;
   background-position: center center;
 }
 
