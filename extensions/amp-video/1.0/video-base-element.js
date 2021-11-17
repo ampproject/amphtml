@@ -5,18 +5,18 @@ import {BaseElement} from './base-element';
 export class VideoBaseElement extends BaseElement {
   /** @override */
   init() {
-    this.registerApiAction_('play', (api) => api.play());
-    this.registerApiAction_('pause', (api) => api.pause());
-    this.registerApiAction_('mute', (api) => api.mute());
-    this.registerApiAction_('unmute', (api) => api.unmute());
+    this.registerAction_('play', (api) => api.play());
+    this.registerAction_('pause', (api) => api.pause());
+    this.registerAction_('mute', (api) => api.mute());
+    this.registerAction_('unmute', (api) => api.unmute());
 
     // Ugly that this action has three names, but:
     // - requestFullscreen for consistency with Element.requestFullscreen
     // - fullscreenenter / fullscreen are for backwards compatibility
     const requestFullscreen = (api) => api.requestFullscreen();
-    this.registerApiAction_('requestFullscreen', requestFullscreen);
-    this.registerApiAction_('fullscreenenter', requestFullscreen);
-    this.registerApiAction_('fullscreen', requestFullscreen);
+    this.registerAction_('requestFullscreen', requestFullscreen);
+    this.registerAction_('fullscreenenter', requestFullscreen);
+    this.registerAction_('fullscreen', requestFullscreen);
   }
 
   /**
@@ -25,7 +25,7 @@ export class VideoBaseElement extends BaseElement {
    * @param {!../../../src/core/constants/action-constants.ActionTrust_Enum=} minTrust
    * @private
    */
-  registerApiAction_(alias, handler, minTrust = ActionTrust_Enum.HIGH) {
+  registerAction_(alias, handler, minTrust = ActionTrust_Enum.HIGH) {
     this.registerAction(
       alias,
       (invocation) => {
