@@ -51,7 +51,7 @@ class TransformCache {
    */
   set(hash, transformPromise) {
     if (this.transformMap.has(hash)) {
-      throw new Error('Read race: Attempting to transform a file twice.');
+      throw new Error(`Read race: Attempting to transform ${hash} file twice.`);
     }
     this.transformMap.set(hash, transformPromise);
     const filepath = path.join(this.cacheDir, hash) + this.fileExtension;
