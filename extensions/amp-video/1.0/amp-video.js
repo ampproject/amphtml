@@ -1,6 +1,6 @@
 import {CSS} from '../../../build/amp-video-1.0.css';
 import {BaseElement} from './base-element';
-import {registerVideoActions} from '#preact/video';
+import {registerVideoActions} from '#preact/video/actions';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 

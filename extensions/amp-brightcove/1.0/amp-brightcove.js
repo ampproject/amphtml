@@ -9,7 +9,7 @@ import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 import {Services} from '#service';
-import {registerVideoActions} from '#preact/video';
+import {registerVideoActions} from '#preact/video/actions';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';

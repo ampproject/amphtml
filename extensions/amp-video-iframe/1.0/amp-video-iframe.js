@@ -3,7 +3,7 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
-import {registerVideoActions} from '#preact/video';
+import {registerVideoActions} from '#preact/video/actions';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

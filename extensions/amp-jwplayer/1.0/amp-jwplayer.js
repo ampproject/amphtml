@@ -2,7 +2,7 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
-import {registerVideoActions} from '#preact/video';
+import {registerVideoActions} from '#preact/video/actions';
 
 import {userAssert} from '#utils/log';
 
