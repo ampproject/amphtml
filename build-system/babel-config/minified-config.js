@@ -74,10 +74,31 @@ function getMinifiedConfig() {
     sourceMaps: 'inline',
     presets: [presetEnv],
     retainLines: true,
+    // Babel assumptions enables transformation optimizations.
+    // Full details at https://babeljs.io/docs/en/assumptions.
     assumptions: {
+      arrayLikeIsIterable: true,
+      constantReexports: true,
       constantSuper: true,
+      enumerableModuleMeta: true,
+      // TODO: determine if ignoreFunctionLength can be enabled
+      // https://babeljs.io/docs/en/assumptions#ignorefunctionlength
+      ignoreFunctionLength: false,
+      ignoreToPrimitiveHint: true,
+      iterableIsArray: false,
+      mutableTemplateObject: false,
       noClassCalls: true,
+      noDocumentAll: true,
+      noIncompleteNsImportDetection: true,
+      noNewArrows: true,
+      objectRestNoSymbols: true,
+      privateFieldsAsProperties: false,
+      pureGetters: true,
       setClassMethods: true,
+      setComputedProperties: true,
+      setPublicClassFields: true,
+      setSpreadProperties: true,
+      skipForOfIteratorClosing: true,
     },
   };
 }
