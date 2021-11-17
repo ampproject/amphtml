@@ -107,6 +107,7 @@ function buildProviderParams(opt_params) {
 }
 
 /**
+ * Creates an amp-social-share element if the type is valid.
  * @param {!Document} doc
  * @param {string} shareType
  * @param {!JsonObject=} opt_params
@@ -115,6 +116,7 @@ function buildProviderParams(opt_params) {
 function buildProvider(doc, shareType, opt_params) {
   const shareProviderLocalizedStringId =
     SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
+
   if (!shareProviderLocalizedStringId) {
     return;
   }
