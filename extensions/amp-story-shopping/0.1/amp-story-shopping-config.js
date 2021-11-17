@@ -2,6 +2,8 @@ import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {devAssert} from '#utils/log';
+
 import {
   Action,
   ShoppingConfigDataDef,
@@ -51,6 +53,8 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       Services.storyRequestServiceForOrNull(this.win),
     ])
       .then(([storeService, requestService]) => {
+        devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
+        devAssert(requestService, 'Could not retrieve AmpStoryRequestService');
         this.storeService_ = storeService;
         this.requestService_ = requestService;
         return this.requestService_.loadConfig(this.element);
