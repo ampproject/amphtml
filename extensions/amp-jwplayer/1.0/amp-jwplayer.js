@@ -2,6 +2,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {registerVideoActions} from '#preact/video';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -19,6 +21,8 @@ const TAG = 'amp-jwplayer';
 class AmpJwplayer extends BaseElement {
   /** @override */
   init() {
+    registerVideoActions(this);
+
     const consentPolicy = this.getConsentPolicy();
     if (consentPolicy) {
       this.getConsentInfo().then((consentInfo) => {

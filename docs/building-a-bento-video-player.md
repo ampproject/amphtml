@@ -14,7 +14,8 @@
 -   [How Video Player Components Work](#how-video-player-components-work)
 -   [Getting Started](#getting-started)
 -   [Directory Structure](#directory-structure)
--   [Extend `VideoBaseElement` for AMP](#extend-videobaseelement-for-amp)
+-   [Define a Web Component](#define-a-web-component)
+    -   [Register AMP Actions](#register-amp-actions)
     -   [`props`](#props)
 -   [Define a Preact component](#define-a-preact-component)
     -   [Forwarding `ref`](#forwarding-ref)
@@ -51,9 +52,7 @@ However, most video players are embedded through an iframe so they should use **
 return <VideoIframe {...props}>
 ```
 
-To enable component support for **AMP documents**, our video player element must extend from a base class `VideoBaseElement`. This enables [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/#amp-video-and-other-video-elements_1) and [analytics](https://github.com/ampproject/amphtml/blob/main/extensions/amp-analytics/amp-video-analytics.md), and allows us to define further behavior specific to the AMP layer, like parsing element attributes into Preact props.
-
-This guide covers how to implement video player components that are internally implemented using these Preact and AMP components.
+This guide covers how to implement video player components that are internally implemented using either of these Preact components.
 
 ## Getting Started
 
@@ -75,35 +74,45 @@ A [full directory for a Bento component](./building-a-bento-amp-extension.md#dir
  └── amp-my-fantastic-player.css   # Custom CSS
 ```
 
-## Extend `VideoBaseElement` for AMP
+## Define a Web Component
 
-Our `BaseElement` should be a superclass of `VideoBaseElement`. In **`base-element.js`**, we change:
+### Register AMP Actions
+
+By calling `registerVideoActions()`, we ensure that common playback methods like `play` and `pause` are available as [AMP actions.](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/#amp-video-and-other-video-elements_1)
+
+In **`amp-my-fantastic-player.js`**, we change:
 
 ```diff
-  import {MyFantasticPlayer} from './component';
-- import {PreactBaseElement} from '#preact/base-element';
-+ import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
++ import {registerVideoActions} from '#preact/video';
 
-- export class BaseElement extends PreactBaseElement {}
-+ export class BaseElement extends VideoBaseElement {}
+  export class AmpMyFantasticPlayer extends BaseElement {
++   /** @override */
++   init() {
++     registerVideoActions(this);
++     return super.init();
++   }
+  }
 ```
 
 into:
 
 ```js
-// base-element.js
+// amp-my-fantastic-player.js
 // ...
-import {MyFantasticPlayer} from './component';
-import {VideoBaseElement} from '../../amp-video/1.0/base-element';
+import {registerVideoActions} from '#preact/video';
 
-export class BaseElement extends VideoBaseElement {}
+export class AmpMyFantasticPlayer extends BaseElement {
+  /** @override */
+  init() {
+    registerVideoActions(this);
+    return super.init();
+  }
+}
 ```
-
-This enables support for AMP actions and analytics, once we map attributes to their prop counterparts in `BaseElement['props']`, and we implement the Preact component.
 
 ### `props`
 
-[**`props`**](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
+[**`props`**](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`amp-video/1.0/base-element.js`](../extensions/amp-video/1.0/base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
 
 ```js
 // base-element.js
@@ -510,7 +519,7 @@ When we click the following button on an AMP document:
 
 We call the corresponding function `play`:
 
-> The AMP action `my-element.play` is declared to be forwarded to the Preact component's method. See the [`init()` method on `VideoBaseElement`](../extensions/amp-video/1.0/base-element.js) for a list of the supported actions.
+> The AMP action `my-element.play` is declared to be forwarded to the Preact component's method. See [**Register AMP Actions**](#register-amp-actions).
 
 ```
 -> FantasticPlayer.play()

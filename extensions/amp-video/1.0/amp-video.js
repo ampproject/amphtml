@@ -1,12 +1,18 @@
 import {CSS} from '../../../build/amp-video-1.0.css';
-import {VideoBaseElement} from './video-base-element';
+import {BaseElement} from './base-element';
+import {registerVideoActions} from '#preact/video';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-video';
 
-class AmpVideo extends VideoBaseElement {
+class AmpVideo extends BaseElement {
+  /** @override */
+  init() {
+    registerVideoActions(this);
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

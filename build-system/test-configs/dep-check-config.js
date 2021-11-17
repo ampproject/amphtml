@@ -225,8 +225,8 @@ exports.rules = [
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
-      // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
-      'extensions/**->extensions/amp-video/1.0/video-base-element.js',
+      // VideoIframe is meant to be shared.
+      // TODO(alanorozco): Move VideoWrapper and VideoIframe to #preact/video
       'extensions/**->extensions/amp-video/1.0/video-iframe.js',
 
       // <amp-video-iframe> versions share this message API definition.

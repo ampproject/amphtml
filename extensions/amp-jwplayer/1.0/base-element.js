@@ -1,17 +1,14 @@
 import {getDataParamsFromAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 
+import {PreactBaseElement} from '#preact/base-element';
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoJwplayer} from './component';
 
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
-
-export class BaseElement extends VideoBaseElement {
+export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
-    super.init();
-
     return dict({
       'queryParams': this.mergeQueryParams(
         getDataParamsFromAttributes(this.element, null, /^playerParam(.+)/),

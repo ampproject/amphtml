@@ -1,5 +1,7 @@
 import {isExperimentOn} from '#experiments';
 
+import {registerVideoActions} from '#preact/video';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -10,6 +12,11 @@ import {CSS} from '../../../build/amp-vimeo-1.0.css';
 const TAG = 'amp-vimeo';
 
 class AmpVimeo extends BaseElement {
+  /** @override */
+  init() {
+    registerVideoActions(this);
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

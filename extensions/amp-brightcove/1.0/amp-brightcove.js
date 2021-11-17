@@ -9,6 +9,7 @@ import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 import {Services} from '#service';
+import {registerVideoActions} from '#preact/video';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';
@@ -21,7 +22,8 @@ class AmpBrightcove extends BaseElement {
 
   /** @override */
   init() {
-    super.init();
+    registerVideoActions(this);
+
     userAssert(
       this.element.getAttribute('data-account'),
       'The data-account attribute is required for <amp-brightcove> %s',

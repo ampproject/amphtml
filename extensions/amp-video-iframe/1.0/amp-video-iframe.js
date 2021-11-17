@@ -3,6 +3,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {registerVideoActions} from '#preact/video';
+
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
@@ -31,6 +33,10 @@ function getIntersectionRatioMinAutoplay(element) {
 }
 
 class AmpVideoIframe extends BaseElement {
+  /** @override */
+  init() {
+    registerVideoActions(this);
+  }
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
