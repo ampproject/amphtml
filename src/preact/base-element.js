@@ -30,7 +30,12 @@ import {BaseElement} from '#preact/bento-ce';
 
 import {WithAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
-import {AmpElementPropDef, collectProps} from './parse-props';
+import {
+  AmpElementPropDef,
+  HAS_SELECTOR,
+  checkPropsFor,
+  collectProps,
+} from './parse-props';
 
 import {installShadowStyle} from '../shadow-embed';
 
@@ -81,25 +86,10 @@ const UNSLOTTED_GROUP = 'unslotted';
 const MATCH_ANY = () => true;
 
 /**
- * @param {!Object<string, !AmpElementPropDef>} propDefs
- * @param {function(!AmpElementPropDef):boolean} cb
- * @return {boolean}
- */
-function checkPropsFor(propDefs, cb) {
-  return Object.values(propDefs).some(cb);
-}
-
-/**
  * @param {!AmpElementPropDef} def
  * @return {boolean}
  */
 const HAS_MEDIA = (def) => !!def.media;
-
-/**
- * @param {!AmpElementPropDef} def
- * @return {boolean}
- */
-const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
 
 /**
  * @param {!AmpElementPropDef} def
@@ -985,20 +975,6 @@ PreactBaseElement['delegatesFocus'] = false;
 PreactBaseElement['props'] = {};
 
 /**
- * @param {null|string} attributeName
- * @param {string|undefined} attributePrefix
- * @return {boolean}
- */
-function matchesAttrPrefix(attributeName, attributePrefix) {
-  return (
-    attributeName !== null &&
-    attributePrefix !== undefined &&
-    attributeName.startsWith(attributePrefix) &&
-    attributeName !== attributePrefix
-  );
-}
-
-/**
  * @param {!NodeList} nodeList
  * @return {boolean}
  */
@@ -1043,7 +1019,7 @@ function shouldMutationBeRerendered(Ctor, m) {
       if (
         m.attributeName == def.attr ||
         (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
-        matchesAttrPrefix(m.attributeName, def.attrPrefix)
+        def.attrMatches?.(m.attributeName)
       ) {
         return true;
       }
