@@ -30,9 +30,9 @@ BaseElement['props'] = {
     ],
     parseAttrs: parseDateAttrs,
   },
-  'whenEnded': {attr: 'when-ended', type: 'string'},
-  'locale': {attr: 'locale', type: 'string'},
-  'biggestUnit': {attr: 'biggest-unit', type: 'string'},
+  'whenEnded': {attr: 'when-ended'},
+  'locale': {attr: 'locale'},
+  'biggestUnit': {attr: 'biggest-unit'},
   'countUp': {attr: 'count-up', type: 'boolean'},
 };
 

@@ -9,9 +9,9 @@ BaseElement['Component'] = BentoBrightcove;
 
 /** @override */
 BaseElement['props'] = {
-  'account': {attr: 'data-account', type: 'string'},
+  'account': {attr: 'data-account'},
   'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'embed': {attr: 'data-embed', type: 'string', default: 'default'},
+  'embed': {attr: 'data-embed', default: 'default'},
   'player': {
     attrs: ['data-player', 'data-player-id'],
     parseAttrs(element) {
@@ -19,10 +19,10 @@ BaseElement['props'] = {
       return player || playerId || 'default';
     },
   },
-  'playlistId': {attr: 'data-playlist-id', type: 'string'},
-  'referrer': {attr: 'data-referrer', type: 'string'},
+  'playlistId': {attr: 'data-playlist-id'},
+  'referrer': {attr: 'data-referrer'},
   'urlParams': createParseAttrsWithPrefix('data-param-'),
-  'videoId': {attr: 'data-video-id', type: 'string'},
+  'videoId': {attr: 'data-video-id'},
   // TODO(wg-bento): These props have no internal implementation yet.
   'dock': {attr: 'dock', media: true},
 };

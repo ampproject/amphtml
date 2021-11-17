@@ -29,7 +29,6 @@ BaseElement['props'] = {
   'includeCommentParent': {
     attr: 'data-include-comment-parent',
     type: 'boolean',
-    default: false,
   },
   'showText': {attr: 'data-show-text'},
   // -comments
