@@ -768,7 +768,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
  */
 async function generateBentoEntryPointSource(name, toExport) {
   return dedent(`
-    import {defineBentoElement} from '../../../../src/preact/bento-ce';
+    import {defineBentoElement} from '#preact/bento-ce';
     import {BaseElement} from '../base-element';
 
     function defineElement() {
