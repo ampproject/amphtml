@@ -91,17 +91,16 @@ const readCache = new Map();
  * completed, the result will be reused.
  *
  * @param {string} path
- * @param {string=} optionsHash
  * @return {Promise<ReadResult>}
  */
-function batchedRead(path, optionsHash) {
+function batchedRead(path) {
   let read = readCache.get(path);
   if (!read) {
     read = fs
       .readFile(path)
       .then((contents) => ({
         contents,
-        hash: md5(contents, optionsHash ?? ''),
+        hash: md5(contents),
       }))
       .finally(() => {
         readCache.delete(path);

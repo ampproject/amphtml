@@ -88,13 +88,19 @@ async function preClosureBabel(file, outputFilename, options) {
   }
   try {
     debug(CompilationLifecycles['pre-babel'], file);
-    const babelOptions =
-      babel.loadOptions({caller: {name: 'pre-closure'}}) || {};
-    const optionsHash = md5(
-      JSON.stringify({babelOptions, argv: process.argv.slice(2)})
+    const callerName = 'pre-closure';
+    const babelOptions = babel.loadOptions({caller: {name: callerName}}) || {};
+    const {contents, hash} = await batchedRead(file);
+    const cachedPromise = transformCache.get(
+      md5(
+        JSON.stringify({
+          callerName,
+          hash,
+          babelOptions,
+          argv: process.argv.slice(2),
+        })
+      )
     );
-    const {contents, hash} = await batchedRead(file, optionsHash);
-    const cachedPromise = transformCache.get(hash);
     if (cachedPromise) {
       if (!(await fs.pathExists(transformedFile))) {
         await fs.outputFile(transformedFile, await cachedPromise);
