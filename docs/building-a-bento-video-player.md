@@ -78,12 +78,12 @@ A [full directory for a Bento component](./building-a-bento-amp-extension.md#dir
 
 ### Register AMP Actions
 
-By calling `registerVideoActions()`, we ensure that common playback methods like `play` and `pause` are available as [AMP actions.](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/#amp-video-and-other-video-elements_1)
+By calling [`registerVideoActions()`](../src/preact/video/actions.js), we ensure that common playback methods like `play` and `pause` are available as [AMP actions.](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/#amp-video-and-other-video-elements_1)
 
 In **`amp-my-fantastic-player.js`**, we change:
 
 ```diff
-+ import {registerVideoActions} from '#preact/video';
++ import {registerVideoActions} from '#preact/video/actions';
 
   export class AmpMyFantasticPlayer extends BaseElement {
 +   /** @override */
@@ -99,7 +99,7 @@ into:
 ```js
 // amp-my-fantastic-player.js
 // ...
-import {registerVideoActions} from '#preact/video';
+import {registerVideoActions} from '#preact/video/actions';
 
 export class AmpMyFantasticPlayer extends BaseElement {
   /** @override */

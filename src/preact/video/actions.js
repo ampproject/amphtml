@@ -1,6 +1,9 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 /**
+ * Register AMP actions for a video player.
+ * It expects the BaseElement implementation to nest a <VideoWrapper> or
+ * <VideoIframe> in its Preact component, or be API-compatible with either.
  * @param {PreactBaseElement<VideoWrapperDef.Api>} impl
  */
 export function registerVideoActions(impl) {
