@@ -339,12 +339,12 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /** Used by amp-lightbox-gallery */
   interactionNext() {
-    this.controls_.interactionNext();
+    this.controls_.handleNext();
   }
 
   /** Used by amp-lightbox-gallery */
   interactionPrev() {
-    this.controls_.interactionPrev();
+    this.controls_.handlePrev();
   }
 
   /**
