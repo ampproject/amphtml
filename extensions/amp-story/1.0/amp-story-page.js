@@ -35,7 +35,6 @@ import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
-  scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
