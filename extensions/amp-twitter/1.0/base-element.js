@@ -1,4 +1,5 @@
 import {PreactBaseElement} from '#preact/base-element';
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
 import {BentoTwitter} from './component';
 
 export class BaseElement extends PreactBaseElement {}
@@ -10,7 +11,7 @@ BaseElement['Component'] = BentoTwitter;
 BaseElement['props'] = {
   'title': {attr: 'title'}, // Needed for Preact component
   'loading': {attr: 'data-loading'},
-  'options': {attrPrefix: 'data-'}, // Needed to render component upon mutation
+  'options': createParseAttrsWithPrefix('data-'), // Needed to render componoent upon mutation
 };
 
 /** @override */
