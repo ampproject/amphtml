@@ -80,7 +80,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       const expectedRemoteResult = JSON.parse(
-        '{"city-pop":{"product-tag-id":"city-pop","brand-label":"...","brand-favicon":"...","product-title":"Plastic Love","product-price":"...","product-images":["..."],"product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"k-pop":{"product-tag-id":"k-pop","brand-label":"...","brand-favicon":"...","product-title":"Gangnam Style","product-price":"...","product-images":["..."],"product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1},"eurodance":{"product-tag-id":"eurodance","brand-label":"...","brand-favicon":"...","product-title":"Crystal King Battle","product-price":"...","product-images":["..."],"product-details":"...","reviews-page":"...","reviews-data":"...","cta-text":1,"shipping-text":1}}'
+        '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love"},"k-pop":{"product-tag-id":"k-pop","product-title":"Gangnam Style"},"eurodance":{"product-tag-id":"eurodance","product-title":"Crystal King Battle"}}'
       );
 
       expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(
