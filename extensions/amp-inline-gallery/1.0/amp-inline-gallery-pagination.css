@@ -6,4 +6,5 @@ amp-inline-gallery-pagination[inset] {
   width: 100%;
   position: absolute;
   bottom: 0;
+  overflow: visible;
 }

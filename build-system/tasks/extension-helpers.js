@@ -505,13 +505,30 @@ async function buildExtension(
 }
 
 /**
- * Writes an extensions's CSS to its npm dist folder.
+ * Writes an extensions's (P)react CSS to its npm dist folder.
  *
  * @param {string} extDir
  * @param {Object} options
  * @return {Promise<void>}
  */
 async function buildNpmCss(extDir, options) {
+  /** @type {Promise<*>[]} */
+  const parallel = [];
+  parallel.push(buildNpmPreactCss(extDir, options));
+  if (options.bento) {
+    parallel.push(buildNpmBentoCss(options.name, extDir, options));
+  }
+  await Promise.all(parallel);
+}
+
+/**
+ * Writes an extensions's Preact CSS to its npm dist folder.
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmPreactCss(extDir, options) {
   const startCssTime = Date.now();
   const filenames = await fastGlob(path.join(extDir, '**', '*.jss.js'));
   if (!filenames.length) {
@@ -522,6 +539,23 @@ async function buildNpmCss(extDir, options) {
   const outfile = path.join(extDir, 'dist', 'styles.css');
   await fs.writeFile(outfile, css);
   endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
+}
+
+/**
+ * Writes an extension's bento component's container CSS to its npm dist folder
+ * @param {string} name
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmBentoCss(name, extDir, options) {
+  const bentoName = getBentoName(name);
+  const {version} = options;
+  const bentoCssFilename = `build/css/${bentoName}-${version}.css`;
+  if (!(await fs.pathExists(bentoCssFilename))) {
+    await buildExtensionCss(extDir, name, version, options);
+  }
+  await fs.copyFile(bentoCssFilename, `${extDir}/dist/web-component.css`);
 }
 
 /** @type {TransformCache} */
@@ -570,31 +604,70 @@ async function buildExtensionCss(extDir, name, version, options) {
 
   const versions = [version, aliasedVersion].filter(Boolean);
 
-  const bundles = await fastGlob(`${extDir}/*.css`);
+  const cssFiles = await fastGlob(`${extDir}/*.css`);
 
-  await Promise.all(
-    bundles.map(async (filename) => {
-      const name = path.basename(filename, '.css');
-      const css = await jsifyCssAsync(filename);
-      await writeCssBinaries(name, versions, css);
+  /** @type {Object<string, string>} */
+  const cssBundles = {};
 
-      if (options.bento) {
-        await buildBentoCss(name, versions, css);
-      }
-    })
+  const ampCssBundles = await Promise.all(
+    cssFiles.map(async (filename) => [
+      path.basename(filename, '.css'),
+      await jsifyCssAsync(filename),
+    ])
   );
+  Object.assign(cssBundles, Object.fromEntries(ampCssBundles));
+
+  /* For bento, create 1 css bundle for each extension encompassing styles for all components */
+  if (options.bento) {
+    const bentoName = getBentoName(name);
+    const bentoCssFilename = `./${extDir}/${bentoName}.css`;
+    /* If multiple stylesheets, generate intermediate css file that imports the rest */
+    if (cssFiles.length > 1) {
+      /* use bento-foo.css if exists */
+      const generateTempBentoCss = !(await fs.pathExists(bentoCssFilename));
+      if (generateTempBentoCss) {
+        await fs.outputFile(
+          bentoCssFilename,
+          cssFiles
+            .map(
+              (filename) => `@import './${path.basename(filename, '.css')}.css'`
+            )
+            .join(';\n')
+        );
+      }
+
+      cssBundles[bentoName] = await renameSelectorsToBentoTagNames(
+        await jsifyCssAsync(bentoCssFilename)
+      );
+
+      if (generateTempBentoCss) {
+        await fs.remove(bentoCssFilename);
+      }
+    } else {
+      cssBundles[bentoName] = await renameSelectorsToBentoTagNames(
+        cssBundles[path.basename(cssFiles[0], '.css')]
+      );
+    }
+  }
+
+  for (const name in cssBundles) {
+    const css = cssBundles[name];
+    writeCssBinaries(name, versions, css);
+  }
 }
 
 /**
  * @param {string} name
  * @param {string[]} versions
  * @param {string} css
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function writeCssBinaries(name, versions, css) {
   const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
-  await writeVersions(`build/${name}`, 'css.js', versions, jsCss);
-  await writeVersions(`build/css/${name}`, 'css', versions, css);
+  await Promise.all([
+    writeVersions(`build/${name}`, 'css.js', versions, jsCss),
+    writeVersions(`build/css/${name}`, 'css', versions, css),
+  ]);
 }
 
 /**
@@ -605,26 +678,13 @@ async function writeCssBinaries(name, versions, css) {
  * @return {!Promise<void>}
  */
 async function writeVersions(prefix, fileExtension, versions, content) {
-  for (const version of versions) {
-    const outfile = `${prefix}-${version}.${fileExtension}`;
-    await fs.outputFile(outfile, content);
-  }
-}
-
-/**
- * Build bento-*.css using the compiled amp-* result as source.
- * It replaces all selectors for elements <amp-*> with <bento-*>.
- * As a result of taking already minified code as source, this function is
- * fairly fast and not cached.
- * @param {string} name
- * @param {string[]} versions
- * @param {string} minifiedAmpCss
- * @return {!Promise}
- */
-async function buildBentoCss(name, versions, minifiedAmpCss) {
-  const bentoName = getBentoName(name);
-  const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
-  await writeCssBinaries(bentoName, versions, renamedCss);
+  await Promise.all(
+    versions.map(async (version) => {
+      const outfile = `${prefix}-${version}.${fileExtension}`;
+      await fs.outputFile(outfile, content);
+    })
+  );
+  prefix;
 }
 
 /**
