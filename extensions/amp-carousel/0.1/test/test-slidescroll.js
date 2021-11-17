@@ -6,6 +6,8 @@ import {createElementWithAttributes} from '#core/dom';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {AmpSlideScroll} from '../slidescroll';
+import {buildDom} from '../build-dom';
 
 describes.realWin(
   'SlideScroll',
@@ -27,6 +29,14 @@ describes.realWin(
       resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
+    /**
+     * @param {boolean=} opt_hasLooping
+     * @param {number=} opt_slideCount
+     * @param {boolean=} opt_attachToDom
+     * @param {boolean=} opt_hasAutoplay
+     * @param {boolean=} opt_autoplayLoops
+     * @return {!Element}
+     */
     function getAmpSlideScroll(
       opt_hasLooping,
       opt_slideCount = 5,
@@ -357,20 +367,14 @@ describes.realWin(
       const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
       impl.showSlide_(1);
-      expect(controls.hasNext_()).to.be.true;
-      expect(controls.hasPrev_()).to.be.true;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
       impl.showSlide_(0);
-      expect(controls.hasNext_()).to.be.true;
-      expect(controls.hasPrev_()).to.be.false;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
 
       impl.showSlide_(4);
-      expect(controls.hasNext_()).to.be.false;
-      expect(controls.hasPrev_()).to.be.true;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
@@ -1053,20 +1057,14 @@ describes.realWin(
         const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
         impl.showSlide_(1);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(0);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(4);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
       });
@@ -1468,6 +1466,66 @@ describes.realWin(
           );
           expect(getNextTitle(el)).to.equal('Next item in carousel (1 of 3)');
         });
+      });
+    });
+
+    describe('buildDom', () => {
+      it('buildDom and buildCallback should result in the same outerHTML', async () => {
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        const el2 = el1.cloneNode(/* deep */ true);
+        const impl = new AmpSlideScroll(el1);
+        impl.setupSlideBehavior_ = () => {};
+        await impl.buildCallback();
+        buildDom(el2);
+
+        expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      it('buildCallback should assign ivars even when server rendered', async () => {
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(el1);
+        el1.setAttribute('i-amphtml-ssr', '');
+        const impl = new AmpSlideScroll(el1);
+        impl.setupSlideBehavior_ = () => {};
+        await impl.buildCallback();
+
+        expect(impl.slides_).length(5);
+        expect(impl.slideWrappers_).length(5);
+        expect(impl.slidesContainer_).ok;
+      });
+
+      it('buildDom should throw if invalid server rendered dom', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        carousel.setAttribute('i-amphtml-ssr', '');
+        expect(() => buildDom(carousel)).throws(/Invalid server render/);
+      });
+
+      it('buildDom should not modify dom for server rendered element', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(carousel);
+        carousel.setAttribute('i-amphtml-ssr', '');
+
+        const before = carousel.outerHTML;
+        buildDom(carousel);
+        const after = carousel.outerHTML;
+
+        expect(before).equal(after);
       });
     });
   }
