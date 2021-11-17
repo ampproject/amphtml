@@ -542,6 +542,22 @@ async function minify(code, map) {
         // eslint-disable-next-line local/camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
       },
+      // eslint-disable-next-line local/camelcase
+      nth_identifier: {
+        get(num) {
+          const leading =
+            '$ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+          const all = leading + '0123456789';
+          let charset = leading;
+          let id = '';
+          do {
+            id += charset[num % charset.length];
+            num = Math.floor(num / charset.length);
+            charset = all;
+          } while (num > 0);
+          return id;
+        },
+      },
     },
     compress: {
       // Settled on this count by incrementing number until there was no more

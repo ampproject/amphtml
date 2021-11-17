@@ -1,5 +1,5 @@
 import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {createCustomEvent} from '#utils/event-helper';
 import {devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
@@ -59,7 +59,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout == Layout_Enum.FIXED_HEIGHT;
   }
 
   /** @override */

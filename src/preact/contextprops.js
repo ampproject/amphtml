@@ -1,5 +1,5 @@
 import {
-  Loading,
+  Loading_Enum,
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
 import {contextProp} from '#core/context/prop';
@@ -41,24 +41,24 @@ const CanPlay = contextProp('CanPlay', {
 });
 
 /**
- * The default `Loading` instruction for a subtree. See `Loading` for the set
+ * The default `Loading_Enum` instruction for a subtree. See `Loading_Enum` for the set
  * of possible values. Non-renderable subtrees automatically get a value of
  * "lazy".
  *
  * Default is "auto".
  *
- * @const {!ContextPropDef<!Loading, boolean>}
+ * @const {!ContextPropDef<!Loading_Enum, boolean>}
  */
 const LoadingProp = contextProp('Loading', {
-  defaultValue: Loading.AUTO,
+  defaultValue: Loading_Enum.AUTO,
   recursive: true,
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>
     loadingReducer(
-      canRender ? Loading.AUTO : Loading.LAZY,
+      canRender ? Loading_Enum.AUTO : Loading_Enum.LAZY,
       loadingReducer(
-        parentValue || Loading.AUTO,
-        inputs.reduce(loadingReducer, Loading.AUTO)
+        parentValue || Loading_Enum.AUTO,
+        inputs.reduce(loadingReducer, Loading_Enum.AUTO)
       )
     ),
 });

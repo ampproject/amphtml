@@ -10,7 +10,7 @@ Renders an iframe that reports its position in the host document to the child wi
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/iframe
@@ -140,7 +140,7 @@ You may use the `bento-iframe` element selector to style the component.
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/iframe

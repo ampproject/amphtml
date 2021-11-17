@@ -6,7 +6,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {toArray} from '#core/types/array';
 
@@ -197,7 +197,7 @@ function waitForEvent(env, name) {
 }
 
 const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
-  type: AmpEvents.FORM_VALUE_CHANGE,
+  type: AmpEvents_Enum.FORM_VALUE_CHANGE,
   bubbles: true,
 };
 const chromed = describes.sandboxed.configure().ifChrome();
@@ -614,7 +614,7 @@ chromed.run('Bind', {}, function () {
               });
               dynamicTag.appendChild(element);
               dynamicTag.dispatchEvent(
-                new Event(AmpEvents.DOM_UPDATE, {bubbles: true})
+                new Event(AmpEvents_Enum.DOM_UPDATE, {bubbles: true})
               );
               return waitForEvent(env, BindEvents.RESCAN_TEMPLATE);
             })
@@ -1533,7 +1533,7 @@ chromed.run('Bind', {}, function () {
           });
         });
 
-        describe('AmpEvents.FORM_VALUE_CHANGE', () => {
+        describe('AmpEvents_Enum.FORM_VALUE_CHANGE', () => {
           it('should dispatch FORM_VALUE_CHANGE on <input [value]> changes', () => {
             const element = createElement(env, container, '[value]="foo"', {
               tag: 'input',
@@ -1579,7 +1579,7 @@ chromed.run('Bind', {}, function () {
               () => {
                 expect(spy).to.have.been.calledOnce;
                 expect(spy).calledWithMatch({
-                  type: AmpEvents.FORM_VALUE_CHANGE,
+                  type: AmpEvents_Enum.FORM_VALUE_CHANGE,
                   bubbles: true,
                 });
               }
@@ -1596,7 +1596,7 @@ chromed.run('Bind', {}, function () {
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AmpEvents.FORM_VALUE_CHANGE,
+                type: AmpEvents_Enum.FORM_VALUE_CHANGE,
                 bubbles: true,
               });
             });

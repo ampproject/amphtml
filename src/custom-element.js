@@ -1,6 +1,6 @@
-import {AmpEvents} from '#core/constants/amp-events';
-import {CommonSignals} from '#core/constants/common-signals';
-import {ReadyState} from '#core/constants/ready-state';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 import {tryResolve} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import * as dom from '#core/dom';
@@ -8,7 +8,11 @@ import {
   UPGRADE_TO_CUSTOMELEMENT_PROMISE,
   UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
 } from '#core/dom/amp-element-helpers';
-import {Layout, LayoutPriority, isLoadingAllowed} from '#core/dom/layout';
+import {
+  LayoutPriority_Enum,
+  Layout_Enum,
+  isLoadingAllowed,
+} from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import * as query from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
@@ -17,7 +21,7 @@ import {applyStaticLayout} from '#core/static-layout';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
-import {ResourceState} from '#service/resource';
+import {ResourceState_Enum} from '#service/resource';
 import {getSchedulerForDoc} from '#service/scheduler';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
@@ -40,7 +44,7 @@ const TAG = 'CustomElement';
 /**
  * @enum {number}
  */
-const UpgradeState = {
+const UpgradeState_Enum = {
   NOT_UPGRADED: 1,
   UPGRADED: 2,
   UPGRADE_FAILED: 3,
@@ -168,8 +172,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       /** @private {?AbortController} */
       this.mountAbortController_ = null;
 
-      /** @private {!ReadyState} */
-      this.readyState_ = ReadyState.UPGRADING;
+      /** @private {!ReadyState_Enum} */
+      this.readyState_ = ReadyState_Enum.UPGRADING;
 
       /** @type {boolean} */
       this.everAttached = false;
@@ -186,8 +190,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
        */
       this.resources_ = null;
 
-      /** @private {!Layout} */
-      this.layout_ = Layout.NODISPLAY;
+      /** @private {!Layout_Enum} */
+      this.layout_ = Layout_Enum.NODISPLAY;
 
       /** @private {number} */
       this.layoutCount_ = 0;
@@ -245,9 +249,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
        * An element always starts in a unupgraded state until it's added to DOM
        * for the first time in which case it can be upgraded immediately or wait
        * for script download or `upgradeCallback`.
-       * @private {!UpgradeState}
+       * @private {!UpgradeState_Enum}
        */
-      this.upgradeState_ = UpgradeState.NOT_UPGRADED;
+      this.upgradeState_ = UpgradeState_Enum.NOT_UPGRADED;
 
       /**
        * Time delay imposed by baseElement upgradeCallback.  If no
@@ -276,7 +280,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       this.signals_ = new Signals();
 
       if (this.implClass_) {
-        this.signals_.signal(CommonSignals.READY_TO_UPGRADE);
+        this.signals_.signal(CommonSignals_Enum.READY_TO_UPGRADE);
       }
 
       const perf = Services.performanceForOrNull(win);
@@ -293,7 +297,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       }
     }
 
-    /** @return {!ReadyState} */
+    /** @return {!ReadyState_Enum} */
     get readyState() {
       return this.readyState_;
     }
@@ -341,12 +345,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     isUpgraded() {
-      return this.upgradeState_ == UpgradeState.UPGRADED;
+      return this.upgradeState_ == UpgradeState_Enum.UPGRADED;
     }
 
     /** @return {!Promise} */
     whenUpgraded() {
-      return this.signals_.whenSignal(CommonSignals.UPGRADED);
+      return this.signals_.whenSignal(CommonSignals_Enum.UPGRADED);
     }
 
     /**
@@ -360,13 +364,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.isInTemplate_) {
         return;
       }
-      if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
+      if (this.upgradeState_ != UpgradeState_Enum.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
         return;
       }
 
       this.implClass_ = newImplClass;
-      this.signals_.signal(CommonSignals.READY_TO_UPGRADE);
+      this.signals_.signal(CommonSignals_Enum.READY_TO_UPGRADE);
       if (this.everAttached) {
         // Usually, we do an implementation upgrade when the element is
         // attached to the DOM. But, if it hadn't yet upgraded from
@@ -406,21 +410,21 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     completeUpgrade_(newImpl, upgradeStartTime) {
       this.impl_ = newImpl;
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
-      this.upgradeState_ = UpgradeState.UPGRADED;
-      this.setReadyStateInternal(ReadyState.BUILDING);
+      this.upgradeState_ = UpgradeState_Enum.UPGRADED;
+      this.setReadyStateInternal(ReadyState_Enum.BUILDING);
       this.classList.remove('amp-unresolved', 'i-amphtml-unresolved');
       this.assertLayout_();
-      this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
+      this.dispatchCustomEventForTesting(AmpEvents_Enum.ATTACHED);
       if (!this.R1()) {
         this.getResources().upgraded(this);
       }
-      this.signals_.signal(CommonSignals.UPGRADED);
+      this.signals_.signal(CommonSignals_Enum.UPGRADED);
     }
 
     /** @private */
     assertLayout_() {
       if (
-        this.layout_ != Layout.NODISPLAY &&
+        this.layout_ != Layout_Enum.NODISPLAY &&
         this.impl_ &&
         !this.impl_.isLayoutSupported(this.layout_)
       ) {
@@ -442,7 +446,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     getBuildPriority() {
       return this.implClass_
         ? this.implClass_.getBuildPriority(this)
-        : LayoutPriority.BACKGROUND;
+        : LayoutPriority_Enum.BACKGROUND;
     }
 
     /**
@@ -453,7 +457,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     getLayoutPriority() {
       return this.impl_
         ? this.impl_.getLayoutPriority()
-        : LayoutPriority.BACKGROUND;
+        : LayoutPriority_Enum.BACKGROUND;
     }
 
     /**
@@ -489,7 +493,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @return {!Promise}
      */
     whenBuilt() {
-      return this.signals_.whenSignal(CommonSignals.BUILT);
+      return this.signals_.whenSignal(CommonSignals_Enum.BUILT);
     }
 
     /**
@@ -510,7 +514,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         return this.buildingPromise_;
       }
 
-      this.setReadyStateInternal(ReadyState.BUILDING);
+      this.setReadyStateInternal(ReadyState_Enum.BUILDING);
 
       // Create the instance.
       const implPromise = this.createImpl_();
@@ -551,16 +555,16 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           this.built_ = true;
           this.classList.add('i-amphtml-built');
           this.classList.remove('i-amphtml-notbuilt', 'amp-notbuilt');
-          this.signals_.signal(CommonSignals.BUILT);
+          this.signals_.signal(CommonSignals_Enum.BUILT);
 
           if (this.R1()) {
             this.setReadyStateInternal(
-              this.readyState_ != ReadyState.BUILDING
+              this.readyState_ != ReadyState_Enum.BUILDING
                 ? this.readyState_
-                : ReadyState.MOUNTING
+                : ReadyState_Enum.MOUNTING
             );
           } else {
-            this.setReadyStateInternal(ReadyState.LOADING);
+            this.setReadyStateInternal(ReadyState_Enum.LOADING);
             this.preconnect(/* onLayout */ false);
           }
 
@@ -585,12 +589,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         },
         (reason) => {
           this.signals_.rejectSignal(
-            CommonSignals.BUILT,
+            CommonSignals_Enum.BUILT,
             /** @type {!Error} */ (reason)
           );
 
           if (this.R1()) {
-            this.setReadyStateInternal(ReadyState.ERROR, reason);
+            this.setReadyStateInternal(ReadyState_Enum.ERROR, reason);
           }
 
           if (!isBlockedByConsent(reason)) {
@@ -610,7 +614,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       }
 
       const readyPromise = this.signals_.whenSignal(
-        CommonSignals.READY_TO_UPGRADE
+        CommonSignals_Enum.READY_TO_UPGRADE
       );
       return readyPromise.then(() => {
         if (this.R1()) {
@@ -646,11 +650,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             return;
           }
           this.setReadyStateInternal(
-            this.readyState_ != ReadyState.MOUNTING
+            this.readyState_ != ReadyState_Enum.MOUNTING
               ? this.readyState_
               : this.implClass_.usesLoading(this)
-              ? ReadyState.LOADING
-              : ReadyState.MOUNTING
+              ? ReadyState_Enum.LOADING
+              : ReadyState_Enum.MOUNTING
           );
           this.mounted_ = true;
           const result = this.impl_.mountCallback(signal);
@@ -664,9 +668,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           if (signal.aborted) {
             throw cancellation();
           }
-          this.signals_.signal(CommonSignals.MOUNTED);
+          this.signals_.signal(CommonSignals_Enum.MOUNTED);
           if (!this.implClass_.usesLoading(this) || hasLoaded) {
-            this.setReadyStateInternal(ReadyState.COMPLETE);
+            this.setReadyStateInternal(ReadyState_Enum.COMPLETE);
           }
         })
         .catch((reason) => {
@@ -675,10 +679,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             this.mountPromise_ = null;
           } else {
             this.signals_.rejectSignal(
-              CommonSignals.MOUNTED,
+              CommonSignals_Enum.MOUNTED,
               /** @type {!Error} */ (reason)
             );
-            this.setReadyStateInternal(ReadyState.ERROR, reason);
+            this.setReadyStateInternal(ReadyState_Enum.ERROR, reason);
           }
           throw reason;
         }));
@@ -701,7 +705,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       const {signal} = this.mountAbortController_;
 
       const readyPromise = this.signals_.whenSignal(
-        CommonSignals.READY_TO_UPGRADE
+        CommonSignals_Enum.READY_TO_UPGRADE
       );
       return readyPromise.then(() => {
         if (!this.R1()) {
@@ -765,7 +769,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @return {!Promise}
      */
     whenMounted() {
-      return this.signals_.whenSignal(CommonSignals.MOUNTED);
+      return this.signals_.whenSignal(CommonSignals_Enum.MOUNTED);
     }
 
     /**
@@ -773,7 +777,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     whenLoaded() {
-      return this.signals_.whenSignal(CommonSignals.LOAD_END);
+      return this.signals_.whenSignal(CommonSignals_Enum.LOAD_END);
     }
 
     /**
@@ -797,11 +801,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         // set its state for the downstream to process it correctly.
         const resource = this.getResource_();
         return resource.whenBuilt().then(() => {
-          if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+          if (resource.getState() == ResourceState_Enum.LAYOUT_COMPLETE) {
             return;
           }
           if (
-            resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
+            resource.getState() != ResourceState_Enum.LAYOUT_SCHEDULED ||
             resource.isMeasureRequested()
           ) {
             resource.measure();
@@ -846,7 +850,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     /**
      * Update the internal ready state.
      *
-     * @param {!ReadyState} state
+     * @param {!ReadyState_Enum} state
      * @param {*=} opt_failure
      * @protected
      * @final
@@ -863,29 +867,29 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       }
 
       switch (state) {
-        case ReadyState.LOADING:
-          this.signals_.signal(CommonSignals.LOAD_START);
-          this.signals_.reset(CommonSignals.UNLOAD);
-          this.signals_.reset(CommonSignals.LOAD_END);
+        case ReadyState_Enum.LOADING:
+          this.signals_.signal(CommonSignals_Enum.LOAD_START);
+          this.signals_.reset(CommonSignals_Enum.UNLOAD);
+          this.signals_.reset(CommonSignals_Enum.LOAD_END);
           this.classList.add('i-amphtml-layout');
           // Potentially start the loading indicator.
           this.toggleLoading(true);
-          this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
+          this.dispatchCustomEventForTesting(AmpEvents_Enum.LOAD_START);
           return;
-        case ReadyState.COMPLETE:
+        case ReadyState_Enum.COMPLETE:
           // LOAD_START is set just in case. It won't be overwritten if
           // it had been set before.
-          this.signals_.signal(CommonSignals.LOAD_START);
-          this.signals_.signal(CommonSignals.LOAD_END);
-          this.signals_.reset(CommonSignals.UNLOAD);
+          this.signals_.signal(CommonSignals_Enum.LOAD_START);
+          this.signals_.signal(CommonSignals_Enum.LOAD_END);
+          this.signals_.reset(CommonSignals_Enum.UNLOAD);
           this.classList.add('i-amphtml-layout');
           this.toggleLoading(false);
           dom.dispatchCustomEvent(this, 'load', null, NO_BUBBLES);
-          this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
+          this.dispatchCustomEventForTesting(AmpEvents_Enum.LOAD_END);
           return;
-        case ReadyState.ERROR:
+        case ReadyState_Enum.ERROR:
           this.signals_.rejectSignal(
-            CommonSignals.LOAD_END,
+            CommonSignals_Enum.LOAD_END,
             /** @type {!Error} */ (opt_failure)
           );
           this.toggleLoading(false);
@@ -977,8 +981,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     getSizer_() {
       if (
         this.sizerElement === undefined &&
-        (this.layout_ === Layout.RESPONSIVE ||
-          this.layout_ === Layout.INTRINSIC)
+        (this.layout_ === Layout_Enum.RESPONSIVE ||
+          this.layout_ === Layout_Enum.INTRINSIC)
       ) {
         // Expect sizer to exist, just not yet discovered.
         this.sizerElement = this.querySelector('i-amphtml-sizer');
@@ -992,11 +996,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @private
      */
     resetSizer_(sizer) {
-      if (this.layout_ === Layout.RESPONSIVE) {
+      if (this.layout_ === Layout_Enum.RESPONSIVE) {
         setStyle(sizer, 'paddingTop', '0');
         return;
       }
-      if (this.layout_ === Layout.INTRINSIC) {
+      if (this.layout_ === Layout_Enum.INTRINSIC) {
         const intrinsicSizerImg = sizer.querySelector(
           '.i-amphtml-intrinsic-sizer'
         );
@@ -1063,7 +1067,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
       // Heights.
       const heightsAttr =
-        this.layout_ === Layout.RESPONSIVE
+        this.layout_ === Layout_Enum.RESPONSIVE
           ? this.getAttribute('heights')
           : null;
       if (heightsAttr) {
@@ -1126,7 +1130,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
-      dom.dispatchCustomEvent(this, AmpEvents.SIZE_CHANGED);
+      dom.dispatchCustomEvent(this, AmpEvents_Enum.SIZE_CHANGED);
     }
 
     /**
@@ -1189,7 +1193,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             this.getResources().upgraded(this);
           }
           this.connected_();
-          this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
+          this.dispatchCustomEventForTesting(AmpEvents_Enum.ATTACHED);
         }
         if (this.implClass_ && this.R1()) {
           this.upgradeOrSchedule_();
@@ -1214,7 +1218,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         }
 
         if (!this.isUpgraded()) {
-          this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
+          this.dispatchCustomEventForTesting(AmpEvents_Enum.STUBBED);
         }
       }
 
@@ -1261,12 +1265,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         // Already built or building: just needs to be mounted.
         this.setReadyStateInternal(
           this.implClass_ && this.implClass_.usesLoading(this)
-            ? ReadyState.LOADING
-            : ReadyState.MOUNTING
+            ? ReadyState_Enum.LOADING
+            : ReadyState_Enum.MOUNTING
         );
       } else {
         // Not built yet: execute prebuild steps.
-        this.setReadyStateInternal(ReadyState.BUILDING);
+        this.setReadyStateInternal(ReadyState_Enum.BUILDING);
 
         // Schedule preconnects.
         if (!opt_disablePreload) {
@@ -1300,7 +1304,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.isInTemplate_) {
         return;
       }
-      if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
+      if (this.upgradeState_ != UpgradeState_Enum.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
         return;
       }
@@ -1315,7 +1319,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // The `upgradeCallback` only allows redirect once for the top-level
       // non-stub class. We may allow nested upgrades later, but they will
       // certainly be bad for performance.
-      this.upgradeState_ = UpgradeState.UPGRADE_IN_PROGRESS;
+      this.upgradeState_ = UpgradeState_Enum.UPGRADE_IN_PROGRESS;
       const startTime = win.Date.now();
       const res = impl.upgradeCallback();
       if (!res) {
@@ -1328,7 +1332,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             this.completeUpgrade_(upgrade || impl, startTime);
           })
           .catch((reason) => {
-            this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
+            this.upgradeState_ = UpgradeState_Enum.UPGRADE_FAILED;
             rethrowAsync(reason);
           });
       } else {
@@ -1565,7 +1569,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      */
     createImpl_() {
       return this.signals_
-        .whenSignal(CommonSignals.READY_TO_UPGRADE)
+        .whenSignal(CommonSignals_Enum.READY_TO_UPGRADE)
         .then(() => {
           this.tryUpgrade_();
           return this.whenUpgraded();
@@ -1585,7 +1589,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Returns the layout of the element.
-     * @return {!Layout}
+     * @return {!Layout_Enum}
      */
     getLayout() {
       return this.layout_;
@@ -1615,11 +1619,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         return Promise.reject(cancellation());
       }
 
-      this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
+      this.dispatchCustomEventForTesting(AmpEvents_Enum.LOAD_START);
       const isLoadEvent = this.layoutCount_ == 0; // First layout is "load".
-      this.signals_.reset(CommonSignals.UNLOAD);
+      this.signals_.reset(CommonSignals_Enum.UNLOAD);
       if (isLoadEvent) {
-        this.signals_.signal(CommonSignals.LOAD_START);
+        this.signals_.signal(CommonSignals_Enum.LOAD_START);
       }
 
       // Potentially start the loading indicator.
@@ -1635,9 +1639,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
             throw cancellation();
           }
           if (isLoadEvent) {
-            this.signals_.signal(CommonSignals.LOAD_END);
+            this.signals_.signal(CommonSignals_Enum.LOAD_END);
           }
-          this.setReadyStateInternal(ReadyState.COMPLETE);
+          this.setReadyStateInternal(ReadyState_Enum.COMPLETE);
           this.layoutCount_++;
           this.toggleLoading(false);
           // Check if this is the first success layout that needs
@@ -1645,7 +1649,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           if (!this.isFirstLayoutCompleted_) {
             this.impl_.firstLayoutCompleted();
             this.isFirstLayoutCompleted_ = true;
-            this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
+            this.dispatchCustomEventForTesting(AmpEvents_Enum.LOAD_END);
           }
         },
         (reason) => {
@@ -1655,11 +1659,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
           // add layoutCount_ by 1 despite load fails or not
           if (isLoadEvent) {
             this.signals_.rejectSignal(
-              CommonSignals.LOAD_END,
+              CommonSignals_Enum.LOAD_END,
               /** @type {!Error} */ (reason)
             );
           }
-          this.setReadyStateInternal(ReadyState.ERROR, reason);
+          this.setReadyStateInternal(ReadyState_Enum.ERROR, reason);
           this.layoutCount_++;
           this.toggleLoading(false);
           throw reason;
@@ -1716,12 +1720,12 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (!this.isBuilt()) {
         return false;
       }
-      this.signals_.signal(CommonSignals.UNLOAD);
+      this.signals_.signal(CommonSignals_Enum.UNLOAD);
       const isReLayoutNeeded = this.impl_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.reset_();
       }
-      this.dispatchCustomEventForTesting(AmpEvents.UNLOAD);
+      this.dispatchCustomEventForTesting(AmpEvents_Enum.UNLOAD);
       return isReLayoutNeeded;
     }
 
@@ -1737,11 +1741,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     reset_() {
       this.layoutCount_ = 0;
       this.isFirstLayoutCompleted_ = false;
-      this.signals_.reset(CommonSignals.MOUNTED);
-      this.signals_.reset(CommonSignals.RENDER_START);
-      this.signals_.reset(CommonSignals.LOAD_START);
-      this.signals_.reset(CommonSignals.LOAD_END);
-      this.signals_.reset(CommonSignals.INI_LOAD);
+      this.signals_.reset(CommonSignals_Enum.MOUNTED);
+      this.signals_.reset(CommonSignals_Enum.RENDER_START);
+      this.signals_.reset(CommonSignals_Enum.LOAD_START);
+      this.signals_.reset(CommonSignals_Enum.LOAD_END);
+      this.signals_.reset(CommonSignals_Enum.INI_LOAD);
     }
 
     /**
@@ -1958,9 +1962,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (
         !this.R1() &&
         show &&
-        (resourceState == ResourceState.NOT_BUILT ||
-          resourceState == ResourceState.NOT_LAID_OUT ||
-          resourceState == ResourceState.READY_FOR_LAYOUT)
+        (resourceState == ResourceState_Enum.NOT_BUILT ||
+          resourceState == ResourceState_Enum.NOT_LAID_OUT ||
+          resourceState == ResourceState_Enum.READY_FOR_LAYOUT)
       ) {
         return;
       }
@@ -1986,7 +1990,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     renderStarted() {
-      this.signals_.signal(CommonSignals.RENDER_START);
+      this.signals_.signal(CommonSignals_Enum.RENDER_START);
       this.togglePlaceholder(false);
       this.toggleLoading(false);
     }
@@ -2010,9 +2014,10 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       // 7. The element's layout is not nodisplay.
 
       const laidOut =
-        this.layoutCount_ > 0 || this.signals_.get(CommonSignals.RENDER_START);
+        this.layoutCount_ > 0 ||
+        this.signals_.get(CommonSignals_Enum.RENDER_START);
       if (
-        this.layout_ == Layout.NODISPLAY ||
+        this.layout_ == Layout_Enum.NODISPLAY ||
         this.hasAttribute('noloading') ||
         (laidOut && !force) ||
         !isLoadingAllowed(this) ||

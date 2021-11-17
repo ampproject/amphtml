@@ -6,7 +6,7 @@ Embeds a [Soundcloud](https://soundcloud.com) clip.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/soundcloud
@@ -31,14 +31,6 @@ defineBentoSoundcloud();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-soundcloud {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
     <script
       type="module"
       async
@@ -49,16 +41,22 @@ defineBentoSoundcloud();
       async
       src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css"
+    />
     <style>
       bento-soundcloud {
-        aspect-ratio: 1;
+        width: 300px;
+        height: 300px;
       }
     </style>
   </head>
   <body>
     <bento-soundcloud
       id="my-track"
-      data-trackid="243169232"
+      data-trackid="89299804"
       data-visual="true"
     ></bento-soundcloud>
     <div class="buttons" style="margin-top: 8px">
@@ -148,7 +146,7 @@ The value for this attribute is the ID of a playlist, an integer.</td>
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/soundcloud

@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {dict} from '#core/types/object';
 
 import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
@@ -83,7 +83,7 @@ export class Mask {
 
     this.controller_ = this.Inputmask_(config);
 
-    this.element_.addEventListener(AmpEvents.FORM_VALUE_CHANGE, () => {
+    this.element_.addEventListener(AmpEvents_Enum.FORM_VALUE_CHANGE, () => {
       this.mask();
     });
   }
