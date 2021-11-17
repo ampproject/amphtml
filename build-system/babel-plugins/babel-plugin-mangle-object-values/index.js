@@ -1,35 +1,14 @@
 /**
- * @fileoverview Mangles the values of an object expression.
+ * @fileoverview Mangles the values of an object expression into their numeric
+ * indices + 1.
  * This is useful when defining large enums, as it allows us to use descriptive
  * values during development, but use short mangled values during production.
  */
-
-const {encode, indexCharset} = require('base62/lib/custom');
 
 const fnName = 'mangleObjectValues';
 
 module.exports = function (babel) {
   const {types: t} = babel;
-
-  let charset;
-
-  /**
-   * @param {number} i
-   * @return {string|number}
-   */
-  function mangle(i) {
-    // 1..99 are smaller as numbers than strings. Skip 0 because it's falsy
-    if (i <= 98) {
-      return i + 1;
-    }
-    if (!charset) {
-      // Only letters to prevent collisions when 0-99 are used as keys.
-      charset = indexCharset(
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      );
-    }
-    return encode(i - 99, charset);
-  }
 
   return {
     name: 'mangle-object-values',
@@ -55,7 +34,8 @@ module.exports = function (babel) {
             );
           }
           const {value} = prop.value;
-          const mangled = (seen[value] = seen[value] || mangle(i));
+          // Skip 0 because it's falsy
+          const mangled = (seen[value] = seen[value] || i + 1);
           prop.value = t.valueToNode(mangled);
         }
         path.replaceWith(objectExpression);
