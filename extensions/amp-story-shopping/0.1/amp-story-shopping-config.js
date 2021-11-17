@@ -20,10 +20,8 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
     /** @private @const {?./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
-
     /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
@@ -35,13 +33,10 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
    */
   addShoppingDataFromConfig_(storyConfig) {
     const productIDtoProduct = {};
-
     for (const item of storyConfig['items']) {
       productIDtoProduct[item['product-tag-id']] = item;
     }
-
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
-
     //TODO(#36412): Add call to validate config here.
   }
 
