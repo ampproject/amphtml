@@ -12,9 +12,12 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '#preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '#preact/context';
+import {forwardRef, toChildArray} from '#preact/compat';
+import {isRTL} from '#core/dom';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {getWin} from '#core/window';
 import {
   cloneElement,
-  toChildArray,
   useCallback,
   useContext,
   useEffect,
@@ -24,10 +27,6 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {forwardRef} from '#preact/compat';
-import {isRTL} from '#core/dom';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {getWin} from '#core/window';
 import {useStyles} from './component.jss';
 import {mod} from '#core/math';
 
