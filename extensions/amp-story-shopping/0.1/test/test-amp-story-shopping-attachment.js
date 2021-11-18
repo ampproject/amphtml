@@ -1,12 +1,12 @@
+import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
-import '../../../amp-story/1.0/amp-story-page-attachment';
 
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story-shopping:0.1'],
+      extensions: ['amp-story:1.0, amp-story-shopping:0.1'],
     },
   },
   (env) => {
