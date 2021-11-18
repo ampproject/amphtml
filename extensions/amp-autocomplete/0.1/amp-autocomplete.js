@@ -1,14 +1,14 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '#core/constants/key-codes';
-import {Layout} from '#core/dom/layout';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {Layout_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
@@ -423,7 +423,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
     this.maybeSetSrcFromInput_();
     if (this.isSsr_) {
@@ -1149,7 +1149,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.element,
       selectName,
       selectEvent,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     // Ensure native change listeners are triggered
@@ -1295,7 +1295,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     switch (event.key) {
-      case Keys.DOWN_ARROW:
+      case Keys_Enum.DOWN_ARROW:
         event.preventDefault();
         if (this.areResultsDisplayed_()) {
           // Disrupt loop around to display user input.
@@ -1309,7 +1309,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.autocomplete_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
         });
-      case Keys.UP_ARROW:
+      case Keys_Enum.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
         if (this.activeIndex_ === 0) {
@@ -1317,7 +1317,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           return Promise.resolve();
         }
         return this.updateActiveItem_(-1);
-      case Keys.ENTER:
+      case Keys_Enum.ENTER:
         const shouldPreventDefault = this.binding_.shouldPreventDefaultOnEnter(
           !!this.activeElement_
         );
@@ -1336,7 +1336,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return this.mutateElement(() => {
           this.toggleResults_(false);
         });
-      case Keys.ESCAPE:
+      case Keys_Enum.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
           if (!this.fallbackDisplayed_) {
@@ -1345,7 +1345,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.toggleResults_(false);
           }
         });
-      case Keys.TAB:
+      case Keys_Enum.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
           const {selectedObject, selectedText} =
@@ -1355,7 +1355,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           });
         }
         return Promise.resolve();
-      case Keys.BACKSPACE:
+      case Keys_Enum.BACKSPACE:
         this.detectBackspace_ = this.shouldSuggestFirst_;
         return Promise.resolve();
       default:
@@ -1386,7 +1386,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 }
 

@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
-import {MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {getWin} from '#core/window';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {setStyle} from '#core/dom/style';
@@ -45,7 +45,7 @@ export function BentoIframe({
     }
     postMessage(
       iframe,
-      MessageType.INTERSECTION,
+      MessageType_Enum.INTERSECTION,
       dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
       targetOrigin
     );
@@ -58,7 +58,7 @@ export function BentoIframe({
     }
     if (
       event.source !== iframe.contentWindow ||
-      event.data?.type !== MessageType.SEND_INTERSECTIONS
+      event.data?.type !== MessageType_Enum.SEND_INTERSECTIONS
     ) {
       return;
     }
@@ -129,7 +129,7 @@ export function BentoIframe({
 
   const handleEmbedSizePostMessage = useCallback(
     (event) => {
-      if (event.data?.type !== MessageType.EMBED_SIZE) {
+      if (event.data?.type !== MessageType_Enum.EMBED_SIZE) {
         return;
       }
       dataRef.current = event.data;

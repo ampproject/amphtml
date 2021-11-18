@@ -3,13 +3,13 @@ import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import * as Preact from '#preact';
 import {
   cloneElement,
+  toChildArray,
   useCallback,
   useContext,
   useLayoutEffect,
   useMemo,
   useState,
 } from '#preact';
-import {toChildArray} from '#preact/compat';
 
 import {BentoLightboxGalleryContext} from './context';
 

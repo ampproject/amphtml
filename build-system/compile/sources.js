@@ -28,8 +28,6 @@ const COMMON_GLOBS = [
   'node_modules/resize-observer-polyfill/ResizeObserver.install.js',
   'node_modules/obj-str/package.json',
   'node_modules/obj-str/dist/obj-str.mjs',
-  'node_modules/promise-pjs/package.json',
-  'node_modules/promise-pjs/promise.mjs',
   'node_modules/rrule/dist/es5/rrule.js',
   'node_modules/timeago.js/package.json',
   'node_modules/timeago.js/**/*.js',

@@ -87,7 +87,7 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
       query: 'foo;bar',
       pageurl: 'http://www.adup-tech.com',
       gdpr: '0',
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       gdpr_consent: 'crazyConsentString',
       adtest: '1',
     });
@@ -96,7 +96,7 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
       adtest: '1',
       amp: true,
       gdpr: '0',
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       gdpr_consent: 'crazyConsentString',
       mincpc: '0.33',
       onAds: env.sandbox.match.func,
@@ -139,7 +139,7 @@ describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {
     aduptech(win, {
       placementkey: 'crazyPlacementKey',
       gdpr: true,
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       gdpr_consent: 'customConsentString',
     });
 

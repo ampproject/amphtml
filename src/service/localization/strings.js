@@ -9,11 +9,11 @@ import {parseJson} from '#core/types/object/json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 100
+ * Next ID: 101
  *
  * @const @enum {string}
  */
-export const LocalizedStringId = {
+export const LocalizedStringId_Enum = {
   // amp-story
   AMP_STORY_ACTIVATE_BUTTON_TEXT: '83',
   AMP_STORY_AUDIO_MUTE_BUTTON_LABEL: '66',
@@ -51,6 +51,7 @@ export const LocalizedStringId = {
   AMP_STORY_PAUSE_BUTTON_LABEL: '85',
   AMP_STORY_PLAY_BUTTON_LABEL: '86',
   AMP_STORY_PREVIOUS_PAGE: '93',
+  AMP_STORY_READ_MORE: '100',
   AMP_STORY_REPLAY: '92',
   AMP_STORY_SHARE_BUTTON_LABEL: '69',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
@@ -58,7 +59,6 @@ export const LocalizedStringId = {
   AMP_STORY_SHARING_PAGE_LABEL: '62',
   AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: '6',
   AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: '7',
-  AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
   AMP_STORY_SHARING_PROVIDER_NAME_LINE: '63',
   AMP_STORY_SHARING_PROVIDER_NAME_LINK: '9',
   AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: '10',
@@ -115,6 +115,7 @@ export const LocalizedStringId = {
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
   // DEPRECATED_AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL: '24',
   // DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
+  // DEPRECATED_AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
 };
 
 /**
@@ -126,7 +127,7 @@ export const LocalizedStringId = {
 export let LocalizedStringDef;
 
 /**
- * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
+ * @typedef {!Object<!LocalizedStringId_Enum, !LocalizedStringDef>}
  */
 export let LocalizedStringBundleDef;
 
@@ -159,14 +160,14 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (
+    const localizedStringId = /** @type {!LocalizedStringId_Enum} */ (
       localizedStringIdAsStr
     );
-    pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
-      localizedStringBundle[localizedStringId].string
-    );
-    pseudoLocaleStringBundle[localizedStringId].fallback = localizationFn(
-      localizedStringBundle[localizedStringId].fallback
+    const entry = localizedStringBundle[localizedStringId];
+    // In unminified builds, this is an object {"string": "foo", ...}.
+    // In minified builds, this is the actual string "foo".
+    pseudoLocaleStringBundle[localizedStringId] = localizationFn(
+      entry['string'] || entry
     );
   });
 

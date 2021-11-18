@@ -426,7 +426,12 @@ export class ProgressBar {
       this.win_,
       StoryAdSegmentExp.ID
     );
-    if (!segmentExpBranch || segmentExpBranch === StoryAdSegmentExp.CONTROL) {
+    if (
+      !segmentExpBranch ||
+      segmentExpBranch === StoryAdSegmentExp.CONTROL ||
+      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_BOTH ||
+      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_AD
+    ) {
       return;
     }
     // Set CSS signal that we are in the experiment.

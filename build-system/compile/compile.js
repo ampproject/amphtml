@@ -231,7 +231,7 @@ async function generateCompilerOptions(outputFilename, options) {
    * TODO(#28387) write a type for this.
    * @type {Object}
    */
-  /* eslint "google-camelcase/google-camelcase": 0*/
+  /* eslint "local/camelcase": 0*/
   const compilerOptions = {
     compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
     // Turns on more optimizations.

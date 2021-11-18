@@ -1,5 +1,3 @@
-
-
 amp-story-cta-layer {
   display: block !important;
   position: absolute !important;
@@ -8,5 +6,5 @@ amp-story-cta-layer {
   bottom: 0 !important;
   left: 0 !important;
   margin: 0 !important;
-  z-index: 3 !important;
+  z-index: 2147483642 !important;
 }

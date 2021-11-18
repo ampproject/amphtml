@@ -12,9 +12,10 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
  * the ongoing `amp` task.
  *
  * @param {string} command
+ * @param {number} pid
  * @return {number}
  */
-exports.createCtrlcHandler = function (command) {
+exports.createCtrlcHandler = function (command, pid = process.pid) {
   logLocalDev(
     green('Running'),
     cyan(command) + green('. Press'),
@@ -31,7 +32,7 @@ exports.createCtrlcHandler = function (command) {
     #!/bin/sh
     ctrlcHandler() {
       echo -e "${killMessage}"
-      ${killCmd} ${process.pid}
+      ${killCmd} ${pid}
       exit 1
     }
     trap 'ctrlcHandler' INT

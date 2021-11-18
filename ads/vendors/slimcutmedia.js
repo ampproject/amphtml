@@ -5,7 +5,7 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function slimcutmedia(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._scm_amp = {
     allowed_data: ['pid', 'ffc'],
     mandatory_data: ['pid'],

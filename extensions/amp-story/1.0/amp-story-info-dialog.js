@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -9,15 +10,14 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {localize} from './amp-story-localization-service';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -47,9 +47,6 @@ export class InfoDialog {
 
     /** @private {boolean} */
     this.isBuilt_ = false;
-
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
@@ -82,8 +79,7 @@ export class InfoDialog {
 
     this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
-    const html = htmlFor(this.parentEl_);
-    this.element_ = html`
+    this.element_ = (
       <div class="i-amphtml-story-info-dialog i-amphtml-story-system-reset">
         <div class="i-amphtml-story-info-dialog-container">
           <h1 class="i-amphtml-story-info-heading"></h1>
@@ -91,7 +87,7 @@ export class InfoDialog {
           <a class="i-amphtml-story-info-moreinfo"></a>
         </div>
       </div>
-    `;
+    );
 
     createShadowRootWithStyle(root, this.element_, CSS);
     this.initializeListeners_();
@@ -206,8 +202,9 @@ export class InfoDialog {
    * @return {*} TODO(#23582): Specify return type
    */
   setHeading_() {
-    const label = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
+    const label = localize(
+      this.parentEl_,
+      LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
     );
     const headingEl = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-info-heading')
@@ -252,8 +249,9 @@ export class InfoDialog {
     );
 
     return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {
-      const label = this.localizationService_.getLocalizedString(
-        LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
+      const label = localize(
+        this.parentEl_,
+        LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
       );
       this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
       this.moreInfoLinkEl_.setAttribute(

@@ -1,8 +1,6 @@
 /**
  * @fileoverview
  * GitHub API util functions.
- * TODO: set owner repo defaults
- * TODO: error handling
  */
 
 const dedent = require('dedent');
@@ -14,6 +12,12 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
   userAgent: 'amp release tagger',
   timeZone: 'America/Los_Angeles',
+});
+octokit.hook.error('request', (error) => {
+  // don't throw an error if resource is not found
+  if (error.status === 404) {
+    return;
+  }
 });
 
 const graphqlWithAuth = graphql.defaults({
@@ -56,14 +60,15 @@ async function _runQueryInBatches(queryType, queries) {
  * @param {string} title
  * @return {Promise<Object>}
  */
-function createIssue(body, label, title) {
-  return octokit.rest.issues.create({
+async function createIssue(body, label, title) {
+  const {data} = await octokit.rest.issues.create({
     owner,
     repo,
     title,
     body,
     labels: [label],
   });
+  return data;
 }
 
 /**
@@ -96,7 +101,7 @@ async function getIssue(title) {
   const search = dedent`\
     search(query:"repo:${owner}/${repo} in:title ${title}", \
     type: ISSUE, first: 1) { nodes { ... on Issue \
-    { number title body }}}`;
+    { number title body url }}}`;
   const query = `query {${search}}`;
   const response = await graphqlWithAuth({query});
   if (response.search?.nodes) {
@@ -107,11 +112,11 @@ async function getIssue(title) {
 /**
  * Get a GitHub release by tag name
  * @param {string} tag
- * @return {Promise<Object>}
+ * @return {Promise<Object|undefined>}
  */
 async function getRelease(tag) {
-  const {data} = await octokit.rest.repos.getReleaseByTag({owner, repo, tag});
-  return data;
+  const response = await octokit.rest.repos.getReleaseByTag({owner, repo, tag});
+  return response?.data;
 }
 
 /**
@@ -154,16 +159,16 @@ async function updateRelease(id, changes) {
  * Get a list of commits between two commits
  * @param {string} head
  * @param {string} base
- * @return {Promise<Object>}
+ * @return {Promise<Object|undefined>}
  */
 async function compareCommits(head, base) {
-  const {data} = await octokit.rest.repos.compareCommits({
+  const response = await octokit.rest.repos.compareCommits({
     owner,
     repo,
     base,
     head,
   });
-  return data;
+  return response?.data;
 }
 
 /**
@@ -212,11 +217,11 @@ async function getPullRequestsBetweenCommits(head, base) {
 /**
  * Get label
  * @param {string} name
- * @return {Promise<Object>}
+ * @return {Promise<Object|undefined>}
  */
 async function getLabel(name) {
-  const {data} = await octokit.rest.issues.getLabel({owner, repo, name});
-  return data;
+  const response = await octokit.rest.issues.getLabel({owner, repo, name});
+  return response?.data;
 }
 
 /**
@@ -260,22 +265,22 @@ async function unlabelPullRequests(prs, labelId) {
 /**
  * Get a git ref
  * @param {string} tag
- * @return {Promise<Object>}
+ * @return {Promise<Object|undefined>}
  */
 async function getRef(tag) {
-  const {data} = await octokit.rest.git.getRef({
+  const response = await octokit.rest.git.getRef({
     owner,
     repo,
     ref: `tags/${tag}`,
   });
-  return data;
+  return response?.data;
 }
 
 /**
  * Create git tag and ref
  * @param {string} tag
  * @param {string} sha
- * @return {!Promise}
+ * @return {Promise<Object|undefined>}
  */
 async function createTag(tag, sha) {
   await octokit.rest.git.createTag({
@@ -288,13 +293,13 @@ async function createTag(tag, sha) {
   });
 
   // once a tag object is created, create a reference
-  const {data} = await octokit.rest.git.createRef({
+  const response = await octokit.rest.git.createRef({
     owner,
     repo,
     ref: `refs/tags/${tag}`,
     sha,
   });
-  return data;
+  return response?.data;
 }
 
 module.exports = {
