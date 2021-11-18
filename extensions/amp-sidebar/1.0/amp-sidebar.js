@@ -4,10 +4,15 @@ import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 import {Services} from '#service/';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
-class AmpSidebar extends BaseElement {
+class AmpSidebar extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   constructor(element) {
     super(element);

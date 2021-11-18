@@ -2,6 +2,11 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -16,7 +21,7 @@ import {
 const TAG = 'amp-jwplayer';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
-class AmpJwplayer extends BaseElement {
+class AmpJwplayer extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     const consentPolicy = this.getConsentPolicy();

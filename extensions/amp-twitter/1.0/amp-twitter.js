@@ -5,11 +5,16 @@ import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#core/assert';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-twitter';
 const TYPE = 'twitter';
 
-class AmpTwitter extends BaseElement {
+class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

@@ -3,10 +3,15 @@ import {VideoBaseElement} from './video-base-element';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-video';
 
-class AmpVideo extends VideoBaseElement {
+class AmpVideo extends setSuperClass(VideoBaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

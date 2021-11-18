@@ -4,6 +4,11 @@ import {userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {measureIntersection} from '#core/dom/layout/intersection';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-iframe';
 /** @const {number} */
@@ -11,7 +16,7 @@ const MINIMUM_DISTANCE_FROM_TOP_PX = 600;
 /** @const {number} */
 const MINIMUM_VIEWPORT_PROPORTION = 0.75;
 
-class AmpIframe extends BaseElement {
+class AmpIframe extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

@@ -3,10 +3,15 @@ import {CSS} from '../../../build/amp-fit-text-1.0.css';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends BaseElement {
+class AmpFitText extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

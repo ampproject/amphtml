@@ -3,6 +3,11 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
@@ -12,7 +17,10 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-date-countdown';
 
-class AmpDateCountdown extends BaseElement {
+class AmpDateCountdown extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

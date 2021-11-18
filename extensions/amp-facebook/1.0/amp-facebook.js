@@ -11,6 +11,11 @@ import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-facebook';
 const COMMENTS_TAG = 'amp-facebook-comments';
@@ -66,14 +71,25 @@ function AmpFacebookMixin(clazz1) {
     }
   };
 }
+class AmpFacebook extends setSuperClass(
+  AmpFacebookMixin(BaseElement),
+  AmpPreactBaseElement
+) {}
 
-class AmpFacebook extends AmpFacebookMixin(BaseElement) {}
+class AmpFacebookComments extends setSuperClass(
+  AmpFacebookMixin(CommentsBaseElement),
+  AmpPreactBaseElement
+) {}
 
-class AmpFacebookComments extends AmpFacebookMixin(CommentsBaseElement) {}
+class AmpFacebookLike extends setSuperClass(
+  AmpFacebookMixin(LikeBaseElement),
+  AmpPreactBaseElement
+) {}
 
-class AmpFacebookLike extends AmpFacebookMixin(LikeBaseElement) {}
-
-class AmpFacebookPage extends AmpFacebookMixin(PageBaseElement) {}
+class AmpFacebookPage extends setSuperClass(
+  AmpFacebookMixin(PageBaseElement),
+  AmpPreactBaseElement
+) {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);

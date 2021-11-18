@@ -7,10 +7,18 @@ import {isExperimentOn} from '#experiments';
 import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-stream-gallery';
 
-class AmpStreamGallery extends BaseElement {
+class AmpStreamGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   init() {
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust_Enum.LOW);

@@ -10,10 +10,14 @@ import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 import {Services} from '#service';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-brightcove';
-
-class AmpBrightcove extends BaseElement {
+class AmpBrightcove extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override @nocollapse */
   static getPreconnects() {
     return ['https://players.brightcove.net'];

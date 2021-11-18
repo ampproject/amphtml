@@ -12,10 +12,18 @@ import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-paginatio
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-inline-gallery';
 
-class AmpInlineGallery extends BaseElement {
+class AmpInlineGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

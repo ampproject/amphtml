@@ -2,6 +2,11 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -9,7 +14,10 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-wordpress-embed';
 
-class AmpWordPressEmbed extends BaseElement {
+class AmpWordPressEmbed extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

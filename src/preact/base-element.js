@@ -1,5 +1,4 @@
 import {devAssert} from '#core/assert';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Loading_Enum} from '#core/constants/loading-instructions';
 import {ReadyState_Enum} from '#core/constants/ready-state';
@@ -108,29 +107,6 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * @template API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
-  /** @override @nocollapse */
-  static R1() {
-    return true;
-  }
-
-  /** @override @nocollapse */
-  static requiresShadowDom() {
-    // eslint-disable-next-line local/no-static-this
-    return this['usesShadowDom'];
-  }
-
-  /** @override @nocollapse */
-  static usesLoading() {
-    // eslint-disable-next-line local/no-static-this
-    return this['loadable'];
-  }
-
-  /** @override @nocollapse */
-  static prerenderAllowed() {
-    // eslint-disable-next-line local/no-static-this
-    return !this.usesLoading();
-  }
-
   /** @param {!Element} element */
   constructor(element) {
     super(element);
@@ -403,24 +379,6 @@ export class PreactBaseElement extends BaseElement {
    */
   api() {
     return devAssert(this.currentRef_);
-  }
-
-  /**
-   * Register an action for AMP documents to execute an API handler.
-   *
-   * This has no effect on Bento documents, since they lack an Actions system.
-   * Instead, they should use `(await element.getApi()).action()`
-   * @param {string} alias
-   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ActionTrust_Enum} minTrust
-   * @protected
-   */
-  registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
-    this.registerAction?.(
-      alias,
-      (invocation) => handler(this.api(), invocation),
-      minTrust
-    );
   }
 
   /**

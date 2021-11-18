@@ -6,12 +6,16 @@ import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
 import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
-class AmpBaseCarousel extends BaseElement {
+class AmpBaseCarousel extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust_Enum.LOW);

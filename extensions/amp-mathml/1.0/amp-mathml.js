@@ -1,5 +1,10 @@
 import {isExperimentOn} from '#experiments';
 
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -11,7 +16,7 @@ import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 /** @const {string} */
 const TAG = 'amp-mathml';
 
-class AmpMathml extends BaseElement {
+class AmpMathml extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override @nocollapse */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();

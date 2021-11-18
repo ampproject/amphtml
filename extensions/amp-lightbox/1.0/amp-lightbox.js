@@ -10,11 +10,16 @@ import {isExperimentOn} from '#experiments';
 import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
 
+/** @extends {PreactBaseElement<LightboxDef.Api>} */
+import {
+  AmpPreactBaseElement,
+  setSuperClass,
+} from '#preact/amp-preact-base-element';
+
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
-/** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends BaseElement {
+class AmpLightbox extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   constructor(element) {
     super(element);
