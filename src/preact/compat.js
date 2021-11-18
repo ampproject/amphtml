@@ -2,6 +2,15 @@ import {options} from /*OK*/ 'preact';
 
 import * as mode from '#core/mode';
 
+const REACT_FORWARD_SYMBOL =
+  (typeof Symbol !== 'undefined' && Symbol.for?.('react.forward_ref')) || 0xf47;
+
+// `__b` is the known mangled name exported by preact. This is called during
+// the diffing algorithm with the constructed VNode, before the vnode is
+// actually used to diff.
+const oldDiff = options['__b'];
+options['__b'] = newDiff;
+
 /**
  * Checks if our VNode type has a `forwardRef_` sigil, in which case it was created by our forwardRef implementation.
  * If so, we move the VNode's ref to it's props, which will be passed to the Component as its props.
@@ -21,14 +30,6 @@ function newDiff(vnode) {
   }
   oldDiff?.(vnode);
 }
-
-// `__b` is the known mangled name exported by preact. This is called during
-// the diffing algorithm with the constructed VNode, before the vnode is
-// actually used to diff.
-const oldDiff = options['__b'];
-options['__b'] = newDiff;
-
-const REACT_FORWARD_SYMBOL = self.Symbol?.for?.('react.forward_ref') || 0xf47;
 
 /**
  * Reimplements forwardRef without dragging in everything from preact/compat.
