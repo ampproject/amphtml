@@ -51,7 +51,7 @@ class TransformCache {
    */
   set(hash, transformPromise) {
     if (this.transformMap.has(hash)) {
-      throw new Error('Read race: Attempting to transform a file twice.');
+      throw new Error(`Read race: Attempting to transform ${hash} file twice.`);
     }
     this.transformMap.set(hash, transformPromise);
     const filepath = path.join(this.cacheDir, hash) + this.fileExtension;
@@ -91,17 +91,16 @@ const readCache = new Map();
  * completed, the result will be reused.
  *
  * @param {string} path
- * @param {string=} optionsHash
  * @return {Promise<ReadResult>}
  */
-function batchedRead(path, optionsHash) {
+function batchedRead(path) {
   let read = readCache.get(path);
   if (!read) {
     read = fs
       .readFile(path)
       .then((contents) => ({
         contents,
-        hash: md5(contents, optionsHash ?? ''),
+        hash: md5(contents),
       }))
       .finally(() => {
         readCache.delete(path);

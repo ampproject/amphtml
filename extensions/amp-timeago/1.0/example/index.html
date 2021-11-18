@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>bento-timeago</title>
     <script
       type="module"
       async
@@ -29,6 +32,18 @@
           'Segoe UI Symbol';
         margin: 2rem;
         background: #ecf1f3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      bento-timeago {
+        font-size: 22px;
+      }
+      .buttons {
+        display: flex;
+        flex-direction: column;
       }
       button {
         border: none;
@@ -38,7 +53,8 @@
         background: white;
         font-size: 18px;
         font-weight: bold;
-        margin-right: 1rem;
+        margin: 0.5rem auto;
+        width: 300px;
       }
     </style>
   </head>
@@ -47,7 +63,7 @@
       id="my-timeago"
       datetime="2017-04-11T00:37:33.809Z"
       locale="en"
-      style="height: 30px"
+      style="height: 30px; width: 300px; margin: 0 auto"
     >
       Saturday 11 April 2017 00.37
     </bento-timeago>
