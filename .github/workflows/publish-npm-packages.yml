@@ -47,8 +47,6 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org
           node-version: 16
-      - name: Install dependencies
-        run: bash ./.github/workflows/install_dependencies.sh
       - name: Get latest scripts
         run: |
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
@@ -56,6 +54,7 @@ jobs:
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/write-package-files.js" -O ${{ env.SCRIPTS_DIR }}/write-package-files.js
       - name: Build package
         run: |
+          npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
           node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }} ${{ matrix.version }}
       - name: Publish package for Nightly releases
