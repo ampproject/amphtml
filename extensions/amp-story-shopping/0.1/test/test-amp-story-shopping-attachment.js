@@ -1,5 +1,4 @@
 import {createElementWithAttributes} from '#core/dom';
-import {AmpStoryPageAttachment} from '../../../amp-story/1.0/amp-story-page-attachment';
 
 import '../amp-story-shopping';
 

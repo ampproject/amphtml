@@ -1,5 +1,7 @@
 import * as Preact from '#core/dom/jsx';
+
 import {Layout_Enum} from '#core/dom/layout';
+
 import {once} from '#core/types/function';
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
