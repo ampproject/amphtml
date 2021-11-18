@@ -645,7 +645,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    */
   async function doCompileJs(options) {
     const buildResult =
-      options.minify && !options.esbuild && shouldUseClosure()
+      options.minify && shouldUseClosure()
         ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
         : esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
@@ -840,6 +840,7 @@ function massageSourcemaps(sourcemapsFile, options) {
  */
 function shouldUseClosure() {
   // TODO(samouri): cleanup closure build pipeline.
+  // If restoring, ensure that it continues returning false if options.bento
   return false;
 }
 
