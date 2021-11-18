@@ -32,7 +32,7 @@ describes.realWin(
       expect(() => shoppingAttachment.buildCallback()).to.not.throw();
     });
 
-    it('should call open on child attachment impl', async () => {
+    it('should open drawer', async () => {
       const attachmentChildEl = element.querySelector(
         'amp-story-page-attachment'
       );
