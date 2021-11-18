@@ -15,6 +15,9 @@ export class BaseElement extends PreactBaseElement {}
 BaseElement['Component'] = BentoFacebook;
 
 /** @override */
+BaseElement['loadable'] = true;
+
+/** @override */
 BaseElement['props'] = {
   // common attributes
   'title': {attr: 'title'}, // Needed for Preact component
