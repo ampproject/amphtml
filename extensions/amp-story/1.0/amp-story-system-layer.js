@@ -51,7 +51,7 @@ const CAPTIONS_CLASS = 'i-amphtml-story-captions-control';
 const NOCAPTIONS_CLASS = 'i-amphtml-story-nocaptions-control';
 
 /** @private @const {string} */
-const PAGE_HAS_CAPTIONS = 'i-amphtml-page-has-captions';
+const PAGE_HAS_CAPTIONS = 'i-amphtml-current-page-has-captions';
 
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
@@ -127,7 +127,7 @@ const renderSystemLayerElement = (element) => (
           LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
         )}
       />
-      <div class="i-amphtml-captions-display">
+      <div class="i-amphtml-story-captions-display">
         <button
           class={CAPTIONS_CLASS + ' i-amphtml-story-button'}
           aria-label="Captions on"
@@ -352,6 +352,11 @@ export class SystemLayer {
     this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
+
+    // TODO: Remove!
+    if (window.location.toString().includes('exp=op')) {
+      this.systemLayerEl_.setAttribute('exp', 'op');
+    }
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
@@ -1042,7 +1047,7 @@ export class SystemLayer {
    * @param {boolean} hasCaptions
    */
   onPageHasCaptionsState_(hasCaptions) {
-    this.systemLayerEl_.classList.toggle(PAGE_HAS_CAPTIONS, hasCaptions);
+    this.systemLayerEl_.toggleAttribute(PAGE_HAS_CAPTIONS, hasCaptions);
   }
 
   /**

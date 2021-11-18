@@ -301,8 +301,8 @@
   display: block !important;
 }
 
-.i-amphtml-page-has-captions:not([captions-on]) .i-amphtml-story-nocaptions-control,
-.i-amphtml-page-has-captions[captions-on] .i-amphtml-story-captions-control {
+.i-amphtml-story-system-layer:not([captions-on]) .i-amphtml-story-nocaptions-control,
+.i-amphtml-story-system-layer[captions-on] .i-amphtml-story-captions-control {
   display: block !important;
 }
 
@@ -325,7 +325,14 @@
   display: block !important;
 }
 
-.i-amphtml-story-system-layer:not([i-amphtml-current-page-has-audio]) .i-amphtml-story-sound-display {
+.i-amphtml-story-system-layer[exp="op"]:not([i-amphtml-current-page-has-audio]) .i-amphtml-story-sound-display,
+.i-amphtml-story-system-layer[exp="op"]:not([i-amphtml-current-page-has-captions]) .i-amphtml-story-captions-display {
+  opacity: 0.4 !important;
+  pointer-events: none;
+}
+
+.i-amphtml-story-system-layer:not([exp="op"]):not([i-amphtml-current-page-has-audio]) .i-amphtml-story-sound-display,
+.i-amphtml-story-system-layer:not([exp="op"]):not([i-amphtml-current-page-has-captions]) .i-amphtml-story-captions-display {
   display: none !important;
 }
 
