@@ -25,6 +25,10 @@ declare module '#utils/analytics' {
   export var triggerAnalyticsEvent: any;
 }
 
+declare module '#core/dom/css-selectors' {
+  export var escapeCssSelectorIdent: (s: string) => string;
+}
+
 // TODO: everything below are core stubs, which we can remove once Core has been
 // converted to TS.
 declare module '#core/constants/key-codes' {
@@ -42,6 +46,7 @@ declare module '#core/dom/layout/viewport-observer' {
 declare module '#core/dom' {
   export var toggleAttribute: any;
   export var dispatchCustomEvent: any;
+  export var isServerRendered: (el: Element) => boolean;
 }
 
 declare module '#core/window' {

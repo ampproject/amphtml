@@ -23,10 +23,6 @@
     "string": "Facebook",
     "description": "Button label for the share target that shares a link via Facebook."
   },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
   "9": {
     "string": "Get Link",
     "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
