@@ -10,6 +10,9 @@ export class BaseElement extends VideoBaseElement {}
 BaseElement['Component'] = BentoYoutube;
 
 /** @override */
+BaseElement['loadable'] = true;
+
+/** @override */
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
   'loop': {attr: 'loop', type: 'boolean'},

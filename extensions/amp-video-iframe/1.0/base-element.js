@@ -24,3 +24,6 @@ BaseElement['props'] = {
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['loadable'] = true;
