@@ -167,9 +167,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AdvancementConfig} */
     this.advancement_ = null;
 
-    /** @private {?Element} */
-    this.cssVariablesStyleEl_ = null;
-
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
       this.win,
@@ -216,9 +213,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
-
-    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
-    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -536,51 +530,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
     ]);
-  }
-
-  /** @override */
-  onLayoutMeasure() {
-    const layoutBox = this.getLayoutSize();
-    // Only measures from the first story page, that always gets built because
-    // of the prerendering optimizations in place.
-    if (
-      !isPrerenderActivePage(this.element) ||
-      (this.layoutBox_ &&
-        this.layoutBox_.width === layoutBox.width &&
-        this.layoutBox_.height === layoutBox.height)
-    ) {
-      return;
-    }
-
-    this.layoutBox_ = layoutBox;
-
-    return this.getVsync().runPromise(
-      {
-        measure: (state) => {
-          const {height, width} = layoutBox;
-          state.height = height;
-          state.width = width;
-          state.vh = height / 100;
-        },
-        mutate: (state) => {
-          const {height, width} = state;
-          if (state.height === 0 && state.width === 0) {
-            return;
-          }
-          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
-          if (!this.cssVariablesStyleEl_) {
-            const doc = this.win.document;
-            this.cssVariablesStyleEl_ = doc.createElement('style');
-            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
-            doc.head.appendChild(this.cssVariablesStyleEl_);
-          }
-          this.cssVariablesStyleEl_.textContent = `:root {--story-page-vh: ${px(
-            state.vh
-          )} !important}`;
-        },
-      },
-      {}
-    );
   }
 
   /**

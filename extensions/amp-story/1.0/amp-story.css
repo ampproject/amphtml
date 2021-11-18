@@ -12,10 +12,17 @@
 /** Common */
 :root {
   --story-page-vw: 1vw !important;
-  --story-page-vh: 1vh !important;
+  --story-page-vh: var(--story-dvh, 1vh) !important;
   --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh)) !important;
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
+  --story-100dvh: calc(var(--story-dvh, 1vh) * 100) !important;
   font-size: calc(2.5 * var(--story-page-vh, 8px));
+}
+
+@supports (height: 1dvh) {
+  :root {
+    --story-dvh: 1dvh !important;
+  }
 }
 
 body {
@@ -152,25 +159,25 @@ amp-story[standalone].amp-notbuilt {
 }
 
 amp-story[standalone]:-webkit-full-screen {
-  height: 100vh !important;
+  height: var(--story-100dvh) !important;
   max-height: none !important;
   max-width: none !important;
 }
 
 amp-story[standalone]:-moz-full-screen {
-  height: 100vh !important;
+  height: var(--story-100dvh) !important;
   max-height: none !important;
   max-width: none !important;
 }
 
 amp-story[standalone]:-ms-fullscreen {
-  height: 100vh !important;
+  height: var(--story-100dvh) !important;
   max-height: none !important;
   max-width: none !important;
 }
 
 amp-story[standalone]:fullscreen {
-  height: 100vh !important;
+  height: var(--story-100dvh) !important;
   max-height: none !important;
   max-width: none !important;
 }
@@ -241,7 +248,7 @@ amp-story-page[distance="1"][distance] {
 amp-story.i-amphtml-experiment-story-load-inactive-outside-viewport:not([desktop])
   amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
 amp-story-page[distance="2"][distance] {
-  transform: translateY(100vh) !important;
+  transform: translateY(var(--story-100dvh)) !important;
 }
 
 amp-story-page [data-text-background-color] {
@@ -398,7 +405,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   margin: auto;
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);
-  font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
+  font-size: calc(var(--i-amphtml-story-layer-height) / 10);
   margin-left: calc((var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) * 0.5); /* Set margin to 1/2 of page-width - layer-width to center layer */
 
   --i-amphtml-aspect-ratio-float: calc(var(--aspect-ratio)) !important; /* Avoid fractions, which don't work with compilers that remove parenthesis */
