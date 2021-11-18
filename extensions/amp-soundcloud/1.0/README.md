@@ -48,14 +48,15 @@ defineBentoSoundcloud();
     />
     <style>
       bento-soundcloud {
-        aspect-ratio: 1;
+        width: 300px;
+        height: 300px;
       }
     </style>
   </head>
   <body>
     <bento-soundcloud
       id="my-track"
-      data-trackid="243169232"
+      data-trackid="89299804"
       data-visual="true"
     ></bento-soundcloud>
     <div class="buttons" style="margin-top: 8px">

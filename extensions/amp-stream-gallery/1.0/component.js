@@ -1,15 +1,16 @@
 import * as Preact from '#preact';
 import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {forwardRef, toChildArray} from '#preact/compat';
-import {setStyle} from '#core/dom/style';
-import {getWin} from '#core/window';
+import {forwardRef} from '#preact/compat';
 import {
+  toChildArray,
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
 } from '#preact';
+import {setStyle} from '#core/dom/style';
+import {getWin} from '#core/window';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 import {propName} from '#preact/utils';

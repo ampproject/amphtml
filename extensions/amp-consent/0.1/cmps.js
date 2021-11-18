@@ -122,4 +122,5 @@ CMP_CONFIG['googlefc'] = {
   'uiConfig': {
     'overlay': true,
   },
+  'clearDirtyBitOnResponse_dontUseThisItMightBeRemoved': true,
 };

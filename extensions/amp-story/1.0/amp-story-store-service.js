@@ -70,6 +70,14 @@ export let InteractiveReactData;
 
 /**
  * @typedef {{
+ *   product-tag-id: string,
+ *   product-title: string,
+ * }}
+ */
+export let ShoppingConfigDataDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -150,6 +158,7 @@ export const StateProperty = {
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
+  SHOPPING_DATA: 'shoppingData',
   SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
   // Any page has audio, or amp-story has a `background-audio` attribute.
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
@@ -195,6 +204,7 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
+  ADD_SHOPPING_DATA: 'addShoppingData',
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
@@ -230,6 +240,8 @@ const stateComparisonFunctions = {
     old.height !== curr.height,
   [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
     old === null || curr === null || !deepEquals(old, curr, 2),
+  [StateProperty.SHOPPING_DATA]: (old, curr) =>
+    old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
@@ -264,6 +276,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PANNING_MEDIA_STATE]: updatedState,
+      });
+    case Action.ADD_SHOPPING_DATA:
+      const updatedShoppingData = {
+        ...state[StateProperty.SHOPPING_DATA],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SHOPPING_DATA]: updatedShoppingData,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -563,6 +584,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
+      [StateProperty.SHOPPING_DATA]: {},
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
