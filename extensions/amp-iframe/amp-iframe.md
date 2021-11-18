@@ -88,7 +88,12 @@ The reasons for this policy are that:
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/). To find the standalone version of `amp-iframe`, see [`bento-iframe`](./1.0/README.md).
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-iframe`, see [**`bento-iframe`**](./1.0/README.md).
 
 ### Iframe with placeholder <a name="iframe-with-placeholder"></a>
 

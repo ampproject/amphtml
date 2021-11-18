@@ -80,7 +80,6 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   version?: string,
  *   hasCss?: boolean,
  *   loadPriority?: string,
- *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
@@ -96,6 +95,7 @@ const ExtensionOptionDef = {};
  *   external?: Array<string>
  *   remap?: Record<string, string>
  *   wrapper?: string,
+ *   babelCaller?: string,
  * }}
  */
 const ExtensionBinaryDef = {};
@@ -484,7 +484,7 @@ async function buildExtension(
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
   if (options.npm) {
-    await buildNpmBinaries(extDir, options);
+    await buildNpmBinaries(extDir, name, options);
     await buildNpmCss(extDir, options);
   }
   if (options.binaries) {
@@ -564,55 +564,51 @@ async function getCssForJssFile(jssFile) {
  * @return {!Promise}
  */
 async function buildExtensionCss(extDir, name, version, options) {
-  /**
-   * Writes CSS binaries
-   *
-   * @param {string} name
-   * @param {string} css
-   */
-  function writeCssBinaries(name, css) {
-    const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
-    const jsName = `build/${name}.js`;
-    const cssName = `build/css/${name}`;
-    fs.writeFileSync(jsName, jsCss, 'utf-8');
-    fs.writeFileSync(cssName, css, 'utf-8');
-  }
-
   const aliasBundle = extensionAliasBundles[name];
-  const isAliased = aliasBundle && aliasBundle.version == version;
+  const aliasedVersion =
+    aliasBundle?.version == version ? aliasBundle.aliasedVersion : null;
 
-  const mainCssPromise = jsifyCssAsync(`${extDir}/${name}.css`);
+  const versions = [version, aliasedVersion].filter(Boolean);
 
-  const mainCssBinaryPromise = mainCssPromise.then((mainCss) => {
-    writeCssBinaries(`${name}-${version}.css`, mainCss);
-    if (isAliased) {
-      writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
-    }
-  });
+  const bundles = await fastGlob(`${extDir}/*.css`);
 
-  const parallel = [mainCssBinaryPromise];
+  await Promise.all(
+    bundles.map(async (filename) => {
+      const name = path.basename(filename, '.css');
+      const css = await jsifyCssAsync(filename);
+      await writeCssBinaries(name, versions, css);
 
-  if (options.bento) {
-    const bentoCssPromise = mainCssPromise.then((mainCss) =>
-      buildBentoCss(name, version, mainCss)
-    );
-    parallel.push(bentoCssPromise);
+      if (options.bento) {
+        await buildBentoCss(name, versions, css);
+      }
+    })
+  );
+}
+
+/**
+ * @param {string} name
+ * @param {string[]} versions
+ * @param {string} css
+ * @return {!Promise}
+ */
+async function writeCssBinaries(name, versions, css) {
+  const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
+  await writeVersions(`build/${name}`, 'css.js', versions, jsCss);
+  await writeVersions(`build/css/${name}`, 'css', versions, css);
+}
+
+/**
+ * @param {string} prefix
+ * @param {string} fileExtension
+ * @param {string[]} versions
+ * @param {string} content
+ * @return {!Promise<void>}
+ */
+async function writeVersions(prefix, fileExtension, versions, content) {
+  for (const version of versions) {
+    const outfile = `${prefix}-${version}.${fileExtension}`;
+    await fs.outputFile(outfile, content);
   }
-
-  if (Array.isArray(options.cssBinaries)) {
-    parallel.push(
-      ...options.cssBinaries.map((name) => {
-        return jsifyCssAsync(`${extDir}/${name}.css`).then((css) => {
-          writeCssBinaries(`${name}-${version}.css`, css);
-          if (isAliased) {
-            writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
-          }
-        });
-      })
-    );
-  }
-
-  await Promise.all(parallel);
 }
 
 /**
@@ -621,50 +617,37 @@ async function buildExtensionCss(extDir, name, version, options) {
  * As a result of taking already minified code as source, this function is
  * fairly fast and not cached.
  * @param {string} name
- * @param {string} version
+ * @param {string[]} versions
  * @param {string} minifiedAmpCss
  * @return {!Promise}
  */
-async function buildBentoCss(name, version, minifiedAmpCss) {
+async function buildBentoCss(name, versions, minifiedAmpCss) {
   const bentoName = getBentoName(name);
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
-  await fs.outputFile(`build/${bentoName}-${version}.css`, renamedCss);
-  await fs.outputFile(`dist/v0/${bentoName}-${version}.css`, renamedCss);
+  await writeCssBinaries(bentoName, versions, renamedCss);
 }
 
 /**
  * @param {string} extDir
+ * @param {string} name
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildNpmBinaries(extDir, options) {
+async function buildNpmBinaries(extDir, name, options) {
   let {npm} = options;
   if (npm === true) {
-    // Default to the standard/expected entrypoint
     npm = {
-      'component.js': {
-        'preact': 'component-preact.js',
-        'react': 'component-react.js',
-      },
-    };
-  }
-  const keys = Object.keys(npm);
-  const promises = keys.flatMap((entryPoint) => {
-    const {preact, react} = npm[entryPoint];
-    const binaries = [];
-    if (preact) {
-      binaries.push({
-        entryPoint,
-        outfile: preact,
+      preact: {
+        entryPoint: 'component.js',
+        outfile: 'component-preact.js',
         external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
         remap: {'preact/dom': 'preact'},
         wrapper: '',
-      });
-    }
-    if (react) {
-      binaries.push({
-        entryPoint,
-        outfile: react,
+      },
+      react: {
+        babelCaller: options.minify ? 'react-minified' : 'react-unminified',
+        entryPoint: 'component.js',
+        outfile: 'component-react.js',
         external: ['react', 'react-dom'],
         remap: {
           'preact': 'react',
@@ -673,11 +656,21 @@ function buildNpmBinaries(extDir, options) {
           'preact/dom': 'react-dom',
         },
         wrapper: '',
-      });
-    }
-    return buildBinaries(extDir, binaries, options);
-  });
-  return Promise.all(promises);
+      },
+      bento: {
+        entryPoint: await getBentoBuildFilename(
+          extDir,
+          getBentoName(name),
+          'web-component',
+          options
+        ),
+        outfile: 'web-component.js',
+        wrapper: '',
+      },
+    };
+  }
+  const binaries = Object.values(npm);
+  return buildBinaries(extDir, binaries, options);
 }
 
 /**
@@ -690,18 +683,19 @@ function buildBinaries(extDir, binaries, options) {
   mkdirSync(`${extDir}/dist`);
 
   const promises = binaries.map((binary) => {
-    const {entryPoint, external, outfile, remap, wrapper} = binary;
+    const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
     return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
       ...options,
       toName: maybeToNpmEsmName(`${name}.max.js`),
       minifiedName: maybeToNpmEsmName(`${name}.js`),
-      latestName: '',
+      aliasName: '',
       outputFormat: esm ? 'esm' : 'cjs',
       externalDependencies: external,
       remapDependencies: remap,
       wrapper: wrapper ?? options.wrapper,
+      babelCaller: babelCaller ?? options.babelCaller,
     });
   });
   return Promise.all(promises);
@@ -717,8 +711,13 @@ async function buildBentoExtensionJs(dir, name, options) {
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
-    wrapper: 'none',
-    filename: await getBentoFilename(dir, bentoName, options),
+    wrapper: 'bento',
+    filename: await getBentoBuildFilename(
+      dir,
+      bentoName,
+      'standalone',
+      options
+    ),
     // Include extension directory since our entrypoint may be elsewhere.
     extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
   });
@@ -730,50 +729,56 @@ async function buildBentoExtensionJs(dir, name, options) {
  * configuration.
  * @param {string} dir
  * @param {string} name
+ * @param {string} mode
  * @param {Object} options
  * @return {Promise<string>}
  */
-async function getBentoFilename(dir, name, options) {
-  const filename = `${name}.js`;
+async function getBentoBuildFilename(dir, name, mode, options) {
+  const modes = {
+    'standalone': {
+      filename: `${name}.js`,
+      toExport: false,
+    },
+    'web-component': {
+      filename: 'web-component.js',
+      toExport: true,
+    },
+  };
+  const {filename, toExport} = modes[mode];
+  if (!filename) {
+    throw new Error(
+      `Unknown bento mode "${mode}" (${name}:${options.version})\n` +
+        `Expected one of: ${Object.keys(modes).join(', ')}`
+    );
+  }
+
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = await generateBentoEntryPointSource(name, options);
-  const generatedFilename = `build/${name}.js`;
-  await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
+  const generatedSource = generateBentoEntryPointSource(name, toExport);
+  const generatedFilename = `build/${filename}`;
+  fs.outputFileSync(`${dir}/${generatedFilename}`, generatedSource);
   return generatedFilename;
 }
 
 /**
  * @param {string} name
- * @param {Object} options
- * @return {Promise<string>}
+ * @param {string} toExport
+ * @return {string}
  */
-async function generateBentoEntryPointSource(name, options) {
-  const css = options.hasCss
-    ? await fs.readFile(`build/${name}-${options.version}.css`, 'utf8')
-    : null;
-
+function generateBentoEntryPointSource(name, toExport) {
   return dedent(`
     import {BaseElement} from '../base-element';
-    
+
     function defineElement() {
-      const css = __css__;
-      if (css) {
-        const style = document.createElement('style');
-        style.textContent = css;
-        document.head.appendChild(style);
-      }
       customElements.define(
         __name__,
         BaseElement.CustomElement(BaseElement)
       );
     }
 
-    defineElement();
-  `)
-    .replace('__css__', JSON.stringify(css))
-    .replace('__name__', JSON.stringify(name));
+    ${toExport ? 'export {defineElement};' : 'defineElement();'}
+  `).replace('__name__', JSON.stringify(name));
 }
 
 /**
@@ -811,7 +816,7 @@ async function buildExtensionJs(dir, name, options) {
     ...options,
     toName: `${name}-${version}.max.js`,
     minifiedName: `${name}-${version}.js`,
-    latestName: isLatest ? `${name}-latest.js` : '',
+    aliasName: isLatest ? `${name}-latest.js` : '',
     wrapper: resolvedWrapper,
   });
 

@@ -15,12 +15,35 @@ const {readFileSync} = require('fs');
  * ```
  *
  * @param {babel} babel
- * @param {any} options
  * @return {babel.PluginObj}
  */
-module.exports = function (babel, options) {
+module.exports = function (babel) {
   const {template, types: t} = babel;
-  const {freeze = true} = options;
+
+  /**
+   * JSON reviver that converts {"string": "foo", ...} to just "foo".
+   * This minifies the format of locale files.
+   * @param {string} _
+   * @param {*} value
+   * @return {*}
+   */
+  function minifyLocalesJsonReviver(_, value) {
+    // Always default to original `value` since this reviver is called for any
+    // property pair, including the higher-level containing object.
+    return value?.string || value;
+  }
+
+  /**
+   * @param {string} filename
+   * @return {*}
+   */
+  function readJson(filename) {
+    // Treat files under /_locales/ specially in order to minify their format.
+    const reviver = filename.includes('/_locales/')
+      ? minifyLocalesJsonReviver
+      : undefined;
+    return JSON.parse(readFileSync(filename, 'utf8'), reviver);
+  }
 
   return {
     manipulateOptions(_opts, parserOpts) {
@@ -67,24 +90,11 @@ module.exports = function (babel, options) {
         );
         let json;
         try {
-          json = JSON.parse(readFileSync(jsonPath, 'utf8'));
+          json = readJson(jsonPath);
         } catch (e) {
           throw path.buildCodeFrameError(
             `could not load JSON file at '${jsonPath}'`
           );
-        }
-
-        if (freeze) {
-          path.replaceWith(
-            template.statement
-              .ast`const ${specifier} = JSON.parse('${JSON.stringify(
-              json
-            )}', function(key, val) {
-                if (typeof val === 'object') Object.freeze(val);
-                return val;
-              });`
-          );
-          return;
         }
 
         path.replaceWith(

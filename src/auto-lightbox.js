@@ -4,11 +4,11 @@ import {Services} from '#service';
 
 import {dev} from '#utils/log';
 
-import {ChunkPriority, chunk} from './chunk';
+import {ChunkPriority_Enum, chunk} from './chunk';
 import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */
-export const AutoLightboxEvents = {
+export const AutoLightboxEvents_Enum = {
   // Triggered when the lightbox attribute is newly set on an item in order to
   // process by the renderer extension (e.g. amp-lightbox-gallery).
   NEWLY_SET: 'amp-auto-lightbox:newly-set',
@@ -44,7 +44,7 @@ export function installAutoLightboxExtension(ampdoc) {
         );
       });
     },
-    ChunkPriority.LOW
+    ChunkPriority_Enum.LOW
   );
 }
 

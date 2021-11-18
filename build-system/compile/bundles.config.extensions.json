@@ -238,6 +238,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
+      "npm": true,
       "bento": true
     }
   },
@@ -533,14 +534,7 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "cssBinaries": [
-        "amp-inline-gallery",
-        "amp-inline-gallery-captions",
-        "amp-inline-gallery-pagination",
-        "amp-inline-gallery-slide",
-        "amp-inline-gallery-thumbnails"
-      ]
+      "hasCss": true
     }
   },
   {
@@ -549,9 +543,6 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "cssBinaries": [
-        "amp-inline-gallery-pagination"
-      ],
       "npm": true,
       "bento": true
     }
@@ -840,10 +831,7 @@
   {
     "name": "amp-render",
     "version": "1.0",
-    "latestVersion": "1.0",
-    "options": {
-      "bento": true
-    }
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-resize-observer-polyfill",
@@ -983,20 +971,7 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
-      "hasCss": true,
-      "cssBinaries": [
-        "amp-story-consent",
-        "amp-story-draggable-drawer-header",
-        "amp-story-form",
-        "amp-story-hint",
-        "amp-story-info-dialog",
-        "amp-story-open-page-attachment",
-        "amp-story-share",
-        "amp-story-share-menu",
-        "amp-story-system-layer",
-        "amp-story-tooltip",
-        "amp-story-unsupported-browser-layer"
-      ]
+      "hasCss": true
     }
   },
   {
@@ -1012,15 +987,7 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "cssBinaries": [
-        "amp-story-auto-ads-ad-badge",
-        "amp-story-auto-ads-attribution",
-        "amp-story-auto-ads-cta-button",
-        "amp-story-auto-ads-inabox",
-        "amp-story-auto-ads-progress-bar",
-        "amp-story-auto-ads-shared"
-      ]
+      "hasCss": true
     }
   },
   {
@@ -1057,19 +1024,7 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "cssBinaries": [
-        "amp-story-interactive-binary-poll",
-        "amp-story-interactive-img",
-        "amp-story-interactive-img-poll",
-        "amp-story-interactive-img-quiz",
-        "amp-story-interactive-poll",
-        "amp-story-interactive-quiz",
-        "amp-story-interactive-results",
-        "amp-story-interactive-results-detailed",
-        "amp-story-interactive-slider",
-        "amp-story-interactive-disclaimer"
-      ]
+      "hasCss": true
     }
   },
   {
@@ -1082,6 +1037,14 @@
   },
   {
     "name": "amp-story-player",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story-shopping",
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
@@ -1150,11 +1113,7 @@
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "cssBinaries": [
-        "amp-truncate-text",
-        "amp-truncate-text-shadow"
-      ]
+      "hasCss": true
     }
   },
   {

@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -10,16 +11,15 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {Keys} from '#core/constants/key-codes';
-import {LocalizedStringId} from '#service/localization/strings';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '#utils/log';
+import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {localize} from './amp-story-localization-service';
 import {setStyles} from '#core/dom/style';
 
 /** @const {string} Class to toggle the share menu. */
@@ -27,27 +27,34 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
- * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = (element) => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
+const renderShareMenu = () => {
+  return (
+    <div
+      class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
+      aria-hidden="true"
+      role="alert"
+    >
       <div class="i-amphtml-story-share-menu-container">
-        <button class="i-amphtml-story-share-menu-close-button" aria-label="close" role="button">
+        <button
+          class="i-amphtml-story-share-menu-close-button"
+          aria-label="close"
+          role="button"
+        >
           &times;
         </button>
       </div>
-    </div>`;
+    </div>
+  );
 };
 
 /**
  * System amp-social-share button template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getAmpSocialSystemShareTemplate = (element) => {
-  return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
+const renderAmpSocialSystemShareElement = () => {
+  return <amp-social-share type="system"></amp-social-share>;
 };
 
 /**
@@ -129,7 +136,7 @@ export class ShareMenu {
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
+    this.element_ = renderAmpSocialSystemShareElement();
 
     this.initializeListeners_();
 
@@ -151,21 +158,19 @@ export class ShareMenu {
     const root = this.win_.document.createElement('div');
     root.classList.add('i-amphtml-story-share-menu-host');
 
-    this.element_ = getTemplate(this.parentEl_);
+    this.element_ = renderShareMenu();
     createShadowRootWithStyle(root, this.element_, CSS);
 
     this.closeButton_ = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
     );
-    const localizationService = getLocalizationService(
-      devAssert(this.parentEl_)
+    this.closeButton_.setAttribute(
+      'aria-label',
+      localize(
+        this.parentEl_,
+        LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+      )
     );
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      this.closeButton_.setAttribute('aria-label', localizedCloseString);
-    }
 
     this.initializeListeners_();
 
@@ -208,7 +213,7 @@ export class ShareMenu {
       );
 
       this.win_.addEventListener('keyup', (event) => {
-        if (event.key == Keys.ESCAPE) {
+        if (event.key == Keys_Enum.ESCAPE) {
           event.preventDefault();
           this.close_();
         }

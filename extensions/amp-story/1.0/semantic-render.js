@@ -1,7 +1,6 @@
+import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
 import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
 import {includes} from '#core/types/string';
 
 /**
@@ -11,13 +10,8 @@ import {includes} from '#core/types/string';
  */
 export function renderPageDescription(page, videos) {
   const descriptionElId = `i-amphtml-story-${page.element.id}-description`;
-  const descriptionEl = createElementWithAttributes(
-    page.win.document,
-    'div',
-    dict({
-      'class': 'i-amphtml-story-page-description',
-      'id': descriptionElId,
-    })
+  const descriptionEl = (
+    <div class="i-amphtml-story-page-description" id={descriptionElId}></div>
   );
   const append = (el) => {
     page.mutateElement(() => {

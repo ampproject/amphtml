@@ -50,6 +50,8 @@ class Static {
   static set 'setter_'(v) {}
 }
 
+var bar_;
+
 foo.bar_;
 foo[bar_];
 foo['bar_'];
@@ -63,5 +65,5 @@ deep.foo?.[bar_];
 deep.foo?.['bar_'];
 
 deep?.foo.bar_;
-deep?.foo.[bar_];
-deep?.foo.['bar_'];
+deep?.foo[bar_];
+deep?.foo['bar_'];

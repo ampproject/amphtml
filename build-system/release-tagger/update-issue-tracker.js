@@ -5,6 +5,8 @@
 
 const dedent = require('dedent');
 const {createIssue, getIssue, updateIssue} = require('./utils');
+const {cyan, magenta} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 const CHANNEL_NAMES = {
   'beta-opt-in': 'Experimental and Beta (opt-in) channels',
@@ -94,6 +96,29 @@ class IssueTracker {
 }
 
 /**
+ * Get issue if it exists and whether it's a cherrypick
+ * @param {string} head
+ * @return {!Promise}
+ */
+async function setup(head) {
+  let issue = await getIssue(`Release ${head}`);
+  if (issue || head.endsWith('000')) {
+    return {isCherrypick: false, issue};
+  }
+
+  // is cherrypick, so find base issue tracker
+  let version = Number(head);
+  while (version % 1000 !== 0) {
+    version--;
+    issue = await getIssue(`Release ${version}`);
+    if (issue) {
+      break;
+    }
+  }
+  return {isCherrypick: true, issue};
+}
+
+/**
  * Create or update issue tracker
  * @param {string} head
  * @param {string} base
@@ -102,30 +127,31 @@ class IssueTracker {
  * @return {Promise<void>}
  */
 async function createOrUpdateTracker(head, base, channel, time) {
-  const timePT =
-    new Date(`${time} UTC`).toLocaleString('en-US', {
-      timeZone: 'America/Los_Angeles',
-    }) + ' PT';
-  const isCherrypick = Number(head) - Number(base) < 1000;
-  const issue = isCherrypick
-    ? await getIssue(`Release ${base}`)
-    : await getIssue(`Release ${head}`);
+  const {isCherrypick, issue} = await setup(head);
 
   // create new tracker
   if (!issue) {
     const tracker = new IssueTracker(head, base);
-    tracker.checkTask(channel, timePT);
+    tracker.checkTask(channel, time);
     const {footer, header, label, main, title} = tracker;
     const body = `${header}\n\n${main}\n\n${footer}`;
-    return await createIssue(body, label, title);
+    const newIssue = await createIssue(body, label, title);
+    log(
+      'Created issue tracker',
+      magenta(newIssue.title),
+      'at',
+      cyan(newIssue['html_url'])
+    );
+    return;
   }
 
   // check task
+  log('Found issue tracker', magenta(issue.title), 'at', cyan(issue.url));
   const tracker = new IssueTracker(head, base, issue.body, issue.number);
   if (isCherrypick) {
     tracker.addCherrypickTasks(channel);
   }
-  tracker.checkTask(channel, timePT);
+  tracker.checkTask(channel, time);
   const {footer, header, main, number, title} = tracker;
   const body = `${header}\n\n${main}\n\n${footer}`;
   await updateIssue(body, number, title);

@@ -693,9 +693,6 @@ data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
 
-// verizonmedia.js
-window.jacData;
-
 // webediads.js
 var wads;
 wads.init;

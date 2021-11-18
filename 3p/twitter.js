@@ -101,7 +101,7 @@ export function twitter(global, data) {
     if (height == 0) {
       return;
     }
-    context.updateDimensions(
+    global.context.updateDimensions(
       container./*OK*/ offsetWidth,
       height + /* margins */ 20
     );

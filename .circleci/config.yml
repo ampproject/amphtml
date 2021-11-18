@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.2.2
+  browser-tools: circleci/browser-tools@1.2.3
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -96,6 +96,10 @@ commands:
           install-npm: false
       - node/install-packages
   setup_vm:
+    parameters:
+      save-git-cache:
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: /tmp
@@ -107,7 +111,8 @@ commands:
       - run:
           name: 'Maybe Gracefully Halt'
           command: /tmp/restored-workspace/maybe_gracefully_halt.sh
-      - checkout_repo
+      - checkout_repo:
+          save-git-cache: << parameters.save-git-cache >>
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -278,7 +283,6 @@ jobs:
       name: node-docker-large
     steps:
       - setup_vm
-      - install_chrome
       - run:
           name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js
@@ -369,7 +373,8 @@ jobs:
     executor:
       name: macos-medium
     steps:
-      - setup_vm
+      - setup_vm:
+          save-git-cache: true
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
