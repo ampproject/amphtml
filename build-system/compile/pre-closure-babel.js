@@ -94,6 +94,7 @@ async function preClosureBabel(file, outputFilename, options) {
     const rehash = md5(
       JSON.stringify({
         callerName,
+        filename: file,
         hash,
         babelOptions,
         argv: process.argv.slice(2),
@@ -101,9 +102,7 @@ async function preClosureBabel(file, outputFilename, options) {
     );
     const cachedPromise = transformCache.get(rehash);
     if (cachedPromise) {
-      if (!(await fs.pathExists(transformedFile))) {
-        await fs.outputFile(transformedFile, await cachedPromise);
-      }
+      await cachedPromise;
     } else {
       const transformPromise = babel
         .transformAsync(contents, {
@@ -112,10 +111,23 @@ async function preClosureBabel(file, outputFilename, options) {
           filenameRelative: path.basename(file),
           sourceFileName: path.relative(process.cwd(), file),
         })
-        .then((result) => result?.code);
+        .then((result) => {
+          const {code, map} = result || {};
+          debug(
+            CompilationLifecycles['pre-closure'],
+            transformedFile,
+            code,
+            map
+          );
+          return code + `\n// ${file}`;
+        })
+        .then(async (code) => {
+          await fs.outputFile(transformedFile, code);
+          return code;
+        });
       transformCache.set(rehash, transformPromise);
-      await fs.outputFile(transformedFile, await transformPromise);
-      debug(CompilationLifecycles['pre-closure'], transformedFile);
+
+      await transformPromise;
     }
   } catch (err) {
     const reason = handlePreClosureError(err, outputFilename, options);

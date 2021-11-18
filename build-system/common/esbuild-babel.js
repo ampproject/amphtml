@@ -73,6 +73,7 @@ function getEsbuildBabelPlugin(
         const rehash = md5(
           JSON.stringify({
             callerName,
+            filename,
             hash,
             babelOptions,
             argv: process.argv.slice(2),
