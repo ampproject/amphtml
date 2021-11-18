@@ -15,7 +15,7 @@ const TAG = 'amp-bind';
  * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */
-const MAX_AST_SIZE = 200;
+const MAX_AST_SIZE = 250;
 
 /** @const @private {string} */
 const CUSTOM_FUNCTIONS = 'custom-functions';
