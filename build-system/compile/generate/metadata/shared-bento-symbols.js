@@ -13,6 +13,8 @@ const {parse} = require('@babel/parser');
 const {readFileSync} = require('fs-extra');
 const {relative} = require('path');
 
+// These must be aliased from `src/`, e.g. `#preact` to `src/preact`.
+// See tsconfig.json for the list of aliases.
 const packages = [
   'preact',
   'preact/slot',
