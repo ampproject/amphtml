@@ -38,6 +38,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout_Enum.FILL;
+    return layout == Layout_Enum.CONTAINER;
   }
 }
