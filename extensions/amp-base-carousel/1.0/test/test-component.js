@@ -169,4 +169,80 @@ describes.sandboxed('BentoBaseCarousel preact component', {}, () => {
     expect(snapEnabledSlides.at(0).text()).to.equal('slide 1');
     expect(snapEnabledSlides.at(1).text()).to.equal('slide 3');
   });
+
+  it('should loop', () => {
+    const wrapper = mount(
+      <BentoBaseCarousel controls="always" loop>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BentoBaseCarousel>
+    );
+
+    const nextArrows = wrapper.find('[aria-label="Next item in carousel"]');
+
+    // initial
+    let slides = wrapper.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+
+    expect(slides.at(0).text()).to.equal('slide 3');
+    expect(slides.at(1).text()).to.equal('slide 1');
+    expect(slides.at(2).text()).to.equal('slide 2');
+
+    // first increment
+    nextArrows.simulate('click');
+    slides = wrapper.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+    expect(slides.at(0).text()).to.equal('slide 1');
+    expect(slides.at(1).text()).to.equal('slide 2');
+    expect(slides.at(2).text()).to.equal('slide 3');
+
+    // full loop
+    nextArrows.simulate('click');
+    nextArrows.simulate('click');
+    slides = wrapper.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+    expect(slides.at(0).text()).to.equal('slide 3');
+    expect(slides.at(1).text()).to.equal('slide 1');
+    expect(slides.at(2).text()).to.equal('slide 2');
+  });
+
+  // TODO: Refactor scroll to make more testable
+  it.skip('should scroll', () => {
+    const wrapper = mount(
+      <BentoBaseCarousel controls="always" loop>
+        <div>slide 1</div>
+        <div>slide 2</div>
+        <div>slide 3</div>
+      </BentoBaseCarousel>
+    );
+
+    const scrollableElement = wrapper.find('Scroller > div');
+
+    // initial
+    let slides = wrapper.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+
+    expect(slides.at(0).text()).to.equal('slide 3');
+    expect(slides.at(1).text()).to.equal('slide 1');
+    expect(slides.at(2).text()).to.equal('slide 2');
+
+    // first increment
+    scrollableElement.simulate('scroll');
+    scrollableElement.simulate('scroll');
+    slides = wrapper.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+    expect(slides.at(0).text()).to.equal('slide 1');
+    expect(slides.at(1).text()).to.equal('slide 2');
+    expect(slides.at(2).text()).to.equal('slide 3');
+
+    // full loop
+    scrollableElement.simulate('scroll');
+    scrollableElement.simulate('scroll');
+    slides = wrapper.find('[data-slide]');
+    expect(slides).to.have.lengthOf(3);
+    expect(slides.at(0).text()).to.equal('slide 3');
+    expect(slides.at(1).text()).to.equal('slide 1');
+    expect(slides.at(2).text()).to.equal('slide 2');
+  });
 });

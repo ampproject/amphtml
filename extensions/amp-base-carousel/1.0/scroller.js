@@ -170,45 +170,39 @@ function ScrollerWithRef(
     scrollToActiveSlide();
   }, [loop, restingIndex, scrollToActiveSlide]);
 
+  const win = containerRef.current ? getWin(containerRef.current) : null;
+
   // Adjust slide position when container size changes.
   useLayoutEffect(() => {
-    if (!containerRef.current) {
-      return;
-    }
-    const node = containerRef.current;
-    if (!node) {
-      return;
-    }
-    // Use local window.
-    const win = getWin(node);
     if (!win) {
       return undefined;
     }
     const observer = new win.ResizeObserver(scrollToActiveSlide);
-    observer.observe(node);
+    observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [scrollToActiveSlide]);
+  }, [scrollToActiveSlide, win]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(() => {
-    // Use local window if possible.
-    const win = containerRef.current ? getWin(containerRef.current) : window;
-    return debounce(
-      win,
-      () => {
-        // Check if the resting index we are centered around is the same as where
-        // we stopped scrolling. If so, we do not need to move anything.
-        if (
-          currentIndex.current === null ||
-          currentIndex.current === restingIndex
-        ) {
-          return;
-        }
-        setRestingIndex(currentIndex.current);
-      },
-      RESET_SCROLL_REFERENCE_POINT_WAIT_MS
-    );
-  }, [restingIndex, setRestingIndex]);
+    // if containerRef is not set yet or serverside rendering, don't debouce.
+    return win
+      ? debounce(
+          win,
+          () => {
+            // Check if the resting index we are centered around is the same as where
+            // we stopped scrolling. If so, we do not need to move anything.
+            if (
+              currentIndex.current === null ||
+              currentIndex.current === restingIndex
+            ) {
+              return;
+            }
+            setRestingIndex(currentIndex.current);
+          },
+          RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+        )
+      : () => undefined;
+  }, [restingIndex, setRestingIndex, win]);
 
   // Track current slide without forcing render.
   // This is necessary for smooth scrolling because
