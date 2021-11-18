@@ -1,4 +1,6 @@
-const bentoRuntimePackages = require('../compile/generate/metadata/bento-runtime-packages');
+const {
+  getSharedBentoSymbols,
+} = require('../compile/generate/metadata/bento-runtime-packages');
 const {generateIntermediatePackage} = require('../compile/generate/bento');
 const {getMinifiedConfig} = require('./minified-config');
 const {getUnminifiedConfig} = require('./unminified-config');
@@ -9,25 +11,28 @@ const {outputFileSync, pathExistsSync} = require('fs-extra');
  * @return {string}
  */
 function writeIntermediatePackage(packages) {
-  const filePath = `build/bento-shared.js`;
-  if (!pathExistsSync(filePath)) {
-    outputFileSync(filePath, generateIntermediatePackage(packages));
+  // Don't remove the `./`
+  const modulePath = './build/bento-shared.js';
+  if (!pathExistsSync(modulePath)) {
+    outputFileSync(modulePath, generateIntermediatePackage(packages));
   }
-  // #build is an alias to the root build/
-  return `#${filePath}`;
+  return modulePath;
 }
 
 /**
  * @param {{[name: string]: string[]}} packages
- * @return {[string, {pkg: string, replacements: {[original: string]: string[]}}]}
+ * @return {[string, {root: string[], alias: {[alias: string]: string}}, string]}
  */
-function getImportPlugin(packages) {
+function getModuleResolver(packages) {
+  const modulePath = writeIntermediatePackage(packages);
+  const alias = Object.fromEntries(
+    Object.entries(packages).map(([name]) => [`^${name}$`, modulePath])
+  );
   return [
-    './build-system/babel-plugins/babel-plugin-bento-imports',
-    {
-      pkg: writeIntermediatePackage(packages),
-      replacements: packages,
-    },
+    'module-resolver',
+    {root: ['.'], alias},
+    // Unique name because babel errors out otherwise:
+    'module-resolver-bento-shared',
   ];
 }
 
@@ -35,10 +40,10 @@ function getImportPlugin(packages) {
  * @param {!Object} config
  * @return {Object}
  */
-function mergeWithConfig(config) {
+function withModuleResolver(config) {
   return {
     ...config,
-    plugins: [getImportPlugin(bentoRuntimePackages), ...config.plugins],
+    plugins: [getModuleResolver(getSharedBentoSymbols()), ...config.plugins],
   };
 }
 
@@ -46,14 +51,14 @@ function mergeWithConfig(config) {
  * @return {!Object}
  */
 function getBentoElementUnminifiedConfig() {
-  return mergeWithConfig(getUnminifiedConfig());
+  return withModuleResolver(getUnminifiedConfig());
 }
 
 /**
  * @return {!Object}
  */
 function getBentoElementMinifiedConfig() {
-  return mergeWithConfig(getMinifiedConfig());
+  return withModuleResolver(getMinifiedConfig());
 }
 
 module.exports = {

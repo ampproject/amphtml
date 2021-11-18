@@ -6,21 +6,21 @@
 // TODO(alanorozco): Move generators of extension-related `defineElement()`
 // into this file. Add tests for them, now that we have tests here.
 
-const bentoRuntimePackages = require('./metadata/bento-runtime-packages');
 const dedent = require('dedent');
+const {getSharedBentoSymbols} = require('./metadata/bento-runtime-packages');
 
 /**
- * @param {Object<string, string[]>} packages
+ * @param {Object<string, string[]>} packageSymbols
  * @return {string}
  */
-function generateBentoRuntime(packages = bentoRuntimePackages) {
-  assertNoDupes(Object.values(packages).flat());
+function generateBentoRuntime(packageSymbols = getSharedBentoSymbols()) {
+  assertNoDupes(Object.values(packageSymbols).flat());
   return dedent(`
     import {dict} from '#core/types/object';
     import {isEsm} from '#core/mode';
     import {install as installCustomElements} from '#polyfills/custom-elements';
 
-    ${Object.entries(packages)
+    ${Object.entries(packageSymbols)
       .map(
         ([name, symbols]) => `import {${symbols.join(', ')}} from '${name}';`
       )
@@ -33,7 +33,7 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
     const bento = self.BENTO || [];
 
     bento['_'] = dict({
-    ${Object.entries(packages)
+    ${Object.entries(packageSymbols)
       .map(([name, symbols]) => [
         `// ${name}`,
         ...symbols.map((symbol) => `'${symbol}': ${symbol},`),
@@ -55,14 +55,14 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
 }
 
 /**
- * @param {Object<string, string[]>} packages
+ * @param {Object<string, string[]>} packageSymbols
  * @return {string}
  */
-function generateIntermediatePackage(packages = bentoRuntimePackages) {
-  assertNoDupes(Object.values(packages).flat());
+function generateIntermediatePackage(packageSymbols = getSharedBentoSymbols()) {
+  assertNoDupes(Object.values(packageSymbols).flat());
   return [
     "const _ = (name) => self.BENTO['_'][name];",
-    ...Object.entries(packages).map(([name, symbols]) => [
+    ...Object.entries(packageSymbols).map(([name, symbols]) => [
       `// ${name}`,
       ...symbols.map(
         (symbol) => `export const ${symbol} = /*#__PURE__*/ _('${symbol}');`
