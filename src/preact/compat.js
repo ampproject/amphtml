@@ -15,7 +15,7 @@ import * as mode from '#core/mode';
  * }} vnode
  */
 function newDiff(vnode) {
-  if (vnode['type']?.forwardRef_) {
+  if (vnode['type']?.forwardRef_ && vnode['ref']) {
     vnode['props']['ref'] = vnode['ref'];
     vnode['ref'] = null;
   }
