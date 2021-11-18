@@ -38,34 +38,35 @@ function getExportedSymbols(source) {
     if (types.isExportAllDeclaration(node)) {
       throw new Error('Should not "export *"');
     }
-    if (types.isExportNamedDeclaration(node)) {
-      symbols.push(
-        // @ts-ignore
-        ...(node.declaration?.declarations?.map(({id}) => id.name) ?? [])
-      );
-      // @ts-ignore
-      symbols.push(node.declaration?.id?.name);
-      symbols.push(
-        ...node.specifiers.map((node) => {
-          if (types.isExportDefaultSpecifier(node)) {
-            throw new Error('Should not export from a default import');
-          }
-          if (types.isExportNamespaceSpecifier(node)) {
-            throw new Error('Should not export a namespace');
-          }
-          const {exported, local} = node;
-          if (types.isStringLiteral(exported)) {
-            throw new Error('Should not export symbol as string');
-          }
-          if (local.name !== exported.name) {
-            throw new Error(
-              `Exported name "${exported.name}" should match local name "${local.name}"`
-            );
-          }
-          return exported.name;
-        })
-      );
+    if (!types.isExportNamedDeclaration(node)) {
+      return;
     }
+    symbols.push(
+      // @ts-ignore
+      ...(node.declaration?.declarations?.map(({id}) => id.name) ?? [])
+    );
+    // @ts-ignore
+    symbols.push(node.declaration?.id?.name);
+    symbols.push(
+      ...node.specifiers.map((node) => {
+        if (types.isExportDefaultSpecifier(node)) {
+          throw new Error('Should not export from a default import');
+        }
+        if (types.isExportNamespaceSpecifier(node)) {
+          throw new Error('Should not export a namespace');
+        }
+        const {exported, local} = node;
+        if (types.isStringLiteral(exported)) {
+          throw new Error('Should not export symbol as string');
+        }
+        if (local.name !== exported.name) {
+          throw new Error(
+            `Exported name "${exported.name}" should match local name "${local.name}"`
+          );
+        }
+        return exported.name;
+      })
+    );
   });
   return symbols;
 }
