@@ -18,11 +18,30 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     xhrMock = env.sandbox.mock(requestService.xhr_);
   });
 
-  it('should not load the share config if no attribute is set', async () => {
+  it('should not load the config if no src or inline is set', async () => {
     xhrMock.expects('fetchJson').never();
 
-    const config = await requestService.loadShareConfig();
-    expect(config).to.be.null;
+    const config = await requestService.loadConfig(shareElement);
+
+    expect(JSON.stringify(config)).to.equal('{}');
+
+    xhrMock.verify();
+  });
+
+  it('should fall back to inline config if no src is set', async () => {
+    xhrMock.expects('fetchJson').never();
+
+    const configData = {'data': {'shareUrl': 'https://example.com'}};
+
+    shareElement.innerHTML = `
+    <script type="application/json">
+      ${JSON.stringify(configData)}
+    </script>
+    `;
+
+    const config = await requestService.loadConfig(shareElement);
+
+    expect(JSON.stringify(config)).to.equal(JSON.stringify(configData));
     xhrMock.verify();
   });
 
@@ -41,7 +60,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadShareConfig();
+    await requestService.loadConfig(shareElement);
     xhrMock.verify();
   });
 
@@ -60,7 +79,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadShareConfig();
+    const config = await requestService.loadConfig(shareElement);
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
@@ -79,7 +98,8 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadShareConfig();
+    await requestService.loadShareConfig(shareElement);
+    await requestService.loadShareConfig(shareElement);
     xhrMock.verify();
   });
 
@@ -98,7 +118,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadShareConfig();
+    const config = await requestService.loadConfig(shareElement);
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
