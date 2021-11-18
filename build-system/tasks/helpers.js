@@ -540,7 +540,7 @@ const mangleIdentifier = {
     let base = 54;
     let id = '';
     do {
-      id += charset[num % base];
+      id = charset[num % base] + id;
       num = Math.floor(num / base);
       base = 64;
     } while (num > 0);
