@@ -79,7 +79,7 @@ function generateIntermediatePackage(packageSymbols = getSharedBentoSymbols()) {
 function assertNoDupes(symbols) {
   if (Array.from(new Set(symbols)).length !== symbols.length) {
     throw new Error(
-      'bento-runtime-packages should not contain duplicate symbol names, even if they come from different packages.'
+      'Shred symbols should not duplicate names, even if they come from different packages.'
     );
   }
 }
