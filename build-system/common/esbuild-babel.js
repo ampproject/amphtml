@@ -66,18 +66,24 @@ function getEsbuildBabelPlugin(
 
       const babelOptions =
         babel.loadOptions({caller: {name: callerName}}) || {};
-      const optionsHash = md5(
-        JSON.stringify({babelOptions, argv: process.argv.slice(2)})
-      );
 
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
-        const {contents, hash} = await batchedRead(filename, optionsHash);
+        const {contents, hash} = await batchedRead(filename);
+        const rehash = md5(
+          JSON.stringify({
+            callerName,
+            filename,
+            hash,
+            babelOptions,
+            argv: process.argv.slice(2),
+          })
+        );
 
         const transformed = await transformContents(
           filename,
           contents,
-          hash,
+          rehash,
           getFileBabelOptions(babelOptions, filename)
         );
         return {contents: transformed};
