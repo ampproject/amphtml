@@ -1,6 +1,6 @@
 const {
   getSharedBentoSymbols,
-} = require('../compile/generate/metadata/bento-runtime-packages');
+} = require('../compile/generate/metadata/shared-bento-symbols');
 const {generateIntermediatePackage} = require('../compile/generate/bento');
 const {getMinifiedConfig} = require('./minified-config');
 const {getUnminifiedConfig} = require('./unminified-config');

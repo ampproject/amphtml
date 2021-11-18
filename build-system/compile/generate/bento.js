@@ -7,7 +7,7 @@
 // into this file. Add tests for them, now that we have tests here.
 
 const dedent = require('dedent');
-const {getSharedBentoSymbols} = require('./metadata/bento-runtime-packages');
+const {getSharedBentoSymbols} = require('./metadata/shared-bento-symbols');
 
 /**
  * @param {Object<string, string[]>} packageSymbols
