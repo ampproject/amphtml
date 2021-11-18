@@ -14,13 +14,16 @@ const dedent = require('dedent');
  * @return {string}
  */
 function generateBentoRuntime(packages = bentoRuntimePackages) {
+  assertNoDupes(Object.values(packages).flat());
   return dedent(`
     import {dict} from '#core/types/object';
     import {isEsm} from '#core/mode';
     import {install as installCustomElements} from '#polyfills/custom-elements';
 
     ${Object.entries(packages)
-      .map(([pkg, names]) => `import {${names.join(', ')}} from '${pkg}';`)
+      .map(
+        ([name, symbols]) => `import {${symbols.join(', ')}} from '${name}';`
+      )
       .join('\n')}
 
     if (!isEsm()) {
@@ -30,8 +33,12 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
     const bento = self.BENTO || [];
 
     bento['_'] = dict({
-    ${getNamesNoDupes(packages)
-      .map((name) => `'${name}': ${name},`)
+    ${Object.entries(packages)
+      .map(([name, symbols]) => [
+        `// ${name}`,
+        ...symbols.map((symbol) => `'${symbol}': ${symbol},`),
+      ])
+      .flat()
       .join('\n')}
     });
 
@@ -52,26 +59,29 @@ function generateBentoRuntime(packages = bentoRuntimePackages) {
  * @return {string}
  */
 function generateIntermediatePackage(packages = bentoRuntimePackages) {
+  assertNoDupes(Object.values(packages).flat());
   return [
     "const _ = (name) => self.BENTO['_'][name];",
-    ...getNamesNoDupes(packages).map(
-      (name) => `export const ${name} = /*#__PURE__*/ _('${name}');`
-    ),
-  ].join('\n');
+    ...Object.entries(packages).map(([name, symbols]) => [
+      `// ${name}`,
+      ...symbols.map(
+        (symbol) => `export const ${symbol} = /*#__PURE__*/ _('${symbol}');`
+      ),
+    ]),
+  ]
+    .flat()
+    .join('\n');
 }
 
 /**
- * @param {Object<string, string[]>} packages
- * @return {string[]}
+ * @param {string[]} symbols
  */
-function getNamesNoDupes(packages = bentoRuntimePackages) {
-  const names = Object.values(packages).flat();
-  if (Array.from(new Set(names)).length !== names.length) {
+function assertNoDupes(symbols) {
+  if (Array.from(new Set(symbols)).length !== symbols.length) {
     throw new Error(
-      'bento-runtime-packages should not contain duplicate leaf names'
+      'bento-runtime-packages should not contain duplicate symbol names, even if they come from different packages.'
     );
   }
-  return names;
 }
 
 module.exports = {

@@ -23,8 +23,10 @@ test('generateBentoRuntime', (t) => {
       const bento = self.BENTO || [];
 
       bento['_'] = dict({
+      // #foo
       'bar': bar,
       'baz': baz,
+      // #baz/bar
       'car': car,
       });
 
@@ -46,8 +48,10 @@ test('generateIntermediatePackage', (t) => {
     generateIntermediatePackage({x: ['foo', 'bar'], y: ['baz']}),
     dedent(`
       const _ = (name) => self.BENTO['_'][name];
+      // x
       export const foo = /*#__PURE__*/ _('foo');
       export const bar = /*#__PURE__*/ _('bar');
+      // y
       export const baz = /*#__PURE__*/ _('baz');
     `)
   );
