@@ -27,7 +27,6 @@ const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
   'line': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
   'linkedin': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
   'pinterest': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
-  'gplus': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
   'tumblr': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
   'twitter': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
   'whatsapp': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
@@ -108,16 +107,19 @@ function buildProviderParams(opt_params) {
 }
 
 /**
+ * Creates an amp-social-share element if the type is valid.
  * @param {!Document} doc
  * @param {string} shareType
  * @param {!JsonObject=} opt_params
- * @return {!Element}
+ * @return {?Element}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = devAssert(
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-    `No localized string to display name for share type ${shareType}.`
-  );
+  const shareProviderLocalizedStringId =
+    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
+
+  if (!shareProviderLocalizedStringId) {
+    return;
+  }
 
   const social = (
     <amp-social-share
