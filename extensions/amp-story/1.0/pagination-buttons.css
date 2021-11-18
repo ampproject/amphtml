@@ -52,7 +52,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   background-repeat: no-repeat !important;
   background-color: transparent !important;
   /* Contrast protection. Make icons white. */
-  filter: invert(100%) drop-shadow(0 0 3px rgba(0, 0, 0, 0.5)) !important;
+  filter: invert(100%) drop-shadow(0 0 3px #0008) !important;
 }
 
 body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-story-desktop-one-panel) .i-amphtml-story-button-move {
@@ -72,7 +72,6 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-stor
   border: 0!important;
   background-color: #fff!important;
   background-repeat: no-repeat!important;
-  background-size: 12px 17px!important;
   justify-content: center!important;
   align-items: center!important;
   opacity: .5!important;
@@ -119,10 +118,9 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {
   height: 48px !important;
   width: 48px !important;
-  margin: auto 12px !important;
+  margin: auto 0 !important;
   background-color: transparent !important;
-  background-size: auto !important;
-  filter: drop-shadow(0 0 16px rgba(0, 0, 0, 0.5)) !important;
+  filter: invert(1) drop-shadow(0 0 6px #000)!important;
   opacity: 1 !important;
 }
 
@@ -153,11 +151,6 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M16.15 19.4a9.1 9.1 0 1 1-1.29 3.95"/><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M15.6 15.1v4.61M20 19.71h-4.4"/></svg>') !important;
   background-position: center center;
-}
-
-.i-amphtml-story-desktop-fullbleed .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 10V2L14 12l10 10v-8c6.63 0 12 5.37 12 12s-5.37 12-12 12-12-5.37-12-12H8c0 8.84 7.16 16 16 16s16-7.16 16-16-7.16-16-16-16z"/></svg>') !important;
-  background-size: auto !important;
 }
 
 .i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
