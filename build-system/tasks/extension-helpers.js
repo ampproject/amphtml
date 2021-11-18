@@ -755,18 +755,18 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = await generateBentoEntryPointSource(name, toExport);
+  const generatedSource = generateBentoEntryPointSource(name, toExport);
   const generatedFilename = `build/${filename}`;
-  await fs.outputFile(`${dir}/${generatedFilename}`, generatedSource);
+  fs.outputFileSync(`${dir}/${generatedFilename}`, generatedSource);
   return generatedFilename;
 }
 
 /**
  * @param {string} name
  * @param {string} toExport
- * @return {Promise<string>}
+ * @return {string}
  */
-async function generateBentoEntryPointSource(name, toExport) {
+function generateBentoEntryPointSource(name, toExport) {
   return dedent(`
     import {BaseElement} from '../base-element';
 
