@@ -1,5 +1,6 @@
 import {createElementWithAttributes} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
+import {AmpStoryPageAttachment} from '../../../amp-story/1.0/amp-story-page-attachment';
+
 import '../amp-story-shopping';
 
 describes.realWin(
@@ -26,7 +27,7 @@ describes.realWin(
       element = createElementWithAttributes(
         win.document,
         'amp-story-shopping-attachment',
-        {'layout': 'nodisplay'}
+        {'layout': 'fill'}
       );
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
@@ -35,9 +36,7 @@ describes.realWin(
     }
 
     it('should build shopping attachment component', () => {
-      expect(() => shoppingAttachment.layoutCallback()).to.not.throw();
-      expect(shoppingAttachment.isLayoutSupported(Layout_Enum.NODISPLAY)).to.be
-        .true;
+      expect(() => shoppingAttachment.buildCallback()).to.not.throw();
     });
   }
 );

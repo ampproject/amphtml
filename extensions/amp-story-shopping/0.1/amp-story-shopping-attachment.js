@@ -1,32 +1,43 @@
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
+import * as Preact from '#core/dom/jsx';
+import {Layout_Enum} from '#core/dom/layout';
+import {once} from '#core/types/function';
 
-import {AmpStoryPageAttachment} from 'extensions/amp-story/1.0/amp-story-page-attachment';
-
-const TAG = 'amp-story-shopping-attachment';
-
-export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
+export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    this.myText_ = TAG;
+    /** @private @return {extensions/amp-story/1.0/amp-story-page-attachment.js.AmpStoryPageAttachment} */
+    this.attachmentEl_ = null;
 
-    /** @private {?Element} */
-    this.container_ = null;
+    /**
+     * Caches a reference to the attachmnet's impl.
+     * @private @return {extensions/amp-story/1.0/amp-story-page-attachment.js.AmpStoryPageAttachment}
+     * */
+    this.getAttachmentImpl_ = once(() =>
+      customElements
+        .whenDefined('amp-story-page-attachment')
+        .then(() => this.attachmentEl_.getImpl())
+    );
   }
 
   /** @override */
   buildCallback() {
-    super.buildCallback();
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
+    this.attachmentEl_ = (
+      <amp-story-page-attachment layout="nodisplay"></amp-story-page-attachment>
+    );
+    this.element.appendChild(this.attachmentEl_);
+  }
+
+  /**
+   * @param {boolean=} shouldAnimate
+   */
+  open(shouldAnimate = true) {
+    this.getAttachmentImpl_().then((impl) => impl.open(shouldAnimate));
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout_Enum.NODISPLAY;
+    return layout == Layout_Enum.FILL;
   }
 }
