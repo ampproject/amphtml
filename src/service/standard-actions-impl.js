@@ -227,7 +227,12 @@ export class StandardActions {
    */
   handleToggleTheme() {
     this.ampdoc.waitForBodyOpen().then((body) => {
-      if ('no' === this.ampdoc.win.localStorage.getItem('amp-dark-mode')) {
+      const prefersDarkScheme = this.ampdoc.win.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      const isDarkMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
+
+      if ('no' === isDarkMode || (!isDarkMode && !prefersDarkScheme)) {
         body.classList.add('amp-dark-mode');
         this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
       } else {
