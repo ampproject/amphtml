@@ -18,20 +18,20 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {?./amp-story-request-service.AmpStoryRequestService} */
+    /** @private @const {?../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
-    /** @private @const {?./amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
 
   /**
    * Keys product data to product-ids and adds them to the store service.
-   * @param {!ShoppingConfigDef} storyConfig
+   * @param {!ShoppingConfigDef} shoppingConfig
    * @private
    */
-  addShoppingDataFromConfig_(storyConfig) {
+  addShoppingDataFromConfig_(shoppingConfig) {
     const productIDtoProduct = {};
-    for (const item of storyConfig['items']) {
+    for (const item of shoppingConfig['items']) {
       productIDtoProduct[item['product-tag-id']] = item;
     }
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
