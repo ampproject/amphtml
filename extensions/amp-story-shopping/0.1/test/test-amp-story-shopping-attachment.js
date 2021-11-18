@@ -1,5 +1,3 @@
-import {createElementWithAttributes} from '#core/dom';
-
 import '../amp-story-shopping';
 
 describes.realWin(
@@ -23,11 +21,7 @@ describes.realWin(
     async function createAmpStoryShoppingAttachment() {
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-      element = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-attachment',
-        {'layout': 'fill'}
-      );
+      element = win.document.createElement('amp-story-shopping-attachment');
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
 
