@@ -29,7 +29,10 @@ const TAG = 'amp-lightbox';
  * @param {string} eventName
  */
 function triggerAmpEvent(element, eventName) {
-  const event = createCustomEvent(getWin(element), eventName);
+  const event = createCustomEvent(
+    getWin(element),
+    `${element.localName}:${eventName}`
+  );
   Services.actionServiceForDoc(element).trigger(
     element,
     eventName,
