@@ -20,10 +20,7 @@ const packages = [
   'preact/slot',
   'core/context',
   'core/context/values',
-  // TODO:
   'preact/component',
-  // 'preact/component/contain',
-  // 'preact/component/wrapper',
   'preact/compat',
   'preact/base-element',
   'preact/context',
