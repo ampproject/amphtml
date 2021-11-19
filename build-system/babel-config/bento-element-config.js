@@ -33,7 +33,8 @@ function getModuleResolver(packages) {
   return [
     'module-resolver',
     {root: ['.'], alias},
-    // Unique name because babel errors out otherwise:
+    // Unique name because "module-resolver" is used elsewhere and babel will
+    // throw a duplicate name error.
     'module-resolver-bento-shared',
   ];
 }
