@@ -21,6 +21,8 @@ BaseElement['props'] = {
   'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock', media: true},
   'credentials': {attr: 'credentials'},
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
   'loading': {attr: 'data-loading'},
   'params': createParseAttrsWithPrefix('data-param-'),
 };
