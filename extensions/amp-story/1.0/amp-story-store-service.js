@@ -247,7 +247,7 @@ const stateComparisonFunctions = {
 };
 
 /**
- * Returns the new sate.
+ * Returns the new state.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
  * @param  {*} data

@@ -250,5 +250,13 @@
   "100": {
     "string": "Read more",
     "description": "Label for a button to open a drawer containing additional content."
+  },
+  "101": {
+    "string": "Shop",
+    "description": "Label for the CTA page outlink for shopping component when one shopping tag is present."
+  },
+  "102": {
+    "string": "View All Products",
+    "description": "Label for the CTA page outlink for shopping component when more than one shopping tag is present."
   }
 }
