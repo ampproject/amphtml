@@ -32,12 +32,12 @@ const packages = [
 function getExportedSymbols(source) {
   const tree = parse(source, {sourceType: 'module', plugins: ['jsx']});
   const symbols = [];
-  types.traverseFast(tree, (node) => {
+  for (const node of tree.program.body) {
     if (types.isExportAllDeclaration(node)) {
       throw new Error('Should not "export *"');
     }
     if (!types.isExportNamedDeclaration(node)) {
-      return;
+      continue;
     }
     symbols.push(
       // @ts-ignore
@@ -65,7 +65,7 @@ function getExportedSymbols(source) {
         return exported.name;
       })
     );
-  });
+  }
   return symbols;
 }
 
