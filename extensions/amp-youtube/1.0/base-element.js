@@ -21,7 +21,7 @@ BaseElement['props'] = {
   'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock', media: true},
   'credentials': {attr: 'credentials'},
-  'loading': {attr: 'data-loding'},
+  'loading': {attr: 'data-loading'},
   'params': createParseAttrsWithPrefix('data-param-'),
 };
 

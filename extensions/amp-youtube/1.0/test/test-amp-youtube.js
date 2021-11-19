@@ -49,7 +49,7 @@ describes.realWin(
       );
     });
 
-    it.only('should pass the data-loading attribute to the underlying iframe', async () => {
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
       element = createElementWithAttributes(win.document, 'amp-youtube', {
         'data-videoid': 'IAvf-rkzNck',
         'data-loading': 'lazy',
@@ -62,7 +62,6 @@ describes.realWin(
       await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
-      console.log(iframe);
       expect(iframe.getAttribute('loading')).to.equal('lazy');
     });
 
