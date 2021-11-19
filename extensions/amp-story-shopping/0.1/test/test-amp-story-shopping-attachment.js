@@ -1,6 +1,10 @@
 import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {Signals} from '#core/data-structures/signals';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {AmpStoryPage} from 'extensions/amp-story/1.0/amp-story-page';
+import {AmpStory} from 'extensions/amp-story/1.0/amp-story';
 
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
@@ -14,21 +18,31 @@ describes.realWin(
     let win;
     let element;
     let shoppingAttachment;
+    let page;
+    let pageEl;
+    let story;
+
+    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     beforeEach(async () => {
       win = env.win;
       registerServiceBuilder(win, 'performance', () => ({
         isPerformanceTrackingOn: () => false,
       }));
+      env.sandbox.stub(win.history, 'replaceState');
       await createAmpStoryShoppingAttachment();
     });
 
     async function createAmpStoryShoppingAttachment() {
-      const pageEl = win.document.createElement('amp-story-page');
+      story = win.document.createElement('amp-story');
+      win.document.body.appendChild(story);
+      pageEl = win.document.createElement('amp-story-page');
+      pageEl.initializeMediaPool_ = () => {};
+      pageEl.getAmpDoc = () => new AmpDocSingle(win);
       pageEl.id = 'page1';
       element = win.document.createElement('amp-story-shopping-attachment');
       pageEl.appendChild(element);
-      win.document.body.appendChild(pageEl);
+      story.appendChild(pageEl);
       shoppingAttachment = await element.getImpl();
     }
 
@@ -41,11 +55,14 @@ describes.realWin(
         'amp-story-page-attachment'
       );
       const attachmentChildImpl = await attachmentChildEl.getImpl();
-      await attachmentChildImpl.buildCallback();
-      shoppingAttachment.open();
-      expect(attachmentChildEl).to.have.class(
-        'i-amphtml-story-draggable-drawer-open'
-      );
+
+      shoppingAttachment.getAttachmentImpl_ = () =>
+        Promise.resolve(attachmentChildImpl);
+
+      const openStub = env.sandbox.stub(attachmentChildImpl, 'open');
+
+      await shoppingAttachment.open(true);
+      expect(openStub).to.be.calledOnce;
     });
   }
 );
