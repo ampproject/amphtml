@@ -103,7 +103,7 @@ class AmpLightbox extends AmpPreactBaseElement {
   onAfterClose_() {
     setIsOpen(this.element, false);
     triggerAmpEvent(this.element, 'close');
-    this.removeAsContainer?.();
+    this.removeAsContainer();
 
     if (this.historyId_ != null) {
       this.history_.pop(this.historyId_);
