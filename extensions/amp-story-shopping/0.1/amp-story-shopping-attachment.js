@@ -37,7 +37,7 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
     const shoppingTag = this.element.ownerDocument
       .getElementById(pageId)
       .getElementsByTagName('amp-story-shopping-tag');
-    const numShoppingTags = shoppingTag.length;
+    const numShoppingTags = shoppingTag != null ? shoppingTag.length : 0;
 
     const pageOutlink = document.getElementsByClassName(
       'i-amphtml-story-page-open-attachment-host'
