@@ -15,30 +15,20 @@ module.exports = function (babel) {
    * @return {function(*,*):void}
    */
   function renamePrivate(field) {
-    return function (path, state) {
-      if (!isAmpSrc(state)) {
-        return;
-      }
-      if (path.node.computed) {
-        return;
-      }
-
+    return function (path) {
       const key = path.get(field);
       if (!key.isIdentifier()) {
         return;
       }
 
       const {name} = key.node;
-      if (name.endsWith('_AMP_PRIVATE_')) {
-        return;
+      if (keys.has(name)) {
+        key.replaceWith(t.identifier(`${name}AMP_PRIVATE_`));
       }
-
-      if (!name.endsWith('_')) {
-        return;
-      }
-      key.replaceWith(t.identifier(`${name}AMP_PRIVATE_`));
     };
   }
+
+  const keys = new Set();
 
   return {
     visitor: {
@@ -46,6 +36,45 @@ module.exports = function (babel) {
       Property: renamePrivate('key'),
       MemberExpression: renamePrivate('property'),
       OptionalMemberExpression: renamePrivate('property'),
+
+      // Gather all eligible keys eligible for mangling.
+      Program(path) {
+        path.traverse({
+          AssignmentExpression(path, state) {
+            if (!isAmpSrc(state)) {
+              return;
+            }
+            const comments =
+              /** @type {import("@babel/types").ExpressionStatement}*/ (
+                path.parentPath.node
+              )?.leadingComments?.join('') ?? '';
+
+            if (!comments.includes('@private')) {
+              return;
+            }
+            const lhs = path.node.left;
+
+            if (!t.isMemberExpression(lhs)) {
+              return;
+            }
+            if (lhs.computed) {
+              return;
+            }
+
+            const ident = lhs.property;
+            if (!t.isIdentifier(ident)) {
+              return;
+            }
+            if (
+              ident.name.endsWith('AMP_PRIVATE_') ||
+              !ident.name.endsWith('_')
+            ) {
+              return;
+            }
+            keys.add(ident.name);
+          },
+        });
+      },
     },
   };
 };
