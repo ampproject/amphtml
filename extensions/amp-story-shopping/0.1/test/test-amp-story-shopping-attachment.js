@@ -1,12 +1,13 @@
 import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story:1.0, amp-story-shopping:0.1'],
+      extensions: ['amp-story:1.0', 'amp-story-shopping:0.1'],
     },
   },
   (env) => {
@@ -16,6 +17,9 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
       await createAmpStoryShoppingAttachment();
     });
 
