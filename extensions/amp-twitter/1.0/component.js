@@ -2,9 +2,9 @@ import * as Preact from '#preact';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
-import {useCallback, useMemo, useRef, useState} from '#preact';
-import {useIntersectionObserver, useValueRef} from '#preact/component';
-import {useMergeRefs} from '#preact/utils';
+import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {useValueRef} from '#preact/component';
+import {getWin} from '#core/window';
 import {setStyle} from '#core/dom/style';
 import {useStyles} from './component.jss';
 
@@ -15,30 +15,26 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
 
 /**
  * @param {!BentoTwitterDef.Props} props
- * @param {{current: (!BentoTwitterDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function BentoTwitterWithRef(
-  {
-    cards,
-    conversation,
-    limit,
-    momentid,
-    onError,
-    onLoad,
-    options: optionsProps,
-    requestResize,
-    style,
-    timelineScreenName,
-    timelineSourceType,
-    timelineUserId,
-    title,
-    tweetLimit,
-    tweetid,
-    ...rest
-  },
-  ref
-) {
+function BentoTwitterWithRef({
+  cards,
+  conversation,
+  limit,
+  momentid,
+  onError,
+  onLoad,
+  options: optionsProps,
+  requestResize,
+  style,
+  timelineScreenName,
+  timelineSourceType,
+  timelineUserId,
+  title,
+  tweetLimit,
+  tweetid,
+  ...rest
+}) {
   const [height, setHeight] = useState(null);
   const [inView, setinView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -107,26 +103,37 @@ function BentoTwitterWithRef(
     ]
   );
 
-  const observerCb = useIntersectionObserver(({isIntersecting, target}) => {
-    if (isIntersecting) {
-      setinView(true);
+  const handleScroll = useCallback(() => {
+    setinView(true);
 
-      /**
-       * Get Main bento-twitter reference. Used the alternative way here to
-       * get the <bento-twitter> reference as using offsetParent is forbidden.
-       */
-      bentoTwitterRef.current = target.parentNode.parentNode.host;
-
-      // unobserve element once it's rendered
-      observerCb(null);
+    // Remove event listener once element is rendered.
+    const iframeContainer = containerRef.current;
+    if (!iframeContainer) {
+      return;
     }
-  });
+    const win = getWin(iframeContainer);
+    win.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const observerCbRef = (containerNode) => {
-    observerCb(containerNode);
-  };
+  useEffect(() => {
+    const iframeContainer = containerRef.current;
 
-  const containerRef = useMergeRefs([ref, observerCbRef]);
+    if (!iframeContainer) {
+      return;
+    }
+    const win = getWin(iframeContainer);
+    const boundingClientRect =
+      iframeContainer./*REVIEW*/ getBoundingClientRect();
+    const isInViewPort = boundingClientRect.top < win./*REVIEW*/ innerHeight;
+
+    if (isInViewPort) {
+      setinView(true);
+    } else {
+      win.addEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll]);
+
+  const containerRef = useRef(null);
 
   return (
     <div ref={containerRef}>
