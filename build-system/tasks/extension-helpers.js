@@ -501,10 +501,10 @@ async function buildExtension(
     return;
   }
 
-  if (options.bento) {
-    await buildBentoExtensionJs(extDir, name, options);
-  }
-  await buildExtensionJs(extDir, name, {...options, bento: false});
+  await Promise.all([
+    maybeBuildBentoExtensionJs(extDir, name, options),
+    buildExtensionJs(extDir, name, {...options, bento: false}),
+  ]);
 }
 
 /**
@@ -710,7 +710,10 @@ function buildBinaries(extDir, binaries, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildBentoExtensionJs(dir, name, options) {
+async function maybeBuildBentoExtensionJs(dir, name, options) {
+  if (!options.bento) {
+    return;
+  }
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
