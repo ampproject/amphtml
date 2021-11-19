@@ -15,6 +15,9 @@ export class BaseElement extends PreactBaseElement {}
 BaseElement['Component'] = BentoFacebook;
 
 /** @override */
+BaseElement['loadable'] = true;
+
+/** @override */
 BaseElement['props'] = {
   // common attributes
   'title': {attr: 'title'}, // Needed for Preact component
@@ -23,6 +26,9 @@ BaseElement['props'] = {
     attr: 'data-locale',
     default: dashToUnderline(window.navigator.language),
   },
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
+  'loading': {attr: 'data-loading'},
   // amp-facebook
   'allowFullScreen': {attr: 'data-allowfullscreen'},
   'embedAs': {attrs: ['data-embed-as'], parseAttrs: parseEmbed},
