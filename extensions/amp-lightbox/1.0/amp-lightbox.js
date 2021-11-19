@@ -89,7 +89,7 @@ class AmpLightbox extends AmpPreactBaseElement {
   /** @private */
   onAfterOpen_() {
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
-    this.setAsContainer?.(scroller);
+    this.setAsContainer(scroller);
 
     this.history_
       .push(() => this.api().close())
