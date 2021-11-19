@@ -4,16 +4,18 @@ const {
 const {generateIntermediatePackage} = require('../compile/generate/bento');
 const {getMinifiedConfig} = require('./minified-config');
 const {getUnminifiedConfig} = require('./unminified-config');
-const {outputFileSync, pathExistsSync} = require('fs-extra');
+const {outputFileSync} = require('fs-extra');
+
+let modulePath;
 
 /**
  * @param {{[name: string]: string[]}} packages
  * @return {string}
  */
 function writeIntermediatePackage(packages) {
-  // Don't remove the `./`
-  const modulePath = './build/bento-shared.js';
-  if (!pathExistsSync(modulePath)) {
+  if (!modulePath) {
+    // Don't remove the `./`
+    modulePath = './build/bento-shared.js';
     outputFileSync(modulePath, generateIntermediatePackage(packages));
   }
   return modulePath;
