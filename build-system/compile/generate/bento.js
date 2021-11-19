@@ -13,7 +13,9 @@ const {getSharedBentoSymbols} = require('./metadata/shared-bento-symbols');
  * @param {Object<string, string[]>} packageSymbols
  * @return {string}
  */
-function generateBentoRuntime(packageSymbols = getSharedBentoSymbols()) {
+function generateBentoRuntimeEntrypoint(
+  packageSymbols = getSharedBentoSymbols()
+) {
   assertNoDupes(Object.values(packageSymbols).flat());
   return dedent(`
     import {dict} from '#core/types/object';
@@ -85,6 +87,6 @@ function assertNoDupes(symbols) {
 }
 
 module.exports = {
-  generateBentoRuntime,
+  generateBentoRuntimeEntrypoint,
   generateIntermediatePackage,
 };

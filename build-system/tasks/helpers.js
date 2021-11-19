@@ -15,7 +15,7 @@ const {
 } = require('../compile/internal-version');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('kleur/colors');
-const {generateBentoRuntime} = require('../compile/generate/bento');
+const {generateBentoRuntimeEntrypoint} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
@@ -139,7 +139,7 @@ async function compileCoreRuntime(options) {
 async function compileBentoRuntime(options) {
   const {srcDir, srcFilename} = jsBundles['bento.js'];
   const filename = `${srcDir}/${srcFilename}`;
-  const fileSource = generateBentoRuntime();
+  const fileSource = generateBentoRuntimeEntrypoint();
   await fs.outputFile(filename, fileSource);
   await doBuildJs(jsBundles, 'bento.js', {
     ...options,
