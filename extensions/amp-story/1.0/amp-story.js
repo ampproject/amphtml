@@ -81,6 +81,7 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
+import {isPreviewMode} from './embed-mode';
 import {isRTL} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
@@ -402,6 +403,7 @@ export class AmpStory extends AMP.BaseElement {
     }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      isPreviewMode(this.win) ||
       prefersReducedMotion(this.win)
     ) {
       Services.performanceFor(this.win).addEnabledExperiment(
