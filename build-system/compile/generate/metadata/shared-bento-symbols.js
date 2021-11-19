@@ -19,7 +19,6 @@ const packages = [
   'preact',
   'preact/slot',
   'core/context',
-  'core/context/values',
   'preact/component',
   'preact/compat',
   'preact/base-element',
