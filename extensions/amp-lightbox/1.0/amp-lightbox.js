@@ -110,7 +110,7 @@ class AmpLightbox extends AmpPreactBaseElement {
 
   /** @override */
   unmountCallback() {
-    this.removeAsContainer?.();
+    this.removeAsContainer();
   }
 
   /** @override */
