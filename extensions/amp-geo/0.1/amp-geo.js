@@ -200,7 +200,7 @@ export class AmpGeo extends AMP.BaseElement {
         }
         this.mode_ = mode.GEO_OVERRIDE;
       }
-    } else if (preRenderMatch && isExperimentOn('amp-geo-ssr')) {
+    } else if (preRenderMatch && (!Services.urlForDoc(this.element).isProxyOrigin(this.win.location) || isExperimentOn('amp-geo-ssr'))) {
       // pre-rendered by a publisher case or cache case.
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
