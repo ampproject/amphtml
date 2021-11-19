@@ -1,0 +1,31 @@
+import {toggle} from '#core/dom/style';
+import {dispatchCustomEvent, toggleAttribute} from '#core/dom';
+import {unmountAll} from '#core/dom/resource-container-helper';
+
+export {CSS as shadowCss} from './component.jss';
+export {BentoLightbox as Component} from './component';
+
+export const usesShadowDom = true;
+export const props = {
+  'animation': {attr: 'animation', media: true, default: 'fade-in'},
+  'closeButtonAs': {selector: '[slot="close-button"]', single: true, as: true},
+  'children': {passthrough: true},
+};
+
+/**
+ * @param {Element} element
+ * @param {boolean} isOpen
+ */
+export function setIsOpen(element, isOpen) {
+  toggleAttribute(element, 'open', isOpen);
+  toggle(element, isOpen);
+  dispatchCustomEvent(element, isOpen ? 'open' : 'close');
+  if (!isOpen) {
+    // Unmount all children when the lightbox is closed. They will automatically
+    // remount when the lightbox is opened again.
+    // TODO(wg-bento): Investigate if this is only needed on the AMP layer.
+    unmountAll(element, /* includeSelf */ false);
+  }
+}
+
+export const isOpen = (element) => element.hasAttribute('open');

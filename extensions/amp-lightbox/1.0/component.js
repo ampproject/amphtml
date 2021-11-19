@@ -70,6 +70,7 @@ function BentoLightboxWithRef(
         setVisible(true);
       },
       close: () => setVisible(false),
+      toggle: (visible) => setVisible(visible),
     }),
     [onBeforeOpenRef]
   );
