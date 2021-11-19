@@ -1,4 +1,4 @@
-/,/utf/**
+/**
  * Note: Attribute selectors were used initially here but we switched to using
  * class-based selector to style each type because of a bug on iOS Safari 8.
  * See https://github.com/ampproject/amphtml/issues/4277 for more details.
