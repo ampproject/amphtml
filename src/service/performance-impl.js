@@ -649,6 +649,11 @@ export class Performance {
 
   /**
    * Tick the largest contentful paint metrics.
+   * Uses entry.startTime, which equates to: `renderTime ?? loadTime`. We can't
+   * always use one or the other because:
+   * - loadTime is 0 for non-remote resources (text)
+   * - renderTime is undefined for crossorigin resources
+   *
    * @param {!LargestContentfulPaint} entry
    */
   tickLargestContentfulPaint_(entry) {
