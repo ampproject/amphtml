@@ -228,23 +228,6 @@ export class Performance {
      */
     this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
-    /**
-     * The latest reported largest contentful paint time. Uses entry.startTime,
-     * which equates to: renderTime ?? loadTime. We can't always use one or the other
-     * because:
-     * - loadTime is 0 for non-remote resources (text)
-     * - renderTime is undefined for crossorigin resources
-     *
-     * @private {?number}
-     */
-    this.largestContentfulPaint_ = null;
-
-    /**
-     * Which type of element was chosen as the LCP.
-     * @private {ELEMENT_TYPE_ENUM}
-     */
-    this.largestContentfulPaintType_ = null;
-
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -434,8 +417,7 @@ export class Performance {
           this.layoutShiftSum_ += entry.value;
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
-        this.largestContentfulPaint_ = entry.startTime;
-        this.largestContentfulPaintType_ = getElementType(entry.element);
+        this.tickLargestContentfulPaint_(entry);
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
@@ -566,9 +548,6 @@ export class Performance {
       this.recordGoogleFontExp_();
       this.tickCumulativeLayoutShiftScore_();
     }
-    if (this.supportsLargestContentfulPaint_) {
-      this.tickLargestContentfulPaint_();
-    }
   }
 
   /**
@@ -670,23 +649,17 @@ export class Performance {
 
   /**
    * Tick the largest contentful paint metrics.
+   * @param {!LargestContentfulPaint} entry
    */
-  tickLargestContentfulPaint_() {
-    if (this.largestContentfulPaint_ == null) {
-      return;
-    }
+  tickLargestContentfulPaint_(entry) {
+    const {element, startTime} = entry;
+    const type = getElementType(element);
 
-    this.tickDelta(
-      TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_TYPE,
-      this.largestContentfulPaintType_
-    );
-    this.tickDelta(
-      TickLabel_Enum.LARGEST_CONTENTFUL_PAINT,
-      this.largestContentfulPaint_
-    );
+    this.tickDelta(TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_TYPE, type);
+    this.tickDelta(TickLabel_Enum.LARGEST_CONTENTFUL_PAINT, startTime);
     this.tickSinceVisible(
       TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_VISIBLE,
-      this.largestContentfulPaint_
+      startTime
     );
     this.flush();
   }
