@@ -121,6 +121,14 @@ function BentoTwitterWithRef({
     if (!iframeContainer) {
       return;
     }
+
+    /**
+     * Need the reference to the <bento-twitter> element to be able to resize the embed.
+     * As the twitter embed size can vary based on the content, the resizing is required to
+     * avoid showing the cut off content.
+     */
+    bentoTwitterRef.current = iframeContainer./*REVIEW*/ offsetParent;
+
     const win = getWin(iframeContainer);
     const boundingClientRect =
       iframeContainer./*REVIEW*/ getBoundingClientRect();
