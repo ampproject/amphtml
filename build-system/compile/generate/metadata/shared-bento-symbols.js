@@ -16,13 +16,13 @@ const {relative} = require('path');
 // These must be aliased from `src/`, e.g. `#preact` to `src/preact`.
 // See tsconfig.json for the list of aliases.
 const packages = [
-  'preact',
-  'preact/slot',
   'core/context',
-  'preact/component',
-  'preact/compat',
+  'preact',
   'preact/base-element',
+  'preact/compat',
+  'preact/component',
   'preact/context',
+  'preact/slot',
 ];
 
 /**
