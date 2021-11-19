@@ -159,25 +159,25 @@ amp-story[standalone].amp-notbuilt {
 }
 
 amp-story[standalone]:-webkit-full-screen {
-  height: var(--story-100dvh) !important;
+  height: 100vh !important;
   max-height: none !important;
   max-width: none !important;
 }
 
 amp-story[standalone]:-moz-full-screen {
-  height: var(--story-100dvh) !important;
+  height: 100vh !important;
   max-height: none !important;
   max-width: none !important;
 }
 
 amp-story[standalone]:-ms-fullscreen {
-  height: var(--story-100dvh) !important;
+  height: 100vh !important;
   max-height: none !important;
   max-width: none !important;
 }
 
 amp-story[standalone]:fullscreen {
-  height: var(--story-100dvh) !important;
+  height: 100vh !important;
   max-height: none !important;
   max-width: none !important;
 }
