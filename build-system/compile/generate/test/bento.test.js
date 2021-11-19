@@ -1,10 +1,13 @@
 const dedent = require('dedent');
 const test = require('ava');
-const {generateBentoRuntime, generateIntermediatePackage} = require('../bento');
+const {
+  generateBentoRuntimeEntrypoint,
+  generateIntermediatePackage,
+} = require('../bento');
 
-test('generateBentoRuntime', (t) => {
+test('generateBentoRuntimeEntrypoint', (t) => {
   t.is(
-    generateBentoRuntime({
+    generateBentoRuntimeEntrypoint({
       '#foo': ['bar', 'baz'],
       '#baz/bar': ['car'],
     }),

@@ -30,11 +30,17 @@ const packages = [
  * @return {string[]}
  */
 function getExportedSymbols(source) {
-  const tree = parse(source, {sourceType: 'module', plugins: ['jsx']});
+  const tree = parse(source, {
+    sourceType: 'module',
+    plugins: ['jsx', 'exportDefaultFrom'],
+  });
   const symbols = [];
   for (const node of tree.program.body) {
     if (types.isExportAllDeclaration(node)) {
       throw new Error('Should not "export *"');
+    }
+    if (types.isExportDefaultDeclaration(node)) {
+      throw new Error('Should not "export default"');
     }
     if (!types.isExportNamedDeclaration(node)) {
       continue;
@@ -66,7 +72,7 @@ function getExportedSymbols(source) {
       })
     );
   }
-  return symbols;
+  return symbols.filter(Boolean);
 }
 
 let sharedBentoSymbols;
@@ -82,7 +88,7 @@ function getSharedBentoSymbols() {
       try {
         const source = readFileSync(filepath, 'utf8');
         const symbols = getExportedSymbols(source);
-        return [`#${pkg}`, symbols.filter(Boolean)];
+        return [`#${pkg}`, symbols];
       } catch (e) {
         e.message = `${filepath}: ${e.message}`;
         throw e;
@@ -93,4 +99,4 @@ function getSharedBentoSymbols() {
   return sharedBentoSymbols;
 }
 
-module.exports = {getSharedBentoSymbols};
+module.exports = {getExportedSymbols, getSharedBentoSymbols};
