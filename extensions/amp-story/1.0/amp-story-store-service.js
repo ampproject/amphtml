@@ -202,11 +202,7 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-<<<<<<< HEAD
   ADD_SHOPPING_DATA: 'addShoppingData',
-  TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
-=======
->>>>>>> 936240c3e5 (♻️🚀 amp-story: Refactor unsupported browser layer for size)
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
