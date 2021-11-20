@@ -398,6 +398,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const destFilename = maybeToEsmName(filename);
   const destFile = path.join(destDir, destFilename);
 
+  const minifyUid = MinifyLockManager.nextUid();
+
   if (watchedTargets.has(entryPoint)) {
     return watchedTargets.get(entryPoint).rebuild();
   }
@@ -465,7 +467,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map));
+      ({code, map} = await minify(code, map, minifyUid));
       map = await massageSourcemaps(map, options);
     }
 
@@ -548,14 +550,62 @@ const mangleIdentifier = {
   },
 };
 
+class MinifyLockManager {
+  static uid_ = 1;
+  static current_ = 1;
+  static waiting_ = [];
+
+  /** @return {number} */
+  static nextUid() {
+    return MinifyLockManager.uid_++;
+  }
+
+  /**
+   * @param {number} id
+   * @return {Promise}
+   */
+  static acquire(id) {
+    if (MinifyLockManager.current_ === id) {
+      return Promise.resolve();
+    }
+
+    const deferred = {}
+    deferred.promise = new Promise(resolve => {
+      deferred.resolve = resolve;
+    });
+
+    MinifyLockManager.waiting_.push({
+      id,
+      deferred,
+    });
+    return deferred.promise;
+  }
+
+  /**
+   * @param {number} id
+   */
+  static release(id) {
+    if (id !== this.current_) {
+      throw new Error(`Trying to release lock that you don't own...`);
+    }
+    const next = ++this.current_;
+    for (const {id, deferred} of MinifyLockManager.waiting_) {
+      if (id !== next) continue;
+      deferred.resolve();
+      break;
+    }
+  }
+}
+
 /**
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
  * @param {string} map
+ * @param {number} minifyUid
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map) {
+async function minify(code, map, minifyUid) {
   /* eslint-disable local/camelcase */
   const terserOptions = {
     mangle: {
@@ -586,8 +636,13 @@ async function minify(code, map) {
   // See https://github.com/ampproject/amphtml/issues/36476
   /** @type {any}*/ (nameCache).vars = {};
 
-  const minified = await terser.minify(code, terserOptions);
-  return {code: minified.code ?? '', map: minified.map};
+  await MinifyLockManager.acquire(minifyUid);
+  try {
+    const minified = await terser.minify(code, terserOptions);
+    return {code: minified.code ?? '', map: minified.map};
+  } finally {
+    MinifyLockManager.release(minifyUid);
+  }
 }
 
 /**
