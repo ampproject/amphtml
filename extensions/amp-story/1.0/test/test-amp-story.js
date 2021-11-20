@@ -809,14 +809,13 @@ describes.realWin(
           continueAnywayButton.click();
 
           await poll(
-            'TOGGLE_PAUSED with pausedStateToRestore_',
-            () => dispatchTogglePausedRestore.callCount > 0
+            '.i-amphtml-story-unsupported-browser-overlay is removed',
+            () =>
+              element.querySelector(
+                '.i-amphtml-story-unsupported-browser-overlay'
+              ) == null
           );
-          expect(
-            element.querySelector(
-              '.i-amphtml-story-unsupported-browser-overlay'
-            )
-          ).to.be.null;
+          expect(dispatchTogglePausedRestore).to.have.been.calledOnce;
         });
       });
 
