@@ -23,6 +23,7 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
 import {setImportantStyles} from '#core/dom/style';
 import {waitFor} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -768,12 +769,24 @@ describes.realWin(
           await createStoryWithPages(2, ['cover', 'page-4']);
           AmpStory.isBrowserSupported = () => false;
           story = new AmpStory(element);
-          const dispatchSpy = env.sandbox.spy(story.storeService_, 'dispatch');
+          expect(
+            element.querySelector(
+              '.i-amphtml-story-unsupported-browser-overlay'
+            )
+          ).to.be.null;
+          const dispatchTogglePaused = env.sandbox
+            .spy(story.storeService_, 'dispatch')
+            .withArgs(Action.TOGGLE_PAUSED, true);
           await story.layoutCallback();
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUPPORTED_BROWSER,
-            false
+          await poll(
+            'TOGGLE_PAUSED true',
+            () => dispatchTogglePaused.callCount > 0
           );
+          expect(
+            element.querySelector(
+              '.i-amphtml-story-unsupported-browser-overlay'
+            )
+          ).to.not.be.null;
         });
 
         it('should display the story after clicking "continue" button', async () => {
@@ -781,19 +794,29 @@ describes.realWin(
 
           AmpStory.isBrowserSupported = () => false;
           story = new AmpStory(element);
-          const dispatchSpy = env.sandbox.spy(
-            story.unsupportedBrowserLayer_.storeService_,
-            'dispatch'
-          );
 
           story.buildCallback();
 
           await story.layoutCallback();
-          story.unsupportedBrowserLayer_.continueButton_.click();
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUPPORTED_BROWSER,
-            true
+
+          const dispatchTogglePausedRestore = env.sandbox
+            .spy(story.storeService_, 'dispatch')
+            .withArgs(Action.TOGGLE_PAUSED, story.pausedStateToRestore_);
+
+          const continueAnywayButton = element.querySelector(
+            '.i-amphtml-story-unsupported-browser-overlay button'
           );
+          continueAnywayButton.click();
+
+          await poll(
+            'TOGGLE_PAUSED with pausedStateToRestore_',
+            () => dispatchTogglePausedRestore.callCount > 0
+          );
+          expect(
+            element.querySelector(
+              '.i-amphtml-story-unsupported-browser-overlay'
+            )
+          ).to.be.null;
         });
       });
 
