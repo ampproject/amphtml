@@ -27,7 +27,7 @@ describes.realWin(
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
       // Extend timeout due to animation delay.
-      await poll('element open updated', isOpenOrNot, undefined, 500);
+      await poll(`element open updated (${open})`, isOpenOrNot, undefined, 500);
     }
 
     function getContent() {

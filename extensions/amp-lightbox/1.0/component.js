@@ -70,7 +70,6 @@ function BentoLightboxWithRef(
         setVisible(true);
       },
       close: () => setVisible(false),
-      toggle: (visible) => setVisible(visible),
     }),
     [onBeforeOpenRef]
   );
@@ -107,9 +106,7 @@ function BentoLightboxWithRef(
       const postInvisibleAnim = () => {
         setStyle(element, 'opacity', 0);
         setStyle(element, 'visibility', 'hidden');
-        if (onAfterCloseRef.current) {
-          onAfterCloseRef.current();
-        }
+        onAfterCloseRef.current?.();
         animation = null;
         setMounted(false);
       };

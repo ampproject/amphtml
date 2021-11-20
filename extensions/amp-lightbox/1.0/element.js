@@ -7,7 +7,7 @@ export {BentoLightbox as Component} from './component';
 
 export const usesShadowDom = true;
 export const props = {
-  'animation': {attr: 'animation', media: true, default: 'fade-in'},
+  'animation': {attr: 'animation', media: true},
   'closeButtonAs': {selector: '[slot="close-button"]', single: true, as: true},
   'children': {passthrough: true},
 };
@@ -15,6 +15,7 @@ export const props = {
 /**
  * @param {Element} element
  * @param {boolean} isOpen
+ * @return {boolean}
  */
 export function setIsOpen(element, isOpen) {
   toggleAttribute(element, 'open', isOpen);
@@ -26,6 +27,24 @@ export function setIsOpen(element, isOpen) {
     // TODO(wg-bento): Investigate if this is only needed on the AMP layer.
     unmountAll(element, /* includeSelf */ false);
   }
+  return isOpen;
 }
 
-export const isOpen = (element) => element.hasAttribute('open');
+/**
+ * @param {!Element} element
+ * @param {boolean} wasOpen
+ * @return {boolean}
+ */
+export function toggleOnMutation(element, wasOpen) {
+  const isOpen = element.hasAttribute('open');
+  if (isOpen !== wasOpen) {
+    element.getApi().then((api) => {
+      if (isOpen) {
+        api.open();
+      } else {
+        api.close();
+      }
+    });
+  }
+  return isOpen;
+}

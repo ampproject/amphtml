@@ -2,14 +2,22 @@ import {PreactBaseElement} from '#preact/base-element';
 import {dict} from '#core/types/object';
 import {
   Component,
-  isOpen,
   props,
   setIsOpen,
   shadowCss,
+  toggleOnMutation,
   usesShadowDom,
 } from './element';
 
 export class BaseElement extends PreactBaseElement {
+  /** @override */
+  constructor(element) {
+    super(element);
+
+    /** @private {boolean} */
+    this.open_ = false;
+  }
+
   /** @override */
   init() {
     return dict({
@@ -20,17 +28,17 @@ export class BaseElement extends PreactBaseElement {
 
   /** @private */
   onBeforeOpen_() {
-    setIsOpen(this.element, true);
+    this.open_ = setIsOpen(this.element, true);
   }
 
   /** @private */
   onAfterClose_() {
-    setIsOpen(this.element, false);
+    this.open_ = setIsOpen(this.element, false);
   }
 
   /** @override */
   mutationObserverCallback() {
-    this.api().toggle(isOpen(this.element));
+    this.open_ = toggleOnMutation(this.element, this.open_);
   }
 }
 

@@ -10,10 +10,10 @@ import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
 import {
   Component,
-  isOpen,
   props,
   setIsOpen,
   shadowCss,
+  toggleOnMutation,
   usesShadowDom,
 } from './element';
 // AmpPreactBaseElement should be declared elsewhere and shared.
@@ -29,10 +29,7 @@ const TAG = 'amp-lightbox';
  * @param {string} eventName
  */
 function triggerAmpEvent(element, eventName) {
-  const event = createCustomEvent(
-    getWin(element),
-    `${element.localName}:${eventName}`
-  );
+  const event = createCustomEvent(getWin(element), eventName);
   Services.actionServiceForDoc(element).trigger(
     element,
     eventName,
@@ -52,6 +49,9 @@ class AmpLightbox extends AmpPreactBaseElement {
 
     /** @private {number|null} */
     this.historyId_ = null;
+
+    /** @private {boolean} */
+    this.open_ = false;
   }
 
   /** @override */
@@ -85,8 +85,8 @@ class AmpLightbox extends AmpPreactBaseElement {
 
   /** @private */
   onBeforeOpen_() {
-    setIsOpen(this.element, true);
-    triggerAmpEvent(this.element, 'open');
+    this.open_ = setIsOpen(this.element, true);
+    triggerAmpEvent(this.element, 'amp-lightbox:open');
   }
 
   /** @private */
@@ -101,8 +101,8 @@ class AmpLightbox extends AmpPreactBaseElement {
 
   /** @private */
   onAfterClose_() {
-    setIsOpen(this.element, false);
-    triggerAmpEvent(this.element, 'close');
+    this.open_ = setIsOpen(this.element, false);
+    triggerAmpEvent(this.element, 'amp-lightbox:close');
     this.removeAsContainer();
 
     if (this.historyId_ != null) {
@@ -118,7 +118,7 @@ class AmpLightbox extends AmpPreactBaseElement {
 
   /** @override */
   mutationObserverCallback() {
-    this.api().toggle(isOpen(this.element));
+    this.open_ = toggleOnMutation(this.element, this.open_);
   }
 }
 
