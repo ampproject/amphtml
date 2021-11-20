@@ -1791,8 +1791,8 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Displays the publisher [fallback] element if provided, or renders our own
    * unsupported browser layer.
-   * @private
    * @return {!Promise|undefined}
+   * @private
    */
   displayUnsupportedBrowser_() {
     this.setPausedStateToRestore_();
