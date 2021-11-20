@@ -81,12 +81,8 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
-<<<<<<< HEAD
 import {isPreviewMode} from './embed-mode';
-import {isRTL} from '#core/dom';
-=======
 import {isRTL, removeElement} from '#core/dom';
->>>>>>> 936240c3e5 (♻️🚀 amp-story: Refactor unsupported browser layer for size)
 import {parseQueryString} from '#core/types/string/url';
 import {
   removeAttributeInMutate,
