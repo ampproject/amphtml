@@ -17,7 +17,7 @@ export const props = {
  * @param {boolean} isOpen
  * @return {boolean}
  */
-export function setIsOpen(element, isOpen) {
+export function setElementOpen(element, isOpen) {
   toggleAttribute(element, 'open', isOpen);
   toggle(element, isOpen);
   dispatchCustomEvent(element, isOpen ? 'open' : 'close');

@@ -11,7 +11,7 @@ import {userAssert} from '#utils/log';
 import {
   Component,
   props,
-  setIsOpen,
+  setElementOpen,
   shadowCss,
   toggleOnMutation,
   usesShadowDom,
@@ -85,7 +85,7 @@ class AmpLightbox extends AmpPreactBaseElement {
 
   /** @private */
   onBeforeOpen_() {
-    this.open_ = setIsOpen(this.element, true);
+    this.open_ = setElementOpen(this.element, true);
     triggerAmpEvent(this.element, 'amp-lightbox:open');
   }
 
@@ -101,7 +101,7 @@ class AmpLightbox extends AmpPreactBaseElement {
 
   /** @private */
   onAfterClose_() {
-    this.open_ = setIsOpen(this.element, false);
+    this.open_ = setElementOpen(this.element, false);
     triggerAmpEvent(this.element, 'amp-lightbox:close');
     this.removeAsContainer();
 

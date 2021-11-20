@@ -3,7 +3,7 @@ import {dict} from '#core/types/object';
 import {
   Component,
   props,
-  setIsOpen,
+  setElementOpen,
   shadowCss,
   toggleOnMutation,
   usesShadowDom,
@@ -28,12 +28,12 @@ export class BaseElement extends PreactBaseElement {
 
   /** @private */
   onBeforeOpen_() {
-    this.open_ = setIsOpen(this.element, true);
+    this.open_ = setElementOpen(this.element, true);
   }
 
   /** @private */
   onAfterClose_() {
-    this.open_ = setIsOpen(this.element, false);
+    this.open_ = setElementOpen(this.element, false);
   }
 
   /** @override */
