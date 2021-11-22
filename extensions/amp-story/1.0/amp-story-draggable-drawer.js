@@ -226,11 +226,11 @@ export class DraggableDrawer extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     const isMobile = uiState === UIType.MOBILE;
-
     isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
 
+    console.log(isMobile, 'onuiupdate');
     this.headerEl.toggleAttribute('desktop', !isMobile);
   }
 
@@ -238,14 +238,19 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   startListeningForTouchEvents_() {
-    // If the element is a direct descendant of amp-story-page, authorize
-    // swiping up by listening to events at the page level. Otherwise, only
-    // authorize swiping down to close by listening to events at the current
-    // element level.
+    // If the element is a direct descendant of amp-story-page or a decendent
+    // of amp-story-shopping-attachment, authorize swiping up by listening to
+    // events at the page level. Otherwise, only authorize swiping down to
+    // close by listening to events at the current element level.
     const parentEl = this.element.parentElement;
-    const el = dev().assertElement(
+    console.log(parentEl.tagName);
+    let el = dev().assertElement(
       parentEl.tagName === 'AMP-STORY-PAGE' ? parentEl : this.element
     );
+
+    if (parentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT') {
+      el = dev().assertElement(this.element.closest('amp-story-page'));
+    }
 
     this.touchEventUnlisteners_.push(
       listen(el, 'touchstart', this.onTouchStart_.bind(this), {
