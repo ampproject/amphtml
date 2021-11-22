@@ -8,6 +8,7 @@ import {dev} from '#utils/log';
 
 import {AmpStoryPageAttachment} from 'extensions/amp-story/1.0/amp-story-page-attachment';
 
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   ShoppingDataDef,
   StateProperty,
@@ -28,9 +29,6 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
 
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
-
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
   }
 
   /**
@@ -59,29 +57,29 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
           tag.getAttribute('data-tag-id')
         ]
     );
-    const numShoppingTags = shoppingTags.length;
 
     const ctaButton = pageIdElem.querySelector(
       '.i-amphtml-story-page-open-attachment-host'
     )?.shadowRoot.children[1];
 
-    if (numShoppingTags === 0 || !ctaButton) {
+    if (shoppingTags.length === 0 || !ctaButton) {
       // Failsafe in case the CTA button fails to load, will call the function again until CTA button loads.
       setTimeout(() => this.updateCtaText_(), 100);
       return;
     }
 
-    const getI18nString = (stringKey) =>
-      this.localizationService_.getLocalizedString(stringKey);
-
     const i18nString =
-      numShoppingTags === 1
-        ? getI18nString(LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL) +
+      shoppingTags.length === 1
+        ? localize(
+            this.element,
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL
+          ) +
           ' ' +
           this.storeService_.get(StateProperty.SHOPPING_DATA)[
             shoppingTags[0].getAttribute('data-tag-id')
           ]['product-title']
-        : getI18nString(
+        : localize(
+            this.element,
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
           );
 
@@ -99,17 +97,14 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
     this.element.appendChild(this.container_);
     applyFillContent(this.container_, /* replacedContent */ true);
 
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.localizationService_ = localizationService;
-
-      this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
-        this.updateCtaText_();
-      });
-    });
+    return Promise.all([Services.storyStoreServiceForOrNull(this.win)]).then(
+      ([storeService]) => {
+        this.storeService_ = storeService;
+        this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+          this.updateCtaText_();
+        });
+      }
+    );
   }
 
   /** @override */
