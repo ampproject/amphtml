@@ -110,6 +110,12 @@ ExtensionPayload.prototype.n;
 ExtensionPayload.prototype.ev;
 
 /**
+ * Whether this extension version is the latest version.
+ * @type {boolean}
+ */
+ExtensionPayload.prototype.l;
+
+/**
  * Priority.
  * @type {string|undefined}
  */
