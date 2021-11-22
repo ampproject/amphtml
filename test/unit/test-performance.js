@@ -1042,7 +1042,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       toggleVisibility(perf, false);
 
       const lcpEvents = perf.events_.filter(({label}) => label === 'lcp');
-      expect(lcpEvents.length).to.equal(1);
+      expect(lcpEvents.length).to.equal(2);
+      expect(lcpEvents).deep.include({
+        label: 'lcp',
+        delta: 12,
+      });
       expect(lcpEvents).deep.include({
         label: 'lcp',
         delta: 23,
