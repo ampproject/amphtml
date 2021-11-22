@@ -26,19 +26,12 @@ let ExtensionLoadPriorityDef;
  * by the main binary
  * @param {string} name
  * @param {string} version
- * @param {boolean} latest
  * @param {boolean=} isModule
  * @param {ExtensionLoadPriorityDef=} loadPriority
  * @return {string}
  */
-function extension(name, version, latest, isModule, loadPriority) {
-  const payload = extensionPayload(
-    name,
-    version,
-    latest,
-    isModule,
-    loadPriority
-  );
+function extension(name, version, isModule, loadPriority) {
+  const payload = extensionPayload(name, version, isModule, loadPriority);
   return `(self.AMP=self.AMP||[]).push(${payload});`;
 }
 
@@ -53,12 +46,11 @@ exports.extension = extension;
  * @see {@link bento}
  * @param {string} name
  * @param {string} version
- * @param {boolean} latest
  * @param {boolean=} isModule
  * @param {ExtensionLoadPriorityDef=} loadPriority
  * @return {string}
  */
-function extensionPayload(name, version, latest, isModule, loadPriority) {
+function extensionPayload(name, version, isModule, loadPriority) {
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -74,7 +66,6 @@ function extensionPayload(name, version, latest, isModule, loadPriority) {
     `v:"${VERSION}",` +
     `n:"${name}",` +
     `ev:"${version}",` +
-    `l:${latest},` +
     priority +
     `f:(function(AMP,_){<%= contents %>})` +
     '}'
