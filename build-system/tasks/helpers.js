@@ -569,8 +569,8 @@ class MinifyLockManager {
       return Promise.resolve();
     }
 
-    const deferred = {}
-    deferred.promise = new Promise(resolve => {
+    const deferred = {};
+    deferred.promise = new Promise((resolve) => {
       deferred.resolve = resolve;
     });
 
@@ -585,13 +585,15 @@ class MinifyLockManager {
    * @param {number} id
    */
   static release(id) {
-    if (id !== this.current_) {
+    if (id !== MinifyLockManager.current_) {
       throw new Error(`Trying to release lock that you don't own...`);
     }
-    const next = ++this.current_;
-    for (const {id, deferred} of MinifyLockManager.waiting_) {
-      if (id !== next) continue;
-      deferred.resolve();
+    const next = ++MinifyLockManager.current_;
+    for (const wait of MinifyLockManager.waiting_) {
+      if (wait.id !== next) {
+        continue;
+      }
+      wait.deferred.resolve();
       break;
     }
   }
