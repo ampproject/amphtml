@@ -62,12 +62,6 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
       '.i-amphtml-story-page-open-attachment-host'
     )?.shadowRoot.children[1];
 
-    if (shoppingTags.length === 0 || !ctaButton) {
-      // Failsafe in case the CTA button fails to load, will call the function again until CTA button loads.
-      setTimeout(() => this.updateCtaText_(), 100);
-      return;
-    }
-
     const i18nString =
       shoppingTags.length === 1
         ? localize(
@@ -83,10 +77,16 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
           );
 
-    this.mutateElement(() => {
-      ctaButton.setAttribute('aria-label', i18nString);
-      ctaButton.children[1].textContent = i18nString;
-    });
+    if (!ctaButton) {
+      this.mutateElement(() => {
+        this.element.setAttribute('data-cta-text', i18nString);
+      });
+    } else {
+      this.mutateElement(() => {
+        ctaButton.setAttribute('aria-label', i18nString);
+        ctaButton.children[1].textContent = i18nString;
+      });
+    }
   }
 
   /** @override */
@@ -100,6 +100,7 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
     return Promise.resolve(Services.storyStoreServiceForOrNull(this.win)).then(
       (storeService) => {
         this.storeService_ = storeService;
+        this.updateCtaText_();
         this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
           this.updateCtaText_();
         });
