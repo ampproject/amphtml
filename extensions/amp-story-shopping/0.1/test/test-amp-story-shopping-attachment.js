@@ -1,7 +1,5 @@
 import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
-import '../amp-story-shopping-attachment';
-import * as Preact from '#core/dom/jsx';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
@@ -9,19 +7,13 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: [
-        'amp-story:1.0',
-        'amp-story-shopping:0.1',
-        'amp-story-attachment:0.1',
-      ],
+      extensions: ['amp-story:1.0', 'amp-story-shopping:0.1'],
     },
   },
   (env) => {
     let win;
     let element;
     let shoppingAttachment;
-    let pageEl;
-    let story;
 
     beforeEach(async () => {
       win = env.win;
@@ -33,9 +25,9 @@ describes.realWin(
     });
 
     async function createAmpStoryShoppingAttachment() {
-      story = win.document.createElement('amp-story');
+      let story = win.document.createElement('amp-story');
       win.document.body.appendChild(story);
-      pageEl = win.document.createElement('amp-story-page');
+      let pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
       element = win.document.createElement('amp-story-shopping-attachment');
       pageEl.appendChild(element);
