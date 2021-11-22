@@ -23,6 +23,9 @@ export const AnalyticsVariable = {
 };
 
 /**
+ * Util function to retrieve the variable service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
  * @param {!Window} win
  * @return {!AmpStoryVariableService}
  */
