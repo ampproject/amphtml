@@ -6,7 +6,7 @@ amp-story-shopping-tag {
   color: white !important;
   position: absolute !important;
   --i-amp-html-shopping-tag-bg-color: rgba(0, 0, 0, 0.3);
-  /* Hight ensures layoutCallback is called. */
+  /* Height and width ensures layoutCallback is called. */
   min-height: 1px !important;
   min-width: 1px !important;
 }
