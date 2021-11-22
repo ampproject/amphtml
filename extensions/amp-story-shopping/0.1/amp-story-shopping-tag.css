@@ -5,10 +5,12 @@ amp-story-shopping-tag {
   width: auto !important;
   color: white !important;
   position: absolute !important;
-  --i-amp-html-shopping-tag-bg-color: rgba(0, 0, 0, 0.3);
   /* Height and width ensures layoutCallback is called. */
   min-height: 1px !important;
   min-width: 1px !important;
+
+  --i-amp-html-shopping-tag-bg-color: rgba(0, 0, 0, 0.3);
+  --i-amp-html-shopping-tag-backdrop-filter: blur(20px);
 }
 
 .amp-story-shopping-tag-inner {
@@ -28,7 +30,7 @@ amp-story-shopping-tag {
   align-items: center !important;
   justify-content: center !important;
   margin-inline-end: 4px !important;
-  backdrop-filter: blur(20px) !important;
+  backdrop-filter: var(--i-amp-html-shopping-tag-backdrop-filter) !important;
 }
 
 .amp-story-shopping-tag-dot:before {
@@ -37,17 +39,17 @@ amp-story-shopping-tag {
   width: 8px !important;
   height: 8px !important;
   background: white !important;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0px 2px 8px var(--i-amp-html-shopping-tag-bg-color) !important;
 }
 
 .amp-story-shopping-tag-pill {
-  align-items: center !important;
   display: flex !important;
+  align-items: center !important;
   border-radius: 18px !important;
   height: 100% !important;
   background-color: var(--i-amp-html-shopping-tag-bg-color) !important;
   padding: 0 6px !important;
-  backdrop-filter: blur(20px) !important;
+  backdrop-filter: var(--i-amp-html-shopping-tag-backdrop-filter) !important;
 }
 
 .amp-story-shopping-tag-pill-image {
