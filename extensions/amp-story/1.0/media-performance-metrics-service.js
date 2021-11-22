@@ -219,7 +219,7 @@ export class MediaPerformanceTracker {
       maybeAddWatchTime(mediaEntry);
       maybeAddRebuffer(mediaEntry);
       if (sendMetrics) {
-        this.sendMetrics_(media, mediaEntry, errorCode);
+        this.sendMetrics_(media, mediaEntry, started, errorCode);
       }
     };
 
