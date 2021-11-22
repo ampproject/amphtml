@@ -253,10 +253,10 @@
   },
   "101": {
     "string": "Shop",
-    "description": "Label for the CTA page outlink for shopping component when one shopping tag is present."
+    "description": "Label for the shopping CTA button when one shopping tag is present."
   },
   "102": {
     "string": "View All Products",
-    "description": "Label for the CTA page outlink for shopping component when more than one shopping tag is present."
+    "description": "Label for the shopping CTA button when more than one shopping tag is present."
   }
 }

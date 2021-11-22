@@ -78,6 +78,13 @@ export let ShoppingConfigDataDef;
 
 /**
  * @typedef {{
+ *  items: !Map<string, !ShoppingConfigDataDef>,
+ * }}
+ */
+export let ShoppingDataDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,

@@ -1,11 +1,17 @@
 import {Layout_Enum, applyFillContent} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
+import {dev} from '#utils/log';
+
 import {AmpStoryPageAttachment} from 'extensions/amp-story/1.0/amp-story-page-attachment';
 
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  ShoppingDataDef,
+  StateProperty,
+} from '../../amp-story/1.0/amp-story-store-service';
 
 const TAG = 'amp-story-shopping-attachment';
 
@@ -28,37 +34,57 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
   }
 
   /**
+   * @private
+   * @return {?Element} the parent amp-story-page
+   */
+  getPage_() {
+    return closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
+    );
+  }
+
+  /**
    * Updates the CTA based on the shopping data.
-   * @param {string} pageIndex
-   * @param {string} pageId
    * @private
    */
-  updateCta_(pageIndex, pageId) {
-    const shoppingTag = this.element.ownerDocument
-      .getElementById(pageId)
-      .getElementsByTagName('amp-story-shopping-tag');
-    const numShoppingTags = shoppingTag != null ? shoppingTag.length : 0;
+  updateCtaText_() {
+    const pageIdElem = this.getPage_();
 
-    const pageOutlink = document.getElementsByClassName(
-      'i-amphtml-story-page-open-attachment-host'
-    )[pageIndex].shadowRoot.children[1];
+    const shoppingTags = Array.from(
+      pageIdElem.getElementsByTagName('amp-story-shopping-tag')
+    ).filter(
+      (tag) =>
+        this.storeService_.get(StateProperty.SHOPPING_DATA)[
+          tag.getAttribute('data-tag-id')
+        ]
+    );
+    const numShoppingTags = shoppingTags.length;
+
+    const ctaButton = pageIdElem.querySelector(
+      '.i-amphtml-story-page-open-attachment-host'
+    )?.shadowRoot.children[1];
+
+    if (!ctaButton) {
+      // Failsafe in case the CTA button fails to load, will call the function again until CTA button loads.
+      setTimeout(() => this.updateCtaText_(), 100);
+      return;
+    }
 
     if (numShoppingTags === 1) {
+      const productName = this.storeService_.get(StateProperty.SHOPPING_DATA)[
+        shoppingTags[0].getAttribute('data-tag-id')
+      ]['product-title'];
+
+      const shopLocalizedString = this.localizationService_.getLocalizedString(
+        LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL
+      );
       this.mutateElement(() => {
-        const productName = this.storeService_.get(StateProperty.SHOPPING_DATA)[
-          shoppingTag[0].getAttribute('data-tag-id')
-        ]['product-title'];
-
-        const shopLocalizedString =
-          this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PRODUCT_NAME
-          );
-
-        pageOutlink.setAttribute(
+        ctaButton.setAttribute(
           'aria-label',
           shopLocalizedString + ' ' + productName
         );
-        pageOutlink.children[1].textContent =
+        ctaButton.children[1].textContent =
           shopLocalizedString + ' ' + productName;
       });
     } else {
@@ -67,10 +93,15 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
           LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
         );
       this.mutateElement(() => {
-        pageOutlink.setAttribute('aria-label', viewAllProductsLocalizedString);
-        pageOutlink.children[1].textContent = viewAllProductsLocalizedString;
+        ctaButton.setAttribute('aria-label', viewAllProductsLocalizedString);
+        ctaButton.children[1].textContent = viewAllProductsLocalizedString;
       });
     }
+
+    /*
+
+
+    */
   }
 
   /** @override */
@@ -87,11 +118,9 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
     ]).then(([storeService, localizationService]) => {
       this.storeService_ = storeService;
       this.localizationService_ = localizationService;
-      this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (pageId) => {
-        const pageIndex = this.storeService_.get(
-          StateProperty.CURRENT_PAGE_INDEX
-        );
-        this.updateCta_(pageIndex, pageId);
+
+      this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+        this.updateCtaText_();
       });
     });
   }

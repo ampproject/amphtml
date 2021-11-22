@@ -5,16 +5,9 @@ import {Services} from '#service';
 import {devAssert} from '#utils/log';
 
 import {
-  ShoppingConfigDataDef,
+  ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-
-/**
- * @typedef {{
- *  items: !Map<string, !ShoppingConfigDataDef>,
- * }}
- */
-let ShoppingDataDef;
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
