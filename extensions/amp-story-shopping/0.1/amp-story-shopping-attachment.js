@@ -6,30 +6,24 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /**
-     * Caches a reference to the attachmnet's impl.
-     * @private @return {extensions/amp-story/1.0/amp-story-page-attachment.js.AmpStoryPageAttachment}
-     * */
-    this.attachmentImpl_ = null;
+    /** @private @return {!Element} */
+    this.attachmentEl = null;
   }
 
   /** @override */
   buildCallback() {
-    const attachmentEl = (
+    this.attachmentEl = (
       <amp-story-page-attachment layout="nodisplay"></amp-story-page-attachment>
     );
-    this.element.appendChild(attachmentEl);
-    return customElements
-      .whenDefined('amp-story-page-attachment')
-      .then(() => attachmentEl.getImpl())
-      .then((impl) => (this.attachmentImpl_ = impl));
+    this.element.appendChild(this.attachmentEl);
   }
 
   /**
    * @param {boolean=} shouldAnimate
+   * @return {Promise}
    */
   open(shouldAnimate = true) {
-    this.attachmentImpl_.open(shouldAnimate);
+    return this.attachmentEl.getImpl().then((impl) => impl.open(shouldAnimate));
   }
 
   /** @override */
