@@ -13,7 +13,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.attachmentEl_ = (
-      <amp-story-page-attachment layout="nodisplay"></amp-story-page-attachment>
+      <amp-story-page-attachment
+        layout="nodisplay"
+        theme={this.element.getAttribute('theme')}
+      ></amp-story-page-attachment>
     );
     this.element.appendChild(this.attachmentEl_);
   }
