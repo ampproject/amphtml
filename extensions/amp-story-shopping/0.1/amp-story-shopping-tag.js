@@ -15,13 +15,11 @@ const fontsToLoad = [
   {
     family: 'Poppins',
     weight: '400',
-    style: 'normal',
     src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
     weight: '700',
-    style: 'normal',
     src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
@@ -97,7 +95,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @private */
   loadFonts_() {
     if (this.win.document.fonts && FontFace) {
-      fontsToLoad.forEach(({family, src, style, weight}) =>
+      fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
         new FontFace(family, src, {weight, style})
           .load()
           .then((font) => this.win.document.fonts.add(font))
