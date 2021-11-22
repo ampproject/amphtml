@@ -32,7 +32,6 @@ const CacheState = {
  *   start: number,
  *   playing: !TimestampDef,
  *   waiting: !TimestampDef,
- *   error: ?number,
  *   jointLatency: number,
  *   rebuffers: number,
  *   rebufferTime: number,
@@ -96,9 +95,10 @@ export class MediaPerformanceTracker {
   /**
    * @param {!HTMLMediaElement} media
    * @param {!MediaEntryDef} mediaEntry
+   * @param {number=} errorCode
    * @private
    */
-  sendMetrics_(media, mediaEntry) {
+  sendMetrics_(media, mediaEntry, errorCode) {
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_CACHE_STATE,
       getVideoCacheState(media)
@@ -109,11 +109,8 @@ export class MediaPerformanceTracker {
     );
 
     // If the media errored.
-    if (mediaEntry.error !== null) {
-      this.performanceService_.tickDelta(
-        TickLabel_Enum.VIDEO_ERROR,
-        mediaEntry.error || 0
-      );
+    if (errorCode != null) {
+      this.performanceService_.tickDelta(TickLabel_Enum.VIDEO_ERROR, errorCode);
       this.performanceService_.flush();
       return;
     }
@@ -176,7 +173,6 @@ export class MediaPerformanceTracker {
   listen_(media) {
     const mediaEntry = {
       status: Status.PAUSED,
-      error: null,
       start: Date.now(),
       playing: 0,
       waiting: 0,
@@ -186,8 +182,9 @@ export class MediaPerformanceTracker {
       watchTime: 0,
     };
 
+    let errorCode;
     const onError = () => {
-      mediaEntry.error = media.error ? media.error.code : 0;
+      errorCode = (media.error && media.error.code) || 0;
       mediaEntry.status = Status.ERRORED;
     };
 
@@ -226,7 +223,7 @@ export class MediaPerformanceTracker {
         addRebuffer(mediaEntry);
       }
       if (sendMetrics) {
-        this.sendMetrics_(media, mediaEntry);
+        this.sendMetrics_(media, mediaEntry, errorCode);
       }
     };
 
