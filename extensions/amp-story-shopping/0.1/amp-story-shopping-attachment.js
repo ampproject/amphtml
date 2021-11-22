@@ -97,8 +97,8 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
     this.element.appendChild(this.container_);
     applyFillContent(this.container_, /* replacedContent */ true);
 
-    return Promise.all([Services.storyStoreServiceForOrNull(this.win)]).then(
-      ([storeService]) => {
+    return Promise.resolve(Services.storyStoreServiceForOrNull(this.win)).then(
+      (storeService) => {
         this.storeService_ = storeService;
         this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
           this.updateCtaText_();
