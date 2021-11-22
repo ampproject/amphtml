@@ -17,9 +17,11 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function () {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
       env.sandbox.stub(win.history, 'replaceState');
       await createAmpStoryShoppingAttachment();
     });

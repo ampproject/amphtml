@@ -7,15 +7,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     super(element);
 
     /** @private @return {!Element} */
-    this.attachmentEl = null;
+    this.attachmentEl_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.attachmentEl = (
+    this.attachmentEl_ = (
       <amp-story-page-attachment layout="nodisplay"></amp-story-page-attachment>
     );
-    this.element.appendChild(this.attachmentEl);
+    this.element.appendChild(this.attachmentEl_);
   }
 
   /**
@@ -23,7 +23,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @return {Promise}
    */
   open(shouldAnimate = true) {
-    return this.attachmentEl.getImpl().then((impl) => impl.open(shouldAnimate));
+    return this.attachmentEl_
+      .getImpl()
+      .then((impl) => impl.open(shouldAnimate));
   }
 
   /** @override */
