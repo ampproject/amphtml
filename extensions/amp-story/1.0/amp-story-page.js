@@ -44,7 +44,7 @@ import {dict} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {localize} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
-import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
+import {MediaPerformanceTracker} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
@@ -191,13 +191,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     const deferred = new Deferred();
 
-    /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
-    this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
-      this.win
-    );
-
-    /** @private {!Array<!HTMLMediaElement>} */
-    this.performanceTrackedVideos_ = [];
+    /** @private @const {!./media-performance-metrics-service.MediaPerformanceTracker} */
+    this.mediaPerformanceTracker_ = new MediaPerformanceTracker(this.win);
 
     /** @private {?Promise} */
     this.registerAllMediaPromise_ = null;
@@ -1422,48 +1417,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   startMeasuringAllVideoPerformance_() {
-    if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
-      return;
-    }
-
     const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (
       this.getAllVideos_()
     );
     for (let i = 0; i < videoEls.length; i++) {
-      this.startMeasuringVideoPerformance_(videoEls[i]);
+      this.mediaPerformanceTracker_.track(videoEls[i]);
     }
   }
 
   /**
-   * @param {!HTMLMediaElement} videoEl
+   * @param {boolean=} sendMetrics true by default
    * @private
    */
-  startMeasuringVideoPerformance_(videoEl) {
-    if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
-      return;
-    }
-
-    this.performanceTrackedVideos_.push(videoEl);
-    this.mediaPerformanceMetricsService_.startMeasuring(videoEl);
-  }
-
-  /**
-   * Stops measuring video performance metrics, if performance tracking is on.
-   * Computes and sends the metrics.
-   * @param {boolean=} sendMetrics
-   * @private
-   */
-  stopMeasuringAllVideoPerformance_(sendMetrics = true) {
-    if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
-      return;
-    }
-
-    for (let i = 0; i < this.performanceTrackedVideos_.length; i++) {
-      this.mediaPerformanceMetricsService_.stopMeasuring(
-        this.performanceTrackedVideos_[i],
-        sendMetrics
-      );
-    }
+  stopMeasuringAllVideoPerformance_(sendMetrics) {
+    this.mediaPerformanceTracker_.stop(sendMetrics !== false);
   }
 
   /**

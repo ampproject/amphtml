@@ -3,8 +3,8 @@ import {Services} from '#service';
 import {TickLabel_Enum} from '#core/constants/enums';
 import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
-import {registerServiceBuilder} from '../../../src/service-helpers';
 import {toArray} from '#core/types/array';
+import {TimestampDef} from '#core/types/date';
 
 /**
  * Media status.
@@ -28,41 +28,16 @@ const CacheState = {
 };
 
 /**
- * Video is first page status.
- * @enum
- */
-const FirstPageState = {
-  NOT_ON_FIRST_PAGE: 0, // Video is not on the first page.
-  ON_FIRST_PAGE: 1, // Video is on the first page.
-};
-
-/**
  * @typedef {{
  *   start: number,
- *   playing: number,
- *   waiting: number,
- * }}
- */
-let TimeStampsDef;
-
-/**
- * @typedef {{
+ *   playing: !TimestampDef,
+ *   waiting: !TimestampDef,
  *   error: ?number,
  *   jointLatency: number,
  *   rebuffers: number,
  *   rebufferTime: number,
  *   watchTime: number
- * }}
- */
-let MetricsDef;
-
-/**
- * @typedef {{
- *   media: !HTMLMediaElement,
  *   status: number,
- *   unlisteners: !Array<!UnlistenDef>,
- *   timeStamps: !TimeStampsDef,
- *   metrics: !MetricsDef
  * }}
  */
 let MediaEntryDef;
@@ -76,50 +51,16 @@ const REBUFFER_THRESHOLD_MS = 250;
 /** @type {string} */
 const TAG = 'media-performance-metrics';
 
-/**
- * Util function to retrieve the media performance metrics service. Ensures we
- * can retrieve the service synchronously from the amp-story codebase without
- * running into race conditions.
- * @param  {!Window} win
- * @return {!MediaPerformanceMetricsService}
- */
-export const getMediaPerformanceMetricsService = (win) => {
-  let service = Services.mediaPerformanceMetricsService(win);
-
-  if (!service) {
-    service = new MediaPerformanceMetricsService(win);
-    registerServiceBuilder(win, 'media-performance-metrics', function () {
-      return service;
-    });
-  }
-
-  return service;
-};
-
-/**
- * Media performance metrics service.
- * @final
- */
-export class MediaPerformanceMetricsService {
+export class MediaPerformanceTracker {
   /**
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */
-    this.mediaMap_ = new WeakMap();
+    /** @private @const {!Array<!function(boolean)>} */
+    this.stopFns_ = [];
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
-  }
-
-  /**
-   * Identifies if the viewer is able to track performance. If the document is
-   * not embedded, there is no messaging channel, so no performance tracking is
-   * needed since there is nobody to forward the events.
-   * @return {boolean}
-   */
-  isPerformanceTrackingOn() {
-    return this.performanceService_.isPerformanceTrackingOn();
   }
 
   /**
@@ -128,7 +69,11 @@ export class MediaPerformanceMetricsService {
    * to reliably record joint latency (time to play), as well initial buffering.
    * @param {!HTMLMediaElement} media
    */
-  startMeasuring(media) {
+  track(media) {
+    if (!this.performanceService_.isPerformanceTrackingOn()) {
+      return;
+    }
+
     // Media must start paused in order to determine the joint latency, and
     // initial buffering, if any.
     if (!media.paused) {
@@ -136,74 +81,38 @@ export class MediaPerformanceMetricsService {
       return;
     }
 
-    const unlisteners = this.listen_(media);
-    const mediaEntry = this.getNewMediaEntry_(media, unlisteners);
-    this.mediaMap_.set(media, mediaEntry);
-
-    // Checks if the media already errored (eg: could have failed the source
-    // selection).
-    if (
-      media.error ||
-      media[MEDIA_LOAD_FAILURE_SRC_PROPERTY] === media.currentSrc
-    ) {
-      mediaEntry.metrics.error = media.error ? media.error.code : 0;
-      mediaEntry.status = Status.ERRORED;
-    }
+    this.stopFns_.push(this.listen_(media));
   }
 
   /**
-   * Stops recording, computes, and sends performance metrics collected for the
-   * given media element.
-   * @param {!HTMLMediaElement} media
-   * @param {boolean=} sendMetrics
+   * @param {boolean} sendMetrics
    */
-  stopMeasuring(media, sendMetrics = true) {
-    const mediaEntry = this.mediaMap_.get(media);
-
-    if (!mediaEntry) {
-      return;
-    }
-
-    mediaEntry.unlisteners.forEach((unlisten) => unlisten());
-    this.mediaMap_.delete(media);
-
-    switch (mediaEntry.status) {
-      case Status.PLAYING:
-        this.addWatchTime_(mediaEntry);
-        break;
-      case Status.WAITING:
-        this.addRebuffer_(mediaEntry);
-        break;
-    }
-
-    if (sendMetrics) {
-      this.sendMetrics_(mediaEntry);
+  stop(sendMetrics) {
+    while (this.stopFns_.length) {
+      this.stopFns_.shift()(sendMetrics);
     }
   }
 
   /**
+   * @param {!HTMLMediaElement} media
    * @param {!MediaEntryDef} mediaEntry
    * @private
    */
-  sendMetrics_(mediaEntry) {
-    const {media, metrics} = mediaEntry;
-
+  sendMetrics_(media, mediaEntry) {
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_CACHE_STATE,
-      this.getVideoCacheState_(media)
+      getVideoCacheState(media)
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_ON_FIRST_PAGE,
-      matches(media, `amp-story-page:first-of-type ${media.tagName}`)
-        ? FirstPageState.ON_FIRST_PAGE
-        : FirstPageState.NOT_ON_FIRST_PAGE
+      Number(matches(media, 'amp-story-page:first-of-type *'))
     );
 
     // If the media errored.
-    if (metrics.error !== null) {
+    if (mediaEntry.error !== null) {
       this.performanceService_.tickDelta(
         TickLabel_Enum.VIDEO_ERROR,
-        metrics.error || 0
+        mediaEntry.error || 0
       );
       this.performanceService_.flush();
       return;
@@ -212,14 +121,14 @@ export class MediaPerformanceMetricsService {
     // If the user was on the video for less than one second, ignore the metrics
     // (eg: users tapping through a story, or scrolling through content).
     if (
-      !metrics.jointLatency &&
-      Date.now() - mediaEntry.timeStamps.start < MINIMUM_TIME_THRESHOLD_MS
+      !mediaEntry.jointLatency &&
+      Date.now() - mediaEntry.start < MINIMUM_TIME_THRESHOLD_MS
     ) {
       return;
     }
 
     // If the playback did not start.
-    if (!metrics.jointLatency) {
+    if (!mediaEntry.jointLatency) {
       this.performanceService_.tickDelta(
         TickLabel_Enum.VIDEO_ERROR,
         5 /* Custom error code */
@@ -229,29 +138,31 @@ export class MediaPerformanceMetricsService {
     }
 
     const rebufferRate = Math.round(
-      (metrics.rebufferTime / (metrics.rebufferTime + metrics.watchTime)) * 100
+      (mediaEntry.rebufferTime /
+        (mediaEntry.rebufferTime + mediaEntry.watchTime)) *
+        100
     );
 
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_JOINT_LATENCY,
-      metrics.jointLatency
+      mediaEntry.jointLatency
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_WATCH_TIME,
-      metrics.watchTime
+      mediaEntry.watchTime
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_REBUFFERS,
-      metrics.rebuffers
+      mediaEntry.rebuffers
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_REBUFFER_RATE,
       rebufferRate
     );
-    if (metrics.rebuffers) {
+    if (mediaEntry.rebuffers) {
       this.performanceService_.tickDelta(
         TickLabel_Enum.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
-        Math.round(metrics.watchTime / metrics.rebuffers)
+        Math.round(mediaEntry.watchTime / mediaEntry.rebuffers)
       );
     }
     this.performanceService_.flush();
@@ -259,171 +170,148 @@ export class MediaPerformanceMetricsService {
 
   /**
    * @param {!HTMLMediaElement} media
-   * @param {!Array<!UnlistenDef>} unlisteners
-   * @return {!MediaEntryDef}
-   * @private
-   */
-  getNewMediaEntry_(media, unlisteners) {
-    return {
-      media,
-      status: Status.PAUSED,
-      unlisteners,
-      timeStamps: {
-        start: Date.now(),
-        playing: 0,
-        waiting: 0,
-      },
-      metrics: {
-        error: null,
-        jointLatency: 0,
-        meanTimeBetweenRebuffers: 0,
-        rebuffers: 0,
-        rebufferTime: 0,
-        watchTime: 0,
-      },
-    };
-  }
-
-  /**
-   * Increments the watch time with the duration from the last `playing` event.
-   * @param {!MediaEntryDef} mediaEntry
-   * @private
-   */
-  addWatchTime_(mediaEntry) {
-    mediaEntry.metrics.watchTime += Date.now() - mediaEntry.timeStamps.playing;
-  }
-
-  /**
-   * Increments the rebuffer time with the duration from the last `waiting`
-   * event, and increments the rebuffers count.
-   * @param {!MediaEntryDef} mediaEntry
-   * @private
-   */
-  addRebuffer_(mediaEntry) {
-    const rebufferTime = Date.now() - mediaEntry.timeStamps.waiting;
-    if (rebufferTime > REBUFFER_THRESHOLD_MS) {
-      mediaEntry.metrics.rebuffers++;
-      mediaEntry.metrics.rebufferTime += rebufferTime;
-    }
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @return {!Array<!UnlistenDef>}
+   * @return {function(boolean)}
    * @private
    */
   listen_(media) {
-    const unlisteners = [
-      listen(media, 'ended', this.onPauseOrEnded_.bind(this)),
-      listen(media, 'pause', this.onPauseOrEnded_.bind(this)),
-      listen(media, 'playing', this.onPlaying_.bind(this)),
-      listen(media, 'waiting', this.onWaiting_.bind(this)),
-    ];
+    const mediaEntry = {
+      status: Status.PAUSED,
+      error: null,
+      start: Date.now(),
+      playing: 0,
+      waiting: 0,
+      jointLatency: 0,
+      rebuffers: 0,
+      rebufferTime: 0,
+      watchTime: 0,
+    };
+
+    const onError = () => {
+      mediaEntry.error = media.error ? media.error.code : 0;
+      mediaEntry.status = Status.ERRORED;
+    };
+
+    // Checks if the media already errored (eg: could have failed the source
+    // selection).
+    if (
+      media.error ||
+      media[MEDIA_LOAD_FAILURE_SRC_PROPERTY] === media.currentSrc
+    ) {
+      onError();
+    }
 
     // If the media element has no `src`, it will try to load the sources in
     // document order. If the last source errors, then the media element
     // loading errored.
     let errorTarget = media;
     if (!media.hasAttribute('src')) {
-      errorTarget = lastChildElement(
-        media,
-        (child) => child.tagName === 'SOURCE'
-      );
-    }
-    unlisteners.push(
-      listen(errorTarget || media, 'error', this.onError_.bind(this))
-    );
-
-    return unlisteners;
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  onError_(event) {
-    // Media error target could be either HTMLMediaElement or HTMLSourceElement.
-    const media =
-      event.target.tagName === 'SOURCE' ? event.target.parent : event.target;
-    const mediaEntry = this.mediaMap_.get(media);
-
-    mediaEntry.metrics.error = media.error ? media.error.code : 0;
-    mediaEntry.status = Status.ERRORED;
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  onPauseOrEnded_(event) {
-    const mediaEntry = this.mediaMap_.get(event.target);
-
-    if (mediaEntry.status === Status.PLAYING) {
-      this.addWatchTime_(mediaEntry);
-    }
-    mediaEntry.status = Status.PAUSED;
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  onPlaying_(event) {
-    const mediaEntry = this.mediaMap_.get(event.target);
-    const {metrics, timeStamps} = mediaEntry;
-
-    if (!metrics.jointLatency) {
-      metrics.jointLatency = Date.now() - timeStamps.start;
+      errorTarget =
+        lastChildElement(media, (child) => child.tagName === 'SOURCE') || media;
     }
 
-    if (mediaEntry.status === Status.WAITING) {
-      this.addRebuffer_(mediaEntry);
-    }
+    const unlisteners = [
+      listen(media, 'ended', () => updateOnPauseOrEnded(mediaEntry)),
+      listen(media, 'pause', () => updateOnPauseOrEnded(mediaEntry)),
+      listen(media, 'playing', () => updateOnPlaying(mediaEntry)),
+      listen(media, 'waiting', () => updateOnWaiting(mediaEntry)),
+      listen(errorTarget, 'error', onError),
+    ];
 
-    timeStamps.playing = Date.now();
-    mediaEntry.status = Status.PLAYING;
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  onWaiting_(event) {
-    const mediaEntry = this.mediaMap_.get(event.target);
-    const {timeStamps} = mediaEntry;
-
-    if (mediaEntry.status === Status.PLAYING) {
-      this.addWatchTime_(mediaEntry);
-    }
-
-    timeStamps.waiting = Date.now();
-    mediaEntry.status = Status.WAITING;
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @return {!CacheState}
-   * @private
-   */
-  getVideoCacheState_(media) {
-    let hasCachedSource = false;
-    // All video caching mechanisms rely on HTMLSourceElements and never a src
-    // on the HTMLMediaElement as it does not allow for fallback sources.
-    const sources = toArray(media.querySelectorAll('source'));
-    for (const source of sources) {
-      const isCachedSource = source.hasAttribute(
-        'i-amphtml-video-cached-source'
-      );
-      // Playing source is cached.
-      if (isCachedSource && media.currentSrc === source.src) {
-        return CacheState.CACHE;
+    const stop = (sendMetrics) => {
+      unlisteners.forEach((unlisten) => unlisten());
+      const {status} = mediaEntry;
+      if (status === Status.PLAYING) {
+        addWatchTime(mediaEntry);
+      } else if (status === Status.WAITING) {
+        addRebuffer(mediaEntry);
       }
-      // Non playing source but is cached. Used to differentiate a cache miss
-      // (e.g. cache returned a 40x) vs no cached source at all.
-      if (isCachedSource) {
-        hasCachedSource = true;
+      if (sendMetrics) {
+        this.sendMetrics_(media, mediaEntry);
       }
-    }
-    return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
+    };
+
+    return stop;
   }
+}
+
+/**
+ * Increments the watch time with the duration from the last `playing` event.
+ * @param {!MediaEntryDef} mediaEntry
+ */
+function addWatchTime(mediaEntry) {
+  mediaEntry.watchTime += Date.now() - mediaEntry.playing;
+}
+
+/**
+ * Increments the rebuffer time with the duration from the last `waiting`
+ * event, and increments the rebuffers count.
+ * @param {!MediaEntryDef} mediaEntry
+ */
+function addRebuffer(mediaEntry) {
+  const rebufferTime = Date.now() - mediaEntry.waiting;
+  if (rebufferTime > REBUFFER_THRESHOLD_MS) {
+    mediaEntry.rebuffers++;
+    mediaEntry.rebufferTime += rebufferTime;
+  }
+}
+
+/**
+ * @param {!MediaEntry} mediaEntry
+ */
+function updateOnPauseOrEnded(mediaEntry) {
+  if (mediaEntry.status === Status.PLAYING) {
+    addWatchTime(mediaEntry);
+  }
+  mediaEntry.status = Status.PAUSED;
+}
+
+/**
+ * @param {!MediaEntryDef} mediaEntry
+ */
+function updateOnPlaying(mediaEntry) {
+  if (!mediaEntry.jointLatency) {
+    mediaEntry.jointLatency = Date.now() - mediaEntry.start;
+  }
+
+  if (mediaEntry.status === Status.WAITING) {
+    addRebuffer(mediaEntry);
+  }
+
+  mediaEntry.playing = Date.now();
+  mediaEntry.status = Status.PLAYING;
+}
+
+/**
+ * @param {!MediaEntryDef} mediaEntry
+ */
+function updateOnWaiting(mediaEntry) {
+  if (mediaEntry.status === Status.PLAYING) {
+    addWatchTime(mediaEntry);
+  }
+
+  mediaEntry.waiting = Date.now();
+  mediaEntry.status = Status.WAITING;
+}
+
+/**
+ * @param {!HTMLMediaElement} media
+ * @return {!CacheState}
+ */
+function getVideoCacheState(media) {
+  let hasCachedSource = false;
+  // All video caching mechanisms rely on HTMLSourceElements and never a src
+  // on the HTMLMediaElement as it does not allow for fallback sources.
+  const sources = toArray(
+    media.querySelectorAll('[i-amphtml-video-cached-source]')
+  );
+  for (const source of sources) {
+    // Playing source is cached.
+    if (media.currentSrc === source.src) {
+      return CacheState.CACHE;
+    }
+    // Non playing source but is cached. Used to differentiate a cache miss
+    // (e.g. cache returned a 40x) vs no cached source at all.
+    hasCachedSource = true;
+  }
+  return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
 }

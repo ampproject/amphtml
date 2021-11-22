@@ -1,12 +1,13 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
-import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
+import {MediaPerformanceTracker} from '../media-performance-metrics-service';
 import {Services} from '#service';
 
 describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   let clock;
   let service;
-  let tickStub;
+  let tickDelta;
+  let flush;
   let win;
 
   before(() => {
@@ -19,11 +20,14 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    env.sandbox
-      .stub(Services, 'performanceFor')
-      .returns({tickDelta: () => {}, flush: () => {}});
-    service = new MediaPerformanceMetricsService(win);
-    tickStub = env.sandbox.stub(service.performanceService_, 'tickDelta');
+    tickDelta = env.sandbox.spy();
+    flush = env.sandbox.spy();
+    env.sandbox.stub(Services, 'performanceFor').returns({
+      tickDelta,
+      flush,
+      isPerformanceTrackingOn: () => true,
+    });
+    service = new MediaPerformanceTracker(win);
   });
 
   afterEach(() => {
@@ -31,139 +35,129 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   });
 
   it('should record and flush metrics', () => {
-    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
-
     const video = win.document.createElement('video');
-    service.startMeasuring(video);
+    service.track(video);
     clock.tick(20);
     video.dispatchEvent(new Event('playing'));
     clock.tick(100);
     video.dispatchEvent(new Event('waiting'));
     clock.tick(300);
-    service.stopMeasuring(video);
+    service.stop(/* sendMetrics */ true);
 
-    expect(tickStub).to.have.callCount(7);
-    expect(flushStub).to.have.been.calledOnce;
+    expect(tickDelta).to.have.callCount(7);
+    expect(flush).to.have.been.calledOnce;
   });
 
   it('should record and flush metrics on error', () => {
-    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
-
     const video = win.document.createElement('video');
-    service.startMeasuring(video);
+    service.track(video);
     clock.tick(2000);
     video.dispatchEvent(new Event('error'));
     clock.tick(10000);
-    service.stopMeasuring(video);
+    service.stop(/* sendMetrics */ true);
 
-    expect(tickStub).to.have.callCount(3);
-    expect(flushStub).to.have.been.calledOnce;
+    expect(tickDelta).to.have.callCount(3);
+    expect(flush).to.have.been.calledOnce;
   });
 
   it('should record and flush metrics for multiple media', () => {
-    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
-
     const video1 = win.document.createElement('video');
     const video2 = win.document.createElement('video');
-    service.startMeasuring(video1);
-    service.startMeasuring(video2);
+    service.track(video1);
+    service.track(video2);
     clock.tick(100);
     video1.dispatchEvent(new Event('playing'));
     clock.tick(200);
-    service.stopMeasuring(video1);
     video2.dispatchEvent(new Event('waiting'));
     clock.tick(300);
     video2.dispatchEvent(new Event('playing'));
-    service.stopMeasuring(video2);
+    service.stop(/* sendMetrics */ true);
 
-    expect(tickStub).to.have.callCount(13);
-    expect(flushStub).to.have.been.calledTwice;
+    expect(tickDelta).to.have.callCount(13);
+    expect(flush).to.have.been.calledTwice;
   });
 
   it('should not flush metrics if sendMetrics is false', () => {
-    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
-
     const video = win.document.createElement('video');
-    service.startMeasuring(video);
+    service.track(video);
     clock.tick(20);
     video.dispatchEvent(new Event('playing'));
     clock.tick(100);
     video.dispatchEvent(new Event('waiting'));
     clock.tick(300);
-    service.stopMeasuring(video, false /** sendMetrics */);
+    service.stop(/* sendMetrics */ false);
 
-    expect(flushStub).to.not.have.been.called;
+    expect(flush).to.not.have.been.called;
   });
 
   describe('Joint latency', () => {
     it('should record joint latency if playback starts with no wait', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vjl', 100);
+      expect(tickDelta).to.have.been.calledWithExactly('vjl', 100);
     });
 
     it('should record joint latency when waiting first', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('waiting'));
       clock.tick(200);
       video.dispatchEvent(new Event('playing'));
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vjl', 300);
+      expect(tickDelta).to.have.been.calledWithExactly('vjl', 300);
     });
 
     it('should not record joint latency if playback does not start', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('waiting'));
       clock.tick(200);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.not.have.been.calledWith('vjl');
+      expect(tickDelta).to.not.have.been.calledWith('vjl');
     });
 
     it('should record joint latency for multiple media', () => {
       const video1 = win.document.createElement('video');
       const video2 = win.document.createElement('video');
-      service.startMeasuring(video1);
-      service.startMeasuring(video2);
+      service.track(video1);
+      service.track(video2);
       clock.tick(100);
       video1.dispatchEvent(new Event('playing'));
       clock.tick(200);
-      service.stopMeasuring(video1);
       video2.dispatchEvent(new Event('waiting'));
       clock.tick(300);
       video2.dispatchEvent(new Event('playing'));
-      service.stopMeasuring(video2);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vjl', 100);
-      expect(tickStub).to.have.been.calledWithExactly('vjl', 600);
+      expect(tickDelta).to.have.been.calledWithExactly('vjl', 100);
+      expect(tickDelta).to.have.been.calledWithExactly('vjl', 600);
     });
   });
 
   describe('Watch time', () => {
     it('should record watch time', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vwt', 200);
+      expect(tickDelta).to.have.been.calledWithExactly('vwt', 200);
     });
 
     it('should record watch time and handle pause events', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
@@ -171,14 +165,14 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(300);
       video.dispatchEvent(new Event('playing'));
       clock.tick(400);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vwt', 600);
+      expect(tickDelta).to.have.been.calledWithExactly('vwt', 600);
     });
 
     it('should record watch time and handle ended events', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
@@ -186,14 +180,14 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(300);
       video.dispatchEvent(new Event('playing'));
       clock.tick(400);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vwt', 600);
+      expect(tickDelta).to.have.been.calledWithExactly('vwt', 600);
     });
 
     it('should record watch time and handle rebuffers', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
@@ -201,16 +195,16 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(300);
       video.dispatchEvent(new Event('playing'));
       clock.tick(400);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vwt', 600);
+      expect(tickDelta).to.have.been.calledWithExactly('vwt', 600);
     });
   });
 
   describe('Rebuffers', () => {
     it('should count rebuffers', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
@@ -220,14 +214,14 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(400);
       video.dispatchEvent(new Event('waiting'));
       clock.tick(500);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vrb', 2);
+      expect(tickDelta).to.have.been.calledWithExactly('vrb', 2);
     });
 
     it('should record rebuffer rate', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
@@ -237,16 +231,16 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(400);
       video.dispatchEvent(new Event('waiting'));
       clock.tick(500);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
       // playing: 600; waiting: 800
       // (800 / (600 + 800)) * 100 ~= 57
-      expect(tickStub).to.have.been.calledWithExactly('vrbr', 57);
+      expect(tickDelta).to.have.been.calledWithExactly('vrbr', 57);
     });
 
     it('should record mean time between rebuffers', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
@@ -256,15 +250,15 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(400);
       video.dispatchEvent(new Event('waiting'));
       clock.tick(500);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
       // 600ms playing divided by 2 rebuffer events.
-      expect(tickStub).to.have.been.calledWithExactly('vmtbrb', 300);
+      expect(tickDelta).to.have.been.calledWithExactly('vmtbrb', 300);
     });
 
     it('should count the initial buffering as a rebuffer', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(300);
       video.dispatchEvent(new Event('waiting'));
       clock.tick(400);
@@ -274,14 +268,14 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(600);
       video.dispatchEvent(new Event('playing'));
       clock.tick(700);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vrb', 2);
+      expect(tickDelta).to.have.been.calledWithExactly('vrb', 2);
     });
 
     it('should exclude very brief rebuffers', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
@@ -289,31 +283,31 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       clock.tick(10);
       video.dispatchEvent(new Event('playing'));
       clock.tick(300);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vrb', 0);
+      expect(tickDelta).to.have.been.calledWithExactly('vrb', 0);
     });
 
     it('should record rebuffer rate even with no rebuffer events', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vrbr', 0);
+      expect(tickDelta).to.have.been.calledWithExactly('vrbr', 0);
     });
 
     it('should not send mean time between rebuffers when no rebuffer', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.not.have.been.calledWith('vmtbrb');
+      expect(tickDelta).to.not.have.been.calledWith('vmtbrb');
     });
   });
 
@@ -322,10 +316,10 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       const video = win.document.createElement('video');
 
       video.onerror = () => {
-        service.startMeasuring(video);
-        service.stopMeasuring(video);
+        service.track(video);
+        service.stop(/* sendMetrics */ true);
 
-        expect(tickStub).to.have.been.calledWithExactly('verr', 4);
+        expect(tickDelta).to.have.been.calledWithExactly('verr', 4);
         done();
       };
 
@@ -337,23 +331,23 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       const video = win.document.createElement('video');
       video[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = '';
 
-      service.startMeasuring(video);
-      service.stopMeasuring(video);
+      service.track(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('verr', 0);
+      expect(tickDelta).to.have.been.calledWithExactly('verr', 0);
     });
 
     it('should detect that the video errors', () => {
       const video = win.document.createElement('video');
-      service.startMeasuring(video);
+      service.track(video);
       clock.tick(100);
       video.dispatchEvent(new Event('playing'));
       clock.tick(200);
       video.dispatchEvent(new Event('error'));
       clock.tick(300);
-      service.stopMeasuring(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('verr', 0);
+      expect(tickDelta).to.have.been.calledWithExactly('verr', 0);
     });
   });
 
@@ -365,10 +359,10 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       video.appendChild(source);
       env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
 
-      service.startMeasuring(video);
-      service.stopMeasuring(video);
+      service.track(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vcs', 0);
+      expect(tickDelta).to.have.been.calledWithExactly('vcs', 0);
     });
 
     it('should register the video as playing from origin w/ cache miss', () => {
@@ -385,10 +379,10 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       video.appendChild(originSource);
       env.sandbox.stub(video, 'currentSrc').value('foo.mp4');
 
-      service.startMeasuring(video);
-      service.stopMeasuring(video);
+      service.track(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vcs', 1);
+      expect(tickDelta).to.have.been.calledWithExactly('vcs', 1);
     });
 
     it('should register the video as playing from cache', () => {
@@ -400,10 +394,10 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       video.appendChild(source);
       env.sandbox.stub(video, 'currentSrc').value(url);
 
-      service.startMeasuring(video);
-      service.stopMeasuring(video);
+      service.track(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vcs', 2);
+      expect(tickDelta).to.have.been.calledWithExactly('vcs', 2);
     });
   });
 
@@ -417,10 +411,10 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       firstPage.appendChild(video);
       win.document.body.appendChild(firstPage);
 
-      service.startMeasuring(video);
-      service.stopMeasuring(video);
+      service.track(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vofp', 1);
+      expect(tickDelta).to.have.been.calledWithExactly('vofp', 1);
     });
 
     it('should report the video is not on the first page', () => {
@@ -438,10 +432,10 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
       secondPage.appendChild(video);
       win.document.body.appendChild(secondPage);
 
-      service.startMeasuring(video);
-      service.stopMeasuring(video);
+      service.track(video);
+      service.stop(/* sendMetrics */ true);
 
-      expect(tickStub).to.have.been.calledWithExactly('vofp', 0);
+      expect(tickDelta).to.have.been.calledWithExactly('vofp', 0);
     });
   });
 });

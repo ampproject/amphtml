@@ -516,17 +516,6 @@ export const Services = {
   },
 
   /**
-   * @param {!Window} win
-   * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
-   */
-  mediaPerformanceMetricsService: (win) => {
-    return (
-      /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
-      (getExistingServiceOrNull(win, 'media-performance-metrics'))
-    );
-  },
-
-  /**
    * @param {!Element} el
    * @return {!Promise<./service/localization.LocalizationService>}
    */

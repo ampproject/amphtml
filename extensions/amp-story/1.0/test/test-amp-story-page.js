@@ -904,10 +904,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expectAsyncConsoleError(/source must start with/, 1);
 
     isPerformanceTrackingOn = true;
-    const startMeasuringStub = env.sandbox.stub(
-      page.mediaPerformanceMetricsService_,
-      'startMeasuring'
-    );
+    const track = env.sandbox.stub(page.mediaPerformanceTracker_, 'track');
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'localhost/video.mp4');
@@ -921,19 +918,16 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     const poolVideoEl = element.querySelector('video');
     // Not called with the original video.
-    expect(startMeasuringStub).to.not.have.been.calledOnceWithExactly(videoEl);
+    expect(track).to.not.have.been.calledOnceWithExactly(videoEl);
     // Called with the media pool replaced video.
-    expect(startMeasuringStub).to.have.been.calledOnceWithExactly(poolVideoEl);
+    expect(track).to.have.been.calledOnceWithExactly(poolVideoEl);
   });
 
   it('should stop tracking media performance when leaving the page', async () => {
     expectAsyncConsoleError(/source must start with/, 1);
 
     isPerformanceTrackingOn = true;
-    const stopMeasuringStub = env.sandbox.stub(
-      page.mediaPerformanceMetricsService_,
-      'stopMeasuring'
-    );
+    const stop = env.sandbox.stub(page.mediaPerformanceTracker_, 'stop');
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp4');
@@ -945,21 +939,14 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await nextTick();
     page.setState(PageState.NOT_ACTIVE);
 
-    const poolVideoEl = element.querySelector('video');
-    expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(
-      poolVideoEl,
-      true /* sendMetrics */
-    );
+    expect(stop).to.have.been.calledOnceWithExactly(true /* sendMetrics */);
   });
 
   it('should not start tracking media performance if tracking is off', async () => {
     expectAsyncConsoleError(/source must start with/, 1);
 
     isPerformanceTrackingOn = false;
-    const startMeasuringStub = env.sandbox.stub(
-      page.mediaPerformanceMetricsService_,
-      'startMeasuring'
-    );
+    const track = env.sandbox.stub(page.mediaPerformanceTracker_, 'track');
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp4');
@@ -969,6 +956,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    expect(startMeasuringStub).to.not.have.been.called;
+    expect(track).to.not.have.been.called;
   });
 });
