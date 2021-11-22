@@ -25,9 +25,9 @@ describes.realWin(
     });
 
     async function createAmpStoryShoppingAttachment() {
-      let story = win.document.createElement('amp-story');
+      const story = win.document.createElement('amp-story');
       win.document.body.appendChild(story);
-      let pageEl = win.document.createElement('amp-story-page');
+      const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
       element = win.document.createElement('amp-story-shopping-attachment');
       pageEl.appendChild(element);
