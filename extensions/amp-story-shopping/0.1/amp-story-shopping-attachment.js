@@ -6,7 +6,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @return {!Element} */
+    /** @private {?Element} */
     this.attachmentEl_ = null;
   }
 
@@ -22,8 +22,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * Fully opens the drawer from its current position.
    * @param {boolean=} shouldAnimate
-   * @return {Promise}
+   * @return {!Promise}
    */
   open(shouldAnimate = true) {
     return this.attachmentEl_
