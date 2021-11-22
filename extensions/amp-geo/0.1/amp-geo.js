@@ -170,7 +170,7 @@ export class AmpGeo extends AMP.BaseElement {
     // compatibility. We make sure that docElem exists at it can be undefined
     // in shadow mode.
     const preRenderMatch =
-      (docElem?.className.match(PRE_RENDER_REGEX)) ||
+      docElem?.className.match(PRE_RENDER_REGEX) ||
       bodyElem.className.match(PRE_RENDER_REGEX);
 
     // Trim the spaces off the patched country.
