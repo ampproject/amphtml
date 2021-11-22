@@ -243,7 +243,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     // events at the page level. Otherwise, only authorize swiping down to
     // close by listening to events at the current element level.
     const parentEl = this.element.parentElement;
-    console.log(parentEl.tagName);
     let el = dev().assertElement(
       parentEl.tagName === 'AMP-STORY-PAGE' ? parentEl : this.element
     );
