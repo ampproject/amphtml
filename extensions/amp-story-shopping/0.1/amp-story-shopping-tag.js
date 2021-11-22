@@ -26,7 +26,7 @@ const fontsToLoad = [
   },
 ];
 
-const ShoppingTagTemplate = ({tagData}) => (
+const renderShoppingTagTemplate = (tagData) => (
   <div class="amp-story-shopping-tag-inner">
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
@@ -88,7 +88,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        <ShoppingTagTemplate tagData={tagData} />,
+        renderShoppingTagTemplate(tagData),
         shoppingTagCSS
       );
     });
