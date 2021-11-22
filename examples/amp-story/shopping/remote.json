@@ -2,15 +2,21 @@
   "items": [
     {
       "product-tag-id": "city-pop",
-      "product-title": "Plastic Love"
+      "product-title": "Plastic Love",
+      "product-price": "19",
+      "brand-label": "Nest"
     },
     {
       "product-tag-id": "k-pop",
-      "product-title": "Gangnam Style"
+      "product-title": "Gangnam Style",
+      "product-price": "10",
+      "brand-label": "Nest"
     },
     {
       "product-tag-id": "eurodance",
-      "product-title": "Crystal King Battle"
+      "product-title": "Crystal King Battle",
+      "product-price": "300",
+      "brand-label": "Nest"
     }
   ]
 }
