@@ -3,8 +3,8 @@ import {installDocService} from '#service/ampdoc-impl';
 import * as CID from '#service/cid-impl';
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
-import {createIframePromise} from '#testing/iframe';
 import {FakePerformance} from '#testing/fake-dom';
+import {createIframePromise} from '#testing/iframe';
 
 describes.sandboxed
   .configure()
