@@ -58,9 +58,9 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
         ]
     );
 
-    const ctaButton = pageIdElem.querySelector(
-      '.i-amphtml-story-page-open-attachment-host'
-    )?.shadowRoot.children[1];
+    const ctaButton = pageIdElem
+      .querySelector('.i-amphtml-story-page-open-attachment-host')
+      ?.shadowRoot.querySelector('.i-amphtml-story-page-open-attachment');
 
     const i18nString =
       shoppingTags.length === 1
@@ -83,7 +83,9 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
 
     this.mutateElement(() => {
       ctaButton.setAttribute('aria-label', i18nString);
-      ctaButton.children[1].textContent = i18nString;
+      ctaButton.querySelector(
+        '.i-amphtml-story-page-attachment-label'
+      ).textContent = i18nString;
     });
   }
 
