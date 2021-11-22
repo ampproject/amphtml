@@ -24,7 +24,7 @@ import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
-  getAnalyticsService,
+  triggerStoryAnalyticsEvent,
 } from './story-analytics';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
@@ -201,9 +201,6 @@ export class AmpStory extends AMP.BaseElement {
     if (isRTL(this.win.document)) {
       this.storeService_.dispatch(Action.TOGGLE_RTL, true);
     }
-
-    /** @private {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
@@ -580,7 +577,8 @@ export class AmpStory extends AMP.BaseElement {
       (isMuted) => {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
-        this.analyticsService_.triggerEvent(
+        triggerStoryAnalyticsEvent(
+          this.win,
           isMuted
             ? StoryAnalyticsEvent.STORY_MUTED
             : StoryAnalyticsEvent.STORY_UNMUTED
@@ -1061,7 +1059,8 @@ export class AmpStory extends AMP.BaseElement {
     );
     this.viewerMessagingHandler_ &&
       this.viewerMessagingHandler_.send('storyContentLoaded', dict({}));
-    this.analyticsService_.triggerEvent(
+    triggerStoryAnalyticsEvent(
+      this.win,
       StoryAnalyticsEvent.STORY_CONTENT_LOADED
     );
     this.signals().signal(CommonSignals_Enum.INI_LOAD);

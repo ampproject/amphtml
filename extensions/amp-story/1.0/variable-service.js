@@ -23,24 +23,13 @@ export const AnalyticsVariable = {
 };
 
 /**
- * Util function to retrieve the variable service. Ensures we can retrieve the
- * service synchronously from the amp-story codebase without running into race
- * conditions.
  * @param {!Window} win
  * @return {!AmpStoryVariableService}
  */
-export const getVariableService = (win) => {
-  let service = Services.storyVariableService(win);
-
-  if (!service) {
-    service = new AmpStoryVariableService(win);
-    registerServiceBuilder(win, 'story-variable', function () {
-      return service;
-    });
-  }
-
-  return service;
-};
+export function getVariableService(win) {
+  registerServiceBuilder(win, 'story-variable', AmpStoryVariableService);
+  return Services.storyVariableService(win);
+}
 
 /**
  * Variable service for amp-story.

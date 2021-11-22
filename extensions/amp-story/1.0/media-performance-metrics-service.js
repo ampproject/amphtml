@@ -5,6 +5,7 @@ import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 import {toArray} from '#core/types/array';
+import {once} from '#core/types/function';
 
 /**
  * Media status.
@@ -83,18 +84,14 @@ const TAG = 'media-performance-metrics';
  * @param  {!Window} win
  * @return {!MediaPerformanceMetricsService}
  */
-export const getMediaPerformanceMetricsService = (win) => {
-  let service = Services.mediaPerformanceMetricsService(win);
-
-  if (!service) {
-    service = new MediaPerformanceMetricsService(win);
-    registerServiceBuilder(win, 'media-performance-metrics', function () {
-      return service;
-    });
-  }
-
-  return service;
-};
+export function getMediaPerformanceMetricsService(win) {
+  registerServiceBuilder(
+    win,
+    'media-performance-metrics',
+    MediaPerformanceMetricsService
+  );
+  return Services.mediaPerformanceMetricsService(win);
+}
 
 /**
  * Media performance metrics service.

@@ -16,18 +16,10 @@ const TAG = 'amp-story';
  * @param  {!Window} win
  * @return {!AmpStoryStoreService}
  */
-export const getStoreService = (win) => {
-  let service = Services.storyStoreService(win);
-
-  if (!service) {
-    service = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function () {
-      return service;
-    });
-  }
-
-  return service;
-};
+export function getStoreService(win) {
+  registerServiceBuilder(win, 'story-store', AmpStoryStoreService);
+  return Services.storyStoreService(win);
+}
 
 /**
  * Different UI experiences to display the story.

@@ -175,9 +175,6 @@ export class ShareWidget {
 
     /** @protected {?Element} */
     this.root = null;
-
-    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = getRequestService(this.win, storyEl);
   }
 
   /**
@@ -303,7 +300,8 @@ export class ShareWidget {
       'amp-story-social-share, amp-story-bookend'
     );
 
-    this.requestService_.loadShareConfig(shareEl).then((config) => {
+    const requestService = getRequestService(this.win);
+    requestService.loadShareConfig(shareEl).then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);

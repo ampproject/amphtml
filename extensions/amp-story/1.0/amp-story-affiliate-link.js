@@ -5,7 +5,10 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
+import {
+  StoryAnalyticsEvent,
+  triggerStoryAnalyticsEvent,
+} from './story-analytics';
 import {getAmpdoc} from '../../../src/service-helpers';
 
 /**
@@ -46,9 +49,6 @@ export class AmpStoryAffiliateLink {
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
-
-    /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, element);
   }
 
   /**
@@ -92,7 +92,8 @@ export class AmpStoryAffiliateLink {
         }
         if (expand) {
           this.element_.removeAttribute('pristine');
-          this.analyticsService_.triggerEvent(
+          triggerStoryAnalyticsEvent(
+            this.win_,
             StoryAnalyticsEvent.FOCUS,
             this.element_
           );
@@ -103,7 +104,8 @@ export class AmpStoryAffiliateLink {
     this.element_.addEventListener('click', (event) => {
       if (this.element_.hasAttribute('expanded')) {
         event.stopPropagation();
-        this.analyticsService_.triggerEvent(
+        triggerStoryAnalyticsEvent(
+          this.win_,
           StoryAnalyticsEvent.CLICK_THROUGH,
           this.element_
         );

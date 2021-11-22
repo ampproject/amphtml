@@ -49,21 +49,12 @@ let PageEventCountDef;
  * service synchronously from the amp-story codebase without running into race
  * conditions.
  * @param {!Window} win
- * @param {!Element} el
  * @return {!StoryAnalyticsService}
  */
-export const getAnalyticsService = (win, el) => {
-  let service = Services.storyAnalyticsService(win);
-
-  if (!service) {
-    service = new StoryAnalyticsService(win, el);
-    registerServiceBuilder(win, 'story-analytics', function () {
-      return service;
-    });
-  }
-
-  return service;
-};
+export function getAnalyticsService(win) {
+  registerServiceBuilder(win, 'story-analytics', StoryAnalyticsService);
+  return Services.storyAnalyticsService(win);
+}
 
 /**
  * Intermediate handler for amp-story specific analytics.
@@ -71,14 +62,13 @@ export const getAnalyticsService = (win, el) => {
 export class StoryAnalyticsService {
   /**
    * @param {!Window} win
-   * @param {!Element} element
    */
-  constructor(win, element) {
+  constructor(win) {
     /** @protected @const {!Window} */
     this.win_ = win;
 
     /** @private @const {!Element} */
-    this.element_ = element;
+    this.element_ = win.document.querySelector('amp-story');
 
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
@@ -120,13 +110,13 @@ export class StoryAnalyticsService {
    * @param {!StoryAnalyticsEvent} eventType
    * @param {Element=} element
    */
-  triggerEvent(eventType, element = null) {
+  triggerEvent(eventType, element) {
     this.incrementPageEventCount_(eventType);
 
     triggerAnalyticsEvent(
       this.element_,
       eventType,
-      this.updateDetails(eventType, element)
+      this.updateDetails_(eventType, element)
     );
   }
 
@@ -134,10 +124,10 @@ export class StoryAnalyticsService {
    * Updates event details.
    * @param {!StoryAnalyticsEvent} eventType
    * @param {Element=} element
-   * @visibleForTesting
    * @return {!JsonObject}}
+   * @private
    */
-  updateDetails(eventType, element = null) {
+  updateDetails_(eventType, element) {
     const details = {};
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
@@ -176,4 +166,13 @@ export class StoryAnalyticsService {
       this.pageEventsMap_[pageId][eventType] || 0;
     this.pageEventsMap_[pageId][eventType]++;
   }
+}
+
+/**
+ * @param {!Window} win
+ * @param {string} eventType
+ * @param {!Element=} opt_element
+ */
+export function triggerStoryAnalyticsEvent(win, eventType, opt_element) {
+  getAnalyticsService(win).triggerEvent(eventType, opt_element);
 }

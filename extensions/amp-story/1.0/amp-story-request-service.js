@@ -20,11 +20,10 @@ const TAG = 'amp-story-request-service';
 export class AmpStoryRequestService {
   /**
    * @param {!Window} win
-   * @param {!Element} storyElement
    */
-  constructor(win, storyElement) {
+  constructor(win) {
     /** @private @const {!Element} */
-    this.storyElement_ = storyElement;
+    this.storyElement_ = win.document.querySelector('amp-story');
 
     /** @private @const {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(win);
@@ -96,18 +95,9 @@ export class AmpStoryRequestService {
  * service synchronously from the amp-story codebase without running into race
  * conditions.
  * @param  {!Window} win
- * @param  {!Element} storyEl
  * @return {!AmpStoryRequestService}
  */
-export const getRequestService = (win, storyEl) => {
-  let service = Services.storyRequestService(win);
-
-  if (!service) {
-    service = new AmpStoryRequestService(win, storyEl);
-    registerServiceBuilder(win, 'story-request', function () {
-      return service;
-    });
-  }
-
-  return service;
-};
+export function getRequestService(win) {
+  registerServiceBuilder(win, 'story-request', AmpStoryRequestService);
+  return Services.storyRequestService(win);
+}

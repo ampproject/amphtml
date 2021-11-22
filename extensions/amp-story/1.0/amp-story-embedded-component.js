@@ -10,7 +10,7 @@ import {
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
-  getAnalyticsService,
+  triggerStoryAnalyticsEvent,
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
@@ -179,9 +179,6 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
 
-    /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
-
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
 
@@ -254,7 +251,8 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
         this.onFocusedStateUpdate_(component);
-        this.analyticsService_.triggerEvent(
+        triggerStoryAnalyticsEvent(
+          this.win_,
           StoryAnalyticsEvent.FOCUS,
           this.triggeringTarget_
         );
@@ -288,7 +286,8 @@ export class AmpStoryEmbeddedComponent {
       'click',
       (event) => {
         event.stopPropagation();
-        this.analyticsService_.triggerEvent(
+        triggerStoryAnalyticsEvent(
+          this.win_,
           StoryAnalyticsEvent.CLICK_THROUGH,
           this.triggeringTarget_
         );

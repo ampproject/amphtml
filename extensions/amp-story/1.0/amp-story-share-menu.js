@@ -2,7 +2,7 @@ import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
-  getAnalyticsService,
+  triggerStoryAnalyticsEvent,
 } from './story-analytics';
 import {
   Action,
@@ -89,9 +89,6 @@ export class ShareMenu {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
-
-    /** @private {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
     /** @private @const {!Element} */
     this.parentEl_ = storyEl;
@@ -246,7 +243,8 @@ export class ShareMenu {
       });
     }
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
-    this.analyticsService_.triggerEvent(
+    triggerStoryAnalyticsEvent(
+      this.win_,
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element_
     );

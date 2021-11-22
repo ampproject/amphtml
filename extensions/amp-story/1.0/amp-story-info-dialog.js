@@ -2,7 +2,7 @@ import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
-  getAnalyticsService,
+  triggerStoryAnalyticsEvent,
 } from './story-analytics';
 import {
   Action,
@@ -50,9 +50,6 @@ export class InfoDialog {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
-
-    /** @private {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, parentEl);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -147,7 +144,8 @@ export class InfoDialog {
     });
 
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-info-dialog';
-    this.analyticsService_.triggerEvent(
+    triggerStoryAnalyticsEvent(
+      this.win_,
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element_
     );

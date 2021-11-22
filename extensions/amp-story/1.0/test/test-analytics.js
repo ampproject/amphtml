@@ -11,9 +11,9 @@ describes.fakeWin('amp-story analytics', {}, (env) => {
     const {win} = env;
 
     rootEl = win.document.createElement('div');
-    storeService = getStoreService(win);
-    analytics = getAnalyticsService(win, rootEl);
     win.document.body.appendChild(rootEl);
+    storeService = getStoreService(win);
+    analytics = getAnalyticsService(rootEl);
     installDocService(win, true);
   });
 
@@ -54,7 +54,7 @@ describes.fakeWin('amp-story analytics', {}, (env) => {
 
     expect(trigger).to.have.been.calledOnceWith('story-page-visible');
 
-    const details = analytics.updateDetails('story-page-visible');
+    const details = analytics.updateDetails_('story-page-visible');
     expect(details.eventDetails).to.deep.equal({});
   });
 

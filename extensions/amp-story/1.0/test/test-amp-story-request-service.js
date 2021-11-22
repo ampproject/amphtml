@@ -14,14 +14,14 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     shareElement = env.win.document.createElement('amp-story-social-share');
     storyElement.appendChild(shareElement);
     env.win.document.body.appendChild(storyElement);
-    requestService = new AmpStoryRequestService(env.win, storyElement);
+    requestService = new AmpStoryRequestService(env.win);
     xhrMock = env.sandbox.mock(requestService.xhr_);
   });
 
   it('should not load the config if no src or inline is set', async () => {
     xhrMock.expects('fetchJson').never();
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await requestService.loadConfig_(shareElement);
 
     expect(JSON.stringify(config)).to.equal('{}');
 
@@ -39,7 +39,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     </script>
     `;
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await requestService.loadConfig_(shareElement);
 
     expect(JSON.stringify(config)).to.equal(JSON.stringify(configData));
     xhrMock.verify();
@@ -60,7 +60,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadConfig(shareElement);
+    await requestService.loadConfig_(shareElement);
     xhrMock.verify();
   });
 
@@ -79,7 +79,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await requestService.loadConfig_(shareElement);
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
@@ -118,7 +118,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await requestService.loadConfig_(shareElement);
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
