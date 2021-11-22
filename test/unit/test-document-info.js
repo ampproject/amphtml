@@ -39,7 +39,6 @@ describes.sandboxed
           }
         }
         const {win} = iframe;
-        debugger;
         installDocService(win, /* isSingleDoc */ true);
         env.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
         win.__AMP_SERVICES.documentInfo = null;
