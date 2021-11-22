@@ -1,16 +1,14 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 
 import {Services} from '#service';
 
-import {devAssert} from '#utils/log';
-
+import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
   ShoppingConfigDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const fontsToLoad = [
@@ -99,7 +97,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @private */
   loadFonts_() {
     if (this.win.document.fonts && FontFace) {
-      fontsToLoad.forEach(({family, src, weight, style}) =>
+      fontsToLoad.forEach(({family, src, style, weight}) =>
         new FontFace(family, src, {weight, style})
           .load()
           .then((font) => this.win.document.fonts.add(font))
