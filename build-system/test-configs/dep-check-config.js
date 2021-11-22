@@ -268,6 +268,7 @@ exports.rules = [
       'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-page-attachment.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/utils.js',
 
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
