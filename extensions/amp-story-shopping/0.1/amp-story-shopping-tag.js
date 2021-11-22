@@ -93,7 +93,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         <ShoppingTagTemplate tagData={tagData} />,
         shoppingTagCSS
       );
-      this.element.textContent = tagData['product-title'];
     });
   }
 
