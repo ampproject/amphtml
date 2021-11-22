@@ -78,15 +78,13 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
           );
 
     if (!ctaButton) {
-      this.mutateElement(() => {
-        this.element.setAttribute('data-cta-text', i18nString);
-      });
-    } else {
-      this.mutateElement(() => {
-        ctaButton.setAttribute('aria-label', i18nString);
-        ctaButton.children[1].textContent = i18nString;
-      });
+      return;
     }
+
+    this.mutateElement(() => {
+      ctaButton.setAttribute('aria-label', i18nString);
+      ctaButton.children[1].textContent = i18nString;
+    });
   }
 
   /** @override */
