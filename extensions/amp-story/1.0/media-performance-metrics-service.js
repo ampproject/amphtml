@@ -134,11 +134,7 @@ export class MediaPerformanceTracker {
       return;
     }
 
-    const rebufferRate = Math.round(
-      (mediaEntry.rebufferTime /
-        (mediaEntry.rebufferTime + mediaEntry.watchTime)) *
-        100
-    );
+    const {rebuffers, watchTime} = mediaEntry;
 
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_JOINT_LATENCY,
@@ -146,20 +142,22 @@ export class MediaPerformanceTracker {
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_WATCH_TIME,
-      mediaEntry.watchTime
+      watchTime
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_REBUFFERS,
-      mediaEntry.rebuffers
+      rebuffers
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_REBUFFER_RATE,
-      rebufferRate
+      Math.round(
+        (mediaEntry.rebufferTime / (mediaEntry.rebufferTime + watchTime)) * 100
+      )
     );
-    if (mediaEntry.rebuffers) {
+    if (rebuffers) {
       this.performanceService_.tickDelta(
         TickLabel_Enum.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
-        Math.round(mediaEntry.watchTime / mediaEntry.rebuffers)
+        Math.round(watchTime / rebuffers)
       );
     }
     this.performanceService_.flush();
