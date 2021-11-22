@@ -65,43 +65,30 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
       '.i-amphtml-story-page-open-attachment-host'
     )?.shadowRoot.children[1];
 
-    if (!ctaButton) {
+    if (numShoppingTags === 0 || !ctaButton) {
       // Failsafe in case the CTA button fails to load, will call the function again until CTA button loads.
       setTimeout(() => this.updateCtaText_(), 100);
       return;
     }
 
-    if (numShoppingTags === 1) {
-      const productName = this.storeService_.get(StateProperty.SHOPPING_DATA)[
-        shoppingTags[0].getAttribute('data-tag-id')
-      ]['product-title'];
+    const getI18nString = (stringKey) =>
+      this.localizationService_.getLocalizedString(stringKey);
 
-      const shopLocalizedString = this.localizationService_.getLocalizedString(
-        LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL
-      );
-      this.mutateElement(() => {
-        ctaButton.setAttribute(
-          'aria-label',
-          shopLocalizedString + ' ' + productName
-        );
-        ctaButton.children[1].textContent =
-          shopLocalizedString + ' ' + productName;
-      });
-    } else {
-      const viewAllProductsLocalizedString =
-        this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
-        );
-      this.mutateElement(() => {
-        ctaButton.setAttribute('aria-label', viewAllProductsLocalizedString);
-        ctaButton.children[1].textContent = viewAllProductsLocalizedString;
-      });
-    }
+    const i18nString =
+      numShoppingTags === 1
+        ? getI18nString(LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL) +
+          ' ' +
+          this.storeService_.get(StateProperty.SHOPPING_DATA)[
+            shoppingTags[0].getAttribute('data-tag-id')
+          ]['product-title']
+        : getI18nString(
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
+          );
 
-    /*
-
-
-    */
+    this.mutateElement(() => {
+      ctaButton.setAttribute('aria-label', i18nString);
+      ctaButton.children[1].textContent = i18nString;
+    });
   }
 
   /** @override */
