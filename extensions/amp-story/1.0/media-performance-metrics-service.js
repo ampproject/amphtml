@@ -29,7 +29,6 @@ const CacheState = {
 
 /**
  * @typedef {{
- *   start: number,
  *   playing: !TimestampDef,
  *   waiting: !TimestampDef,
  *   jointLatency: number,
@@ -95,10 +94,11 @@ export class MediaPerformanceTracker {
   /**
    * @param {!HTMLMediaElement} media
    * @param {!MediaEntryDef} mediaEntry
+   * @param {!TimestampDef} started
    * @param {number=} errorCode
    * @private
    */
-  sendMetrics_(media, mediaEntry, errorCode) {
+  sendMetrics_(media, mediaEntry, started, errorCode) {
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_CACHE_STATE,
       getVideoCacheState(media)
@@ -119,7 +119,7 @@ export class MediaPerformanceTracker {
     // (eg: users tapping through a story, or scrolling through content).
     if (
       !mediaEntry.jointLatency &&
-      Date.now() - mediaEntry.start < MINIMUM_TIME_THRESHOLD_MS
+      Date.now() - started < MINIMUM_TIME_THRESHOLD_MS
     ) {
       return;
     }
@@ -171,9 +171,9 @@ export class MediaPerformanceTracker {
    * @private
    */
   listen_(media) {
+    const started = Date.now();
     const mediaEntry = {
       status: Status.PAUSED,
-      start: Date.now(),
       playing: 0,
       waiting: 0,
       jointLatency: 0,
@@ -209,19 +209,15 @@ export class MediaPerformanceTracker {
     const unlisteners = [
       listen(media, 'ended', () => updateOnPauseOrEnded(mediaEntry)),
       listen(media, 'pause', () => updateOnPauseOrEnded(mediaEntry)),
-      listen(media, 'playing', () => updateOnPlaying(mediaEntry)),
+      listen(media, 'playing', () => updateOnPlaying(mediaEntry, started)),
       listen(media, 'waiting', () => updateOnWaiting(mediaEntry)),
       listen(errorTarget, 'error', onError),
     ];
 
     const stop = (sendMetrics) => {
       unlisteners.forEach((unlisten) => unlisten());
-      const {status} = mediaEntry;
-      if (status === Status.PLAYING) {
-        addWatchTime(mediaEntry);
-      } else if (status === Status.WAITING) {
-        addRebuffer(mediaEntry);
-      }
+      maybeAddWatchTime(mediaEntry);
+      maybeAddRebuffer(mediaEntry);
       if (sendMetrics) {
         this.sendMetrics_(media, mediaEntry, errorCode);
       }
@@ -235,8 +231,10 @@ export class MediaPerformanceTracker {
  * Increments the watch time with the duration from the last `playing` event.
  * @param {!MediaEntryDef} mediaEntry
  */
-function addWatchTime(mediaEntry) {
-  mediaEntry.watchTime += Date.now() - mediaEntry.playing;
+function maybeAddWatchTime(mediaEntry) {
+  if (mediaEntry.status === Status.PLAYING) {
+    mediaEntry.watchTime += Date.now() - mediaEntry.playing;
+  }
 }
 
 /**
@@ -244,11 +242,13 @@ function addWatchTime(mediaEntry) {
  * event, and increments the rebuffers count.
  * @param {!MediaEntryDef} mediaEntry
  */
-function addRebuffer(mediaEntry) {
-  const rebufferTime = Date.now() - mediaEntry.waiting;
-  if (rebufferTime > REBUFFER_THRESHOLD_MS) {
-    mediaEntry.rebuffers++;
-    mediaEntry.rebufferTime += rebufferTime;
+function maybeAddRebuffer(mediaEntry) {
+  if (mediaEntry.status === Status.WAITING) {
+    const rebufferTime = Date.now() - mediaEntry.waiting;
+    if (rebufferTime > REBUFFER_THRESHOLD_MS) {
+      mediaEntry.rebuffers++;
+      mediaEntry.rebufferTime += rebufferTime;
+    }
   }
 }
 
@@ -256,24 +256,19 @@ function addRebuffer(mediaEntry) {
  * @param {!MediaEntry} mediaEntry
  */
 function updateOnPauseOrEnded(mediaEntry) {
-  if (mediaEntry.status === Status.PLAYING) {
-    addWatchTime(mediaEntry);
-  }
+  maybeAddWatchTime(mediaEntry);
   mediaEntry.status = Status.PAUSED;
 }
 
 /**
  * @param {!MediaEntryDef} mediaEntry
+ * @param {!TimestampDef} started
  */
-function updateOnPlaying(mediaEntry) {
+function updateOnPlaying(mediaEntry, started) {
   if (!mediaEntry.jointLatency) {
-    mediaEntry.jointLatency = Date.now() - mediaEntry.start;
+    mediaEntry.jointLatency = Date.now() - started;
   }
-
-  if (mediaEntry.status === Status.WAITING) {
-    addRebuffer(mediaEntry);
-  }
-
+  maybeAddRebuffer(mediaEntry);
   mediaEntry.playing = Date.now();
   mediaEntry.status = Status.PLAYING;
 }
@@ -282,10 +277,7 @@ function updateOnPlaying(mediaEntry) {
  * @param {!MediaEntryDef} mediaEntry
  */
 function updateOnWaiting(mediaEntry) {
-  if (mediaEntry.status === Status.PLAYING) {
-    addWatchTime(mediaEntry);
-  }
-
+  maybeAddWatchTime(mediaEntry);
   mediaEntry.waiting = Date.now();
   mediaEntry.status = Status.WAITING;
 }
