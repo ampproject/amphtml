@@ -4,6 +4,7 @@ import * as CID from '#service/cid-impl';
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 
 import {createIframePromise} from '#testing/iframe';
+import {FakePerformance} from '#testing/fake-dom';
 
 describes.sandboxed
   .configure()
@@ -38,6 +39,7 @@ describes.sandboxed
           }
         }
         const {win} = iframe;
+        debugger;
         installDocService(win, /* isSingleDoc */ true);
         env.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
         win.__AMP_SERVICES.documentInfo = null;
@@ -82,6 +84,7 @@ describes.sandboxed
         location: {
           href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -119,6 +122,7 @@ describes.sandboxed
         location: {
           href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -318,6 +322,7 @@ describes.sandboxed
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -356,6 +361,7 @@ describes.sandboxed
         location: {
           href: base + '?f=0&amp_r=test%3Dhello%20world',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
@@ -393,6 +399,7 @@ describes.sandboxed
         location: {
           href: base + '?f=0&amp_r=%3Dinvalid',
         },
+        performance: new FakePerformance(window),
       };
       win.document.defaultView = win;
       installDocService(win, /* isSingleDoc */ true);
