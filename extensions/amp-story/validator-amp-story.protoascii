@@ -1080,6 +1080,7 @@ descendant_tag_list {
   tag: "AMP-SOUNDCLOUD"
   tag: "AMP-SELECTOR"
   tag: "AMP-SPRINGBOARD-PLAYER"
+  tag: "AMP-STATE"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
