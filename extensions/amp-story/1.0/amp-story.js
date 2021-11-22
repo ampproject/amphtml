@@ -345,7 +345,7 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    if (!this.win.CSS.supports || !this.win.CSS.supports('height', '100dvh')) {
+    if (!this.win.CSS?.supports?.('height: 1dvh')) {
       this.onResize_(this.getViewport().getSize());
     }
 
