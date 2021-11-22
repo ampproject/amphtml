@@ -122,6 +122,26 @@ describes.realWin(
       expect(userErrorStub).to.not.be.called;
     });
 
+    it('should be able to handle `documentElement` being null (shadow mode instances)', () => {
+      env.sandbox.stub(ampdoc, 'getRootNode').returns({});
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('unknown');
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          false
+        );
+      });
+    });
+
     it('should add classes to html and body element for the geo', () => {
       addConfigElement('script');
 

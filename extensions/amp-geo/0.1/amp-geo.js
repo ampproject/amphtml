@@ -162,13 +162,15 @@ export class AmpGeo extends AMP.BaseElement {
    */
   findCountry_(ampdoc) {
     const bodyElem = ampdoc.getBody();
+    /** @type {?Element|undefined} */
     const docElem = ampdoc.getRootNode().documentElement;
     // Flag to see if we've been pre-rendered with a country
     // Prioritize the prerender hinting classes found in `html` over `body`
     // though we do not drop support for detecting in `body` for backwards
-    // compatibility.
+    // compatibility. We make sure that docElem exists at it can be undefined
+    // in shadow mode.
     const preRenderMatch =
-      docElem.className.match(PRE_RENDER_REGEX) ||
+      (docElem && docElem.className.match(PRE_RENDER_REGEX)) ||
       bodyElem.className.match(PRE_RENDER_REGEX);
 
     // Trim the spaces off the patched country.
@@ -200,7 +202,11 @@ export class AmpGeo extends AMP.BaseElement {
         }
         this.mode_ = mode.GEO_OVERRIDE;
       }
-    } else if (preRenderMatch && (!Services.urlForDoc(this.element).isProxyOrigin(this.win.location) || isExperimentOn('amp-geo-ssr'))) {
+    } else if (
+      preRenderMatch &&
+      (!Services.urlForDoc(this.element).isProxyOrigin(this.win.location) ||
+        isExperimentOn(this.win, 'amp-geo-ssr'))
+    ) {
       // pre-rendered by a publisher case or cache case.
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
@@ -429,20 +435,23 @@ export class AmpGeo extends AMP.BaseElement {
    * clearPreRender_()
    * Returns a list of classes to remove if pre-render has
    * been invalidated by way of an override.
-   * @param {!Element} docElem
    * @param {!Element} body
+   * @param {?Element|undefined} docElem
    * @return {!Array<string>}
    */
-  clearPreRender_(docElem, body) {
-    const {classList: bodyClassList} = body;
-    const {classList: docElemClassList} = docElem;
+  clearPreRender_(body, docElem) {
     const classesToRemove = new Set();
 
-    iterateCursor(docElemClassList, (el) => {
-      if (STRIP_RE.test(el)) {
-        classesToRemove.add(el);
-      }
-    });
+    if (docElem) {
+      const {classList: docElemClassList} = docElem;
+      iterateCursor(docElemClassList, (el) => {
+        if (STRIP_RE.test(el)) {
+          classesToRemove.add(el);
+        }
+      });
+    }
+
+    const {classList: bodyClassList} = body;
     iterateCursor(bodyClassList, (el) => {
       if (STRIP_RE.test(el)) {
         classesToRemove.add(el);
@@ -471,6 +480,7 @@ export class AmpGeo extends AMP.BaseElement {
         return this.findCountry_(ampdoc).then(() => body);
       })
       .then((body) => {
+        /** @type {?Element|undefined} */
         const docElem = ampdoc.getRootNode().documentElement;
         this.matchCountryGroups_(config);
 
@@ -478,7 +488,7 @@ export class AmpGeo extends AMP.BaseElement {
 
         switch (this.mode_) {
           case mode.GEO_OVERRIDE:
-            classesToRemove = this.clearPreRender_(docElem, body);
+            classesToRemove = this.clearPreRender_(body, docElem);
           // Intentionally fall through.
           case mode.GEO_HOT_PATCH:
           case mode.GEO_API:
@@ -505,20 +515,25 @@ export class AmpGeo extends AMP.BaseElement {
             // Actual change happens in callback so runtime can
             // optimize dom mutations.
             this.mutateElement(() => {
-              const {classList: docElemClassList} = docElem;
+              const docElemClassList = docElem && docElem.classList;
               const {classList: bodyClassList} = body;
               // Always remove the pending class
               classesToRemove.add('amp-geo-pending');
               classesToRemove.forEach((toRemove) => {
                 /** @type {!DOMTokenList} */ (bodyClassList).remove(toRemove);
-                /** @type {!DOMTokenList} */ (docElemClassList).remove(
-                  toRemove
-                );
+
+                if (docElemClassList) {
+                  /** @type {!DOMTokenList} */ (docElemClassList).remove(
+                    toRemove
+                  );
+                }
               });
 
               // add the new classes to <html> and <<body>
               classesToAdd.forEach((toAdd) => {
-                docElemClassList.add(toAdd);
+                if (docElemClassList) {
+                  docElemClassList.add(toAdd);
+                }
                 bodyClassList.add(toAdd);
               });
 
