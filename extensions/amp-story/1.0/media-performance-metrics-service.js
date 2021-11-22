@@ -35,7 +35,7 @@ const CacheState = {
  *   jointLatency: number,
  *   rebuffers: number,
  *   rebufferTime: number,
- *   watchTime: number
+ *   watchTime: number,
  *   status: number,
  * }}
  */
