@@ -29,7 +29,6 @@ import {localize} from './amp-story-localization-service';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 import {resetStyles, setImportantStyles} from '#core/dom/style';
-import objstr from 'obj-str';
 
 /** @private @const {string} */
 const LAUNCH_ICON_CLASS = 'i-amphtml-tooltip-action-icon-launch';
@@ -720,6 +719,8 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   renderFocusedStateElement_() {
+    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+
     this.tooltipArrow_ = <div class="i-amphtml-story-tooltip-arrow"></div>;
     this.tooltip_ = (
       <a class="i-amphtml-story-tooltip" target="_blank" role="tooltip">
@@ -758,37 +759,33 @@ export class AmpStoryEmbeddedComponent {
       ></button>
     );
 
-    const tooltipOverlay = (
+    return (
       <section
         onClick={(e) => this.onOutsideTooltipClick_(e)}
-        class={objstr({
-          'i-amphtml-story-focused-state-layer': true,
-          'i-amphtml-story-system-reset i-amphtml-hidden': true,
-        })}
+        class={
+          'i-amphtml-story-focused-state-layer' +
+          ' i-amphtml-story-system-reset i-amphtml-hidden'
+        }
       >
         <div
-          class={objstr({
-            'i-amphtml-story-focused-state-layer-nav-button-container': true,
-            'i-amphtml-story-tooltip-nav-button-left': true,
-          })}
+          class={
+            'i-amphtml-story-focused-state-layer-nav-button-container' +
+            ' i-amphtml-story-tooltip-nav-button-left'
+          }
         >
           {this.buttonLeft_}
         </div>
         <div
-          class={objstr({
-            'i-amphtml-story-focused-state-layer-nav-button-container': true,
-            'i-amphtml-story-tooltip-nav-button-right': true,
-          })}
+          class={
+            'i-amphtml-story-focused-state-layer-nav-button-container' +
+            ' i-amphtml-story-tooltip-nav-button-right'
+          }
         >
           {this.buttonRight_}
         </div>
         {this.tooltip_}
       </section>
     );
-
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
-
-    return tooltipOverlay;
   }
 
   /**

@@ -16,7 +16,6 @@ import {localize} from './amp-story-localization-service';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {listen} from '#utils/event-helper';
 import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
-import objStr from 'obj-str';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
@@ -137,10 +136,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     const spacerEl = (
       <button
         role="button"
-        class={objStr({
-          'i-amphtml-story-draggable-drawer-spacer': true,
-          'i-amphtml-story-system-reset': true,
-        })}
+        class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
         aria-label={localize(
           this.element,
           LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
