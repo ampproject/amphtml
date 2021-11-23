@@ -836,9 +836,9 @@ describes.realWin(
         it('should register and preload the background audio', async () => {
           const src = 'https://example.com/foo.mp3';
           story.element.setAttribute('background-audio', src);
-          const registerStub = env.sandbox.stub(story.mediaPool_, 'register');
+          const registerStub = env.sandbox.stub(story.pool, 'register');
           const preloadStub = env.sandbox
-            .stub(story.mediaPool_, 'preload')
+            .stub(story.pool, 'preload')
             .resolves();
 
           await createStoryWithPages(2, ['cover', 'page-1']);
@@ -861,7 +861,7 @@ describes.realWin(
           await createStoryWithPages(2, ['cover', 'page-1']);
 
           const blessAllStub = env.sandbox
-            .stub(story.mediaPool_, 'blessAll')
+            .stub(story.pool, 'blessAll')
             .resolves();
 
           await story.layoutCallback();
@@ -877,7 +877,7 @@ describes.realWin(
           story.backgroundAudioEl_ = backgroundAudioEl;
 
           await story.layoutCallback();
-          const pauseStub = env.sandbox.stub(story.mediaPool_, 'pause');
+          const pauseStub = env.sandbox.stub(story.pool, 'pause');
 
           story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
           story.storeService_.dispatch(Action.TOGGLE_AD, true);
@@ -898,8 +898,8 @@ describes.realWin(
           story.storeService_.dispatch(Action.TOGGLE_AD, true);
           story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
 
-          const unmuteStub = env.sandbox.stub(story.mediaPool_, 'unmute');
-          const playStub = env.sandbox.stub(story.mediaPool_, 'play');
+          const unmuteStub = env.sandbox.stub(story.pool, 'unmute');
+          const playStub = env.sandbox.stub(story.pool, 'play');
 
           story.storeService_.dispatch(Action.TOGGLE_AD, false);
 
@@ -919,8 +919,8 @@ describes.realWin(
           await story.layoutCallback();
           story.storeService_.dispatch(Action.TOGGLE_AD, true);
 
-          const unmuteStub = env.sandbox.stub(story.mediaPool_, 'unmute');
-          const playStub = env.sandbox.stub(story.mediaPool_, 'play');
+          const unmuteStub = env.sandbox.stub(story.pool, 'unmute');
+          const playStub = env.sandbox.stub(story.pool, 'play');
 
           story.storeService_.dispatch(Action.TOGGLE_AD, false);
 
@@ -949,7 +949,7 @@ describes.realWin(
         expect(story.element.hasAttribute('muted')).to.be.true;
       });
 
-      describe('#getMaxMediaElementCounts', () => {
+      describe('#getMediaPoolAllocatedCounts_', () => {
         it('should create 2 audio & video elements when no elements found', async () => {
           await createStoryWithPages(2, ['cover', 'page-1']);
 
@@ -958,7 +958,7 @@ describes.realWin(
             [MediaType.AUDIO]: 2,
             [MediaType.VIDEO]: 2,
           };
-          expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+          expect(story.getMediaPoolAllocatedCounts_()).to.deep.equal(expected);
         });
 
         it('should create 2 extra audio & video elements for ads', async () => {
@@ -978,7 +978,7 @@ describes.realWin(
             [MediaType.AUDIO]: 3,
             [MediaType.VIDEO]: 3,
           };
-          expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+          expect(story.getMediaPoolAllocatedCounts_()).to.deep.equal(expected);
         });
 
         it('never have more than the defined maximums', async () => {
@@ -1001,16 +1001,16 @@ describes.realWin(
             [MediaType.AUDIO]: 4,
             [MediaType.VIDEO]: 8,
           };
-          expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+          expect(story.getMediaPoolAllocatedCounts_()).to.deep.equal(expected);
         });
       });
 
-      describe('#getElementDistance', () => {
+      describe('#getElementDistance_', () => {
         it('should return -1 for elements without a page', async () => {
           await createStoryWithPages(3);
           await story.layoutCallback();
           const elToFind = win.document.createElement('video');
-          const distance = story.getElementDistance(elToFind);
+          const distance = story.getElementDistance_(elToFind);
           expect(distance).to.equal(-1);
         });
 
@@ -1021,7 +1021,7 @@ describes.realWin(
           const hostPage = pageArray[1];
           hostPage.setAttribute('distance', '4');
           hostPage.appendChild(elToFind);
-          const distance = story.getElementDistance(elToFind);
+          const distance = story.getElementDistance_(elToFind);
           expect(distance).to.equal(4);
         });
 
@@ -1034,7 +1034,7 @@ describes.realWin(
           const iframe = win.document.createElement('iframe');
           hostPage.appendChild(iframe);
           iframe.contentDocument.body.appendChild(elToFind);
-          const distance = story.getElementDistance(elToFind);
+          const distance = story.getElementDistance_(elToFind);
           expect(distance).to.equal(4);
         });
       });
