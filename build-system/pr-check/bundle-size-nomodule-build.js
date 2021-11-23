@@ -9,6 +9,7 @@ const {
   storeNomoduleBuildToWorkspace,
   timedExecOrDie,
 } = require('./utils');
+const {initializeMangleCache} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
@@ -18,6 +19,7 @@ const jobName = 'bundle-size-nomodule-build.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
+  initializeMangleCache();
   timedExecOrDie('amp dist --noconfig --version_override 0000000000000');
   storeNomoduleBuildToWorkspace();
 }

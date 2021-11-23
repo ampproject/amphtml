@@ -18,6 +18,7 @@ const {cyan, green, red} = require('kleur/colors');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
+const {getStdout} = require('../common/process');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -56,6 +57,9 @@ const EXTENSION_BUNDLE_MAP = {
  * Used while building the 3p frame
  **/
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
+
+/***/
+const terserMangleConfig = path.join('dist', 'terser.json');
 
 /**
  * Used to debounce file edits during watch to prevent races.
@@ -525,7 +529,65 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 /**
  * Name cache to help terser perform cross-binary property mangling.
  */
-const nameCache = {};
+let nameCache;
+
+/**
+ * Reads a pre-generated terser mangle mapping, or creates an empty object if
+ * one hasn't been created.
+ *
+ * @return {!Object}
+ */
+function readNameCache() {
+  if (nameCache) {
+    return nameCache;
+  }
+  try {
+    nameCache = JSON.parse(fs.readFileSync(terserMangleConfig, 'utf8'));
+  } catch {
+    nameCache = {};
+  }
+  return nameCache;
+}
+
+/**
+ * Creates and saves a pre-generated terser mangle mapping of all identifiers
+ * that end with `_`. It's ok if this isn't perfect, terser will generate new
+ * mangles for anything we didn't find ourselves.
+ */
+function initializeMangleCache() {
+  const names = getStdout(
+    `git grep --only-matching -hI '\\b[a-zA-Z0-9_]\\+_\\b'`
+  ).split('\n');
+  /** @type {!Object<string, number>} */
+  const frequency = names.reduce((freq, name) => {
+    const escaped = '$' + name;
+    freq[escaped] ||= 0;
+    freq[escaped]++;
+    return freq;
+  }, {});
+  const freqs = Object.entries(frequency).sort((a, b) => {
+    if (b[1] - a[1] !== 0) {
+      return b[1] - a[1];
+    }
+    return a[0].localeCompare(b[0]);
+  });
+  const props = Object.fromEntries(
+    freqs.map(([key], i) => {
+      return [key, mangleIdentifier.get(i)];
+    })
+  );
+  fs.writeFileSync(
+    terserMangleConfig,
+    JSON.stringify(
+      {
+        // Yes, this looks redundant, but terser really does use 2 props objects.
+        props: {props},
+      },
+      null,
+      2
+    )
+  );
+}
 
 /**
  * Implements a stable identifier mangler, based only on the input order.
@@ -578,13 +640,14 @@ async function minify(code, map) {
     sourceMap: {content: map},
     toplevel: true,
     module: !!argv.esm,
-    nameCache,
+    nameCache: readNameCache(),
   };
   /* eslint-enable local/camelcase */
 
   // Remove the local variable name cache which should not be reused between binaries.
   // See https://github.com/ampproject/amphtml/issues/36476
   /** @type {any}*/ (nameCache).vars = {};
+  console.log(nameCache);
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};
@@ -846,4 +909,5 @@ module.exports = {
   watchDebounceDelay,
   shouldUseClosure,
   mangleIdentifier,
+  initializeMangleCache,
 };
