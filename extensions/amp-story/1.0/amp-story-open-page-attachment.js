@@ -65,15 +65,11 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
   const isOutlink =
     attachmentEl.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
     attachmentEl.getAttribute('href');
-  const element = isOutlink
-    ? renderOutlinkUI(pageEl, attachmentEl)
-    : renderInlineUi(pageEl, attachmentEl);
-  // This ensures `active` is set on first render.
-  // Otherwise setState may be called before this.openAttachmentEl_ exists.
-  if (pageEl.hasAttribute('active')) {
-    element.setAttribute('active');
+  if (isOutlink) {
+    return renderOutlinkUI(pageEl, attachmentEl);
+  } else {
+    return renderInlineUi(pageEl, attachmentEl);
   }
-  return element;
 };
 
 /**
