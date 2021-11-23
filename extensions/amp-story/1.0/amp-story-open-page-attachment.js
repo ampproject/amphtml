@@ -188,8 +188,8 @@ const renderInlineUi = (pageEl, attachmentEl) => {
       aria-label={openLabel}
     >
       <div class="i-amphtml-story-inline-page-attachment-chip">
-        {makeImgElWithBG(attachmentEl.getAttribute('cta-image-2'))}
         {makeImgElWithBG(attachmentEl.getAttribute('cta-image'))}
+        {makeImgElWithBG(attachmentEl.getAttribute('cta-image-2'))}
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
       {openLabel !== 'none' && (
