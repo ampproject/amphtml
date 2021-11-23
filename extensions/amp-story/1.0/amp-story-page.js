@@ -1616,11 +1616,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       );
 
       this.mutateElement(() => {
-        this.element.appendChild(container);
-        createShadowRootWithStyle(
-          container,
-          this.openAttachmentEl_,
-          pageAttachmentCSS
+        this.element.appendChild(
+          createShadowRootWithStyle(
+            container,
+            this.openAttachmentEl_,
+            pageAttachmentCSS
+          )
         );
       });
     }

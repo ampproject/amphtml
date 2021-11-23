@@ -275,10 +275,12 @@ export class AmpStoryEmbeddedComponent {
    * @return {Node}
    */
   buildFocusedState_() {
-    this.shadowRoot_ = <div />;
-
     this.focusedStateOverlay_ = this.renderFocusedStateElement_();
-    createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
+    this.shadowRoot_ = createShadowRootWithStyle(
+      <div />,
+      this.focusedStateOverlay_,
+      CSS
+    );
 
     this.tooltip_.addEventListener(
       'click',

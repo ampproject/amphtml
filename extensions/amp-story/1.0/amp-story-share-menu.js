@@ -161,15 +161,11 @@ export class ShareMenu {
    * @return {!Element}
    */
   buildForFallbackSharing_() {
-    const root = <div class="i-amphtml-story-share-menu-host"></div>;
-
     this.element_ = renderForFallbackSharing(
       this.parentEl_,
       this.shareWidget_.build(getAmpdoc(this.parentEl_)),
       (event) => this.onShareMenuClick_(event)
     );
-
-    createShadowRootWithStyle(root, this.element_, CSS);
 
     // Only listen for closing when system share is unsupported, since the
     // native layer would handle all the UI interactions.
@@ -180,7 +176,11 @@ export class ShareMenu {
       }
     });
 
-    return root;
+    return createShadowRootWithStyle(
+      <div class="i-amphtml-story-share-menu-host"></div>,
+      this.element_,
+      CSS
+    );
   }
 
   /**

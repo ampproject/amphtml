@@ -123,10 +123,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.element.classList.add('amp-story-draggable-drawer-root');
 
     const templateEl = renderDrawerElement();
-    const headerShadowRootEl = <div />;
     this.headerEl = renderHeaderElement();
-
-    createShadowRootWithStyle(headerShadowRootEl, this.headerEl, CSS);
 
     this.containerEl = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
@@ -152,7 +149,9 @@ export class DraggableDrawer extends AMP.BaseElement {
     );
 
     this.containerEl.insertBefore(spacerEl, this.contentEl);
-    this.contentEl.appendChild(headerShadowRootEl);
+    this.contentEl.appendChild(
+      createShadowRootWithStyle(<div />, this.headerEl, CSS)
+    );
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);

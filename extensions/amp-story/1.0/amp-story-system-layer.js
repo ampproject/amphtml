@@ -253,9 +253,6 @@ export class SystemLayer {
     /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /**
      * Root element containing a shadow DOM root.
      * @private {?Element}
@@ -304,13 +301,10 @@ export class SystemLayer {
    * @param {string} initialPageId
    */
   build(initialPageId) {
-    if (this.isBuilt_) {
-      return this.getRoot();
+    if (this.root_) {
+      return this.root_;
     }
 
-    this.isBuilt_ = true;
-
-    this.root_ = <div class="i-amphtml-system-layer-host"></div>;
     this.systemLayerEl_ = renderSystemLayerElement(this.parentEl_);
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
@@ -318,7 +312,11 @@ export class SystemLayer {
     this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
       Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
-    createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
+    this.root_ = createShadowRootWithStyle(
+      <div class="i-amphtml-system-layer-host"></div>,
+      this.systemLayerEl_,
+      CSS
+    );
 
     this.systemLayerEl_.insertBefore(
       this.progressBar_.build(initialPageId),
@@ -364,7 +362,7 @@ export class SystemLayer {
 
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
-    return this.getRoot();
+    return this.root_;
   }
 
   /** @private */
@@ -736,7 +734,7 @@ export class SystemLayer {
    * @private
    */
   hideMessageInternal_(message) {
-    if (!this.isBuilt_) {
+    if (!this.root_) {
       return;
     }
     this.vsync_.mutate(() => {

@@ -105,8 +105,7 @@ export class InfoDialog {
       </div>
     );
 
-    const root = <div />;
-    createShadowRootWithStyle(root, this.element_, CSS);
+    const root = createShadowRootWithStyle(<div />, this.element_, CSS);
     this.initializeListeners_();
 
     return this.requestMoreInfoLink_().then((moreInfoUrl) =>
