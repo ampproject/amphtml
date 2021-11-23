@@ -65,7 +65,7 @@ export class StandardActions {
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
 
-    this.initThemeMode();
+    this.initThemeMode_();
   }
 
   /**
@@ -111,14 +111,32 @@ export class StandardActions {
    * This methode needs to be called on page load to set the `amp-dark-mode`
    * class on the body if the user prefers the dark mode.
    */
-  initThemeMode() {
-    const themeMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
-    const prefersDarkScheme = this.ampdoc.win.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
+  initThemeMode_() {
+    if (this.prefersDarkMode_()) {
+      this.ampdoc.waitForBodyOpen().then((body) => {
+        body.classList.add('amp-dark-mode');
+      });
+    }
+  }
 
-    if ((null === themeMode && prefersDarkScheme) || 'yes' === themeMode) {
-      this.ampdoc.getBody().classList.add('amp-dark-mode');
+  /**
+   * Checks whether the user prefers dark mode based on local storage and
+   * user's operating systen settings.
+   *
+   * @return {boolean}
+   */
+  prefersDarkMode_() {
+    try {
+      const themeMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
+
+      return (
+        'yes' === themeMode ||
+        (!themeMode &&
+          this.ampdoc.win.matchMedia('(prefers-color-scheme: dark)').matches)
+      );
+    } catch (e) {
+      // LocalStorage may not be accessible
+      return this.ampdoc.win.matchMedia('(prefers-color-scheme: dark)').matches;
     }
   }
 
@@ -180,7 +198,7 @@ export class StandardActions {
             dev().error(TAG, 'Failed to opt out of CID', reason);
           });
       case 'toggleTheme':
-        this.handleToggleTheme();
+        this.handleToggleTheme_();
         return null;
     }
     throw user().createError('Unknown AMP action ', method);
@@ -225,19 +243,21 @@ export class StandardActions {
    *
    * This action sets the `amp-dark-mode` class on the body element and stores the the preference for dark mode in localstorage.
    */
-  handleToggleTheme() {
+  handleToggleTheme_() {
     this.ampdoc.waitForBodyOpen().then((body) => {
-      const prefersDarkScheme = this.ampdoc.win.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches;
-      const isDarkMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
-
-      if ('no' === isDarkMode || (!isDarkMode && !prefersDarkScheme)) {
-        body.classList.add('amp-dark-mode');
-        this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
-      } else {
-        body.classList.remove('amp-dark-mode');
-        this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'no');
+      try {
+        const darkMode = this.prefersDarkMode_();
+        if (darkMode) {
+          body.classList.remove('amp-dark-mode');
+          this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'no');
+        } else {
+          body.classList.add('amp-dark-mode');
+          this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
+        }
+      } catch (e) {
+        // LocalStorage may not be accessible
+        // toggle should work even if localStorage is not available.
+        body.classList.toggle('amp-dark-mode');
       }
     });
   }
