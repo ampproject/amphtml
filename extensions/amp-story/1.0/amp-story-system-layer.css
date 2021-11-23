@@ -1,8 +1,5 @@
 
 
-@import './amp-story-share.css';
-
-
 .i-amphtml-story-system-layer {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.32), transparent) !important;
   position: absolute !important;
