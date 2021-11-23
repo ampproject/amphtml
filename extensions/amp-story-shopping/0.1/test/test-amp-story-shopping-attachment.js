@@ -62,13 +62,15 @@ describes.realWin(
         .true;
     });
 
-    it('should set attribute data-cta-text when ctaButtonAnchorEl is null', async () => {
+    it('should set attribute data-cta-text when ctaButton is null', async () => {
       const i18nString = 'Shop Hootenanny Hat';
       const localizedString = env.sandbox.stub(LocalizationService, 'localize');
       localizedString.returns(i18nString);
       await shoppingAttachment.buildCallback();
       shoppingDataDispatchStoreService();
-      expect(element.getAttribute('data-cta-text')).to.equal(i18nString);
+      env.sandbox.stub(shoppingAttachment, 'mutateElement').callsFake(() => {
+        expect(element.getAttribute('data-cta-text')).to.equal(i18nString);
+      });
     });
   }
 );
