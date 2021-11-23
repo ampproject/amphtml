@@ -647,7 +647,6 @@ async function minify(code, map) {
   // Remove the local variable name cache which should not be reused between binaries.
   // See https://github.com/ampproject/amphtml/issues/36476
   /** @type {any}*/ (nameCache).vars = {};
-  console.log(nameCache);
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};
