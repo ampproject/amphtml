@@ -256,8 +256,12 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
 
-    /** @private {!MediaPool} */
-    this.mediaPool_ = MediaPool.for(this);
+    /** @public @const {!MediaPool} */
+    this.pool = new MediaPool(
+      this.win,
+      this.getMaxMediaElementCounts_(),
+      (element) => this.getElementDistance_(element)
+    );
 
     /** @private {boolean} */
     this.areAccessAuthorizationsCompleted_ = false;
@@ -1974,8 +1978,8 @@ export class AmpStory extends AMP.BaseElement {
         backgroundAudioEl = /** @type {!HTMLMediaElement} */ (
           backgroundAudioEl
         );
-        this.mediaPool_.register(backgroundAudioEl);
-        return this.mediaPool_.preload(backgroundAudioEl);
+        this.pool.register(backgroundAudioEl);
+        return this.pool.preload(backgroundAudioEl);
       })
       .then(() => {
         this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (
@@ -2080,8 +2084,12 @@ export class AmpStory extends AMP.BaseElement {
     return this.pages_[pageIndex] || null;
   }
 
-  /** @override */
-  getElementDistance(element) {
+  /**
+   * @param {!Element} element
+   * @return {number}
+   * @private
+   */
+  getElementDistance_(element) {
     const page = this.getPageContainingElement_(element);
 
     // An element not contained in a page is likely to be global to the story,
@@ -2094,8 +2102,11 @@ export class AmpStory extends AMP.BaseElement {
     return page.getDistance();
   }
 
-  /** @override */
-  getMaxMediaElementCounts() {
+  /**
+   * @return {!Object<string, number>}
+   * @private
+   */
+  getMaxMediaElementCounts_() {
     let audioMediaElementsCount = this.element.querySelectorAll(
       'amp-audio, [background-audio]'
     ).length;
@@ -2155,7 +2166,7 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.backgroundAudioEl_) {
       return;
     }
-    this.mediaPool_.pause(this.backgroundAudioEl_);
+    this.pool.pause(this.backgroundAudioEl_);
   }
 
   /**
@@ -2170,7 +2181,7 @@ export class AmpStory extends AMP.BaseElement {
       }
     };
 
-    this.mediaPool_.blessAll().then(unmuteAllMedia, unmuteAllMedia);
+    this.pool.blessAll().then(unmuteAllMedia, unmuteAllMedia);
   }
 
   /**
@@ -2181,8 +2192,8 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.backgroundAudioEl_) {
       return;
     }
-    this.mediaPool_.unmute(this.backgroundAudioEl_);
-    this.mediaPool_.play(this.backgroundAudioEl_);
+    this.pool.unmute(this.backgroundAudioEl_);
+    this.pool.play(this.backgroundAudioEl_);
   }
 
   /**

@@ -28,7 +28,6 @@ import {EventType, dispatch} from './events';
 import {Layout_Enum} from '#core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {MediaPool} from './media-pool';
 import {Services} from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
@@ -38,8 +37,8 @@ import {
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
-import {debounce} from '#core/types/function';
-import {dev} from '#utils/log';
+import {debounce, once} from '#core/types/function';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {localize} from './amp-story-localization-service';
@@ -189,8 +188,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
 
-    const deferred = new Deferred();
-
     /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
     this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
       this.win
@@ -201,15 +198,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.registerAllMediaPromise_ = null;
-
-    /** @private @const {!Promise<!MediaPool>} */
-    this.mediaPoolPromise_ = deferred.promise;
-
-    /** @private @const {!function(!MediaPool)} */
-    this.mediaPoolResolveFn_ = deferred.resolve;
-
-    /** @private @const {!function(*)} */
-    this.mediaPoolRejectFn_ = deferred.reject;
 
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
@@ -236,6 +224,19 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /**
+     * @return {!Promise<./media-pool.MediaPool>}
+     * @private
+     */
+    this.getPool_ = once(() => {
+      const storyElement = devAssert(
+        closestAncestorElementBySelector(this.element, 'amp-story')
+      );
+      return whenUpgradedToCustomElement(storyElement)
+        .then(() => storyElement.getImpl())
+        .then((impl) => impl.pool);
+    });
   }
 
   /**
@@ -259,7 +260,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   buildCallback() {
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
-    this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.maybeSetPreviewDuration_();
     this.maybeSetStoryNextUp_();
@@ -386,21 +386,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   delegateVideoAutoplay() {
     iterateCursor(this.element.querySelectorAll('amp-video'), delegateAutoplay);
-  }
-
-  /** @private */
-  initializeMediaPool_() {
-    const storyEl = dev().assertElement(
-      closestAncestorElementBySelector(this.element, 'amp-story'),
-      'amp-story-page must be a descendant of amp-story.'
-    );
-
-    whenUpgradedToCustomElement(storyEl)
-      .then(() => storyEl.getImpl())
-      .then(
-        (storyImpl) => this.mediaPoolResolveFn_(MediaPool.for(storyImpl)),
-        (reason) => this.mediaPoolRejectFn_(reason)
-      );
   }
 
   /**
@@ -534,7 +519,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     return Promise.all([
       this.beforeVisible(),
       this.waitForMediaLayout_(),
-      this.mediaPoolPromise_,
+      this.getPool_(),
     ]);
   }
 
@@ -826,7 +811,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   whenAllMediaElements_(callbackFn) {
     const mediaSet = toArray(this.getAllMedia_());
 
-    return this.mediaPoolPromise_.then((mediaPool) => {
+    return this.getPool_().then((mediaPool) => {
       const promises = mediaSet.map((mediaEl) => {
         return callbackFn(mediaPool, dev().assertElement(mediaEl));
       });
@@ -1552,7 +1537,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.playMessageEl_.addEventListener('click', () => {
       this.togglePlayMessage_(false);
       this.startMeasuringAllVideoPerformance_();
-      this.mediaPoolPromise_
+      this.getPool_()
         .then((mediaPool) => mediaPool.blessAll())
         .then(() => this.playAllMedia_());
     });

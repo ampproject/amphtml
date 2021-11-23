@@ -19,14 +19,13 @@ import {dev, devAssert} from '#utils/log';
 import {findIndex} from '#core/types/array';
 import {isConnectedNode} from '#core/dom';
 import {matches} from '#core/dom/query';
-import {getWin} from '#core/window';
 import {userInteractedWith} from '../../../src/video-interface';
+import {isEnumValue} from '#core/types';
 
 /** @const @enum {string} */
 export const MediaType = {
-  UNSUPPORTED: 'unsupported',
-  AUDIO: 'audio',
-  VIDEO: 'video',
+  AUDIO: 'AUDIO',
+  VIDEO: 'VIDEO',
 };
 
 /** @const @enum {string} */
@@ -80,11 +79,6 @@ const POOL_ELEMENT_ID_PREFIX = 'i-amphtml-pool-media-';
 /**
  * @const {string}
  */
-const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
-
-/**
- * @const {string}
- */
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
 
 /**
@@ -100,16 +94,6 @@ const MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_ORIGIN__';
 export const REPLACED_MEDIA_PROPERTY_NAME = 'replaced-media';
 
 /**
- * @type {!Object<string, !MediaPool>}
- */
-const instances = {};
-
-/**
- * @type {number}
- */
-let nextInstanceId = 0;
-
-/**
  * 🍹 MediaPool
  * Keeps a pool of N media elements to be shared across components.
  */
@@ -119,9 +103,12 @@ export class MediaPool {
    * @param {!Object<!MediaType, number>} maxCounts The maximum amount of each
    *     media element that can be allocated by the pool.
    * @param {!ElementDistanceFnDef} distanceFn A function that, given an
-   *     element, returns the distance of that element from the current position
-   *     in the document.  The definition of "distance" can be implementation-
-   *     dependant, as long as it is consistent between invocations.
+   *     element, returns a numerical distance representing how far the specified
+   *     element is from the user's current position in the document.  The
+   *     absolute magnitude of this number is irrelevant; the relative magnitude
+   *     is used to determine which media elements should be evicted (elements
+   *     furthest from the user's current position in the document are evicted
+   *     from the MediaPool first).
    */
   constructor(win, maxCounts, distanceFn) {
     /** @private @const {!Window} */
@@ -180,27 +167,6 @@ export class MediaPool {
     /** @private {?Array<!AmpElement>} */
     this.ampElementsToBless_ = null;
 
-    /** @const {!Object<string, (function(): !PoolBoundElementDef)>} */
-    this.mediaFactory_ = {
-      [MediaType.AUDIO]: () => {
-        const audioEl = this.win_.document.createElement('audio');
-        audioEl.setAttribute('muted', '');
-        audioEl.muted = true;
-        audioEl.classList.add('i-amphtml-pool-media');
-        audioEl.classList.add('i-amphtml-pool-audio');
-        return audioEl;
-      },
-      [MediaType.VIDEO]: () => {
-        const videoEl = this.win_.document.createElement('video');
-        videoEl.setAttribute('muted', '');
-        videoEl.muted = true;
-        videoEl.setAttribute('playsinline', '');
-        videoEl.classList.add('i-amphtml-pool-media');
-        videoEl.classList.add('i-amphtml-pool-video');
-        return videoEl;
-      },
-    };
-
     this.initializeMediaPool_(maxCounts);
   }
 
@@ -209,50 +175,33 @@ export class MediaPool {
    * each of the types of media elements.  We need to create these eagerly so
    * that all media elements exist by the time that blessAll() is invoked,
    * thereby "blessing" all media elements for playback without user gesture.
-   * @param {!Object<!MediaType, number>} maxCounts The maximum amount of each
+   * @param {!Object<string, number>} maxCounts The maximum amount of each
    *     media element that can be allocated by the pool.
    * @private
    */
   initializeMediaPool_(maxCounts) {
     let poolIdCounter = 0;
-
-    this.forEachMediaType_((key) => {
-      const type = MediaType[key];
-      const count = maxCounts[type] || 0;
-
-      if (count <= 0) {
-        return;
-      }
-
-      const ctor = devAssert(
-        this.mediaFactory_[type],
-        `Factory for media type \`${type}\` unset.`
-      );
-
-      // Cloning nodes is faster than building them.
-      // Construct a seed media element as a small optimization.
-      const mediaElSeed = ctor.call(this);
+    for (const type in maxCounts) {
+      const count = maxCounts[type];
 
       this.allocated[type] = [];
       this.unallocated[type] = [];
 
-      // Reverse-looping is generally faster and Closure would usually make
-      // this optimization automatically. However, it skips it due to a
-      // comparison with the itervar below, so we have to roll it by hand.
-      for (let i = count; i > 0; i--) {
-        // Use seed element at end of set to prevent wasting it.
-        const mediaEl = /** @type {!PoolBoundElementDef} */ (
-          i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true)
-        );
+      for (let i = 0; i < count; i++) {
+        const mediaEl = this.win_.document.createElement(type);
+        mediaEl.classList.add('i-amphtml-pool-media');
+        mediaEl.classList.add(`i-amphtml-pool-${type.toLowerCase()}`);
+        mediaEl.setAttribute('muted', '');
+        mediaEl.muted = true;
+        if (type === 'VIDEO') {
+          mediaEl.setAttribute('playsinline', '');
+        }
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
-        // In Firefox, cloneNode() does not properly copy the muted property
-        // that was set in the seed. We need to set it again here.
-        mediaEl.muted = true;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.unallocated[type].push(mediaEl);
       }
-    });
+    }
   }
 
   /**
@@ -321,15 +270,9 @@ export class MediaPool {
    * @private
    */
   getMediaType_(mediaElement) {
-    const tagName = mediaElement.tagName.toLowerCase();
-    switch (tagName) {
-      case 'audio':
-        return MediaType.AUDIO;
-      case 'video':
-        return MediaType.VIDEO;
-      default:
-        return MediaType.UNSUPPORTED;
-    }
+    const {tagName} = mediaElement;
+    devAssert(isEnumValue(MediaType, tagName));
+    return tagName;
   }
 
   /**
@@ -585,14 +528,6 @@ export class MediaPool {
   }
 
   /**
-   * @param {function(string)} callbackFn
-   * @private
-   */
-  forEachMediaType_(callbackFn) {
-    Object.keys(MediaType).forEach(callbackFn.bind(this));
-  }
-
-  /**
    * Invokes a function for all media managed by the media pool.
    * @param {function(!PoolBoundElementDef)} callbackFn The function to be
    *     invoked.
@@ -600,14 +535,9 @@ export class MediaPool {
    */
   forEachMediaElement_(callbackFn) {
     [this.allocated, this.unallocated].forEach((mediaSet) => {
-      this.forEachMediaType_((key) => {
-        const type = MediaType[key];
-        const els = /** @type {!Array} */ (mediaSet[type]);
-        if (!els) {
-          return;
-        }
-        els.forEach(callbackFn.bind(this));
-      });
+      for (const type in mediaSet) {
+        mediaSet[type].forEach(callbackFn);
+      }
     });
   }
 
@@ -975,58 +905,4 @@ export class MediaPool {
 
     return task.whenComplete();
   }
-
-  /**
-   * @param {!MediaPoolRoot} root
-   * @return {!MediaPool}
-   */
-  static for(root) {
-    const element = root.getElement();
-    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
-    const hasInstanceAllocated = existingId && instances[existingId];
-
-    if (hasInstanceAllocated) {
-      return instances[existingId];
-    }
-
-    const newId = String(nextInstanceId++);
-    element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
-    instances[newId] = new MediaPool(
-      getWin(root.getElement()),
-      root.getMaxMediaElementCounts(),
-      (element) => root.getElementDistance(element)
-    );
-
-    return instances[newId];
-  }
-}
-
-/**
- * Defines a common interface for elements that contain a MediaPool.
- *
- * @interface
- */
-export class MediaPoolRoot {
-  /**
-   * @return {!Element} The root element of this media pool.
-   */
-  getElement() {}
-
-  /**
-   * @param {!Element} unusedElement The element whose distance should be
-   *    retrieved.
-   * @return {number} A numerical distance representing how far the specified
-   *     element is from the user's current position in the document.  The
-   *     absolute magnitude of this number is irrelevant; the relative magnitude
-   *     is used to determine which media elements should be evicted (elements
-   *     furthest from the user's current position in the document are evicted
-   *     from the MediaPool first).
-   */
-  getElementDistance(unusedElement) {}
-
-  /**
-   * @return {!Object<!MediaType, number>} The maximum amount of each media
-   *     type to allow within this element.
-   */
-  getMaxMediaElementCounts() {}
 }

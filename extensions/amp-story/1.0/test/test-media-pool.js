@@ -1,6 +1,5 @@
-import {MediaPool, MediaType} from '../media-pool';
+import {MediaPool} from '../media-pool';
 import {Services} from '#service';
-import {findIndex} from '#core/types/array';
 
 const NOOP = () => {};
 
@@ -8,10 +7,6 @@ describes.realWin('media-pool', {}, (env) => {
   let win;
   let mediaPool;
   let distanceFnStub;
-  const COUNTS = {
-    [MediaType.AUDIO]: 2,
-    [MediaType.VIDEO]: 2,
-  };
 
   beforeEach(() => {
     win = env.win;
@@ -20,7 +15,7 @@ describes.realWin('media-pool', {}, (env) => {
       .callsFake(() => ({mutate: (task) => task()}));
     env.sandbox.stub(Services, 'timerFor').callsFake(() => ({delay: NOOP}));
 
-    mediaPool = new MediaPool(win, COUNTS, (element) => {
+    mediaPool = new MediaPool(win, {AUDIO: 2, VIDEO: 2}, (element) => {
       return distanceFnStub(element);
     });
   });
@@ -67,35 +62,22 @@ describes.realWin('media-pool', {}, (env) => {
   }
 
   /**
-   * @param {!Object|!Array} poolOrPools
+   * @param {!Object} pool
    * @return {!Array<!HTMLMediaElement>}
    */
-  function getElements(poolOrPools) {
-    const results = [];
-
-    const pools = Array.isArray(poolOrPools) ? poolOrPools : [poolOrPools];
-    pools.forEach((pool) => {
-      Object.keys(pool).forEach((key) => {
-        pool[key].forEach((el) => {
-          results.push(el);
-        });
-      });
-    });
-
-    return results;
+  function getElements(pool) {
+    return Object.values(pool).flat();
   }
 
   /**
    * @param {!Array<!HTMLMediaElement>} array
    * @param {!HTMLMediaElement} element
-   * @return {boolean>}
+   * @return {boolean}
    */
   function isElementInPool(array, element) {
-    const index = findIndex(array, (el) => {
+    return array.some((el) => {
       return el['replaced-media'] === element.getAttribute('id');
     });
-
-    return index >= 0;
   }
 
   it('should not be null', () => {
@@ -107,48 +89,40 @@ describes.realWin('media-pool', {}, (env) => {
   });
 
   it('should allocate element on play', () => {
-    mediaPool = new MediaPool(win, {'video': 2}, (unusedEl) => 0);
+    mediaPool = new MediaPool(win, {'VIDEO': 2}, (unusedEl) => 0);
 
-    const videoEl = createMediaElement('video');
+    const videoEl = createMediaElement('VIDEO');
     mediaPool.register(videoEl);
 
-    expect(mediaPool.allocated['video'].length).to.equal(0);
-    expect(mediaPool.unallocated['video'].length).to.equal(2);
+    expect(mediaPool.allocated['VIDEO'].length).to.equal(0);
+    expect(mediaPool.unallocated['VIDEO'].length).to.equal(2);
 
     mediaPool.play(videoEl);
 
-    expect(mediaPool.allocated['video'].length).to.equal(1);
-    expect(mediaPool.unallocated['video'].length).to.equal(1);
+    expect(mediaPool.allocated['VIDEO'].length).to.equal(1);
+    expect(mediaPool.unallocated['VIDEO'].length).to.equal(1);
   });
 
   it.skip('should evict the element with the highest distance first', () => {
-    const elements = createMediaElements('video', 3);
-    mediaPool = new MediaPool(
-      win,
-      {'video': 2},
-      arrayOrderDistanceFn(elements)
-    );
+    const elements = createMediaElements('VIDEO', 3);
+    mediaPool = new MediaPool(win, {VIDEO: 2}, arrayOrderDistanceFn(elements));
 
     elements.forEach((element) => mediaPool.register(element));
     elements.forEach((element) => mediaPool.play(element));
 
-    expect(mediaPool.allocated['video'].length).to.equal(2);
-    expect(isElementInPool(mediaPool.allocated['video'], elements[0])).to.be
+    expect(mediaPool.allocated['VIDEO'].length).to.equal(2);
+    expect(isElementInPool(mediaPool.allocated['VIDEO'], elements[0])).to.be
       .true;
-    expect(isElementInPool(mediaPool.allocated['video'], elements[1])).to.be
+    expect(isElementInPool(mediaPool.allocated['VIDEO'], elements[1])).to.be
       .true;
-    expect(isElementInPool(mediaPool.allocated['video'], elements[2])).to.be
+    expect(isElementInPool(mediaPool.allocated['VIDEO'], elements[2])).to.be
       .false;
   });
 
   it('should be able to play alot of videos', () => {
     const alot = 100;
-    const elements = createMediaElements('video', alot);
-    mediaPool = new MediaPool(
-      win,
-      {'video': 2},
-      arrayOrderDistanceFn(elements)
-    );
+    const elements = createMediaElements('VIDEO', alot);
+    mediaPool = new MediaPool(win, {VIDEO: 2}, arrayOrderDistanceFn(elements));
 
     elements.forEach((element) => mediaPool.register(element));
 
