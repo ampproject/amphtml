@@ -4,22 +4,9 @@ import {Sources} from './sources';
 import {isConnectedNode} from '#core/dom';
 
 /**
- * The name for a boolean property on an element indicating whether that element
- * has already been "blessed".
  * @const {string}
  */
-export const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
-
-/**
- * CSS class names that should not be removed from an element when swapping it
- * into/out of the DOM.
- * @const {!Array<string>}
- */
-const PROTECTED_CSS_CLASS_NAMES = [
-  'i-amphtml-pool-media',
-  'i-amphtml-pool-audio',
-  'i-amphtml-pool-video',
-];
+export const ELEMENT_NAME_PREFIX = 'i-amphtml-pool-';
 
 /**
  * Attribute names that should not be removed from an element when swapping it
@@ -37,7 +24,7 @@ const PROTECTED_ATTRIBUTES = ['id', 'src', 'class', 'autoplay'];
  * @private
  */
 function isProtectedCssClassName(cssClassName) {
-  return PROTECTED_CSS_CLASS_NAMES.indexOf(cssClassName) >= 0;
+  return cssClassName.startsWith(ELEMENT_NAME_PREFIX);
 }
 
 /**

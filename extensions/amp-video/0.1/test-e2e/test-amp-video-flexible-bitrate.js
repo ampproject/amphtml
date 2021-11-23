@@ -144,7 +144,7 @@ describes.endtoend(
         await controller.findElement('amp-story-page#page-3[active]');
 
         const sources = await controller.findElements(
-          '#video3 video.i-amphtml-pool-media source'
+          '#video3 .i-amphtml-pool-video source'
         );
 
         await testElementForSrcAndBitrate(
@@ -177,7 +177,7 @@ describes.endtoend(
         await controller.findElement('amp-story-page#page-6[active]');
 
         const sources = await controller.findElements(
-          '#video6 video.i-amphtml-pool-media source'
+          '#video6 .i-amphtml-pool-video source'
         );
 
         await testElementForSrcAndBitrate(
@@ -227,7 +227,7 @@ describes.endtoend(
         await controller.findElement('amp-story-page#page-4[active]');
 
         const video4El = await controller.findElement(
-          '#video4 video.i-amphtml-pool-media'
+          '#video4 .i-amphtml-pool-video'
         );
 
         await expect(

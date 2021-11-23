@@ -5,7 +5,7 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Deferred} from '#core/data-structures/promise';
 import {LocalizationService} from '#service/localization';
-import {MediaType} from '../media-pool';
+import {MediaPool} from '../media-pool';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
@@ -34,14 +34,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     html = htmlFor(win.document);
 
-    const mediaPoolRoot = {
-      getElement: () => win.document.createElement('div'),
-      getMaxMediaElementCounts: () => ({
-        [MediaType.VIDEO]: 8,
-        [MediaType.AUDIO]: 8,
-      }),
-    };
-
     const localizationService = new LocalizationService(win.document.body);
     env.sandbox
       .stub(Services, 'localizationForDoc')
@@ -58,8 +50,17 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       };
     });
 
+    let pool;
     const story = win.document.createElement('amp-story');
-    story.getImpl = () => Promise.resolve(mediaPoolRoot);
+    story.getImpl = () =>
+      Promise.resolve({
+        get pool() {
+          if (!pool) {
+            pool = new MediaPool(win, {VIDEO: 8, AUDIO: 8});
+          }
+          return pool;
+        },
+      });
     // Makes whenUpgradedToCustomElement() resolve immediately.
     story.createdCallback = Promise.resolve();
 
@@ -180,7 +181,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     page
       .layoutCallback()
-      .then(() => page.mediaPoolPromise_)
+      .then(() => page.getPool_())
       .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('register').withExactArgs(videoEl).once();
@@ -218,7 +219,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     page
       .layoutCallback()
-      .then(() => page.mediaPoolPromise_)
+      .then(() => page.getPool_())
       .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('preload').resolves();
@@ -251,7 +252,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       page.buildCallback();
       page
         .layoutCallback()
-        .then(() => page.mediaPoolPromise_)
+        .then(() => page.getPool_())
         .then(async (mediaPool) => {
           mediaPoolMock = env.sandbox.mock(mediaPool);
           mediaPoolMock.expects('register').withExactArgs(videoEl).once();
@@ -288,7 +289,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   it('should register the background audio on layoutCallback', async () => {
     element.setAttribute('background-audio', 'foo.mp3');
     page.buildCallback();
-    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPool = await page.getPool_();
     const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
     await page.layoutCallback();
 
@@ -316,7 +317,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     ampAudioEl.buildInternal();
     page.buildCallback();
 
-    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPool = await page.getPool_();
     const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
     env.sandbox.stub(mediaPool, 'preload');
 
@@ -337,7 +338,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   it('should preload the background audio on layoutCallback', async () => {
     element.setAttribute('background-audio', 'foo.mp3');
     page.buildCallback();
-    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPool = await page.getPool_();
     const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
     await page.layoutCallback();
 
@@ -367,7 +368,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     gridLayerEl.appendChild(ampVideoEl);
 
     page.buildCallback();
-    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPool = await page.getPool_();
     const mediaPoolRegister = env.sandbox.spy(mediaPool, 'register');
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
@@ -393,7 +394,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     gridLayerEl.appendChild(ampVideoEl);
 
     page.buildCallback();
-    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPool = await page.getPool_();
     const mediaPoolRegister = env.sandbox.spy(mediaPool, 'register');
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
@@ -468,7 +469,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     page
       .layoutCallback()
-      .then(() => page.mediaPoolPromise_)
+      .then(() => page.getPool_())
       .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
@@ -499,7 +500,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     page
       .layoutCallback()
-      .then(() => page.mediaPoolPromise_)
+      .then(() => page.getPool_())
       .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock.expects('mute').withExactArgs(videoEl).once();
@@ -531,7 +532,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     page
       .layoutCallback()
-      .then(() => page.mediaPoolPromise_)
+      .then(() => page.getPool_())
       .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
@@ -611,7 +612,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     gridLayerEl.appendChild(videoEl);
 
     page.buildCallback();
-    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPool = await page.getPool_();
     const mediaPoolPlay = env.sandbox.stub(mediaPool, 'play');
     mediaPoolPlay.returns(Promise.reject());
 

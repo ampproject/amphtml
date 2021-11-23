@@ -259,7 +259,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @public @const {!MediaPool} */
     this.pool = new MediaPool(
       this.win,
-      this.getMaxMediaElementCounts_(),
+      this.getMediaPoolAllocatedCounts_(),
       (element) => this.getElementDistance_(element)
     );
 
@@ -2106,7 +2106,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {!Object<string, number>}
    * @private
    */
-  getMaxMediaElementCounts_() {
+  getMediaPoolAllocatedCounts_() {
     let audioMediaElementsCount = this.element.querySelectorAll(
       'amp-audio, [background-audio]'
     ).length;

@@ -1,6 +1,6 @@
 import {
   BlessTask,
-  ELEMENT_BLESSED_PROPERTY_NAME,
+  ELEMENT_NAME_PREFIX,
   LoadTask,
   MuteTask,
   PauseTask,
@@ -62,20 +62,16 @@ export let DomElementDef;
 export let ElementDistanceFnDef;
 
 /**
- * Represents a task to be executed on a media element.
- * @typedef {function(!PoolBoundElementDef, *): !Promise}
+ * The name for a boolean property on an element indicating whether that element
+ * has already been "blessed".
+ * @const {string}
  */
-let ElementTask_1_0_Def; // eslint-disable-line local/camelcase
+const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
 
 /**
  * @const {string}
  */
 const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-placeholder-media-';
-
-/**
- * @const {string}
- */
-const POOL_ELEMENT_ID_PREFIX = 'i-amphtml-pool-media-';
 
 /**
  * @const {string}
@@ -189,16 +185,15 @@ export class MediaPool {
 
       for (let i = 0; i < count; i++) {
         const mediaEl = this.win_.document.createElement(type);
-        mediaEl.classList.add('i-amphtml-pool-media');
-        mediaEl.classList.add(`i-amphtml-pool-${type.toLowerCase()}`);
-        mediaEl.setAttribute('muted', '');
+        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
+        mediaEl.className = ELEMENT_NAME_PREFIX + type.toLowerCase();
+        mediaEl.id = ELEMENT_NAME_PREFIX + poolIdCounter++;
         mediaEl.muted = true;
+        mediaEl.setAttribute('muted', '');
         if (type === 'VIDEO') {
           mediaEl.setAttribute('playsinline', '');
         }
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
-        mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
-        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.unallocated[type].push(mediaEl);
       }
     }
