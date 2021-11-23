@@ -17,7 +17,17 @@ import {defineElement as defineBentoWordpressEmbed} from '@bentoproject/wordpres
 defineBentoWordpressEmbed();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -50,6 +60,7 @@ defineBentoWordpressEmbed();
   <body>
     <bento-wordpress-embed
       id="my-embed"
+      style="width: 300px; height: 400px"
       data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
     ></bento-wordpress-embed>
     <div class="buttons" style="margin-top: 8px">

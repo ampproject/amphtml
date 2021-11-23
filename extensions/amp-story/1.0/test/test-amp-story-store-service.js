@@ -106,14 +106,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     expect(listenerSpy).to.have.been.calledWith(true);
   });
 
-  it('should toggle the supported browser state', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.SUPPORTED_BROWSER_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(false);
-  });
-
   it('should pause the story when displaying the share menu', () => {
     const pausedListenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);

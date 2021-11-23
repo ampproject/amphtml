@@ -17,7 +17,17 @@ import {defineElement as defineBentoSoundcloud} from '@bentoproject/soundcloud';
 defineBentoSoundcloud();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -48,14 +58,15 @@ defineBentoSoundcloud();
     />
     <style>
       bento-soundcloud {
-        aspect-ratio: 1;
+        width: 300px;
+        height: 300px;
       }
     </style>
   </head>
   <body>
     <bento-soundcloud
       id="my-track"
-      data-trackid="243169232"
+      data-trackid="89299804"
       data-visual="true"
     ></bento-soundcloud>
     <div class="buttons" style="margin-top: 8px">

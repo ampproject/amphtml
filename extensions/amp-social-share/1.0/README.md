@@ -19,7 +19,17 @@ import {defineElement as defineBentoSocialShare} from '@bentoproject/social-shar
 defineBentoSocialShare();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-social-share-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-social-share-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-social-share-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -33,21 +43,15 @@ defineBentoSocialShare();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs"
-    ></script>
-    <script
-      nomodule
-      async
-      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
-    ></script>
     <link
       rel="stylesheet"
       type="text/css"
-      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+      href="https://cdn.ampproject.org/v0/bento-social-share-1.0.css"
     />
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-social-share-1.0.js"
+    ></script>
     <style>
       bento-social-share {
         width: 375px;
@@ -68,13 +72,13 @@ defineBentoSocialShare();
 
     <script>
       (async () => {
-        const button = document.querySelector('#my-share');
+        const socialShare = document.querySelector('#my-share');
         await customElements.whenDefined('bento-social-share');
 
         // set up button actions
         document.querySelector('#change-share').onclick = () => {
-          twitter.setAttribute('type', 'linkedin');
-          twitter.setAttribute('aria-label', 'Share on LinkedIn');
+          socialShare.setAttribute('type', 'linkedin');
+          socialShare.setAttribute('aria-label', 'Share on LinkedIn');
         };
       })();
     </script>

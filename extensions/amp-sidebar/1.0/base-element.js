@@ -94,7 +94,7 @@ BaseElement['shadowCss'] = COMPONENT_CSS;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
-  'side': {attr: 'side', type: 'string'},
+  'side': {attr: 'side'},
 };
 
 /**
