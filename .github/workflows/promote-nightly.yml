@@ -10,7 +10,7 @@ on:
 
 jobs:
   promote-nightly:
-    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml
+    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml@main
     with:
       channel-name: 'Nightly'
       js-file: 'promote-nightly.js'

@@ -11,7 +11,7 @@ on:
 
 jobs:
   promote-lts:
-    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml
+    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml@main
     with:
       channel-name: 'LTS'
       js-file: 'promote-lts.js'

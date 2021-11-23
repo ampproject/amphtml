@@ -9,7 +9,7 @@ on:
 
 jobs:
   promote-stable:
-    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml
+    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml@main
     with:
       channel-name: 'Stable'
       js-file: 'promote-stable.js'
