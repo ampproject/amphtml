@@ -64,11 +64,10 @@ const renderAmpSocialShareSystemElement = () => {
   return (
     <amp-social-share
       type="system"
-      style={{
-        visibility: 'hidden',
-        pointerEvents: 'none',
-        zIndex: -1,
-      }}
+      // TODO(alanorozco): This style attr would be nicer as an object.
+      // We need to enable babel-plugin-jsx-style-object in the testing config
+      // so that we can verify results of style objects.
+      style="visibility:hidden;pointer-events:none;z-index:-1"
     ></amp-social-share>
   );
 };
