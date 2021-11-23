@@ -62,51 +62,13 @@ describes.realWin(
         .true;
     });
 
-    it('should set attribute data-cta-text when ctaButton is null', async () => {
+    it('should set attribute data-cta-text when ctaButtonAnchorEl is null', async () => {
       const i18nString = 'Shop Hootenanny Hat';
       const localizedString = env.sandbox.stub(LocalizationService, 'localize');
       localizedString.returns(i18nString);
       await shoppingAttachment.buildCallback();
       shoppingDataDispatchStoreService();
       expect(element.getAttribute('data-cta-text')).to.equal(i18nString);
-    });
-
-    it('should set text content of cta button to shop for one item when there is only one item', async () => {
-      const i18nString = 'Shop Hootenanny Hat';
-      const localizedString = env.sandbox.stub(LocalizationService, 'localize');
-      localizedString.returns(i18nString);
-      await shoppingAttachment.buildCallback();
-      shoppingDataDispatchStoreService();
-
-      env.sandbox
-        .stub(env.ampdoc.getHeadNode(), 'querySelector')
-        .withArgs('.i-amphtml-story-page-open-attachment-host')
-        .returns(
-          '<div class="i-amphtml-story-page-open-attachment-host" role="button"></div>'
-        );
-
-      env.sandbox.stub(shoppingAttachment, 'mutateElement').callsFake(() => {
-        expect(element.getAttribute('data-cta-text')).to.equal(i18nString);
-      });
-    });
-
-    it('should set text content of cta button to view all products item when there is more than one item', async () => {
-      const i18nString = 'View All Products';
-      const localizedString = env.sandbox.stub(LocalizationService, 'localize');
-      localizedString.returns(i18nString);
-      await shoppingAttachment.buildCallback();
-      shoppingDataDispatchStoreService();
-
-      env.sandbox
-        .stub(env.ampdoc.getHeadNode(), 'querySelector')
-        .withArgs('.i-amphtml-story-page-open-attachment-host')
-        .returns(
-          '<div class="i-amphtml-story-page-open-attachment-host" role="button"></div>'
-        );
-
-      env.sandbox.stub(shoppingAttachment, 'mutateElement').callsFake(() => {
-        expect(element.getAttribute('data-cta-text')).to.equal(i18nString);
-      });
     });
   }
 );

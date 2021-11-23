@@ -1,4 +1,4 @@
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
@@ -14,19 +14,10 @@ import {
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 
-const TAG = 'amp-story-shopping-attachment';
-
 export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {string} */
-    this.myText_ = TAG;
-
-    /** @private {?Element} */
-    this.container_ = null;
-
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
@@ -50,50 +41,45 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
   updateCtaText_(shoppingData) {
     const pageIdElem = this.getPage_();
 
-    const shoppingTags = Array.from(
+    const shoppingTagsPageAttachment = Array.from(
       pageIdElem.getElementsByTagName('amp-story-shopping-tag')
     ).filter((tag) => shoppingData[tag.getAttribute('data-tag-id')]);
 
-    const ctaButton = pageIdElem
+    const ctaButtonAnchorEl = pageIdElem
       .querySelector('.i-amphtml-story-page-open-attachment-host')
       ?.shadowRoot.querySelector('.i-amphtml-story-page-open-attachment');
 
     const i18nString =
-      shoppingTags.length === 1
+      shoppingTagsPageAttachment.length === 1
         ? localize(
             this.element,
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL
           ) +
           ' ' +
-          this.storeService_.get(StateProperty.SHOPPING_DATA)[
-            shoppingTags[0].getAttribute('data-tag-id')
+          shoppingData[
+            shoppingTagsPageAttachment[0].getAttribute('data-tag-id')
           ]['product-title']
         : localize(
             this.element,
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
           );
-
-    if (!ctaButton) {
-      this.element.setAttribute('data-cta-text', i18nString);
-    } else {
-      this.mutateElement(() => {
-        ctaButton.setAttribute('aria-label', i18nString);
-        ctaButton.querySelector(
+    this.mutateElement(() => {
+      // If the CTA button isn't built, set the data-cta-text so text is added when it's built.
+      if (!ctaButtonAnchorEl) {
+        this.element.setAttribute('data-cta-text', i18nString);
+      } else {
+        ctaButtonAnchorEl.setAttribute('aria-label', i18nString);
+        ctaButtonAnchorEl.querySelector(
           '.i-amphtml-story-page-attachment-label'
         ).textContent = i18nString;
-      });
-    }
+      }
+    });
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
-
-    return Promise.resolve(Services.storyStoreServiceForOrNull(this.win)).then(
+    return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
         this.storeService_.subscribe(
