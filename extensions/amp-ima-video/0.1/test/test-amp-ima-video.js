@@ -56,26 +56,6 @@ describes.realWin(
       expect(sourceChildren[1][1]).to.eql({'any-attribute': ''});
     });
 
-    it('creates placeholder image from data-poster attribute', async () => {
-      const element = html`
-        <amp-ima-video
-          data-tag="https://example.com"
-          data-poster="https://example.com/foo.png"
-          width="1"
-          height="1"
-        ></amp-ima-video>
-      `;
-
-      await env.win.document.body.appendChild(element).whenBuilt();
-
-      const img = element.querySelector('img');
-      expect(img).to.not.be.null;
-      expect(img).to.have.attribute('placeholder');
-      expect(img).to.have.class('i-amphtml-fill-content');
-      expect(img.getAttribute('loading')).to.equal('lazy');
-      expect(img.getAttribute('src')).to.equal('https://example.com/foo.png');
-    });
-
     it('sets consent data in context object', async () => {
       const initialConsentState = 'foo_getConsentPolicyState';
       const initialConsentMetadata = {'foo_getConsentMetadata': 'bar'};
@@ -110,6 +90,26 @@ describes.realWin(
         initialConsentMetadata,
         initialConsentValue,
       });
+    });
+
+    it('creates placeholder image from data-poster attribute', async () => {
+      const element = html`
+        <amp-ima-video
+          data-tag="https://example.com"
+          data-poster="https://example.com/foo.png"
+          width="1"
+          height="1"
+        ></amp-ima-video>
+      `;
+
+      await env.win.document.body.appendChild(element).whenBuilt();
+
+      const img = element.querySelector('img');
+      expect(img).to.not.be.null;
+      expect(img).to.have.attribute('placeholder');
+      expect(img).to.have.class('i-amphtml-fill-content');
+      expect(img.getAttribute('loading')).to.equal('lazy');
+      expect(img.getAttribute('src')).to.equal('https://example.com/foo.png');
     });
   }
 );
