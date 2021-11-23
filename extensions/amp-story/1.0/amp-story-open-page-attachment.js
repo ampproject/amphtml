@@ -70,14 +70,25 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
     : renderInlineUi(pageEl, attachmentEl);
   // This ensures `active` is set on first render.
   // Otherwise setState may be called before this.openAttachmentEl_ exists.
-  element.toggleAttribute('active', pageEl.hasAttribute('active'));
+  if (pageEl.hasAttribute('active')) {
+    element.setAttribute('active');
+  }
   return element;
 };
 
+/**
+ * @param {!Element} element
+ * @return {?string}
+ */
 const ctaLabelFromAttr = (element) =>
   // For legacy support of amp-story-page-attachment with a src and cta-text attribute.
   element.getAttribute('cta-text') || element.getAttribute('data-cta-text');
 
+/**
+ * @param {!Element} element
+ * @param {?string=} label
+ * @return {?string}
+ */
 const openLabelOrFallback = (element, label) =>
   label?.trim() ||
   localize(
@@ -110,17 +121,6 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 
   // Set image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
-  const openImg =
-    openImgAttr && openImgAttr !== 'none' ? (
-      <div
-        class="i-amphtml-story-outlink-page-attachment-img"
-        style={{
-          'background-image': 'url(' + openImgAttr + ') !important',
-        }}
-      ></div>
-    ) : (
-      renderOutlinkLinkIconElement()
-    );
 
   const openAttachmentEl = (
     <a
@@ -133,7 +133,14 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
     >
       {renderOutlinkAttachmentArrow()}
       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip">
-        {openImg}
+        {openImgAttr && openImgAttr !== 'none' ? (
+          <div
+            class="i-amphtml-story-outlink-page-attachment-img"
+            style={{backgroundImage: `url(${openImgAttr}) !important`}}
+          ></div>
+        ) : (
+          renderOutlinkLinkIconElement()
+        )}
         <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
       </div>
     </a>
@@ -160,36 +167,33 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
  * @return {!Element}
  */
 const renderInlineUi = (pageEl, attachmentEl) => {
-  const makeImgElWithBG = (openImgAttr) => {
-    if (!openImgAttr) {
-      return null;
+  const makeImgElWithBG = (attr) => {
+    const url = attachmentEl.getAttribute(attr);
+    if (!url) {
+      return;
     }
-    const proxied = maybeMakeProxyUrl(openImgAttr, pageEl.getAmpDoc());
+    const proxied = maybeMakeProxyUrl(url, pageEl.getAmpDoc());
     return (
       <div
         class="i-amphtml-story-inline-page-attachment-img"
-        style={{'background-image': 'url(' + proxied + ') !important'}}
+        style={{backgroundImage: `url(${proxied}) !important`}}
       ></div>
     );
   };
 
-  const theme = attachmentEl.getAttribute('theme');
+  const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
   const openLabel = openLabelOrFallback(ctaLabelFromAttr(attachmentEl));
 
   return (
     <a
       class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
       role="button"
-      theme={
-        AttachmentTheme.DARK === theme?.toLowerCase()
-          ? AttachmentTheme.DARK
-          : null
-      }
+      theme={AttachmentTheme.DARK === theme && theme}
       aria-label={openLabel}
     >
       <div class="i-amphtml-story-inline-page-attachment-chip">
-        {makeImgElWithBG(attachmentEl.getAttribute('cta-image'))}
-        {makeImgElWithBG(attachmentEl.getAttribute('cta-image-2'))}
+        {makeImgElWithBG('cta-image')}
+        {makeImgElWithBG('cta-image-2')}
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
       {openLabel !== 'none' && (
