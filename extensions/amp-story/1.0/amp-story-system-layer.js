@@ -88,10 +88,12 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
 /**
  * @param {!Element} element
+ * @param {?Element=} children
  * @return {!Element}
  */
-const renderSystemLayerElement = (element) => (
+const renderSystemLayerElement = (element, children) => (
   <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
+    {children}
     <a class={String(ATTRIBUTION_CLASS)} target="_blank">
       <div class="i-amphtml-story-attribution-logo-container">
         <img alt="" class="i-amphtml-story-attribution-logo" />
@@ -305,7 +307,10 @@ export class SystemLayer {
       return this.root_;
     }
 
-    this.systemLayerEl_ = renderSystemLayerElement(this.parentEl_);
+    this.systemLayerEl_ = renderSystemLayerElement(
+      this.parentEl_,
+      this.progressBar_.build(initialPageId)
+    );
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
@@ -316,11 +321,6 @@ export class SystemLayer {
       <div class="i-amphtml-system-layer-host"></div>,
       this.systemLayerEl_,
       CSS
-    );
-
-    this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(initialPageId),
-      this.systemLayerEl_.firstChild
     );
 
     this.buttonsContainer_ = this.systemLayerEl_.querySelector(
