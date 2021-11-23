@@ -940,13 +940,10 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(
-          devAssert(this.viewer_),
-          this.storeService_
-        )
-          ? new InfoDialog(this.win, this.element)
-          : null;
-        if (infoDialog) {
+        if (
+          shouldShowStoryUrlInfo(devAssert(this.viewer_), this.storeService_)
+        ) {
+          const infoDialog = new InfoDialog(this.win, this.element);
           infoDialog.build();
         }
       });

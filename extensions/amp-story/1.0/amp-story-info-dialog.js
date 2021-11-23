@@ -41,9 +41,6 @@ export class InfoDialog {
     /** @private {?Element} */
     this.element_ = null;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
@@ -118,14 +115,6 @@ export class InfoDialog {
         this.parentEl_.appendChild(root);
       })
     );
-  }
-
-  /**
-   * Whether the element has been built.
-   * @return {boolean}
-   */
-  isBuilt() {
-    return this.isBuilt_;
   }
 
   /**
