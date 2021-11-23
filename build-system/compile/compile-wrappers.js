@@ -1,4 +1,3 @@
-const latestVersions = require('./bundles.legacy-latest-versions');
 const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
@@ -61,14 +60,12 @@ function extensionPayload(name, version, isModule, loadPriority) {
   }
   // Use a numeric value instead of boolean. "m" stands for "module"
   const m = isModule ? 1 : 0;
-  const latest = latestVersions[name] === version;
   return (
     '{' +
     `m:${m},` +
     `v:"${VERSION}",` +
     `n:"${name}",` +
     `ev:"${version}",` +
-    `l:${latest},` +
     priority +
     `f:(function(AMP,_){<%= contents %>})` +
     '}'
