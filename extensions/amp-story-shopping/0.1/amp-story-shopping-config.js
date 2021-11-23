@@ -35,7 +35,6 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       productIDtoProduct[item['product-tag-id']] = item;
     }
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
-
     //TODO(#36412): Add call to validate config here.
   }
 
