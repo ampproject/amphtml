@@ -28,8 +28,16 @@ export class PlatformStore {
    * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
+   * @param {} opt_externalOnEntitlementResolvedCallbacks
    */
-  constructor(platformKeys, scoreConfig, fallbackEntitlement, opt_Platforms) {
+  constructor(
+    platformKeys,
+    scoreConfig,
+    fallbackEntitlement,
+    opt_Platforms,
+    opt_externalOnEntitlementResolvedCallbacks
+  ) {
+    console.log('constructing platform store!');
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = opt_Platforms || dict();
 
@@ -50,6 +58,12 @@ export class PlatformStore {
 
     /** @private @const {!Observable<!EntitlementChangeEventDef>} */
     this.onEntitlementResolvedCallbacks_ = new Observable();
+
+    /** @private @const {!Observable<!EntitlementChangeEventDef>} */
+    this.externalOnEntitlementResolvedCallbacks_ =
+      opt_externalOnEntitlementResolvedCallbacks
+        ? opt_externalOnEntitlementResolvedCallbacks
+        : new Observable();
 
     /** @private @const {!Observable<{platformKey: string}>} */
     this.onPlatformResolvedCallbacks_ = new Observable();
@@ -100,12 +114,14 @@ export class PlatformStore {
     }
 
     // Then create new platform store with the newly reset platforms in it.
-    return new PlatformStore(
+    const store = new PlatformStore(
       this.platformKeys_,
       this.scoreConfig_,
       this.fallbackEntitlement_,
-      this.subscriptionPlatforms_
+      this.subscriptionPlatforms_,
+      this.externalOnEntitlementResolvedCallbacks_
     );
+    return store;
   }
 
   /**
@@ -190,7 +206,17 @@ export class PlatformStore {
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
+    console.log('adding callbacks for onchange in platform store: ' + callback);
     this.onEntitlementResolvedCallbacks_.add(callback);
+  }
+
+  /**
+   * This registers a callback which is called whenever a platform key is resolved
+   * with an entitlement.
+   * @param {function(!EntitlementChangeEventDef):void} callback
+   */
+  addOnEntitlementResolvedCallback(callback) {
+    this.externalOnEntitlementResolvedCallbacks_.add(callback);
   }
 
   /**
@@ -199,6 +225,7 @@ export class PlatformStore {
    * @param {!./entitlement.Entitlement} entitlement
    */
   resolveEntitlement(platformKey, entitlement) {
+    console.log('resolving entitlement');
     if (entitlement) {
       entitlement.service = platformKey;
     }
@@ -218,7 +245,15 @@ export class PlatformStore {
     if (entitlement.granted) {
       this.saveGrantEntitlement_(entitlement);
     }
+    console.log(
+      'calling resolved callbacks! number of callback: ' +
+        this.onEntitlementResolvedCallbacks_.getHandlerCount()
+    );
     this.onEntitlementResolvedCallbacks_.fire({
+      platformKey,
+      entitlement,
+    });
+    this.externalOnEntitlementResolvedCallbacks_.fire({
       platformKey,
       entitlement,
     });
@@ -305,6 +340,9 @@ export class PlatformStore {
    */
   getGrantStatus() {
     if (this.grantStatusPromise_ !== null) {
+      this.grantStatusPromise_.promise.then((s) =>
+        console.log('getGrantStatus is: ' + s)
+      );
       return this.grantStatusPromise_.promise;
     }
 
@@ -325,6 +363,7 @@ export class PlatformStore {
     } else {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange((e) => {
+        console.log('executing one entilement callback!');
         const {entitlement} = e;
         if (entitlement.granted) {
           this.grantStatusPromise_.resolve(true);
@@ -577,6 +616,9 @@ export class PlatformStore {
       }
       return platform2.weight - platform1.weight;
     });
+    console.log(
+      'winning platform is: ' + platformWeights[0].platform.getPlatformKey
+    );
     return platformWeights[0].platform;
   }
 

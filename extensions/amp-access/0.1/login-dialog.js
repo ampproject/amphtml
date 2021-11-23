@@ -219,7 +219,7 @@ export class WebLoginDialog {
     this.dialogReadyPromise_ = null;
     if (typeof this.urlOrPromise == 'string') {
       const loginUrl = buildLoginUrl(this.urlOrPromise, returnUrl);
-      dev().fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
+      dev().warn(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
       this.dialog_ = openWindowDialog(this.win, loginUrl, '_blank', options);
       if (this.dialog_) {
         this.dialogReadyPromise_ = Promise.resolve();
@@ -275,14 +275,14 @@ export class WebLoginDialog {
     }, 500);
 
     this.messageUnlisten_ = listen(this.win, 'message', (e) => {
-      dev().fine(TAG, 'MESSAGE:', e);
+      dev().warn(TAG, 'MESSAGE:', e);
       if (e.origin != returnOrigin) {
         return;
       }
       if (!getData(e) || getData(e)['sentinel'] != 'amp') {
         return;
       }
-      dev().fine(TAG, 'Received message from dialog: ', getData(e));
+      dev().warn(TAG, 'Received message from dialog: ', getData(e));
       if (getData(e)['type'] == 'result') {
         if (this.dialog_) {
           this.dialog_./*OK*/ postMessage(
@@ -307,7 +307,7 @@ export class WebLoginDialog {
     if (!this.resolve_) {
       return;
     }
-    dev().fine(TAG, 'Login done: ', result, opt_error);
+    dev().warn(TAG, 'Login done: ', result, opt_error);
     if (opt_error) {
       this.reject_(opt_error);
     } else {
@@ -323,8 +323,8 @@ export class WebLoginDialog {
   getReturnUrl_() {
     const currentUrl = this.viewer.getResolvedViewerUrl();
     let returnUrl;
-    if (getMode().localDev) {
-      const loc = this.win.location;
+    const loc = this.win.location;
+    if (getMode().localDev && loc.host !== 'localhost:8000') {
       returnUrl =
         loc.protocol +
         '//' +
@@ -333,6 +333,7 @@ export class WebLoginDialog {
     } else {
       returnUrl = `${urls.cdn}/v0/amp-login-done-0.1.html`;
     }
+    console.log('return url: ' + returnUrl);
     return returnUrl + '?url=' + encodeURIComponent(currentUrl);
   }
 }

@@ -872,6 +872,7 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   stop(canResume = false) {
+    console.log('stop in time based advancement');
     super.stop();
 
     if (this.timeoutId_ !== null) {

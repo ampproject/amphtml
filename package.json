@@ -123,6 +123,7 @@
     "fetch-mock": "9.11.0",
     "formidable": "1.2.2",
     "fs-extra": "10.0.0",
+    "gulp": "4.0.2",
     "gulp-connect": "5.7.0",
     "html-minifier": "4.0.0",
     "ignore": "5.1.8",

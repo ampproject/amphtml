@@ -162,6 +162,9 @@ export class SubscriptionService {
 
       isStoryDocument(this.ampdoc_).then((isStory) => {
         // Delegates the platform selection and activation call if is story.
+        if (isStory) {
+          console.log('is story document so dont activate platform');
+        }
         this.startAuthorizationFlow_(!isStory /** shouldActivatePlatform */);
       });
     });
@@ -382,6 +385,20 @@ export class SubscriptionService {
   }
 
   /**
+   * @param {!./entitlement.Entitlement} entitlement
+   */
+  resolveEntitlement(entitlement) {
+    this.platformStore_.resolveEntitlement('local', entitlement);
+    this.platformConfig_['services'][0]['authorizationUrl'] =
+      '//localhost:8000/subscription/1/entitlements';
+    /** @type {!Array} */ (this.platformConfig_['services']).forEach(
+      (service) => {
+        this.initializeLocalPlatforms_(service);
+      }
+    );
+  }
+
+  /**
    * @param {string} platformKey
    * @param {!./entitlement.Entitlement} entitlement
    * @private
@@ -452,6 +469,12 @@ export class SubscriptionService {
           entitlement =
             entitlement ||
             Entitlement.empty(subscriptionPlatform.getPlatformKey());
+          console.log(
+            'platform: ' +
+              subscriptionPlatform.getPlatformKey() +
+              ' fetched entitlement: ' +
+              entitlement.granted
+          );
           this.resolveEntitlementsToStore_(
             subscriptionPlatform.getPlatformKey(),
             entitlement
@@ -632,6 +655,29 @@ export class SubscriptionService {
     if (shouldActivatePlatform) {
       this.selectAndActivatePlatform_();
     }
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  selectAndActivatePlatform() {
+    this.selectAndActivatePlatform_();
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   */
+  getGrantStatus() {
+    return this.platformStore_.getGrantStatus();
+  }
+
+  /**
+   * This registers a callback which is called whenever a platform key is resolved
+   * with an entitlement.
+   * @param {function(!EntitlementChangeEventDef):void} callback
+   */
+  addOnEntitlementResolvedCallback(callback) {
+    this.platformStore_.addOnEntitlementResolvedCallback(callback);
   }
 
   /**

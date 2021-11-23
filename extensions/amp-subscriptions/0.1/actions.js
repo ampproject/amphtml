@@ -80,6 +80,7 @@ export class Actions {
       'Action URL is not ready: %s',
       action
     );
+    console.log('before executing action: ' + action);
     return this.execute_(url, action);
   }
 
@@ -100,16 +101,17 @@ export class Actions {
       return this.actionPromise_;
     }
 
-    dev().fine(TAG, 'Start action: ', url, action);
+    dev().warn(TAG, 'Start action: ', url, action);
 
     this.analytics_.actionEvent(LOCAL, action, ActionStatus.STARTED);
     const dialogPromise = this.openPopup_(url);
     const actionPromise = dialogPromise
       .then((result) => {
-        dev().fine(TAG, 'Action completed: ', action, result);
+        dev().warn(TAG, 'Action completed: ', action, result);
         this.actionPromise_ = null;
         const query = parseQueryString(result);
         const s = query['success'];
+        console.log('login success: ' + s);
         const success = s == 'true' || s == 'yes' || s == '1';
         if (success) {
           this.analytics_.actionEvent(LOCAL, action, ActionStatus.SUCCESS);

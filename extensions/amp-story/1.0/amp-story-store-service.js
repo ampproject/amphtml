@@ -81,6 +81,7 @@ export let InteractiveReactData;
  *    canShowSystemLayerButtons: boolean,
  *    viewerCustomControls: !Array<!Object>,
  *    accessState: boolean,
+ *    subscriptionState: boolean,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
@@ -132,6 +133,7 @@ export const StateProperty = {
 
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
+  SUBSCRIPTION_STATE: 'subscriptionState', // amp-subscriptions paywall.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
@@ -183,6 +185,7 @@ export const Action = {
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
+  TOGGLE_SUBSCRIPTION: 'toggleSubscription',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
@@ -286,6 +289,21 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.ACCESS_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    // Triggers the amp-subscriptions paywall
+    case Action.TOGGLE_SUBSCRIPTION:
+      console.log(
+        'received toggle subscrition action in store service: ' + data
+      );
+      // Don't change the PAUSED_STATE if SUBSCRIPTION_STATE is not changed.
+      if (state[StateProperty.SUBSCRIPTION_STATE] === data) {
+        return state;
+      }
+
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTION_STATE]: !!data,
+        // [StateProperty.PAUSED_STATE]: !!data,
       });
     case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({
@@ -548,6 +566,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
       [StateProperty.ACCESS_STATE]: false,
+      [StateProperty.SUBSCRIPTION_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.EDUCATION_STATE]: false,

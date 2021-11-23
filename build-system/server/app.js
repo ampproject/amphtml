@@ -1227,6 +1227,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   // Create entitlements response.
   const source = 'local' + req.params.id;
   const granted = req.params.id > 0;
+  console.log('local entitlement granted: ' + granted);
   const grantReason = granted ? 'SUBSCRIBER' : 'NOT_SUBSCRIBER';
   const decryptedDocumentKey = decryptDocumentKey(req.query.crypt);
   const response = {
@@ -1262,6 +1263,44 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   }
 
   res.json(response);
+});
+
+/**
+ * @param {string} returnUrl
+ * @return {string}
+ */
+function cleanupReturnUrl(returnUrl) {
+  if (!returnUrl) {
+    returnUrl = '/';
+  }
+  // Make sure we do not introduce a universal unbound redirector.
+  if (
+    !returnUrl.startsWith('/') &&
+    !returnUrl.startsWith('https://cdn.ampproject.org') &&
+    !returnUrl.startsWith('https://scenic-2017.appspot.com') &&
+    !returnUrl.startsWith('http://localhost:') &&
+    !returnUrl.startsWith('https://localhost:')
+  ) {
+    returnUrl = '/';
+  }
+  return returnUrl;
+}
+
+const googleSignInClientId =
+  process.env.GSI_CLIENT_ID ||
+  '520465458218-e9vp957krfk2r0i4ejeh6aklqm7c25p4.apps.googleusercontent.com';
+
+/**
+ * Signin page. Format:
+ * /signin?return=RETURN_URL
+ */
+app.use('/subscriptions/login', (req, res) => {
+  const returnUrl = cleanupReturnUrl(req.query['return'] || null);
+  res.render('../paywall-login', {
+    'type_signin': true,
+    'returnUrl': returnUrl,
+    googleSignInClientId,
+  });
 });
 
 // Simulate a publisher's SKU map API.

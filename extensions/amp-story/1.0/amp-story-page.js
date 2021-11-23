@@ -1413,6 +1413,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    */
   next(isAutomaticAdvance = false) {
+    console.log('next in amp-story-page!');
     const pageId = this.getNextPageId(isAutomaticAdvance);
 
     if (!pageId) {

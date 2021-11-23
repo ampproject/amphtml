@@ -35,6 +35,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+// import {AmpStorySubscription} from './amp-story-subscription';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -198,6 +199,12 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
+    /** @private @const {} */
+    this.subscriptionService_ = null;
+
+    /** @private @const {} */
+    this.granted_ = true;
+
     // Check if story is RTL.
     if (isRTL(this.win.document)) {
       this.storeService_.dispatch(Action.TOGGLE_RTL, true);
@@ -265,8 +272,14 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} */
     this.areAccessAuthorizationsCompleted_ = false;
 
+    /** @private {boolean} */
+    this.areSubscriptionsAuthorizationsCompleted_ = false;
+
     /** @private */
     this.navigateToPageAfterAccess_ = null;
+
+    /** @private */
+    this.navigateToPageAfterSubscriptionsAreGranted_ = null;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -333,6 +346,15 @@ export class AmpStory extends AMP.BaseElement {
       .registerLocalizedStringBundle('vi', LocalizedStringsVi)
       .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
       .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
+
+    Services.subscriptionsServiceForDoc(this.element).then(
+      (subscriptionService) => {
+        this.subscriptionService_ = subscriptionService;
+        this.subscriptionService_.getGrantStatus().then((granted) => {
+          this.granted_ = granted;
+        });
+      }
+    );
 
     const enXaPseudoLocaleBundle = createPseudoLocale(
       LocalizedStringsEn,
@@ -1372,6 +1394,43 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    if (this.subscriptionService_) {
+      this.subscriptionService_.getGrantStatus().then((granted) => {
+        this.granted_ = granted;
+      });
+    }
+    console.log('granted: ' + this.granted_);
+    if (
+      !this.granted_ &&
+      targetPage.element.hasAttribute('subscriptions-section') &&
+      targetPage.element.getAttribute('subscriptions-section') == 'content' &&
+      !this.areSubscriptionsAuthorizationsCompleted_
+    ) {
+      if (this.navigateToPageAfterSubscriptionsAreGranted_) {
+        console.log('next page available and the page is locked!');
+        return Promise.resolve();
+      }
+      console.log('next page has subscription-section with content');
+      this.navigateToPageAfterSubscriptionsAreGranted_ = targetPage;
+      this.subscriptionService_.selectAndActivatePlatform();
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, true);
+      this.subscriptionService_.addOnEntitlementResolvedCallback(() => {
+        console.log(
+          'subscriptionService onChange callbacks is called to toggle!'
+        );
+        this.areSubscriptionsAuthorizationsCompleted_ = true;
+        this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
+        this.switchTo_(
+          this.navigateToPageAfterSubscriptionsAreGranted_.element.id,
+          NavigationDirection.NEXT
+        );
+        this.navigateToPageAfterSubscriptionsAreGranted_ = null;
+      });
+      return Promise.resolve();
+    }
+
+    console.log('should only execute this when content not blocked!');
+
     // If the next page is paywall protected, display the access UI and wait for
     // the document to be reauthorized.
     if (targetPage.element.hasAttribute('amp-access-hide')) {
@@ -1379,6 +1438,12 @@ export class AmpStory extends AMP.BaseElement {
       this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
     }
+
+    // if (this.win.document.body.hasAttribute('i-amphtml-subs-grant-no')) {
+    //   console.log('next page is grant no');
+    //   this.navigateToPageAfterSubscriptionsAreGranted_ = targetPage;
+    //   return Promise.resolve();
+    // }
 
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
@@ -2548,5 +2613,6 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
   AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment); // Shares codepath with amp-story-page-attachment.
+  // AMP.registerElement('amp-story-subscription', AmpStorySubscription);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

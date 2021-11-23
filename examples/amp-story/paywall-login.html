@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>The Scenic</title>
+    <link rel="canonical" href="index.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Playfair+Display"
+      type="text/css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Muli"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="/styles.css" type="text/css" />
+    <link rel="icon" type="image/png" href="/icons/icon-2x.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-2x.png" />
+    <meta name="msapplication-TileImage" content="/icons/icon-2x.png" />
+    <meta name="msapplication-TileColor" content="#37dc8c" />
+
+    <!-- GSI dependencies -->
+    <meta
+      name="google-signin-client_id"
+      content="<% googleSignInClientId %>"
+    />
+
+    <style>
+      .container {
+        font-size: 16px;
+        line-height: 1.4em;
+      }
+      h2 {
+        margin-bottom: 16px;
+      }
+      input {
+        border: 1px solid #ddd;
+        border-radius: 3px;
+      }
+      .input-container {
+        display: flex;
+        flex-direction: row;
+        padding: 5px;
+        height: 35px;
+        max-width: 300px;
+      }
+      .input-container span {
+        flex: 1;
+      }
+      .input-container input,
+      .input-container .input {
+        flex: 2;
+      }
+      section {
+        margin: 16px 0;
+      }
+
+      .g_signin_custom {
+        cursor: pointer;
+        display: inline-block;
+        background: white;
+        color: #444;
+        width: 190px;
+        height: 42px;
+        border-radius: 5px;
+        border: thin solid rgba(0, 0, 0, 0.3px);
+        box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
+      }
+      .g_signin_custom span.label {
+        font-family: serif;
+        font-weight: normal;
+      }
+      .g_signin_custom span.icon {
+        background: url('https://google-developers.appspot.com/identity/sign-in/g-normal.png')
+          transparent 5px 50% no-repeat;
+        display: inline-block;
+        vertical-align: middle;
+        width: 42px;
+        height: 42px;
+      }
+      .g_signin_custom span.buttonText {
+        display: inline-block;
+        vertical-align: middle;
+        padding-left: 42px;
+        padding-right: 42px;
+        font-size: 14px;
+        font-weight: bold;
+        /* Use the Roboto font that is loaded in the <head> */
+        font-family: 'Roboto', sans-serif;
+      }
+    </style>
+
+    <script>
+      function gapiLoad() {
+        gapi.load('auth2', function () {
+          auth2 = gapi.auth2.init({
+            client_id:
+              '<% googleSignInClientId %>',
+            scope: 'profile email',
+          });
+        });
+      }
+
+      function signInWithGoogle() {
+        gapi.auth2.getAuthInstance().signIn().then(onSignIn);
+      }
+
+      function renderGoogleSignIn() {
+        console.log('RENDER: ', gapi.signin2);
+        gapi.auth2.render('g_signin', {
+          'scope': 'profile email',
+          'width': 240,
+          'height': 50,
+          'longtitle': true,
+          'theme': 'light',
+          'onsuccess': onSignIn,
+        });
+      }
+
+      function onSignIn(googleUser) {
+        var form = document.getElementById('loginForm');
+        var idTokenInput = document.getElementById('id_token');
+        idTokenInput.value = googleUser.getAuthResponse().id_token;
+
+        // Save the AMP reader ID, if it's present.
+        var ampReaderId = location.search.match(/rid=([^&]+)/);
+        if (ampReaderId) {
+          var ridInput = document.getElementById('rid');
+          ridInput.value = ampReaderId[1];
+        }
+
+        form.submit();
+      }
+    </script>
+
+    <script
+      src="https://apis.google.com/js/platform.js?onload=gapiLoad"
+      async
+      defer
+    ></script>
+  </head>
+  <body>
+    <div class="main-body">
+      <header>
+        <a class="brand-header" href="/">
+          <div class="brand-logo"></div>
+          <div class="brand-name">The Scenic</div>
+        </a>
+      </header>
+      <main role="main">
+        <div class="container">
+          <%#type_signin%>
+          <h2>Sign-in to Scenic</h2>
+          <%/type_signin%> <%#type_subscribe%>
+          <h2>Subscribe to Scenic</h2>
+          <div>First, create your account:</div>
+          <%/type_subscribe%>
+
+          <section>
+            Use your username/password:
+            <form id="loginForm" action="./signin" method="post">
+              <input type="hidden" name="returnUrl" value="<% returnUrl %>" />
+              <input type="hidden" id="id_token" name="id_token" value="" />
+              <input type="hidden" id="rid" name="rid" value="" />
+              <div class="input-container">
+                <span>Email:</span>
+                <input name="email" type="email" required />
+              </div>
+              <div class="input-container">
+                <span>Password:</span>
+                <input name="password" type="password" required />
+              </div>
+              <div class="input-container">
+                <span></span>
+                <input type="submit" value="Submit" />
+              </div>
+            </form>
+          </section>
+
+          <section>
+            Or sign in with:
+            <div class="input-container">
+              <span></span>
+              <div
+                id="g_signin"
+                class="g_signin_custom"
+                onclick="signInWithGoogle()"
+                aria-role="button"
+              >
+                <span class="icon"></span>
+                <span class="buttonText">Google</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

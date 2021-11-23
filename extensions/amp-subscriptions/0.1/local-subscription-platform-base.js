@@ -155,10 +155,12 @@ export class LocalSubscriptionBasePlatform {
 
   /** @override */
   activate(entitlement) {
+    console.log('activate in local sub base: ' + entitlement);
     // Note all platforms are resolved at this stage
     // Get the factor states of each platform and
     // add them to the renderState object
     this.createRenderState_(entitlement).then((renderState) => {
+      console.log('done create render state: ' + renderState);
       this.renderer_.render(renderState);
     });
   }

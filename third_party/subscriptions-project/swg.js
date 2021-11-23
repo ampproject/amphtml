@@ -9416,6 +9416,7 @@ class Dialog {
    * @param {!DialogConfig=} dialogConfig Configuration options for the dialog.
    */
   constructor(doc, importantStyles = {}, styles = {}, dialogConfig = {}) {
+    console.log('creating swg dialog!');
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
@@ -11607,6 +11608,7 @@ class EntitlementsManager {
         return serviceUrl(url);
       })
       .then((url) => {
+        console.log('final SwG backend URL in amp-story-subscriptions: ' + url);
         this.deps_
           .eventManager()
           .logSwgEvent(AnalyticsEvent.ACTION_GET_ENTITLEMENTS, false);

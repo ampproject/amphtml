@@ -7,6 +7,7 @@ export class Dialog {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    console.log('creating amp-subscription dialog!');
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -78,12 +79,30 @@ export class Dialog {
   }
 
   /**
+   * @param {!Element} content
+   */
+  setContent(content) {
+    console.log('set content: ' + content.outerHTML);
+    if (this.content_) {
+      this.wrapper_.replaceChild(content, this.content_);
+    } else {
+      this.wrapper_.appendChild(content);
+    }
+    this.content_ = content;
+    console.log(
+      'after set content the subscription dialog becomes: ' +
+        this.wrapper_.outerHTML
+    );
+  }
+
+  /**
    * Opens the dialog with the specified content.
    * @param {!Element} content
    * @param {boolean=} showCloseAction
    * @return {!Promise}
    */
   open(content, showCloseAction = true) {
+    console.log('open dialog');
     return this.action_(() => this.open_(content, showCloseAction));
   }
 
@@ -92,6 +111,7 @@ export class Dialog {
    * @return {!Promise}
    */
   close() {
+    console.log('close dialog');
     return this.action_(() => this.close_());
   }
 
@@ -112,12 +132,15 @@ export class Dialog {
    * @private
    */
   open_(content, showCloseAction = true) {
-    if (this.content_) {
-      this.wrapper_.replaceChild(content, this.content_);
-    } else {
-      this.wrapper_.appendChild(content);
+    if (content) {
+      if (this.content_) {
+        this.wrapper_.replaceChild(content, this.content_);
+      } else {
+        this.wrapper_.appendChild(content);
+      }
+      this.content_ = content;
     }
-    this.content_ = content;
+
     if (this.visible_) {
       return Promise.resolve();
     }

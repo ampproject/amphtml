@@ -64,6 +64,7 @@ export class LocalSubscriptionPlatformRenderer {
    * @return {!Promise<boolean>}
    */
   renderDialog_(authResponse) {
+    console.log('inside render dialog: ' + authResponse);
     // Make sure the document is fully parsed.
     return this.ampdoc_
       .whenReady()
@@ -74,8 +75,11 @@ export class LocalSubscriptionPlatformRenderer {
           .querySelectorAll('[subscriptions-dialog][subscriptions-display]');
         for (let i = 0; i < candidates.length; i++) {
           const candidate = candidates[i];
+          console.log('candidate: ' + candidate);
           const expr = candidate.getAttribute('subscriptions-display');
+          console.log('subscription dialog display: ' + expr);
           if (expr && evaluateExpr(expr, authResponse)) {
+            console.log('found matched dialog candidate!');
             return candidate;
           }
         }
