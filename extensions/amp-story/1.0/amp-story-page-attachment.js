@@ -11,7 +11,6 @@ import {dev} from '#utils/log';
 import {getHistoryState} from '#core/window/history';
 import {localize} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
-import {htmlRefs} from '#core/dom/static-template';
 import {
   allowlistFormActions,
   setupResponseAttributeElements,
@@ -230,8 +229,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       >
         {image}
         <span class="i-amphtml-story-page-attachment-remote-title">
-          <span ref="openStringEl"></span>
-          <span ref="urlStringEl"></span>
+          <span>
+            {localize(
+              this.element,
+              LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
+            )}
+          </span>
+          <span>{hrefAttr}</span>
         </span>
         <svg
           class="i-amphtml-story-page-attachment-remote-icon"
@@ -261,16 +265,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Consider whether we can use `noopener` and/or `noreferrer` so that we
     // can inline the attribute, and avoid the warning.
     link.setAttribute('href', hrefAttr);
-
-    const {openStringEl, urlStringEl} = htmlRefs(link);
-
-    // Set url prevew text.
-    const localizedOpenString = localize(
-      this.element,
-      LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
-    );
-    openStringEl.textContent = localizedOpenString;
-    urlStringEl.textContent = hrefAttr;
 
     this.contentEl.appendChild(link);
   }
