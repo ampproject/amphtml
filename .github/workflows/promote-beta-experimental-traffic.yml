@@ -9,7 +9,7 @@ on:
 
 jobs:
   promote-beta-experimental-opt-in:
-    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml@main
+    uses: ampproject/amphtml/.github/workflows/promote-reusable-workflow.yml@main
     with:
       channel-name: 'Beta/Experimental 1% traffic'
       js-file: 'promote-beta-experimental-traffic.js'
