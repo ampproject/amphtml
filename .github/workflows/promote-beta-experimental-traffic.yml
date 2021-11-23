@@ -1,6 +1,6 @@
 # Promotes the current Beta/Experimental opt-in channel to Beta/Experimental traffic on a schedule.
 
-name: Promote Beta/Experimental traffic Channels
+name: Promote Beta/Experimental 1% traffic Channels
 
 on:
   schedule:
@@ -11,7 +11,7 @@ jobs:
   promote-beta-experimental-traffic:
     environment: release_tagger
     if: github.repository == 'ampproject/amphtml'
-    name: Promote Beta/Experimental traffic Channel
+    name: Promote Beta/Experimental 1% traffic Channel
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: ⭐ Promote Beta/Experimental traffic Channel ⭐
+      - name: ⭐ Promote Beta/Experimental 1% traffic Channel ⭐
         run: node --unhandled-rejections=strict build-system/release-workflows/promote-beta-experimental-traffic.js
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
