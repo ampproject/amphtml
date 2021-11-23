@@ -7,16 +7,51 @@ import {
 import {AmpStoryPageAttachment} from 'extensions/amp-story/1.0/amp-story-page-attachment';
 import * as Preact from '#core/dom/jsx';
 
-const TAG = 'amp-story-shopping-attachment';
-
 const PdpTemplate = ({productData, children}) => {
   return (
     <div>
-      <div>PDP template</div>
-      <div>{productData.name}</div>
-      <div>${productData.price}</div>
-      <br />
+      <div class="amp-story-shopping-attachment-outer">
+        <div class="medium-12px">{productData.brand}</div>
+        <div class="flex-between">
+          <div class="bold-20px">{productData['product-title']}</div>
+          <div class="medium-16px">${productData.price}</div>
+        </div>
+        <div class="regular-12px">4.7 (240 reviews)</div>
+        <div class="buy-now-cta">Buy Now</div>
+      </div>
+      <div class="carousel-wrapper">
+        <amp-img
+          alt="A view of the sea"
+          src="/examples/visual-tests/amp-story/img/shopping/mini-speaker-hero-1.png"
+          width="492"
+          height="612"
+          layout="responsive"
+        ></amp-img>
+        {/* <amp-carousel
+        width="450"
+        height="300"
+        layout="responsive"
+        type="slides"
+        role="region"
+        aria-label="Basic carousel"
+      >
+        <amp-img
+          src="/examples/visual-tests/amp-story/img/shopping/mini-speaker-hero-1.png"
+          width="450"
+          height="300"
+        ></amp-img>
+        <amp-img
+          src="/examples/visual-tests/amp-story/img/shopping/mini-speaker-hero-2.png"
+          width="450"
+          height="300"
+        ></amp-img>
+      </amp-carousel> */}
+      </div>
+      <div class="details">
+        <span class="amp-story-shopping-attachment-header-2">Details</span>
+      </div>
       {children}
+      <div class="spacer"></div>
     </div>
   );
 };
@@ -24,7 +59,9 @@ const PdpTemplate = ({productData, children}) => {
 const PlpTemplate = ({products, cb}) => {
   return (
     <div class="amp-story-shopping-attachment-outer">
-      <div class="amp-story-shopping-attachment-header">Also in this story</div>
+      <div class="amp-story-shopping-attachment-header-2">
+        Also in this story
+      </div>
       <div class="amp-story-shopping-attachment-cards">
         {products.map((productData) => (
           <div
@@ -37,8 +74,8 @@ const PlpTemplate = ({products, cb}) => {
               src={productData.img}
             ></img>
             <div class="brand">{productData.brand}</div>
-            <div class="name">{productData.name}</div>
-            <div class="price">${productData.price}</div>
+            <div class="name">{productData['product-title']}</div>
+            <div class="medium-12px">${productData.price}</div>
           </div>
         ))}
       </div>
@@ -70,7 +107,6 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
   /** @override */
   open(shouldAnimate) {
     const data = this.storeService_.get(StateProperty.SHOPPING_STATE);
-    // this.templateWrapper_.innerHTML = '';
 
     const productsOnPage = Array.from(this.shoppingTags_).map((tag) => {
       return data[tag.dataset.tagId];
@@ -93,14 +129,13 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
           }
         >
           {plpTemplate}
-        </PdpTemplate>,
-        this.templateWrapper_.childNodes
+        </PdpTemplate>
       );
     } else {
-      this.templateWrapper_.replaceChildren(
-        plpTemplate,
-        this.templateWrapper_.childNodes
-      );
+      // this.templateWrapper_.innerHTML = '';
+      // this.templateWrapper_.appendChild(plpTemplate);
+
+      this.templateWrapper_.replaceChildren(plpTemplate);
     }
 
     super.open(shouldAnimate);

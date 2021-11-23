@@ -1,15 +1,16 @@
 amp-story-shopping-attachment {
   font-family: 'Poppins', sans-serif !important;
-  font-weight: 700 !important;
 }
 
 .amp-story-shopping-attachment-outer {
-  padding: 0 16px 16px 16px;
+  padding: 0 16px 0px;
 }
 
-.amp-story-shopping-attachment-header {
+.amp-story-shopping-attachment-header-2 {
+  font-weight: 600; /* semi bold */
   font-size: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 17px;
+  margin-top: 13px;
 }
 
 .amp-story-shopping-attachment-cards {
@@ -19,6 +20,7 @@ amp-story-shopping-attachment {
 }
 
 .amp-story-shopping-attachment-card {
+  cursor: pointer;
   width: calc(50% - 8px);
   margin-bottom: 36px;
 }
@@ -29,15 +31,88 @@ amp-story-shopping-attachment {
 }
 
 .brand {
+  margin-bottom: 4px;
+  line-height: 12px;
   font-size: 10px;
-  font-weight: 700 !important;
+  font-weight: 500 !important; /* medium */
 }
 
 .name {
+  margin-bottom: 4px;
+  line-height: 16px;
   font-size: 14px;
+  font-weight: 600; /* semi bold */
 }
 
-.price {
+.regular-12px {
+  font-weight: 400 !important; /* regular */
   font-size: 12px;
-  /* font-weight: 700 !important; */
+  line-height: 20px;
 }
+
+.medium-12px {
+  font-weight: 500 !important; /* medium */
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.medium-16px {
+  font-weight: 500 !important; /* medium */
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.bold-20px {
+  font-weight: 700 !important; /* medium */
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.flex-between {
+  margin-top: 1px;
+  margin-bottom: 7px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.buy-now-cta {
+  cursor: pointer;
+  margin-top: 10px;
+  padding: 0px 14px;
+  display: inline-flex;
+  align-items: center;
+  background: black;
+  color: white;
+  height: 36px;
+  border-radius: 18px;
+  font-weight: 500 !important; /* medium */
+  font-size: 14px;
+  position: relative;
+  margin-bottom: 21px;
+}
+
+.buy-now-cta:after {
+  display: inline-block;
+  margin-left: 10px;
+  content: '';
+  width: 12.5px;
+  height: 12.5px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.917 1.917v8.166h8.166V6h1.167v4.083a1.17 1.17 0 0 1-1.167 1.167H1.917A1.166 1.166 0 0 1 .75 10.083V1.917C.75 1.275 1.27.75 1.917.75H6v1.167H1.917Zm5.25 0V.75h4.083v4.083h-1.167V2.74L4.35 8.473l-.822-.822L9.26 1.917H7.167Z" fill="#fff"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.carousel-wrapper {
+  margin: 0px 14px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.details {
+  padding: 0px 14px;
+  border-bottom: 8px solid rgba(0,0,0,.03);
+  padding-bottom: 20px;
+}
+
