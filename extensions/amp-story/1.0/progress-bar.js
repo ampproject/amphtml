@@ -141,6 +141,7 @@ export class ProgressBar {
       <ol aria-hidden="true" class="i-amphtml-story-progress-bar"></ol>
     );
     this.root_ = root;
+
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
     });
@@ -148,7 +149,10 @@ export class ProgressBar {
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
       (pageIds) => {
-        this.clear_();
+        const attached = !!root.parentElement;
+        if (attached) {
+          this.clear_();
+        }
 
         this.segmentsAddedPromise_ = this.mutator_.mutateElement(root, () => {
           /** @type {!Array} */ (pageIds).forEach((id) => {
@@ -158,11 +162,13 @@ export class ProgressBar {
           });
         });
 
-        this.updateProgress(
-          this.activeSegmentId_,
-          this.activeSegmentProgress_,
-          true /** updateAllSegments */
-        );
+        if (attached) {
+          this.updateProgress(
+            this.activeSegmentId_,
+            this.activeSegmentProgress_,
+            true /** updateAllSegments */
+          );
+        }
       },
       true /** callToInitialize */
     );

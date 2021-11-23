@@ -112,6 +112,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
 
   const openLabel = openLabelOrFallback(
+    pageEl,
     anchorChild?.textContent || ctaLabelFromAttr(attachmentEl)
   );
 
@@ -178,7 +179,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   };
 
   const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
-  const openLabel = openLabelOrFallback(ctaLabelFromAttr(attachmentEl));
+  const openLabel = openLabelOrFallback(pageEl, ctaLabelFromAttr(attachmentEl));
 
   return (
     <a
