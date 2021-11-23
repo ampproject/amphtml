@@ -44,19 +44,15 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
 
   /**
    * Updates the CTA based on the shopping data.
+   * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  updateCtaText_() {
+  updateCtaText_(shoppingData) {
     const pageIdElem = this.getPage_();
 
     const shoppingTags = Array.from(
       pageIdElem.getElementsByTagName('amp-story-shopping-tag')
-    ).filter(
-      (tag) =>
-        this.storeService_.get(StateProperty.SHOPPING_DATA)[
-          tag.getAttribute('data-tag-id')
-        ]
-    );
+    ).filter((tag) => shoppingData[tag.getAttribute('data-tag-id')]);
 
     const ctaButton = pageIdElem
       .querySelector('.i-amphtml-story-page-open-attachment-host')
@@ -78,15 +74,15 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
           );
 
     if (!ctaButton) {
-      return;
+      this.element.setAttribute('data-cta-text', i18nString);
+    } else {
+      this.mutateElement(() => {
+        ctaButton.setAttribute('aria-label', i18nString);
+        ctaButton.querySelector(
+          '.i-amphtml-story-page-attachment-label'
+        ).textContent = i18nString;
+      });
     }
-
-    this.mutateElement(() => {
-      ctaButton.setAttribute('aria-label', i18nString);
-      ctaButton.querySelector(
-        '.i-amphtml-story-page-attachment-label'
-      ).textContent = i18nString;
-    });
   }
 
   /** @override */
@@ -100,10 +96,12 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
     return Promise.resolve(Services.storyStoreServiceForOrNull(this.win)).then(
       (storeService) => {
         this.storeService_ = storeService;
-        this.updateCtaText_();
-        this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
-          this.updateCtaText_();
-        });
+        this.storeService_.subscribe(
+          StateProperty.SHOPPING_DATA,
+          (shoppingData) => {
+            this.updateCtaText_(shoppingData);
+          }
+        );
       }
     );
   }
