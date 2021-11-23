@@ -23,10 +23,7 @@ describes.realWin(
         };
       });
       env.sandbox.stub(win.history, 'replaceState');
-      await createAmpStoryShoppingImpl();
-    });
 
-    async function createAmpStoryShoppingImpl() {
       const story = win.document.createElement('amp-story');
       win.document.body.appendChild(story);
       const pageEl = win.document.createElement('amp-story-page');
@@ -35,7 +32,7 @@ describes.realWin(
       pageEl.appendChild(shoppingEl);
       story.appendChild(pageEl);
       shoppingImpl = await shoppingEl.getImpl();
-    }
+    });
 
     it('should build shopping attachment component', () => {
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
