@@ -10,6 +10,9 @@
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style amp-custom>
       #tag-1 {
         left: 7%;
@@ -18,11 +21,34 @@
       #tag-2 {
         top: 28%;
         left: 43%;
-      }  
+      }
       #tag-3 {
         top: 33%;
         left: 85%;
-      }            
+      }
+      .big-text {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 100%;
+        letter-spacing: -1px;
+      }
+      .small-text {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 130%;
+        letter-spacing: -0.7px;
+        margin-top: 14px;
+      }
+      .text-wrap {
+        top: 50%;
+        position: relative;
+        margin: 22px;
+        border-top: 5px solid black;
+        padding-top: 18px;
+        margin-top: 53px;
+      }
     </style>
   </head>
   <body>
@@ -66,11 +92,19 @@
         <amp-story-grid-layer template="fill">
           <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
         </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="text-wrap">
+              <div class='big-text'>Best for budget: The Nest family</div>
+              <div class='small-text'>The best range of options for any budget buyer is the Nest family, get a full dynamic range and pair.</div>
+            </div>
+          </div>
+        </amp-story-grid-layer>   
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag id="tag-1" data-tag-id="product-1"></amp-story-shopping-tag>
           <amp-story-shopping-tag id="tag-2" data-tag-id="product-2"></amp-story-shopping-tag>
           <amp-story-shopping-tag id="tag-3" data-tag-id="product-10"></amp-story-shopping-tag>
-        </amp-story-grid-layer>
+        </amp-story-grid-layer>             
         <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
       </amp-story-page>
 
