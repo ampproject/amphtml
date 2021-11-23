@@ -69,6 +69,15 @@ export class InfoDialog {
 
     const {canonicalUrl} = Services.documentInfoForDoc(this.parentEl_);
 
+    const linkElement = (
+      <a class="i-amphtml-story-info-moreinfo" target="_blank">
+        {localize(
+          this.parentEl_,
+          LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
+        )}
+      </a>
+    );
+
     this.element_ = (
       <div
         class="i-amphtml-story-info-dialog i-amphtml-story-system-reset"
@@ -90,28 +99,20 @@ export class InfoDialog {
               canonicalUrl.replace(/([/.]+)/gi, '$1\u200B')
             }
           </a>
-          <a class="i-amphtml-story-info-moreinfo" target="_blank">
-            {localize(
-              this.parentEl_,
-              LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
-            )}
-          </a>
+          {linkElement}
         </div>
       </div>
     );
 
-    const root = createShadowRootWithStyle(<div />, this.element_, CSS);
     this.initializeListeners_();
 
     return this.requestMoreInfoLink_().then((moreInfoUrl) =>
       this.mutator_.mutateElement(this.parentEl_, () => {
         if (moreInfoUrl) {
-          const linkElement = devAssert(
-            this.element_.querySelector('.i-amphtml-story-info-moreinfo')
-          );
           linkElement.classList.add(MOREINFO_VISIBLE_CLASS);
           linkElement.setAttribute('href', moreInfoUrl);
         }
+        const root = createShadowRootWithStyle(<div />, this.element_, CSS);
         this.parentEl_.appendChild(root);
       })
     );
