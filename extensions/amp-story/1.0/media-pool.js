@@ -101,17 +101,17 @@ export const REPLACED_MEDIA_PROPERTY_NAME = 'replaced-media';
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
-   * @param {!Object<!MediaType, number>} maxCounts The maximum amount of each
-   *     media element that can be allocated by the pool.
-   * @param {!ElementDistanceFnDef} distanceFn A function that, given an
-   *     element, returns a numerical distance representing how far the specified
-   *     element is from the user's current position in the document.  The
-   *     absolute magnitude of this number is irrelevant; the relative magnitude
-   *     is used to determine which media elements should be evicted (elements
-   *     furthest from the user's current position in the document are evicted
-   *     from the MediaPool first).
+   * @param {!Object<!MediaType, number>} counts
+   *     Amount of elements to allocate per media type.
+   * @param {!ElementDistanceFnDef} distanceFn
+   *     A function that returns a numerical distance representing how far a
+   *     given element is from the user's current position in the document.
+   *     The absolute magnitude of this number is irrelevant; the relative
+   *     magnitude is used to determine which media elements should be evicted
+   *     (elements furthest from the user's current position in the document are
+   *     evicted from the MediaPool first).
    */
-  constructor(win, maxCounts, distanceFn) {
+  constructor(win, counts, distanceFn) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -168,7 +168,7 @@ export class MediaPool {
     /** @private {?Array<!AmpElement>} */
     this.ampElementsToBless_ = null;
 
-    this.initializeMediaPool_(maxCounts);
+    this.initializeMediaPool_(counts);
   }
 
   /**
@@ -176,14 +176,13 @@ export class MediaPool {
    * each of the types of media elements.  We need to create these eagerly so
    * that all media elements exist by the time that blessAll() is invoked,
    * thereby "blessing" all media elements for playback without user gesture.
-   * @param {!Object<string, number>} maxCounts The maximum amount of each
-   *     media element that can be allocated by the pool.
+   * @param {!Object<!MediaType, number>} counts
    * @private
    */
-  initializeMediaPool_(maxCounts) {
+  initializeMediaPool_(counts) {
     let poolIdCounter = 0;
-    for (const type in maxCounts) {
-      const count = maxCounts[type];
+    for (const type in counts) {
+      const count = counts[type];
 
       this.allocated[type] = [];
       this.unallocated[type] = [];
