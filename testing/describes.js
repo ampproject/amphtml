@@ -758,7 +758,6 @@ class AmpFixture {
           env.extensions.registerExtension(
             extensionId,
             extensionVersion,
-            /* latest */ false,
             installer,
             win.AMP
           );
@@ -781,13 +780,11 @@ class AmpFixture {
      * Installs the specified extension.
      * @param {string} extensionId
      * @param {string=} version
-     * @param {boolean=} latest
      * @param {boolean=} auto
      */
     env.installExtension = function (
       extensionId,
       version = '0.1',
-      latest = false,
       auto = true
     ) {
       const installer = extensionsBuffer[`${extensionId}:${version}`];
@@ -803,7 +800,6 @@ class AmpFixture {
       env.extensions.registerExtension(
         extensionId,
         version,
-        latest,
         installer,
         win.AMP
       );

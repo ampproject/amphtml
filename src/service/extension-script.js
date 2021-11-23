@@ -4,7 +4,6 @@ import {urls} from '../config';
 import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
-const LATEST_VERSION = 'latest';
 
 /**
  * Calculate the base url for any scripts.
@@ -150,7 +149,6 @@ export function createExtensionScript(win, extensionId, version) {
  * @param {!Window} win
  * @param {string} extensionId
  * @param {string} version
- * @param {boolean} latest
  * @param {boolean=} includeInserted If true, includes script elements that
  *   are inserted by the runtime dynamically. Default is true.
  * @return {!Array<!Element>}
@@ -159,7 +157,6 @@ export function getExtensionScripts(
   win,
   extensionId,
   version,
-  latest,
   includeInserted = true
 ) {
   // Always ignore <script> elements that have a mismatched RTV.
@@ -185,8 +182,7 @@ export function getExtensionScripts(
     if (
       scriptExtensionId == extensionId &&
       (isIntermediateExtension(extensionId) ||
-        scriptExtensionVersion == version ||
-        (scriptExtensionVersion == LATEST_VERSION && latest))
+        scriptExtensionVersion == version)
     ) {
       filtered.push(match);
     }

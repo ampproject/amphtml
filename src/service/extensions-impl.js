@@ -24,7 +24,6 @@ import {installStylesForDoc} from '../style-installer';
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
 const DEFAULT_VERSION = '0.1';
-const LATEST_VERSION = 'latest';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LOADER_PROP = '__AMP_EXT_LDR';
 const SCRIPT_LOADED_PROP = '__AMP_SCR_LOADED';
@@ -62,7 +61,6 @@ let ExtensionDef;
  *
  * @typedef {{
  *   version: string,
- *   latest: boolean,
  *   extension: !ExtensionDef,
  *   auto: boolean,
  *   docFactories: !Array<function(!./ampdoc-impl.AmpDoc)>,
@@ -109,9 +107,6 @@ export class Extensions {
 
     /** @private {?string} */
     this.currentExtensionVersion_ = null;
-
-    /** @private {?boolean} */
-    this.currentExtensionLatest_ = null;
   }
 
   /**
@@ -121,15 +116,11 @@ export class Extensions {
    * script itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} extensionId
    * @param {string} version
-   * @param {boolean} latest
    * @param {function(!Object, !Object)} factory
    * @param {!Object} arg
    * @restricted
    */
-  registerExtension(extensionId, version, latest, factory, arg) {
-    const latestHolder = latest
-      ? this.extensions_[extensionKey(extensionId, LATEST_VERSION)]
-      : null;
+  registerExtension(extensionId, version, factory, arg) {
     const holder = this.getExtensionHolder_(
       extensionId,
       version,
@@ -138,9 +129,8 @@ export class Extensions {
       // then this registration should not auto-install either. If the numeric
       // version was independently added to the document, then it's auto-install
       // will be preserved.
-      latestHolder?.auto ?? true
+      true
     );
-    holder.latest = latest;
 
     if (holder.loaded) {
       // This extension has already been registered. This could be a
@@ -149,16 +139,9 @@ export class Extensions {
       return;
     }
 
-    // Replace the "latest": both numerical and "latest" will be pointing to
-    // the same record.
-    if (latest) {
-      this.extensions_[extensionKey(extensionId, LATEST_VERSION)] = holder;
-    }
-
     try {
       this.currentExtensionId_ = extensionId;
       this.currentExtensionVersion_ = version;
-      this.currentExtensionLatest_ = latest;
       factory(arg, arg['_']);
       if (getMode(this.win).localDev || getMode(this.win).test) {
         if (Object.freeze) {
@@ -169,16 +152,13 @@ export class Extensions {
       }
       holder.loaded = true;
       holder.resolve?.(holder.extension);
-      latestHolder?.resolve?.(holder.extension);
     } catch (e) {
       holder.error = e;
       holder.reject?.(e);
-      latestHolder?.reject?.(e);
       throw e;
     } finally {
       this.currentExtensionId_ = null;
       this.currentExtensionVersion_ = null;
-      this.currentExtensionLatest_ = null;
     }
   }
 
@@ -249,16 +229,14 @@ export class Extensions {
    * Reloads the new version of the extension.
    * @param {string} extensionId
    * @param {string} version
-   * @param {boolean} latest
    * @return {!Promise<!ExtensionDef>}
    */
-  reloadExtension(extensionId, version, latest) {
+  reloadExtension(extensionId, version) {
     // Ignore inserted script elements to prevent recursion.
     const els = getExtensionScripts(
       this.win,
       extensionId,
       version,
-      latest,
       /* includeInserted */ false
     );
     // The previously awaited extension loader must not have finished or
@@ -278,16 +256,10 @@ export class Extensions {
    * @param {!Window} win
    * @param {string} extensionId
    * @param {string=} version
-   * @param {boolean=} latest
    * @return {!Promise}
    */
-  importUnwrapped(win, extensionId, version = DEFAULT_VERSION, latest = true) {
-    const scriptsInHead = getExtensionScripts(
-      win,
-      extensionId,
-      version,
-      latest
-    );
+  importUnwrapped(win, extensionId, version = DEFAULT_VERSION) {
+    const scriptsInHead = getExtensionScripts(win, extensionId, version);
     let scriptElement = scriptsInHead.length > 0 ? scriptsInHead[0] : null;
     let promise;
     if (scriptElement) {
@@ -434,14 +406,9 @@ export class Extensions {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
       const version = dev().assertString(this.currentExtensionVersion_);
-      const latest = this.currentExtensionLatest_ || false;
       // Note that this won't trigger for FIE extensions that are not present
       // in the parent doc.
-      if (
-        ampdoc.declaresExtension(extensionId, version) ||
-        (latest && ampdoc.declaresExtension(extensionId, LATEST_VERSION)) ||
-        holder.auto
-      ) {
+      if (ampdoc.declaresExtension(extensionId, version) || holder.auto) {
         factory(ampdoc);
       }
     }
@@ -532,9 +499,6 @@ export class Extensions {
       });
       holder = /** @type {ExtensionHolderDef} */ ({
         version,
-        // Usually a version starts "unknown" and the latest becomes known
-        // when it has been loaded.
-        latest: version == LATEST_VERSION,
         extension,
         auto: opt_auto || false,
         docFactories: [],
@@ -621,12 +585,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptsInHead = getExtensionScripts(
-        this.win,
-        extensionId,
-        version,
-        holder.latest
-      );
+      const scriptsInHead = getExtensionScripts(this.win, extensionId, version);
       holder.scriptPresent = scriptsInHead.length > 0;
     }
     return !holder.scriptPresent;
