@@ -2107,16 +2107,13 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getMediaPoolAllocatedCounts_() {
-    let audioMediaElementsCount = this.element.querySelectorAll(
-      'amp-audio, [background-audio]'
-    ).length;
+    const audioMediaElementsCount =
+      this.element.querySelectorAll('amp-audio, [background-audio]').length +
+      // The root element (amp-story) might have a background-audio as well.
+      Number(this.element.hasAttribute('background-audio'));
+
     const videoMediaElementsCount =
       this.element.querySelectorAll('amp-video').length;
-
-    // The root element (amp-story) might have a background-audio as well.
-    if (this.element.hasAttribute('background-audio')) {
-      audioMediaElementsCount++;
-    }
 
     return {
       [MediaType.AUDIO]: Math.min(
