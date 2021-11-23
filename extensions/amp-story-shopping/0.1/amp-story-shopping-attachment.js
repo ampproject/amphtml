@@ -22,7 +22,7 @@ const PdpTemplate = ({productData, children}) => {
       <div class="carousel-wrapper">
         <amp-img
           alt="A view of the sea"
-          src="/examples/visual-tests/amp-story/img/shopping/mini-speaker-hero-1.png"
+          src={productData.img}
           width="492"
           height="612"
           layout="responsive"
