@@ -40,7 +40,8 @@ describes.realWin(
         </amp-ima-video>
       `;
 
-      await env.win.document.body.appendChild(element).whenBuilt();
+      env.win.document.body.appendChild(element);
+      await element.whenBuilt();
 
       element.layoutCallback();
 
@@ -79,7 +80,8 @@ describes.realWin(
         ></amp-ima-video>
       `;
 
-      await env.win.document.body.appendChild(element).whenBuilt();
+      env.win.document.body.appendChild(element);
+      await element.whenBuilt();
 
       element.layoutCallback();
 
@@ -102,7 +104,8 @@ describes.realWin(
         ></amp-ima-video>
       `;
 
-      await env.win.document.body.appendChild(element).whenBuilt();
+      env.win.document.body.appendChild(element);
+      await element.whenBuilt();
 
       const img = element.querySelector('img');
       expect(img).to.not.be.null;
