@@ -1,6 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
-import {LoadingSpinner} from './loading-spinner';
+import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {localize} from './amp-story-localization-service';
@@ -26,12 +26,7 @@ let FormElementChildrenDef;
  * @const {Object<string, (function(Element):!FormElementChildrenDef|function():!FormElementChildrenDef)>}
  */
 const createStatusChildrenByAttribute = {
-  'submitting': () => {
-    const loadingSpinner = new LoadingSpinner();
-    const element = loadingSpinner.build();
-    loadingSpinner.toggle(true /* isActive */);
-    return element;
-  },
+  'submitting': () => toggleLoadingSpinner(renderLoadingSpinner(), true),
 
   'submit-success': (formEl) =>
     createFormResultChildren(

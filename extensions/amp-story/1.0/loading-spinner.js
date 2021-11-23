@@ -4,7 +4,7 @@ import * as Preact from '#core/dom/jsx';
 const SPINNER_ACTIVE_ATTRIBUTE = 'active';
 
 /** @return {!Element} */
-const renderSpinnerElement = () => (
+export const renderLoadingSpinner = () => (
   <div class="i-amphtml-story-spinner" aria-hidden="true">
     <div class="i-amphtml-story-spinner-container">
       <div class="i-amphtml-story-spinner-layer">
@@ -16,41 +16,19 @@ const renderSpinnerElement = () => (
 );
 
 /**
- * Loading spinner UI element.
+ * @param {Element} element
+ * @param {boolean} isActive
+ * @return {Element}
  */
-export class LoadingSpinner {
-  /**
-   */
-  constructor() {
-    /** @public {?Element} */
-    this.root_ = null;
-
-    /** @private {boolean} */
-    this.isActive_ = false;
-  }
-
-  /**
-   * @return {!Element}
-   */
-  build() {
-    if (!this.root_) {
-      this.root_ = renderSpinnerElement();
-    }
-    return this.root_;
-  }
-
-  /** @param {boolean} isActive */
-  toggle(isActive) {
-    if (isActive === this.isActive_) {
-      return;
-    }
+export function toggleLoadingSpinner(element, isActive) {
+  if (isActive !== element.hasAttribute(SPINNER_ACTIVE_ATTRIBUTE)) {
     if (isActive) {
-      this.root_.setAttribute(SPINNER_ACTIVE_ATTRIBUTE, '');
-      this.root_.setAttribute('aria-hidden', 'false');
+      element.setAttribute(SPINNER_ACTIVE_ATTRIBUTE, '');
+      element.setAttribute('aria-hidden', 'false');
     } else {
-      this.root_.removeAttribute(SPINNER_ACTIVE_ATTRIBUTE);
-      this.root_.setAttribute('aria-hidden', 'true');
+      element.removeAttribute(SPINNER_ACTIVE_ATTRIBUTE);
+      element.setAttribute('aria-hidden', 'true');
     }
-    this.isActive_ = isActive;
   }
+  return element;
 }

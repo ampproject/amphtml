@@ -26,7 +26,7 @@ import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {EventType, dispatch} from './events';
 import {Layout_Enum} from '#core/dom/layout';
-import {LoadingSpinner} from './loading-spinner';
+import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {MediaPool} from './media-pool';
 import {Services} from '#service';
@@ -38,7 +38,7 @@ import {
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
-import {debounce} from '#core/types/function';
+import {debounce, once} from '#core/types/function';
 import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
@@ -177,8 +177,13 @@ export class AmpStoryPage extends AMP.BaseElement {
       100
     );
 
-    /** @private {?LoadingSpinner} */
-    this.loadingSpinner_ = null;
+    /**
+     * @return {!Element}
+     * @private
+     */
+    this.getLoadingSpinner_ = once(() =>
+      this.buildAndAppendVideoLoadingSpinner_()
+    );
 
     /** @private {?Element} */
     this.playMessageEl_ = null;
@@ -1458,13 +1463,13 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Element}
    * @private
    */
   buildAndAppendVideoLoadingSpinner_() {
-    this.loadingSpinner_ = new LoadingSpinner();
-    const loadingSpinnerEl = this.loadingSpinner_.build();
-    loadingSpinnerEl.setAttribute('aria-label', 'Loading video');
-    this.element.appendChild(loadingSpinnerEl);
+    const loadingSpinner = renderLoadingSpinner();
+    loadingSpinner.setAttribute('aria-label', 'Loading video');
+    return this.element.appendChild(loadingSpinner);
   }
 
   /**
@@ -1477,11 +1482,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   toggleLoadingSpinner_(isActive) {
     this.mutateElement(() => {
-      if (!this.loadingSpinner_) {
-        this.buildAndAppendVideoLoadingSpinner_();
-      }
-
-      this.loadingSpinner_.toggle(isActive);
+      toggleLoadingSpinner(this.getLoadingSpinner_(), isActive);
     });
   }
 
