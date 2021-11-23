@@ -106,16 +106,20 @@ export class InfoDialog {
 
     this.initializeListeners_();
 
-    return this.requestMoreInfoLink_().then((moreInfoUrl) =>
+    return Promise.all([
       this.mutator_.mutateElement(this.parentEl_, () => {
-        if (moreInfoUrl) {
-          linkElement.classList.add(MOREINFO_VISIBLE_CLASS);
-          linkElement.setAttribute('href', moreInfoUrl);
-        }
         const root = createShadowRootWithStyle(<div />, this.element_, CSS);
         this.parentEl_.appendChild(root);
-      })
-    );
+      }),
+      this.requestMoreInfoLink_().then((moreInfoUrl) => {
+        if (moreInfoUrl) {
+          return this.mutator_.mutateElement(this.parentEl_, () => {
+            linkElement.classList.add(MOREINFO_VISIBLE_CLASS);
+            linkElement.setAttribute('href', moreInfoUrl);
+          });
+        }
+      }),
+    ]);
   }
 
   /**
