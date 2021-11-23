@@ -24,6 +24,7 @@ import {isEnumValue} from '#core/types';
 
 /** @const @enum {string} */
 export const MediaType = {
+  // Values should only correspond to tagnames in uppercase.
   AUDIO: 'AUDIO',
   VIDEO: 'VIDEO',
 };
