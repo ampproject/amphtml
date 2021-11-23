@@ -7,17 +7,6 @@ import {toArray} from '#core/types/array';
 import {TimestampDef} from '#core/types/date';
 
 /**
- * Media status.
- * @enum
- */
-const Status = {
-  ERRORED: 0,
-  PAUSED: 1,
-  PLAYING: 2,
-  WAITING: 3,
-};
-
-/**
  * Cache serving status.
  * @enum
  */
@@ -29,13 +18,12 @@ const CacheState = {
 
 /**
  * @typedef {{
- *   playing: !TimestampDef,
- *   waiting: !TimestampDef,
+ *   status: string,
+ *   at: !TimestampDef,
  *   jointLatency: number,
  *   rebuffers: number,
  *   rebufferTime: number,
  *   watchTime: number,
- *   status: number,
  * }}
  */
 let MediaEntryDef;
@@ -171,9 +159,8 @@ export class MediaPerformanceTracker {
   listen_(media) {
     const started = Date.now();
     const mediaEntry = {
-      status: Status.PAUSED,
-      playing: 0,
-      waiting: 0,
+      status: 'pause',
+      at: 0,
       jointLatency: 0,
       rebuffers: 0,
       rebufferTime: 0,
@@ -183,7 +170,7 @@ export class MediaPerformanceTracker {
     let errorCode;
     const onError = () => {
       errorCode = (media.error && media.error.code) || 0;
-      mediaEntry.status = Status.ERRORED;
+      mediaEntry.status = 'error';
     };
 
     // Checks if the media already errored (eg: could have failed the source
@@ -198,24 +185,54 @@ export class MediaPerformanceTracker {
     // If the media element has no `src`, it will try to load the sources in
     // document order. If the last source errors, then the media element
     // loading errored.
-    let errorTarget = media;
-    if (!media.hasAttribute('src')) {
-      errorTarget =
-        lastChildElement(media, (child) => child.tagName === 'SOURCE') || media;
-    }
+    const errorTarget =
+      (media.hasAttribute('src') &&
+        lastChildElement(media, (child) => child.tagName === 'SOURCE')) ||
+      media;
+
+    const maybeAddWatchTime = (previousStatus) => {
+      if (previousStatus === 'playing') {
+        mediaEntry.watchTime += Date.now() - mediaEntry.at;
+      }
+    };
+
+    const maybeAddRebuffer = (previousStatus) => {
+      if (previousStatus === 'waiting') {
+        const rebufferTime = Date.now() - mediaEntry.at;
+        if (rebufferTime > REBUFFER_THRESHOLD_MS) {
+          mediaEntry.rebuffers++;
+          mediaEntry.rebufferTime += rebufferTime;
+        }
+      }
+    };
+
+    const onPlaying = (previousStatus) => {
+      if (!mediaEntry.jointLatency) {
+        mediaEntry.jointLatency = Date.now() - started;
+      }
+      maybeAddRebuffer(previousStatus);
+    };
+
+    const listenMediaStatus = (type, fn) =>
+      listen(media, type, () => {
+        fn(mediaEntry.status);
+        mediaEntry.status = type;
+        mediaEntry.at = Date.now();
+      });
 
     const unlisteners = [
-      listen(media, 'ended', () => updateOnPauseOrEnded(mediaEntry)),
-      listen(media, 'pause', () => updateOnPauseOrEnded(mediaEntry)),
-      listen(media, 'playing', () => updateOnPlaying(mediaEntry, started)),
-      listen(media, 'waiting', () => updateOnWaiting(mediaEntry)),
+      listenMediaStatus('ended', maybeAddWatchTime),
+      listenMediaStatus('pause', maybeAddWatchTime),
+      listenMediaStatus('playing', onPlaying),
+      listenMediaStatus('waiting', maybeAddWatchTime),
       listen(errorTarget, 'error', onError),
     ];
 
     const stop = (sendMetrics) => {
       unlisteners.forEach((unlisten) => unlisten());
-      maybeAddWatchTime(mediaEntry);
-      maybeAddRebuffer(mediaEntry);
+      const {status} = mediaEntry;
+      maybeAddWatchTime(status);
+      maybeAddRebuffer(status);
       if (sendMetrics) {
         this.sendMetrics_(media, mediaEntry, started, errorCode);
       }
@@ -223,61 +240,6 @@ export class MediaPerformanceTracker {
 
     return stop;
   }
-}
-
-/**
- * Increments the watch time with the duration from the last `playing` event.
- * @param {!MediaEntryDef} mediaEntry
- */
-function maybeAddWatchTime(mediaEntry) {
-  if (mediaEntry.status === Status.PLAYING) {
-    mediaEntry.watchTime += Date.now() - mediaEntry.playing;
-  }
-}
-
-/**
- * Increments the rebuffer time with the duration from the last `waiting`
- * event, and increments the rebuffers count.
- * @param {!MediaEntryDef} mediaEntry
- */
-function maybeAddRebuffer(mediaEntry) {
-  if (mediaEntry.status === Status.WAITING) {
-    const rebufferTime = Date.now() - mediaEntry.waiting;
-    if (rebufferTime > REBUFFER_THRESHOLD_MS) {
-      mediaEntry.rebuffers++;
-      mediaEntry.rebufferTime += rebufferTime;
-    }
-  }
-}
-
-/**
- * @param {!MediaEntry} mediaEntry
- */
-function updateOnPauseOrEnded(mediaEntry) {
-  maybeAddWatchTime(mediaEntry);
-  mediaEntry.status = Status.PAUSED;
-}
-
-/**
- * @param {!MediaEntryDef} mediaEntry
- * @param {!TimestampDef} started
- */
-function updateOnPlaying(mediaEntry, started) {
-  if (!mediaEntry.jointLatency) {
-    mediaEntry.jointLatency = Date.now() - started;
-  }
-  maybeAddRebuffer(mediaEntry);
-  mediaEntry.playing = Date.now();
-  mediaEntry.status = Status.PLAYING;
-}
-
-/**
- * @param {!MediaEntryDef} mediaEntry
- */
-function updateOnWaiting(mediaEntry) {
-  maybeAddWatchTime(mediaEntry);
-  mediaEntry.waiting = Date.now();
-  mediaEntry.status = Status.WAITING;
 }
 
 /**
