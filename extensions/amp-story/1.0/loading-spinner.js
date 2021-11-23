@@ -1,8 +1,5 @@
 import * as Preact from '#core/dom/jsx';
 
-/** @const {string} */
-const SPINNER_ACTIVE_ATTRIBUTE = 'active';
-
 /** @return {!Element} */
 export const renderLoadingSpinner = () => (
   <div class="i-amphtml-story-spinner" aria-hidden="true">
@@ -21,13 +18,12 @@ export const renderLoadingSpinner = () => (
  * @return {Element}
  */
 export function toggleLoadingSpinner(element, isActive) {
-  if (isActive !== element.hasAttribute(SPINNER_ACTIVE_ATTRIBUTE)) {
+  if (isActive !== element.hasAttribute('active')) {
+    element.setAttribute('aria-hidden', String(!isActive));
     if (isActive) {
-      element.setAttribute(SPINNER_ACTIVE_ATTRIBUTE, '');
-      element.setAttribute('aria-hidden', 'false');
+      element.setAttribute('active', '');
     } else {
-      element.removeAttribute(SPINNER_ACTIVE_ATTRIBUTE);
-      element.setAttribute('aria-hidden', 'true');
+      element.removeAttribute('active');
     }
   }
   return element;
