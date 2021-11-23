@@ -15,7 +15,7 @@ import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
-import {dev, devAssert} from '#utils/log';
+import {dev} from '#utils/log';
 import {localize} from './amp-story-localization-service';
 
 /** @const {string} Class to toggle the info dialog. */

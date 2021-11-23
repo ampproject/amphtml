@@ -1,5 +1,4 @@
 import * as Preact from '#core/dom/jsx';
-import {dev} from '#utils/log';
 
 /** @const {string} */
 const SPINNER_ACTIVE_ATTRIBUTE = 'active';
