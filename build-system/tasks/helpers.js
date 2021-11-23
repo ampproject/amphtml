@@ -542,7 +542,7 @@ function readNameCache() {
     return nameCache;
   }
   try {
-    nameCache = JSON.parse(fs.readFileSync(terserMangleConfig, 'utf8'));
+    nameCache = fs.readJsonSync(terserMangleConfig, 'utf8');
   } catch {
     nameCache = {};
   }
@@ -558,34 +558,36 @@ function initializeMangleCache() {
   const names = getStdout(
     `git grep --only-matching -hI '\\b[a-zA-Z0-9_]\\+_\\b'`
   ).split('\n');
+
   /** @type {!Object<string, number>} */
   const frequency = names.reduce((freq, name) => {
+    // Terser escapes names with a leading `$`, which also helpfully prevents
+    // prototype collisions.
     const escaped = '$' + name;
     freq[escaped] ||= 0;
     freq[escaped]++;
     return freq;
   }, {});
-  const freqs = Object.entries(frequency).sort((a, b) => {
+
+  // Sort them so that more common names appear first.
+  const sorted = Object.entries(frequency).sort((a, b) => {
     if (b[1] - a[1] !== 0) {
       return b[1] - a[1];
     }
     return a[0].localeCompare(b[0]);
   });
+
+  // Now generate a our name -> mangled name mapping.
   const props = Object.fromEntries(
-    freqs.map(([key], i) => {
+    sorted.map(([key], i) => {
       return [key, mangleIdentifier.get(i)];
     })
   );
-  fs.writeFileSync(
+
+  fs.outputFileSync(
     terserMangleConfig,
-    JSON.stringify(
-      {
-        // Yes, this looks redundant, but terser really does use 2 props objects.
-        props: {props},
-      },
-      null,
-      2
-    )
+    // Yes, this looks redundant, but terser really does use 2 props objects.
+    JSON.stringify({props: {props}}, null, 2)
   );
 }
 
