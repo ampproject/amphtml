@@ -212,7 +212,7 @@ export class ShareWidget {
 
     if (!copyTextToClipboard(this.win, url)) {
       const failureString = localize(
-        this.storyEl,
+        this.storyEl_,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl_, devAssert(failureString));
@@ -260,7 +260,7 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    const shareEl = this.storyEl.querySelector(
+    const shareEl = this.storyEl_.querySelector(
       'amp-story-social-share, amp-story-bookend'
     );
 
