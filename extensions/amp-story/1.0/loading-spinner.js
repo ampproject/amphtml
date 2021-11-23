@@ -34,18 +34,10 @@ export class LoadingSpinner {
    * @return {!Element}
    */
   build() {
-    if (this.root_) {
-      return this.root_;
+    if (!this.root_) {
+      this.root_ = renderSpinnerElement();
     }
-
-    this.root_ = renderSpinnerElement();
-
-    return this.getRoot();
-  }
-
-  /** @return {!Element} */
-  getRoot() {
-    return dev().assertElement(this.root_);
+    return this.root_;
   }
 
   /** @param {boolean} isActive */

@@ -51,8 +51,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
   it('should build the sharing menu', () => {
     shareMenu.build();
-
-    expect(shareMenu.isBuilt()).to.be.true;
     expect(shareMenu.element_).to.exist;
   });
 
@@ -69,9 +67,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
       .returns(win.document.createElement('div'));
 
     shareMenu.build();
-
-    expect(shareMenu.isBuilt()).to.be.true;
-
     shareWidgetMock.verify();
   });
 

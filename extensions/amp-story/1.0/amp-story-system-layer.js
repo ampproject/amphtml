@@ -564,13 +564,6 @@ export class SystemLayer {
   /**
    * @return {!Element}
    */
-  getRoot() {
-    return dev().assertElement(this.root_);
-  }
-
-  /**
-   * @return {!Element}
-   */
   getShadowRoot() {
     return dev().assertElement(this.systemLayerEl_);
   }

@@ -61,7 +61,6 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
 
   it('should build the info dialog', async () => {
     await infoDialog.build();
-    expect(infoDialog.isBuilt()).to.be.true;
     expect(infoDialog.element_).to.exist;
   });
 

@@ -89,9 +89,6 @@ export class ShareMenu {
     this.element_ = null;
 
     /** @private {boolean} */
-    this.isBuilt_ = false;
-
-    /** @private {boolean} */
     this.isSystemShareSupported_ = false;
 
     /** @private @const {!ShareWidget} */
@@ -116,11 +113,9 @@ export class ShareMenu {
    * UI.
    */
   build() {
-    if (this.isBuilt()) {
+    if (this.element_) {
       return;
     }
-
-    this.isBuilt_ = true;
 
     this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported();
 
@@ -133,14 +128,6 @@ export class ShareMenu {
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(child);
     });
-  }
-
-  /**
-   * Whether the element has been built.
-   * @return {boolean}
-   */
-  isBuilt() {
-    return this.isBuilt_;
   }
 
   /**

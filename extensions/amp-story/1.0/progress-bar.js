@@ -71,9 +71,6 @@ export class ProgressBar {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /** @private {?Element} */
     this.root_ = null;
 
@@ -136,13 +133,14 @@ export class ProgressBar {
    * @return {!Element}
    */
   build(initialSegmentId) {
-    if (this.isBuilt_) {
-      return this.getRoot();
+    if (this.root_) {
+      return this.root_;
     }
 
-    this.root_ = (
+    const root = (
       <ol aria-hidden="true" class="i-amphtml-story-progress-bar"></ol>
     );
+    this.root_ = root;
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
     });
@@ -150,28 +148,21 @@ export class ProgressBar {
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
       (pageIds) => {
-        if (this.isBuilt_) {
-          this.clear_();
-        }
+        this.clear_();
 
-        this.segmentsAddedPromise_ = this.mutator_.mutateElement(
-          this.getRoot(),
-          () => {
-            /** @type {!Array} */ (pageIds).forEach((id) => {
-              if (!(id in this.segmentIdMap_)) {
-                this.addSegment_(id);
-              }
-            });
-          }
+        this.segmentsAddedPromise_ = this.mutator_.mutateElement(root, () => {
+          /** @type {!Array} */ (pageIds).forEach((id) => {
+            if (!(id in this.segmentIdMap_)) {
+              this.addSegment_(id);
+            }
+          });
+        });
+
+        this.updateProgress(
+          this.activeSegmentId_,
+          this.activeSegmentProgress_,
+          true /** updateAllSegments */
         );
-
-        if (this.isBuilt_) {
-          this.updateProgress(
-            this.activeSegmentId_,
-            this.activeSegmentProgress_,
-            true /** updateAllSegments */
-          );
-        }
       },
       true /** callToInitialize */
     );
@@ -208,14 +199,13 @@ export class ProgressBar {
 
         this.render_(false /** shouldAnimate */);
       }
-      this.getRoot().classList.toggle(
+      root.classList.toggle(
         'i-amphtml-progress-bar-overflow',
         this.segmentCount_ > MAX_SEGMENTS
       );
     });
 
-    this.isBuilt_ = true;
-    return this.getRoot();
+    return root;
   }
 
   /**
@@ -240,8 +230,8 @@ export class ProgressBar {
         -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
         (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
 
-      this.mutator_.mutateElement(this.getRoot(), () => {
-        this.getRoot().classList.toggle(
+      this.mutator_.mutateElement(this.getRoot_(), () => {
+        this.getRoot_().classList.toggle(
           'i-amphtml-animate-progress',
           shouldAnimate
         );
@@ -309,7 +299,7 @@ export class ProgressBar {
    */
   getBarWidth_() {
     return this.mutator_.measureElement(() => {
-      return this.getRoot()./*OK*/ getBoundingClientRect().width;
+      return this.getRoot_()./*OK*/ getBoundingClientRect().width;
     });
   }
 
@@ -374,10 +364,10 @@ export class ProgressBar {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    this.mutator_.mutateElement(this.getRoot(), () => {
+    this.mutator_.mutateElement(this.getRoot_(), () => {
       rtlState
-        ? this.getRoot().setAttribute('dir', 'rtl')
-        : this.getRoot().removeAttribute('dir');
+        ? this.getRoot_().setAttribute('dir', 'rtl')
+        : this.getRoot_().removeAttribute('dir');
     });
   }
 
@@ -389,7 +379,7 @@ export class ProgressBar {
     // We need to take into account both conditionals since we could've switched
     // from a screen that had an overflow to one that doesn't and viceversa.
     if (
-      this.getRoot().classList.contains('i-amphtml-progress-bar-overflow') ||
+      this.getRoot_().classList.contains('i-amphtml-progress-bar-overflow') ||
       this.segmentCount_ > MAX_SEGMENTS
     ) {
       this.getInitialFirstExpandedSegmentIndex_(this.activeSegmentIndex_);
@@ -453,7 +443,7 @@ export class ProgressBar {
     const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
     // Fill in segment before ad segment.
     this.updateProgressByIndex_(index, 1, false);
-    const progressEl = this.getRoot()?.querySelector(
+    const progressEl = this.getRoot_()?.querySelector(
       `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
         // +2 because of zero-index and we want the chip after the ad.
         index + 2
@@ -488,7 +478,7 @@ export class ProgressBar {
         <div class="i-amphtml-story-page-progress-value"></div>
       </li>
     );
-    this.getRoot().appendChild(segmentProgressBar);
+    this.getRoot_().appendChild(segmentProgressBar);
     this.segments_.push(segmentProgressBar);
   }
 
@@ -513,11 +503,10 @@ export class ProgressBar {
   }
 
   /**
-   * Gets the root element of the progress bar.
-   *
    * @return {!Element}
+   * @private
    */
-  getRoot() {
+  getRoot_() {
     return dev().assertElement(this.root_);
   }
 
@@ -659,7 +648,7 @@ export class ProgressBar {
     // JavaScript indices start at 0.
     const nthChildIndex = segmentIndex + 1;
     const progressEl = scopedQuerySelector(
-      this.getRoot(),
+      this.getRoot_(),
       `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
         nthChildIndex
       )}) .i-amphtml-story-page-progress-value`

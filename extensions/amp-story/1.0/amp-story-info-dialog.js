@@ -66,11 +66,9 @@ export class InfoDialog {
    *     before assertions.
    */
   build() {
-    if (this.isBuilt()) {
+    if (this.element_) {
       return Promise.resolve();
     }
-
-    this.isBuilt_ = true;
 
     const {canonicalUrl} = Services.documentInfoForDoc(this.parentEl_);
 
