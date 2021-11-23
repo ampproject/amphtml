@@ -9,29 +9,7 @@ on:
 
 jobs:
   promote-beta-experimental-opt-in:
-    environment: release_tagger
-    if: github.repository == 'ampproject/amphtml'
-    name: Promote Beta/Experimental opt-in Channel
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 100
-
-      - name: Set Up Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
-
-      - name: Set Up Environment
-        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: ⭐ Promote Beta/Experimental opt-in Channel ⭐
-        run: node --unhandled-rejections=strict build-system/release-workflows/promote-beta-experimental-opt-in.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+    uses: ampproject/amphtml/.github/workflows/reusable/promote.yml
+    with:
+      channel-name: 'Beta/Experimental opt-in'
+      js-file: 'promote-beta-experimental-opt-in.js'
