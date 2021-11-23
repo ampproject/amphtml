@@ -1,9 +1,12 @@
 import '../amp-carousel';
 import * as Listen from '#utils/event-helper';
+import {ActionService} from '#service/action-impl';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '#service';
 import {getDetail, listenOncePromise} from '#utils/event-helper';
+import {user} from '#utils/log';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /**
  * @fileoverview Some simple tests for amp-carousel. Most of the functionality
@@ -378,6 +381,68 @@ describes.realWin(
           return;
         }
         expect.fail();
+      });
+
+      it('should be allowlisted in email', async () => {
+        env.win.document.documentElement.setAttribute('amp4email', '');
+        const action = new ActionService(env.ampdoc, env.win.document);
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+        const carousel = await getCarousel({loop: false});
+        env.sandbox.spy(carousel, 'enqueAction');
+        env.sandbox.stub(carousel, 'getDefaultActionAlias');
+        await whenUpgradedToCustomElement(carousel);
+        await carousel.whenBuilt();
+
+        action.execute(
+          carousel,
+          'goToSlide',
+          {},
+          'source',
+          'caller',
+          'event',
+          ActionTrust_Enum.HIGH
+        );
+
+        expect(carousel.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: {},
+            caller: 'caller',
+            event: 'event',
+            method: 'goToSlide',
+            node: carousel,
+            source: 'source',
+            trust: ActionTrust_Enum.HIGH,
+          })
+        );
+      });
+    });
+
+    describe('toggleAutoplay action', () => {
+      it('should not be allowlisted in email', async () => {
+        env.win.document.documentElement.setAttribute('amp4email', '');
+        const action = new ActionService(env.ampdoc, env.win.document);
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+        const carousel = await getCarousel({loop: false});
+        const userErrorStub = env.sandbox.stub(user(), 'error');
+        env.sandbox.stub(carousel, 'getDefaultActionAlias');
+        await whenUpgradedToCustomElement(carousel);
+        await carousel.whenBuilt();
+
+        action.execute(
+          carousel,
+          'toggleAutoplay',
+          {},
+          'source',
+          'caller',
+          'event',
+          ActionTrust_Enum.HIGH
+        );
+
+        expect(userErrorStub).to.be.calledOnce;
+        expect(userErrorStub.args[0][1]).to.match(
+          /"AMP-CAROUSEL.toggleAutoplay" is not allowlisted/
+        );
       });
     });
 
