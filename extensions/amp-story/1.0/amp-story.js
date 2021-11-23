@@ -167,11 +167,11 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
-/** @const {!Object<string, number>} */
-const MAX_MEDIA_ELEMENT_COUNTS = {
-  [MediaType.AUDIO]: 4,
-  [MediaType.VIDEO]: 8,
-};
+/** Max amount of <audio> elements to reserve in MediaPool. */
+const MAX_AUDIO_ELEMENT_COUNT = 4;
+
+/** Max amount of <video> elements to reserve in MediaPool. */
+const MAX_VIDEO_ELEMENT_COUNT = 8;
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -2103,7 +2103,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Object<string, number>}
+   * @return {!Object<!MediaType, number>}
    * @private
    */
   getMediaPoolAllocatedCounts_() {
@@ -2121,11 +2121,11 @@ export class AmpStory extends AMP.BaseElement {
     return {
       [MediaType.AUDIO]: Math.min(
         audioMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
-        MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]
+        MAX_AUDIO_ELEMENT_COUNT
       ),
       [MediaType.VIDEO]: Math.min(
         videoMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
-        MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]
+        MAX_VIDEO_ELEMENT_COUNT
       ),
     };
   }
