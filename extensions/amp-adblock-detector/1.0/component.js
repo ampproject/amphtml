@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {useCallback, useEffect, useRef, useState} from '#preact';
+import {useEffect, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
@@ -32,25 +32,20 @@ export function BentoAdblockDetectorWithRef(
   const fallbackDivRef = useRef(null);
   const containerWrapperRef = useRef(ref);
 
-  const adBlockerDetectedCallback = useCallback(() => {
-    containerWrapperRef.current./*OK*/ offsetParent.removeChild(
-      containerWrapperRef.current./*OK*/ offsetParent.children[0]
-    );
-  }, []);
-
   useEffect(() => {
+    /** Try to fetch `https://www3.doubleclick.net` */
     const url = 'https://www3.doubleclick.net';
     fetch(url, {
       method: 'HEAD',
       mode: 'no-cors',
       cache: 'no-store',
     }).catch(() => {
-      adBlockerDetectedCallback();
+      /** AdBlocker won't allow to fetch from `url`, show `fallbackDiv` */
       setIsBlockerDetected(true);
       console /*OK*/
         .error('AdBlocker Detected!');
     });
-  }, [adBlockerDetectedCallback]);
+  }, []);
 
   return (
     <ContainWrapper layout size paint {...rest} ref={containerWrapperRef}>
