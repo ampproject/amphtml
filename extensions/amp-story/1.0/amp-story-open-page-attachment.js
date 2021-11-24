@@ -15,6 +15,10 @@ import {
 import {htmlRefs} from '#core/dom/static-template';
 import {getWin} from '#core/window';
 
+import {Services} from '#service';
+
+import {ShoppingDataDef, StateProperty} from './amp-story-store-service';
+
 /**
  * @enum {string}
  */
@@ -104,7 +108,7 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
 };
 
 /**
- * Renders inline page attachment UI.
+ * Renders page outlink UI.
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
@@ -183,6 +187,35 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 };
 
 /**
+ * Updates the CTA based on the shopping data.
+ * @param {!ShoppingDataDef} shoppingData
+ * @param {!Element} pageEl
+ * @param {!Element} openAttachmentEl
+ * @private
+ */
+const updateCtaText_ = (shoppingData, pageEl, openAttachmentEl) => {
+  const shoppingTagsPageAttachment = Array.from(
+    pageEl.getElementsByTagName('amp-story-shopping-tag')
+  ).filter((tag) => shoppingData[tag.getAttribute('data-tag-id')]);
+
+  const i18nString =
+    shoppingTagsPageAttachment.length === 1
+      ? localize(pageEl, LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL) +
+        ' ' +
+        shoppingData[shoppingTagsPageAttachment[0].getAttribute('data-tag-id')][
+          'product-title'
+        ]
+      : localize(
+          pageEl,
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
+        );
+
+  openAttachmentEl.getElementsByClassName(
+    'i-amphtml-story-page-attachment-label'
+  )[0].textContent = i18nString;
+};
+
+/**
  * Renders inline page attachment UI.
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
@@ -238,6 +271,14 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     const src = maybeMakeProxyUrl(openImgAttr, pageEl.getAmpDoc());
     chipEl.prepend(makeImgElWithBG(src));
   }
+
+  Services.storyStoreServiceForOrNull(getWin(openAttachmentEl)).then(
+    (storeService) => {
+      storeService.subscribe(StateProperty.SHOPPING_DATA, (shoppingData) => {
+        updateCtaText_(shoppingData, pageEl, openAttachmentEl);
+      });
+    }
+  );
 
   return openAttachmentEl;
 };
