@@ -273,13 +273,13 @@ describes.realWin(
           }
         },
       };
-      story.onResize();
+      story.onResizeDebounced();
       expect(isDesktopStub).to.be.calledOnce;
       expect(story.element.classList.contains('i-amphtml-story-landscape')).to
         .be.true;
       story.element.style.width = '10px';
       story.element.style.height = '11px';
-      story.onResize();
+      story.onResizeDebounced();
       expect(isDesktopStub).to.be.calledTwice;
       expect(story.element.classList.contains('i-amphtml-story-landscape')).to
         .be.false;
@@ -421,7 +421,7 @@ describes.realWin(
 
       await story.layoutCallback();
       story.landscapeOrientationMedia_ = {matches: false};
-      story.onResize();
+      story.onResizeDebounced();
       await Promise.resolve();
       expect(story.element).to.have.attribute('orientation');
       expect(story.element.getAttribute('orientation')).to.equal('portrait');
