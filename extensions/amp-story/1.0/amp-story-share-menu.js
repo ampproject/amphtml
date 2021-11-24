@@ -85,7 +85,7 @@ export class ShareMenu {
     this.isSystemShareSupported_ = false;
 
     /** @private @const {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(this.win_, storyEl);
+    this.shareWidget_ = new ShareWidget(this.win_, storyEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);

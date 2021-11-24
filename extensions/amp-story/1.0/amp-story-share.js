@@ -181,15 +181,6 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!Window} win
-   * @param {!Element} storyEl
-   * @return {!ShareWidget}
-   */
-  static create(win, storyEl) {
-    return new ShareWidget(win, storyEl);
-  }
-
-  /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    */
