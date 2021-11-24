@@ -570,6 +570,7 @@ async function minify(code, map) {
       // Settled on this count by incrementing number until there was no more
       // effect on minification quality.
       passes: 3,
+     'pure_getters': true,
     },
     output: {
       beautify: !!argv.pretty_print,

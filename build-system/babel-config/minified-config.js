@@ -77,6 +77,7 @@ function getMinifiedConfig() {
     assumptions: {
       constantSuper: true,
       noClassCalls: true,
+      pureGetters: true,
       setClassMethods: true,
     },
   };
