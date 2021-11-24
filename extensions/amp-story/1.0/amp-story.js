@@ -67,7 +67,13 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {computedStyle, px, setImportantStyles, toggle} from '#core/dom/style';
+import {
+  computedStyle,
+  getStyle,
+  px,
+  setImportantStyles,
+  toggle,
+} from '#core/dom/style';
 import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '#utils/log';
@@ -346,8 +352,12 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    if (!this.win.CSS?.supports?.('height: 1dvh')) {
-      this.onResize_(this.getViewport().getSize());
+    if (
+      !this.win.CSS?.supports?.('height: 1dvh') &&
+      !getStyle(this.win.document.documentElement, '--story-dvh')
+    ) {
+      this.getViewport().onResize((size) => this.polyfillDvh_(size));
+      this.polyfillDvh_(this.getViewport().getSize());
     }
 
     const pageId = this.getInitialPageId_();
@@ -1563,7 +1573,7 @@ export class AmpStory extends AMP.BaseElement {
    * @param {!Object} size including new width and height
    * @private
    */
-  onResize_(size) {
+  polyfillDvh_(size) {
     const {height, width} = size;
     if (height === 0 && width === 0) {
       return;
