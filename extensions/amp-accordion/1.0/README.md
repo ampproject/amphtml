@@ -81,6 +81,65 @@ defineBentoAccordion();
         <div>Content in section 3.</div>
       </section>
     </bento-accordion>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+Bento enabled components in standalone use are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
+
+```javascript
+await customElements.whenDefined('bento-accordion');
+const api = await accordion.getApi();
+```
+
+#### API Example
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-accordion id="my-accordion">
+      <section>
+        <h2>Section 1</h2>
+        <div>Content in section 1.</div>
+      </section>
+      <section>
+        <h2>Section 2</h2>
+        <div>Content in section 2.</div>
+      </section>
+       <!-- Expanded on page load due to attribute: -->
+      <section expanded>
+        <h2>Section 3</h2>
+        <div>Content in section 3.</div>
+      </section>
+    </bento-accordion>
     <script>
       (async () => {
         const accordion = document.querySelector('#my-accordion');
@@ -95,15 +154,6 @@ defineBentoAccordion();
     </script>
   </body>
 </html>
-```
-
-### Interactivity and API usage
-
-Bento enabled components in standalone use are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
-
-```javascript
-await customElements.whenDefined('bento-accordion');
-const api = await accordion.getApi();
 ```
 
 #### Actions

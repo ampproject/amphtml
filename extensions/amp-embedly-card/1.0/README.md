@@ -83,25 +83,6 @@ defineBentoEmbedlyCard();
       data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
     >
     </bento-embedly-card>
-
-    <div class="buttons" style="margin-top: 8px">
-      <button id="change-url">Change embed</button>
-    </div>
-
-    <script>
-      (async () => {
-        const embedlyCard = document.querySelector('#my-url');
-        await customElements.whenDefined('bento-embedly-card');
-
-        // set up button actions
-        document.querySelector('#change-url').onclick = () => {
-          embedlyCard.setAttribute(
-            'data-url',
-            'https://www.youtube.com/watch?v=wcJSHR0US80'
-          );
-        };
-      })();
-    </script>
   </body>
 </html>
 ```
@@ -188,6 +169,83 @@ Allows settings the `dark` theme which changes the background color of the main 
 #### title (optional)
 
 Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Embedly card"`.
+
+#### API Example
+
+Programmatically changing any of the attribute values, will automatically update the element. For example, by changing the `data-url` value, you can switch to a different embed:
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.css"
+    />
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-embedly-card-1.0.js"
+    ></script>
+    <style>
+      bento-embedly-card {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a">
+    </bento-embedly-key>
+
+    <bento-embedly-card
+      data-url="https://twitter.com/AMPhtml/status/986750295077040128"
+      data-card-theme="dark"
+      data-card-controls="0"
+    >
+    </bento-embedly-card>
+
+    <bento-embedly-card
+      id="my-url"
+      data-url="https://www.youtube.com/watch?v=LZcKdHinUhE"
+    >
+    </bento-embedly-card>
+
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-url">Change embed</button>
+    </div>
+
+    <script>
+      (async () => {
+        const embedlyCard = document.querySelector('#my-url');
+        await customElements.whenDefined('bento-embedly-card');
+
+        // set up button actions
+        document.querySelector('#change-url').onclick = () => {
+          embedlyCard.setAttribute(
+            'data-url',
+            'https://www.youtube.com/watch?v=wcJSHR0US80'
+          );
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
 
 ---
 
