@@ -33,7 +33,6 @@ import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
 import {isExperimentOn} from '#experiments/';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {installStylesForDoc} from 'src/style-installer';
 
 /** @const {string} */
