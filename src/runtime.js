@@ -176,6 +176,7 @@ function adoptShared(global, callback) {
           extensions.registerExtension(
             fnOrStruct.n,
             fnOrStruct.ev,
+            fnOrStruct.l,
             fnOrStruct.f,
             global.AMP
           );
@@ -451,7 +452,11 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (mode.version() == v) {
     return false;
   }
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n, fnOrStruct.ev);
+  Services.extensionsFor(win).reloadExtension(
+    fnOrStruct.n,
+    fnOrStruct.ev,
+    fnOrStruct.l
+  );
   return true;
 }
 
