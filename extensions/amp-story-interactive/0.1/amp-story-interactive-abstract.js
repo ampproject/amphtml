@@ -34,6 +34,7 @@ import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
 import {isExperimentOn} from '#experiments/';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {installStylesForDoc} from 'src/style-installer';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -103,44 +104,6 @@ const fontsToLoad = [
     src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
-
-/**
- * Installs the host CSS.
- *
- * We define this function instead of using runtime style install solutions for
- * different reasons:
- *
- * 1. We don't do it as part of `registerElement` since components with
- *    different names extend from the same abstract AmpStoryInteractive. As such,
- *    we'd unnnecessarily install the same styles for every inheriting component
- *    present on the page.
- *
- * 2. We don't use `installStylesForDoc()` since it's unnecessarily large. We
- *    don't want to bundle it as part of this extension.
- * @param {string} id
- * @param {!Element|!ShadowRoot} cssRoot
- * @param {!Element} sibling
- * @param {string} cssText
- */
-function installHostCssOnce(id, cssRoot, sibling, cssText) {
-  if (cssRoot.querySelector(`#${escapeCssSelectorIdent(id)}`)) {
-    return;
-  }
-  const docOrShadowRoot = cssRoot.ownerDocument || cssRoot;
-  const style = docOrShadowRoot.createElement('style');
-  style.id = id;
-  style./*OK*/ textContent = cssText;
-  if (docOrShadowRoot !== cssRoot) {
-    // If in head, add before `<style amp-custom>` if present.
-    // If in a shadow root, preserve the provided insertBefore sibling.
-    sibling = cssRoot.querySelector('style[amp-custom]');
-  }
-  if (sibling) {
-    sibling.parentNode.insertBefore(style, sibling);
-  } else {
-    cssRoot.appendChild(style);
-  }
-}
 
 /**
  * Interactive abstract class with shared functionality for interactive components.
@@ -226,11 +189,18 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
 
-    installHostCssOnce(
-      'i-amphtml-style-story-interactive',
-      this.getAmpDoc().getHeadNode(),
-      this.element,
-      hostCss
+    // We install host CSS directly instead of during `registerElement` since
+    // components with different names extend from this class. As such, we'd
+    // unnnecessarily install the same styles once for each type of inheriting
+    // component present on the page.
+    // Instead, we ensure that we only install once by preserving the extension
+    // name "amp-story-interactive".
+    installStylesForDoc(
+      this.getAmpDoc(),
+      hostCss,
+      /* whenReady */ null,
+      /* isRuntimeCss */ false,
+      /* ext */ 'amp-story-interactive'
     );
   }
 
