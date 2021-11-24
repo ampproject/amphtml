@@ -1,5 +1,3 @@
-import {loadScript} from '#3p/3p';
-
 import * as Preact from '#preact';
 import {useCallback, useEffect, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
@@ -41,21 +39,17 @@ export function BentoAdblockDetectorWithRef(
   }, []);
 
   useEffect(() => {
-    /**
-     * Try to load `adsbygoogle.js` and check whether it is blocked or not.
-     * TODO(@anuragvasanwala): This block needs to be improved.
-     */
-    loadScript(
-      global,
-      'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
-      (e) => {
-        setIsBlockerDetected(false);
-      },
-      (e) => {
-        adBlockerDetectedCallback();
-        setIsBlockerDetected(true);
-      }
-    );
+    const url = 'https://www3.doubleclick.net';
+    fetch(url, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-store',
+    }).catch(() => {
+      adBlockerDetectedCallback();
+      setIsBlockerDetected(true);
+      console /*OK*/
+        .error('AdBlocker Detected!');
+    });
   }, [adBlockerDetectedCallback]);
 
   return (

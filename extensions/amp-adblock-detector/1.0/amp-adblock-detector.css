@@ -3,7 +3,7 @@
  * - display:block element
  * - size-defined element
  */
- amp-adblock-detector {
+amp-adblock-detector {
   display: block;
   overflow: hidden;
   position: relative;
