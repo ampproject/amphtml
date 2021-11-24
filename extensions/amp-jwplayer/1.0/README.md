@@ -132,7 +132,6 @@ You can use the API to trigger the available actions (`play`, `pause`, `mute`, `
 </html>
 ```
 
-
 ### Layout and style
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.

@@ -247,6 +247,7 @@ Or via `className`:
 ### Props
 
 ##### trackId
+
 This attribute is required if <code>data-playlistid</code> is not defined.
 The value for this attribute is the ID of a track, an integer.
 

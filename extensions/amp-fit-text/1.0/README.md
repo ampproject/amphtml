@@ -195,7 +195,6 @@ Programmatically changing an attribute value will automatically update the eleme
 </html>
 ```
 
-
 ---
 
 ## Preact/React Component

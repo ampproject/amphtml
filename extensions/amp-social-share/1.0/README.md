@@ -392,7 +392,6 @@ Programmatically changing any of the attribute values will automatically update 
 </html>
 ```
 
-
 ---
 
 ## Preact/React Component
