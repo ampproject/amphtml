@@ -70,7 +70,7 @@ defineBentoLightbox();
 
 ### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. The `bento-lightbox` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-lightbox` component API is accessible by including the following script tag in your document:
 
 ```js
 await customElements.whenDefined('bento-lightbox');
