@@ -22,6 +22,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     super(element);
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+
+    /** @private {?Element} */
+    this.buttonEl_ = null;
   }
 
   /** @override */
@@ -36,11 +39,33 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.initializeListeners_();
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
       (shoppingData) => this.updateShoppingTag_(shoppingData),
       true /** callToInitialize */
     );
+  }
+
+  /**
+   * @private
+   */
+  initializeListeners_() {
+    this.buttonEl_ = this.element.querySelector('button');
+    this.buttonEl_.addEventListener(
+      'click',
+      (event) => this.onShoppingTagClick_(event),
+      true /** useCapture */
+    );
+  }
+
+  /**
+   * @param e
+   * @private
+   */
+  onShoppingTagClick_(e) {
+    console.log('e', e);
+    console.log('shopping tag clicked1');
   }
 
   /** @override */
