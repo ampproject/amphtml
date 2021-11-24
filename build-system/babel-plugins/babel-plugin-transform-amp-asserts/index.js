@@ -83,8 +83,8 @@ module.exports = function (babel) {
       */
     }
 
+    path.replaceWith(t.parenthesizedExpression(arg));
     if (type) {
-      path.replaceWith(t.parenthesizedExpression(arg));
       // If it starts with a capital, make the type non-nullable.
       if (/^[A-Z]/.test(type)) {
         type = '!' + type;
