@@ -914,13 +914,16 @@ amp-story .amp-video-eq,
   --interactive-prompt-background: transparent !important;
 }
 
-amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component,
-amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component,
-amp-story-interactive-results-detailed.i-amphtml-story-interactive-component {
+amp-story-interactive-binary-poll,
+amp-story-interactive-img-poll,
+amp-story-interactive-img-quiz,
+amp-story-interactive-results,
+amp-story-interactive-results-detailed {
   max-width: 18em !important;
 }
 
-amp-story-interactive-img-poll.i-amphtml-story-interactive-component, amp-story-interactive-img-quiz.i-amphtml-story-interactive-component {
+amp-story-interactive-img-poll,
+amp-story-interactive-img-quiz {
   --interactive-prompt-alignment: center;
 }
 
