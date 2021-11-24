@@ -126,17 +126,17 @@ export class StandardActions {
    * @return {boolean}
    */
   prefersDarkMode_() {
+    const prefersDarkScheme = this.ampdoc.win.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+
     try {
       const themeMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
 
-      return (
-        'yes' === themeMode ||
-        (!themeMode &&
-          this.ampdoc.win.matchMedia('(prefers-color-scheme: dark)').matches)
-      );
+      return 'yes' === themeMode || (!themeMode && prefersDarkScheme);
     } catch (e) {
       // LocalStorage may not be accessible
-      return this.ampdoc.win.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDarkScheme;
     }
   }
 
@@ -246,8 +246,7 @@ export class StandardActions {
   handleToggleTheme_() {
     this.ampdoc.waitForBodyOpen().then((body) => {
       try {
-        const darkMode = this.prefersDarkMode_();
-        if (darkMode) {
+        if (this.prefersDarkMode_()) {
           body.classList.remove('amp-dark-mode');
           this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'no');
         } else {
@@ -255,9 +254,7 @@ export class StandardActions {
           this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
         }
       } catch (e) {
-        // LocalStorage may not be accessible
-        // toggle should work even if localStorage is not available.
-        body.classList.toggle('amp-dark-mode');
+        // LocalStorage may not be accessible.
       }
     });
   }
