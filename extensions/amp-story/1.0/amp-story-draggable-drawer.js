@@ -237,7 +237,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   startListeningForTouchEvents_() {
-    // If the element is a direct descendant of amp-story-page or a decendent
+    // If the element is a direct descendant of amp-story-page or a descendant
     // of amp-story-shopping-attachment, authorize swiping up by listening to
     // events at the page level. Otherwise, only authorize swiping down to
     // close by listening to events at the current element level.
