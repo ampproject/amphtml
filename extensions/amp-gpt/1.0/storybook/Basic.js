@@ -33,6 +33,9 @@ export const targeting = (args) => {
       optDiv="div2"
       height="600"
       width="120"
+      fallbackDiv={() => {
+        <div>Error while loading Ad!</div>;
+      }}
       {...args}
       targeting={JSON.stringify(targeting)}
     >

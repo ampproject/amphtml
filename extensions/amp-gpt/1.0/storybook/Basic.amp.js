@@ -58,7 +58,7 @@ export const slotTargeting = (args) => {
 export const disableInitialLoad = (args) => {
   const disableInitialLoad = boolean('disable-initial-load', true);
   return (
-    <div style="background: lightblue;">
+    <div>
       <amp-gpt
         ad-unit-path="/21730346048/test-skyscraper"
         opt-div="div3"
