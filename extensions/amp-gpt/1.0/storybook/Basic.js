@@ -17,8 +17,6 @@ export const _default = (args) => {
       adUnitPath={'/21730346048/test-skyscraper'}
       optDiv={'div1'}
       style={{height: '600px', width: '120px'}}
-      height="600"
-      width="120"
       {...args}
     >
       This text is inside.
@@ -33,8 +31,6 @@ export const targeting = (args) => {
       adUnitPath="/21730346048/test-skyscraper"
       optDiv="div2"
       style={{height: '600px', width: '120px'}}
-      height="600"
-      width="120"
       fallbackDiv={() => {
         <div>Error while loading Ad!</div>;
       }}
