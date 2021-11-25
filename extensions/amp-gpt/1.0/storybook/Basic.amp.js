@@ -61,7 +61,7 @@ export const disableInitialLoad = (args) => {
     <div>
       <amp-gpt
         ad-unit-path="/21730346048/test-skyscraper"
-        opt-div="div3"
+        opt-div="div_gpt_slot"
         height="250"
         width="300"
         disable-initial-load={disableInitialLoad}
@@ -69,16 +69,7 @@ export const disableInitialLoad = (args) => {
       >
         <div slot="fallback">Error while loading script.</div>
       </amp-gpt>
-      <button
-        onclick="
-        googletag.cmd.push(
-          function() {
-            googletag.pubads().refresh();
-          }
-        );"
-      >
-        Show/Refresh Ad
-      </button>
+      <button on="tap:div_gpt_slot.refresh()">Show/Refresh Ad</button>
     </div>
   );
 };

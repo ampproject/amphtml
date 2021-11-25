@@ -13,15 +13,8 @@ const TAG = 'amp-gpt';
 class AmpGpt extends BaseElement {
   /** @override */
   init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
-
-    return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
+    this.registerApiAction('display', (api) => api.display());
+    this.registerApiAction('refresh', (api) => api.refresh());
   }
 
   /** @override */

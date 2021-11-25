@@ -57,6 +57,10 @@ export const targeting = (args) => {
 export const disableInitialLoad = (args) => {
   const disableInitialLoad = boolean('disable-initial-load', true);
 
+  // TODO(#30447): replace imperative calls with "button" knobs when the
+  // Storybook 6.1 is released.
+  const gptSlotRef = Preact.useRef();
+
   return (
     <>
       <BentoGpt
@@ -68,15 +72,9 @@ export const disableInitialLoad = (args) => {
         }}
         {...args}
         disableInitialLoad={disableInitialLoad}
+        ref={gptSlotRef}
       ></BentoGpt>
-      <button
-        onclick="
-        googletag.cmd.push(
-          function() {
-            googletag.pubads().refresh();
-          }
-        );"
-      >
+      <button onClick={() => gptSlotRef.current.refresh()}>
         Show/Refresh Ad
       </button>
     </>

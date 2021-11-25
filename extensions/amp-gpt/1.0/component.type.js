@@ -15,7 +15,14 @@ var BentoGptDef = {};
 BentoGptDef.Props;
 
 /** @interface */
-BentoGptDef.BentoGptApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
+BentoGptDef.Api = class {
+  /**
+   * Display current ad slot
+   */
+  display() {}
+
+  /**
+   * Display current ad slot
+   */
+  refresh() {}
 };

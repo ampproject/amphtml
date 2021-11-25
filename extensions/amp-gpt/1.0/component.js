@@ -1,7 +1,14 @@
 import {loadScript} from '#3p/3p';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper, useIntersectionObserver} from '#preact/component';
 import {useMergeRefs} from '#preact/utils';
@@ -21,12 +28,12 @@ function DisplayAsWithRef({as: Comp = 'div', ...rest}, ref) {
 const DisplayAs = forwardRef(DisplayAsWithRef);
 
 /**
- *
- * @param {*} x
- * @return {boolean} TODO
+ * Checks whether given value is string or not.
+ * @param value Value to be check
+ * @return {boolean} True if value is string type
  */
-function isString(x) {
-  return Object.prototype.toString.call(x) === '[object String]';
+function isString(value) {
+  return Object.prototype.toString.call(value) === '[object String]';
 }
 
 /**
@@ -41,6 +48,7 @@ export function BentoGptWithRef(
     fallback,
     height,
     optDiv,
+    // For multi-size Gpt Ad - Omitted for now
     size,
     style,
     targeting,
@@ -127,8 +135,15 @@ export function BentoGptWithRef(
   /**
    * Display GPT Ad
    */
-  const display = useCallback((adSlot) => {
-    global.googletag.display(adSlot);
+  const display = useCallback(() => {
+    global.googletag.display(gptAdDivRef.current);
+  }, []);
+
+  /**
+   * Refresh GPT Ad
+   */
+  const refresh = useCallback(() => {
+    global.googletag?.pubads().refresh([gptAdSlotRef.current]);
   }, []);
 
   /**
@@ -184,7 +199,7 @@ export function BentoGptWithRef(
       initializeTargets(gptAdSlotRef.current);
 
       /** Display GPT Ad */
-      display(gptAdDivRef.current);
+      display();
     });
   }, [
     adUnitPath,
@@ -195,6 +210,17 @@ export function BentoGptWithRef(
     parsedSize,
     showFallback,
   ]);
+
+  /** Gpt Component - API Functions */
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!BentoGptDef.Api} */ ({
+        display,
+        refresh,
+      }),
+    [display, refresh]
+  );
 
   useEffect(() => {
     global.bentoids = global.bentoids || [];
