@@ -114,7 +114,10 @@ export class StandardActions {
   initThemeMode_() {
     if (this.prefersDarkMode_()) {
       this.ampdoc.waitForBodyOpen().then((body) => {
-        body.classList.add('amp-dark-mode');
+        const darkModeClass =
+          body.getAttribute('prefers-dark-mode-class') || 'amp-dark-mode';
+
+        body.classList.add(darkModeClass);
       });
     }
   }
@@ -244,11 +247,14 @@ export class StandardActions {
   handleToggleTheme_() {
     this.ampdoc.waitForBodyOpen().then((body) => {
       try {
+        const darkModeClass =
+          body.getAttribute('prefers-dark-mode-class') || 'amp-dark-mode';
+
         if (this.prefersDarkMode_()) {
-          body.classList.remove('amp-dark-mode');
+          body.classList.remove(darkModeClass);
           this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'no');
         } else {
-          body.classList.add('amp-dark-mode');
+          body.classList.add(darkModeClass);
           this.ampdoc.win.localStorage.setItem('amp-dark-mode', 'yes');
         }
       } catch (e) {
