@@ -16,6 +16,7 @@ export const _default = (args) => {
     <BentoGpt
       adUnitPath={'/21730346048/test-skyscraper'}
       optDiv={'div1'}
+      style={{height: '600px', width: '120px'}}
       height="600"
       width="120"
       {...args}
@@ -31,6 +32,7 @@ export const targeting = (args) => {
     <BentoGpt
       adUnitPath="/21730346048/test-skyscraper"
       optDiv="div2"
+      style={{height: '600px', width: '120px'}}
       height="600"
       width="120"
       fallbackDiv={() => {

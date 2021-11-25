@@ -40,12 +40,14 @@ export function BentoGpt({
   height,
   optDiv,
   size,
+  style,
   targeting,
   width,
   ...rest
 }) {
   /** Styles */
   const classes = useStyles();
+  style.position = 'absolute';
 
   /** States */
   const [errorOnScriptLoad, setErrorOnScriptLoad] = useState(false);
@@ -227,15 +229,15 @@ export function BentoGpt({
       initialiseGpt(global);
     }
   }, [disableInitialLoad, initialiseGpt, optDiv, showFallback]);
+
   return (
     <ContainWrapper
       layout
-      height={height}
-      width={width}
+      size
       paint
       {...rest}
       ref={useMergeRefs([containerRef, inObRef])}
-      style={{position: 'absolute'}}
+      style={style}
     >
       {isLoading && (
         <div class={classes.loaderWrapper}>
