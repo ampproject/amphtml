@@ -47,7 +47,7 @@ export function BentoGpt({
 }) {
   /** Styles */
   const classes = useStyles();
-  style.position = 'absolute';
+  //style.position = 'absolute';
   height = !height ? style.height : height;
   width = !width ? style.width : width;
 
