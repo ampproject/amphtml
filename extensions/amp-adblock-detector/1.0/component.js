@@ -33,8 +33,8 @@ export function BentoAdblockDetectorWithRef(
   const containerWrapperRef = useRef(ref);
 
   useEffect(() => {
-    /** Try to fetch `https://www3.doubleclick.net` */
-    const url = 'https://www3.doubleclick.net';
+    /** Try to fetch `https://doubleclick.net` */
+    const url = 'https://doubleclick.net';
     fetch(url, {
       method: 'HEAD',
       mode: 'no-cors',
