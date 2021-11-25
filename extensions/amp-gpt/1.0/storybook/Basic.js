@@ -25,20 +25,61 @@ export const _default = (args) => {
 };
 
 export const targeting = (args) => {
-  const targeting = {color: 'red'};
+  const targetingAtf = {color: 'red', position: 'atf'};
+  const targetingBtf = {position: 'btf'};
+
   return (
-    <BentoGpt
-      adUnitPath="/21730346048/test-skyscraper"
-      optDiv="div2"
-      style={{height: '600px', width: '120px'}}
-      fallbackDiv={() => {
-        <div>Error while loading Ad!</div>;
-      }}
-      {...args}
-      targeting={JSON.stringify(targeting)}
-    >
-      This text is inside.
-    </BentoGpt>
+    <>
+      <BentoGpt
+        adUnitPath="/6355419/Travel/Asia"
+        optDiv="div_targeting_atf"
+        style={{height: '90px', width: '728px'}}
+        fallbackDiv={() => {
+          <div>Error while loading Ad!</div>;
+        }}
+        {...args}
+        targeting={JSON.stringify(targetingAtf)}
+      ></BentoGpt>
+      <BentoGpt
+        adUnitPath="/6355419/Travel/Asia"
+        optDiv="div_targeting_btf"
+        style={{height: '90px', width: '728px'}}
+        fallbackDiv={() => {
+          <div>Error while loading Ad!</div>;
+        }}
+        {...args}
+        targeting={JSON.stringify(targetingBtf)}
+      ></BentoGpt>
+    </>
+  );
+};
+
+export const disableInitialLoad = (args) => {
+  const disableInitialLoad = boolean('disable-initial-load', true);
+
+  return (
+    <>
+      <BentoGpt
+        adUnitPath="/21730346048/test-skyscraper"
+        optDiv="div_disable_initial_load"
+        style={{height: '250px', width: '300px'}}
+        fallbackDiv={() => {
+          <div>Error while loading Ad!</div>;
+        }}
+        {...args}
+        disableInitialLoad={disableInitialLoad}
+      ></BentoGpt>
+      <button
+        onclick="
+        googletag.cmd.push(
+          function() {
+            googletag.pubads().refresh();
+          }
+        );"
+      >
+        Show/Refresh Ad
+      </button>
+    </>
   );
 };
 
