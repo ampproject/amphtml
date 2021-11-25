@@ -42,8 +42,6 @@ export function BentoAdblockDetectorWithRef(
     }).catch(() => {
       /** AdBlocker won't allow to fetch from `url`, show `fallbackDiv` */
       setIsBlockerDetected(true);
-      console /*OK*/
-        .error('AdBlocker Detected!');
     });
   }, []);
 
