@@ -16,7 +16,6 @@
 
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {Deferred} from '#core/data-structures/promise';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {tryParseJson} from '#core/types/object/json';
 import {includes} from '#core/types/string';
@@ -54,13 +53,12 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-
-    /** @protected {!Deferred<string>} */
-    this.getAdUrlDeferred = new Deferred();
   }
 
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
+    let adUrl;
+
     Promise.any([
       getConsentPolicyInfo(this.element, this.getConsentPolicy() || 'default'),
       new Promise((resolve) => setTimeout(() => resolve(), 10)),
@@ -86,28 +84,32 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
         const formatId = this.element.getAttribute('data-format');
         const tagId = 'sas_' + formatId;
-        const adUrl = buildUrl(
-          (this.element.getAttribute('data-domain') ||
-            'https://www.smartadserver.com') + '/ac',
-          {
-            'siteid': this.element.getAttribute('data-site'),
-            'pgid': this.element.getAttribute('data-page'),
-            'fmtid': formatId,
-            'tgt': this.element.getAttribute('data-target'),
-            'tag': tagId,
-            'out': 'amp-hb',
-            ...urlParams,
-            'gdpr_consent': consentString,
-            'pgDomain': this.win.top.location.hostname,
-            'tmstp': Date.now(),
-          },
-          MAX_URL_LENGTH,
-          TRUNCATION_PARAM
+        adUrl(
+          buildUrl(
+            (this.element.getAttribute('data-domain') ||
+              'https://www.smartadserver.com') + '/ac',
+            {
+              'siteid': this.element.getAttribute('data-site'),
+              'pgid': this.element.getAttribute('data-page'),
+              'fmtid': formatId,
+              'tgt': this.element.getAttribute('data-target'),
+              'tag': tagId,
+              'out': 'amp-hb',
+              ...urlParams,
+              'gdpr_consent': consentString,
+              'pgDomain': this.win.top.location.hostname,
+              'tmstp': Date.now(),
+            },
+            MAX_URL_LENGTH,
+            TRUNCATION_PARAM
+          )
         );
-        this.getAdUrlDeferred.resolve(adUrl);
       });
     });
-    return this.getAdUrlDeferred.promise;
+
+    return new Promise((resolve) => {
+      adUrl = resolve;
+    });
   }
 
   /** @override */
