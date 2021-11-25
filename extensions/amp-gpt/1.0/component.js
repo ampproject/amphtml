@@ -31,20 +31,24 @@ function isString(x) {
 
 /**
  * @param {!BentoGpt.Props} props
+ * @param {{current: (!BentoGptDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function BentoGpt({
-  adUnitPath,
-  disableInitialLoad = false,
-  fallback,
-  height,
-  optDiv,
-  size,
-  style,
-  targeting,
-  width,
-  ...rest
-}) {
+export function BentoGptWithRef(
+  {
+    adUnitPath,
+    disableInitialLoad = false,
+    fallback,
+    height,
+    optDiv,
+    size,
+    style,
+    targeting,
+    width,
+    ...rest
+  },
+  ref
+) {
   /** Styles */
   const classes = useStyles();
   //style.position = 'absolute';
@@ -58,7 +62,7 @@ export function BentoGpt({
   /** References */
   const gptAdDivRef = useRef(null);
   const gptAdSlotRef = useRef(null);
-  const containerRef = useRef(null);
+  const containerRef = useRef(ref);
   const fallbackDivRef = useRef(null);
   const fallbackTimerRef = useRef(null);
   const gptAdResponcereceivedRef = useRef(false);
@@ -253,3 +257,7 @@ export function BentoGpt({
     </ContainWrapper>
   );
 }
+
+const BentoGpt = forwardRef(BentoGptWithRef);
+BentoGpt.displayName = 'BentoGpt'; // Make findable for tests.
+export {BentoGpt};
