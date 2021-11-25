@@ -21,7 +21,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-wistia-player';
 
@@ -106,7 +106,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell Wistia Player we want to receive messages
       this.listenToFrame_();
-      dispatchCustomEvent(element, VideoEvents.LOAD);
+      dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
     });
 
     this.playerReadyResolver_(loaded);
@@ -167,9 +167,9 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     if (playerEvent === 'statechange') {
       const state = data['args'] ? data['args'][1] : undefined;
       redispatch(element, state, {
-        'playing': VideoEvents.PLAYING,
-        'paused': VideoEvents.PAUSE,
-        'ended': [VideoEvents.PAUSE, VideoEvents.ENDED],
+        'playing': VideoEvents_Enum.PLAYING,
+        'paused': VideoEvents_Enum.PAUSE,
+        'ended': [VideoEvents_Enum.PAUSE, VideoEvents_Enum.ENDED],
       });
       return;
     }

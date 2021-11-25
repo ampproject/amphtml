@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import * as docready from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 
@@ -335,7 +335,7 @@ describes.realWin(
       );
       env.sandbox
         .stub(ampdoc, 'getVisibilityState')
-        .returns(VisibilityState.PRERENDER);
+        .returns(VisibilityState_Enum.PRERENDER);
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
       initCb();

@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {AmpDocSingle} from '#service/ampdoc-impl';
 
@@ -367,7 +367,7 @@ describes.realWin(
         return liveList.updateAction_().then(() => {
           expect(spy).to.have.been.calledOnce;
           expect(spy).calledWithMatch({
-            type: AmpEvents.DOM_UPDATE,
+            type: AmpEvents_Enum.DOM_UPDATE,
             bubbles: true,
           });
         });

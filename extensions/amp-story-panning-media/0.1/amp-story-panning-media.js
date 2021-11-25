@@ -1,6 +1,6 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {closest} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
@@ -63,9 +63,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
-    this.element_ = element;
-
     /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = null;
 
@@ -97,28 +94,26 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => {
-        this.storeService_ = storeService;
-      }
+      (storeService) => (this.storeService_ = storeService)
     );
   }
 
   /** @override */
   layoutCallback() {
-    this.ampImgEl_ = dev().assertElement(
-      this.element_.querySelector('amp-img')
-    );
+    this.ampImgEl_ = dev().assertElement(this.element.querySelector('amp-img'));
 
     this.groupId_ =
-      this.element_.getAttribute('group-id') ||
+      this.element.getAttribute('group-id') ||
       this.ampImgEl_.getAttribute('src');
 
     this.initializeListeners_();
 
     return whenUpgradedToCustomElement(this.ampImgEl_)
-      .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
+      .then(() =>
+        this.ampImgEl_.signals().whenSignal(CommonSignals_Enum.LOAD_END)
+      )
       .then(() => {
-        const imgEl = dev().assertElement(this.element_.querySelector('img'));
+        const imgEl = dev().assertElement(this.element.querySelector('img'));
         // Remove layout="fill" classes so image is not clipped.
         imgEl.classList = '';
         this.setImageCenteringStyles_();
@@ -132,8 +127,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       StateProperty.PAGE_SIZE,
       () => {
         this.elementSize_ = {
-          width: this.element_./*OK*/ offsetWidth,
-          height: this.element_./*OK*/ offsetHeight,
+          width: this.element./*OK*/ offsetWidth,
+          height: this.element./*OK*/ offsetHeight,
         };
         this.setImageCenteringStyles_();
         this.setAnimateTo_();
@@ -156,22 +151,21 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
-    const callback = (mutationsList) => {
-      this.pageDistance_ = parseInt(
+    const callback = (mutationsList) =>
+      (this.pageDistance_ = parseInt(
         mutationsList[0].target.getAttribute('distance'),
         10
-      );
-    };
+      ));
     const observer = new MutationObserver(callback);
     this.getPage_() && observer.observe(this.getPage_(), config);
   }
 
   /** @private */
   setAnimateTo_() {
-    const x = parseFloat(this.element_.getAttribute('data-x') || 0);
-    const y = parseFloat(this.element_.getAttribute('data-y') || 0);
-    const zoom = parseFloat(this.element_.getAttribute('data-zoom') || 1);
-    const lockBounds = this.element_.hasAttribute('lock-bounds');
+    const x = parseFloat(this.element.getAttribute('data-x') || 0);
+    const y = parseFloat(this.element.getAttribute('data-y') || 0);
+    const zoom = parseFloat(this.element.getAttribute('data-zoom') || 1);
+    const lockBounds = this.element.hasAttribute('lock-bounds');
 
     if (lockBounds) {
       // Zoom must be set to calculate maxBounds.
@@ -278,7 +272,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   setImageCenteringStyles_() {
-    const imgEl = this.element_.querySelector('img');
+    const imgEl = this.element.querySelector('img');
     if (!imgEl) {
       return;
     }
@@ -384,7 +378,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FILL;
+    return layout == Layout_Enum.FILL;
   }
 }
 

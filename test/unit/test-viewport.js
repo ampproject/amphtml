@@ -23,6 +23,8 @@ import {installVsyncService} from '#service/vsync-impl';
 import {loadPromise} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
+import {FakePerformance} from '#testing/fake-dom';
+
 import {getMode} from '../../src/mode';
 import {setParentWindow} from '../../src/service-helpers';
 
@@ -1648,6 +1650,7 @@ describes.sandboxed('Viewport META', {}, (env) => {
         clearTimeout: window.clearTimeout,
         location: {},
         Promise: window.Promise,
+        performance: new FakePerformance(window),
       };
       installTimerService(windowApi);
       installVsyncService(windowApi);

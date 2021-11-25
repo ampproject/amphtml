@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {user} from '#utils/log';
@@ -181,7 +181,7 @@ export class BackgroundBlur {
   ensureMediaLoaded_(mediaEl) {
     return new Promise((resolve) => {
       whenUpgradedToCustomElement(mediaEl)
-        .then(() => mediaEl.signals().whenSignal(CommonSignals.LOAD_END))
+        .then(() => mediaEl.signals().whenSignal(CommonSignals_Enum.LOAD_END))
         .then(() => {
           resolve(mediaEl);
         })

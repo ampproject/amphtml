@@ -1,14 +1,14 @@
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
 import {dev, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
-import {htmlFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
 import {setImportantStyles} from '#core/dom/style';
@@ -19,44 +19,44 @@ const TAG = 'amp-story-access';
 /**
  * @enum {string}
  */
-export const Type = {
+export const Type_Enum = {
   BLOCKING: 'blocking',
   NOTIFICATION: 'notification',
 };
 
 /**
  * Story access blocking type template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getBlockingTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-header">
-            <div class="i-amphtml-story-access-logo"></div>
-          </div>
-          <div class="i-amphtml-story-access-content"></div>
+const renderBlockingElement = () => {
+  return (
+    <div class="i-amphtml-story-access-overflow">
+      <div class="i-amphtml-story-access-container">
+        <div class="i-amphtml-story-access-header">
+          <div class="i-amphtml-story-access-logo"></div>
         </div>
-      </div>`;
+        <div class="i-amphtml-story-access-content"></div>
+      </div>
+    </div>
+  );
 };
 
 /**
  * Story access notification type template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getNotificationTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-content">
-            <span class="i-amphtml-story-access-close-button" role="button">
-              &times;
-            </span>
-          </div>
+const renderNotificationElement = () => {
+  return (
+    <div class="i-amphtml-story-access-overflow">
+      <div class="i-amphtml-story-access-container">
+        <div class="i-amphtml-story-access-content">
+          <span class="i-amphtml-story-access-close-button" role="button">
+            &times;
+          </span>
         </div>
-      </div>`;
+      </div>
+    </div>
+  );
 };
 
 /**
@@ -78,7 +78,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
   buildCallback() {
     // Defaults to blocking paywall.
     if (!this.element.hasAttribute('type')) {
-      this.element.setAttribute('type', Type.BLOCKING);
+      this.element.setAttribute('type', Type_Enum.BLOCKING);
     }
 
     const drawerEl = this.renderDrawerEl_();
@@ -102,7 +102,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /**
@@ -130,7 +130,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   onAccessStateChange_(isAccess) {
-    if (this.getType_() === Type.BLOCKING) {
+    if (this.getType_() === Type_Enum.BLOCKING) {
       this.toggle_(isAccess);
     }
   }
@@ -141,7 +141,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @param {number} currentPageIndex
    */
   onCurrentPageIndexChange_(currentPageIndex) {
-    if (this.getType_() === Type.NOTIFICATION) {
+    if (this.getType_() === Type_Enum.NOTIFICATION) {
       // Only show the notification if on the first page of the story.
       // Note: this can be overriden by an amp-access attribute that might
       // show/hide the notification based on the user's authorizations.
@@ -197,8 +197,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
    */
   renderDrawerEl_() {
     switch (this.getType_()) {
-      case Type.BLOCKING:
-        const drawerEl = getBlockingTemplate(this.element);
+      case Type_Enum.BLOCKING:
+        const drawerEl = renderBlockingElement();
 
         const logoSrc = getStoryAttributeSrc(
           this.element,
@@ -215,8 +215,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
         return drawerEl;
         break;
-      case Type.NOTIFICATION:
-        return getNotificationTemplate(this.element);
+      case Type_Enum.NOTIFICATION:
+        return renderNotificationElement();
         break;
       default:
         user().error(

@@ -2,12 +2,13 @@ import {compile} from '#compiler/compile';
 
 describes.sandboxed('compile', {}, () => {
   it('should throw if provided invalid input', () => {
-    const errorMsg = /Must provide versions and either document or nodes/;
+    const errorMsg =
+      /Must provide component_versions and either document or nodes/;
 
     expect(() => compile()).throw(errorMsg);
     expect(() => compile({})).throw(errorMsg);
     expect(() => compile({unknown: {}})).throw(errorMsg);
-    expect(() => compile({versions: []})).throw(errorMsg);
+    expect(() => compile({component_versions: []})).throw(errorMsg); // eslint-disable-line local/camelcase
     expect(() => compile({nodes: []})).throw(errorMsg);
     expect(() => compile({document: {}})).throw(errorMsg);
   });
@@ -18,7 +19,11 @@ describes.sandboxed('compile', {}, () => {
       tree: [{tagid: 92, children: []}],
       'quirks_mode': false,
     };
-    expect(compile({document, versions: []})).to.deep.equal({document});
+
+    // eslint-disable-next-line local/camelcase
+    expect(compile({document, component_versions: []})).to.deep.equal({
+      document,
+    });
   });
 
   it('should return compiled nodes', () => {
@@ -26,6 +31,8 @@ describes.sandboxed('compile', {}, () => {
       {tagid: 1, value: 'a', children: [], attributes: []},
       {tagid: 7, value: 'b', children: [], attributes: []},
     ];
-    expect(compile({nodes, versions: []})).to.deep.equal({nodes});
+
+    // eslint-disable-next-line local/camelcase
+    expect(compile({nodes, component_versions: []})).to.deep.equal({nodes});
   });
 });

@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
@@ -5,15 +6,13 @@ import {
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
-
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {localize} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
-let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ButtonState_1_0_Def; // eslint-disable-line local/camelcase
 
 /** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
@@ -21,7 +20,7 @@ const BackButtonStates = {
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
-    label: LocalizedStringId.AMP_STORY_PREVIOUS_PAGE,
+    label: LocalizedStringId_Enum.AMP_STORY_PREVIOUS_PAGE,
   },
 };
 
@@ -31,29 +30,28 @@ const ForwardButtonStates = {
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_PAGE,
+    label: LocalizedStringId_Enum.AMP_STORY_NEXT_PAGE,
   },
   NEXT_STORY: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_STORY,
+    label: LocalizedStringId_Enum.AMP_STORY_NEXT_STORY,
   },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
-    label: LocalizedStringId.AMP_STORY_REPLAY,
+    label: LocalizedStringId_Enum.AMP_STORY_REPLAY,
   },
 };
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const buildPaginationButton = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-button-container">
-        <button class="i-amphtml-story-button-move"></button>
-      </div>`;
+const renderPaginationButton = () => (
+  <div class="i-amphtml-story-button-container">
+    <button class="i-amphtml-story-button-move"></button>
+  </div>
+);
 
 /**
  * Desktop navigation buttons.
@@ -70,22 +68,20 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = buildPaginationButton(doc);
+    this.element = renderPaginationButton();
 
     /** @private @const {!Element} */
     this.buttonElement_ = dev().assertElement(
       this.element.querySelector('button')
     );
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(doc);
-
     this.element.classList.add(initialState.className);
-    initialState.label &&
+    if (initialState.label) {
       this.buttonElement_.setAttribute(
         'aria-label',
-        this.localizationService_.getLocalizedString(initialState.label)
+        localize(doc, initialState.label)
       );
+    }
     this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -105,7 +101,7 @@ class PaginationButton {
     state.label
       ? this.buttonElement_.setAttribute(
           'aria-label',
-          this.localizationService_.getLocalizedString(state.label)
+          localize(this.win_.document, state.label)
         )
       : this.buttonElement_.removeAttribute('aria-label');
 

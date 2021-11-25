@@ -1,4 +1,5 @@
-import {LocalizedStringId} from '#service/localization/strings';
+import * as Preact from '#core/dom/jsx';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
 import {
@@ -7,30 +8,29 @@ import {
 } from '#core/window/clipboard';
 import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
 import {listen} from '#utils/event-helper';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {addAttributesToElement} from '#core/dom';
 
 /**
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!Object<string, !LocalizedStringId>}
+ * @const {!Object<string, !LocalizedStringId_Enum>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
-  'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
-  'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
-  'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
-  'line': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
-  'linkedin': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
-  'pinterest': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
-  'gplus': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
-  'tumblr': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
-  'twitter': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
-  'whatsapp': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
-  'sms': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
+  'system': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
+  'email': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
+  'facebook': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'line': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
+  'linkedin': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
+  'pinterest': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
+  'tumblr': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
+  'twitter': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
+  'whatsapp': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
+  'sms': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
 
 /**
@@ -45,55 +45,46 @@ export const SHARE_PROVIDERS_KEY = 'shareProviders';
  */
 export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
-/** @private @const {!./simple-template.ElementDef} */
-const TEMPLATE = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-share-widget'}),
-  children: [
-    {
-      tag: 'ul',
-      attrs: dict({'class': 'i-amphtml-story-share-list'}),
-      children: [
-        {
-          tag: 'li',
-          attrs: dict({'class': 'i-amphtml-story-share-system'}),
-        },
-      ],
-    },
-  ],
-};
+/** @return {!Element} */
+const renderElement = () => (
+  <div class="i-amphtml-story-share-widget">
+    <ul class="i-amphtml-story-share-list">
+      <li class="i-amphtml-story-share-system" />
+    </ul>
+  </div>
+);
 
-/** @private @const {!./simple-template.ElementDef} */
-const SHARE_ITEM_TEMPLATE = {
-  tag: 'li',
-  attrs: dict({'class': 'i-amphtml-story-share-item'}),
-};
+/**
+ * @param {!Node} child
+ * @return {!Element} */
+const renderShareItemListElement = (child) => (
+  <li class="i-amphtml-story-share-item">{child}</li>
+);
 
 /**
  * @private
  * @param {!Element} el
- * @return {./simple-template-ElementDef}
+ * @return {!Element}
  */
-function buildLinkShareItemTemplate(el) {
-  return {
-    tag: 'div',
-    attrs: dict({
-      'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
-      'tabindex': 0,
-      'role': 'button',
-      'aria-label': getLocalizationService(el).getLocalizedString(
-        LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK
-      ),
-    }),
-    children: [
-      {
-        tag: 'span',
-        attrs: dict({'class': 'i-amphtml-story-share-label'}),
-        localizedStringId:
-          LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
-      },
-    ],
-  };
+function renderLinkShareButtonElement(el) {
+  return (
+    <div
+      class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
+      tabIndex={0}
+      role="button"
+      aria-label={localize(
+        el,
+        LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+      )}
+    >
+      <span class="i-amphtml-story-share-label">
+        {localize(
+          el,
+          LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+        )}
+      </span>
+    </div>
+  );
 }
 
 /**
@@ -116,43 +107,33 @@ function buildProviderParams(opt_params) {
 }
 
 /**
+ * Creates an amp-social-share element if the type is valid.
  * @param {!Document} doc
  * @param {string} shareType
  * @param {!JsonObject=} opt_params
- * @return {!Node}
+ * @return {?Element}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderLocalizedStringId = devAssert(
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-    `No localized string to display name for share type ${shareType}.`
-  );
+  const shareProviderLocalizedStringId =
+    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
 
-  return renderSimpleTemplate(
-    doc,
-    /** @type {!Array<!./simple-template.ElementDef>} */ ([
-      {
-        tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (
-          Object.assign(
-            dict({
-              'width': 48,
-              'height': 48,
-              'class': 'i-amphtml-story-share-icon',
-              'type': shareType,
-            }),
-            buildProviderParams(opt_params)
-          )
-        ),
-        children: [
-          {
-            tag: 'span',
-            attrs: dict({'class': 'i-amphtml-story-share-label'}),
-            localizedStringId: shareProviderLocalizedStringId,
-          },
-        ],
-      },
-    ])
+  if (!shareProviderLocalizedStringId) {
+    return;
+  }
+
+  const social = (
+    <amp-social-share
+      width={48}
+      height={48}
+      class="i-amphtml-story-share-icon"
+      type={shareType}
+    >
+      <span class="i-amphtml-story-share-label">
+        {localize(doc, shareProviderLocalizedStringId)}
+      </span>
+    </amp-social-share>
   );
+  return addAttributesToElement(social, buildProviderParams(opt_params));
 }
 
 /**
@@ -161,24 +142,16 @@ function buildProvider(doc, shareType, opt_params) {
  * @return {!Element}
  */
 function buildCopySuccessfulToast(doc, url) {
-  return renderAsElement(
-    doc,
-    /** @type {!./simple-template.ElementDef} */ ({
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-copy-successful'}),
-      children: [
-        {
-          tag: 'div',
-          localizedStringId:
-            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT,
-        },
-        {
-          tag: 'div',
-          attrs: dict({'class': 'i-amphtml-story-copy-url'}),
-          unlocalizedString: url,
-        },
-      ],
-    })
+  return (
+    <div class="i-amphtml-story-copy-successful">
+      <div>
+        {localize(
+          doc,
+          LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+        )}
+      </div>
+      <div class="i-amphtml-story-copy-url">{url}</div>
+    </div>
   );
 }
 
@@ -225,7 +198,7 @@ export class ShareWidget {
 
     this.ampdoc_ = ampdoc;
 
-    this.root = renderAsElement(this.win.document, TEMPLATE);
+    this.root = renderElement();
 
     this.loadProviders();
     this.maybeAddLinkShareButton_();
@@ -248,10 +221,7 @@ export class ShareWidget {
       return;
     }
 
-    const linkShareButton = renderAsElement(
-      this.win.document,
-      buildLinkShareItemTemplate(this.storyEl)
-    );
+    const linkShareButton = renderLinkShareButtonElement(this.storyEl);
 
     this.add_(linkShareButton);
 
@@ -276,10 +246,9 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      const localizationService = getLocalizationService(this.storyEl);
-      devAssert(localizationService, 'Could not retrieve LocalizationService.');
-      const failureString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+      const failureString = localize(
+        this.storyEl,
+        LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl, dev().assertString(failureString));
       return;
@@ -330,7 +299,11 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    this.requestService_.loadShareConfig().then((config) => {
+    const shareEl = this.storyEl.querySelector(
+      'amp-story-social-share, amp-story-bookend'
+    );
+
+    this.requestService_.loadShareConfig(shareEl).then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
@@ -390,9 +363,7 @@ export class ShareWidget {
    */
   add_(node) {
     const list = devAssert(this.root).lastElementChild;
-    const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
-
-    item.appendChild(node);
+    const item = renderShareItemListElement(node);
 
     // `lastElementChild` is the system share button container, which should
     // always be last in list

@@ -23,10 +23,6 @@
     "string": "Facebook",
     "description": "Button label for the share target that shares a link via Facebook."
   },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
   "9": {
     "string": "Get Link",
     "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
@@ -106,10 +102,6 @@
   "35": {
     "string": "Swipe up",
     "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Expand Tweet",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
   },
   "62": {
     "string": "Share starting from this page",
@@ -254,5 +246,9 @@
   "99": {
     "string": "Form successfully submitted",
     "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+  },
+  "100": {
+    "string": "Read more",
+    "description": "Label for a button to open a drawer containing additional content."
   }
 }
