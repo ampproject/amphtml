@@ -126,18 +126,16 @@ export class StandardActions {
    * @return {boolean}
    */
   prefersDarkMode_() {
-    const prefersDarkScheme = this.ampdoc.win.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
-
     try {
       const themeMode = this.ampdoc.win.localStorage.getItem('amp-dark-mode');
 
-      return 'yes' === themeMode || (!themeMode && prefersDarkScheme);
-    } catch (e) {
-      // LocalStorage may not be accessible
-      return prefersDarkScheme;
-    }
+      if (themeMode) {
+        return 'yes' === themeMode;
+      }
+    } catch (e) {}
+
+    // LocalStorage may not be accessible
+    return this.ampdoc.win.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 
   /**
