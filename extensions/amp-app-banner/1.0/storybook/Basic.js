@@ -5,15 +5,32 @@ export default {
   title: 'AppBanner',
   component: BentoAppBanner,
   args: {
-    'exampleProperty': 'example string property argument',
+    'device': ['iOS', 'Android'],
   },
 };
+
+const cssContent = {
+  display: 'flex',
+  textAlign: 'center',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: 10
+}
 
 // DO NOT SUBMIT: This is example code only.
 export const _default = (args) => {
   return (
-    <BentoAppBanner style={{width: 300, height: 200}} {...args}>
-      This text is inside.
+    <BentoAppBanner {...args}>
+      <div className="content" style={cssContent}>
+        <img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png" width="40" height="34" />
+        <div className="description">
+          <h5>Get the App</h5>
+          <p>Experience a richer experience on our mobile app!</p>
+        </div>
+        <div className="actions">
+          <button open-button>Open In App</button>
+        </div>
+      </div>
     </BentoAppBanner>
   );
 };
