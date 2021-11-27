@@ -145,7 +145,10 @@ export class GoogleSubscriptionsPlatform {
       )
       .map((exp) => exp.substring(4));
 
-    const swgConfig = {'experiments': ampExperimentsForSwg};
+    const swgConfig = {
+      'experiments': ampExperimentsForSwg,
+      'skipAccountCreationScreen': true,
+    };
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
