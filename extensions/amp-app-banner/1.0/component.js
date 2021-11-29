@@ -18,8 +18,12 @@ export function BentoAppBanner({exampleTagNameProp, children, ...rest}) {
   const styles = useStyles();
 
   return (
-    <ContainWrapper layout paint {...rest}>
-      {children}
+    <ContainWrapper {...rest}>
+      <div className={styles.banner}>
+        <div className={styles.bannerPadding} />
+        <div className={styles.dismiss} />
+        {children}
+      </div>
     </ContainWrapper>
   );
 }
