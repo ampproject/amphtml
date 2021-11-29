@@ -2,6 +2,10 @@ amp-story-shopping-attachment {
   font-family: 'Poppins', sans-serif !important;
 }
 
+amp-story-shopping-attachment a {
+  text-decoration: none;
+}
+
 .amp-story-shopping-attachment-outer {
   padding: 0 16px 0px;
 }

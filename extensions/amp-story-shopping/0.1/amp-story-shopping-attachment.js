@@ -17,7 +17,9 @@ const PdpTemplate = ({productData, children}) => {
           <div class="medium-16px">${productData.price}</div>
         </div>
         <div class="regular-12px">4.7 (240 reviews)</div>
-        <div class="buy-now-cta">Buy Now</div>
+        <a href={productData.url}>
+          <div class="buy-now-cta">Buy Now</div>
+        </a>
       </div>
       <div class="carousel-wrapper">
         <amp-img
@@ -125,18 +127,19 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
         <PdpTemplate
           productData={
             data.activeProduct ||
-            data[this.shoppingTags_[0].getAttribute('product-tag-id')]
+            data[this.shoppingTags_[0].getAttribute('data-tag-id')]
           }
         >
           {plpTemplate}
         </PdpTemplate>
       );
     } else {
-      // this.templateWrapper_.innerHTML = '';
-      // this.templateWrapper_.appendChild(plpTemplate);
-
       this.templateWrapper_.replaceChildren(plpTemplate);
     }
+
+    this.element.querySelector(
+      '.i-amphtml-story-draggable-drawer-container'
+    ).scrollTop = 0;
 
     super.open(shouldAnimate);
   }

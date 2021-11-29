@@ -197,15 +197,25 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   const openLabelAttr =
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
-  const openLabel =
-    (openLabelAttr && openLabelAttr.trim()) ||
-    localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+
+  let openLabel;
+  if (attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT') {
+    openLabel =
+      pageEl.querySelectorAll('amp-story-shopping-tag').length > 1
+        ? 'View All Products'
+        : 'View Product Details';
+  } else {
+    openLabel =
+      (openLabelAttr && openLabelAttr.trim()) ||
+      localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+  }
+
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   if (openLabel !== 'none') {
-    const textEl = <span class="i-amphtml-story-page-attachment-label"></span>;
-    textEl.textContent = openLabel;
-    openAttachmentEl.appendChild(textEl);
+    openAttachmentEl.appendChild(
+      <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
+    );
   }
 
   // Add images if they are defined.

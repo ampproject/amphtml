@@ -26,6 +26,10 @@
         top: 33%;
         left: 85%;
       }
+      #tag-4 {
+        top: 33%;
+        left: 85%;
+      }      
       .big-text {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 48px;
@@ -69,21 +73,24 @@
                   "product-title": "Nest Mini Speaker",
                   "brand": "Nest",
                   "price": "799",
-                  "img": "/examples/visual-tests/amp-story/img/shopping/product-1.png"
+                  "img": "/examples/visual-tests/amp-story/img/shopping/product-1.png",
+                  "url": "https://store.google.com/product/google_nest_mini"
                 },
                 {
                   "name": "product-2",
                   "product-title": "Nest Audio Speaker",
                   "brand": "Nest",
                   "price": "400",
-                  "img": "/examples/visual-tests/amp-story/img/shopping/product-2.png"
+                  "img": "/examples/visual-tests/amp-story/img/shopping/product-2.png",
+                  "url": "https://store.google.com/us/product/nest_audio"
                 },
                 {
                   "name": "product-10",
                   "product-title": "Nest Home Smart Speaker",
                   "brand": "Nest",
                   "price": "1000",
-                  "img": "/examples/visual-tests/amp-story/img/shopping/product-3.png"
+                  "img": "/examples/visual-tests/amp-story/img/shopping/product-3.png",
+                  "url": "https://www.google.com/shopping/product/r/US/137301725878870814"
                 }
               ]
             }
@@ -108,82 +115,39 @@
         <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
       </amp-story-page>
 
-      <!-- <amp-story-page id="page-2">
-        <amp-story-shopping-config layout='nodisplay'>
-          <script type="application/json">
-            {
-              "products": [
-                {
-                  "name": "product-3",
-                  "price": "799"
-                }                
-              ]
-            }
-          </script>          
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="product-3"></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
-      </amp-story-page>
-      
-      <amp-story-page id="page-3">
+      <amp-story-page id="single product">
         <amp-story-shopping-config layout='nodisplay'>
           <script type="application/json">
             {
               "products": [
                 {
                   "name": "product-4",
-                  "price": "799"
+                  "product-title": "Nest Mini Speaker",
+                  "brand": "Nest",
+                  "price": "79",
+                  "img": "/examples/visual-tests/amp-story/img/shopping/product-1.png",
+                  "url": "https://www.google.com/shopping/product/r/US/137301725878870814"
                 }
               ]
             }
-          </script>          
+          </script>
         </amp-story-shopping-config>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="product-4"></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="product-2"></amp-story-shopping-tag>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
         </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="text-wrap">
+              <div class='big-text'>Best for budget: The Nest family</div>
+              <div class='small-text'>The best range of options for any budget buyer is the Nest family, get a full dynamic range and pair.</div>
+            </div>
+          </div>
+        </amp-story-grid-layer>   
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag id="tag-4" data-tag-id="product-4"></amp-story-shopping-tag>
+        </amp-story-grid-layer>             
         <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
       </amp-story-page>      
-          
-      <amp-story-page id="page-4">
-        <amp-story-shopping-config layout='nodisplay'>
-          <script type="application/json">
-            {
-              "products": [
-                {
-                  "name": "product-5",
-                  "price": "799"
-                }                
-              ]
-            }
-          </script>          
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="product-5"></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
-      </amp-story-page>
-
-      <amp-story-page id="page-5">
-        <amp-story-shopping-config layout='nodisplay'>
-          <script type="application/json">
-            {
-              "products": [
-                {
-                  "name": "product-1",
-                  "price": "799"
-                }                
-              ]
-            }
-          </script>          
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="product-1"></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
-      </amp-story-page> -->
 
     </amp-story>
   </body>
