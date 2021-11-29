@@ -294,6 +294,6 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
  * This extension installs the share widget.
  */
 
-AMP.extension('amp-story-interactive', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-social-share-menu', AmpStoryShareMenuElement);
+AMP.extension('amp-story-share-menu', '0.1', (AMP) => {
+  AMP.registerElement('amp-story-share-menu', AmpStoryShareMenu);
 });

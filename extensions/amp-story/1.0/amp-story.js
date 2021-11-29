@@ -52,7 +52,6 @@ import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '#service';
-import {ShareMenu} from './amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -91,6 +90,7 @@ import {
 } from './utils';
 import {isEsm} from '#core/mode';
 import {upgradeBackgroundAudio} from './audio';
+import {AmpStoryShare} from './amp-story-share';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -213,8 +213,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
-    this.shareMenu_ = new ShareMenu(this.win, this.element);
+    /** @private @const {!AmpStoryShare} Sharing logic */
+    this.shareMenu_ = new AmpStoryShare(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
@@ -929,9 +929,6 @@ export class AmpStory extends AMP.BaseElement {
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
           this.activePage_.openAttachment(false /** shouldAnimate */);
         }
-
-        // Preloads and prerenders the share menu.
-        this.shareMenu_.build();
 
         const infoDialog = shouldShowStoryUrlInfo(
           devAssert(this.viewer_),
