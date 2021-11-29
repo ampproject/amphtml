@@ -16,10 +16,10 @@ const TAG = 'amp-story-share';
 
 export class AmpStoryShare {
   /**
-   * @param {!Element} storyEl
    * @param {!Window} win
+   * @param {!Element} storyEl
    */
-  constructor(storyEl, win) {
+  constructor(win, storyEl) {
     /**  @private {!Window} */
     this.win_ = win;
 
@@ -29,8 +29,12 @@ export class AmpStoryShare {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
 
+    console.log('getStoreService');
+
     /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(win, storyEl);
+
+    console.log('getAnalyticsService');
 
     /** @private @const {!Element} */
     this.parentEl_ = storyEl;

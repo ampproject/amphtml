@@ -213,8 +213,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {!AmpStoryShare} Sharing logic */
-    this.shareMenu_ = new AmpStoryShare(this.win, this.element);
+    new AmpStoryShare(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
