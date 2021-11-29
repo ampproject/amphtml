@@ -53,6 +53,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+    this.listen();
   }
 
   /** @override */
@@ -122,7 +123,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     return super.sendXhrRequest(adUrl).then((response) => {
       return response.text().then((responseText) => {
         if (includes(responseText, SAS_NO_AD_STR)) {
-          this./*OK*/ collapse();
+          this.collapseIframe();
         }
         return new Response(response);
       });
@@ -174,6 +175,27 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
       BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
     };
+  }
+
+  /**
+   * Collapses ad iframe
+   */
+  collapseIframe() {
+    this./*OK*/ collapse();
+  }
+
+  /**
+   * Adds message event listener and triggers collapsing
+   */
+  listen() {
+    const collapse = () => {
+      this.collapseIframe();
+    };
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'collapse') {
+        collapse();
+      }
+    });
   }
 
   /**
