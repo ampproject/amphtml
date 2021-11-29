@@ -58,6 +58,15 @@ function ScrollerWithRef(
 ) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
+  const containerRefCallback = (ref) => {
+    if (containerRef.current) {
+      containerRef.current.removeEventListener('scroll', handleScroll);
+    }
+    containerRef.current = ref;
+    if (ref) {
+      ref.addEventListener('scroll', handleScroll, {passive: true});
+    }
+  };
 
   /**
    * The number of slides we want to place before the reference or resting index.
@@ -250,9 +259,8 @@ function ScrollerWithRef(
 
   return (
     <div
-      ref={containerRef}
+      ref={containerRefCallback}
       onClick={onClick}
-      onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
         axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
       }`}
