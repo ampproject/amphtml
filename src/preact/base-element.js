@@ -1,8 +1,8 @@
 import {devAssert} from '#core/assert';
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
-import {Loading} from '#core/constants/loading-instructions';
-import {ReadyState} from '#core/constants/ready-state';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Loading_Enum} from '#core/constants/loading-instructions';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 import {
   addGroup,
   discover,
@@ -12,7 +12,11 @@ import {
 } from '#core/context';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {PauseHelper} from '#core/dom/video/pause-helper';
@@ -26,7 +30,12 @@ import {BaseElement} from '#preact/bento-ce';
 
 import {WithAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
-import {AmpElementPropDef, collectProps} from './parse-props';
+import {
+  AmpElementPropDef,
+  HAS_SELECTOR,
+  checkPropsFor,
+  collectProps,
+} from './parse-props';
 
 import {installShadowStyle} from '../shadow-embed';
 
@@ -77,25 +86,10 @@ const UNSLOTTED_GROUP = 'unslotted';
 const MATCH_ANY = () => true;
 
 /**
- * @param {!Object<string, !AmpElementPropDef>} propDefs
- * @param {function(!AmpElementPropDef):boolean} cb
- * @return {boolean}
- */
-function checkPropsFor(propDefs, cb) {
-  return Object.values(propDefs).some(cb);
-}
-
-/**
  * @param {!AmpElementPropDef} def
  * @return {boolean}
  */
 const HAS_MEDIA = (def) => !!def.media;
-
-/**
- * @param {!AmpElementPropDef} def
- * @return {boolean}
- */
-const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
 
 /**
  * @param {!AmpElementPropDef} def
@@ -143,7 +137,7 @@ export class PreactBaseElement extends BaseElement {
 
     /** @private {!JsonObject} */
     this.defaultProps_ = dict({
-      'loading': Loading.AUTO,
+      'loading': Loading_Enum.AUTO,
       'onReadyState': (state, opt_failure) => {
         this.onReadyState_(state, opt_failure);
       },
@@ -165,7 +159,7 @@ export class PreactBaseElement extends BaseElement {
     this.context_ = {
       renderable: false,
       playable: true,
-      loading: Loading.AUTO,
+      loading: Loading_Enum.AUTO,
       notify: () => this.mutateElement(() => {}),
     };
 
@@ -252,7 +246,7 @@ export class PreactBaseElement extends BaseElement {
         // Besides normal benefits of using plain CSS, an important feature of
         // using this layout is that AMP does not add "sizer" elements thus
         // keeping the user DOM clean.
-        layout == Layout.CONTAINER
+        layout == Layout_Enum.CONTAINER
       );
     }
     return super.isLayoutSupported(layout);
@@ -333,7 +327,7 @@ export class PreactBaseElement extends BaseElement {
     this.scheduleRender_();
 
     if (Ctor['loadable']) {
-      this.setReadyState?.(ReadyState.LOADING);
+      this.setReadyState?.(ReadyState_Enum.LOADING);
     }
     this.maybeUpdateReadyState_();
 
@@ -346,7 +340,7 @@ export class PreactBaseElement extends BaseElement {
     if (!Ctor['loadable']) {
       return;
     }
-    this.mutateProps(dict({'loading': Loading.EAGER}));
+    this.mutateProps(dict({'loading': Loading_Enum.EAGER}));
     this.resetLoading_ = true;
   }
 
@@ -354,8 +348,8 @@ export class PreactBaseElement extends BaseElement {
   mountCallback() {
     discover(this.element);
     const Ctor = this.constructor;
-    if (Ctor['loadable'] && this.getProp('loading') != Loading.AUTO) {
-      this.mutateProps({'loading': Loading.AUTO});
+    if (Ctor['loadable'] && this.getProp('loading') != Loading_Enum.AUTO) {
+      this.mutateProps({'loading': Loading_Enum.AUTO});
       this.resetLoading_ = false;
     }
   }
@@ -365,7 +359,7 @@ export class PreactBaseElement extends BaseElement {
     discover(this.element);
     const Ctor = this.constructor;
     if (Ctor['loadable']) {
-      this.mutateProps({'loading': Loading.UNLOAD});
+      this.mutateProps({'loading': Loading_Enum.UNLOAD});
     }
     this.updateIsPlaying_(false);
     this.mediaQueryProps_?.dispose();
@@ -418,10 +412,10 @@ export class PreactBaseElement extends BaseElement {
    * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
    * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ActionTrust} minTrust
+   * @param {../action-constants.ActionTrust_Enum} minTrust
    * @protected
    */
-  registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
+  registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     this.registerAction?.(
       alias,
       (invocation) => handler(this.api(), invocation),
@@ -498,7 +492,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {!ReadyState} state
+   * @param {!ReadyState_Enum} state
    * @param {*=} opt_failure
    * @private
    */
@@ -510,13 +504,13 @@ export class PreactBaseElement extends BaseElement {
       // These are typically iframe-based elements where we don't know
       // whether a media is currently playing. So we have to assume that
       // it is whenever the element is loaded.
-      this.updateIsPlaying_(state == ReadyState.COMPLETE);
+      this.updateIsPlaying_(state == ReadyState_Enum.COMPLETE);
     }
 
     // Reset "loading" property back to "auto".
     if (this.resetLoading_) {
       this.resetLoading_ = false;
-      this.mutateProps({'loading': Loading.AUTO});
+      this.mutateProps({'loading': Loading_Enum.AUTO});
     }
   }
 
@@ -706,7 +700,7 @@ export class PreactBaseElement extends BaseElement {
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
     if (!isShadow && !isDetached) {
       this.mutateElement(() =>
-        dispatchCustomEvent(this.element, AmpEvents.DOM_UPDATE, null)
+        dispatchCustomEvent(this.element, AmpEvents_Enum.DOM_UPDATE, null)
       );
     }
 
@@ -828,7 +822,7 @@ export class PreactBaseElement extends BaseElement {
   pauseCallback() {
     const Ctor = this.constructor;
     if (Ctor['unloadOnPause']) {
-      this.mutateProps(dict({'loading': Loading.UNLOAD}));
+      this.mutateProps(dict({'loading': Loading_Enum.UNLOAD}));
       this.resetLoading_ = true;
     } else {
       const {currentRef_: api} = this;
@@ -981,20 +975,6 @@ PreactBaseElement['delegatesFocus'] = false;
 PreactBaseElement['props'] = {};
 
 /**
- * @param {null|string} attributeName
- * @param {string|undefined} attributePrefix
- * @return {boolean}
- */
-function matchesAttrPrefix(attributeName, attributePrefix) {
-  return (
-    attributeName !== null &&
-    attributePrefix !== undefined &&
-    attributeName.startsWith(attributePrefix) &&
-    attributeName !== attributePrefix
-  );
-}
-
-/**
  * @param {!NodeList} nodeList
  * @return {boolean}
  */
@@ -1039,7 +1019,7 @@ function shouldMutationBeRerendered(Ctor, m) {
       if (
         m.attributeName == def.attr ||
         (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
-        matchesAttrPrefix(m.attributeName, def.attrPrefix)
+        def.attrMatches?.(m.attributeName)
       ) {
         return true;
       }

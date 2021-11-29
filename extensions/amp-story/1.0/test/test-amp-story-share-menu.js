@@ -3,7 +3,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
@@ -123,7 +123,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     // Create escape keyup event.
     const keyupEvent = new Event('keyup');
-    keyupEvent.keyCode = Keys.ESCAPE;
+    keyupEvent.keyCode = Keys_Enum.ESCAPE;
     win.dispatchEvent(keyupEvent);
 
     expect(clickCallbackSpy).to.have.been.calledOnce;

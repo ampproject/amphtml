@@ -1,6 +1,6 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
 import {Services} from '#service';
@@ -877,8 +877,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
   async function toggleVisibility(perf, on) {
     viewerVisibilityState = on
-      ? VisibilityState.VISIBLE
-      : VisibilityState.HIDDEN;
+      ? VisibilityState_Enum.VISIBLE
+      : VisibilityState_Enum.HIDDEN;
     perf.onAmpDocVisibilityChange_();
   }
 
@@ -1042,7 +1042,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       toggleVisibility(perf, false);
 
       const lcpEvents = perf.events_.filter(({label}) => label === 'lcp');
-      expect(lcpEvents.length).to.equal(1);
+      expect(lcpEvents.length).to.equal(2);
+      expect(lcpEvents).deep.include({
+        label: 'lcp',
+        delta: 12,
+      });
       expect(lcpEvents).deep.include({
         label: 'lcp',
         delta: 23,
@@ -1248,7 +1252,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
       });
 
-      viewerVisibilityState = VisibilityState.INACTIVE;
+      viewerVisibilityState = VisibilityState_Enum.INACTIVE;
       perf.onAmpDocVisibilityChange_();
 
       const clsEvents = perf.events_.filter((evt) =>

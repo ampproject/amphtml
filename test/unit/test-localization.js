@@ -4,7 +4,7 @@ import {
   getLanguageCodesFromString,
 } from '#service/localization';
 import {
-  LocalizedStringId,
+  LocalizedStringId_Enum,
   createPseudoLocale,
 } from '#service/localization/strings';
 
@@ -19,11 +19,11 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should have unique values', () => {
       // Transform string IDs from a map of keys to values to a multimap of
       // values to a list of keys that have that value.
-      const localizedStringIdKeys = Object.keys(LocalizedStringId);
+      const localizedStringIdKeys = Object.keys(LocalizedStringId_Enum);
       const valuesToKeys = localizedStringIdKeys.reduce(
         (freq, LocalizedStringIdKey) => {
           const LocalizedStringIdValue =
-            LocalizedStringId[LocalizedStringIdKey];
+            LocalizedStringId_Enum[LocalizedStringIdKey];
           if (!freq[LocalizedStringIdValue]) {
             freq[LocalizedStringIdValue] = [];
           }

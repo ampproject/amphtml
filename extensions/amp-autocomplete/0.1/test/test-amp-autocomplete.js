@@ -1,6 +1,6 @@
 import '../amp-autocomplete';
 import {AmpAutocomplete} from '../amp-autocomplete';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
@@ -616,7 +616,7 @@ describes.realWin(
     });
 
     describe('keyDownHandler_() on arrow keys', () => {
-      const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
+      const event = {key: Keys_Enum.DOWN_ARROW, preventDefault: () => {}};
       let displayInputSpy, updateActiveSpy, eventPreventSpy;
 
       beforeEach(() => {
@@ -679,7 +679,7 @@ describes.realWin(
         return impl
           .layoutCallback()
           .then(() => {
-            event.key = Keys.UP_ARROW;
+            event.key = Keys_Enum.UP_ARROW;
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -693,7 +693,7 @@ describes.realWin(
         return impl
           .layoutCallback()
           .then(() => {
-            event.key = Keys.UP_ARROW;
+            event.key = Keys_Enum.UP_ARROW;
             impl.activeIndex_ = 0;
             return impl.keyDownHandler_(event);
           })
@@ -707,7 +707,7 @@ describes.realWin(
 
     describe('keyDownHandler_() on Enter', () => {
       const event = {
-        key: Keys.ENTER,
+        key: Keys_Enum.ENTER,
         preventDefault: () => {},
         target: {textContent: 'hello'},
       };
@@ -771,7 +771,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Esc', () => {
-      const event = {key: Keys.ESCAPE, preventDefault: () => {}};
+      const event = {key: Keys_Enum.ESCAPE, preventDefault: () => {}};
       const displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
@@ -797,7 +797,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Tab', () => {
-      const event = {key: Keys.TAB, preventDefault: () => {}};
+      const event = {key: Keys_Enum.TAB, preventDefault: () => {}};
       const eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
@@ -817,7 +817,7 @@ describes.realWin(
     });
 
     describe('keyDownHandler_() on Backspace', () => {
-      const event = {key: Keys.BACKSPACE};
+      const event = {key: Keys_Enum.BACKSPACE};
 
       it('should set flag to true when suggest-first is present', () => {
         return impl
@@ -847,7 +847,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() and fallthrough on any other key', () => {
-      const event = {key: Keys.LEFT_ARROW};
+      const event = {key: Keys_Enum.LEFT_ARROW};
       return impl.layoutCallback().then(() => {
         return expect(impl.keyDownHandler_(event)).to.be.fulfilled;
       });

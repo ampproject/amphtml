@@ -21,24 +21,17 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
-import {AmpEvents} from '#core/constants/amp-events';
-import {
-  AmpStoryEmbeddedComponent,
-  EMBED_ID_ATTRIBUTE_NAME,
-  EXPANDABLE_COMPONENTS,
-  expandableElementsSelectors,
-} from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {EventType, dispatch} from './events';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {MediaPool} from './media-pool';
 import {Services} from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
-import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
+import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
 import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
@@ -48,7 +41,6 @@ import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '#core/types/function';
 import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
-import {getAmpdoc} from '../../../src/service-helpers';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {localize} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
@@ -59,13 +51,14 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {px, toggle} from '#core/dom/style';
+import {toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
+import {embeddedElementsSelectors} from './amp-story-embedded-component';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -99,19 +92,6 @@ export const Selectors = {
   ALL_VIDEO: 'amp-story-grid-layer video',
   ALL_TABBABLE: 'a, amp-twitter > iframe',
 };
-
-/** @private @const {string} */
-const EMBEDDED_COMPONENTS_SELECTORS = Object.keys(EXPANDABLE_COMPONENTS).join(
-  ', '
-);
-
-/** @private @const {string} */
-const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
-  expandableElementsSelectors()
-).join(',');
-
-/** @private @const {number} */
-const RESIZE_TIMEOUT_MS = 1000;
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
@@ -168,33 +148,6 @@ export const NavigationDirection = {
 };
 
 /**
- * Prepares an embed for its expanded mode animation. Since this requires
- * calculating the size of the embed, we debounce after each resize event to
- * make sure we have the final size before doing the calculation for the
- * animation.
- * @param {!Window} win
- * @param {!Element} page
- * @param {!../../../src/service/mutator-interface.MutatorInterface} mutator
- * @return {function(!Element, ?UnlistenDef)}
- */
-function debounceEmbedResize(win, page, mutator) {
-  return debounce(
-    win,
-    (el, unlisten) => {
-      AmpStoryEmbeddedComponent.prepareForAnimation(
-        page,
-        dev().assertElement(el),
-        mutator
-      );
-      if (unlisten) {
-        unlisten();
-      }
-    },
-    RESIZE_TIMEOUT_MS
-  );
-}
-
-/**
  * The <amp-story-page> custom element, which represents a single page of
  * an <amp-story>.
  */
@@ -214,9 +167,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AdvancementConfig} */
     this.advancement_ = null;
 
-    /** @private {?Element} */
-    this.cssVariablesStyleEl_ = null;
-
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
       this.win,
@@ -235,9 +185,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
-
-    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     const deferred = new Deferred();
 
@@ -266,9 +213,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
-
-    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
-    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -391,7 +335,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           this.maybeUpdateAutoAdvanceTime_(videoDuration);
           return;
         }
-        listenOnce(video, VideoEvents.LOADEDMETADATA, () => {
+        listenOnce(video, VideoEvents_Enum.LOADEDMETADATA, () => {
           this.maybeUpdateAutoAdvanceTime_(videoImpl.getDuration());
         });
       });
@@ -466,7 +410,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /**
@@ -542,7 +486,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       registerAllPromise.then(() => {
         this.signals()
-          .whenSignal(CommonSignals.LOAD_END)
+          .whenSignal(CommonSignals_Enum.LOAD_END)
           .then(() => {
             if (this.state_ == PageState.PLAYING) {
               this.advancement_.start();
@@ -578,9 +522,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.backgroundAudioDeferred_.resolve();
 
     this.muteAllMedia();
-    this.getViewport().onResize(
-      debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
-    );
 
     this.renderOpenAttachmentUI_();
 
@@ -589,58 +530,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
     ]);
-  }
-
-  /** @override */
-  onLayoutMeasure() {
-    const layoutBox = this.getLayoutSize();
-    // Only measures from the first story page, that always gets built because
-    // of the prerendering optimizations in place.
-    if (
-      !isPrerenderActivePage(this.element) ||
-      (this.layoutBox_ &&
-        this.layoutBox_.width === layoutBox.width &&
-        this.layoutBox_.height === layoutBox.height)
-    ) {
-      return;
-    }
-
-    this.layoutBox_ = layoutBox;
-
-    return this.getVsync().runPromise(
-      {
-        measure: (state) => {
-          const {height, width} = layoutBox;
-          state.height = height;
-          state.width = width;
-          state.vh = height / 100;
-        },
-        mutate: (state) => {
-          const {height, width} = state;
-          if (state.height === 0 && state.width === 0) {
-            return;
-          }
-          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
-          if (!this.cssVariablesStyleEl_) {
-            const doc = this.win.document;
-            this.cssVariablesStyleEl_ = doc.createElement('style');
-            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
-            doc.head.appendChild(this.cssVariablesStyleEl_);
-          }
-          this.cssVariablesStyleEl_.textContent = `:root {--story-page-vh: ${px(
-            state.vh
-          )} !important}`;
-        },
-      },
-      {}
-    );
-  }
-
-  /**
-   * @private
-   */
-  onResize_() {
-    this.findAndPrepareEmbeddedComponents_(true /* forceResize */);
   }
 
   /**
@@ -684,7 +573,9 @@ export class AmpStoryPage extends AMP.BaseElement {
             }
 
             whenUpgradedToCustomElement(mediaEl)
-              .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
+              .then((el) =>
+                el.signals().whenSignal(CommonSignals_Enum.LOAD_END)
+              )
               .then(resolve, resolve);
             break;
           case 'amp-audio':
@@ -726,9 +617,9 @@ export class AmpStoryPage extends AMP.BaseElement {
           case 'amp-audio':
           case 'amp-video':
             const signal =
-              mediaEl.getAttribute('layout') === Layout.NODISPLAY
-                ? CommonSignals.BUILT
-                : CommonSignals.LOAD_END;
+              mediaEl.getAttribute('layout') === Layout_Enum.NODISPLAY
+                ? CommonSignals_Enum.BUILT
+                : CommonSignals_Enum.LOAD_END;
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(signal))
@@ -751,12 +642,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Finds embedded components in page and prepares them.
-   * @param {boolean=} forceResize
    * @private
    */
-  findAndPrepareEmbeddedComponents_(forceResize = false) {
+  findAndPrepareEmbeddedComponents_() {
     this.addClickShieldToEmbeddedComponents_();
-    this.resizeInteractiveEmbeddedComponents_(forceResize);
     this.buildAffiliateLinks_();
   }
 
@@ -767,7 +656,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   addClickShieldToEmbeddedComponents_() {
     const componentEls = toArray(
-      scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
+      scopedQuerySelectorAll(this.element, embeddedElementsSelectors())
     );
 
     if (componentEls.length <= 0) {
@@ -778,37 +667,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       componentEls.forEach((el) => {
         el.classList.add('i-amphtml-embedded-component');
       });
-    });
-  }
-
-  /**
-   * Resizes interactive embeds to prepare them for their expanded animation.
-   * @param {boolean} forceResize
-   * @private
-   */
-  resizeInteractiveEmbeddedComponents_(forceResize) {
-    toArray(
-      scopedQuerySelectorAll(
-        this.element,
-        INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS
-      )
-    ).forEach((el) => {
-      const debouncePrepareForAnimation = debounceEmbedResize(
-        this.win,
-        this.element,
-        this.mutator_
-      );
-
-      if (forceResize) {
-        debouncePrepareForAnimation(el, null /* unlisten */);
-      } else if (!el.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
-        // Element has not been prepared for its animation yet.
-        const unlisten = listen(el, AmpEvents.SIZE_CHANGED, () => {
-          debouncePrepareForAnimation(el, unlisten);
-        });
-        // Run in case target never changes size.
-        debouncePrepareForAnimation(el, null /* unlisten */);
-      }
     });
   }
 
@@ -1193,7 +1051,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
     this.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => this.animationManager_.applyLastFrame());
   }
 
@@ -1637,7 +1495,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     labelEl.textContent = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO
+      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
     );
 
     this.playMessageEl_.addEventListener('click', () => {
@@ -1685,7 +1543,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     labelEl.textContent = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO
     );
 
     this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));

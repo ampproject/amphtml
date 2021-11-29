@@ -420,8 +420,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
+  const babelCaller =
+    options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
+
   const babelPlugin = getEsbuildBabelPlugin(
-    options.minify ? 'minified' : 'unminified',
+    babelCaller,
     /* enableCache */ true
   );
   const plugins = [babelPlugin];
@@ -453,6 +456,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
+        mainFields: ['module', 'browser', 'main'],
         write: false,
       });
     } else {
@@ -525,6 +529,27 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 const nameCache = {};
 
 /**
+ * Implements a stable identifier mangler, based only on the input order.
+ *
+ * Terser uses a char-frequency mangler by default, which isn't stable and
+ * causes wild fluctuations in bundle size.
+ */
+const mangleIdentifier = {
+  get(num) {
+    const charset =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_0123456789';
+    let base = 54;
+    let id = '';
+    do {
+      id = charset[num % base] + id;
+      num = Math.floor(num / base);
+      base = 64;
+    } while (num > 0);
+    return id;
+  },
+};
+
+/**
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
@@ -532,13 +557,15 @@ const nameCache = {};
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
 async function minify(code, map) {
+  /* eslint-disable local/camelcase */
   const terserOptions = {
     mangle: {
       properties: {
         regex: '_AMP_PRIVATE_$',
-        // eslint-disable-next-line local/camelcase
         keep_quoted: /** @type {'strict'} */ ('strict'),
+        nth_identifier: mangleIdentifier,
       },
+      nth_identifier: mangleIdentifier,
     },
     compress: {
       // Settled on this count by incrementing number until there was no more
@@ -547,17 +574,18 @@ async function minify(code, map) {
     },
     output: {
       beautify: !!argv.pretty_print,
-      // eslint-disable-next-line local/camelcase
       keep_quoted_props: true,
     },
     sourceMap: {content: map},
     toplevel: true,
     module: !!argv.esm,
-    nameCache,
+    nameCache: argv.nomanglecache ? undefined : nameCache,
   };
+  /* eslint-enable local/camelcase */
+
   // Remove the local variable name cache which should not be reused between binaries.
   // See https://github.com/ampproject/amphtml/issues/36476
-  /** @type {any}*/ (nameCache).vars = {};
+  nameCache.vars = undefined;
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};
@@ -818,4 +846,5 @@ module.exports = {
   printNobuildHelp,
   watchDebounceDelay,
   shouldUseClosure,
+  mangleIdentifier,
 };

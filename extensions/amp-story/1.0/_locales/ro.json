@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Obțineți linkul"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Glisați în sus"
-  },
-  "36": {
-    "string": "Extindeți tweetul"
   },
   "62": {
     "string": "Distribuiți începând cu această pagină"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Se deschide"
+  },
+  "98": {
+    "string": "Formularul nu a fost trimis; încercați din nou"
+  },
+  "99": {
+    "string": "Formularul a fost trimis cu succes"
   }
 }
