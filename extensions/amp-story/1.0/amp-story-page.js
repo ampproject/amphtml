@@ -109,17 +109,19 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
 
 /**
- * @param {string|Node} label
+ * @param {!Element} context
  * @param {function(Event)} onClick
  * @return {!Element}
  */
-const renderPlayMessageElement = (label, onClick) => (
+const renderPlayMessageElement = (context, onClick) => (
   <button
     role="button"
     class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
     onClick={onClick}
   >
-    <span class="i-amphtml-story-page-play-label">{label}</span>
+    <span class="i-amphtml-story-page-play-label">
+      {localize(context, LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO)}
+    </span>
     <span class="i-amphtml-story-page-play-icon"></span>
   </button>
 );
@@ -1493,16 +1495,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
-    this.playMessageEl_ = renderPlayMessageElement(
-      localize(this.element, LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO),
-      () => {
-        this.togglePlayMessage_(false);
-        this.startMeasuringAllVideoPerformance_();
-        this.mediaPoolPromise_
-          .then((mediaPool) => mediaPool.blessAll())
-          .then(() => this.playAllMedia_());
-      }
-    );
+    this.playMessageEl_ = renderPlayMessageElement(this.element, () => {
+      this.togglePlayMessage_(false);
+      this.startMeasuringAllVideoPerformance_();
+      this.mediaPoolPromise_
+        .then((mediaPool) => mediaPool.blessAll())
+        .then(() => this.playAllMedia_());
+    });
 
     this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
   }

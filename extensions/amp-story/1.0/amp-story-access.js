@@ -5,7 +5,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {Layout_Enum} from '#core/dom/layout';
-import {closest} from '#core/dom/query';
 import {copyChildren, removeChildren} from '#core/dom';
 import {devAssert, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
@@ -24,16 +23,17 @@ export const Type_Enum = {
 };
 
 /**
+ * @param {function():void} onOverflowClick
  * @param {?Element=} header
- * @param {?Element=} closeButton
+ * @param {?Element=} children
  * @return {!Element}
  */
-const renderDrawerElement = (header, closeButton) => {
+const renderDrawerElement = (onOverflowClick, header, children) => {
   return (
-    <div class="i-amphtml-story-access-overflow">
+    <div class="i-amphtml-story-access-overflow" onClick={onOverflowClick}>
       <div class="i-amphtml-story-access-container">
         {header}
-        <div class="i-amphtml-story-access-content">{closeButton}</div>
+        <div class="i-amphtml-story-access-content">{children}</div>
       </div>
     </div>
   );
@@ -46,9 +46,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?Element} */
-    this.containerEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
@@ -63,9 +60,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     const drawerEl = this.renderDrawerEl_();
 
-    this.containerEl_ = devAssert(
-      drawerEl.querySelector('.i-amphtml-story-access-container')
-    );
     const contentEl = devAssert(
       drawerEl.querySelector('.i-amphtml-story-access-content')
     );
@@ -100,8 +94,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
-
-    this.element.addEventListener('click', (event) => this.onClick_(event));
   }
 
   /**
@@ -130,20 +122,12 @@ export class AmpStoryAccess extends AMP.BaseElement {
   }
 
   /**
-   * Handles click events and maybe closes the paywall.
    * @param {!Event} event
-   * @return {*} TODO(#23582): Specify return type
    * @private
    */
-  onClick_(event) {
-    const el = devAssert(event.target);
-
-    if (el.classList.contains('i-amphtml-story-access-close-button')) {
-      return this.toggle_(false);
-    }
-
-    // Closes the menu if click happened outside of the main container.
-    if (!closest(el, (el) => el === this.containerEl_, this.element)) {
+  onOverflowClick_(event) {
+    // Closes the menu if click happened directly on overflow element.
+    if (event.target === event.currentTarget) {
       this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
     }
   }
@@ -176,6 +160,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   renderDrawerEl_() {
+    const onOverflowClick = (event) => this.onOverflowClick_(event);
     switch (this.getType_()) {
       case Type_Enum.BLOCKING:
         const logoSrc = getStoryAttributeSrc(
@@ -191,14 +176,24 @@ export class AmpStoryAccess extends AMP.BaseElement {
             ></div>
           </div>
         );
-        return renderDrawerElement(header);
+        return renderDrawerElement(onOverflowClick, header);
       case Type_Enum.NOTIFICATION:
         const closeButton = (
-          <span class="i-amphtml-story-access-close-button" role="button">
+          <span
+            class="i-amphtml-story-access-close-button"
+            role="button"
+            onClick={() => {
+              this.toggle_(false);
+            }}
+          >
             &times;
           </span>
         );
-        return renderDrawerElement(null, closeButton);
+        return renderDrawerElement(
+          onOverflowClick,
+          /* header */ null,
+          closeButton
+        );
       default:
         user().error(
           TAG,

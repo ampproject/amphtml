@@ -15,9 +15,7 @@ import {Keys_Enum} from '#core/constants/key-codes';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {ShareWidget} from './amp-story-share';
-import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
 
@@ -27,17 +25,22 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
  * @param {!Element} element
- * @param {!Element} shareWidgetElement
- * @param {function(Event)} onClick
+ * @param {function(Event)} close
+ * @param {?Array<?Element|?string>|?Element|?string|undefined} children
  * @return {!Element}
  */
-const renderForFallbackSharing = (element, shareWidgetElement, onClick) => {
+const renderForFallbackSharing = (element, close, children) => {
   return (
     <div
       class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
-      onClick={onClick}
       aria-hidden="true"
       role="alert"
+      onClick={(event) => {
+        // Close if click occurred directly on this element.
+        if (event.target === event.currentTarget) {
+          close(event);
+        }
+      }}
     >
       <div class="i-amphtml-story-share-menu-container">
         <button
@@ -47,10 +50,11 @@ const renderForFallbackSharing = (element, shareWidgetElement, onClick) => {
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
           )}
           role="button"
+          onClick={close}
         >
           &times;
         </button>
-        {shareWidgetElement}
+        {children}
       </div>
     </div>
   );
@@ -147,10 +151,13 @@ export class ShareMenu {
    * @return {!Element}
    */
   buildForFallbackSharing_() {
+    const shareWidgetElement = this.shareWidget_.build(
+      getAmpdoc(this.parentEl_)
+    );
     this.element_ = renderForFallbackSharing(
       this.parentEl_,
-      this.shareWidget_.build(getAmpdoc(this.parentEl_)),
-      (event) => this.onShareMenuClick_(event)
+      () => this.close_(),
+      shareWidgetElement
     );
 
     // Only listen for closing when system share is unsupported, since the
@@ -215,23 +222,6 @@ export class ShareMenu {
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element_
     );
-  }
-
-  /**
-   * Handles click events and maybe closes the menu for the fallback UI.
-   * @param  {!Event} event
-   */
-  onShareMenuClick_(event) {
-    const el = dev().assertElement(event.target);
-    const {firstElementChild} = this.element_;
-
-    if (
-      el.classList.contains('.i-amphtml-story-share-menu-close-button') ||
-      // Click happened outside of the menu main container:
-      !closest(el, (el) => el === firstElementChild, this.element_)
-    ) {
-      this.close_();
-    }
   }
 
   /**

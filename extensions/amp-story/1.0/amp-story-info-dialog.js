@@ -82,10 +82,18 @@ export class InfoDialog {
       <div
         class="i-amphtml-story-info-dialog i-amphtml-story-system-reset"
         onClick={(event) => {
-          this.onInfoDialogClick_(event);
+          // Close if click occurred directly on this element.
+          if (event.target === event.currentTarget) {
+            this.close_();
+          }
         }}
       >
-        <div class="i-amphtml-story-info-dialog-container">
+        <div
+          class="i-amphtml-story-info-dialog-container"
+          onClick={(event) => {
+            this.onClick_(event);
+          }}
+        >
           <h1 class="i-amphtml-story-info-heading">
             {localize(
               this.parentEl_,
@@ -150,16 +158,9 @@ export class InfoDialog {
   }
 
   /**
-   * Handles click events and maybe closes the dialog.
    * @param  {!Event} event
    */
-  onInfoDialogClick_(event) {
-    const el = dev().assertElement(event.target);
-    // Closes the dialog if click happened outside of the dialog main container.
-    const mainContainer = this.element_.firstElementChild;
-    if (!closest(el, (el) => el === mainContainer, this.element_)) {
-      this.close_();
-    }
+  onClick_(event) {
     const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
     if (anchorClicked) {
       triggerClickFromLightDom(anchorClicked, this.element_);
