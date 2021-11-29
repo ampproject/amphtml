@@ -11,6 +11,8 @@ import {
 import {Services} from '#service';
 import {devAssert, user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {getAmpdoc} from '../../../src/service-helpers';
+import {toggle} from 'cli-spinners';
 
 const TAG = 'amp-story-share';
 
@@ -23,39 +25,38 @@ export class AmpStoryShare {
     /**  @private {!Window} */
     this.win_ = win;
 
-    /** @private {!AmpStoryShareMenu} */
+    /** @private {?Element} */
     this.shareMenu_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
 
-    console.log('getStoreService');
-
     /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(win, storyEl);
-
-    console.log('getAnalyticsService');
 
     /** @private @const {!Element} */
     this.parentEl_ = storyEl;
 
+    this.ampDoc_ = getAmpdoc(storyEl);
+
     this.initializeListeners_();
   }
 
-  // /**
-  //  * Creates a share menu
-  //  * @private
-  //  */
-  // buildShareMenu_() {
-  //   const menuItem = this.parentEl_.ownerDocument.createElement(
-  //     'amp-story-share-menu'
-  //   );
-  //   this.parentEl_.appendChild(menuItem);
-  //   whenUpgradedToCustomElement(menuItem)
-  //     .then(() => menuItem.getImpl())
-  //     .then((impl) => (this.shareMenu_ = impl));
-  //   this.onUIStateUpdate_(this.storeService_.get(StateProperty.UI_STATE));
-  // }
+  /**
+   * Creates a share menu
+   * @private
+   */
+  buildShareMenu_() {
+    Services.extensionsFor(this.win_).installExtensionForDoc(
+      this.ampDoc_,
+      'amp-story-share-menu'
+    );
+    this.shareMenu_ = this.parentEl_.ownerDocument.createElement(
+      'amp-story-share-menu'
+    );
+    this.parentEl_.appendChild(this.shareMenu_);
+    this.onUIStateUpdate_(this.storeService_.get(StateProperty.UI_STATE));
+  }
 
   /**
    * @private
@@ -75,13 +76,12 @@ export class AmpStoryShare {
   }
 
   /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc}  ampdoc
    * @return {boolean} Whether the browser supports native system sharing.
    */
-  isSystemShareSupported(ampdoc) {
-    const viewer = Services.viewerForDoc(ampdoc);
+  isSystemShareSupported() {
+    const viewer = Services.viewerForDoc(this.ampDoc_);
 
-    const platform = Services.platformFor(this.win);
+    const platform = Services.platformFor(this.win_);
 
     // Chrome exports navigator.share in WebView but does not implement it.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
@@ -112,16 +112,23 @@ export class AmpStoryShare {
    */
   onShareMenuStateUpdate_(isOpen) {
     const systemShareSupported = this.isSystemShareSupported();
-    if (systemShareSupported && isOpen) {
-      // Dispatches a click event on the amp-social-share button to trigger the
-      // native system sharing UI. This has to be done upon user interaction.
-      this.handleSystemShare_();
+    if (systemShareSupported) {
+      if (isOpen) {
+        // Opens the system share dialog.
+        this.handleSystemShare_();
 
-      // There is no way to know when the user dismisses the native system share
-      // menu, so we pretend it is closed on the story end, and let the native
-      // end handle the UI interactions.
-      this.close_();
+        // There is no way to know when the user dismisses the native system share
+        // menu, so we immediately set the state to closed.
+        this.close_();
+      }
+    } else {
+      if (isOpen && !this.shareMenu_) {
+        this.buildShareMenu_();
+      } else {
+        toggle(this.shareMenu_, isOpen);
+      }
     }
+
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
     this.analyticsService_.triggerEvent(
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
@@ -141,13 +148,12 @@ export class AmpStoryShare {
    * @private
    */
   handleSystemShare_() {
-    const {navigator, title} = this.win_;
-    const {canonicalUrl} = Services.getAmpdoc(this.parentEl_);
+    const {navigator} = this.win_;
     devAssert(navigator.share);
 
     const shareData = {
-      url: canonicalUrl,
-      text: title,
+      url: Services.documentInfoForDoc(this.parentEl_).canonicalUrl,
+      text: this.win_.document.title,
     };
 
     navigator.share(shareData).catch((e) => {
