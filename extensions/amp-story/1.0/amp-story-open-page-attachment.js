@@ -270,21 +270,19 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     chipEl.prepend(makeImgElWithBG(src));
   }
 
-  const storeServiceElem = Services.storyStoreServiceForOrNull(
-    getWin(openAttachmentEl)
+  Services.storyStoreServiceForOrNull(getWin(openAttachmentEl)).then(
+    (storeService) => {
+      storeService.subscribe(
+        StateProperty.SHOPPING_DATA,
+        (shoppingData) => {
+          openAttachmentEl.getElementsByClassName(
+            'i-amphtml-story-page-attachment-label'
+          )[0].textContent = updateCtaText_(shoppingData, pageEl);
+        },
+        true /* callToInitialize */
+      );
+    }
   );
-
-  storeServiceElem.then((storeService) => {
-    storeService.subscribe(
-      StateProperty.SHOPPING_DATA,
-      (shoppingData) => {
-        openAttachmentEl.getElementsByClassName(
-          'i-amphtml-story-page-attachment-label'
-        )[0].textContent = updateCtaText_(shoppingData, pageEl);
-      },
-      true /* callToInitialize */
-    );
-  });
 
   return openAttachmentEl;
 };
