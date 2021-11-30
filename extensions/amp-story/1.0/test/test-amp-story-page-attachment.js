@@ -2,8 +2,6 @@ import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import * as LocalizationService from '../amp-story-localization-service';
-import {Action, getStoreService} from '../amp-story-store-service';
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachmentEl;
   let attachment;
@@ -61,27 +59,5 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     await outlink.layoutCallback();
 
     expect(anchorEl.getAttribute('target')).to.eql('_top');
-  });
-
-  async function shoppingDataDispatchStoreService() {
-    const shoppingData = {
-      'hat': {'product-title': 'Hootenanny Hat'},
-    };
-    storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
-  }
-  it('should set attribute data-cta-text when ctaButton is null', async () => {
-    const i18nString = 'Shop Hootenanny Hat';
-    const localizedString = env.sandbox.stub(LocalizationService, 'localize');
-    localizedString.returns(i18nString);
-
-    outlink.buildCallback();
-    await outlink.layoutCallback();
-
-    shoppingDataDispatchStoreService();
-    expect(
-      outlinkEl
-        .getElementsByClassName('i-amphtml-story-draggable-drawer-spacer')[0]
-        .getAttribute('aria-label')
-    ).to.equal(i18nString);
   });
 });

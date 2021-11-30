@@ -187,33 +187,6 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 };
 
 /**
- * Updates the CTA based on the shopping data.
- * @param {!ShoppingDataDef} shoppingData
- * @param {!Element} pageEl
- * @return {string}
- * @private
- */
-const updateCtaText_ = (shoppingData, pageEl) => {
-  const shoppingTagsPageAttachment = Array.from(
-    pageEl.getElementsByTagName('amp-story-shopping-tag')
-  ).filter((tag) => shoppingData[tag.getAttribute('data-tag-id')]);
-
-  const i18nString =
-    shoppingTagsPageAttachment.length === 1
-      ? localize(pageEl, LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL) +
-        ' ' +
-        shoppingData[shoppingTagsPageAttachment[0].getAttribute('data-tag-id')][
-          'product-title'
-        ]
-      : localize(
-          pageEl,
-          LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
-        );
-
-  return i18nString;
-};
-
-/**
  * Renders inline page attachment UI.
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
@@ -243,6 +216,14 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   if (openLabel !== 'none') {
     const textEl = <span class="i-amphtml-story-page-attachment-label"></span>;
     textEl.textContent = openLabel;
+    if (
+      attachmentEl.tagName.toLowerCase() === 'amp-story-shopping-attachment'
+    ) {
+      textEl.textContent = localize(
+        pageEl,
+        LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL
+      );
+    }
     openAttachmentEl.appendChild(textEl);
   }
 
@@ -269,20 +250,6 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     const src = maybeMakeProxyUrl(openImgAttr, pageEl.getAmpDoc());
     chipEl.prepend(makeImgElWithBG(src));
   }
-
-  Services.storyStoreServiceForOrNull(getWin(openAttachmentEl)).then(
-    (storeService) => {
-      storeService.subscribe(
-        StateProperty.SHOPPING_DATA,
-        (shoppingData) => {
-          openAttachmentEl.getElementsByClassName(
-            'i-amphtml-story-page-attachment-label'
-          )[0].textContent = updateCtaText_(shoppingData, pageEl);
-        },
-        true /* callToInitialize */
-      );
-    }
-  );
 
   return openAttachmentEl;
 };
