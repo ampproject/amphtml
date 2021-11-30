@@ -8,7 +8,7 @@ When the user interacts with the element, a modal expands to fill the viewport u
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. As a web component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox-gallery
@@ -19,7 +19,7 @@ import {defineElement as defineBentoLightboxGallery} from '@bentoproject/lightbo
 defineBentoLightboxGallery();
 ```
 
-### Example: Import via `<script>`
+### Import via `<script>`
 
 <!--% example %-->
 
@@ -33,8 +33,11 @@ defineBentoLightboxGallery();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css"
+    />
     <script
       type="module"
       async
@@ -104,7 +107,7 @@ In the following example, `<bento-lightbox-gallery>` displays the `alt` value as
 
 ## Interactivity and API usage
 
-Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-lightbox-gallery');
@@ -163,7 +166,7 @@ Each bento component has a small css library you must include to guarantee prope
 
 The preact/react version of the bentolightboxgallery functions differently than the web component version. The following example will demonstrate the use of `<BentoLightboxGallery>` as a functional component.
 
-### Example: Import Via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox-gallery

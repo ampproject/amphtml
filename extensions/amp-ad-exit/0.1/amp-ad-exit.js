@@ -1,9 +1,9 @@
 import {
-  MessageType,
+  MessageType_Enum,
   deserializeMessage,
   listen,
 } from '#core/3p-frame-messaging';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
@@ -83,7 +83,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.registerAction(
       'setVariable',
       this.setVariable.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
 
     /** @private @const {!Object<string, !Object<string, string>>} */
@@ -519,7 +519,7 @@ export class AmpAdExit extends AMP.BaseElement {
       const responseMsg = deserializeMessage(getData(event));
       if (
         !responseMsg ||
-        responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE
+        responseMsg['type'] != MessageType_Enum.IFRAME_TRANSPORT_RESPONSE
       ) {
         return;
       }

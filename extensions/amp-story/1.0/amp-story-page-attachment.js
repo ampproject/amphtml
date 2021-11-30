@@ -2,7 +2,7 @@ import * as Preact from '#core/dom/jsx';
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
@@ -130,7 +130,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         class="i-amphtml-story-page-attachment-close-button"
         aria-label={localize(
           this.element,
-          LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
         )}
         role="button"
       ></button>
@@ -217,7 +217,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 48 48"
         >
-          <path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path>
+          <path d="M38 38H10V10h14V6H10a4 4 0 0 0-4 4v28a4 4 0 0 0 4 4h28a4 4 0 0 0 4-4V24h-4v14zM28 6v4h7.2L15.5 29.7l2.8 2.8L38 12.8V20h4V6H28z" />
         </svg>
       </a>
     );
@@ -263,7 +263,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Set url prevew text.
     const localizedOpenString = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
+      LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
     );
     openStringEl.textContent = localizedOpenString;
     urlStringEl.textContent = hrefAttr;

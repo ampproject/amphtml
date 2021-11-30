@@ -5,7 +5,7 @@ import {setStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 import {PositionObserver} from '#service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {PositionObserverFidelity_Enum} from '#service/position-observer/position-observer-worker';
 
 import {macroTask} from '#testing/helpers';
 
@@ -53,16 +53,16 @@ describes.realWin('PositionObserver', {amp: 1}, (env) => {
     describe('API functions includes observe/unobserve/changeFidelity', () => {
       it('should observe identical element and start', () => {
         const spy = env.sandbox.spy(posOb, 'startCallback_');
-        posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
-        posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
+        posOb.observe(elem, PositionObserverFidelity_Enum.LOW, () => {});
+        posOb.observe(elem1, PositionObserverFidelity_Enum.LOW, () => {});
         expect(posOb.workers_).to.have.length(2);
         expect(spy).to.be.calledOnce;
       });
 
       it('should unobserve and stop', () => {
         const spy = env.sandbox.spy(posOb, 'stopCallback_');
-        posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
-        posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
+        posOb.observe(elem, PositionObserverFidelity_Enum.LOW, () => {});
+        posOb.observe(elem1, PositionObserverFidelity_Enum.LOW, () => {});
         posOb.unobserve(elem);
         expect(posOb.workers_).to.have.length(1);
         expect(spy).to.not.be.called;
@@ -83,7 +83,7 @@ describes.realWin('PositionObserver', {amp: 1}, (env) => {
       });
       it('should update new position with scroll event', function* () {
         const spy = env.sandbox.spy();
-        posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
+        posOb.observe(elem, PositionObserverFidelity_Enum.HIGH, spy);
         clock.tick(2);
         yield macroTask();
         expect(spy).to.be.calledOnce;
@@ -109,7 +109,7 @@ describes.realWin('PositionObserver', {amp: 1}, (env) => {
 
       it('should not update if element position does not change', function* () {
         const spy = env.sandbox.spy();
-        posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
+        posOb.observe(elem, PositionObserverFidelity_Enum.HIGH, spy);
         yield macroTask();
         expect(spy).to.be.calledOnce;
         win.dispatchEvent(new Event('scroll'));
@@ -134,7 +134,7 @@ describes.realWin('PositionObserver', {amp: 1}, (env) => {
         const sizes = viewport.getSize();
         const spy = env.sandbox.spy();
         top = 1;
-        posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
+        posOb.observe(elem, PositionObserverFidelity_Enum.HIGH, spy);
         yield macroTask();
         expect(spy).to.be.calledWith({
           positionRect: layoutRectLtwh(2, 1, 20, 10),
@@ -172,7 +172,7 @@ describes.realWin('PositionObserver', {amp: 1}, (env) => {
         const viewport = Services.viewportForDoc(ampdoc);
         const sizes = viewport.getSize();
         const spy = env.sandbox.spy();
-        posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
+        posOb.observe(elem, PositionObserverFidelity_Enum.HIGH, spy);
         yield macroTask();
         spy.resetHistory();
         top = -11;

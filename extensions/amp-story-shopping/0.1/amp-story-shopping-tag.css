@@ -1,2 +1,7 @@
 amp-story-shopping-tag {
+    /**
+    * This is placeholder for the shopping tag until syling is implemented.
+    * Having a min-height enables the layoutCallback to be called.
+    */
+    min-height: 20px;
 }

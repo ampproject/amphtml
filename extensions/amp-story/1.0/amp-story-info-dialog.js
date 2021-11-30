@@ -10,7 +10,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
@@ -204,7 +204,7 @@ export class InfoDialog {
   setHeading_() {
     const label = localize(
       this.parentEl_,
-      LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
+      LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
     );
     const headingEl = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-info-heading')
@@ -251,7 +251,7 @@ export class InfoDialog {
     return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {
       const label = localize(
         this.parentEl_,
-        LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
+        LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
       );
       this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
       this.moreInfoLinkEl_.setAttribute(

@@ -22,16 +22,16 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {EventType, dispatch} from './events';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {MediaPool} from './media-pool';
 import {Services} from '#service';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
-import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
+import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
 import {iterateCursor} from '#core/dom';
 import {
   closestAncestorElementBySelector,
@@ -51,7 +51,7 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
 import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {px, toggle} from '#core/dom/style';
+import {toggle} from '#core/dom/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -167,9 +167,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AdvancementConfig} */
     this.advancement_ = null;
 
-    /** @private {?Element} */
-    this.cssVariablesStyleEl_ = null;
-
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
       this.win,
@@ -216,9 +213,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
-
-    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
-    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -341,7 +335,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           this.maybeUpdateAutoAdvanceTime_(videoDuration);
           return;
         }
-        listenOnce(video, VideoEvents.LOADEDMETADATA, () => {
+        listenOnce(video, VideoEvents_Enum.LOADEDMETADATA, () => {
           this.maybeUpdateAutoAdvanceTime_(videoImpl.getDuration());
         });
       });
@@ -416,7 +410,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /**
@@ -492,7 +486,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       registerAllPromise.then(() => {
         this.signals()
-          .whenSignal(CommonSignals.LOAD_END)
+          .whenSignal(CommonSignals_Enum.LOAD_END)
           .then(() => {
             if (this.state_ == PageState.PLAYING) {
               this.advancement_.start();
@@ -538,51 +532,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
-  /** @override */
-  onLayoutMeasure() {
-    const layoutBox = this.getLayoutSize();
-    // Only measures from the first story page, that always gets built because
-    // of the prerendering optimizations in place.
-    if (
-      !isPrerenderActivePage(this.element) ||
-      (this.layoutBox_ &&
-        this.layoutBox_.width === layoutBox.width &&
-        this.layoutBox_.height === layoutBox.height)
-    ) {
-      return;
-    }
-
-    this.layoutBox_ = layoutBox;
-
-    return this.getVsync().runPromise(
-      {
-        measure: (state) => {
-          const {height, width} = layoutBox;
-          state.height = height;
-          state.width = width;
-          state.vh = height / 100;
-        },
-        mutate: (state) => {
-          const {height, width} = state;
-          if (state.height === 0 && state.width === 0) {
-            return;
-          }
-          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
-          if (!this.cssVariablesStyleEl_) {
-            const doc = this.win.document;
-            this.cssVariablesStyleEl_ = doc.createElement('style');
-            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
-            doc.head.appendChild(this.cssVariablesStyleEl_);
-          }
-          this.cssVariablesStyleEl_.textContent = `:root {--story-page-vh: ${px(
-            state.vh
-          )} !important}`;
-        },
-      },
-      {}
-    );
-  }
-
   /**
    * Reacts to UI state updates.
    * @param {!UIType} uiState
@@ -624,7 +573,9 @@ export class AmpStoryPage extends AMP.BaseElement {
             }
 
             whenUpgradedToCustomElement(mediaEl)
-              .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
+              .then((el) =>
+                el.signals().whenSignal(CommonSignals_Enum.LOAD_END)
+              )
               .then(resolve, resolve);
             break;
           case 'amp-audio':
@@ -666,9 +617,9 @@ export class AmpStoryPage extends AMP.BaseElement {
           case 'amp-audio':
           case 'amp-video':
             const signal =
-              mediaEl.getAttribute('layout') === Layout.NODISPLAY
-                ? CommonSignals.BUILT
-                : CommonSignals.LOAD_END;
+              mediaEl.getAttribute('layout') === Layout_Enum.NODISPLAY
+                ? CommonSignals_Enum.BUILT
+                : CommonSignals_Enum.LOAD_END;
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(signal))
@@ -1100,7 +1051,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
     this.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => this.animationManager_.applyLastFrame());
   }
 
@@ -1544,7 +1495,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     labelEl.textContent = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO
+      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
     );
 
     this.playMessageEl_.addEventListener('click', () => {
@@ -1592,7 +1543,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     labelEl.textContent = localize(
       this.element,
-      LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO
     );
 
     this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));

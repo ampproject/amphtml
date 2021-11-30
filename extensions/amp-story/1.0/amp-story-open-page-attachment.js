@@ -3,7 +3,7 @@ import * as Preact from '#core/dom/jsx';
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
 import {AttachmentTheme} from './amp-story-page-attachment';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {dev} from '#utils/log';
 import {localize} from './amp-story-localization-service';
@@ -52,7 +52,7 @@ const renderOutlinkElement = () => (
       width="20px"
       height="8px"
     >
-      <path d="M18,7.7c-0.2,0-0.5-0.1-0.7-0.2l-7.3-4l-7.3,4C2,7.9,1.1,7.7,0.7,6.9c-0.4-0.7-0.1-1.6,0.6-2l8-4.4c0.5-0.2,1-0.2,1.5,0l8,4.4c0.7,0.4,1,1.3,0.6,2C19,7.4,18.5,7.7,18,7.7z"></path>
+      <path d="m18 7.7-.7-.2-7.3-4-7.3 4c-.7.4-1.6.2-2-.6-.4-.7-.1-1.6.6-2l8-4.4a2 2 0 0 1 1.5 0l8 4.4c.7.4 1 1.3.6 2-.4.5-.9.8-1.4.8z" />
     </svg>
     <div
       class="i-amphtml-story-outlink-page-attachment-outlink-chip"
@@ -79,8 +79,8 @@ export const renderOutlinkLinkIconElement = () => (
     <path
       fill-opacity=".1"
       d="M12 0c6.6 0 12 5.4 12 12s-5.4 12-12 12S0 18.6 0 12 5.4 0 12 0z"
-    ></path>
-    <path d="M13.8 14.6c.1.1.2.3.2.5s-.1.3-.2.5L12.3 17c-.7.7-1.7 1.1-2.7 1.1-1 0-1.9-.4-2.7-1.1-.7-.7-1.1-1.7-1.1-2.7 0-1 .4-1.9 1.1-2.7l1.5-1.5c.2 0 .3-.1.5-.1s.3.1.5.2c.1.1.2.3.2.5s-.1.4-.2.5l-1.5 1.5c-.5.5-.7 1.1-.7 1.7 0 .6.3 1.3.7 1.7.5.5 1.1.7 1.7.7s1.3-.3 1.7-.7l1.5-1.5c.3-.3.7-.3 1 0zM17 7c-.7-.7-1.7-1.1-2.7-1.1-1 0-1.9.4-2.7 1.1l-1.5 1.5c0 .1-.1.3-.1.4 0 .2.1.3.2.5.1.1.3.2.5.2s.3-.1.5-.2l1.5-1.5c.5-.5 1.1-.7 1.7-.7.6 0 1.3.3 1.7.7.5.5.7 1.1.7 1.7 0 .6-.3 1.3-.7 1.7l-1.5 1.5c-.1.1-.2.3-.2.5s.1.3.2.5c.1.1.3.2.5.2s.3-.1.5-.2l1.5-1.5c.7-.7 1.1-1.7 1.1-2.7-.1-1-.5-1.9-1.2-2.6zm-7.9 7.2c0 .2.1.3.2.5.1.1.3.2.5.2s.4-.1.5-.2l4.5-4.5c.1-.1.2-.3.2-.5s-.1-.4-.2-.5c-.3-.2-.8-.2-1 .1l-4.5 4.5c-.1.1-.2.3-.2.4z"></path>
+    />
+    <path d="m13.8 14.6.2.5-.2.5-1.5 1.4c-.7.7-1.7 1.1-2.7 1.1A4 4 0 0 1 6.9 17a3.9 3.9 0 0 1-1.1-2.7 4 4 0 0 1 1.1-2.7l1.5-1.5.5-.1.5.2.2.5-.2.5-1.5 1.5c-.5.5-.7 1.1-.7 1.7 0 .6.3 1.3.7 1.7.5.5 1.1.7 1.7.7s1.3-.3 1.7-.7l1.5-1.5c.3-.3.7-.3 1 0zM17 7a3.9 3.9 0 0 0-2.7-1.1A4 4 0 0 0 11.6 7l-1.5 1.5-.1.4.2.5.5.2.5-.2 1.5-1.5c.5-.5 1.1-.7 1.7-.7.6 0 1.3.3 1.7.7.5.5.7 1.1.7 1.7 0 .6-.3 1.3-.7 1.7l-1.5 1.5-.2.5.2.5.5.2.5-.2 1.5-1.5c.7-.7 1.1-1.7 1.1-2.7-.1-1-.5-1.9-1.2-2.6zm-7.9 7.2.2.5.5.2.5-.2 4.5-4.5.2-.5-.2-.5c-.3-.2-.8-.2-1 .1l-4.5 4.5-.2.4z" />
   </svg>
 );
 
@@ -151,11 +151,15 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   // Append text & aria-label.
   const openLabelAttr =
     anchorChild?.textContent ||
+    // For legacy support of amp-story-page-attachment with a src and cta-text attribute.
     attachmentEl.getAttribute('cta-text') ||
     attachmentEl.getAttribute('data-cta-text');
   const openLabel = openLabelAttr
     ? openLabelAttr.trim()
-    : localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+    : localize(
+        pageEl,
+        LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      );
   ctaLabelEl.textContent = openLabel;
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
@@ -199,7 +203,10 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
-    localize(pageEl, LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
+    localize(
+      pageEl,
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    );
   openAttachmentEl.setAttribute('aria-label', openLabel);
 
   if (openLabel !== 'none') {

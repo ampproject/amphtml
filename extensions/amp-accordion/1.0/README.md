@@ -14,7 +14,7 @@ Displays content sections that can be collapsed and expanded. This component pro
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/accordion
@@ -25,7 +25,76 @@ import {defineElement as defineBentoAccordion} from '@bentoproject/accordion';
 defineBentoAccordion();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css" crossorigin="anonymous">
+```
+
+### Example
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-accordion id="my-accordion">
+      <section>
+        <h2>Section 1</h2>
+        <div>Content in section 1.</div>
+      </section>
+      <section>
+        <h2>Section 2</h2>
+        <div>Content in section 2.</div>
+      </section>
+       <!-- Expanded on page load due to attribute: -->
+      <section expanded>
+        <h2>Section 3</h2>
+        <div>Content in section 3.</div>
+      </section>
+    </bento-accordion>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+Bento components are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
+
+```javascript
+await customElements.whenDefined('bento-accordion');
+const api = await accordion.getApi();
+```
+
+#### API Example
 
 <!--% example %-->
 
@@ -85,15 +154,6 @@ defineBentoAccordion();
     </script>
   </body>
 </html>
-```
-
-### Interactivity and API usage
-
-Bento enabled components in standalone use are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
-
-```javascript
-await customElements.whenDefined('bento-accordion');
-const api = await accordion.getApi();
 ```
 
 #### Actions
@@ -414,7 +474,7 @@ Keep the following points in mind when you style an amp-accordion:
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/accordion
