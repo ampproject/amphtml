@@ -1,7 +1,6 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachmentEl;
   let attachment;
