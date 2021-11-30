@@ -190,10 +190,10 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
  * Updates the CTA based on the shopping data.
  * @param {!ShoppingDataDef} shoppingData
  * @param {!Element} pageEl
- * @param {!Element} openAttachmentEl
+ * @return {string}
  * @private
  */
-const updateCtaText_ = (shoppingData, pageEl, openAttachmentEl) => {
+const updateCtaText_ = (shoppingData, pageEl) => {
   const shoppingTagsPageAttachment = Array.from(
     pageEl.getElementsByTagName('amp-story-shopping-tag')
   ).filter((tag) => shoppingData[tag.getAttribute('data-tag-id')]);
@@ -210,9 +210,7 @@ const updateCtaText_ = (shoppingData, pageEl, openAttachmentEl) => {
           LocalizedStringId_Enum.AMP_STORY_SHOPPING_VIEW_ALL_PRODUCTS
         );
 
-  openAttachmentEl.getElementsByClassName(
-    'i-amphtml-story-page-attachment-label'
-  )[0].textContent = i18nString;
+  return i18nString;
 };
 
 /**
@@ -272,13 +270,21 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     chipEl.prepend(makeImgElWithBG(src));
   }
 
-  Services.storyStoreServiceForOrNull(getWin(openAttachmentEl)).then(
-    (storeService) => {
-      storeService.subscribe(StateProperty.SHOPPING_DATA, (shoppingData) => {
-        updateCtaText_(shoppingData, pageEl, openAttachmentEl);
-      });
-    }
+  const storeServiceElem = Services.storyStoreServiceForOrNull(
+    getWin(openAttachmentEl)
   );
+
+  storeServiceElem.then((storeService) => {
+    storeService.subscribe(
+      StateProperty.SHOPPING_DATA,
+      (shoppingData) => {
+        openAttachmentEl.getElementsByClassName(
+          'i-amphtml-story-page-attachment-label'
+        )[0].textContent = updateCtaText_(shoppingData, pageEl);
+      },
+      true /* callToInitialize */
+    );
+  });
 
   return openAttachmentEl;
 };
