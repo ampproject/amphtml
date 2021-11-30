@@ -12,7 +12,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    super.buildCallback();
     this.attachmentEl_ = (
       <amp-story-page-attachment
         layout="nodisplay"
