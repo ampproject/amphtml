@@ -7,7 +7,6 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachment;
   let outlinkEl;
   let outlink;
-  let storeService;
 
   beforeEach(() => {
     const {win} = env;
@@ -29,11 +28,6 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     storyEl.appendChild(outlinkEl);
     outlinkEl.appendChild(win.document.createElement('a'));
     outlink = new AmpStoryPageAttachment(outlinkEl);
-
-    storeService = getStoreService(win);
-    registerServiceBuilder(win, 'story-store', function () {
-      return storeService;
-    });
   });
 
   afterEach(() => {
