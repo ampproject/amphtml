@@ -90,7 +90,7 @@ function renderLinkShareItemElement(el, onClick) {
 /**
  * @param {!Document} doc
  * @param {string} shareType
- * @return {!Element}
+ * @return {!Element|undefined}
  */
 function buildProvider(doc, shareType) {
   const shareProviderLocalizedStringId =
