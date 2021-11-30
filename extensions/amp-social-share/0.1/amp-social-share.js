@@ -16,7 +16,7 @@ import {addParamsToUrl} from '../../../src/url';
 
 const TAG = 'amp-social-share';
 
-class AmpSocialShare extends AMP.BaseElement {
+export class AmpSocialShare extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
