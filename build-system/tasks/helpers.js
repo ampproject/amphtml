@@ -456,6 +456,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
+        mainFields: ['module', 'browser', 'main'],
         write: false,
       });
     } else {
@@ -536,7 +537,7 @@ const nameCache = {};
 const mangleIdentifier = {
   get(num) {
     const charset =
-      '$ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz0123456789';
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_0123456789';
     let base = 54;
     let id = '';
     do {
@@ -578,13 +579,13 @@ async function minify(code, map) {
     sourceMap: {content: map},
     toplevel: true,
     module: !!argv.esm,
-    nameCache,
+    nameCache: argv.nomanglecache ? undefined : nameCache,
   };
   /* eslint-enable local/camelcase */
 
   // Remove the local variable name cache which should not be reused between binaries.
   // See https://github.com/ampproject/amphtml/issues/36476
-  /** @type {any}*/ (nameCache).vars = {};
+  nameCache.vars = undefined;
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};

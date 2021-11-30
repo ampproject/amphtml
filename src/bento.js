@@ -11,15 +11,12 @@ if (!isEsm()) {
   installCustomElements(self, class {});
 }
 
-const BENTO = self.BENTO || [];
-
-BENTO.push = (fn) => {
-  fn();
-};
+const waiting = self.BENTO || [];
+const push = (fn) => fn();
 
 // eslint-disable-next-line local/window-property-name
-self.BENTO = BENTO;
+self.BENTO = {push};
 
-for (let i = 0; i < BENTO.length; i++) {
-  BENTO.push(BENTO[i]);
+for (let i = 0; i < waiting.length; i++) {
+  push(waiting[i]);
 }

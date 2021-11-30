@@ -84,6 +84,7 @@ export function ampMediaElementFor(el) {
  * @param  {!Element} container
  * @param  {!Element} element
  * @param  {string} css
+ * @return {!Element}
  */
 export function createShadowRootWithStyle(container, element, css) {
   const style = self.document.createElement('style');
@@ -95,6 +96,7 @@ export function createShadowRootWithStyle(container, element, css) {
 
   containerToUse.appendChild(style);
   containerToUse.appendChild(element);
+  return container;
 }
 
 /**

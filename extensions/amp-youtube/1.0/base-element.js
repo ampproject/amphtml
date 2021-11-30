@@ -10,6 +10,9 @@ export class BaseElement extends VideoBaseElement {}
 BaseElement['Component'] = BentoYoutube;
 
 /** @override */
+BaseElement['loadable'] = true;
+
+/** @override */
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
   'loop': {attr: 'loop', type: 'boolean'},
@@ -18,6 +21,9 @@ BaseElement['props'] = {
   'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock', media: true},
   'credentials': {attr: 'credentials'},
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
+  'loading': {attr: 'data-loading'},
   'params': createParseAttrsWithPrefix('data-param-'),
 };
 

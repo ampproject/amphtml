@@ -69,6 +69,14 @@ export function createContext(value) {
   return preact.createContext(value, undefined);
 }
 
+/**
+ * @param {...PreactDef.Renderable} unusedChildren
+ * @return {!Array<PreactDef.Renderable>}
+ */
+export function toChildArray(unusedChildren) {
+  return preact.toChildArray.apply(undefined, arguments);
+}
+
 // Defines the type interfaces for the approved Preact Hooks APIs.
 // TODO: useReducer, useDebugValue, useErrorBoundary
 
@@ -145,5 +153,3 @@ export function useCallback(cb, opt_deps) {
 export function useImperativeHandle(ref, create, opt_deps) {
   return hooks.useImperativeHandle(ref, create, opt_deps);
 }
-
-export {toChildArray} from 'preact';

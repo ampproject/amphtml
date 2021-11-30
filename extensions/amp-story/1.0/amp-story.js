@@ -8,6 +8,7 @@
  * </amp-story>
  * </code>
  */
+import * as Preact from '#core/dom/jsx';
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
@@ -55,7 +56,7 @@ import {Services} from '#service';
 import {ShareMenu} from './amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
-import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
+import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {
   childElement,
@@ -67,7 +68,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
+import {computedStyle, px, setImportantStyles, toggle} from '#core/dom/style';
 import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '#utils/log';
@@ -81,13 +82,15 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getMode, isModeDevelopment} from '../../../src/mode';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
-import {isRTL} from '#core/dom';
+import {isPreviewMode} from './embed-mode';
+import {isRTL, removeElement} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
+import {isEsm} from '#core/mode';
 import {upgradeBackgroundAudio} from './audio';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -220,9 +223,6 @@ export class AmpStory extends AMP.BaseElement {
     /** Instantiate in case there are embedded components. */
     new AmpStoryEmbeddedComponent(this.win, this.element);
 
-    /** @private @const {!UnsupportedBrowserLayer} */
-    this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
-
     /** @private {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
 
@@ -345,6 +345,10 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
+    if (!this.win.CSS?.supports?.('height: 1dvh')) {
+      this.onResize_(this.getViewport().getSize());
+    }
+
     const pageId = this.getInitialPageId_();
     if (pageId) {
       const page = this.element.querySelector(
@@ -402,6 +406,7 @@ export class AmpStory extends AMP.BaseElement {
     }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
+      isPreviewMode(this.win) ||
       prefersReducedMotion(this.win)
     ) {
       Services.performanceFor(this.win).addEnabledExperiment(
@@ -428,14 +433,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   pause_() {
-    // Preserve if previously set. This method can be called several times when
-    // setting the visibilitystate to paused and then inactive.
-    if (this.pausedStateToRestore_ === null) {
-      this.pausedStateToRestore_ = !!this.storeService_.get(
-        StateProperty.PAUSED_STATE
-      );
-    }
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.setPausedStateToRestore_();
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.pauseBackgroundAudio_();
     }
@@ -454,14 +452,31 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   resume_() {
+    this.restorePausedState_();
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.playBackgroundAudio_();
+    }
+  }
+
+  /** @private */
+  setPausedStateToRestore_() {
+    // Preserve if previously set. This method can be called several times when
+    // setting the visibilitystate to paused and then inactive.
+    if (this.pausedStateToRestore_ === null) {
+      this.pausedStateToRestore_ = !!this.storeService_.get(
+        StateProperty.PAUSED_STATE
+      );
+    }
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+  }
+
+  /** @private */
+  restorePausedState_() {
     this.storeService_.dispatch(
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
     this.pausedStateToRestore_ = null;
-    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-      this.playBackgroundAudio_();
-    }
   }
 
   /**
@@ -472,7 +487,7 @@ export class AmpStory extends AMP.BaseElement {
     // Lock body to prevent overflow.
     this.lockBody_();
     // Standalone CSS affects sizing of the entire page.
-    this.onResize();
+    this.onResizeDebounced();
   }
 
   /**
@@ -585,13 +600,6 @@ export class AmpStory extends AMP.BaseElement {
         );
       },
       false /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.SUPPORTED_BROWSER_STATE,
-      (isBrowserSupported) => {
-        this.onSupportedBrowserStateUpdate_(isBrowserSupported);
-      }
     );
 
     this.storeService_.subscribe(StateProperty.ADVANCEMENT_MODE, (mode) => {
@@ -733,7 +741,9 @@ export class AmpStory extends AMP.BaseElement {
       attributeFilter: ['class'],
     });
 
-    this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
+    this.getViewport().onResize(
+      debounce(this.win, () => this.onResizeDebounced(), 300)
+    );
     this.installGestureRecognizers_();
 
     // TODO(gmajoulet): migrate this to amp-story-viewer-messaging-handler once
@@ -876,8 +886,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
-      this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
-      return Promise.resolve();
+      return this.displayUnsupportedBrowser_();
     }
     return this.layoutStory_();
   }
@@ -931,13 +940,10 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(
-          devAssert(this.viewer_),
-          this.storeService_
-        )
-          ? new InfoDialog(this.win, this.element)
-          : null;
-        if (infoDialog) {
+        if (
+          shouldShowStoryUrlInfo(devAssert(this.viewer_), this.storeService_)
+        ) {
+          const infoDialog = new InfoDialog(this.win, this.element);
           infoDialog.build();
         }
       });
@@ -1541,13 +1547,29 @@ export class AmpStory extends AMP.BaseElement {
    * Handle resize events and set the story's desktop state.
    * @visibleForTesting
    */
-  onResize() {
+  onResizeDebounced() {
     this.uiState_ = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
     this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
+  }
+
+  /**
+   * Handles resize events and sets CSS variables.
+   * @param {!Object} size including new width and height
+   * @private
+   */
+  onResize_(size) {
+    const {height, width} = size;
+    if (height === 0 && width === 0) {
+      return;
+    }
+    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+    setImportantStyles(this.win.document.documentElement, {
+      '--story-dvh': px(height / 100),
+    });
   }
 
   /**
@@ -1787,50 +1809,31 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * If browser is supported, displays the story. Otherwise, shows either the
-   * default unsupported browser layer or the publisher fallback (if provided).
-   * @param {boolean} isBrowserSupported
+   * Displays the publisher [fallback] element if provided, or renders our own
+   * unsupported browser layer.
+   * @return {!Promise|undefined}
    * @private
    */
-  onSupportedBrowserStateUpdate_(isBrowserSupported) {
-    const fallbackEl = this.getFallback();
-    if (isBrowserSupported) {
-      // Removes the default unsupported browser layer or throws an error
-      // if the publisher has provided their own fallback.
-      if (fallbackEl) {
-        dev().error(
-          TAG,
-          'No handler to exit unsupported browser state on ' +
-            'publisher provided fallback.'
-        );
-      } else {
-        this.layoutStory_().then(() => {
-          this.storeService_.dispatch(
-            Action.TOGGLE_PAUSED,
-            this.pausedStateToRestore_
-          );
-          this.pausedStateToRestore_ = null;
-          this.mutateElement(() => {
-            this.unsupportedBrowserLayer_.removeLayer();
-          });
-        });
-      }
-    } else {
-      this.pausedStateToRestore_ = !!this.storeService_.get(
-        StateProperty.PAUSED_STATE
-      );
-      this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-      // Displays the publisher provided fallback or fallbacks to the default
-      // unsupported browser layer.
-      if (fallbackEl) {
-        this.toggleFallback(true);
-      } else {
-        this.unsupportedBrowserLayer_.build();
-        this.mutateElement(() => {
-          this.element.appendChild(this.unsupportedBrowserLayer_.get());
-        });
-      }
+  displayUnsupportedBrowser_() {
+    this.setPausedStateToRestore_();
+    if (this.getFallback()) {
+      this.toggleFallback(true);
+      return;
     }
+    // Provide "continue anyway" button only when rendering our own layer.
+    // Publisher provided fallbacks do not allow users to continue.
+    const continueAnyway = () => {
+      this.layoutStory_().then(() => {
+        this.restorePausedState_();
+        this.mutateElement(() => {
+          removeElement(layer);
+        });
+      });
+    };
+    const layer = renderUnsupportedBrowserLayer(this.element, continueAnyway);
+    return this.mutateElement(() => {
+      this.element.appendChild(layer);
+    });
   }
 
   /**
@@ -2013,9 +2016,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      this.element.appendChild(
-        this.win.document.createElement('amp-story-education')
-      );
+      this.element.appendChild(<amp-story-education />);
     });
 
     Services.extensionsFor(this.win).installExtensionForDoc(
@@ -2459,6 +2460,13 @@ export class AmpStory extends AMP.BaseElement {
    *     for amp-story.
    */
   static isBrowserSupported(win) {
+    if (isEsm()) {
+      // Browsers that run the ESM build are should support the features
+      // detected below.
+      // If the logic changes so that ESM browsers do not pass support detection,
+      // this optimization should be removed.
+      return true;
+    }
     return Boolean(
       win.CSS &&
         win.CSS.supports &&
@@ -2481,7 +2489,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.setAttribute('mode', 'inspect');
 
-    const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
+    const devToolsEl = <amp-story-dev-tools />;
     this.win.document.body.appendChild(devToolsEl);
     this.element.setAttribute('hide', '');
 
