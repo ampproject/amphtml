@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {
   Action,
@@ -46,9 +47,7 @@ export class AmpStoryShare {
       this.ampDoc_,
       'amp-story-share-menu'
     );
-    this.shareMenu_ = this.parentEl_.ownerDocument.createElement(
-      'amp-story-share-menu'
-    );
+    this.shareMenu_ = <div class="i-amphtml-story-share-menu"></div>;
     this.parentEl_.appendChild(this.shareMenu_);
   }
 

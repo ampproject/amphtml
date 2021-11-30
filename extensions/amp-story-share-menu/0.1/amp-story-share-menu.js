@@ -19,6 +19,7 @@ import {Toast} from './toast';
 
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
+import {AmpSocialShare} from '../../amp-social-share/0.1/amp-social-share';
 import {getRequestService} from '../../amp-story/1.0/amp-story-request-service';
 import {
   Action,
@@ -67,11 +68,7 @@ export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
  */
 const renderShareMenu = () => {
   return (
-    <div
-      class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
-      aria-hidden="true"
-      role="alert"
-    >
+    <div class="i-amphtml-story-share-menu" aria-hidden="true" role="alert">
       <div class="i-amphtml-story-share-menu-container">
         <button
           class="i-amphtml-story-share-menu-close-button"
@@ -119,12 +116,20 @@ function buildProviderParams(opt_params) {
 /**
  * Share menu UI.
  */
-export class AmpStoryShareMenu extends AMP.BaseElement {
+class AmpStoryShareMenu {
   /**
    * @param {!Element} element
+   * @param {!Window} win
    */
-  constructor(element) {
-    super(element);
+  constructor(element, win) {
+    /** @private {!Element} */
+    this.element_ = element;
+
+    /** @private {!Window} */
+    this.win_ = win;
+
+    /** @private {?Element} */
+    this.rootEl_ = null;
 
     /** @private {?Element} */
     this.closeButton_ = null;
@@ -132,21 +137,30 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
     /** @private {?Element} */
     this.innerContainerEl_ = null;
 
+    /** @private {?../../services/localization.LocalizationService} */
     this.localizationService_ = null;
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    this.requestService_ = getRequestService(this.win, this.element);
+    /** @private {!AmpDoc} */
+    this.ampdoc_ = getAmpdoc(element);
+
+    /** @private {!Element} */
+    this.storyEl_ = closestAncestorElementBySelector(element, 'amp-story');
+
+    this.requestService_ = getRequestService(win, element);
+
+    this.vsync_ = Services.vsyncFor(win);
   }
 
   /** @override */
-  buildCallback() {
+  build() {
     return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win).then((service) => {
+      Services.storyStoreServiceForOrNull(this.win_).then((service) => {
         this.storeService_ = service;
       }),
-      Services.localizationServiceForOrNull(this.element).then((service) => {
+      Services.localizationServiceForOrNull(this.element_).then((service) => {
         this.localizationService_ = service;
       }),
     ]).then(() => this.buildShareMenu_());
@@ -157,13 +171,13 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * @private
    */
   buildShareMenu_() {
-    this.element.classList.add('i-amphtml-story-share-menu-host');
+    this.element_.classList.add('i-amphtml-story-share-menu-host');
 
-    this.element_ = renderShareMenu();
-    createShadowRootWithStyle(this.element, this.element_, CSS);
+    this.rootEl_ = renderShareMenu();
+    createShadowRootWithStyle(this.element_, this.rootEl_, CSS);
 
     this.closeButton_ = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
+      this.rootEl_.querySelector('.i-amphtml-story-share-menu-close-button')
     );
     this.closeButton_.setAttribute(
       'aria-label',
@@ -174,7 +188,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
 
     this.initializeListeners_();
 
-    this.innerContainerEl_ = this.element_./*OK*/ querySelector(
+    this.innerContainerEl_ = this.rootEl_./*OK*/ querySelector(
       '.i-amphtml-story-share-menu-container'
     );
 
@@ -184,7 +198,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
 
   /** @private */
   maybeAddLinkShareButton_() {
-    if (!isCopyingToClipboardSupported(this.win.document)) {
+    if (!isCopyingToClipboardSupported(this.win_.document)) {
       return;
     }
 
@@ -204,11 +218,6 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
         this.copyUrlToClipboard_();
       }
     });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout === 'container';
   }
 
   /**
@@ -231,11 +240,11 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
       true
     );
 
-    this.element_.addEventListener('click', (event) =>
+    this.rootEl_.addEventListener('click', (event) =>
       this.onShareMenuClick_(event)
     );
 
-    this.win.addEventListener('keyup', (event) => {
+    this.win_.addEventListener('keyup', (event) => {
       if (event.key == Keys_Enum.ESCAPE) {
         event.preventDefault();
         this.close_();
@@ -250,9 +259,9 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * @private
    */
   onShareMenuStateUpdate_(isOpen) {
-    this.mutateElement(() => {
-      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
-      this.element_.setAttribute('aria-hidden', !isOpen);
+    this.vsync_.mutate(() => {
+      this.rootEl_.classList.toggle(VISIBLE_CLASS, isOpen);
+      this.rootEl_.setAttribute('aria-hidden', !isOpen);
     });
   }
 
@@ -268,7 +277,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
     }
 
     // Closes the menu if click happened outside of the menu main container.
-    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
+    if (!closest(el, (el) => el === this.innerContainerEl_, this.rootEl_)) {
       this.close_();
     }
   }
@@ -279,10 +288,10 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    this.mutateElement(() => {
+    this.vsync_.mutate(() => {
       uiState !== UIType.MOBILE
-        ? this.element_.setAttribute('desktop', '')
-        : this.element_.removeAttribute('desktop');
+        ? this.rootEl_.setAttribute('desktop', '')
+        : this.rootEl_.removeAttribute('desktop');
     });
   }
 
@@ -299,14 +308,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * @protected
    */
   loadProviders() {
-    Services.extensionsFor(this.win).installExtensionForDoc(
-      getAmpdoc(this.element),
-      'amp-social-share'
-    );
-
-    const storyEl = closestAncestorElementBySelector(this.element, 'amp-story');
-
-    const shareEl = storyEl.querySelector(
+    const shareEl = this.storyEl_.querySelector(
       'amp-story-social-share, amp-story-bookend'
     );
 
@@ -370,22 +372,21 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * @private
    */
   copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(
-      getAmpdoc(this.element)
-    ).canonicalUrl;
+    const url = Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
 
-    const storyEl = closestAncestorElementBySelector(this.element, 'amp-story');
-
-    if (!copyTextToClipboard(this.win, url)) {
+    if (!copyTextToClipboard(this.win_, url)) {
       const failureString = this.localizationService_.getLocalizedString(
-        storyEl,
+        this.storyEl_,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
-      Toast.show(storyEl, dev().assertString(failureString));
+      Toast.show(this.storyEl_, dev().assertString(failureString));
       return;
     }
 
-    Toast.show(storyEl, this.buildCopySuccessfulToast_(this.win.document, url));
+    Toast.show(
+      this.storyEl_,
+      this.buildCopySuccessfulToast_(this.win_.document, url)
+    );
   }
 
   /**
@@ -466,5 +467,12 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
  */
 
 AMP.extension('amp-story-share-menu', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-share-menu', AmpStoryShareMenu);
+  AMP.ampdoc.whenReady().then(() => {
+    const element = AMP.ampdoc
+      .getRootNode()
+      .querySelector('.i-amphtml-story-share-menu');
+    const shareMenu = new AmpStoryShareMenu(element, AMP.ampdoc.win);
+    shareMenu.build();
+  });
+  AMP.registerElement('amp-social-share', AmpSocialShare);
 });
