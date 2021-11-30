@@ -62,13 +62,9 @@ export class AmpStoryShare {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
-    );
+    this.storeService_.subscribe(StateProperty.UI_STATE, (uiState) => {
+      this.onUIStateUpdate_(uiState);
+    });
 
     this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
       this.onShareMenuStateUpdate_(isOpen);
@@ -129,10 +125,10 @@ export class AmpStoryShare {
       }
     }
 
-    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
+    this.shareMenu_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
     this.analyticsService_.triggerEvent(
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-      this.element_
+      this.shareMenu_
     );
   }
 
