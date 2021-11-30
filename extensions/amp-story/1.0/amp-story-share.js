@@ -51,7 +51,6 @@ export class AmpStoryShare {
       this.ampDoc_,
       'amp-story-share-menu'
     );
-    Services.storyRequestService(this.win);
     this.shareMenu_ = this.parentEl_.ownerDocument.createElement(
       'amp-story-share-menu'
     );
