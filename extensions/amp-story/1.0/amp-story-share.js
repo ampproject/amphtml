@@ -93,10 +93,12 @@ function renderLinkShareItemElement(el, onClick) {
  * @return {!Element}
  */
 function buildProvider(doc, shareType) {
-  const shareProviderLocalizedStringId = devAssert(
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-    `No localized string to display name for share type ${shareType}.`
-  );
+  const shareProviderLocalizedStringId =
+    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
+
+  if (!shareProviderLocalizedStringId) {
+    return;
+  }
 
   return (
     <amp-social-share
