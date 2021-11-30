@@ -46,16 +46,16 @@ export class AmpStoryShare {
    * Creates a share menu
    * @private
    */
-  buildShareMenu_() {
+  buildFallbackShareMenu_() {
     Services.extensionsFor(this.win_).installExtensionForDoc(
       this.ampDoc_,
       'amp-story-share-menu'
     );
+    Services.storyRequestService(this.win);
     this.shareMenu_ = this.parentEl_.ownerDocument.createElement(
       'amp-story-share-menu'
     );
     this.parentEl_.appendChild(this.shareMenu_);
-    this.onUIStateUpdate_(this.storeService_.get(StateProperty.UI_STATE));
   }
 
   /**
@@ -110,26 +110,21 @@ export class AmpStoryShare {
     const systemShareSupported = this.isSystemShareSupported();
     if (systemShareSupported) {
       if (isOpen) {
-        // Opens the system share dialog.
-        this.handleSystemShare_();
+        this.openSystemShare_();
 
-        // There is no way to know when the user dismisses the native system share
-        // menu, so we immediately set the state to closed.
+        // There is no way to know when the user dismisses the native system
+        //  share menu, so we immediately set the state to closed.
         this.close_();
       }
     } else {
       if (isOpen && !this.shareMenu_) {
-        this.buildShareMenu_();
-      } else {
-        toggle(this.shareMenu_, isOpen);
+        this.buildFallbackShareMenu_();
       }
     }
 
-    this.shareMenu_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
-    this.analyticsService_.triggerEvent(
-      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-      this.shareMenu_
-    );
+    if (isOpen) {
+      this.analyticsService_.triggerEvent(StoryAnalyticsEvent.STORY_SHARED);
+    }
   }
 
   /**
@@ -143,7 +138,7 @@ export class AmpStoryShare {
   /**
    * @private
    */
-  handleSystemShare_() {
+  openSystemShare_() {
     const {navigator} = this.win_;
     devAssert(navigator.share);
 

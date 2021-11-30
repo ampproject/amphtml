@@ -96,24 +96,29 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    console.log('buildCallback started');
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((service) => {
+        console.log('store service ready');
         this.storeService_ = service;
       }),
       Services.storyRequestServiceForOrNull(this.win).then((service) => {
+        console.log('request service ready');
         this.requestService_ = service;
       }),
       Services.localizationServiceForOrNull(this.element).then((service) => {
+        console.log('localization service ready');
         this.localizationService_ = service;
       }),
-    ]).then(() => this.buildForFallbackSharing_());
+    ]).then(() => this.buildShareMenu_());
   }
 
   /**
    * Builds and appends the fallback UI.
    * @private
    */
-  buildForFallbackSharing_() {
+  buildShareMenu_() {
+    console.log('building share menu');
     const root = this.win.document.createElement('div');
     root.classList.add('i-amphtml-story-share-menu-host');
 

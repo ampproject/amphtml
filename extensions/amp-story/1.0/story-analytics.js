@@ -23,6 +23,7 @@ export const StoryAnalyticsEvent = {
   STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
+  STORY_SHARED: 'story-shared',
 };
 
 /**
