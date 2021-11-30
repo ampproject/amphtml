@@ -8,22 +8,48 @@ import {
   useRef,
   useState,
 } from '#preact';
+import { getAndroidAppInfo } from "./android";
 import {useStyles} from './component.jss';
+import { getIOSAppInfo } from "./ios";
 
 /**
  * @param {!BentoAppBanner.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BentoAppBanner({exampleTagNameProp, children, ...rest}) {
+export function BentoAppBanner({
+  children,
+  onInstall,
+  dismissButtonAriaLabel = "Dismiss",
+  ...rest
+}) {
   const styles = useStyles();
 
   return (
     <ContainWrapper {...rest}>
       <div className={styles.banner}>
         <div className={styles.bannerPadding} />
-        <div className={styles.dismiss} />
+        <button className={styles.dismiss} aria-label={dismissButtonAriaLabel} />
         {children}
       </div>
     </ContainWrapper>
   );
+}
+
+
+function AppBannerIOS(props) {
+  const appInfo = useMemo(getIOSAppInfo);
+  if (!appInfo) {
+    return null;
+  }
+
+  return <BentoAppBanner {...props} onInstall={appInfo.openOrInstall} />;
+}
+
+function AppBannerAndroid(props) {
+  const appInfo = useMemo(getAndroidAppInfo);
+  if (!appInfo) {
+    return null;
+  }
+
+  return <BentoAppBanner {...props} onInstall={appInfo.openOrInstall} />;
 }
