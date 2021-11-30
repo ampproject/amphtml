@@ -115,7 +115,7 @@ export class StandardActions {
     if (this.prefersDarkMode_()) {
       this.ampdoc.waitForBodyOpen().then((body) => {
         const darkModeClass =
-          body.getAttribute('prefers-dark-mode-class') || 'amp-dark-mode';
+          body.getAttribute('data-prefers-dark-mode-class') || 'amp-dark-mode';
 
         body.classList.add(darkModeClass);
       });
@@ -248,7 +248,7 @@ export class StandardActions {
     this.ampdoc.waitForBodyOpen().then((body) => {
       try {
         const darkModeClass =
-          body.getAttribute('prefers-dark-mode-class') || 'amp-dark-mode';
+          body.getAttribute('data-prefers-dark-mode-class') || 'amp-dark-mode';
 
         if (this.prefersDarkMode_()) {
           body.classList.remove(darkModeClass);
