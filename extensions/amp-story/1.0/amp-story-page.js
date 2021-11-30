@@ -757,7 +757,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       iterateCursor(
         scopedQuerySelectorAll(
           fie.win.document.body,
-          Selectors.ALL_IFRAMED_MEDIA
+          selector.replace(/amp-story-grid-layer/g, '')
         ),
         (el) => mediaSet.push(el)
       );
