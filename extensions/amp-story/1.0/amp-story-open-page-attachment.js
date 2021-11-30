@@ -1,6 +1,4 @@
 import * as Preact from '#core/dom/jsx';
-import {htmlRefs} from '#core/dom/static-template';
-
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
@@ -16,10 +14,6 @@ import {
 } from './utils';
 import {getWin} from '#core/window';
 import {scopedQuerySelector} from '#core/dom/query';
-
-import {Services} from '#service';
-
-import {ShoppingDataDef, StateProperty} from './amp-story-store-service';
 
 /**
  * @enum {string}
@@ -79,61 +73,6 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
 };
 
 /**
- * Sets custom theme attributes.
- * @param {!Element} attachmentEl
- * @param {!Element} openAttachmentEl
- */
-export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
-  if (!attachmentEl.hasAttribute('cta-accent-color')) {
-    dev().warn(
-      'AMP-STORY-PAGE-OUTLINK',
-      'No cta-accent-color attribute found.'
-    );
-  }
-
-  const accentColor =
-    attachmentEl.getAttribute('cta-accent-color') || '#000000';
-
-  // Calculating contrast color (black or white) needed for outlink CTA UI.
-  let contrastColor = null;
-  setImportantStyles(attachmentEl, {
-    'background-color': accentColor,
-  });
-
-  const win = getWin(attachmentEl);
-  const styles = computedStyle(win, attachmentEl);
-  const rgb = getRGBFromCssColorValue(styles['background-color']);
-  contrastColor = getTextColorForRGB(rgb);
-  setImportantStyles(attachmentEl, {
-    'background-color': '',
-  });
-  if (
-    attachmentEl.getAttribute('cta-accent-element') ===
-    CtaAccentElement.BACKGROUND
-  ) {
-    setImportantStyles(openAttachmentEl, {
-      '--i-amphtml-outlink-cta-background-color': accentColor,
-      '--i-amphtml-outlink-cta-text-color': contrastColor,
-    });
-    setImportantStyles(attachmentEl, {
-      '--i-amphtml-outlink-cta-background-color': accentColor,
-      '--i-amphtml-outlink-cta-text-color': contrastColor,
-    });
-  } else {
-    setImportantStyles(openAttachmentEl, {
-      '--i-amphtml-outlink-cta-background-color': contrastColor,
-      '--i-amphtml-outlink-cta-text-color': accentColor,
-    });
-    setImportantStyles(attachmentEl, {
-      '--i-amphtml-outlink-cta-background-color': contrastColor,
-      '--i-amphtml-outlink-cta-text-color': accentColor,
-    });
-  }
-};
-
-/**
- * Renders page outlink UI.
-=======
  * @param {!Element} element
  * @return {?string}
  */
@@ -240,58 +179,79 @@ const renderInlineUi = (pageEl, attachmentEl) => {
         style={`background-image: url(${proxied}) !important`}
       ></div>
     );
-    openAttachmentEl.setAttribute('aria-label', openLabel);
-
-    if (openLabel !== 'none') {
-      const textEl = (
-        <span class="i-amphtml-story-page-attachment-label"></span>
-      );
-      textEl.textContent = openLabel;
-      if (
-        attachmentEl.tagName.toLowerCase() === 'amp-story-shopping-attachment'
-      ) {
-        textEl.textContent = localize(
-          pageEl,
-          LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL
-        );
-      }
-      openAttachmentEl.appendChild(textEl);
-    }
-
-    // Add images if they are defined.
-    const {chipEl} = htmlRefs(openAttachmentEl);
-    const makeImgElWithBG = (openImgAttr) => {
-      const ctaImgEl = (
-        <div class="i-amphtml-story-inline-page-attachment-img"></div>
-      );
-      setImportantStyles(ctaImgEl, {
-        'background-image': 'url(' + openImgAttr + ')',
-      });
-      return ctaImgEl;
-    };
-
-    const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
-    const openLabel = openLabelOrFallback(
-      pageEl,
-      ctaLabelFromAttr(attachmentEl)
-    );
-
-    return (
-      <a
-        class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-        role="button"
-        theme={AttachmentTheme.DARK === theme && theme}
-        aria-label={openLabel}
-      >
-        <div class="i-amphtml-story-inline-page-attachment-chip">
-          {makeImgElWithBG('cta-image')}
-          {makeImgElWithBG('cta-image-2')}
-          <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
-        </div>
-        {openLabel !== 'none' && (
-          <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
-        )}
-      </a>
-    );
   };
+
+  const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
+  const openLabel = openLabelOrFallback(pageEl, ctaLabelFromAttr(attachmentEl));
+
+  return (
+    <a
+      class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+      role="button"
+      theme={AttachmentTheme.DARK === theme && theme}
+      aria-label={openLabel}
+    >
+      <div class="i-amphtml-story-inline-page-attachment-chip">
+        {makeImgElWithBG('cta-image')}
+        {makeImgElWithBG('cta-image-2')}
+        <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
+      </div>
+      {openLabel !== 'none' && (
+        <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
+      )}
+    </a>
+  );
+};
+
+/**
+ * Sets custom theme attributes.
+ * @param {!Element} attachmentEl
+ * @param {!Element} openAttachmentEl
+ */
+export const setCustomThemeStyles = (attachmentEl, openAttachmentEl) => {
+  if (!attachmentEl.hasAttribute('cta-accent-color')) {
+    dev().warn(
+      'AMP-STORY-PAGE-OUTLINK',
+      'No cta-accent-color attribute found.'
+    );
+  }
+
+  const accentColor =
+    attachmentEl.getAttribute('cta-accent-color') || '#000000';
+
+  // Calculating contrast color (black or white) needed for outlink CTA UI.
+  let contrastColor = null;
+  setImportantStyles(attachmentEl, {
+    'background-color': accentColor,
+  });
+
+  const win = getWin(attachmentEl);
+  const styles = computedStyle(win, attachmentEl);
+  const rgb = getRGBFromCssColorValue(styles['background-color']);
+  contrastColor = getTextColorForRGB(rgb);
+  setImportantStyles(attachmentEl, {
+    'background-color': '',
+  });
+  if (
+    attachmentEl.getAttribute('cta-accent-element') ===
+    CtaAccentElement.BACKGROUND
+  ) {
+    setImportantStyles(openAttachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': accentColor,
+      '--i-amphtml-outlink-cta-text-color': contrastColor,
+    });
+    setImportantStyles(attachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': accentColor,
+      '--i-amphtml-outlink-cta-text-color': contrastColor,
+    });
+  } else {
+    setImportantStyles(openAttachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': contrastColor,
+      '--i-amphtml-outlink-cta-text-color': accentColor,
+    });
+    setImportantStyles(attachmentEl, {
+      '--i-amphtml-outlink-cta-background-color': contrastColor,
+      '--i-amphtml-outlink-cta-text-color': accentColor,
+    });
+  }
 };
