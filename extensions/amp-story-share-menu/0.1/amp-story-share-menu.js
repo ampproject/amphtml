@@ -188,7 +188,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
       return;
     }
 
-    const linkShareButton = this.renderLinkShareButtonElement();
+    const linkShareButton = this.renderLinkShareButtonElement_();
 
     this.add_(linkShareButton);
 
@@ -441,7 +441,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * @private
    * @return {!Element}
    */
-  renderLinkShareButtonElement() {
+  renderLinkShareButtonElement_() {
     return (
       <div
         class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
