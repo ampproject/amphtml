@@ -8,6 +8,7 @@
  * </amp-story>
  * </code>
  */
+import * as Preact from '#core/dom/jsx';
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
@@ -66,7 +67,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {computedStyle, setImportantStyles, toggle} from '#core/dom/style';
+import {computedStyle, px, setImportantStyles, toggle} from '#core/dom/style';
 import {createPseudoLocale} from '#service/localization/strings';
 import {debounce} from '#core/types/function';
 import {dev, devAssert, user} from '#utils/log';
@@ -343,6 +344,10 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
+    if (!this.win.CSS?.supports?.('height: 1dvh')) {
+      this.onResize_(this.getViewport().getSize());
+    }
+
     const pageId = this.getInitialPageId_();
     if (pageId) {
       const page = this.element.querySelector(
@@ -481,7 +486,7 @@ export class AmpStory extends AMP.BaseElement {
     // Lock body to prevent overflow.
     this.lockBody_();
     // Standalone CSS affects sizing of the entire page.
-    this.onResize();
+    this.onResizeDebounced();
   }
 
   /**
@@ -735,7 +740,9 @@ export class AmpStory extends AMP.BaseElement {
       attributeFilter: ['class'],
     });
 
-    this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
+    this.getViewport().onResize(
+      debounce(this.win, () => this.onResizeDebounced(), 300)
+    );
     this.installGestureRecognizers_();
 
     // TODO(gmajoulet): migrate this to amp-story-viewer-messaging-handler once
@@ -929,13 +936,10 @@ export class AmpStory extends AMP.BaseElement {
           this.activePage_.openAttachment(false /** shouldAnimate */);
         }
 
-        const infoDialog = shouldShowStoryUrlInfo(
-          devAssert(this.viewer_),
-          this.storeService_
-        )
-          ? new InfoDialog(this.win, this.element)
-          : null;
-        if (infoDialog) {
+        if (
+          shouldShowStoryUrlInfo(devAssert(this.viewer_), this.storeService_)
+        ) {
+          const infoDialog = new InfoDialog(this.win, this.element);
           infoDialog.build();
         }
       });
@@ -1539,13 +1543,29 @@ export class AmpStory extends AMP.BaseElement {
    * Handle resize events and set the story's desktop state.
    * @visibleForTesting
    */
-  onResize() {
+  onResizeDebounced() {
     this.uiState_ = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
     this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
+  }
+
+  /**
+   * Handles resize events and sets CSS variables.
+   * @param {!Object} size including new width and height
+   * @private
+   */
+  onResize_(size) {
+    const {height, width} = size;
+    if (height === 0 && width === 0) {
+      return;
+    }
+    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+    setImportantStyles(this.win.document.documentElement, {
+      '--story-dvh': px(height / 100),
+    });
   }
 
   /**
@@ -1992,9 +2012,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      this.element.appendChild(
-        this.win.document.createElement('amp-story-education')
-      );
+      this.element.appendChild(<amp-story-education />);
     });
 
     Services.extensionsFor(this.win).installExtensionForDoc(
@@ -2467,7 +2485,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.setAttribute('mode', 'inspect');
 
-    const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
+    const devToolsEl = <amp-story-dev-tools />;
     this.win.document.body.appendChild(devToolsEl);
     this.element.setAttribute('hide', '');
 

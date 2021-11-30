@@ -64,23 +64,7 @@ defineBentoTwitters();
     </style>
   </head>
   <body>
-    <bento-twitter id="my-tweet" data-tweetid="885634330868850689">
-    </bento-twitter>
-    <div class="buttons" style="margin-top: 8px">
-      <button id="change-tweet">Change tweet</button>
-    </div>
-
-    <script>
-      (async () => {
-        const twitter = document.querySelector('#my-tweet');
-        await customElements.whenDefined('bento-twitter');
-
-        // set up button actions
-        document.querySelector('#change-tweet').onclick = () => {
-          twitter.setAttribute('data-tweetid', '495719809695621121');
-        };
-      })();
-    </script>
+    <bento-twitter id="my-tweet" data-tweetid="885634330868850689"></bento-twitter>
   </body>
 </html>
 ```
@@ -145,6 +129,65 @@ For details on the available options, see Twitter's docs <a href="https://develo
     <td>Define a <code>title</code> attribute for the component. The default is <code>Twitter</code>.</td>
   </tr>
 </table>
+
+### Interactivity and API usage
+
+Programmatically changing any of the attribute values will automatically update the element. For example, changing the tweet id via `data-tweetid` will automatically load the new tweet:
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+    />
+    <style>
+      bento-twitter {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-twitter id="my-tweet" data-tweetid="885634330868850689">
+    </bento-twitter>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-tweet">Change tweet</button>
+    </div>
+
+    <script>
+      (async () => {
+        const twitter = document.querySelector('#my-tweet');
+
+        // set up button actions
+        document.querySelector('#change-tweet').onclick = () => {
+          twitter.setAttribute('data-tweetid', '495719809695621121');
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
 
 ---
 

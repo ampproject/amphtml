@@ -1,8 +1,4 @@
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {
   Action,
   StateProperty,
@@ -12,7 +8,6 @@ import {Services} from '#service';
 import {devAssert, user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {toggle} from 'cli-spinners';
 
 const TAG = 'amp-story-share';
 
@@ -149,5 +144,14 @@ export class AmpStoryShare {
     navigator.share(shareData).catch((e) => {
       user().warn(TAG, e.message, shareData);
     });
+  }
+
+  /**
+   */
+  loadRequiredExtensions() {
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc_(),
+      'amp-social-share'
+    );
   }
 }

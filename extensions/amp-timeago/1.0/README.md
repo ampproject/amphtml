@@ -17,7 +17,33 @@ import {defineElement as defineBentoTimeago} from '@bentoproject/timeago';
 defineBentoTimeago();
 ```
 
-### Import via `<script>`
+### Include via `<script>`
+
+```html
+<script
+  type="module"
+  async
+  src="https://cdn.ampproject.org/bento.mjs"
+></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+<script
+  type="module"
+  async
+  src="https://cdn.ampproject.org/v0/bento-timeago-1.0.mjs"
+></script>
+<script
+  nomodule
+  async
+  src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
+></script>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css"
+/>
+```
+
+### Example
 
 <!--% example %-->
 
@@ -165,6 +191,70 @@ Add the `locale` attribute to specify one of the following values to change the 
 #### `cutoff`
 
 Add the `cutoff` attribute to display the date specified in the `datatime` attribute after passing the specified date in seconds.
+
+#### API Example
+
+By programmatically changing attribute values, you can dynamically change the text or locale:
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-timeago-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-timeago
+      id="my-timeago"
+      datetime="2017-04-11T00:37:33.809Z"
+      locale="en"
+      style="height: 30px"
+    >
+      Saturday 11 April 2017 00.37
+    </bento-timeago>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="ar-button">Change locale to Arabic</button>
+      <button id="en-button">Change locale to English</button>
+      <button id="now-button">Change time to now</button>
+    </div>
+
+    <script>
+      (async () => {
+        const timeago = document.querySelector('#my-timeago');
+
+        // set up button actions
+        document.querySelector('#ar-button').onclick = () =>
+          timeago.setAttribute('locale', 'ar');
+        document.querySelector('#en-button').onclick = () =>
+          timeago.setAttribute('locale', 'en');
+        document.querySelector('#now-button').onclick = () =>
+          timeago.setAttribute('datetime', 'now');
+      })();
+    </script>
+  </body>
+</html>
+```
 
 ---
 
