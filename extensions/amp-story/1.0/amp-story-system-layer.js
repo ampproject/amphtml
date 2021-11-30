@@ -1,5 +1,4 @@
 import * as Preact from '#core/dom/jsx';
-import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
 import {
   Action,
   StateProperty,
@@ -870,7 +869,7 @@ export class SystemLayer {
       this.viewerMessagingHandler_.send(
         'documentStateUpdate',
         dict({
-          'state': AMP_STORY_PLAYER_EVENT,
+          'state': 'AMP_STORY_PLAYER_EVENT',
           'value': eventName,
         })
       );
