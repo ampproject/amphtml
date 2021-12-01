@@ -75,6 +75,35 @@ export class AmpAccessFewcents {
    * @return {!Promise<!JsonObject>}
    */
   authorize() {
+  /**
+   * add request parameters for the authorize endpoint
+   * @return {string} authorize url
+   * @private
+   */
+  prepareAuthorizeUrl_() {
+    dev().fine(TAG, 'Publishers config', this.fewcentsConfig_);
+    return;
+  }
+
+  /**
+   * get paywall data by making call to authorize endpoint
+   * @return {!Promise<Object>}
+   * @private
+   */
+  getPaywallData_() {
+    dev().fine(TAG, 'authorizeUrl', this.authorizeUrl_, CONFIG_BASE_PATH);
+
+    return Promise.reject({
+      response: {
+        status: 402,
+        json() {
+          return Promise.resolve({success: true});
+        },
+      },
+    });
+  }
+
+  /**
     return Promise.resolve();
   }
 }
