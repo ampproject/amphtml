@@ -10,8 +10,8 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
-/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
-const fontsToLoad = [
+/** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+const FONTS_TO_LOAD = [
   {
     family: 'Poppins',
     weight: '400',
@@ -64,7 +64,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   layoutCallback() {
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.updateShoppingTag_(shoppingData),
+      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
   }
@@ -78,7 +78,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  updateShoppingTag_(shoppingData) {
+  createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
     if (!tagData) {
       return;
@@ -95,7 +95,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @private */
   loadFonts_() {
     if (this.win.document.fonts && FontFace) {
-      fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
+      FONTS_TO_LOAD.forEach(({family, src, style = 'normal', weight}) =>
         new FontFace(family, src, {weight, style})
           .load()
           .then((font) => this.win.document.fonts.add(font))
