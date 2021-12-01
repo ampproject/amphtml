@@ -19,7 +19,7 @@ import {Toast} from './toast';
 
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {AmpSocialShare} from '../../amp-social-share/0.1/amp-social-share';
+import {AmpSocialShare} from '../../amp-social-share/0.1/amp-social-share-impl';
 import {getRequestService} from '../../amp-story/1.0/amp-story-request-service';
 import {
   Action,

@@ -65,9 +65,10 @@ export class AmpStoryShare {
   }
 
   /**
+   * @private
    * @return {boolean} Whether the browser supports native system sharing.
    */
-  isSystemShareSupported() {
+  isSystemShareSupported_() {
     const viewer = Services.viewerForDoc(this.ampDoc_);
 
     const platform = Services.platformFor(this.win_);
@@ -100,7 +101,7 @@ export class AmpStoryShare {
    * @private
    */
   onShareMenuStateUpdate_(isOpen) {
-    const systemShareSupported = this.isSystemShareSupported();
+    const systemShareSupported = this.isSystemShareSupported_();
     if (systemShareSupported) {
       if (isOpen) {
         this.openSystemShare_();
@@ -143,14 +144,5 @@ export class AmpStoryShare {
     navigator.share(shareData).catch((e) => {
       user().warn(TAG, e.message, shareData);
     });
-  }
-
-  /**
-   */
-  loadRequiredExtensions() {
-    Services.extensionsFor(this.win).installExtensionForDoc(
-      this.getAmpDoc_(),
-      'amp-social-share'
-    );
   }
 }
