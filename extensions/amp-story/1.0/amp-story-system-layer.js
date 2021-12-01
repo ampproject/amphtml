@@ -1,5 +1,5 @@
 import * as Preact from '#core/dom/jsx';
-import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {
   Action,
   StateProperty,
