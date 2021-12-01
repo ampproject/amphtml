@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+const TAG = 'amp-access-fewcents';
+
+const TAG_SHORTHAND = 'aaf';
+
+const CONFIG_BASE_PATH =
+  'https://api.hounds.fewcents.co/v1/amp/authorizeBid?articleUrl=SOURCE_URL&ampReaderId=READER_ID&returnUrl=RETURN_URL';
+
+const DEFAULT_MESSAGES = {
+  fcTitleText: 'Instant Access With Fewcents.',
+  fcButtonText: 'Unlock',
+};
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
  */
