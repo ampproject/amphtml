@@ -585,7 +585,7 @@ export class AmpVideo extends AMP.BaseElement {
     sources.forEach((source) => {
       // Cached sources should have been moved from <amp-video> to <video>.
       devAssert(!isCachedByCdn(source, element));
-      urlService.assertHttpsUrl(source.getAttribute('src'), source);
+      // urlService.assertHttpsUrl(source.getAttribute('src'), source);
       this.video_.appendChild(source);
     });
 

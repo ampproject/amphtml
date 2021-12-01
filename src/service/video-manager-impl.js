@@ -1503,13 +1503,15 @@ export class AnalyticsPercentageTracker {
         (PERCENTAGE_FREQUENCY_MIN_MS * (100 / PERCENTAGE_INTERVAL)) / 1000
       );
 
-      this.warnForTesting_(
-        'This video is too short for `video-percentage-played`. ' +
-          'Reports may be innacurate. For best results, use videos over',
-        bestResultLength,
-        'seconds long.',
-        video.element
-      );
+      // Commented out to reduce noise & potential performance impact
+      // of logging.
+      // this.warnForTesting_(
+      //   'This video is too short for `video-percentage-played`. ' +
+      //     'Reports may be innacurate. For best results, use videos over',
+      //   bestResultLength,
+      //   'seconds long.',
+      //   video.element
+      // );
     }
 
     return true;
