@@ -106,4 +106,53 @@ export class AmpAccessFewcents {
   /**
     return Promise.resolve();
   }
+
+  /**
+   * @param {string} name
+   * @return {!Element}
+   * @private
+   */
+  createElement_(name) {
+    return this.ampdoc.win.document.createElement(name);
+  }
+
+  /**
+   * @return {!Element} return element on publisher's page where paywall will be displayed
+   * @private
+   */
+  getPaywallContainer_() {
+    const dialogContainer = this.ampdoc.getElementById(
+      'amp-access-fewcents-dialog'
+    );
+    return user().assertElement(
+      dialogContainer,
+      'No element found with given id '
+    );
+  }
+
+  /**
+   * Creates the paywall component
+   * @private
+   */
+  renderPurchaseOverlay_() {
+    this.dialogContainer_ = this.getPaywallContainer_();
+    this.innerContainer_ = this.createElement_('div');
+    this.innerContainer_.className = TAG_SHORTHAND + '-container';
+
+    const headerText = this.createElement_('div');
+    headerText.className = TAG_SHORTHAND + '-headerText';
+    headerText.textContent = this.i18n_['fcTitleText'];
+
+    this.innerContainer_.appendChild(headerText);
+
+    // unlock button element
+    const unlockButton = this.createElement_('button');
+    unlockButton.className = TAG_SHORTHAND + '-purchase-button';
+    unlockButton.textContent = this.i18n_['fcButtonText'];
+
+    this.innerContainer_.appendChild(unlockButton);
+
+    this.dialogContainer_.appendChild(this.innerContainer_);
+    this.containerEmpty_ = false;
+  }
 }
