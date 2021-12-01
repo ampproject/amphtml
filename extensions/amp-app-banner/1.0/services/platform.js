@@ -1,4 +1,7 @@
 class PlatformService {
+  navigator_ = window.navigator;
+
+
   /**
    * Whether the current platform an Android device.
    * @return {boolean}

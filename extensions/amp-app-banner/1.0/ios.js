@@ -1,11 +1,13 @@
 import { dict } from "#core/types/object";
 import { user, userAssert } from "#utils/log";
 import { openWindowDialog } from "../../../src/open-window-dialog";
-import { docService } from "./services/meta";
+import { docService } from "./services/document";
 import { platformService } from "./services/platform";
 import { timerService } from "./services/timer";
 import { urlService } from "./services/url";
 import { viewerService } from "./services/viewer";
+
+const OPEN_LINK_TIMEOUT = 1500;
 
 export function getIOSAppInfo() {
   const canShowBuiltinBanner = !viewerService.isEmbedded() && platformService.isSafari();
@@ -24,21 +26,21 @@ export function getIOSAppInfo() {
   const { installAppUrl, openInAppUrl } = parseIOSMetaContent(metaContent);
   if (!installAppUrl) return null;
 
-  const openOrInstall = () => {
-    if (!viewerService.isEmbedded()) {
-      timerService.delay(() => {
-        openWindowDialog(window, installAppUrl, '_top');
-      }, OPEN_LINK_TIMEOUT);
-      openWindowDialog(window, openInAppUrl, '_top');
-    } else {
-      timerService.delay(() => {
-        viewerService.sendMessage('navigateTo', dict({'url': installAppUrl}));
-      }, OPEN_LINK_TIMEOUT);
-      viewerService.sendMessage('navigateTo', dict({'url': openInAppUrl}));
+  return {
+    openOrInstall: () => {
+      if (!viewerService.isEmbedded()) {
+        timerService.delay(() => {
+          openWindowDialog(window, installAppUrl, '_top');
+        }, OPEN_LINK_TIMEOUT);
+        openWindowDialog(window, openInAppUrl, '_top');
+      } else {
+        timerService.delay(() => {
+          viewerService.sendMessage('navigateTo', dict({ 'url': installAppUrl }));
+        }, OPEN_LINK_TIMEOUT);
+        viewerService.sendMessage('navigateTo', dict({ 'url': openInAppUrl }));
+      }
     }
   };
-
-  return { openOrInstall };
 }
 
 function parseIOSMetaContent(metaContent) {

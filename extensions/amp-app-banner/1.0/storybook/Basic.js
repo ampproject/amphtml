@@ -1,11 +1,12 @@
 import * as Preact from '#preact';
-import {BentoAppBanner} from '../component';
+import {AppBanner} from '../component';
 
 export default {
   title: 'AppBanner',
-  component: BentoAppBanner,
+  component: AppBanner,
   args: {
-    'device': ['iOS', 'Android'],
+    onInstall() { console.log("Event triggered: onInstall"); },
+    onDismiss() { console.log("Event triggered: onDismiss"); },
   },
 };
 
@@ -17,10 +18,9 @@ const cssContent = {
   padding: 10
 }
 
-// DO NOT SUBMIT: This is example code only.
 export const _default = (args) => {
   return (
-    <BentoAppBanner {...args}>
+    <AppBanner {...args} id="ID">
       <div className="content" style={cssContent}>
         <img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png" width="40" height="34" />
         <div className="description">
@@ -31,6 +31,6 @@ export const _default = (args) => {
           <button open-button>Open In App</button>
         </div>
       </div>
-    </BentoAppBanner>
+    </AppBanner>
   );
 };

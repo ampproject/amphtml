@@ -11,10 +11,6 @@ const OPEN_LINK_TIMEOUT = 1500;
 
 export function getAndroidAppInfo() {
   const win = window;
-  const manifestLink = win.document.head.querySelector(
-    'link[rel=manifest],link[rel=origin-manifest]'
-  );
-
   // We want to fallback to browser builtin mechanism when possible.
   const isChromeAndroid = platformService.isAndroid() && platformService.isChrome();
   const isProxyOrigin = urlService.isProxyOrigin(win.location);
@@ -27,6 +23,10 @@ export function getAndroidAppInfo() {
     );
     return null;
   }
+
+  const manifestLink = win.document.head.querySelector(
+    'link[rel=manifest],link[rel=origin-manifest]'
+  );
 
   const missingDataSources = platformService.isAndroid() && !manifestLink;
   if (missingDataSources) {
@@ -41,7 +41,7 @@ export function getAndroidAppInfo() {
   const promise = xhrService.fetchJson(manifestHref).then(parseManifest);
   return {
     promise,
-    openOrInstall() {
+    openOrInstall: () => {
       promise.then((manifest) => {
         if (!manifest) return;
         const { openInAppUrl, installAppUrl } = manifest;
