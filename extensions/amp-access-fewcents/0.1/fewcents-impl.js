@@ -75,6 +75,23 @@ export class AmpAccessFewcents {
    * @return {!Promise<!JsonObject>}
    */
   authorize() {
+    return this.getPaywallData_().then(
+      (response) => {
+        // removing the paywall if shown and showing the content
+        this.emptyContainer_();
+        return {access: response.data.access, flash: true};
+      },
+      (err) => {
+        const {response} = err;
+        // rendering the paywall
+        return response.json().then(() => {
+          this.emptyContainer_().then(this.renderPurchaseOverlay_.bind(this));
+          return {access: false};
+        });
+      }
+    );
+  }
+
   /**
    * add request parameters for the authorize endpoint
    * @return {string} authorize url
@@ -104,6 +121,11 @@ export class AmpAccessFewcents {
   }
 
   /**
+   * Removes the paywall from the element on publisher's page where paywall is displayed
+   * @private
+   * @return {!Promise}
+   */
+  emptyContainer_() {
     return Promise.resolve();
   }
 
