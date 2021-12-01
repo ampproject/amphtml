@@ -1,3 +1,47 @@
-amp-access-fewcents {
-  /** Component styles */
+.aaf-container {
+  height: auto;
+  width: 70%;
+  max-width: 540px;
+  align-items: center;
+  margin: auto;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 15px;
+  background-color: whitesmoke;
+  border: 0px;
+  border-radius: 5px;
+  opacity: 1;
+  transition: opacity 0.5s ease 0s;
+  font-family: Arial;
+  font-weight: normal;
+  box-shadow: 1px 2px 2px 2px grey;
+  overflow: hidden;
+}
+
+.aaf-headerText {
+  text-align: center;
+  font-size: 17px;
+  text-align: center;
+  word-wrap: normal;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.aaf-purchase-button {
+  line-height: 1.2;
+  cursor: pointer;
+  color: white;
+  border: 0;
+  background: rgb(8, 40, 154);
+  width: 100%;
+  border-radius: 5px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  outline: none;
+  margin: auto;
+  padding: 0px 25px;
+  max-width: 160px;
 }
