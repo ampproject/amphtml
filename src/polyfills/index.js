@@ -35,11 +35,11 @@ if (self.document) {
   if (!mode.isEsm()) {
     installDocContains(self);
     installGetBoundingClientRect(self);
+    installCustomElements(self, class {});
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   if (!IS_SXG) {
-    installCustomElements(self, class {});
     installIntersectionObserver(self);
     installResizeObserver(self);
     installAbortController(self);

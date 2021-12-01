@@ -456,6 +456,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
+        mainFields: ['module', 'browser', 'main'],
         write: false,
       });
     } else {
@@ -536,7 +537,7 @@ const nameCache = {};
 const mangleIdentifier = {
   get(num) {
     const charset =
-      '$ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz0123456789';
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_0123456789';
     let base = 54;
     let id = '';
     do {
@@ -562,9 +563,7 @@ async function minify(code, map) {
       properties: {
         regex: '_AMP_PRIVATE_$',
         keep_quoted: /** @type {'strict'} */ ('strict'),
-        nth_identifier: mangleIdentifier,
       },
-      nth_identifier: mangleIdentifier,
     },
     compress: {
       // Settled on this count by incrementing number until there was no more
@@ -578,13 +577,13 @@ async function minify(code, map) {
     sourceMap: {content: map},
     toplevel: true,
     module: !!argv.esm,
-    nameCache,
+    nameCache: argv.nomanglecache ? undefined : nameCache,
   };
   /* eslint-enable local/camelcase */
 
   // Remove the local variable name cache which should not be reused between binaries.
   // See https://github.com/ampproject/amphtml/issues/36476
-  /** @type {any}*/ (nameCache).vars = {};
+  nameCache.vars = undefined;
 
   const minified = await terser.minify(code, terserOptions);
   return {code: minified.code ?? '', map: minified.map};
@@ -822,11 +821,8 @@ function massageSourcemaps(sourcemapsFile, options) {
  * @return {boolean}
  */
 function shouldUseClosure() {
-  // Normally setting this server-side experiment flag would be handled by
-  // the release process automatically. Since this experiment is actually on the build system
-  // itself instead of runtime, it is never run through babel (where the replacements usually happen).
-  // Therefore we must compute this one by hand.
-  return argv.define_experiment_constant !== 'ESBUILD_COMPILATION';
+  // TODO(samouri): cleanup closure build pipeline.
+  return false;
 }
 
 module.exports = {

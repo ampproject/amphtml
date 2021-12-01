@@ -686,11 +686,11 @@ export class FriendlyIframeEmbed {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   if (!mode.isEsm()) {
     installDocContains(childWin);
+    installCustomElements(childWin, class {});
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   if (!IS_SXG) {
-    installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
     installResizeObserver(parentWin, childWin);
     installAbortController(childWin);

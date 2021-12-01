@@ -17,7 +17,17 @@ import {defineElement as defineBentoSidebar} from '@bentoproject/sidebar';
 defineBentoSidebar();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -79,7 +89,7 @@ defineBentoSidebar();
 
 ### Interactivity and API usage
 
-Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-sidebar` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-sidebar` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-sidebar');

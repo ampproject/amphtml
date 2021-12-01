@@ -54,5 +54,40 @@ describes.realWin(
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe).to.not.be.null;
     });
+
+    it('should pass the loading attribute to the underlying iframe', async () => {
+      element = html`
+        <amp-video-iframe
+          layout="responsive"
+          width="16"
+          height="9"
+          data-loading="lazy"
+        ></amp-video-iframe>
+      `;
+
+      env.win.document.body.appendChild(element);
+
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('lazy');
+    });
+
+    it('should set data-loading="auto" if no value is specified', async () => {
+      element = html`
+        <amp-video-iframe
+          layout="responsive"
+          width="16"
+          height="9"
+        ></amp-video-iframe>
+      `;
+
+      env.win.document.body.appendChild(element);
+
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('auto');
+    });
   }
 );
