@@ -15,6 +15,14 @@
     }
   },
   {
+    "name": "amp-access-fewcents",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-access-laterpay",
     "version": [
       "0.1",
