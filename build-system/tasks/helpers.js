@@ -563,9 +563,7 @@ async function minify(code, map) {
       properties: {
         regex: '_AMP_PRIVATE_$',
         keep_quoted: /** @type {'strict'} */ ('strict'),
-        nth_identifier: mangleIdentifier,
       },
-      nth_identifier: mangleIdentifier,
     },
     compress: {
       // Settled on this count by incrementing number until there was no more
