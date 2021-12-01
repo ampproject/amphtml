@@ -64,6 +64,56 @@ defineBentoJwplayer();
       data-media-id="CtaIzmFs"
       style="width: 480px; height: 270px"
     ></bento-jwplayer>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+Bento components are highly interactive through their API. The `bento-jwplayer` component API is accessible by including the following script tag in your document:
+
+```javascript
+await customElements.whenDefined('bento-jwplayer');
+const jwplayerApi = await document.querySelector('bento-jwplayer').getApi();
+```
+
+You can use the API to trigger the available actions (`play`, `pause`, `mute`, `unmute`, `requestFullscreen`):
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-jwplayer
+      id="jwplayer"
+      data-player-id="BjcwyK37"
+      data-media-id="CtaIzmFs"
+      style="width: 480px; height: 270px"
+    ></bento-jwplayer>
 
     <script>
       (async () => {
@@ -80,15 +130,6 @@ defineBentoJwplayer();
     </script>
   </body>
 </html>
-```
-
-### Interactivity and API usage
-
-Bento enabled components in standalone use are highly interactive through their API. The `bento-jwplayer` component API is accessible by including the following script tag in your document:
-
-```javascript
-await customElements.whenDefined('bento-accordion');
-const api = await document.querySelector('bento-accordion').getApi();
 ```
 
 ### Layout and style

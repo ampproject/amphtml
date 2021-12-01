@@ -63,6 +63,8 @@ class AmpCarousel extends AMP.BaseElement {
       },
       ActionTrust_Enum.LOW
     );
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    this.action_.addToAllowlist('AMP-CAROUSEL', 'goToSlide', ['email']);
   }
 
   /** @param {!AmpElement} element */

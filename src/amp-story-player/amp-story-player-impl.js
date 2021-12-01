@@ -16,6 +16,7 @@ import {parseQueryString} from '#core/types/string/url';
 import {createCustomEvent, listenOnce} from '#utils/event-helper';
 
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
+import {AMP_STORY_PLAYER_EVENT} from './event';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
@@ -102,9 +103,6 @@ const STORY_MESSAGE_STATE_TYPE_ENUM = {
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
 };
-
-/** @const {string} */
-export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
 
 /** @const {string} */
 const CLASS_NO_NAVIGATION_TRANSITION =

@@ -76,6 +76,9 @@ BaseElement['props'] = {
   'adMacros': createParseAttrsWithPrefix('data-ad-macro-'),
   'config': createParseAttrsWithPrefix('data-config-'),
   'autoplay': {attr: 'autoplay', type: 'boolean'},
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
+  'loading': {attr: 'data-loading'},
   // TODO(wg-bento): These props have no internal implementation yet.
   'dock': {attr: 'dock', media: true},
 };
@@ -85,3 +88,6 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['loadable'] = true;

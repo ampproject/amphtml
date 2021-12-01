@@ -18,6 +18,12 @@ export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
  * @interface
  */
 export class VideoInterface {
+  /** @return {!AmpElement} */
+  get element() {}
+
+  /** @return {!Window} */
+  get win() {}
+
   /**
    * See `BaseElement`.
    * @return {!./utils/signals.Signals}
@@ -181,12 +187,6 @@ export class VideoInterface {
    */
   seekTo(unusedTimeSeconds) {}
 }
-
-/** @type {!AmpElement} */
-VideoInterface.prototype.element;
-
-/** @type {!Window} */
-VideoInterface.prototype.win;
 
 /**
  * Attributes
