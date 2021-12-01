@@ -34,7 +34,33 @@ export class AmpAccessFewcents {
    * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
-  constructor(accessService, accessSource) {}
+  constructor(accessService, accessSource) {
+    /** @const */
+    this.ampdoc = accessService.ampdoc;
+
+    /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
+    this.accessSource_ = accessSource;
+
+    /** @private {?Node} */
+    this.innerContainer_ = null;
+
+    /** @private {?Node} */
+    this.dialogContainer_ = null;
+
+    /** @const @private {JsonObject} */ // loads publisher config
+    this.fewcentsConfig_ = this.accessSource_.getAdapterConfig();
+
+    /** @private {string} */
+    this.authorizeUrl_ = this.prepareAuthorizeUrl_();
+
+    /** @private {!JsonObject} */
+    this.i18n_ = /** @type {!JsonObject} */ (
+      Object.assign(dict(), DEFAULT_MESSAGES)
+    );
+
+    // Install styles.
+    installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
+  }
 
   /**
    * Decides whether to show the paywall or not
