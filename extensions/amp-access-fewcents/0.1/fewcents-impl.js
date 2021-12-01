@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import {dict} from '#core/types/object';
+
+import {dev, user} from '#utils/log';
+
+import {CSS} from '../../../build/amp-access-fewcents-0.1.css';
+import {installStylesForDoc} from '../../../src/style-installer';
+
 const TAG = 'amp-access-fewcents';
 
 const TAG_SHORTHAND = 'aaf';
@@ -25,6 +32,7 @@ const DEFAULT_MESSAGES = {
   fcTitleText: 'Instant Access With Fewcents.',
   fcButtonText: 'Unlock',
 };
+
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
  */
