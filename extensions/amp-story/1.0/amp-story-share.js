@@ -7,7 +7,6 @@ import {
 } from './amp-story-store-service';
 import {Services} from '#service';
 import {devAssert, user} from '#utils/log';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {getAmpdoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-story-share';
@@ -55,10 +54,6 @@ export class AmpStoryShare {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.UI_STATE, (uiState) => {
-      this.onUIStateUpdate_(uiState);
-    });
-
     this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
       this.onShareMenuStateUpdate_(isOpen);
     });
@@ -78,20 +73,6 @@ export class AmpStoryShare {
     const isChromeWebview = viewer.isWebviewEmbedded() && platform.isChrome();
 
     return 'share' in navigator && !isChromeWebview;
-  }
-
-  /**
-   * Reacts to UI state updates and triggers the right UI.
-   * @param {!UIType} uiState
-   * @private
-   */
-  onUIStateUpdate_(uiState) {
-    if (!this.shareMenu_) {
-      return;
-    }
-    whenUpgradedToCustomElement(this.shareMenu_)
-      .then(() => this.shareMenu_.getImpl())
-      .then((impl) => impl.setUIType(uiState));
   }
 
   /**
