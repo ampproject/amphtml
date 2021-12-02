@@ -64,23 +64,6 @@ defineBentoFitText();
       Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
       inermis reprehendunt.
     </bento-fit-text>
-    <div class="buttons" style="margin-top: 8px">
-      <button id="font-button">Change max-font-size</button>
-      <button id="content-button">Change content</button>
-    </div>
-
-    <script>
-      (async () => {
-        const fitText = document.querySelector('#my-fit-text');
-        await customElements.whenDefined('bento-fit-text');
-
-        // set up button actions
-        document.querySelector('#font-button').onclick = () =>
-          fitText.setAttribute('max-font-size', '40');
-        document.querySelector('#content-button').onclick = () =>
-          (fitText.textContent = 'new content');
-      })();
-    </script>
   </body>
 </html>
 ```
@@ -153,6 +136,64 @@ Specifies the minimum font size in pixels as an integer that the `bento-fit-text
 #### `max-font-size`
 
 Specifies the maximum font size in pixels as an integer that the `bento-fit-text` can use.
+
+#### API Example
+
+Programmatically changing an attribute value will automatically update the element.
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-fit-text-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-fit-text-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-fit-text id="my-fit-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
+      inermis reprehendunt.
+    </bento-fit-text>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="font-button">Change max-font-size</button>
+      <button id="content-button">Change content</button>
+    </div>
+
+    <script>
+      (async () => {
+        const fitText = document.querySelector('#my-fit-text');
+        await customElements.whenDefined('bento-fit-text');
+
+        // set up button actions
+        document.querySelector('#font-button').onclick = () =>
+          fitText.setAttribute('max-font-size', '40');
+        document.querySelector('#content-button').onclick = () =>
+          (fitText.textContent = 'new content');
+      })();
+    </script>
+  </body>
+</html>
+```
 
 ---
 

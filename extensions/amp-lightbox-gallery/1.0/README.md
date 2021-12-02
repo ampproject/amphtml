@@ -107,7 +107,7 @@ In the following example, `<bento-lightbox-gallery>` displays the `alt` value as
 
 ## Interactivity and API usage
 
-Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-lightbox-gallery');

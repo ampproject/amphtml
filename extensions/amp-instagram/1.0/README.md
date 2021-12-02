@@ -67,19 +67,6 @@ defineBentoInstagram();
       style="height: 800px; width: 400px"
     >
     </bento-instagram>
-    <button id="change-shortcode">Change shortcode</button>
-
-    <script>
-      (async () => {
-        const instagram = document.querySelector('#my-instagram');
-        await customElements.whenDefined('bento-instagram');
-
-        // set up button actions
-        document.querySelector('#change-shortcode').onclick = () => {
-          instagram.dataset.shortcode = '1totVhIFXl';
-        };
-      })();
-    </script>
   </body>
 </html>
 ```
@@ -128,6 +115,65 @@ The instagram data-shortcode is found in every instagram photo URL. For example,
 #### `data-captioned`
 
 Include the Instagram caption. `bento-instagram` will attempt to resize to the correct height including the caption.
+
+#### API Example
+
+By programmatically changing the `data-shortcode` attribute value, you can dynamically switch to a different post:
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-instagram-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-instagram-1.0.js"
+    ></script>
+    <style>
+      bento-instagram {
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-instagram
+      id="my-instagram"
+      data-shortcode="CKXYAzuj7TE"
+      data-captioned
+      style="height: 800px; width: 400px"
+    >
+    </bento-instagram>
+    <button id="change-shortcode">Change shortcode</button>
+
+    <script>
+      (async () => {
+        const instagram = document.querySelector('#my-instagram');
+        await customElements.whenDefined('bento-instagram');
+
+        // set up button actions
+        document.querySelector('#change-shortcode').onclick = () => {
+          instagram.dataset.shortcode = '1totVhIFXl';
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
 
 ### Styling
 

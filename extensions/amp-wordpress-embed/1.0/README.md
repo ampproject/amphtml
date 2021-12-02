@@ -63,23 +63,6 @@ defineBentoWordpressEmbed();
       style="width: 300px; height: 400px"
       data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
     ></bento-wordpress-embed>
-    <div class="buttons" style="margin-top: 8px">
-      <button id="switch-button">Switch embed</button>
-    </div>
-
-    <script>
-      (async () => {
-        const embed = document.querySelector('#my-embed');
-        await customElements.whenDefined('bento-wordpress-embed');
-
-        // set up button actions
-        document.querySelector('#switch-button').onclick = () =>
-          embed.setAttribute(
-            'data-url',
-            'https://make.wordpress.org/core/2021/09/09/core-editor-improvement-cascading-impact-of-improvements-to-featured-images/'
-          );
-      })();
-    </script>
   </body>
 </html>
 ```
@@ -123,7 +106,62 @@ bento-wordpress-embed {
 
 #### data-url (required)
 
-The URL of the post to embed.
+The URL of the post to embed. Programmatically changing the attribute value will automatically update the embedded content.
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-wordpress-embed-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-wordpress-embed
+      id="my-embed"
+      style="width: 300px; height: 400px"
+      data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+    ></bento-wordpress-embed>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="switch-button">Switch embed</button>
+    </div>
+
+    <script>
+      (async () => {
+        const embed = document.querySelector('#my-embed');
+        await customElements.whenDefined('bento-wordpress-embed');
+
+        // set up button actions
+        document.querySelector('#switch-button').onclick = () =>
+          embed.setAttribute(
+            'data-url',
+            'https://make.wordpress.org/core/2021/09/09/core-editor-improvement-cascading-impact-of-improvements-to-featured-images/'
+          );
+      })();
+    </script>
+  </body>
+</html>
+```
 
 ---
 
