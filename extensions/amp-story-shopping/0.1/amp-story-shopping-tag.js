@@ -34,15 +34,17 @@ const fontsToLoad = [
   },
 ];
 
-const ProductTag = ({tagData}) => (
-  <div class="amp-story-shopping-tag-inner">
-    <span class="amp-story-shopping-tag-dot"></span>
-    <span class="amp-story-shopping-tag-pill">
-      <span class="amp-story-shopping-tag-pill-image"></span>
-      <span class="amp-story-shopping-tag-pill-text">{tagData.price}</span>
-    </span>
-  </div>
-);
+const ProductTag = ({tagData}) => {
+  return (
+    <div class="amp-story-shopping-tag-inner">
+      <span class="amp-story-shopping-tag-dot"></span>
+      <span class="amp-story-shopping-tag-pill">
+        <span class="amp-story-shopping-tag-pill-image"></span>
+        <span class="amp-story-shopping-tag-pill-text">{tagData.price}</span>
+      </span>
+    </div>
+  );
+};
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -84,6 +86,26 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       return;
     }
     this.renderedTag_ = <ProductTag tagData={data[this.id_]} />;
+
+    if (data[this.id_]['product-icon']) {
+      const imageHolder = this.renderedTag_.querySelector(
+        '.amp-story-shopping-tag-pill-image'
+      );
+      console.log(imageHolder);
+      imageHolder.style.backgroundImage =
+        'url(' + data[this.id_]['product-icon'] + ')';
+      imageHolder.style.backgroundSize = 'cover';
+    }
+
+    // class="amp-story-shopping-tag-pill-image"
+    // style={
+    //   tagData['product-icon'] && {
+    //     backgroundImage:
+    //       'url(' + tagData['product-icon'] + ') !important',
+    //     backgroundSize: 'cover !important',
+    //   }
+    // }
+
     createShadowRootWithStyle(this.element, this.renderedTag_, shoppingTagCSS);
   }
 
