@@ -250,5 +250,9 @@
   "100": {
     "string": "Read more",
     "description": "Label for a button to open a drawer containing additional content."
+  },
+  "101": {
+    "string": "Shop Now",
+    "description": "Label for the shopping CTA button."
   }
 }

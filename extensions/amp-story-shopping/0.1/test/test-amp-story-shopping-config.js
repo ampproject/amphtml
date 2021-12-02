@@ -33,7 +33,7 @@ describes.realWin(
       });
 
       requestService = getRequestService(win);
-      registerServiceBuilder(win, 'story-store', function () {
+      registerServiceBuilder(win, 'story-request', function () {
         return requestService;
       });
 

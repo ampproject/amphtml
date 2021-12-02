@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
