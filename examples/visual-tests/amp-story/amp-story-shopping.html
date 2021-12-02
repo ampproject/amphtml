@@ -25,14 +25,6 @@
         top: 33%;
         left: 7%;
       }
-      [data-tag-id=k-pop] {
-        top: 28%;
-        left: 43%;
-      }
-      [data-tag-id=eurodance] {
-        top: 33%;
-        left: 80%;
-      }
     </style>
   </head>
   <body>
@@ -44,7 +36,9 @@
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="inline-light-theme">
         <!--
-          Inline Shopping Component Config
+          Example of:
+          Inline config.
+          Multiple product tags with icon defined.
         -->
         <amp-story-shopping-config layout="nodisplay">
           <script type="application/json">
@@ -53,7 +47,20 @@
                    {
                     "product-tag-id": "hat",
                     "product-title": "Hootenanny Hat",
-                    "product-price": "799"
+                    "product-price": "799",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                   },
+                   {
+                    "product-tag-id": "sunglasses",
+                    "product-title": "Spectacular Spectacles",
+                    "product-price": "400",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
+                   },
+                   {
+                    "product-tag-id": "backpack",
+                    "product-title": "Beastly Backpack",
+                    "product-price": "1000",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
                    }
                 ]
               }
@@ -69,8 +76,9 @@
       </amp-story-page>
       <amp-story-page id="remote-dark-theme">
         <!--
-          Example of JSON retrieved from src attribute.
-          Falls back to inline if request fails.
+          Example of:
+          Remote JSON with inline fallback.
+          Single product tag without icon.
         -->
         <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
           <script type="application/json">
@@ -80,16 +88,6 @@
                     "product-tag-id": "city-pop",
                     "product-title": "Plastic Love",
                     "product-price": "799"
-                   },
-                   {
-                    "product-tag-id": "k-pop",
-                    "product-title": "Gangnam Style",
-                    "product-price": "400"
-                   },
-                   {
-                    "product-tag-id": "eurodance",
-                    "product-title": "Crystal King Battle",
-                    "product-price": "1000"
                    }
                 ]
               }
