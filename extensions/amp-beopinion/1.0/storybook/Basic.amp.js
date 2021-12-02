@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
@@ -9,15 +10,11 @@ export default {
     experiments: ['bento'],
   },
   args: {
-    'data-example-property': 'example string property argument',
+    'data-account': '589446dd42ee0d6fdd9c3dfd',
+    'data-content': '5a703a2f46e0fb00016d51b3',
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
 export const _default = (args) => {
-  return (
-    <amp-beopinion width="300" height="200" {...args}>
-      This text is inside.
-    </amp-beopinion>
-  );
+  return <amp-beopinion {...args}></amp-beopinion>;
 };

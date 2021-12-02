@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoBeopinion} from '../component';
 
 export default {
@@ -11,9 +12,5 @@ export default {
 };
 
 export const _default = ({...args}) => {
-  return (
-    <BentoBeopinion style={{width: 300, height: 200}} {...args}>
-      This text is inside.
-    </BentoBeopinion>
-  );
+  return <BentoBeopinion style={{width: 300, height: 200}} {...args} />;
 };
