@@ -110,10 +110,11 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
   open(shouldAnimate) {
     const data = this.storeService_.get(StateProperty.SHOPPING_STATE);
 
-    const productsOnPage = Array.from(this.shoppingTags_).map((tag) => {
-      return data[tag.dataset.tagId];
-    });
-    // .filter((product) => product !== data.activeProduct);
+    const productsOnPage = Array.from(this.shoppingTags_)
+      .map((tag) => {
+        return data[tag.dataset.tagId];
+      })
+      .filter((product) => product !== data.activeProduct);
 
     const plpTemplate = (
       <PlpTemplate

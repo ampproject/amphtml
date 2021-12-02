@@ -200,10 +200,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
 
   let openLabel;
   if (attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT') {
-    openLabel =
-      pageEl.querySelectorAll('amp-story-shopping-tag').length > 1
-        ? 'View All Products'
-        : 'View Product Details';
+    openLabel = 'Shop Now';
   } else {
     openLabel =
       (openLabelAttr && openLabelAttr.trim()) ||
