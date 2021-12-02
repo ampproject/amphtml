@@ -1,43 +1,88 @@
 import * as Preact from '#preact';
-import {ContainWrapper} from '#preact/component';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
-import {useStyles} from './component.jss';
+import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
+import {tryParseJson} from '#core/types/object/json';
+import {useCallback, useMemo, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
+import {ProxyIframeEmbed} from '#preact/component/3p-frame';
+
+const TYPE = 'beopinion';
+const FULL_HEIGHT = '100%';
+const MATCHES_MESSAGING_ORIGIN = () => true;
+const DEFAULT_TITLE = 'BeOpinion content';
 
 /**
- * @param {!BentoBeopinion.Props} props
+ * @param {!BentoBeopinionDef.Props} props
+ * @param {{current: ?BentoBeopinionDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function BentoBeopinion({exampleTagNameProp, ...rest}) {
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState(0);
-  const exampleRef = useRef(null);
-  const styles = useStyles();
+export function BentoBeopinionWithRef(
+  {
+    account,
+    content,
+    myContent,
+    name,
+    onError,
+    onLoad,
+    requestResize,
+    style,
+    title = DEFAULT_TITLE,
+    ...rest
+  },
+  ref
+) {
+  const [height, setHeight] = useState(null);
+  const onLoadRef = useValueRef(onLoad);
+  const onErrorRef = useValueRef(onError);
 
-  useCallback(() => {
-    /* Do things */
-  }, []);
-  useEffect(() => {
-    /* Do things */
-  }, []);
-  useLayoutEffect(() => {
-    /* Do things */
-  }, []);
-  useMemo(() => {
-    /* Do things */
-  }, []);
+  const messageHandler = useCallback(
+    (event) => {
+      const data = tryParseJson(event.data) ?? deserializeMessage(event.data);
+      if (data['type'] == MessageType_Enum.EMBED_SIZE) {
+        const eventHeight = data['height'];
+        if (requestResize) {
+          requestResize(eventHeight);
+          setHeight(FULL_HEIGHT);
+        } else {
+          setHeight(eventHeight);
+        }
+
+        onLoadRef.current?.();
+      } else if (data['type'] === MessageType_Enum.NO_CONTENT) {
+        onErrorRef.current?.();
+      }
+    },
+    [requestResize, onErrorRef, onLoadRef]
+  );
+
+  const options = useMemo(
+    () => ({
+      account,
+      content,
+      name,
+      myContent,
+      onError,
+      onLoad,
+      requestResize,
+      title,
+    }),
+    [account, content, name, myContent, onError, onLoad, requestResize, title]
+  );
 
   return (
-    <ContainWrapper layout size paint {...rest}>
-      {exampleTagNameProp}
-      <div className={`${styles.exampleContentHidden}`}>This is hidden</div>
-    </ContainWrapper>
+    <ProxyIframeEmbed
+      options={options}
+      ref={ref}
+      title={title}
+      {...rest}
+      matchesMessagingOrigin={MATCHES_MESSAGING_ORIGIN}
+      messageHandler={messageHandler}
+      type={TYPE}
+      style={height ? {...style, height} : style}
+    />
   );
 }
+
+const BentoBeopinion = forwardRef(BentoBeopinionWithRef);
+BentoBeopinion.displayName = 'BentoBeopinion'; // Make findable for tests.
+export {BentoBeopinion};
