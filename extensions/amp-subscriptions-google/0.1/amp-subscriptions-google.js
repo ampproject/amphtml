@@ -144,7 +144,7 @@ export class GoogleSubscriptionsPlatform {
           exp.startsWith('swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
       .map((exp) => exp.substring(4));
-    
+
     // Force skipping the account creation screen in the buyflow
     const swgConfig = {
       'experiments': ampExperimentsForSwg,
