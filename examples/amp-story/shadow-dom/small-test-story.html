@@ -1,28 +1,63 @@
-<!doctype html>
-<html amp lang="en">
+<!DOCTYPE html>
+<html>
   <head>
     <meta charset="utf-8">
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
-    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <meta name="viewport" content="width=device-width">
+    <title>Shadow DOM: Small Test Story</title>
+    <!-- Asynchronously load the AMP-with-Shadow-DOM runtime library. -->
+    <script async src="https://cdn.ampproject.org/shadow-v0.js"></script>
     <style amp-custom>
       body {
+        margin: 0px;
         color: #fff;
         height: 100%;
         margin: 0px !important;
         width: 100%;
       }
+
+      #container {
+        border-width: 0px;
+        height: 700px;
+        width: 400px;
+      }
     </style>
   </head>
-
   <body>
-    <amp-story standalone>
-      <amp-story-page id="page1">
-        <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="../media/hangouts.jpg"></amp-img>
-        </amp-story-grid-layer>
-      </amp-story-page>
-    </amp-story>
+    <div id="container"></div>
+    
+    <script>    
+      (window.AMP = window.AMP || []).push((AMP) => {
+        // AMP is now available.
+        
+        function fetchDocument(url) {
+          // unfortunately fetch() does not support retrieving documents,
+          // so we have to resort to good old XMLHttpRequest.
+          var xhr = new XMLHttpRequest();
+
+          return new Promise(function(resolve, reject) {
+            xhr.open('GET', url, true);
+            xhr.responseType = 'document';
+            xhr.setRequestHeader('Accept', 'text/html');
+            xhr.onload = function() {
+              // .responseXML contains a ready-to-use Document object
+              resolve(xhr.responseXML);
+            };
+            xhr.send();
+          });
+        }
+
+        // This can be any DOM element
+        var container = document.getElementById('container');
+
+        // The AMP page you want to display
+        var url = "http://0.0.0.0:8000/examples/amp-story/shadow-dom/small-story-markup.html";
+
+        // Use our fetchDocument method to get the doc
+        fetchDocument(url).then(function(doc) {
+          // Let AMP take over and render the page
+          var ampedDoc = AMP.attachShadowDoc(container, doc, url);
+        });
+      });
+    </script>
   </body>
 </html>
