@@ -32,7 +32,7 @@ const renderShoppingTagTemplate = (tagData) => (
         class="amp-story-shopping-tag-pill-image"
         style={
           tagData['product-icon'] && {
-            backgroundImage: 'url(' + tagData['product-icon'] + ')',
+            backgroundImage: 'url(' + tagData['product-icon'] + ') !important',
             backgroundSize: 'cover',
           }
         }
