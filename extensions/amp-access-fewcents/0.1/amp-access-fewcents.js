@@ -16,9 +16,8 @@
 
 import {Services} from '#service';
 
+import {TAG} from './fewcents-constants';
 import {AmpAccessFewcents} from './fewcents-impl';
-
-const TAG = 'amp-access-fewcents';
 
 AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerServiceForDoc(

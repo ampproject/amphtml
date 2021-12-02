@@ -18,21 +18,15 @@ import {dict} from '#core/types/object';
 
 import {dev, user} from '#utils/log';
 
+import {
+  CONFIG_BASE_PATH,
+  DEFAULT_MESSAGES,
+  TAG,
+  TAG_SHORTHAND,
+} from './fewcents-constants';
+
 import {CSS} from '../../../build/amp-access-fewcents-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
-
-const TAG = 'amp-access-fewcents';
-
-const TAG_SHORTHAND = 'aaf';
-
-const CONFIG_BASE_PATH =
-  'https://api.hounds.fewcents.co/v1/amp/authorizeBid?articleUrl=SOURCE_URL&ampReaderId=READER_ID&returnUrl=RETURN_URL';
-
-const DEFAULT_MESSAGES = {
-  /* fc denotes fewcents */
-  fcTitleText: 'Instant Access With Fewcents.',
-  fcButtonText: 'Unlock',
-};
 
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
