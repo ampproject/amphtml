@@ -149,12 +149,12 @@ export class AmpAccessFewcents {
    * @private
    */
   getPaywallContainer_() {
-    const dialogContainer = this.ampdoc.getElementById(
-      'amp-access-fewcents-dialog'
-    );
+    const containerId = this.fewcentsConfig_['contentSelector'];
+    const dialogContainer = this.ampdoc.getElementById(containerId);
     return user().assertElement(
       dialogContainer,
-      'No element found with given id '
+      'No element found with given id',
+      containerId
     );
   }
 
