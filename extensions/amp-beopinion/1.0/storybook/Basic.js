@@ -5,12 +5,12 @@ export default {
   title: 'Beopinion',
   component: BentoBeopinion,
   args: {
-    'exampleProperty': 'example string property argument',
+    account: '589446dd42ee0d6fdd9c3dfd',
+    content: '5a703a2f46e0fb00016d51b3',
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const _default = (args) => {
+export const _default = ({...args}) => {
   return (
     <BentoBeopinion style={{width: 300, height: 200}} {...args}>
       This text is inside.
