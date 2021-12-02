@@ -13,9 +13,7 @@ import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
 
 /**
- * Maps share provider type to visible name.
- * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
- * does not need to be included here.
+ * Maps share provider type to localization asset.
  * @const {!Object<string, !LocalizedStringId_Enum>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
@@ -88,15 +86,18 @@ function renderLinkShareItemElement(el, onClick) {
 }
 
 /**
+ * Returns the share button for the provider if available.
  * @param {!Document} doc
  * @param {string} shareType
- * @return {!Element}
+ * @return {?Element}
  */
 function buildProvider(doc, shareType) {
-  const shareProviderLocalizedStringId = devAssert(
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
-    `No localized string to display name for share type ${shareType}.`
-  );
+  const shareProviderLocalizedStringId =
+    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
+
+  if (!shareProviderLocalizedStringId) {
+    return null;
+  }
 
   return (
     <amp-social-share
