@@ -107,6 +107,7 @@ export class AmpAccessFewcents {
     // [TODO]: Actual API implementation using fetch
     dev().fine(TAG, 'authorizeUrl', this.authorizeUrl_, CONFIG_BASE_PATH);
 
+    // Currently, case only for showing the paywall later in future depend upon API response
     return Promise.reject({
       response: {
         status: 402,
