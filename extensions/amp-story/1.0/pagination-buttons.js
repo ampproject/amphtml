@@ -74,12 +74,12 @@ class PaginationButton {
     /** @private {!PaginationButtonStateDef} */
     this.state_ = initialState;
 
-    /** @public @const {!Element} */
+    /** @const {!Element} */
     this.element = renderPaginationButton(doc, initialState, (e) =>
       this.onClick_(e)
     );
 
-    /** @private @const {!Element} */
+    /** @const {!Element} */
     this.buttonElement = devAssert(this.element.firstElementChild);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -236,7 +236,7 @@ export class PaginationButtons {
    * @private
    */
   toggleEnabled_(paginationButton, isVisible) {
-    const {element, buttonElement} = paginationButton;
+    const {buttonElement, element} = paginationButton;
     element?.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
     buttonElement?.toggleAttribute('disabled', !isVisible);
   }
