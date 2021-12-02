@@ -6,7 +6,6 @@ import {Services} from '#service';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
 import {user, userAssert} from '#utils/log';
-import {getAmpdoc} from 'src/service-helpers';
 
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
