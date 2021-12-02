@@ -3508,7 +3508,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    # Only valid if contents are exactly either of these:
+    # Only valid if contents is exactly:
     # "use strict";if(!self.CSS||!CSS.supports||!CSS.supports("height:1dvh")){function e(){document.documentElement.style.setProperty("--story-dvh",innerHeight/100+"px","important")}addEventListener("resize",e,{passive:!0}),e()}
     cdata_regex: "\"use strict\";if\\(!self\\.CSS\\|\\|!CSS\\.supports\\|\\|!CSS\\.supports\\(\"height:1dvh\"\\)\\)\\{function e\\(\\)\\{document\\.documentElement\\.style\\.setProperty\\(\"--story-dvh\",innerHeight/100\\+\"px\",\"important\"\\)\\}addEventListener\\(\"resize\",e,\\{passive:!0\\}\\),e\\(\\)\\}"
   }

@@ -78,6 +78,13 @@ export let ShoppingConfigDataDef;
 
 /**
  * @typedef {{
+ *  items: !Map<string, !ShoppingConfigDataDef>,
+ * }}
+ */
+export let ShoppingDataDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -244,7 +251,7 @@ const stateComparisonFunctions = {
 };
 
 /**
- * Returns the new sate.
+ * Returns the new state.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
  * @param  {*} data

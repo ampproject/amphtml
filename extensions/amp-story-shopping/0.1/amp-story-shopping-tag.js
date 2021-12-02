@@ -5,7 +5,7 @@ import {Services} from '#service';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
-  ShoppingConfigDataDef,
+  ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -43,13 +43,6 @@ const renderShoppingTagTemplate = (tagData) => (
     </span>
   </div>
 );
-
-/**
- * @typedef {{
- *  items: !Map<string, !ShoppingConfigDataDef>,
- * }}
- */
-let ShoppingDataDef;
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
