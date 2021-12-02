@@ -19,7 +19,7 @@ import {setStyles} from '#core/dom/style';
 import {loadScript} from './3p';
 
 /**
- * Produces the Twitter API object for the passed in callback. If the current
+ * Produces the BeOpinion API object for the passed in callback. If the current
  * frame is the master frame it makes a new one by injecting the respective
  * script, otherwise it schedules the callback for the script from the master
  * window.
