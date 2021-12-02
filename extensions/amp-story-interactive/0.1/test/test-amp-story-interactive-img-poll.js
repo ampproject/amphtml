@@ -1,6 +1,5 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveImgPoll} from '../amp-story-interactive-img-poll';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
@@ -10,6 +9,7 @@ import {
   getMockInteractiveData,
   getMockOutOfBoundsData,
   getMockScrambledData,
+  mockXhrWithJson,
 } from './helpers';
 import {measureMutateElementStub} from '#testing/helpers/service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -23,7 +23,7 @@ describes.realWin(
     let win;
     let ampStoryPoll;
     let storyEl;
-    let requestService;
+    let xhrMock;
 
     beforeEach(() => {
       win = env.win;
@@ -37,10 +37,8 @@ describes.realWin(
       );
       ampStoryPollEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = new AmpStoryRequestService(win);
-      registerServiceBuilder(win, 'story-request', function () {
-        return requestService;
-      });
+      const xhr = Services.xhrFor(win);
+      xhrMock = env.sandbox.mock(xhr);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -65,6 +63,10 @@ describes.realWin(
         .stub(ampStoryPoll, 'measureMutateElement')
         .callsFake(measureMutateElementStub);
       env.sandbox.stub(ampStoryPoll, 'mutateElement').callsFake((fn) => fn());
+    });
+
+    afterEach(() => {
+      xhrMock.verify();
     });
 
     it('should fill the content of the options with images', async () => {
@@ -135,9 +137,7 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
+      mockXhrWithJson(xhrMock, getMockInteractiveData());
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -151,9 +151,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with scrambled data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockScrambledData());
+      mockXhrWithJson(xhrMock, getMockScrambledData());
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -172,9 +170,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with incomplete data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockIncompleteData());
+      mockXhrWithJson(xhrMock, getMockIncompleteData());
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -193,9 +189,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with out of bounds data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockOutOfBoundsData());
+      mockXhrWithJson(xhrMock, getMockOutOfBoundsData());
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
