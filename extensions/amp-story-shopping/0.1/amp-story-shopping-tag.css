@@ -14,6 +14,9 @@ amp-story-shopping-tag {
   align-items: center !important;
   justify-content: center !important;
 }
+.amp-story-shopping-tag-inner[flip] {
+  flex-direction: row-reverse;
+}
 
 .amp-story-shopping-tag-dot {
   width: 16px !important;
@@ -24,7 +27,7 @@ amp-story-shopping-tag {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin-inline-end: 4px !important;
+  margin: 4px !important;
   backdrop-filter: blur(20px);
 }
 

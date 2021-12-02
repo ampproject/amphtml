@@ -91,20 +91,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       const imageHolder = this.renderedTag_.querySelector(
         '.amp-story-shopping-tag-pill-image'
       );
-      console.log(imageHolder);
       imageHolder.style.backgroundImage =
         'url(' + data[this.id_]['product-icon'] + ')';
       imageHolder.style.backgroundSize = 'cover';
     }
 
-    // class="amp-story-shopping-tag-pill-image"
-    // style={
-    //   tagData['product-icon'] && {
-    //     backgroundImage:
-    //       'url(' + tagData['product-icon'] + ') !important',
-    //     backgroundSize: 'cover !important',
-    //   }
-    // }
+    if (this.element.hasAttribute('flip')) {
+      this.renderedTag_.setAttribute('flip', true);
+    }
 
     createShadowRootWithStyle(this.element, this.renderedTag_, shoppingTagCSS);
   }

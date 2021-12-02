@@ -12,46 +12,55 @@
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <style amp-custom>
       #tag-1 {
-        left: 7%;
-        top: 33%;
+        left: 6%;
+        top: 29%;
       }
       #tag-2 {
-        top: 28%;
-        left: 43%;
+        top: 21%;
+        left: 36%;
       }
       #tag-3 {
-        top: 33%;
-        left: 79%;
+        top: 36%;
+        left: 69%;
       }
       #tag-4 {
-        top: 33%;
-        left: 79%;
-      }      
-      .big-text {
+        top: 26%;
+        left: 67%;
+      }
+      .text-wrap {
+        top: 56%;
+        position: relative;
+        margin: 22px;
+        border-top: 3px solid black;
+        padding-top: 15px;
+      }
+      #cover .text-wrap {
+        top: 50%;
+      }
+      .text-wrap span {
+        display: block;
+      }
+      .big-text, 
+      .big-text-2 {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 48px;
         font-weight: 700;
         line-height: 100%;
-        letter-spacing: -1px;
+        letter-spacing: -0.05em;
+        font-size: 2.7em;
+      }
+      .big-text-2 {
+        font-size: 2em;
       }
       .small-text {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 20px;
-        font-weight: 500;
+        font-size: 1.2em;
+        font-weight: 600;
         line-height: 130%;
         letter-spacing: -0.7px;
-        margin-top: 14px;
-      }
-      .text-wrap {
-        top: 50%;
-        position: relative;
-        margin: 22px;
-        border-top: 5px solid black;
-        padding-top: 18px;
-        margin-top: 53px;
+        margin-top: 12px;
       }
     </style>
   </head>
@@ -63,7 +72,7 @@
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
 
-      <amp-story-page id="default">
+      <amp-story-page id="cover">
         <amp-story-shopping-config layout='nodisplay'>
           <script type="application/json">
             {
@@ -72,7 +81,7 @@
                   "name": "product-1",
                   "product-title": "Nest Mini Speaker",
                   "brand": "Nest",
-                  "price": "799",
+                  "price": "50",
                   "img": "/examples/visual-tests/amp-story/img/shopping/product-1.png",
                   "url": "https://store.google.com/product/google_nest_mini",
                   "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
@@ -81,7 +90,7 @@
                   "name": "product-2",
                   "product-title": "Nest Audio Speaker",
                   "brand": "Nest",
-                  "price": "400",
+                  "price": "100",
                   "img": "/examples/visual-tests/amp-story/img/shopping/product-2.png",
                   "url": "https://store.google.com/us/product/nest_audio",
                   "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
@@ -90,7 +99,7 @@
                   "name": "product-10",
                   "product-title": "Nest Home Smart Speaker",
                   "brand": "Nest",
-                  "price": "79",
+                  "price": "30",
                   "img": "/examples/visual-tests/amp-story/img/shopping/product-3.png",
                   "url": "https://www.google.com/shopping/product/r/US/137301725878870814",
                   "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
@@ -100,12 +109,12 @@
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg-1.png"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="fill">
           <div>
             <div class="text-wrap">
-              <div class='big-text'>Best for budget: The Nest family</div>
+              <div class='big-text'><span>Best for budget:</span><span>The Nest family</span></div>
               <div class='small-text'>The best range of options for any budget buyer is the Nest family, get a full dynamic range and pair.</div>
             </div>
           </div>
@@ -113,7 +122,7 @@
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag id="tag-1" data-tag-id="product-1"></amp-story-shopping-tag>
           <amp-story-shopping-tag id="tag-2" data-tag-id="product-2"></amp-story-shopping-tag>
-          <amp-story-shopping-tag id="tag-3" data-tag-id="product-10"></amp-story-shopping-tag>
+          <amp-story-shopping-tag id="tag-3" data-tag-id="product-10" flip></amp-story-shopping-tag>
         </amp-story-grid-layer>             
         <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
       </amp-story-page>
@@ -124,7 +133,7 @@
             {
               "products": [
                 {
-                  "name": "product-4",
+                  "name": "product-1",
                   "product-title": "Nest Mini Speaker",
                   "brand": "Nest",
                   "price": "79",
@@ -136,18 +145,18 @@
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg-2.png"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="fill">
           <div>
             <div class="text-wrap">
-              <div class='big-text'>Best for budget: The Nest family</div>
-              <div class='small-text'>The best range of options for any budget buyer is the Nest family, get a full dynamic range and pair.</div>
+              <div class='big-text-2'><span>Best for budget:</span><span>Nest Audio Speaker</span></div>
+              <div class='small-text'>Get a full dynamic range for a price that won’t break your budget.</div>
             </div>
           </div>
         </amp-story-grid-layer>   
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag id="tag-4" data-tag-id="product-4"></amp-story-shopping-tag>
+          <amp-story-shopping-tag id="tag-4" data-tag-id="product-2"></amp-story-shopping-tag>
         </amp-story-grid-layer>             
         <amp-story-shopping-attachment layout='nodisplay'></amp-story-shopping-attachment>
       </amp-story-page>      
