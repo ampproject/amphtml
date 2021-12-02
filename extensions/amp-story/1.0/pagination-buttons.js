@@ -16,7 +16,6 @@ let PaginationButtonStateDef;
 
 /** @const {!Object<string, !PaginationButtonStateDef>} */
 const BackButtonStates = {
-  HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
@@ -26,7 +25,6 @@ const BackButtonStates = {
 
 /** @const {!Object<string, !PaginationButtonStateDef>} */
 const ForwardButtonStates = {
-  HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
@@ -82,7 +80,7 @@ class PaginationButton {
     );
 
     /** @private @const {!Element} */
-    this.buttonElement_ = devAssert(this.element.firstElementChild);
+    this.buttonElement = devAssert(this.element.firstElementChild);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
@@ -98,12 +96,10 @@ class PaginationButton {
     }
     this.element.classList.remove(this.state_.className);
     this.element.classList.add(state.className);
-    state.label
-      ? this.buttonElement_.setAttribute(
-          'aria-label',
-          localize(this.win_.document, state.label)
-        )
-      : this.buttonElement_.removeAttribute('aria-label');
+    this.buttonElement.setAttribute(
+      'aria-label',
+      localize(this.win_.document, state.label)
+    );
 
     this.state_ = state;
   }
@@ -167,19 +163,13 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.backButton_ = new PaginationButton(
       doc,
-      BackButtonStates.HIDDEN,
+      BackButtonStates.PREVIOUS_PAGE,
       this.storeService_,
       win
     );
 
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
-
-    /** @private {?PaginationButtonStateDef} */
-    this.backButtonStateToRestore_ = null;
-
-    /** @private {?PaginationButtonStateDef} */
-    this.forwardButtonStateToRestore_ = null;
 
     this.initializeListeners_();
 
@@ -222,13 +212,8 @@ export class PaginationButtons {
   onCurrentPageIndexUpdate_(pageIndex) {
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
 
-    if (pageIndex === 0) {
-      this.backButton_.updateState(BackButtonStates.HIDDEN);
-    }
-
-    if (pageIndex > 0) {
-      this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
-    }
+    // Hide back button if no previous page.
+    this.toggleEnabled_(this.backButton_, pageIndex > 0);
 
     if (pageIndex < totalPages - 1) {
       this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
@@ -245,27 +230,24 @@ export class PaginationButtons {
   }
 
   /**
+   * Updates element based on visibility state.
+   * @param {?PaginationButton} paginationButton
+   * @param {boolean} isVisible
+   * @private
+   */
+  toggleEnabled_(paginationButton, isVisible) {
+    const {element, buttonElement} = paginationButton;
+    element?.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
+    buttonElement?.toggleAttribute('disabled', !isVisible);
+  }
+
+  /**
    * Reacts to system UI visibility state updates.
    * @param {boolean} isVisible
    * @private
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
-    if (isVisible) {
-      this.backButton_.updateState(
-        /** @type {!PaginationButtonStateDef} */ (
-          devAssert(this.backButtonStateToRestore_)
-        )
-      );
-      this.forwardButton_.updateState(
-        /** @type {!PaginationButtonStateDef} */ (
-          devAssert(this.forwardButtonStateToRestore_)
-        )
-      );
-    } else {
-      this.backButtonStateToRestore_ = this.backButton_.getState();
-      this.backButton_.updateState(BackButtonStates.HIDDEN);
-      this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
-      this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
-    }
+    this.toggleEnabled_(this.backButton_, isVisible);
+    this.toggleEnabled_(this.forwardButton_, isVisible);
   }
 }
