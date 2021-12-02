@@ -201,3 +201,22 @@ export const addThresholdsToInteractive = (interactive, thresholdList) => {
     );
   });
 };
+
+export const MOCK_URL = 'https://amp.dev';
+
+/**
+ *
+ * @param {!../../../../service/xhr-impl.Xhr} xhrMock
+ * @param {!Object} json
+ */
+export function mockXhrWithJson(xhrMock, json) {
+  xhrMock
+    .expects('fetchJson')
+    .resolves({
+      ok: true,
+      json() {
+        return Promise.resolve(json);
+      },
+    })
+    .once();
+}

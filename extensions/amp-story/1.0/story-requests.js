@@ -6,6 +6,7 @@ import {Services} from '#service';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
 import {user, userAssert} from '#utils/log';
+import {getAmpdoc} from 'src/service-helpers';
 
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
@@ -27,7 +28,7 @@ export function executeRequest(el, rawUrl, opts = {}) {
     return Promise.resolve(null);
   }
 
-  const xhrService = Services.xhrFor(el);
+  const xhrService = Services.xhrFor(el.ownerDocument.defaultView);
 
   return Services.urlReplacementsForDoc(el)
     .expandUrlAsync(user().assertString(rawUrl))
@@ -47,9 +48,11 @@ export function getElementConfig(element) {
   const rawUrl = element.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
   if (rawUrl) {
     const credentials = element.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
-    return executeRequest(rawUrl, credentials ? {credentials} : {}).catch(() =>
-      getInlineConfig(element)
-    );
+    return executeRequest(
+      element,
+      rawUrl,
+      credentials ? {credentials} : {}
+    ).catch(() => getInlineConfig(element));
   }
   return getInlineConfig(element);
 }

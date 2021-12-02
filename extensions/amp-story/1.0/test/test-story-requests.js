@@ -1,10 +1,7 @@
-import {
-  AmpStoryRequestService,
-  CONFIG_SRC_ATTRIBUTE_NAME,
-} from '../amp-story-request-service';
+import {Services} from '#service';
+import {CONFIG_SRC_ATTRIBUTE_NAME, getElementConfig} from '../story-requests';
 
-describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
-  let requestService;
+describes.fakeWin('story-requests', {amp: true}, (env) => {
   let storyElement;
   let shareElement;
   let xhrMock;
@@ -14,14 +11,14 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     shareElement = env.win.document.createElement('amp-story-social-share');
     storyElement.appendChild(shareElement);
     env.win.document.body.appendChild(storyElement);
-    requestService = new AmpStoryRequestService(env.win, storyElement);
-    xhrMock = env.sandbox.mock(requestService.xhr_);
+    const xhr = Services.xhrFor(env.win);
+    xhrMock = env.sandbox.mock(xhr);
   });
 
   it('should not load the config if no src or inline is set', async () => {
     xhrMock.expects('fetchJson').never();
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await getElementConfig(shareElement);
 
     expect(JSON.stringify(config)).to.equal('{}');
 
@@ -39,7 +36,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
     </script>
     `;
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await getElementConfig(shareElement);
 
     expect(JSON.stringify(config)).to.equal(JSON.stringify(configData));
     xhrMock.verify();
@@ -60,7 +57,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    await requestService.loadConfig(shareElement);
+    await getElementConfig(shareElement);
     xhrMock.verify();
   });
 
@@ -79,27 +76,8 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await getElementConfig(shareElement);
     expect(config).to.equal(fetchedConfig);
-    xhrMock.verify();
-  });
-
-  it('should fetch the share config once if called multiple times', async () => {
-    const shareUrl = 'https://publisher.com/share';
-
-    shareElement.setAttribute(CONFIG_SRC_ATTRIBUTE_NAME, shareUrl);
-    xhrMock
-      .expects('fetchJson')
-      .resolves({
-        ok: true,
-        json() {
-          return Promise.resolve();
-        },
-      })
-      .once();
-
-    await requestService.loadShareConfig(shareElement);
-    await requestService.loadShareConfig(shareElement);
     xhrMock.verify();
   });
 
@@ -118,7 +96,7 @@ describes.fakeWin('amp-story-request-service', {amp: true}, (env) => {
       })
       .once();
 
-    const config = await requestService.loadConfig(shareElement);
+    const config = await getElementConfig(shareElement);
     expect(config).to.equal(fetchedConfig);
     xhrMock.verify();
   });
