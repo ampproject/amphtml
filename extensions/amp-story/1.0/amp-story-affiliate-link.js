@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 /**
  * @fileoverview Affiliate link component that expands when clicked.
  */
@@ -6,7 +7,6 @@ import {Services} from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {htmlFor} from '#core/dom/static-template';
 
 /**
  * Links that are affiliate links.
@@ -116,14 +116,15 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addIconElement_() {
-    const iconEl = htmlFor(this.element_)`
+    const iconEl = (
       <div class="i-amphtml-story-affiliate-link-circle">
         <i class="i-amphtml-story-affiliate-link-icon"></i>
         <div class="i-amphtml-story-reset i-amphtml-hidden">
           <span class="i-amphtml-story-affiliate-link-text" hidden></span>
           <i class="i-amphtml-story-affiliate-link-launch" hidden></i>
         </div>
-      </div>`;
+      </div>
+    );
     this.element_.appendChild(iconEl);
   }
 
@@ -157,8 +158,7 @@ export class AmpStoryAffiliateLink {
    * @private
    */
   addPulseElement_() {
-    const pulseEl = htmlFor(this.element_)`
-      <div class="i-amphtml-story-affiliate-link-pulse"></div>`;
+    const pulseEl = <div class="i-amphtml-story-affiliate-link-pulse"></div>;
     this.element_.appendChild(pulseEl);
   }
 }

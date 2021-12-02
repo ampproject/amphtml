@@ -2,7 +2,7 @@ import {AmpLayout} from '#builtins/amp-layout/amp-layout';
 import {buildDom} from '#builtins/amp-layout/build-dom';
 
 import {createElementWithAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 
 describes.realWin('amp-layout', {amp: true}, (env) => {
   async function getAmpLayout(attrs, innerHTML) {
@@ -24,7 +24,7 @@ describes.realWin('amp-layout', {amp: true}, (env) => {
   it('should reparent all children under a container for when layout!=container', async () => {
     const children = '<span>hello</span><span>world</span>';
     const ampLayout = await getAmpLayout(
-      {layout: Layout.FIXED, height: 100, width: 100},
+      {layout: Layout_Enum.FIXED, height: 100, width: 100},
       children
     );
 
@@ -58,5 +58,17 @@ describes.realWin('amp-layout', {amp: true}, (env) => {
     buildDom(layout2);
 
     expect(layout1.outerHTML).to.equal(layout2.outerHTML);
+  });
+
+  it('buildDom does not modify server rendered elements', () => {
+    const layout = createElementWithAttributes(env.win.document, 'amp-layout');
+    buildDom(layout);
+    layout.setAttribute('i-amphtml-ssr', '');
+
+    const before = layout.outerHTML;
+    buildDom(layout);
+    const after = layout.outerHTML;
+
+    expect(before).to.equal(after);
   });
 });

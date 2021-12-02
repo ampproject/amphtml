@@ -1,18 +1,16 @@
 'use strict';
 
-const path = require('path');
-
 // Enforces importing a Preact namespace specifier if using JSX
 //
 // Good
-// import * as Preact from 'path/to/preact';
+// import * as Preact from '#preact';
 // <div />
 //
 // Bad
 // <div />
 //
 // Bad
-// import { createElement } from 'path/to/preact';
+// import { createElement } from '#preact';
 // <div />
 module.exports = {
   meta: {
@@ -32,19 +30,16 @@ module.exports = {
       }
       warned = true;
 
+      const [packageName = '#preact'] = context.options;
+
       context.report({
         node,
         message: [
           'Using JSX requires importing the Preact namespace',
-          "Eg, `import * as Preact from 'src/preact'`",
+          `Eg, \`import * as Preact from '${packageName}'\``,
         ].join('\n\t'),
 
         fix(fixer) {
-          const fileName = context.getFilename();
-          const absolutePath = path
-            .relative(path.dirname(fileName), './src/preact')
-            .replace(/\.js$/, '');
-
           const ancestors = context.getAncestors();
           const program = ancestors[0];
           let firstImport = program.body.find(
@@ -56,7 +51,7 @@ module.exports = {
 
           return fixer.insertTextBefore(
             firstImport,
-            `import * as Preact from '${absolutePath}';\n`
+            `import * as Preact from '${packageName}';\n`
           );
         },
       });

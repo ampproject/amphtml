@@ -1,10 +1,10 @@
 import {BaseElement} from './base-element';
 import {
   BatchFetchOptionsDef,
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {computedStyle, setStyles} from '#core/dom/style';
 import {dev, user, userAssert} from '#utils/log';
@@ -132,7 +132,7 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!UrlReplacementPolicy_Enum}
    * @private
    */
   getPolicy_() {
@@ -141,12 +141,12 @@ export class AmpRender extends BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
     // and add a `Substitution` sections in this component's markdown file.
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }
@@ -198,7 +198,7 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER) {
+    if (layout === Layout_Enum.CONTAINER) {
       userAssert(
         this.getPlaceholder(),
         'placeholder required with layout="container"'
@@ -281,7 +281,7 @@ export class AmpRender extends BaseElement {
   /** @override */
   handleOnLoad() {
     this.toggleLoading(false);
-    if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
+    if (this.element.getAttribute('layout') !== Layout_Enum.CONTAINER) {
       this.togglePlaceholder(false);
       return;
     }

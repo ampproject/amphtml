@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "product-tag-id": "city-pop",
+      "product-title": "Plastic Love",
+      "product-price": "19"
+    },
+    {
+      "product-tag-id": "k-pop",
+      "product-title": "Gangnam Style",
+      "product-price": "10"
+    },
+    {
+      "product-tag-id": "eurodance",
+      "product-title": "Crystal King Battle",
+      "product-price": "300"
+    }
+  ]
+}

@@ -32,6 +32,7 @@ function getUnminifiedConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
+    './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,
@@ -41,8 +42,8 @@ function getUnminifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
-    '@babel/plugin-transform-react-constant-elements',
     '@babel/plugin-transform-classes',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
   const unminifiedPresets = [presetEnv];
