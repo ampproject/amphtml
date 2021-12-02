@@ -33,7 +33,7 @@ const renderShoppingTagTemplate = (tagData) => (
         style={
           tagData['product-icon'] && {
             backgroundImage: 'url(' + tagData['product-icon'] + ') !important',
-            backgroundSize: 'cover',
+            backgroundSize: 'cover !important',
           }
         }
       ></span>
