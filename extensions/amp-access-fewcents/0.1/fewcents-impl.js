@@ -29,6 +29,7 @@ const CONFIG_BASE_PATH =
   'https://api.hounds.fewcents.co/v1/amp/authorizeBid?articleUrl=SOURCE_URL&ampReaderId=READER_ID&returnUrl=RETURN_URL';
 
 const DEFAULT_MESSAGES = {
+  /* fc denotes fewcents */
   fcTitleText: 'Instant Access With Fewcents.',
   fcButtonText: 'Unlock',
 };
@@ -52,38 +53,38 @@ export class AmpAccessFewcents {
     /** @private {?Node} */
     this.innerContainer_ = null;
 
-    /** @private {?Node} */
+    /** @private {?Node} Main container where paywall will be rendered */
     this.dialogContainer_ = null;
 
-    /** @const @private {JsonObject} */ // loads publisher config
+    /** @const @private {JsonObject}  Stores the config passed by the publisher */
     this.fewcentsConfig_ = this.accessSource_.getAdapterConfig();
 
-    /** @private {string} */
+    /** @private {string} Authorize endpoint to get paywall data*/
     this.authorizeUrl_ = this.prepareAuthorizeUrl_();
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (
-      Object.assign(dict(), DEFAULT_MESSAGES)
-    );
+    this.i18n_ = Object.assign(dict(), DEFAULT_MESSAGES);
 
     // Install styles.
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
   }
 
   /**
-   * Decides whether to show the paywall or not
+   * Decides to show the paywall or publisher content by calling authorize endpoint
    * @return {!Promise<!JsonObject>}
    */
   authorize() {
     return this.getPaywallData_().then(
+      // [TODO] : More edge cases to be added with actual call
       (response) => {
-        // removing the paywall if shown and showing the content
+        // Removing the paywall from dialogContainer
         this.emptyContainer_();
-        return {access: response.data.access, flash: true};
+        // Showing the publisher's content
+        return {access: response.data.access};
       },
       (err) => {
+        // Rendering the paywall when request promise is rejected
         const {response} = err;
-        // rendering the paywall
         return response.json().then(() => {
           this.emptyContainer_().then(this.renderPurchaseOverlay_.bind(this));
           return {access: false};
@@ -93,21 +94,23 @@ export class AmpAccessFewcents {
   }
 
   /**
-   * add request parameters for the authorize endpoint
-   * @return {string} authorize url
+   * Add request parameters for the authorize endpoint
+   * @return {string}
    * @private
    */
   prepareAuthorizeUrl_() {
+    // [TODO]: Actual implementation
     dev().fine(TAG, 'Publishers config', this.fewcentsConfig_);
     return;
   }
 
   /**
-   * get paywall data by making call to authorize endpoint
+   * Get paywall data by calling authorize endpoint
    * @return {!Promise<Object>}
    * @private
    */
   getPaywallData_() {
+    // [TODO]: Actual API implementation using fetch
     dev().fine(TAG, 'authorizeUrl', this.authorizeUrl_, CONFIG_BASE_PATH);
 
     return Promise.reject({
@@ -126,10 +129,12 @@ export class AmpAccessFewcents {
    * @return {!Promise}
    */
   emptyContainer_() {
+    // [TODO]: Actual implementation
     return Promise.resolve();
   }
 
   /**
+   * Creates new element for the paywall
    * @param {string} name
    * @return {!Element}
    * @private
@@ -139,7 +144,8 @@ export class AmpAccessFewcents {
   }
 
   /**
-   * @return {!Element} return element on publisher's page where paywall will be displayed
+   * Return element on publisher's page where paywall will be displayed
+   * @return {!Element}
    * @private
    */
   getPaywallContainer_() {
@@ -153,21 +159,23 @@ export class AmpAccessFewcents {
   }
 
   /**
-   * Creates the paywall component
+   * Creates the paywall component and append it to dialog container
    * @private
    */
   renderPurchaseOverlay_() {
+    // [TODO]: Create entire paywall element with button event listener for login flow
     this.dialogContainer_ = this.getPaywallContainer_();
     this.innerContainer_ = this.createElement_('div');
     this.innerContainer_.className = TAG_SHORTHAND + '-container';
 
+    // Creating header text of paywall
     const headerText = this.createElement_('div');
     headerText.className = TAG_SHORTHAND + '-headerText';
     headerText.textContent = this.i18n_['fcTitleText'];
 
     this.innerContainer_.appendChild(headerText);
 
-    // unlock button element
+    // Creating unlock button on paywall
     const unlockButton = this.createElement_('button');
     unlockButton.className = TAG_SHORTHAND + '-purchase-button';
     unlockButton.textContent = this.i18n_['fcButtonText'];
