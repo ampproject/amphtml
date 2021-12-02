@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
@@ -29,6 +30,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.buttonEl_ = (
+      <button type="button" role="button" style="background: #fff;"></button>
+    );
+    this.element.appendChild(this.buttonEl_);
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
@@ -51,7 +56,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.buttonEl_ = this.element.querySelector('button');
+    console.log('initializelistener', this.buttonEl_);
     this.buttonEl_.addEventListener(
       'click',
       (event) => this.onShoppingTagClick_(event),
@@ -83,7 +88,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       return;
     }
     this.mutateElement(() => {
-      this.element.textContent = tagData['product-title'];
+      this.buttonEl_.textContent = tagData['product-title'];
     });
   }
 }
