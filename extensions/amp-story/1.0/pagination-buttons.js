@@ -244,6 +244,17 @@ export class PaginationButtons {
       }
     }
   }
+  /**
+   * Updates element based on visibility state.
+   * @param {?PaginationButton} paginationButton
+   * @param {boolean} isVisible
+   * @private
+   */
+  toggleEnabled_(paginationButton, isVisible) {
+    const {buttonElement, element} = paginationButton;
+    element?.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
+    buttonElement?.toggleAttribute('disabled', !isVisible);
+  }
 
   /**
    * Reacts to system UI visibility state updates.
@@ -251,22 +262,7 @@ export class PaginationButtons {
    * @private
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
-    if (isVisible) {
-      this.backButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
-          devAssert(this.backButtonStateToRestore_)
-        )
-      );
-      this.forwardButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
-          devAssert(this.forwardButtonStateToRestore_)
-        )
-      );
-    } else {
-      this.backButtonStateToRestore_ = this.backButton_.getState();
-      this.backButton_.updateState(BackButtonStates.HIDDEN);
-      this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
-      this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
-    }
+    this.toggleEnabled_(this.backButton_, isVisible);
+    this.toggleEnabled_(this.forwardButton_, isVisible);
   }
 }
