@@ -1,6 +1,5 @@
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {px, setStyles} from '#core/dom/style';
 import {dict, getValueForExpr} from '#core/types/object';
 
 /**
@@ -28,9 +27,6 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
   ) {
     return;
   }
-  setStyles(apesterElement, {
-    'height': px(parseInt(apesterElement.getAttribute('height'), 10)),
-  });
   const provider = videoSettings['provider'];
   switch (provider) {
     case 'sr': {
