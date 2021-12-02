@@ -131,7 +131,9 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
             data[this.shoppingTags_[0].getAttribute('data-tag-id')]
           }
         >
-          {productsOnPage.length > 0 && plpTemplate}
+          {productsOnPage.length > 1 &&
+            this.shoppingTags_.length > 1 &&
+            plpTemplate}
         </PdpTemplate>
       );
     } else {
