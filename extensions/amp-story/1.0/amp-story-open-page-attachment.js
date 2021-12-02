@@ -83,12 +83,12 @@ const ctaLabelFromAttr = (element) =>
 /**
  * @param {!Element} element
  * @param {!Element} attachmentEl
- * @param {?string=} label
+ * @param {?string} label
  * @return {?string}
  */
 const openLabelOrFallback = (element, attachmentEl, label) =>
   attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT'
-    ? localize(element, LocalizedStringId_Enum.AMP_STORY_SHOPPING_SHOP_LABEL)
+    ? localize(element, LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL)
     : label?.trim() ||
       localize(
         element,
