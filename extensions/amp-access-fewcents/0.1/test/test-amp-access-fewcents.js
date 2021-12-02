@@ -20,7 +20,6 @@ describes.realWin(
       html = htmlFor(doc);
     });
 
-    // DO NOT SUBMIT: This is example code only.
     it('should contain "hello world" when built', async () => {
       const element = html`
         <amp-access-fewcents width="100" height="10" layout="responsive">
