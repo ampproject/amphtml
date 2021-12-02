@@ -5,13 +5,21 @@ var BentoBeopinionDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   account: (string|undefined),
+ *   content: (string|undefined),
+ *   myContent: (string|undefined),
+ *   loading: (string|undefined),
+ *   name: (string|undefined),
+ *   onLoad: (function():undefined|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
+ *   requestResize: (function(number):*|undefined),
+ *   title: (string|undefined),
  * }}
  */
 BentoBeopinionDef.Props;
 
-/** @interface */
-BentoBeopinionDef.BentoBeopinionApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};
+/** @constructor */
+BentoBeopinionDef.Api = function () {};
+
+/** @type {string} */
+BentoBeopinionDef.Api.prototype.readyState;

@@ -10,14 +10,8 @@ const TAG = 'amp-beopinion';
 class AmpBeopinion extends BaseElement {
   /** @override */
   init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
-
     return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
+      'requestResize': (height) => this.attemptChangeHeight(height),
     });
   }
 

@@ -1,6 +1,6 @@
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {BentoBeopinion} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoBeopinion} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -8,10 +8,15 @@ export class BaseElement extends PreactBaseElement {}
 BaseElement['Component'] = BentoBeopinion;
 
 /** @override */
+BaseElement['unloadOnPause'] = true;
+
+/** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  account: {attr: 'data-account'},
+  content: {attr: 'data-content'},
+  myContent: {attr: 'data-my-content'},
+  name: {attr: 'data-name'},
+  title: {attr: 'title'},
 };
 
 /** @override */
@@ -19,10 +24,3 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
-
-// DO NOT SUBMIT: If BaseElement['shadowCss']  is set to `null`, remove the
-// following declaration.
-// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
-// Once addressed, remove this set of comments.
-/** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
