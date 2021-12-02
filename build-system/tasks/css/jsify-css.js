@@ -41,7 +41,7 @@ const cssNanoDefaultOptions = {
   reduceInitial: false,
   zindex: false,
   svgo: {
-    encode: true,
+    encode: false,
   },
 };
 

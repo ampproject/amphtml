@@ -1,20 +1,48 @@
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {devAssert} from '#utils/log';
-
+import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
-  ShoppingConfigDataDef,
+  ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
-/**
- * @typedef {{
- *  items: !Map<string, !ShoppingConfigDataDef>,
- * }}
- */
-let ShoppingDataDef;
+/** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+const FONTS_TO_LOAD = [
+  {
+    family: 'Poppins',
+    weight: '400',
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+  },
+  {
+    family: 'Poppins',
+    weight: '700',
+    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+  },
+];
+
+const renderShoppingTagTemplate = (tagData) => (
+  <div class="amp-story-shopping-tag-inner">
+    <span class="amp-story-shopping-tag-dot"></span>
+    <span class="amp-story-shopping-tag-pill">
+      <span
+        class="amp-story-shopping-tag-pill-image"
+        style={
+          tagData['product-icon'] && {
+            backgroundImage: 'url(' + tagData['product-icon'] + ') !important',
+            backgroundSize: 'cover !important',
+          }
+        }
+      ></span>
+      <span class="amp-story-shopping-tag-pill-text">
+        {tagData['product-price']}
+      </span>
+    </span>
+  </div>
+);
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -26,11 +54,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.loadFonts_();
+    this.element.setAttribute('role', 'button');
     return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => {
-        devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
-        this.storeService_ = storeService;
-      }
+      (storeService) => (this.storeService_ = storeService)
     );
   }
 
@@ -38,7 +65,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   layoutCallback() {
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.updateShoppingTag_(shoppingData),
+      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
   }
@@ -52,13 +79,28 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  updateShoppingTag_(shoppingData) {
+  createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
     if (!tagData) {
       return;
     }
     this.mutateElement(() => {
-      this.element.textContent = tagData['product-title'];
+      createShadowRootWithStyle(
+        this.element,
+        renderShoppingTagTemplate(tagData),
+        shoppingTagCSS
+      );
     });
+  }
+
+  /** @private */
+  loadFonts_() {
+    if (this.win.document.fonts && FontFace) {
+      FONTS_TO_LOAD.forEach(({family, src, style = 'normal', weight}) =>
+        new FontFace(family, src, {weight, style})
+          .load()
+          .then((font) => this.win.document.fonts.add(font))
+      );
+    }
   }
 }

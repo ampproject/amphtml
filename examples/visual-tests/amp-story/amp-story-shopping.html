@@ -8,17 +8,37 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
+    <style amp-custom>
+      [data-tag-id="hat"] {
+        top: 33%;
+        left: 7%;
+      }
+      [data-tag-id="sunglasses"] {
+        top: 28%;
+        left: 43%;
+      }
+      [data-tag-id="backpack"] {
+        top: 33%;
+        left: 80%;
+      }
+      [data-tag-id=city-pop] {
+        top: 33%;
+        left: 7%;
+      }
+    </style>
   </head>
   <body>
     <amp-story
         standalone
-        title="New Story Shopping Component Visual Diff Test"
+        title="Story Shopping Component Visual Diff Test"
         publisher="AMP Story Shopping"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="inline-light-theme">
         <!--
-          Inline Shopping Component Config
+          Example of:
+          Inline config.
+          Multiple product tags with icon defined.
         -->
         <amp-story-shopping-config layout="nodisplay">
           <script type="application/json">
@@ -27,30 +47,38 @@
                    {
                     "product-tag-id": "hat",
                     "product-title": "Hootenanny Hat",
+                    "product-price": "799",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
                    },
                    {
                     "product-tag-id": "sunglasses",
                     "product-title": "Spectacular Spectacles",
+                    "product-price": "400",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
                    },
                    {
                     "product-tag-id": "backpack",
                     "product-title": "Beastly Backpack",
+                    "product-price": "1000",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
                    }
                 ]
               }
           </script>
         </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-tag-id="hat" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="sunglasses" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="backpack" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
       <amp-story-page id="remote-dark-theme">
         <!--
-          Example of JSON retrieved from src attribute.
-          Falls back to inline if request fails.
+          Example of:
+          Remote JSON with inline fallback.
+          Single product tag without icon.
         -->
         <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
           <script type="application/json">
@@ -59,19 +87,15 @@
                    {
                     "product-tag-id": "city-pop",
                     "product-title": "Plastic Love",
-                   },
-                   {
-                    "product-tag-id": "k-pop",
-                    "product-title": "Gangnam Style",
-                   },
-                   {
-                    "product-tag-id": "eurodance",
-                    "product-title": "Crystal King Battle",
+                    "product-price": "799"
                    }
                 ]
               }
           </script>
         </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
           <amp-story-shopping-tag data-tag-id="k-pop" ></amp-story-shopping-tag>

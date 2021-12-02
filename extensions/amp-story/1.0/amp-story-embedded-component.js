@@ -26,11 +26,9 @@ import {
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
-import {htmlRefs} from '#core/dom/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 import {resetStyles, setImportantStyles} from '#core/dom/style';
-import objstr from 'obj-str';
 
 /** @private @const {string} */
 const LAUNCH_ICON_CLASS = 'i-amphtml-tooltip-action-icon-launch';
@@ -275,13 +273,11 @@ export class AmpStoryEmbeddedComponent {
    * @return {Node}
    */
   buildFocusedState_() {
-    this.shadowRoot_ = this.win_.document.createElement('div');
-
     this.focusedStateOverlay_ = this.renderFocusedStateElement_();
-    createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
-
-    this.focusedStateOverlay_.addEventListener('click', (event) =>
-      this.onOutsideTooltipClick_(event)
+    this.shadowRoot_ = createShadowRootWithStyle(
+      <div />,
+      this.focusedStateOverlay_,
+      CSS
     );
 
     this.tooltip_.addEventListener(
@@ -723,79 +719,73 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   renderFocusedStateElement_() {
-    const tooltipOverlay = (
-      <section
-        class={objstr({
-          'i-amphtml-story-focused-state-layer': true,
-          'i-amphtml-story-system-reset i-amphtml-hidden': true,
-        })}
-      >
-        <div
-          class={objstr({
-            'i-amphtml-story-focused-state-layer-nav-button-container': true,
-            'i-amphtml-story-tooltip-nav-button-left': true,
-          })}
-        >
-          <button
-            ref="buttonLeft"
-            class={objstr({
-              'i-amphtml-story-focused-state-layer-nav-button': true,
-              'i-amphtml-story-tooltip-nav-button-left': true,
-            })}
-          ></button>
-        </div>
-        <div
-          class={objstr({
-            'i-amphtml-story-focused-state-layer-nav-button-container': true,
-            'i-amphtml-story-tooltip-nav-button-right': true,
-          })}
-        >
-          <button
-            ref="buttonRight"
-            class={objstr({
-              'i-amphtml-story-focused-state-layer-nav-button': true,
-              'i-amphtml-story-tooltip-nav-button-right': true,
-            })}
-          ></button>
-        </div>
-        <a
-          class="i-amphtml-story-tooltip"
-          target="_blank"
-          ref="tooltip"
-          role="tooltip"
-        >
-          <div class="i-amphtml-story-tooltip-custom-icon"></div>
-          <p class="i-amphtml-tooltip-text" ref="text"></p>
-          <div class="i-amphtml-tooltip-action-icon"></div>
-          <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>
-        </a>
-      </section>
-    );
-    const overlayEls = htmlRefs(tooltipOverlay);
-    const {arrow, buttonLeft, buttonRight, tooltip} =
-      /** @type {!tooltipElementsDef} */ (overlayEls);
-
-    this.tooltip_ = tooltip;
-    this.tooltipArrow_ = arrow;
-    this.buttonLeft_ = buttonLeft;
-    this.buttonRight_ = buttonRight;
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    this.buttonLeft_.addEventListener('click', (e) =>
-      this.onNavigationalClick_(
-        e,
-        rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
-      )
+    this.tooltipArrow_ = <div class="i-amphtml-story-tooltip-arrow"></div>;
+    this.tooltip_ = (
+      <a class="i-amphtml-story-tooltip" target="_blank" role="tooltip">
+        <div class="i-amphtml-story-tooltip-custom-icon"></div>
+        <p class="i-amphtml-tooltip-text" ref="text"></p>
+        <div class="i-amphtml-tooltip-action-icon"></div>
+        {this.tooltipArrow_}
+      </a>
+    );
+    this.buttonLeft_ = (
+      <button
+        class={
+          'i-amphtml-story-focused-state-layer-nav-button' +
+          ' i-amphtml-story-tooltip-nav-button-left'
+        }
+        onClick={(e) =>
+          this.onNavigationalClick_(
+            e,
+            rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
+          )
+        }
+      ></button>
+    );
+    this.buttonRight_ = (
+      <button
+        class={
+          'i-amphtml-story-focused-state-layer-nav-button' +
+          ' i-amphtml-story-tooltip-nav-button-right'
+        }
+        onClick={(e) =>
+          this.onNavigationalClick_(
+            e,
+            rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE
+          )
+        }
+      ></button>
     );
 
-    this.buttonRight_.addEventListener('click', (e) =>
-      this.onNavigationalClick_(
-        e,
-        rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE
-      )
+    return (
+      <section
+        onClick={(e) => this.onOutsideTooltipClick_(e)}
+        class={
+          'i-amphtml-story-focused-state-layer' +
+          ' i-amphtml-story-system-reset i-amphtml-hidden'
+        }
+      >
+        <div
+          class={
+            'i-amphtml-story-focused-state-layer-nav-button-container' +
+            ' i-amphtml-story-tooltip-nav-button-left'
+          }
+        >
+          {this.buttonLeft_}
+        </div>
+        <div
+          class={
+            'i-amphtml-story-focused-state-layer-nav-button-container' +
+            ' i-amphtml-story-tooltip-nav-button-right'
+          }
+        >
+          {this.buttonRight_}
+        </div>
+        {this.tooltip_}
+      </section>
     );
-
-    return tooltipOverlay;
   }
 
   /**

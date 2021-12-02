@@ -122,10 +122,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.element.classList.add('amp-story-draggable-drawer-root');
 
     const templateEl = renderDrawerElement();
-    const headerShadowRootEl = this.win.document.createElement('div');
     this.headerEl = renderHeaderElement();
-
-    createShadowRootWithStyle(headerShadowRootEl, this.headerEl, CSS);
 
     this.containerEl = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
@@ -136,17 +133,21 @@ export class DraggableDrawer extends AMP.BaseElement {
       )
     );
 
-    const spacerEl = this.win.document.createElement('button');
-    spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
-    spacerEl.classList.add('i-amphtml-story-system-reset');
-    spacerEl.setAttribute('role', 'button');
-    const localizedCloseString = localize(
-      this.element,
-      LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+    const spacerEl = (
+      <button
+        role="button"
+        class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
+        aria-label={localize(
+          this.element,
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+      ></button>
     );
-    spacerEl.setAttribute('aria-label', localizedCloseString);
+
     this.containerEl.insertBefore(spacerEl, this.contentEl);
-    this.contentEl.appendChild(headerShadowRootEl);
+    this.contentEl.appendChild(
+      createShadowRootWithStyle(<div />, this.headerEl, CSS)
+    );
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);
