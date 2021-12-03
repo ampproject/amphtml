@@ -5,6 +5,7 @@ import '../amp-story-shopping';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
+  StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
@@ -74,6 +75,16 @@ describes.realWin(
       await shoppingDataDispatchStoreService();
       expect(shoppingTag.element.textContent).to.be.empty;
       expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
+    });
+
+    it('should set active product in store service when shopping tag is clicked', async () => {
+      shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
+      await shoppingDataDispatchStoreService();
+      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
+        expect(
+          storeService.get(StateProperty.SHOPPING_DATA['activeProduct'])
+        ).to.equal('sunglasses');
+      });
     });
   }
 );
