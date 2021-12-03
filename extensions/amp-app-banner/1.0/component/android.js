@@ -18,7 +18,7 @@ export function getAndroidAppInfo() {
 
   if (canShowBuiltinBanner) {
     user().info(
-      TAG,
+      'bento-app-banner',
       'Browser supports builtin banners. Not rendering amp-app-banner.'
     );
     return null;
@@ -28,7 +28,7 @@ export function getAndroidAppInfo() {
     'link[rel=manifest],link[rel=origin-manifest]'
   );
 
-  const missingDataSources = platformService.isAndroid() && !manifestLink;
+  const missingDataSources = !manifestLink;
   if (missingDataSources) {
     return null;
   }
@@ -58,9 +58,8 @@ function parseManifest(manifestJson) {
   const apps = manifestJson['related_applications'];
   if (!apps) {
     user().warn(
-      TAG,
+      'bento-app-banner',
       'related_applications is missing from manifest.json file: %s',
-      this.element
     );
     return null;
   }
@@ -75,9 +74,8 @@ function parseManifest(manifestJson) {
   }
 
   user().warn(
-    TAG,
+    'bento-app-banner',
     'Could not find a platform=play app in manifest: %s',
-    this.element
   );
   return null;
 }
