@@ -56,8 +56,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.setAttribute('role', 'button');
     this.loadFonts_();
+    this.element.setAttribute('role', 'button');
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => (this.storeService_ = storeService)
     );
