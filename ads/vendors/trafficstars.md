@@ -53,4 +53,3 @@ For details on the configuration semantics, please contact the ad network or ref
 -   `subid_3` - attribute of data
 -   `subid_4` - attribute of data
 -   `subid_5` - attribute of data
--   `subid_6` - attribute of data

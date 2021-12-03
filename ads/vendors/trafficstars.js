@@ -19,7 +19,6 @@ const params = [
   'subid_3',
   'subid_4',
   'subid_5',
-  'subid_6',
 ];
 const optionalParams = params.concat(jsonParams);
 const adContainerId = 'trafficstars_id';
