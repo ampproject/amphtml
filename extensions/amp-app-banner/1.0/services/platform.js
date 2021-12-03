@@ -1,5 +1,7 @@
 class PlatformService {
-  navigator_ = window.navigator;
+  constructor() {
+    this.navigator_ = window.navigator;
+  }
 
 
   /**
