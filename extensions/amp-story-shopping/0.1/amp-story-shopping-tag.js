@@ -26,6 +26,11 @@ const FONTS_TO_LOAD = [
   },
 ];
 
+/**
+ * @param {!ShoppingConfigDataDef} tagData
+ * @param {function(Event)} onClick
+ * @return {!Element}
+ */
 const renderShoppingTagTemplate = (tagData, onClick) => (
   <div class="amp-story-shopping-tag-inner" role="button" onClick={onClick}>
     <span class="amp-story-shopping-tag-dot"></span>
