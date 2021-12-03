@@ -1,11 +1,11 @@
 import { user } from "#utils/log";
-import { openWindowDialog } from "../../../src/open-window-dialog";
-import { docInfoService } from "./services/document";
-import { platformService } from "./services/platform";
-import { timerService } from "./services/timer";
-import { urlService } from "./services/url";
-import { viewerService } from "./services/viewer";
-import { xhrService } from "./services/xhr";
+import { openWindowDialog } from "../../../../src/open-window-dialog";
+import { docInfoService } from "../services/document";
+import { platformService } from "../services/platform";
+import { timerService } from "../services/timer";
+import { urlService } from "../services/url";
+import { viewerService } from "../services/viewer";
+import { xhrService } from "../services/xhr";
 
 const OPEN_LINK_TIMEOUT = 1500;
 

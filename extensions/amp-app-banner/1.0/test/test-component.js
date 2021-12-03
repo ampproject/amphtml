@@ -1,6 +1,6 @@
 import * as Preact from 'preact';
 import { mount } from "enzyme";
-import { AppBanner } from "../component";
+import { AppBanner } from "../component/component";
 
 describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
   describe('raw AppBanner', () => {

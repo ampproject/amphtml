@@ -1,19 +1,16 @@
 import * as Preact from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {
-  useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from '#preact';
 // import { userAssert } from "#utils/log";
 import { getAndroidAppInfo } from "./android";
 import {useStyles} from './component.jss';
 import { getIOSAppInfo } from "./ios";
-import { platformService } from "./services/platform";
-import { useLocalStorage } from "./services/storage";
+import { platformService } from "../services/platform";
+import { useLocalStorage } from "../services/storage";
 
 
 /**

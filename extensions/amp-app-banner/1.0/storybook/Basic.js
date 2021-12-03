@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {AppBanner} from '../component';
+import {AppBanner} from '../component/component';
 
 export default {
   title: 'AppBanner',

@@ -1,15 +1,14 @@
-import { mount } from "enzyme";
-import { getIOSAppInfo } from "../ios";
+import { getIOSAppInfo } from "../component/ios";
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   describe("getIOSAppInfo", () => {
-
     describe("when no meta header is present", () => {
       it("should return null when no meta header is present", () => {
         const iosInfo = getIOSAppInfo();
         expect(iosInfo).to.be.null;
       });
     });
+
     describe("when meta header is present", () => {
       beforeEach(() => {
         // Inject a tag like: <meta name="apple-itunes-app" content="..." />
