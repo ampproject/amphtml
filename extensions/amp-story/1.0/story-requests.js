@@ -6,6 +6,7 @@ import {Services} from '#service';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
 import {user, userAssert} from '#utils/log';
+import {getWin} from '#core/window';
 
 /** @private @const {string} */
 export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
@@ -27,7 +28,7 @@ export function executeRequest(el, rawUrl, opts = {}) {
     return Promise.resolve(null);
   }
 
-  const xhrService = Services.xhrFor(el.ownerDocument.defaultView);
+  const xhrService = Services.xhrFor(getWin(el));
 
   return Services.urlReplacementsForDoc(el)
     .expandUrlAsync(user().assertString(rawUrl))
