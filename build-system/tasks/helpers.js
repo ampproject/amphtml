@@ -483,18 +483,27 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Object}
    */
   function remapDependenciesPlugin() {
-    const remapDependencies = {__proto__: null, ...options.remapDependencies};
+    const remaps = Object.entries(options.remapDependencies).map(
+      ([path, value]) => {
+        return [new RegExp(`^${path}$`), value];
+      }
+    );
     const external = options.externalDependencies;
     return {
       name: 'remap-dependencies',
       setup(build) {
         build.onResolve({filter: /.*/}, (args) => {
-          const dep = args.path;
-          const remap = remapDependencies[dep];
-          if (remap) {
-            const isExternal = external.includes(remap);
+          const {path: importPath, resolveDir} = args;
+          const dep = importPath.startsWith('.')
+            ? path.posix.join(resolveDir, importPath)
+            : importPath;
+          for (const [key, value] of remaps) {
+            if (!key.test(dep)) {
+              continue;
+            }
+            const isExternal = external.includes(value);
             return {
-              path: isExternal ? remap : require.resolve(remap),
+              path: isExternal ? value : require.resolve(value),
               external: isExternal,
             };
           }
