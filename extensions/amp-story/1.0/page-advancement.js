@@ -1153,10 +1153,13 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       // amp-video, amp-audio, as well as amp-story-page with a background audio
       // are eligible for media based auto advance.
       let element = pageEl.querySelector(
-        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
-          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        `amp-video[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-video#${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}, amp-audio[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (
         matches(
