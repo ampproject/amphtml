@@ -19,6 +19,16 @@ defineBentoLightbox();
 
 ### Import via `<script>`
 
+```html
+<script type="module" async src="https://cdn.ampproject.org/bento.mjs"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+<script type="module" async src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.mjs"></script>
+<script nomodule async src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css">
+```
+
+### Example
+
 <!--% example %-->
 
 ```html
