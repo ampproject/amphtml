@@ -484,9 +484,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    */
   function remapDependenciesPlugin() {
     const remaps = Object.entries(options.remapDependencies).map(
-      ([path, value]) => {
-        return [new RegExp(`^${path}$`), value];
-      }
+      ([path, value]) => ({regex: new RegExp(`^${path}$`), value})
     );
     const external = options.externalDependencies;
     return {
@@ -497,8 +495,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
           const dep = importPath.startsWith('.')
             ? path.posix.join(resolveDir, importPath)
             : importPath;
-          for (const [key, value] of remaps) {
-            if (!key.test(dep)) {
+          for (const {regex, value} of remaps) {
+            if (!regex.test(dep)) {
               continue;
             }
             const isExternal = external.includes(value);
