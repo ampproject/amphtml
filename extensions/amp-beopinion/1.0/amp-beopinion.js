@@ -6,10 +6,31 @@ import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
+import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
+
 /** @const {string} */
 const TAG = 'amp-beopinion';
+const TYPE = 'beopinion';
 
 class AmpBeopinion extends BaseElement {
+  /** @override @nocollapse */
+  static getPreconnects(element) {
+    const ampdoc = element.getAmpDoc();
+    const {win} = ampdoc;
+    return [
+      // Base URL for 3p bootstrap iframes
+      getBootstrapBaseUrl(win, ampdoc),
+      // Script URL for iframe
+      getBootstrapUrl(TYPE),
+      // Hosts the script that renders widgets.
+      'https://widget.beop.io/sdk.js',
+
+      'https://s.beop.io',
+      'https://t.beop.io',
+      'https://data.beop.io',
+    ];
+  }
+
   /** @override */
   init() {
     return dict({
