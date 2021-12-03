@@ -63,6 +63,10 @@ describes.realWin(
       env.sandbox.stub(ampStoryPoll, 'mutateElement').callsFake((fn) => fn());
     });
 
+    afterEach(() => {
+      xhrMock.verify();
+    });
+
     it('should throw an error with fewer than two options', () => {
       addConfigToInteractive(ampStoryPoll, 1);
       allowConsoleError(() => {

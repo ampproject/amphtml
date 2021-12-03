@@ -59,6 +59,10 @@ describes.realWin(
       env.sandbox.stub(ampStorySlider, 'mutateElement').callsFake((fn) => fn());
     });
 
+    afterEach(() => {
+      xhrMock.verify();
+    });
+
     it('should create an input element, with type range', async () => {
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
