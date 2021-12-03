@@ -76,12 +76,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onClick_() {
-    const activeProduct = this.storeService_.get(StateProperty.SHOPPING_DATA)[
-      this.element.getAttribute('data-tag-id')
-    ]['product-tag-id'];
-
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-      'activeProduct': activeProduct,
+      'activeProduct': this.storeService_.get(StateProperty.SHOPPING_DATA)[
+        this.element.getAttribute('data-tag-id')
+      ]['product-tag-id'],
     });
   }
 
