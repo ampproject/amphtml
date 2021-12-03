@@ -5,6 +5,8 @@ import {Services} from '#service';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
+  Action,
+  ShoppingConfigDataDef,
   ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
@@ -24,8 +26,8 @@ const FONTS_TO_LOAD = [
   },
 ];
 
-const renderShoppingTagTemplate = (tagData) => (
-  <div class="amp-story-shopping-tag-inner">
+const renderShoppingTagTemplate = (tagData, onClick) => (
+  <div class="amp-story-shopping-tag-inner" role="button" onClick={onClick}>
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
       <span
@@ -50,21 +52,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     super(element);
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
-
-    /** @private {?Element} */
-    this.buttonEl_ = null;
   }
 
   /** @override */
   buildCallback() {
-    /*
-    this.buttonEl_ = (
-      <button type="button" role="button" style="background: #fff;"></button>
-    );
-    this.element.appendChild(this.buttonEl_);
-*/
-    this.loadFonts_();
     this.element.setAttribute('role', 'button');
+    this.loadFonts_();
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => (this.storeService_ = storeService)
     );
@@ -72,7 +65,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.initializeListeners_();
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
       (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
@@ -83,22 +75,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /**
    * @private
    */
-  initializeListeners_() {
-    console.log('initializelistener', this.buttonEl_);
-    this.buttonEl_.addEventListener(
-      'click',
-      (event) => this.onShoppingTagClick_(event),
-      true /** useCapture */
-    );
-  }
+  onClick_() {
+    const activeProduct = this.storeService_.get(StateProperty.SHOPPING_DATA)[
+      this.element.getAttribute('data-tag-id')
+    ]['product-tag-id'];
 
-  /**
-   * @param e
-   * @private
-   */
-  onShoppingTagClick_(e) {
-    console.log('e', e);
-    console.log('shopping tag clicked1');
+    this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+      'activeProduct': activeProduct,
+    });
   }
 
   /** @override */
@@ -116,10 +100,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       return;
     }
     this.mutateElement(() => {
-      this.buttonEl_.textContent = tagData['product-title'];
       createShadowRootWithStyle(
         this.element,
-        renderShoppingTagTemplate(tagData),
+        renderShoppingTagTemplate(tagData, this.onClick_.bind(this)),
         shoppingTagCSS
       );
     });
