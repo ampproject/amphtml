@@ -76,7 +76,7 @@ function AppBannerAndroid(props) {
     return null;
   }
 
-  return <AppBanner ref={ref} {...props} onInstall={appInfo.openOrInstall} />;
+  return <AppBanner {...props} onInstall={appInfo.openOrInstall} />;
 }
 
 const AppBannerForCurrentPlatform = (

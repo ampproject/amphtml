@@ -10,14 +10,9 @@ const TAG = 'amp-app-banner';
 class AmpAppBanner extends BaseElement {
   /** @override */
   init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
-
     return dict({
       // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
+      'dismissButtonAriaLabel': this.element.getAttribute('dismiss-button-aria-label'),
     });
   }
 
