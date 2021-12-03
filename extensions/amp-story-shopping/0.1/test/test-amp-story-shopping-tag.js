@@ -25,12 +25,10 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
-
       await createAmpStoryShoppingTag();
     });
 
@@ -42,10 +40,8 @@ describes.realWin(
         'amp-story-shopping-tag',
         {'layout': 'container'}
       );
-
       pageEl.appendChild(element);
       win.document.body.appendChild(pageEl);
-
       shoppingTag = await element.getImpl();
     }
 
