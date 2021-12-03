@@ -24,7 +24,6 @@ Serves ads from the [TrafficStars](https://www.trafficstars.com/).
   data-subid_3="{string}"
   data-subid_4="{string}"
   data-subid_5="{string}"
-  data-subid_6="{string}"
 >
 </amp-embed>
 ```
