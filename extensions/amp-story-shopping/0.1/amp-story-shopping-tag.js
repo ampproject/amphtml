@@ -87,7 +87,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   onClick_(tagData) {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-      'activeProduct': tagData,
+      'activeProductData': tagData,
     });
   }
 

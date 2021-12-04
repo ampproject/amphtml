@@ -72,12 +72,15 @@ export let InteractiveReactData;
  * @typedef {{
  *   product-tag-id: string,
  *   product-title: string,
+ *   product-price: string,
+ *   product-icon: string,
  * }}
  */
 export let ShoppingConfigDataDef;
 
 /**
  * @typedef {{
+ *  activeProductData: ShoppingConfigDataDef,
  *  items: !Map<string, !ShoppingConfigDataDef>,
  * }}
  */

@@ -78,7 +78,7 @@ describes.realWin(
       await shoppingDataDispatchStoreService();
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
         expect(
-          storeService.get(StateProperty.SHOPPING_DATA['activeProduct'])
+          storeService.get(StateProperty.SHOPPING_DATA['activeProductData'])
         ).to.deep.equal({
           'product-tag-id': 'sunglasses',
           'product-title': 'Spectacular Spectacles',
