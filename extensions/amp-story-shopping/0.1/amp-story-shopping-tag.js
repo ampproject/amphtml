@@ -32,7 +32,11 @@ const FONTS_TO_LOAD = [
  * @return {!Element}
  */
 const renderShoppingTagTemplate = (tagData, onClick) => (
-  <div class="amp-story-shopping-tag-inner" role="button" onClick={onClick}>
+  <div
+    class="amp-story-shopping-tag-inner"
+    role="button"
+    onClick={() => onClick(tagData)}
+  >
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
       <span
@@ -78,13 +82,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * @param {!ShoppingConfigDataDef} tagData
    * @private
    */
-  onClick_() {
+  onClick_(tagData) {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-      'activeProduct': this.storeService_.get(StateProperty.SHOPPING_DATA)[
-        this.element.getAttribute('data-tag-id')
-      ]['product-tag-id'],
+      'activeProduct': tagData,
     });
   }
 
@@ -105,7 +108,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        renderShoppingTagTemplate(tagData, this.onClick_.bind(this)),
+        renderShoppingTagTemplate(tagData, (tagData) => this.onClick_(tagData)),
         shoppingTagCSS
       );
     });
