@@ -75,8 +75,6 @@ describes.realWin(
 
     it('should set active product in store service when shopping tag is clicked', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
-      await shoppingTag.buildCallback();
-      await shoppingTag.layoutCallback();
       await shoppingDataDispatchStoreService();
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
         expect(
