@@ -191,24 +191,27 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     attachmentEl,
     ctaLabelFromAttr(attachmentEl)
   );
-
-  return (
-    <a
-      class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-      role="button"
-      theme={AttachmentTheme.DARK === theme && theme}
-      aria-label={openLabel}
-    >
-      <div class="i-amphtml-story-inline-page-attachment-chip">
-        {makeImgElWithBG('cta-image')}
-        {makeImgElWithBG('cta-image-2')}
-        <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
-      </div>
-      {openLabel !== 'none' && (
-        <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
-      )}
-    </a>
-  );
+  if (pageEl.getElementsByTagName('amp-story-shopping-tag').length === 0) {
+    return <div></div>;
+  } else {
+    return (
+      <a
+        class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+        role="button"
+        theme={AttachmentTheme.DARK === theme && theme}
+        aria-label={openLabel}
+      >
+        <div class="i-amphtml-story-inline-page-attachment-chip">
+          {makeImgElWithBG('cta-image')}
+          {makeImgElWithBG('cta-image-2')}
+          <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
+        </div>
+        {openLabel !== 'none' && (
+          <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
+        )}
+      </a>
+    );
+  }
 };
 
 /**
