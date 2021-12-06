@@ -2,13 +2,23 @@ import {loadScript, validateData} from '#3p/3p';
 import {parseJson} from '#core/types/object/json';
 
 const requiredParams = ['spot'];
-const jsonParams = ['nativeSettings', 'wrapperStyles', 'iFrameStyles'];
+const jsonParams = [
+  'nativeSettings',
+  'wrapperStyles',
+  'iFrameStyles',
+  'queriesParams',
+];
 const params = [
   'uploadLink',
-  'queriesParams',
   'onLoadResponseHook',
   'onSpotRenderedHook',
   'onLoadErrorHook',
+  'subid',
+  'subid_1',
+  'subid_2',
+  'subid_3',
+  'subid_4',
+  'subid_5',
 ];
 const optionalParams = params.concat(jsonParams);
 const adContainerId = 'trafficstars_id';
