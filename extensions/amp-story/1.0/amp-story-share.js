@@ -9,7 +9,7 @@ import {
 import {devAssert, user} from '#utils/log';
 import {map} from '#core/types/object';
 import {localize} from './amp-story-localization-service';
-import {getElementConfig} from './story-requests';
+import {getElementConfig} from './request-utils';
 import {isObject} from '#core/types';
 
 /**

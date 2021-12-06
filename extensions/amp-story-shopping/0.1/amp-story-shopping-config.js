@@ -2,7 +2,7 @@ import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {getElementConfig} from 'extensions/amp-story/1.0/story-requests';
+import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 
 import {
   Action,
