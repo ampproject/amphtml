@@ -78,6 +78,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /**
    * @param {!ShoppingDataDef} shoppingData
    * @private
+   *
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
