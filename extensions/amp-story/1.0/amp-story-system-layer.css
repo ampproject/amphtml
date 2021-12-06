@@ -11,15 +11,11 @@
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  height: calc(var(--story-page-vh) * 15) !important;
+  height: 140px !important;
   z-index: 100000 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   pointer-events: none !important;
   font-family: 'Roboto', sans-serif !important;
-}
-
-[desktop] .i-amphtml-story-system-layer {
-  height: 96px !important;
 }
 
 .i-amphtml-story-hidden.i-amphtml-story-system-layer {
@@ -107,15 +103,12 @@
 }
 
 .i-amphtml-story-button {
-  background-repeat: no-repeat !important;
-  background-position: center center !important;
   height: 48px !important;
   width: 48px !important;
   cursor: pointer !important;
   border: none !important;
   pointer-events: auto !important;
-  /* for svg backgrounds: */
-  background: center center no-repeat !important;
+  background: none !important;
 }
 
 [desktop] .i-amphtml-story-button {
@@ -123,7 +116,7 @@
 }
 
 .i-amphtml-story-button:active {
-  background-color: rgba(0, 0, 0, 0.2) !important;
+  background-color: #0003 !important;
 }
 
 .i-amphtml-story-progress-bar {
@@ -131,13 +124,14 @@
   display: flex !important;
   height: 2px !important;
   left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
   margin: 6px 10px 0 10px !important;
   padding: 0 2px !important;
   position: absolute !important;
-  right: 0 !important;
-  top: 0 !important;
   visibility: visible !important;
   z-index: 100001 !important;
+  overflow: hidden !important;
 }
 
 /* TODO(#33969): clean up when ad progress bar is finalized. */
@@ -364,13 +358,6 @@
 
 .i-amphtml-animate-progress li {
   transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-}
-
-.i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
-  width: calc(100% - 4px) !important;
-  margin: 4px 2px 0 !important;
-  overflow: hidden !important;
-  padding: 0 !important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
