@@ -125,3 +125,21 @@ amp-story-shopping-attachment a {
   padding-bottom: 20px;
 }
 
+.details-text p,
+.details-text li {
+  font-size: 13px !important;
+  font-weight: 400 !important; /* regular */
+  font-size: 13px !important;
+  line-height: 18px !important;
+}
+
+.details-text ul {
+  margin: 0;
+  list-style-type: none;
+  padding: 0;
+}
+
+p.details-sub-header {
+  font-weight: 600 !important; /* semi bold */
+  line-height: 16px !important;
+}

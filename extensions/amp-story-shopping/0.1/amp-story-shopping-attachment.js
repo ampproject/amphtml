@@ -45,6 +45,23 @@ const PdpTemplate = ({productData, children}) => {
       </div>
       <div class="details">
         <span class="amp-story-shopping-attachment-header-2">Details</span>
+        <div class="details-text">
+          {productData['product-details'] &&
+            productData['product-details'].map((item) =>
+              typeof item === 'string' ? (
+                <p>{item}</p>
+              ) : (
+                <div>
+                  <p class="details-sub-header">{item.header}</p>
+                  <ul>
+                    {item.bullets.map((bullet) => (
+                      <li>{bullet}</li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            )}
+        </div>
       </div>
       {children}
       <div class="spacer"></div>
