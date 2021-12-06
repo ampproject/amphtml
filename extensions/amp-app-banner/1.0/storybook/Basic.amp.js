@@ -1,23 +1,42 @@
-import * as Preact from '#preact';
-import {withAmp} from '@ampproject/storybook-addon';
+import { withAmp } from "@ampproject/storybook-addon";
+
 
 export default {
-  title: 'amp-app-banner-1_0',
-  decorators: [withAmp],
+  title: "amp-app-banner-1_0",
+  decorators: [ withAmp ],
   parameters: {
-    extensions: [{name: 'amp-app-banner', version: '1.0'}],
-    experiments: ['bento'],
+    extensions: [ { name: "amp-app-banner", version: "1.0" } ],
+    experiments: [ "bento" ]
   },
   args: {
-    'data-example-property': 'example string property argument',
-  },
+    "dismiss-button-aria-label": "Dismiss"
+  }
 };
 
-// DO NOT SUBMIT: This is example code only.
+const cssContent = {
+  display: "flex",
+  textAlign: "center",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: 10
+};
+
 export const _default = (args) => {
   return (
-    <amp-app-banner width="300" height="200" {...args}>
-      This text is inside.
-    </amp-app-banner>
+    <>
+      <strong>This banner should be hidden, since this page does not include required meta tags</strong>
+      <amp-app-banner {...args} id="ID">
+        <div className="content" style={cssContent}>
+          <img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png" width="40" height="34" />
+          <div className="description">
+            <h5>Get the App</h5>
+            <p>Experience a richer experience on our mobile app!</p>
+          </div>
+          <div className="actions">
+            <button open-button>Open In App</button>
+          </div>
+        </div>
+      </amp-app-banner>
+    </>
   );
 };
