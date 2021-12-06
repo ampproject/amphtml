@@ -4,15 +4,16 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "com_google_absl",
-    sha256 = "1e1a4004258dbbce62e546739f24f613867225d24bb4d504273bf2417ba4bf27",
-    strip_prefix = "abseil-cpp-master",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
+    sha256 = "368be019fc8d69a566ac2cf7a75262d5ba8f6409e3ef3cdbcf0106bdeb32e91c",
+    strip_prefix = "abseil-cpp-9336be04a242237cd41a525bedfcf3be1bb55377",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/9336be04a242237cd41a525bedfcf3be1bb55377.zip"],
 )
 
 http_archive(
     name = "com_github_glog",
-    strip_prefix = "glog-master",
-    urls = ["https://github.com/google/glog/archive/master.zip"],
+    sha256 = "9411249a033ff79b100d55111347cba886eebf4f0bb6394554b9c11a98eb837f",
+    strip_prefix = "glog-f4dd77ae6b8e5f8e1323c929e81dbc40ff58fc7b",
+    urls = ["https://github.com/google/glog/archive/f4dd77ae6b8e5f8e1323c929e81dbc40ff58fc7b.zip"],
 )
 
 http_archive(
@@ -24,25 +25,25 @@ http_archive(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "f0435ecdf55ad1cc232c3dfe6a94384b35c4c9727f40c64027c8c1cf2af0d348",
-    strip_prefix = "protobuf-master",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
+    sha256 = "3f703847ef2f6b0e9c63a56b9ecc4f05cfc0c2e434555348130f37b03fb9d957",
+    strip_prefix = "protobuf-4812107b9d0fb9fdcca933766c237c38f2150379",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/4812107b9d0fb9fdcca933766c237c38f2150379.zip"],
 )
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 http_archive(
     name = "com_github_gflags_gflags",
-    sha256 = "289609e7e2fa13d637a6545ab78cde4b56085a501aa57b7ea294ccb76026d931",
-    strip_prefix = "gflags-master",
-    urls = ["https://github.com/gflags/gflags/archive/master.zip"],
+    sha256 = "cfdba0f2f17e8b1ff75c98113d5080d8ec016148426abcc19130864e2952d7bd",
+    strip_prefix = "gflags-827c769e5fc98e0f2a34c47cef953cc6328abced",
+    urls = ["https://github.com/gflags/gflags/archive/827c769e5fc98e0f2a34c47cef953cc6328abced.zip"],
 )
 
 http_archive(
     name = "com_googlesource_code_re2",
-    sha256 = "11ba1bbdcf83d995417b8ff15ae1e958fd81a0bfd714bc50d2bcb1aaf08f1bb5",
-    strip_prefix = "re2-main",
-    urls = ["https://github.com/google/re2/archive/main.zip"],
+    sha256 = "892edf0e0df82740c50d2a624ded968b16ed331606e1c69dc3554b5449191601",
+    strip_prefix = "re2-d826d9fcb68c62996c1b7c0a45d604e22d814952",
+    urls = ["https://github.com/google/re2/archive/d826d9fcb68c62996c1b7c0a45d604e22d814952.zip"],
 )
 
 # rules_cc defines rules for generating C++ code from Protocol Buffers.
