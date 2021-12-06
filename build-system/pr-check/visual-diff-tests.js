@@ -21,10 +21,14 @@ function pushBuildWorkflow() {
  * Steps to run during PR builds.
  */
 function prBuildWorkflow() {
+  // We need to pass in both --esm AND --minified since `transform.ts`
+  // which holds the server transformer code reads from global argv and
+  // it is not easy to pass through from the visual diff task to this
+  // typescript router.
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    timedExecOrDie('amp visual-diff');
+    timedExecOrDie('amp visual-diff --esm --minified');
   } else {
-    timedExecOrDie('amp visual-diff --empty');
+    timedExecOrDie('amp visual-diff --empty --esm --minified');
     skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or visual diff tests'
