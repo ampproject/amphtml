@@ -229,13 +229,6 @@ export class AmpStoryEmbeddedComponent {
         this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
         break;
       case EmbeddedComponentState.FOCUSED:
-        if (this.state_ !== EmbeddedComponentState.HIDDEN) {
-          dev().warn(
-            TAG,
-            `Invalid component update. Not possible to go from ${this.state_}
-              to ${component.state}`
-          );
-        }
         this.setState_(EmbeddedComponentState.FOCUSED, component);
         break;
     }

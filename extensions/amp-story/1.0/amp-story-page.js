@@ -80,7 +80,6 @@ export const Selectors = {
     'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
     'amp-story-grid-layer amp-anim',
   ALL_AMP_VIDEO: 'amp-story-grid-layer amp-video',
-  ALL_IFRAMED_MEDIA: 'audio, video',
   ALL_PLAYBACK_AMP_MEDIA:
     'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video',
   // TODO(gmajoulet): Refactor the way these selectors are used. They will be
@@ -757,7 +756,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       iterateCursor(
         scopedQuerySelectorAll(
           fie.win.document.body,
-          Selectors.ALL_IFRAMED_MEDIA
+          selector.replace(/amp-story-grid-layer/g, '')
         ),
         (el) => mediaSet.push(el)
       );
