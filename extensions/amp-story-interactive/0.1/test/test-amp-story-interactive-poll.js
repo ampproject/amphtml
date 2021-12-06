@@ -109,7 +109,7 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline', async () => {
-      xhrJson = getMockInteractiveData());
+      xhrJson = getMockInteractiveData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -123,7 +123,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with scrambled data', async () => {
       const NUM_OPTIONS = 4;
-      xhrJson = getMockScrambledData());
+      xhrJson = getMockScrambledData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -142,7 +142,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with incomplete data', async () => {
       const NUM_OPTIONS = 4;
-      xhrJson = getMockIncompleteData());
+      xhrJson = getMockIncompleteData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -161,7 +161,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with out of bounds data', async () => {
       const NUM_OPTIONS = 4;
-      xhrJson = getMockOutOfBoundsData());
+      xhrJson = getMockOutOfBoundsData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 

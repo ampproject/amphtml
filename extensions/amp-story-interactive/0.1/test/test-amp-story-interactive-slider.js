@@ -153,7 +153,7 @@ describes.realWin(
     });
 
     it('should show post-selection state when backend replies with user selection', async () => {
-      xhrJson = getSliderInteractiveData());
+      xhrJson = getSliderInteractiveData();
       ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
@@ -180,7 +180,7 @@ describes.realWin(
     });
 
     it('should display the average indicator in the correct position', async () => {
-      xhrJson = getSliderInteractiveData());
+      xhrJson = getSliderInteractiveData();
       ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
