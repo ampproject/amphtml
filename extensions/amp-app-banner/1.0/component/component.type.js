@@ -5,13 +5,8 @@ var BentoAppBannerDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   dismissButtonAriaLabel: {string|undefined},
+ *   id: {string},
  * }}
  */
 BentoAppBannerDef.Props;
-
-/** @interface */
-BentoAppBannerDef.BentoAppBannerApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};

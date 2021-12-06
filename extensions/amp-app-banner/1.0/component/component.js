@@ -8,10 +8,6 @@ import { getAndroidAppInfo } from "./android";
 import { useStyles } from "./component.jss";
 import { getIOSAppInfo } from "./ios";
 
-/**
- * @param {!BentoAppBanner.Props} props
- * @return {PreactDef.Renderable}
- */
 export function AppBanner({
                             children,
                             onInstall,
@@ -70,6 +66,10 @@ const AppBannerForCurrentPlatform = (
       null
 );
 
+/**
+ * @param {!BentoAppBanner.Props} props
+ * @return {PreactDef.Renderable}
+ */
 export function BentoAppBanner(props) {
   const [ isDismissed, setDismissed ] = useLocalStorage(getStorageKey(props.id), false);
   if (isDismissed) {
