@@ -684,17 +684,22 @@ export class PreactBaseElement extends BaseElement {
     // Add AmpContext with renderable/playable proeprties.
     const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
 
-    if (this.hydrationPending_) {
-      this.hydrationPending_ = false;
-      hydrate(v, this.container_);
-    } else {
-      const replacement = lightDomTag
-        ? childElementByAttr(this.container_, RENDERED_ATTR)
-        : null;
-      if (replacement) {
-        replacement[RENDERED_PROP] = true;
+    try {
+      if (this.hydrationPending_) {
+        this.hydrationPending_ = false;
+        hydrate(v, this.container_);
+      } else {
+        const replacement = lightDomTag
+          ? childElementByAttr(this.container_, RENDERED_ATTR)
+          : null;
+        if (replacement) {
+          replacement[RENDERED_PROP] = true;
+        }
+        render(v, this.container_, replacement);
       }
-      render(v, this.container_, replacement);
+    } catch (err) {
+      this.renderDeferred_?.reject(err);
+      throw err;
     }
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.

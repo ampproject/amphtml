@@ -9,14 +9,6 @@ const TAG = 'amp-app-banner';
 
 class AmpAppBanner extends BaseElement {
   /** @override */
-  init() {
-    return dict({
-      // Extra props passed by wrapper AMP component
-      'dismissButtonAriaLabel': this.element.getAttribute('dismiss-button-aria-label'),
-    });
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'bento') ||

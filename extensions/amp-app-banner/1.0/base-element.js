@@ -10,9 +10,8 @@ BaseElement['Component'] = BentoAppBanner;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
   'dismissButtonAriaLabel': {attr: 'dismiss-button-aria-label'},
+  'id': {attr: 'id'},
 };
 
 /** @override */
