@@ -61,6 +61,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     super(element);
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+    /** @param {!Element} element */
+    this.renderedEl_ = null;
   }
 
   /** @override */
@@ -102,11 +104,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
-    if (!tagData) {
+    if (this.renderedEl_ || !tagData) {
       return;
     }
     this.mutateElement(() => {
-      createShadowRootWithStyle(
+      this.renderedEl_ = createShadowRootWithStyle(
         this.element,
         renderShoppingTagTemplate(tagData, (tagData) => this.onClick_(tagData)),
         shoppingTagCSS
