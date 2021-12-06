@@ -134,9 +134,12 @@ export class AmpStoryShoppingAttachment extends AmpStoryPageAttachment {
       this.templateWrapper_.replaceChildren(plpTemplate);
     }
 
-    this.element.querySelector(
-      '.i-amphtml-story-draggable-drawer-container'
-    ).scrollTop = 0;
+    this.element
+      .querySelector('.i-amphtml-story-draggable-drawer-container')
+      .scroll({
+        top: 0,
+        behavior: 'smooth',
+      });
 
     super.open(shouldAnimate);
   }
