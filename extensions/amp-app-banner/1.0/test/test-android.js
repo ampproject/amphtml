@@ -1,6 +1,6 @@
 import { getAndroidAppInfo } from "../component/android";
-import { docInfoService } from "../services/document";
-import { xhrService } from "../services/xhr";
+import { docInfoService } from "#preact/services/document";
+import { xhrService } from "#preact/services/xhr";
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   let xhrServiceStub;

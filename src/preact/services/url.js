@@ -1,4 +1,4 @@
-import { assertHttpsUrl, isProtocolValid, isProxyOrigin, parseUrlWithA } from "../../../../src/url";
+import { assertHttpsUrl, isProtocolValid, isProxyOrigin, parseUrlWithA } from "../../url";
 
 class UrlService {
   getAnchor_() {
