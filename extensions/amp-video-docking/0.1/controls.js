@@ -21,7 +21,10 @@ import {VideoDockingEvents, pointerCoords} from './events';
 import {HtmlLiteralTagDef} from './html';
 import {Timeout} from './timeout';
 
-import {PlayingStates, VideoEvents} from '../../../src/video-interface';
+import {
+  PlayingStates_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 /**
  * A single controls set can be displayed at a time on the controls layer.
@@ -300,16 +303,16 @@ export class Controls {
         this.hideOnTimeout(TIMEOUT_AFTER_INTERACTION)
       ),
 
-      listen(element, VideoEvents.PLAYING, () => this.onPlay_()),
-      listen(element, VideoEvents.PAUSE, () => this.onPause_()),
-      listen(element, VideoEvents.MUTED, () => this.onMute_()),
-      listen(element, VideoEvents.UNMUTED, () => this.onUnmute_()),
+      listen(element, VideoEvents_Enum.PLAYING, () => this.onPlay_()),
+      listen(element, VideoEvents_Enum.PAUSE, () => this.onPause_()),
+      listen(element, VideoEvents_Enum.MUTED, () => this.onMute_()),
+      listen(element, VideoEvents_Enum.UNMUTED, () => this.onUnmute_()),
 
-      listen(element, VideoEvents.AD_START, () =>
+      listen(element, VideoEvents_Enum.AD_START, () =>
         this.useControlSet_(ControlSet.SCROLL_BACK)
       ),
 
-      listen(element, VideoEvents.AD_END, () =>
+      listen(element, VideoEvents_Enum.AD_END, () =>
         this.useControlSet_(ControlSet.PLAYBACK)
       )
     );
@@ -405,7 +408,8 @@ export class Controls {
 
     const isRollingAd = manager.isRollingAd(video);
     const isMuted = manager.isMuted(video);
-    const isPlaying = manager.getPlayingState(video) !== PlayingStates.PAUSED;
+    const isPlaying =
+      manager.getPlayingState(video) !== PlayingStates_Enum.PAUSED;
 
     const {container, overlay} = this;
 

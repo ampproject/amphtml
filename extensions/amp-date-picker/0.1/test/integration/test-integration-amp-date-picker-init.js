@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {createFixtureIframe} from '#testing/iframe';
 
@@ -24,7 +24,7 @@ config.run('amp-date-picker', {}, async () => {
     expect(fixture.doc.querySelectorAll(testExtension)).to.have.length(1);
     // Wait for a the LOAD_START event which is enough of a signal that the
     // runtime has executed.
-    await fixture.awaitEvent(AmpEvents.LOAD_START, 1);
+    await fixture.awaitEvent(AmpEvents_Enum.LOAD_START, 1);
     expect(fixture.doc.documentElement.getAttribute('esm')).to.equal('1');
     checkElementUpgrade(fixture.doc.querySelector(testExtension));
   });

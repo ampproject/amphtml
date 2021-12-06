@@ -1,4 +1,8 @@
-import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeFixed,
+} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
@@ -49,7 +53,7 @@ export class AmpAudio extends AMP.BaseElement {
   buildCallback() {
     // If layout="nodisplay" force autoplay to off
     const layout = this.getLayout();
-    if (layout === Layout.NODISPLAY) {
+    if (layout === Layout_Enum.NODISPLAY) {
       this.element.removeAttribute('autoplay');
       this.buildAudioElement();
     }
@@ -160,7 +164,7 @@ export class AmpAudio extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const layout = this.getLayout();
-    if (layout !== Layout.NODISPLAY) {
+    if (layout !== Layout_Enum.NODISPLAY) {
       this.buildAudioElement();
     }
     this.updateMetadata_();

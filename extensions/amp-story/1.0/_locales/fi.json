@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Hae linkki"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Pyyhkäise ylös"
-  },
-  "36": {
-    "string": "Laajenna tviitti"
   },
   "62": {
     "string": "Jaa tältä sivulta alkaen"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Avataan"
+  },
+  "98": {
+    "string": "Lomaketta ei lähetetty, yritä uudelleen"
+  },
+  "99": {
+    "string": "Lomake lähetettiin"
   }
 }

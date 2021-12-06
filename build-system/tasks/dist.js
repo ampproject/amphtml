@@ -387,7 +387,7 @@ module.exports = {
   runPreDistSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 dist.description =
   'Compile AMP production binaries and apply AMP_CONFIG to runtime files';
@@ -398,6 +398,8 @@ dist.flags = {
     'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
+  nomanglecache:
+    'Do not share the mangle cache between binaries, useful only in estimating size impacts of code changes.',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   coverage: 'Instrument code for collecting coverage information',
   extensions: 'Build only the listed extensions',

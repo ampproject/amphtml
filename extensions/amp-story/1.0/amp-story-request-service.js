@@ -1,7 +1,7 @@
 import {Services} from '#service';
+import {once} from '#core/types/function';
 import {getChildJsonConfig} from '#core/dom';
 import {isProtocolValid} from '../../../src/url';
-import {once} from '#core/types/function';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 import {user, userAssert} from '#utils/log';
 
@@ -30,7 +30,7 @@ export class AmpStoryRequestService {
     this.xhr_ = Services.xhrFor(win);
 
     /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
-    this.loadShareConfig = once(() => this.loadShareConfigImpl_());
+    this.loadShareConfig = once((element) => this.loadConfig(element));
   }
 
   /**
@@ -54,33 +54,40 @@ export class AmpStoryRequestService {
   }
 
   /**
-   * Retrieves the publisher share providers.
-   * Has to be called through `loadShareConfig`.
+   * Retrieves the inline config - will be called if
+   * src attribute is invalid or not present.
+   * @param  {!Element} element
+   * @return {(!Promise<!JsonObject>|!Promise<null>)}
+   * @private
+   */
+  getInlineConfig_(element) {
+    try {
+      return Promise.resolve(getChildJsonConfig(element));
+    } catch (err) {
+      return Promise.resolve(err);
+    }
+  }
+
+  /**
+   * Retrieves the config from and determines if
+   * a remote or inline config will be used.
+   * @param  {?Element} element
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
-  loadShareConfigImpl_() {
-    const shareConfigEl = this.storyElement_.querySelector(
-      'amp-story-social-share, amp-story-bookend'
-    );
-    if (!shareConfigEl) {
+  loadConfig(element) {
+    if (!element) {
       return Promise.resolve();
     }
-
-    if (shareConfigEl.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
-      const rawUrl = shareConfigEl.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
-      const credentials = shareConfigEl.getAttribute(
-        CREDENTIALS_ATTRIBUTE_NAME
-      );
-      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
+    if (element.hasAttribute(CONFIG_SRC_ATTRIBUTE_NAME)) {
+      const rawUrl = element.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
+      const credentials = element.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
+      return this.executeRequest(
+        rawUrl,
+        credentials ? {credentials} : {}
+      ).catch(() => this.getInlineConfig_(element));
     }
 
-    // Fallback. Check for an inline json config.
-    let config = null;
-    try {
-      config = getChildJsonConfig(shareConfigEl);
-    } catch (err) {}
-
-    return Promise.resolve(config);
+    return this.getInlineConfig_(element);
   }
 }
 

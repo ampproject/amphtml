@@ -1,4 +1,9 @@
-import {BaseElement} from './base-element';
+import {
+  BaseElement,
+  CommentsBaseElement,
+  LikeBaseElement,
+  PageBaseElement,
+} from './base-element';
 import {createLoaderLogo} from '../0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';
 import {dict} from '#core/types/object';
@@ -13,90 +18,62 @@ const LIKE_TAG = 'amp-facebook-like';
 const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
-class AmpFacebook extends BaseElement {
-  /** @override @nocollapse */
-  static createLoaderLogoCallback(element) {
-    return createLoaderLogo(element);
-  }
-
-  /** @override @nocollapse */
-  static getPreconnects(element) {
-    const ampdoc = element.getAmpDoc();
-    const {win} = ampdoc;
-    const locale = element.hasAttribute('data-locale')
-      ? element.getAttribute('data-locale')
-      : dashToUnderline(window.navigator.language);
-    return [
-      // Base URL for 3p bootstrap iframes
-      getBootstrapBaseUrl(win, ampdoc),
-      // Script URL for iframe
-      getBootstrapUrl(TYPE),
-      'https://facebook.com',
-      // This domain serves the actual tweets as JSONP.
-      'https://connect.facebook.net/' + locale + '/sdk.js',
-    ];
-  }
-
-  /** @override */
-  init() {
-    return dict({
-      'requestResize': (height) => this.attemptChangeHeight(height),
-    });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-facebook'),
-      'expected global "bento" or specific "bento-facebook" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
-  }
-}
-
 /**
- * Checks for valid data-embed-as attribute when given.
- * @param {!Element} element
- * @return {string}
+ * Mixin to implement base amp functionality for all facebook components
+ * @param {*} clazz1
+ * @return {*} mixin
  */
-function parseEmbed(element) {
-  const embedAs = element.getAttribute('data-embed-as');
-  userAssert(
-    !embedAs ||
-      ['post', 'video', 'comment', 'comments', 'like', 'page'].indexOf(
-        embedAs
-      ) !== -1,
-    'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-      ' "post", "video", "comment", "comments", "like", or "page", but was: %s',
-    embedAs
-  );
-  return embedAs;
+function AmpFacebookMixin(clazz1) {
+  return class extends clazz1 {
+    /** @override @nocollapse */
+    static createLoaderLogoCallback(element) {
+      return createLoaderLogo(element);
+    }
+
+    /** @override @nocollapse */
+    static getPreconnects(element) {
+      const ampdoc = element.getAmpDoc();
+      const {win} = ampdoc;
+      const locale = element.hasAttribute('data-locale')
+        ? element.getAttribute('data-locale')
+        : dashToUnderline(window.navigator.language);
+      return [
+        // Base URL for 3p bootstrap iframes
+        getBootstrapBaseUrl(win, ampdoc),
+        // Script URL for iframe
+        getBootstrapUrl(TYPE),
+        'https://facebook.com',
+        // This domain serves the actual tweets as JSONP.
+        'https://connect.facebook.net/' + locale + '/sdk.js',
+      ];
+    }
+
+    /** @override */
+    init() {
+      return dict({
+        'requestResize': (height) => this.attemptChangeHeight(height),
+      });
+    }
+
+    /** @override */
+    isLayoutSupported(layout) {
+      userAssert(
+        isExperimentOn(this.win, 'bento') ||
+          isExperimentOn(this.win, 'bento-facebook'),
+        'expected global "bento" or specific "bento-facebook" experiment to be enabled'
+      );
+      return super.isLayoutSupported(layout);
+    }
+  };
 }
 
-/** @override */
-AmpFacebook['props'] = {
-  ...BaseElement['props'],
-  'embedAs': {
-    attrs: ['data-embed-as'],
-    parseAttrs: parseEmbed,
-  },
-};
+class AmpFacebook extends AmpFacebookMixin(BaseElement) {}
 
-class AmpFacebookComments extends AmpFacebook {}
+class AmpFacebookComments extends AmpFacebookMixin(CommentsBaseElement) {}
 
-/** @override */
-AmpFacebookComments['staticProps'] = {'embedAs': 'comments'};
+class AmpFacebookLike extends AmpFacebookMixin(LikeBaseElement) {}
 
-class AmpFacebookLike extends AmpFacebook {}
-
-/** @override */
-AmpFacebookLike['staticProps'] = {'embedAs': 'like'};
-
-class AmpFacebookPage extends AmpFacebook {}
-
-/** @override */
-AmpFacebookPage['staticProps'] = {'embedAs': 'page'};
+class AmpFacebookPage extends AmpFacebookMixin(PageBaseElement) {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);

@@ -3,7 +3,7 @@
  *
  * @enum {string}
  */
-export const ReadyState = {
+export const ReadyState_Enum = {
   /**
    * The element has not been upgraded yet.
    */

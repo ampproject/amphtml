@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Link abrufen"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Nach oben wischen"
-  },
-  "36": {
-    "string": "Tweet maximieren"
   },
   "62": {
     "string": "Ab dieser Seite teilen"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Wird geöffnet"
+  },
+  "98": {
+    "string": "Formular nicht abgeschickt, versuche es erneut"
+  },
+  "99": {
+    "string": "Formular erfolgreich abgeschickt"
   }
 }

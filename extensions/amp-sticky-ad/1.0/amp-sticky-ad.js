@@ -1,6 +1,6 @@
 import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {realChildElements} from '#core/dom/query';
@@ -241,7 +241,7 @@ class AmpStickyAd extends AMP.BaseElement {
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
     const signals = ad.signals();
-    return signals.whenSignal(CommonSignals.RENDER_START).then(() => {
+    return signals.whenSignal(CommonSignals_Enum.RENDER_START).then(() => {
       let backgroundColor;
       return this.measureElement(() => {
         backgroundColor = computedStyle(this.win, this.element)[
