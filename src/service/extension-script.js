@@ -1,3 +1,4 @@
+import {propagateNonce} from '#core/dom';
 import * as mode from '#core/mode';
 
 import {urls} from '../config';
@@ -120,14 +121,7 @@ export function createExtensionScript(win, extensionId, version) {
   if (mode.isEsm()) {
     scriptElement.setAttribute('type', 'module');
   }
-
-  // Propagate nonce to all generated script tags.
-  // In recent browsers the value is only accessible via property, not attribute.
-  const currentScript = win.document.head.querySelector('script[nonce]');
-  if (currentScript) {
-    scriptElement.nonce =
-      currentScript.nonce ?? currentScript.getAttribute('nonce');
-  }
+  propagateNonce(win.document, scriptElement);
 
   // Allow error information to be collected
   // https://github.com/ampproject/amphtml/issues/7353
