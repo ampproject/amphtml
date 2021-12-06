@@ -568,6 +568,7 @@ export function isServerRendered(element) {
 export function propagateNonce(doc, scriptEl) {
   const currentScript = doc.head.querySelector('script[nonce]');
   if (currentScript) {
-    scriptEl.nonce = currentScript.nonce || currentScript.getAttribute('nonce');
+    const nonce = currentScript.nonce || currentScript.getAttribute('nonce');
+    scriptEl.setAttribute('nonce', nonce);
   }
 }
