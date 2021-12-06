@@ -1,13 +1,13 @@
-#include "grammar/tablebuilder.h"
+#include "cpp/htmlparser/grammar/tablebuilder.h"
 
 #include <array>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 
-#include "defer.h"
-#include "fileutil.h"
-#include "strings.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/strings.h"
 
 namespace htmlparser::grammar {
 

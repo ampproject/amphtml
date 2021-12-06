@@ -18,8 +18,8 @@
 // hierarchy. However the parsing routines sometimes instantiate a
 // temporary TokenStream and put some AST nodes into there.
 
-#ifndef HTMLPARSER__CSS_PARSE_CSS_H_
-#define HTMLPARSER__CSS_PARSE_CSS_H_
+#ifndef CPP_HTMLPARSER_CSS_PARSE_CSS_H_
+#define CPP_HTMLPARSER_CSS_PARSE_CSS_H_
 
 #include <memory>
 #include <string>
@@ -29,8 +29,8 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/strip.h"
-#include "css/parse-css.pb.h"
-#include "json/types.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
+#include "cpp/htmlparser/json/types.h"
 #include "validator.pb.h"
 
 namespace htmlparser::css {
@@ -1010,4 +1010,4 @@ class SelectorVisitor : public RuleVisitor {
 };
 }  // namespace htmlparser::css
 
-#endif  // HTMLPARSER__CSS_PARSE_CSS_H_
+#endif  // CPP_HTMLPARSER_CSS_PARSE_CSS_H_

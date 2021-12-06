@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__JSON_PARSER_H_
-#define HTMLPARSER__JSON_PARSER_H_
+#ifndef CPP_HTMLPARSER_JSON_PARSER_H_
+#define CPP_HTMLPARSER_JSON_PARSER_H_
 
 #include <string_view>
 #include <optional>
@@ -19,4 +19,4 @@ class JSONParser {
 }  // namespace htmlparser::json
 
 
-#endif  // HTMLPARSER__JSON_PARSER_H_
+#endif  // CPP_HTMLPARSER_JSON_PARSER_H_
