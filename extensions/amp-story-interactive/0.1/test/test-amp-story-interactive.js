@@ -21,7 +21,6 @@ import {
   getMockInteractiveData,
   getMockOutOfBoundsData,
   getMockScrambledData,
-  mockXhrWithJson,
 } from './helpers';
 import {dict} from '#core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
@@ -84,6 +83,7 @@ describes.realWin(
     let analyticsVars;
     let storeService;
     let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
@@ -112,8 +112,16 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+
       const xhr = Services.xhrFor(env.win);
       xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
+      });
+
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationServiceForOrNull')
@@ -139,10 +147,6 @@ describes.realWin(
           fn1();
           fn2();
         });
-    });
-
-    afterEach(() => {
-      xhrMock.verify();
     });
 
     it('should parse the attributes properly into an options list', async () => {
@@ -207,7 +211,7 @@ describes.realWin(
     });
 
     it('should update the quiz when the user has already reacted', async () => {
-      mockXhrWithJson(xhrMock, getMockInteractiveData());
+      xhrJson = getMockInteractiveData();
       addConfigToInteractive(ampStoryInteractive);
       ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
@@ -224,7 +228,7 @@ describes.realWin(
     it('should select the correct option if the backend responds with scrambled data', async () => {
       const NUM_OPTIONS = 4;
       const scrambledData = getMockScrambledData();
-      mockXhrWithJson(xhrMock, scrambledData);
+      xhrJson = scrambledData;
       addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
       ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
@@ -252,7 +256,7 @@ describes.realWin(
     it('should select the correct option if the backend responds with incomplete data', async () => {
       const NUM_OPTIONS = 4;
       const incompleteData = getMockIncompleteData();
-      mockXhrWithJson(xhrMock, incompleteData);
+      xhrJson = incompleteData;
       addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
       ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
@@ -280,7 +284,7 @@ describes.realWin(
     it('should select the correct option if the backend responds with out of bounds data', async () => {
       const NUM_OPTIONS = 4;
       const outOfBoundsData = getMockOutOfBoundsData();
-      mockXhrWithJson(xhrMock, outOfBoundsData);
+      xhrJson = outOfBoundsData;
       addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
       ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
@@ -375,7 +379,7 @@ describes.realWin(
       });
 
       it('should create the dialog when the disclaimer icon is clicked', async () => {
-        mockXhrWithJson(xhrMock, getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
         addConfigToInteractive(ampStoryInteractive);
         ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
         await ampStoryInteractive.buildCallback();
@@ -394,7 +398,7 @@ describes.realWin(
       });
 
       it('should destroy the dialog when the close button is clicked', async () => {
-        mockXhrWithJson(xhrMock, getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
         addConfigToInteractive(ampStoryInteractive);
         ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
         await ampStoryInteractive.buildCallback();
@@ -413,7 +417,7 @@ describes.realWin(
       });
 
       it('should set the url of the disclaimer to the backend url', async () => {
-        mockXhrWithJson(xhrMock, getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
 
         addConfigToInteractive(ampStoryInteractive);
         ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
@@ -433,7 +437,7 @@ describes.realWin(
       });
 
       it('should remove learn more link when backend is not on list', async () => {
-        mockXhrWithJson(xhrMock, getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
 
         addConfigToInteractive(ampStoryInteractive);
         ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);

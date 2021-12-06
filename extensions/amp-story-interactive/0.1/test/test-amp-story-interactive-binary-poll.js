@@ -7,7 +7,6 @@ import {
   MOCK_URL,
   addConfigToInteractive,
   getMockInteractiveData,
-  mockXhrWithJson,
 } from './helpers';
 import {measureMutateElementStub} from '#testing/helpers/service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -22,6 +21,7 @@ describes.realWin(
     let ampStoryPoll;
     let storyEl;
     let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
@@ -37,6 +37,12 @@ describes.realWin(
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       const xhr = Services.xhrFor(win);
       xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
+      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -61,10 +67,6 @@ describes.realWin(
         .stub(ampStoryPoll, 'measureMutateElement')
         .callsFake(measureMutateElementStub);
       env.sandbox.stub(ampStoryPoll, 'mutateElement').callsFake((fn) => fn());
-    });
-
-    afterEach(() => {
-      xhrMock.verify();
     });
 
     it('should throw an error with fewer than two options', () => {
@@ -104,7 +106,7 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline', async () => {
-      mockXhrWithJson(xhrMock, getMockInteractiveData());
+      xhrJson = getMockInteractiveData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -117,12 +119,12 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline with scrambled data', async () => {
-      mockXhrWithJson(xhrMock, {
+      xhrJson = {
         options: [
           {index: 1, count: 2, selected: true},
           {index: 0, count: 8, selected: true},
         ],
-      });
+      };
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -135,9 +137,9 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline with incomplete data', async () => {
-      mockXhrWithJson(xhrMock, {
+      xhrJson = {
         options: [{index: 1, count: 2, selected: true}],
-      });
+      };
 
       ampStoryPoll.element.setAttribute('endpoint', MOCK_URL);
 
@@ -150,12 +152,12 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline with out of bounds data', async () => {
-      mockXhrWithJson(xhrMock, {
+      xhrJson = {
         options: [
           {index: 1, count: 2, selected: true},
           {index: 2, count: 1, selected: false},
         ],
-      });
+      };
 
       ampStoryPoll.element.setAttribute('endpoint', MOCK_URL);
 

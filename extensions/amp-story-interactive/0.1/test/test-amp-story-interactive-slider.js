@@ -3,7 +3,7 @@ import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-servi
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
-import {MOCK_URL, getSliderInteractiveData, mockXhrWithJson} from './helpers';
+import {MOCK_URL, getSliderInteractiveData} from './helpers';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   MID_SELECTION_CLASS,
@@ -20,6 +20,7 @@ describes.realWin(
     let ampStorySlider;
     let storyEl;
     let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
@@ -46,6 +47,12 @@ describes.realWin(
       ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       const xhr = Services.xhrFor(env.win);
       xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
+      });
 
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox
@@ -57,10 +64,6 @@ describes.realWin(
         return storeService;
       });
       env.sandbox.stub(ampStorySlider, 'mutateElement').callsFake((fn) => fn());
-    });
-
-    afterEach(() => {
-      xhrMock.verify();
     });
 
     it('should create an input element, with type range', async () => {
@@ -150,7 +153,7 @@ describes.realWin(
     });
 
     it('should show post-selection state when backend replies with user selection', async () => {
-      mockXhrWithJson(xhrMock, getSliderInteractiveData());
+      xhrJson = getSliderInteractiveData());
       ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
@@ -177,7 +180,7 @@ describes.realWin(
     });
 
     it('should display the average indicator in the correct position', async () => {
-      mockXhrWithJson(xhrMock, getSliderInteractiveData());
+      xhrJson = getSliderInteractiveData());
       ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
