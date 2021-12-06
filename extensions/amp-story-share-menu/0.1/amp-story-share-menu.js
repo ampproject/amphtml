@@ -339,16 +339,6 @@ class AmpStoryShareMenu {
         );
         return;
       }
-
-      if (provider == 'system') {
-        user().warn(
-          'AMP-STORY',
-          '`system` is not a valid share provider type. Native sharing is ' +
-            'enabled by default and cannot be turned off.',
-          provider
-        );
-        return;
-      }
       this.add_(this.buildProvider_(/** @type {string} */ (provider)));
     });
   }
@@ -383,10 +373,7 @@ class AmpStoryShareMenu {
       return;
     }
 
-    Toast.show(
-      this.storyEl_,
-      this.buildCopySuccessfulToast_(this.win_.document, url)
-    );
+    Toast.show(this.storyEl_, this.buildCopySuccessfulToast_(url));
   }
 
   /**
@@ -399,6 +386,14 @@ class AmpStoryShareMenu {
     const shareProviderLocalizedStringId =
       SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
 
+    if (shareType === 'system') {
+      user().warn(
+        'AMP-STORY',
+        '`system` is not a valid share provider type. Native sharing is ' +
+          'enabled by default and cannot be turned off.'
+      );
+      return;
+    }
     if (!shareProviderLocalizedStringId) {
       return;
     }
@@ -421,11 +416,10 @@ class AmpStoryShareMenu {
   }
 
   /**
-   * @param {!Document} doc
    * @param {string} url
    * @return {!Element}
    */
-  buildCopySuccessfulToast_(doc, url) {
+  buildCopySuccessfulToast_(url) {
     return (
       <div class="i-amphtml-story-copy-successful">
         <div>
@@ -443,20 +437,17 @@ class AmpStoryShareMenu {
    * @return {!Element}
    */
   renderLinkShareButtonElement_() {
+    const localizedStr = this.localizationService_.getLocalizedString(
+      LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+    );
     return (
       <div
         class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
         tabIndex={0}
         role="button"
-        aria-label={this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
-        )}
+        aria-label={localizedStr}
       >
-        <span class="i-amphtml-story-share-label">
-          {this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
-          )}
-        </span>
+        <span class="i-amphtml-story-share-label">{localizedStr}</span>
       </div>
     );
   }
