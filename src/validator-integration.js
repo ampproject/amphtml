@@ -46,9 +46,10 @@ export function loadScript(doc, url) {
   script.src = url;
 
   // Propagate nonce to all generated script tags.
+  // In recent browsers the value is only accessible via property, not attribute.
   const currentScript = doc.head.querySelector('script[nonce]');
   if (currentScript) {
-    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
+    script.nonce = currentScript.nonce ?? currentScript.getAttribute('nonce');
   }
 
   const promise = loadPromise(script).then(

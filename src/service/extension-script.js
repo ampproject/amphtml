@@ -122,9 +122,11 @@ export function createExtensionScript(win, extensionId, version) {
   }
 
   // Propagate nonce to all generated script tags.
+  // In recent browsers the value is only accessible via property, not attribute.
   const currentScript = win.document.head.querySelector('script[nonce]');
   if (currentScript) {
-    scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
+    scriptElement.nonce =
+      currentScript.nonce ?? currentScript.getAttribute('nonce');
   }
 
   // Allow error information to be collected
