@@ -32,7 +32,7 @@ import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
 import {isExperimentOn} from '#experiments/';
-import {executeRequest} from 'extensions/amp-story/1.0/story-requests';
+import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';

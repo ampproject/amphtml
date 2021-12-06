@@ -14,7 +14,7 @@ export const CONFIG_SRC_ATTRIBUTE_NAME = 'src';
 /** @private const {string} */
 export const CREDENTIALS_ATTRIBUTE_NAME = 'data-credentials';
 
-const TAG = 'story-requests';
+const TAG = 'request-utils';
 
 /**
  * @param {!Element} el

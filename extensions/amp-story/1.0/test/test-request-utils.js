@@ -1,7 +1,7 @@
 import {Services} from '#service';
-import {CONFIG_SRC_ATTRIBUTE_NAME, getElementConfig} from '../story-requests';
+import {CONFIG_SRC_ATTRIBUTE_NAME, getElementConfig} from '../request-utils';
 
-describes.fakeWin('story-requests', {amp: true}, (env) => {
+describes.fakeWin('request-utils', {amp: true}, (env) => {
   let storyElement;
   let shareElement;
   let xhrMock;
