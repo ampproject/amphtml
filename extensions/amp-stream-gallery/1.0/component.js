@@ -1,8 +1,7 @@
 import * as Preact from '#preact';
 import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {forwardRef} from '#preact/compat';
+import {Children, forwardRef} from '#preact/compat';
 import {
-  toChildArray,
   useCallback,
   useImperativeHandle,
   useLayoutEffect,
@@ -42,7 +41,7 @@ function BentoStreamGalleryWithRef(props, ref) {
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
-  const {length} = toChildArray(children);
+  const length = Children.count(children);
   const measure = useCallback(
     (containerWidth) =>
       getVisibleCount(
