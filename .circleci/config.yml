@@ -542,6 +542,7 @@ workflows:
           name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
           requires:
+            - 'Module Build (Test)'
             - 'Nomodule Build (Test)'
       - local_unit_tests:
           name: 'Local Unit Tests'
