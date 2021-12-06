@@ -191,6 +191,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     attachmentEl,
     ctaLabelFromAttr(attachmentEl)
   );
+
   return (
     <a
       class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
