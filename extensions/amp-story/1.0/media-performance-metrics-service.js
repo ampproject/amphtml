@@ -3,7 +3,7 @@ import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
-import {registerServiceBuilder, registerServiceBuilderForDoc} from '../../../src/service-helpers';
+import {registerServiceBuilder} from '../../../src/service-helpers';
 import {toArray} from '#core/types/array';
 
 /**

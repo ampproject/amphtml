@@ -533,7 +533,7 @@ export class Services {
     );
   }
 
-  // /**q
+  // /**
   //  * @param {!Element} element
   //  * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
   //  */
