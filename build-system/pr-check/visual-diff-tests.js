@@ -22,9 +22,9 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    timedExecOrDie('amp visual-diff --esm --minified');
+    timedExecOrDie('amp visual-diff');
   } else {
-    timedExecOrDie('amp visual-diff --empty --esm --minified');
+    timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or visual diff tests'
