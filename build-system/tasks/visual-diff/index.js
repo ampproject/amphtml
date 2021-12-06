@@ -702,7 +702,7 @@ visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {
   'main': 'Include a blank snapshot (baseline for skipped builds)',
   'empty': 'Create a dummy Percy build with only a blank snapshot',
-  'esm': 'Serve ESM JS (uses the new typescript server transforms)',
+  'esm': 'uses the typescript server transforms which will serve the mjs files',
   'chrome_debug': 'Print debug info from Chrome',
   'webserver_debug': 'Print debug info from the local amp webserver',
   'percy_agent_debug': 'Print debug info from the @percy/agent instance',
