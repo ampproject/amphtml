@@ -3,5 +3,5 @@
  * @externs
  */
 
-/** @type {undefined|string}| */
+/** @type {undefined|string} */
 Element.prototype.nonce;
