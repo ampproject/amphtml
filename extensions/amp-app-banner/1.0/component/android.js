@@ -1,20 +1,24 @@
-import { user } from "#utils/log";
-import { openWindowDialog } from "../../../../src/open-window-dialog";
-import { docInfoService } from "#preact/services/document";
-import { platformService } from "#preact/services/platform";
-import { timerService } from "#preact/services/timer";
-import { urlService } from "#preact/services/url";
-import { viewerService } from "#preact/services/viewer";
-import { xhrService } from "#preact/services/xhr";
+import {docInfoService} from '#preact/services/document';
+import {platformService} from '#preact/services/platform';
+import {timerService} from '#preact/services/timer';
+import {urlService} from '#preact/services/url';
+import {viewerService} from '#preact/services/viewer';
+import {xhrService} from '#preact/services/xhr';
+
+import {user} from '#utils/log';
+
+import {openWindowDialog} from '../../../../src/open-window-dialog';
 
 const OPEN_LINK_TIMEOUT = 1500;
 
 export function getAndroidAppInfo() {
   const win = window;
   // We want to fallback to browser builtin mechanism when possible.
-  const isChromeAndroid = platformService.isAndroid() && platformService.isChrome();
+  const isChromeAndroid =
+    platformService.isAndroid() && platformService.isChrome();
   const isProxyOrigin = urlService.isProxyOrigin(win.location);
-  const canShowBuiltinBanner = !isProxyOrigin && !viewerService.isEmbedded() && isChromeAndroid;
+  const canShowBuiltinBanner =
+    !isProxyOrigin && !viewerService.isEmbedded() && isChromeAndroid;
 
   if (canShowBuiltinBanner) {
     user().info(
@@ -33,7 +37,6 @@ export function getAndroidAppInfo() {
     return null;
   }
 
-
   const manifestHref = manifestLink.getAttribute('href');
 
   urlService.assertHttpsUrl(manifestHref, null, 'manifest href');
@@ -43,15 +46,17 @@ export function getAndroidAppInfo() {
     promise,
     openOrInstall: () => {
       promise.then((manifest) => {
-        if (!manifest) return;
-        const { openInAppUrl, installAppUrl } = manifest;
+        if (!manifest) {
+          return;
+        }
+        const {installAppUrl, openInAppUrl} = manifest;
         timerService.delay(() => {
           window.top.location.assign(installAppUrl);
         }, OPEN_LINK_TIMEOUT);
         openWindowDialog(window, openInAppUrl, '_top');
       });
-    }
-  }
+    },
+  };
 }
 
 function parseManifest(manifestJson) {
@@ -59,7 +64,7 @@ function parseManifest(manifestJson) {
   if (!apps) {
     user().warn(
       'bento-app-banner',
-      'related_applications is missing from manifest.json file: %s',
+      'related_applications is missing from manifest.json file: %s'
     );
     return null;
   }
@@ -69,19 +74,19 @@ function parseManifest(manifestJson) {
     if (app['platform'] === 'play') {
       const installAppUrl = `https://play.google.com/store/apps/details?id=${app['id']}`;
       const openInAppUrl = getAndroidIntentForUrl(app['id']);
-      return { installAppUrl, openInAppUrl };
+      return {installAppUrl, openInAppUrl};
     }
   }
 
   user().warn(
     'bento-app-banner',
-    'Could not find a platform=play app in manifest: %s',
+    'Could not find a platform=play app in manifest: %s'
   );
   return null;
 }
 
 function getAndroidIntentForUrl(appId) {
-  const canonicalUrl = docInfoService.canonicalUrl;
+  const {canonicalUrl} = docInfoService;
   const parsedUrl = urlService.parse(canonicalUrl);
   const cleanProtocol = parsedUrl.protocol.replace(':', '');
   const {host, pathname} = parsedUrl;

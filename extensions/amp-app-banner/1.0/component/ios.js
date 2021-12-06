@@ -1,16 +1,20 @@
-import { dict } from "#core/types/object";
-import { user, userAssert } from "#utils/log";
-import { openWindowDialog } from "../../../../src/open-window-dialog";
-import { docService } from "#preact/services/document";
-import { platformService } from "#preact/services/platform";
-import { timerService } from "#preact/services/timer";
-import { urlService } from "#preact/services/url";
-import { viewerService } from "#preact/services/viewer";
+import {dict} from '#core/types/object';
+
+import {docService} from '#preact/services/document';
+import {platformService} from '#preact/services/platform';
+import {timerService} from '#preact/services/timer';
+import {urlService} from '#preact/services/url';
+import {viewerService} from '#preact/services/viewer';
+
+import {user, userAssert} from '#utils/log';
+
+import {openWindowDialog} from '../../../../src/open-window-dialog';
 
 const OPEN_LINK_TIMEOUT = 1500;
 
 export function getIOSAppInfo() {
-  const canShowBuiltinBanner = !viewerService.isEmbedded() && platformService.isSafari();
+  const canShowBuiltinBanner =
+    !viewerService.isEmbedded() && platformService.isSafari();
   if (canShowBuiltinBanner) {
     user().info(
       'bento-app-banner',
@@ -19,13 +23,20 @@ export function getIOSAppInfo() {
     return null;
   }
 
-  const canNavigateTo = !viewerService.isEmbedded() || viewerService.hasCapability('navigateTo')
-  if (!canNavigateTo) return null;
+  const canNavigateTo =
+    !viewerService.isEmbedded() || viewerService.hasCapability('navigateTo');
+  if (!canNavigateTo) {
+    return null;
+  }
 
   const metaContent = docService.getMetaByName('apple-itunes-app');
-  if (!metaContent) return null;
-  const { installAppUrl, openInAppUrl } = parseIOSMetaContent(metaContent);
-  if (!installAppUrl) return null;
+  if (!metaContent) {
+    return null;
+  }
+  const {installAppUrl, openInAppUrl} = parseIOSMetaContent(metaContent);
+  if (!installAppUrl) {
+    return null;
+  }
 
   return {
     installAppUrl,
@@ -38,9 +49,9 @@ export function getIOSAppInfo() {
         openWindowDialog(window, openInAppUrl, '_top');
       } else {
         timerService.delay(() => {
-          viewerService.sendMessage('navigateTo', dict({ 'url': installAppUrl }));
+          viewerService.sendMessage('navigateTo', dict({'url': installAppUrl}));
         }, OPEN_LINK_TIMEOUT);
-        viewerService.sendMessage('navigateTo', dict({ 'url': openInAppUrl }));
+        viewerService.sendMessage('navigateTo', dict({'url': openInAppUrl}));
       }
     },
   };
@@ -67,8 +78,8 @@ export function parseIOSMetaContent(metaContent) {
     user().error(
       'bento-app-banner',
       '<meta name="apple-itunes-app">\'s content should contain ' +
-      'app-argument to allow opening an already installed application ' +
-      'on iOS.'
+        'app-argument to allow opening an already installed application ' +
+        'on iOS.'
     );
   }
 

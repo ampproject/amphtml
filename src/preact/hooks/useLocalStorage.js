@@ -1,7 +1,7 @@
-import { useCallback, useState } from "#preact";
+import {useCallback, useState} from '#preact';
 
 export function useLocalStorage(key, defaultValue) {
-  const [ value, setValue ] = useState(() => {
+  const [value, setValue] = useState(() => {
     const value = localStorage.getItem(key);
     return value === undefined ? defaultValue : value;
   });
@@ -11,5 +11,5 @@ export function useLocalStorage(key, defaultValue) {
     setValue(newValue);
   }, []);
 
-  return [ value, storeValue ];
+  return [value, storeValue];
 }

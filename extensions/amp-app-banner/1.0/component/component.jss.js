@@ -20,15 +20,14 @@ const bannerPadding = {
   'height': '4px',
   /** Must be above the dismiss button to cover bottom shadow */
   'z-index': '15',
-}
+};
 const dismiss = {
   'position': 'absolute',
   'width': '28px',
   'height': '28px',
   'top': '-28px',
   'right': '0',
-  'background-image':
-    `url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="%234F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>')`,
+  'background-image': `url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="%234F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>')`,
   'background-size': '13px 13px',
   'background-position': '9px center',
   'background-color': '#fff',
@@ -56,7 +55,7 @@ const dismiss = {
       'left': '0',
     },
   },
-}
+};
 
 const JSS = {
   banner,

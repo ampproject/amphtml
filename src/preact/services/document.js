@@ -1,4 +1,4 @@
-import { urlService } from "./url";
+import {urlService} from './url';
 
 class DocumentService {
   getMetaByName(metaName) {
@@ -18,8 +18,7 @@ class DocumentService {
 }
 export const docService = new DocumentService();
 
-
-class DocumentInfoService{
+class DocumentInfoService {
   get sourceUrl() {
     return window.location.href;
   }

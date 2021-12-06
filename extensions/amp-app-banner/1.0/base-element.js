@@ -1,6 +1,7 @@
-import {CSS as COMPONENT_CSS} from './component/component.jss';
-import {BentoAppBanner} from './component/component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoAppBanner} from './component/component';
+import {CSS as COMPONENT_CSS} from './component/component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 

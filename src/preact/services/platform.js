@@ -3,7 +3,6 @@ class PlatformService {
     this.navigator_ = window.navigator;
   }
 
-
   /**
    * Whether the current platform an Android device.
    * @return {boolean}
@@ -186,7 +185,6 @@ class PlatformService {
     }
     return Number(currentIosVersion.split('.')[0]);
   }
-
 }
 
 export const platformService = new PlatformService();

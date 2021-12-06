@@ -12,7 +12,7 @@ class ViewerService {
    * @deprecated
    */
   sendMessage() {
-    throw new Error("NOT IMPLEMENTED!")
+    throw new Error('NOT IMPLEMENTED!');
   }
 }
 

@@ -1,41 +1,47 @@
-import * as Preact from "#preact"
-import { useEffect, useMemo, useRef } from "#preact";
-import { ContainWrapper } from "#preact/component";
-import { useLocalStorage } from "#preact/hooks/useLocalStorage";
-import { platformService } from "#preact/services/platform";
-import { user } from "#utils/log";
-import { getAndroidAppInfo } from "./android";
-import { useStyles } from "./component.jss";
-import { getIOSAppInfo } from "./ios";
+import * as Preact from '#preact';
+import {useEffect, useMemo, useRef} from '#preact';
+import {ContainWrapper} from '#preact/component';
+import {useLocalStorage} from '#preact/hooks/useLocalStorage';
+import {platformService} from '#preact/services/platform';
+
+import {user} from '#utils/log';
+
+import {getAndroidAppInfo} from './android';
+import {useStyles} from './component.jss';
+import {getIOSAppInfo} from './ios';
 
 export function AppBanner({
-                            children,
-                            onInstall,
-                            onDismiss,
-                            dismissButtonAriaLabel = "Dismiss",
-                            ...rest
-                          }) {
+  children,
+  dismissButtonAriaLabel = 'Dismiss',
+  onDismiss,
+  onInstall,
+  ...rest
+}) {
   const styles = useStyles();
 
   const bannerRef = useRef(null);
   useEffect(() => {
     // We expect the children to include an open-button, like: <button open-button>Install App</button>
-    const button = bannerRef.current.querySelector("button[open-button]");
+    const button = bannerRef.current.querySelector('button[open-button]');
     user().assert(
       button,
-      "<button open-button> is required inside %s: %s",
-      "BentoAppBanner"
+      '<button open-button> is required inside %s: %s',
+      'BentoAppBanner'
     );
 
-    button.addEventListener("click", onInstall);
-    return () => button.removeEventListener("click", onInstall);
+    button.addEventListener('click', onInstall);
+    return () => button.removeEventListener('click', onInstall);
   }, []);
 
   return (
     <ContainWrapper {...rest}>
-      <div className={styles.banner} ref={bannerRef}>
-        <div className={styles.bannerPadding} />
-        <button className={styles.dismiss} aria-label={dismissButtonAriaLabel} onClick={onDismiss} />
+      <div class={styles.banner} ref={bannerRef}>
+        <div class={styles.bannerPadding} />
+        <button
+          class={styles.dismiss}
+          aria-label={dismissButtonAriaLabel}
+          onClick={onDismiss}
+        />
         {children}
       </div>
     </ContainWrapper>
@@ -60,18 +66,21 @@ function AppBannerAndroid(props) {
   return <AppBanner {...props} onInstall={appInfo.openOrInstall} />;
 }
 
-const AppBannerForCurrentPlatform = (
-  platformService.isIos() ? AppBannerIOS :
-    platformService.isAndroid() ? AppBannerAndroid :
-      null
-);
+const AppBannerForCurrentPlatform = platformService.isIos()
+  ? AppBannerIOS
+  : platformService.isAndroid()
+  ? AppBannerAndroid
+  : null;
 
 /**
  * @param {!BentoAppBanner.Props} props
  * @return {PreactDef.Renderable}
  */
 export function BentoAppBanner(props) {
-  const [ isDismissed, setDismissed ] = useLocalStorage(getStorageKey(props.id), false);
+  const [isDismissed, setDismissed] = useLocalStorage(
+    getStorageKey(props.id),
+    false
+  );
   if (isDismissed) {
     return null;
   }
@@ -80,13 +89,15 @@ export function BentoAppBanner(props) {
     return null;
   }
 
-  return <AppBannerForCurrentPlatform {...props} onDismiss={() => setDismissed(true)} />;
+  return (
+    <AppBannerForCurrentPlatform
+      {...props}
+      onDismiss={() => setDismissed(true)}
+    />
+  );
 }
 
 function getStorageKey(id) {
-  user().assert(
-    id,
-    "bento-app-banner should have an id."
-  );
-  return "bento-app-banner:" + id;
+  user().assert(id, 'bento-app-banner should have an id.');
+  return 'bento-app-banner:' + id;
 }

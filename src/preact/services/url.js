@@ -1,4 +1,9 @@
-import { assertHttpsUrl, isProtocolValid, isProxyOrigin, parseUrlWithA } from "../../url";
+import {
+  assertHttpsUrl,
+  isProtocolValid,
+  isProxyOrigin,
+  parseUrlWithA,
+} from '../../url';
 
 class UrlService {
   getAnchor_() {
@@ -11,7 +16,7 @@ class UrlService {
     return parseUrlWithA(this.getAnchor_(), url);
   }
   isProtocolValid(url) {
-    return isProtocolValid(url)
+    return isProtocolValid(url);
   }
   assertHttpsUrl(urlString, elementContext, sourceName) {
     return assertHttpsUrl(urlString, elementContext, sourceName);
@@ -20,7 +25,7 @@ class UrlService {
   /**
    * TODO: Should this be deprecated for Bento?
    * @param url
-   * @returns {boolean}
+   * @return {boolean}
    */
   isProxyOrigin(url) {
     return isProxyOrigin(url);
