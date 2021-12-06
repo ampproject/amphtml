@@ -1,4 +1,4 @@
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {toArray} from '#core/types/array';
 
 import {listen} from '#utils/event-helper';
@@ -33,7 +33,7 @@ export class AmpStoryCaptions extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout === Layout.CONTAINER;
+    return isLayoutSizeDefined(layout) || layout === Layout_Enum.CONTAINER;
   }
 
   /**
