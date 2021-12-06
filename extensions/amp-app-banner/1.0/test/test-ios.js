@@ -1,6 +1,6 @@
 import {getIOSAppInfo} from '../component/ios';
 
-describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
+describes.sandboxed('BentoAppBanner preact component v1.0', {}, () => {
   describe('getIOSAppInfo', () => {
     describe('when no meta header is present', () => {
       it('should return null when no meta header is present', () => {

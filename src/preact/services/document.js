@@ -1,6 +1,10 @@
 import {urlService} from './url';
 
 class DocumentService {
+  /**
+   * @param {string} metaName
+   * @return {string|null}
+   */
   getMetaByName(metaName) {
     const metas = window.document.head.querySelectorAll('meta[name]');
     for (let i = 0; i < metas.length; i++) {
@@ -16,12 +20,20 @@ class DocumentService {
     return null;
   }
 }
+// eslint-disable-next-line local/no-export-side-effect
 export const docService = new DocumentService();
 
 class DocumentInfoService {
+  /**
+   * @return {string}
+   */
   get sourceUrl() {
     return window.location.href;
   }
+
+  /**
+   * @return {string}
+   */
   get canonicalUrl() {
     const rootNode = window.document;
 
@@ -36,4 +48,6 @@ class DocumentInfoService {
     return canonicalUrl;
   }
 }
+
+// eslint-disable-next-line local/no-export-side-effect
 export const docInfoService = new DocumentInfoService();

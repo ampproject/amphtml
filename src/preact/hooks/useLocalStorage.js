@@ -1,15 +1,27 @@
 import {useCallback, useState} from '#preact';
 
+// eslint-disable-next-line local/no-forbidden-terms, local/no-global
+const storage = window.localStorage;
+
+/**
+ *
+ * @param {string} key
+ * @param {any} [defaultValue]
+ * @return {[]}
+ */
 export function useLocalStorage(key, defaultValue) {
   const [value, setValue] = useState(() => {
-    const value = localStorage.getItem(key);
+    const value = storage.getItem(key);
     return value === undefined ? defaultValue : value;
   });
 
-  const storeValue = useCallback((newValue) => {
-    localStorage.setItem(key, newValue);
-    setValue(newValue);
-  }, []);
+  const storeValue = useCallback(
+    (newValue) => {
+      storage.setItem(key, newValue);
+      setValue(newValue);
+    },
+    [key]
+  );
 
   return [value, storeValue];
 }

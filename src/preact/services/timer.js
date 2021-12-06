@@ -1,4 +1,8 @@
 class TimerService {
+  /**
+   * @param {function} cb
+   * @param {number} [timeout]
+   */
   delay(cb, timeout = 0) {
     if (timeout > 0) {
       setTimeout(cb, timeout);
@@ -9,4 +13,5 @@ class TimerService {
   }
 }
 
+// eslint-disable-next-line local/no-export-side-effect
 export const timerService = new TimerService();

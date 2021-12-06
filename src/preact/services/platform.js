@@ -1,4 +1,7 @@
 class PlatformService {
+  /**
+   * @constructor
+   */
   constructor() {
     this.navigator_ = window.navigator;
   }
@@ -187,4 +190,5 @@ class PlatformService {
   }
 }
 
+// eslint-disable-next-line local/no-export-side-effect
 export const platformService = new PlatformService();

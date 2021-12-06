@@ -2,12 +2,21 @@
  * TODO: Should this be deprecated for Bento?
  */
 class ViewerService {
+  /**
+   * @return {boolean}
+   */
   isEmbedded() {
     return false;
   }
-  hasCapability(feature) {
+
+  /**
+   * @param {string} opt_feature
+   * @return {boolean}
+   */
+  hasCapability(opt_feature) {
     return false;
   }
+
   /**
    * @deprecated
    */
@@ -16,4 +25,5 @@ class ViewerService {
   }
 }
 
+// eslint-disable-next-line local/no-export-side-effect
 export const viewerService = new ViewerService();

@@ -34,13 +34,13 @@ describes.realWin(
     it('should not render an element without an id', async () => {
       const err = /bento-app-banner should have an id/;
       expectAsyncConsoleError(err, 2);
-      await expect(mountElement(html` <amp-app-banner /> `)).to.be.rejectedWith(
-        err
-      );
+      await expect(
+        mountElement(html`<amp-app-banner></amp-app-banner>`)
+      ).to.be.rejectedWith(err);
     });
 
     it('renders the element', async () => {
-      const element = await mountElement(html`
+      await mountElement(html`
         <amp-app-banner id="TEST">
           <h2>Our app is way better</h2>
           <button open-button>Get the app</button>

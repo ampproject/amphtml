@@ -1,5 +1,5 @@
 import {mount} from 'enzyme';
-import * as Preact from 'preact';
+import * as Preact from '#preact';
 
 import {AppBanner} from '../component/component';
 

@@ -3,6 +3,7 @@ import * as Preact from '#preact';
 import {AppBanner} from '../component/component';
 
 // TODO: use something like storybook actions instead of console.log:
+// eslint-disable-next-line local/no-forbidden-terms
 const action = (message) => () => console.log(message);
 
 export default {
