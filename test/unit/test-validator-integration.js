@@ -63,8 +63,10 @@ describes.fakeWin('validator-integration', {}, (env) => {
   describe('loadScript', () => {
     it('should propagate pre-existing nonces', () => {
       const scriptEl = env.win.document.createElement('script');
-      scriptEl.setAttribute('nonce', '123');
+      scriptEl.setAttribute('nonce', '');
+      scriptEl.nonce = '123';
       win.document.head.append(scriptEl);
+
       loadScriptStub = env.sandbox
         .stub(eventHelper, 'loadPromise')
         .returns(Promise.resolve());
@@ -72,7 +74,7 @@ describes.fakeWin('validator-integration', {}, (env) => {
       loadScript(win.document, 'http://example.com');
 
       expect(loadScriptStub).calledWith(
-        env.sandbox.match((el) => el.getAttribute('nonce') === '123')
+        env.sandbox.match((el) => el.nonce === '123')
       );
     });
   });
