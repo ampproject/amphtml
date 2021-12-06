@@ -1834,6 +1834,7 @@ describe('ValidatorRulesMakeSense', () => {
         let hasOctetStream = false;
         let hasCiphertext = false;
         let hasAmpOnerror = false;
+        let hasAmpStoryDvhPolyfill = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) {
             continue;
@@ -1862,13 +1863,17 @@ describe('ValidatorRulesMakeSense', () => {
           if (attrSpec.name === 'amp-onerror') {
             hasAmpOnerror = true;
           }
+          if (attrSpec.name === 'amp-story-dvh-polyfill') {
+            hasAmpStoryDvhPolyfill = true;
+          }
         }
         it('script tags must have either a src attribute or type json, ' +
                'octet-stream (during SwG encryption), or text/plain',
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext) || hasAmpOnerror)
+                 (hasOctetStream && hasCiphertext) || hasAmpOnerror ||
+                  hasAmpStoryDvhPolyfill)
                  .toBe(true);
            });
       }

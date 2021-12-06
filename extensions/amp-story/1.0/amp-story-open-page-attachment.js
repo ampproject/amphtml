@@ -82,15 +82,18 @@ const ctaLabelFromAttr = (element) =>
 
 /**
  * @param {!Element} element
- * @param {?string=} label
+ * @param {!Element} attachmentEl
+ * @param {?string} label
  * @return {?string}
  */
-const openLabelOrFallback = (element, label) =>
-  label?.trim() ||
-  localize(
-    element,
-    LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-  );
+const openLabelOrFallback = (element, attachmentEl, label) =>
+  attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT'
+    ? localize(element, LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL)
+    : label?.trim() ||
+      localize(
+        element,
+        LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      );
 
 /**
  * Renders inline page attachment UI.
@@ -113,6 +116,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 
   const openLabel = openLabelOrFallback(
     pageEl,
+    attachmentEl,
     anchorChild?.textContent || ctaLabelFromAttr(attachmentEl)
   );
 
@@ -182,7 +186,11 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   };
 
   const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
-  const openLabel = openLabelOrFallback(pageEl, ctaLabelFromAttr(attachmentEl));
+  const openLabel = openLabelOrFallback(
+    pageEl,
+    attachmentEl,
+    ctaLabelFromAttr(attachmentEl)
+  );
 
   return (
     <a

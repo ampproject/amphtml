@@ -651,7 +651,7 @@ async function buildNpmBinaries(extDir, name, options) {
         external: ['react', 'react-dom'],
         remap: {
           'preact': 'react',
-          'preact/compat': 'react',
+          '.*/preact/compat': 'react',
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
