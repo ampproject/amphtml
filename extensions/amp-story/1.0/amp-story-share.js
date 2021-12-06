@@ -6,18 +6,14 @@ import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '#core/window/clipboard';
-import {dev, devAssert, user} from '#utils/log';
-import {dict, map} from '#core/types/object';
+import {devAssert, user} from '#utils/log';
+import {map} from '#core/types/object';
 import {localize} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '#core/types';
-import {listen} from '#utils/event-helper';
-import {addAttributesToElement} from '#core/dom';
 
 /**
- * Maps share provider type to visible name.
- * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
- * does not need to be included here.
+ * Maps share provider type to localization asset.
  * @const {!Object<string, !LocalizedStringId_Enum>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
@@ -45,29 +41,21 @@ export const SHARE_PROVIDERS_KEY = 'shareProviders';
  */
 export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
-/** @return {!Element} */
-const renderElement = () => (
-  <div class="i-amphtml-story-share-widget">
-    <ul class="i-amphtml-story-share-list">
-      <li class="i-amphtml-story-share-system" />
-    </ul>
-  </div>
-);
-
 /**
  * @param {!Node} child
  * @return {!Element} */
-const renderShareItemListElement = (child) => (
+const renderShareItemElement = (child) => (
   <li class="i-amphtml-story-share-item">{child}</li>
 );
 
 /**
  * @private
  * @param {!Element} el
+ * @param {function(e)} onClick
  * @return {!Element}
  */
-function renderLinkShareButtonElement(el) {
-  return (
+function renderLinkShareItemElement(el, onClick) {
+  return renderShareItemElement(
     <div
       class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
       tabIndex={0}
@@ -76,6 +64,16 @@ function renderLinkShareButtonElement(el) {
         el,
         LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
       )}
+      onClick={onClick}
+      onKeyUp={(e) => {
+        // Check if pressed Space or Enter to trigger button.
+        // TODO(wg-stories): Try switching this element to a <button> and
+        // removing this keyup handler, since it gives you this behavior for free.
+        const code = e.charCode || e.keyCode;
+        if (code === 32 || code === 13) {
+          onClick();
+        }
+      }}
     >
       <span class="i-amphtml-story-share-label">
         {localize(
@@ -88,40 +86,20 @@ function renderLinkShareButtonElement(el) {
 }
 
 /**
- * @param {!JsonObject=} opt_params
- * @return {!JsonObject}
- */
-function buildProviderParams(opt_params) {
-  const attrs = dict();
-
-  if (opt_params) {
-    Object.keys(opt_params).forEach((field) => {
-      if (field === 'provider') {
-        return;
-      }
-      attrs[`data-param-${field}`] = opt_params[field];
-    });
-  }
-
-  return attrs;
-}
-
-/**
- * Creates an amp-social-share element if the type is valid.
+ * Returns the share button for the provider if available.
  * @param {!Document} doc
  * @param {string} shareType
- * @param {!JsonObject=} opt_params
  * @return {?Element}
  */
-function buildProvider(doc, shareType, opt_params) {
+function buildProvider(doc, shareType) {
   const shareProviderLocalizedStringId =
     SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
 
   if (!shareProviderLocalizedStringId) {
-    return;
+    return null;
   }
 
-  const social = (
+  return (
     <amp-social-share
       width={48}
       height={48}
@@ -133,7 +111,6 @@ function buildProvider(doc, shareType, opt_params) {
       </span>
     </amp-social-share>
   );
-  return addAttributesToElement(social, buildProviderParams(opt_params));
 }
 
 /**
@@ -164,14 +141,11 @@ export class ShareWidget {
    * @param {!Element} storyEl
    */
   constructor(win, storyEl) {
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = null;
-
     /** @protected @const {!Window} */
     this.win = win;
 
     /** @protected @const {!Element} */
-    this.storyEl = storyEl;
+    this.storyEl_ = storyEl;
 
     /** @protected {?Element} */
     this.root = null;
@@ -190,19 +164,21 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    */
-  build(ampdoc) {
+  build() {
     devAssert(!this.root, 'Already built.');
 
-    this.ampdoc_ = ampdoc;
-
-    this.root = renderElement();
+    this.root = (
+      <div class="i-amphtml-story-share-widget">
+        <ul class="i-amphtml-story-share-list">
+          {this.maybeRenderLinkShareButton_()}
+          <li>{this.maybeRenderSystemShareButton_()}</li>
+        </ul>
+      </div>
+    );
 
     this.loadProviders();
-    this.maybeAddLinkShareButton_();
-    this.maybeAddSystemShareButton_();
 
     return this.root;
   }
@@ -212,30 +188,20 @@ export class ShareWidget {
    * @private
    */
   getAmpDoc_() {
-    return devAssert(this.ampdoc_);
+    return devAssert(this.storyEl_.getAmpDoc());
   }
 
-  /** @private */
-  maybeAddLinkShareButton_() {
+  /**
+   * @return {?Element}
+   * @private
+   */
+  maybeRenderLinkShareButton_() {
     if (!isCopyingToClipboardSupported(this.win.document)) {
       return;
     }
-
-    const linkShareButton = renderLinkShareButtonElement(this.storyEl);
-
-    this.add_(linkShareButton);
-
-    listen(linkShareButton, 'click', (e) => {
+    return renderLinkShareItemElement(this.storyEl_, (e) => {
       e.preventDefault();
       this.copyUrlToClipboard_();
-    });
-    listen(linkShareButton, 'keyup', (e) => {
-      const code = e.charCode || e.keyCode;
-      // Check if pressed Space or Enter to trigger button.
-      if (code === 32 || code === 13) {
-        e.preventDefault();
-        this.copyUrlToClipboard_();
-      }
     });
   }
 
@@ -247,42 +213,38 @@ export class ShareWidget {
 
     if (!copyTextToClipboard(this.win, url)) {
       const failureString = localize(
-        this.storyEl,
+        this.storyEl_,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
-      Toast.show(this.storyEl, dev().assertString(failureString));
+      Toast.show(this.storyEl_, devAssert(failureString));
       return;
     }
 
-    Toast.show(this.storyEl, buildCopySuccessfulToast(this.win.document, url));
+    Toast.show(this.storyEl_, buildCopySuccessfulToast(this.win.document, url));
   }
 
-  /** @private */
-  maybeAddSystemShareButton_() {
+  /**
+   * @return {?Element}
+   * @private
+   */
+  maybeRenderSystemShareButton_() {
     if (!this.isSystemShareSupported()) {
       // `amp-social-share` will hide `system` buttons when not supported, but
       // we also need to avoid adding it for rendering reasons.
-      return;
+      return null;
     }
 
-    const container = dev()
-      .assertElement(this.root)
-      .querySelector('.i-amphtml-story-share-system');
-
     this.loadRequiredExtensions();
-
-    container.appendChild(buildProvider(this.win.document, 'system'));
+    return buildProvider(this.win.document, 'system');
   }
 
   /**
    * NOTE(alanorozco): This is a duplicate of the logic in the
    * `amp-social-share` component.
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc=}  ampdoc
    * @return {boolean} Whether the browser supports native system sharing.
    */
-  isSystemShareSupported(ampdoc = this.getAmpDoc_()) {
-    const viewer = Services.viewerForDoc(ampdoc);
-
+  isSystemShareSupported() {
+    const viewer = Services.viewerForDoc(this.storyEl_);
     const platform = Services.platformFor(this.win);
 
     // Chrome exports navigator.share in WebView but does not implement it.
@@ -299,7 +261,7 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    const shareEl = this.storyEl.querySelector(
+    const shareEl = this.storyEl_.querySelector(
       'amp-story-social-share, amp-story-bookend'
     );
 
@@ -310,63 +272,61 @@ export class ShareWidget {
       if (!providers) {
         return;
       }
-      this.setProviders_(providers);
+      for (const provider of providers) {
+        this.setProviders_(provider);
+      }
     });
   }
 
   /**
-   * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!Object|string>)} providers
+   * @param {Object<string, *>|string} provider
    * @private
    * TODO(alanorozco): Set story metadata in share config.
    */
-  setProviders_(providers) {
-    /** @type {!Array} */ (providers).forEach((provider) => {
-      if (isObject(provider)) {
-        this.add_(
-          buildProvider(
-            this.win.document,
-            provider['provider'],
-            /** @type {!JsonObject} */ (provider)
-          )
-        );
-        return;
-      }
+  setProviders_(provider) {
+    let params;
 
-      if (provider == 'system') {
-        user().warn(
-          'AMP-STORY',
-          '`system` is not a valid share provider type. Native sharing is ' +
-            'enabled by default and cannot be turned off.',
-          provider
-        );
-        return;
-      }
-      this.add_(
-        buildProvider(this.win.document, /** @type {string} */ (provider))
+    if (isObject(provider)) {
+      params = provider;
+      provider = provider['provider'];
+      delete params['provider'];
+    }
+
+    if (provider == 'system') {
+      user().warn(
+        'AMP-STORY',
+        '`system` is not a valid share provider type. Native sharing is ' +
+          'enabled by default and cannot be turned off.',
+        provider
       );
-    });
-  }
+      return;
+    }
 
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc=} ampdoc
-   */
-  loadRequiredExtensions(ampdoc = this.getAmpDoc_()) {
-    Services.extensionsFor(this.win).installExtensionForDoc(
-      ampdoc,
-      'amp-social-share'
+    const element = buildProvider(
+      this.win.document,
+      /** @type {string} */ (provider)
     );
-  }
 
-  /**
-   * @param {!Node} node
-   * @private
-   */
-  add_(node) {
+    if (params) {
+      for (const field in params) {
+        element.setAttribute(`data-param-${field}`, params[field]);
+      }
+    }
+
     const list = devAssert(this.root).lastElementChild;
-    const item = renderShareItemListElement(node);
+    const item = renderShareItemElement(element);
 
     // `lastElementChild` is the system share button container, which should
     // always be last in list
     list.insertBefore(item, list.lastElementChild);
+  }
+
+  /**
+   */
+  loadRequiredExtensions() {
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc_(),
+      'amp-social-share'
+    );
   }
 }

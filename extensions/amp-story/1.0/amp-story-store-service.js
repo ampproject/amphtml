@@ -78,6 +78,13 @@ export let ShoppingConfigDataDef;
 
 /**
  * @typedef {{
+ *  items: !Map<string, !ShoppingConfigDataDef>,
+ * }}
+ */
+export let ShoppingDataDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -109,7 +116,6 @@ export let ShoppingConfigDataDef;
  *    storyHasAudioState: boolean,
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
- *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
  *    viewportWarningState: boolean,
@@ -159,7 +165,6 @@ export const StateProperty = {
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SHOPPING_DATA: 'shoppingData',
-  SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
   // Any page has audio, or amp-story has a `background-audio` attribute.
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
@@ -205,7 +210,6 @@ export const Action = {
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   ADD_SHOPPING_DATA: 'addShoppingData',
-  TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
@@ -247,7 +251,7 @@ const stateComparisonFunctions = {
 };
 
 /**
- * Returns the new sate.
+ * Returns the new state.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
  * @param  {*} data
@@ -392,11 +396,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
-      });
-    case Action.TOGGLE_SUPPORTED_BROWSER:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.SUPPORTED_BROWSER_STATE]: !!data,
       });
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ ({
@@ -585,7 +584,6 @@ export class AmpStoryStoreService {
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SHOPPING_DATA]: {},
-      [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,

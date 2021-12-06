@@ -518,7 +518,7 @@ async function populateNetWildcard_(tempDir, outputDir) {
  * @return {Promise<void>}
  */
 async function cleanup_(tempDir) {
-  await fs.rmdir(tempDir, {recursive: true});
+  await fs.rm(tempDir, {recursive: true});
 
   logSeparator_();
 }

@@ -757,8 +757,8 @@ extension, its files and its examples. You will need to add an entry in the top-
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-kaltura-player', version: '0.1', latestVersion: '0.1'},
-  {name: 'amp-carousel', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
+  {name: 'amp-kaltura-player', version: '0.1'},
+  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
 ...
 ];
 ```
@@ -770,10 +770,6 @@ maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you
 should version your extension. This would usually be by creating a 0.2
 directory next to your 0.1.
-
-When version 0.2 is under development, make sure that `latestVersion` is
-set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2
-is ready to be released, `latestVersion` can be changed to 0.2.
 
 If your extension is still in experiments breaking changes usually are
 fine so you can just update the same version.

@@ -73,10 +73,7 @@ app.use(bodyParser.text());
 // Middleware is executed in order, so this must be at the top.
 // TODO(#24333): Migrate all server URL handlers to new-server/router and
 // deprecate app.js.
-// TODO(erwinmombay, #32865): Make visual diff tests use the new server
-if (!argv._.includes('visual-diff')) {
-  app.use(require('./new-server/router'));
-}
+app.use(require('./new-server/router'));
 
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
