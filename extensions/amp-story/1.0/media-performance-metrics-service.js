@@ -3,7 +3,7 @@ import {Services} from '#service';
 import {TickLabel} from '#core/constants/enums';
 import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
-import {registerServiceBuilder} from '../../../src/service-helpers';
+import {registerServiceBuilder, registerServiceBuilderForDoc} from '../../../src/service-helpers';
 import {toArray} from '#core/types/array';
 
 /**
@@ -96,20 +96,42 @@ export const getMediaPerformanceMetricsService = (win) => {
   return service;
 };
 
+// /**
+//  * Util function to retrieve the media performance metrics service for a given
+//  * AMP document. Ensures we can retrieve the service synchronously from the
+//  * amp-story codebase without running into race conditions.
+//  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+//  * @return {!MediaPerformanceMetricsService}
+//  */
+//  export const getMediaPerformanceMetricsServiceForDoc = (elementOrAmpDoc) => {
+//   let service = Services.mediaPerformanceMetricsServiceForDoc(elementOrAmpDoc);
+
+//   if (!service) {
+//     service = new MediaPerformanceMetricsService(undefined /* win */, elementOrAmpDoc);
+//     registerServiceBuilderForDoc(elementOrAmpDoc, 'media-performance-metrics', function () {
+//       return service;
+//     });
+//   }
+
+//   return service;
+// };
+
 /**
  * Media performance metrics service.
  * @final
  */
 export class MediaPerformanceMetricsService {
   /**
-   * @param {!Window} win
+   * @param {!Window=} win
+   * @param {!Element=} elementOrAmpDoc
    */
-  constructor(win) {
+  constructor(win = undefined, elementOrAmpDoc = undefined) {
     /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */
     this.mediaMap_ = new WeakMap();
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
-    this.performanceService_ = Services.performanceFor(win);
+    this.performanceService_ =
+        elementOrAmpDoc ? Services.performanceForDoc(elementOrAmpDoc) : Services.performanceFor(win);
   }
 
   /**

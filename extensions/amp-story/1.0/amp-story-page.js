@@ -51,7 +51,7 @@ import {getAmpdoc} from '../../../src/service-helpers';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
-import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
+import {getMediaPerformanceMetricsService, getMediaPerformanceMetricsServiceForDoc} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
@@ -243,6 +243,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
       this.win
     );
+
+    // /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
+    // this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsServiceForDoc(
+    //   storyAmpdoc
+    // );
 
     /** @private {!Array<!HTMLMediaElement>} */
     this.performanceTrackedVideos_ = [];
