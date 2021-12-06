@@ -121,26 +121,6 @@ const renderSystemLayerElement = (element, children) => (
         )}
       />
       <div class="i-amphtml-story-sound-display">
-        <div role="alert" class="i-amphtml-message-container">
-          <div class="i-amphtml-story-mute-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
-            )}
-          </div>
-          <div class="i-amphtml-story-unmute-sound-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
-            )}
-          </div>
-          <div class="i-amphtml-story-unmute-no-sound-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
-            )}
-          </div>
-        </div>
         <button
           class={UNMUTE_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
