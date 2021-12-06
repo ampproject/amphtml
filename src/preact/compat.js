@@ -82,8 +82,8 @@ function toArray(children) {
 }
 
 /**
- * @param {...PreactDef.Renderable} children
- * @param {functional(PreactDef.Renderable):R} fn
+ * @param {PreactDef.Renderable} children
+ * @param {function(PreactDef.Renderable):R} fn
  * @return {!Array<R>}
  * @template R
  */
@@ -92,7 +92,7 @@ function map(children, fn) {
 }
 
 /**
- * @param {...PreactDef.Renderable} children
+ * @param {PreactDef.Renderable} children
  * @return {number}
  */
 function count(children) {
