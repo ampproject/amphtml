@@ -112,6 +112,11 @@ amp-story-shopping-attachment a {
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 20px;
+  display: flex;
+}
+
+.carousel-wrapper img {
+  width: 100%;
 }
 
 .details {
