@@ -26,6 +26,7 @@
     },
   },
   "include": [
+    "*.js",
     "constants/**/*.js",
     "data-structures/**/*.js",
     "document/**/*.js",

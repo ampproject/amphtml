@@ -15,6 +15,8 @@ interface IPausable {
 // expectations rather than the catch-all AMP-specific `AmpElement` class. This
 // is already done with the `IPausable` interface.
 interface AmpElement extends HTMLElement, IPausable {
+  sizerElement?: HTMLElement;
+
   getPlaceholder: () => null|Element;
 }
 }

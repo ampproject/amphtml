@@ -18,7 +18,7 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
  * `hasNaturalDimensions` checks for membership in this set.
  * `getNaturalDimensions` determines the dimensions for an element in the
  *    set and caches it.
- * @type {!Object<string, ?./dom/layout/index.DimensionsDef>}
+ * @type {!Object<string, ?import('./dom/layout').DimensionsDef>}
  * @private  Visible for testing only!
  */
 export const naturalDimensions_ = {
@@ -46,7 +46,7 @@ export function hasNaturalDimensions(tagName) {
  * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
  * @param {!Element} element
- * @return {./dom/layout/index.DimensionsDef}
+ * @return {import('./dom/layout').DimensionsDef}
  */
 export function getNaturalDimensions(element) {
   const tagName = element.tagName.toUpperCase();
@@ -72,7 +72,7 @@ export function getNaturalDimensions(element) {
     };
     doc.body.removeChild(temp);
   }
-  return /** @type {./dom/layout/index.DimensionsDef} */ (
+  return /** @type {import('./dom/layout').DimensionsDef} */ (
     naturalDimensions_[tagName]
   );
 }

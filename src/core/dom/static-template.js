@@ -8,7 +8,7 @@ let svgContainer;
  * Creates the html helper for the doc.
  *
  * @param {!HTMLElement|!Document} nodeOrDoc
- * @return {function(!Array<string>):!HTMLElement}
+ * @return {function(!ReadonlyArray<string>):!HTMLElement}
  */
 export function htmlFor(nodeOrDoc) {
   const doc = nodeOrDoc.ownerDocument || /** @type {!Document} */ (nodeOrDoc);
@@ -23,7 +23,7 @@ export function htmlFor(nodeOrDoc) {
  * Creates the svg helper for the doc.
  *
  * @param {!HTMLElement|!Document} nodeOrDoc
- * @return {function(!Array<string>):!HTMLElement}
+ * @return {function(!ReadonlyArray<string>):!HTMLElement}
  */
 export function svgFor(nodeOrDoc) {
   const doc = nodeOrDoc.ownerDocument || /** @type {!Document} */ (nodeOrDoc);
@@ -45,7 +45,7 @@ export function svgFor(nodeOrDoc) {
  * Only the root element and its subtree will be returned. DO NOT use this to
  * render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!Array<string>} strings
+ * @param {!ReadonlyArray<string>} strings
  * @return {!HTMLElement}
  */
 function svg(strings) {
@@ -63,7 +63,7 @@ function svg(strings) {
  * Only the root element and its subtree will be returned. DO NOT use this to
  * render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!Array<string>} strings
+ * @param {!ReadonlyArray<string>} strings
  * @return {!HTMLElement}
  */
 function html(strings) {
@@ -73,7 +73,7 @@ function html(strings) {
 /**
  * Helper used by html and svg string literal functions.
  * @param {!HTMLElement} container
- * @param {!Array<string>} strings
+ * @param {!ReadonlyArray<string>} strings
  * @return {!HTMLElement}
  */
 function createNode(container, strings) {
