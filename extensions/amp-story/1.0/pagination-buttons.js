@@ -227,14 +227,14 @@ export class PaginationButtons {
 
   /**
    * Updates element based on visibility state.
-   * @param {?PaginationButton} paginationButton
+   * @param {!PaginationButton} paginationButton
    * @param {boolean} isVisible
    * @private
    */
   toggleEnabled_(paginationButton, isVisible) {
     const {element} = paginationButton;
-    element?.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
-    element?.querySelector('button')?.toggleAttribute('disabled', !isVisible);
+    element.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
+    element.querySelector('button')?.toggleAttribute('disabled', !isVisible);
   }
 
   /**
