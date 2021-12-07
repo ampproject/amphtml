@@ -11,8 +11,11 @@ import {openWindowDialog} from '../../../../src/open-window-dialog';
 
 const OPEN_LINK_TIMEOUT = 1500;
 
+/**
+ * @return {{openOrInstall: function, promise: Promise<Response>}|null}
+ */
 export function getAndroidAppInfo() {
-  const win = window;
+  const win = self.window;
   // We want to fallback to browser builtin mechanism when possible.
   const isChromeAndroid =
     platformService.isAndroid() && platformService.isChrome();
@@ -22,7 +25,7 @@ export function getAndroidAppInfo() {
 
   if (canShowBuiltinBanner) {
     user().info(
-      'bento-app-banner',
+      'BENTO-APP-BANNER',
       'Browser supports builtin banners. Not rendering amp-app-banner.'
     );
     return null;
@@ -39,7 +42,7 @@ export function getAndroidAppInfo() {
 
   const manifestHref = manifestLink.getAttribute('href');
 
-  urlService.assertHttpsUrl(manifestHref, null, 'manifest href');
+  urlService.assertHttpsUrl(manifestHref, undefined, 'manifest href');
 
   const promise = xhrService.fetchJson(manifestHref).then(parseManifest);
   return {
@@ -59,11 +62,15 @@ export function getAndroidAppInfo() {
   };
 }
 
+/**
+ * @param {object} manifestJson
+ * @return {{installAppUrl: string, openInAppUrl: string}|null}
+ */
 function parseManifest(manifestJson) {
   const apps = manifestJson['related_applications'];
   if (!apps) {
     user().warn(
-      'bento-app-banner',
+      'BENTO-APP-BANNER',
       'related_applications is missing from manifest.json file: %s'
     );
     return null;
@@ -79,12 +86,16 @@ function parseManifest(manifestJson) {
   }
 
   user().warn(
-    'bento-app-banner',
+    'BENTO-APP-BANNER',
     'Could not find a platform=play app in manifest: %s'
   );
   return null;
 }
 
+/**
+ * @param {string} appId
+ * @return {string}
+ */
 function getAndroidIntentForUrl(appId) {
   const {canonicalUrl} = docInfoService;
   const parsedUrl = urlService.parse(canonicalUrl);

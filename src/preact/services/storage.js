@@ -2,7 +2,7 @@ class StorageService {
   /** */
   constructor() {
     // eslint-disable-next-line local/no-forbidden-terms
-    this.storage_ = window.localStorage;
+    this.storage_ = self.localStorage;
   }
 
   /**

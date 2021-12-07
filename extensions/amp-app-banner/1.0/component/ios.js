@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {docService} from '#preact/services/document';
 import {platformService} from '#preact/services/platform';
 import {timerService} from '#preact/services/timer';
@@ -12,12 +10,15 @@ import {openWindowDialog} from '../../../../src/open-window-dialog';
 
 const OPEN_LINK_TIMEOUT = 1500;
 
+/**
+ * @return {{openOrInstall: function, installAppUrl: string, openInAppUrl: string}|null}
+ */
 export function getIOSAppInfo() {
   const canShowBuiltinBanner =
     !viewerService.isEmbedded() && platformService.isSafari();
   if (canShowBuiltinBanner) {
     user().info(
-      'bento-app-banner',
+      'BENTO-APP-BANNER',
       'Browser supports builtin banners. Not rendering amp-app-banner.'
     );
     return null;
@@ -42,21 +43,29 @@ export function getIOSAppInfo() {
     installAppUrl,
     openInAppUrl,
     openOrInstall: () => {
-      if (!viewerService.isEmbedded()) {
+      if (viewerService.isEmbedded()) {
+        user().warn(
+          'BENTO-APP-BANNER',
+          'Bento components should never be running in an embedded viewer'
+        );
+        // timerService.delay(() => {
+        //   viewerService.sendMessage('navigateTo', dict({'url': installAppUrl}));
+        // }, OPEN_LINK_TIMEOUT);
+        // viewerService.sendMessage('navigateTo', dict({'url': openInAppUrl}));
+      } else {
         timerService.delay(() => {
           openWindowDialog(window, installAppUrl, '_top');
         }, OPEN_LINK_TIMEOUT);
         openWindowDialog(window, openInAppUrl, '_top');
-      } else {
-        timerService.delay(() => {
-          viewerService.sendMessage('navigateTo', dict({'url': installAppUrl}));
-        }, OPEN_LINK_TIMEOUT);
-        viewerService.sendMessage('navigateTo', dict({'url': openInAppUrl}));
       }
     },
   };
 }
 
+/**
+ * @param {string} metaContent
+ * @return {{installAppUrl: string, openInAppUrl: string}}
+ */
 export function parseIOSMetaContent(metaContent) {
   const parts = metaContent.replace(/\s/, '').split(',');
   const config = {};
@@ -76,7 +85,7 @@ export function parseIOSMetaContent(metaContent) {
     );
   } else {
     user().error(
-      'bento-app-banner',
+      'BENTO-APP-BANNER',
       '<meta name="apple-itunes-app">\'s content should contain ' +
         'app-argument to allow opening an already installed application ' +
         'on iOS.'

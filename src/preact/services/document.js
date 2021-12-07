@@ -6,7 +6,7 @@ class DocumentService {
    * @return {string|null}
    */
   getMetaByName(metaName) {
-    const metas = window.document.head.querySelectorAll('meta[name]');
+    const metas = self.window.document.head.querySelectorAll('meta[name]');
     for (let i = 0; i < metas.length; i++) {
       const meta = metas[i];
       const name = meta.getAttribute('name');
@@ -20,6 +20,7 @@ class DocumentService {
     return null;
   }
 }
+
 // eslint-disable-next-line local/no-export-side-effect
 export const docService = new DocumentService();
 
@@ -28,14 +29,14 @@ class DocumentInfoService {
    * @return {string}
    */
   get sourceUrl() {
-    return window.location.href;
+    return self.window.location.href;
   }
 
   /**
    * @return {string}
    */
   get canonicalUrl() {
-    const rootNode = window.document;
+    const rootNode = self.window.document;
 
     let canonicalUrl = rootNode?.AMP?.canonicalUrl;
     if (!canonicalUrl) {

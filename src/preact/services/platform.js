@@ -3,7 +3,7 @@ class PlatformService {
    * @constructor
    */
   constructor() {
-    this.navigator_ = window.navigator;
+    this.navigator_ = self.navigator;
   }
 
   /**

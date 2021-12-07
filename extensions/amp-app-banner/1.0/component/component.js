@@ -4,12 +4,18 @@ import {ContainWrapper} from '#preact/component';
 import {useLocalStorage} from '#preact/hooks/useLocalStorage';
 import {platformService} from '#preact/services/platform';
 
-import {user} from '#utils/log';
+import {userAssert} from '#utils/log';
 
 import {getAndroidAppInfo} from './android';
 import {useStyles} from './component.jss';
 import {getIOSAppInfo} from './ios';
 
+/**
+ * The raw App Banner component; no platform-specific logic
+ * @param {BentoAppBannerDef.RawProps} props
+ * @return {JSX.Element}
+ * @constructor
+ */
 export function AppBanner({
   children,
   dismissButtonAriaLabel = 'Dismiss',
@@ -23,7 +29,7 @@ export function AppBanner({
   useEffect(() => {
     // We expect the children to include an open-button, like: <button open-button>Install App</button>
     const button = bannerRef.current.querySelector('button[open-button]');
-    user().assert(
+    userAssert(
       button,
       '<button open-button> is required inside %s: %s',
       'BentoAppBanner'
@@ -31,7 +37,7 @@ export function AppBanner({
 
     button.addEventListener('click', onInstall);
     return () => button.removeEventListener('click', onInstall);
-  }, []);
+  }, [onInstall]);
 
   return (
     <ContainWrapper {...rest}>
@@ -48,8 +54,13 @@ export function AppBanner({
   );
 }
 
+/**
+ * @param {BentoAppBannerDef.Props} props
+ * @return {JSX.Element|null}
+ * @constructor
+ */
 function AppBannerIOS(props) {
-  const appInfo = useMemo(getIOSAppInfo);
+  const appInfo = useMemo(getIOSAppInfo, []);
   if (!appInfo) {
     return null;
   }
@@ -57,8 +68,13 @@ function AppBannerIOS(props) {
   return <AppBanner {...props} onInstall={appInfo.openOrInstall} />;
 }
 
+/**
+ * @param {BentoAppBannerDef.Props} props
+ * @return {JSX.Element|null}
+ * @constructor
+ */
 function AppBannerAndroid(props) {
-  const appInfo = useMemo(getAndroidAppInfo);
+  const appInfo = useMemo(getAndroidAppInfo, []);
   if (!appInfo) {
     return null;
   }
@@ -97,7 +113,11 @@ export function BentoAppBanner(props) {
   );
 }
 
+/**
+ * @param {string} id
+ * @return {string}
+ */
 function getStorageKey(id) {
-  user().assert(id, 'bento-app-banner should have an id.');
+  userAssert(id, 'bento-app-banner should have an id.');
   return 'bento-app-banner:' + id;
 }

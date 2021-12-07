@@ -14,7 +14,7 @@ class UrlService {
    */
   getAnchor_() {
     if (!this.anchor_) {
-      this.anchor_ = document.createElement('a');
+      this.anchor_ = self.document.createElement('a');
     }
     return this.anchor_;
   }
