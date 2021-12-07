@@ -428,7 +428,7 @@ export class AmpStory extends AMP.BaseElement {
       );
     }
     if (isStoryTransformed) {
-      Services.performanceFor(this.win).addEnabledExperiment('story-transformed');
+      Services.performanceFor(this.win).addEnabledExperiment('transformed');
     }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
       Services.performanceFor(this.win).addEnabledExperiment(
