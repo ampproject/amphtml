@@ -31,7 +31,7 @@ const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
  * callback is executed.
  * @param {!Element} parent
  * @param {function(!Element):boolean} checkFunc
- * @param {function()} callback
+ * @param {function():void} callback
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
@@ -66,14 +66,14 @@ export function waitForChild(parent, checkFunc, callback) {
  */
 export function waitForChildPromise(parent, checkFunc) {
   return new Promise((resolve) => {
-    waitForChild(parent, checkFunc, resolve);
+    waitForChild(parent, checkFunc, /** @type {function():void} */ (resolve));
   });
 }
 
 /**
  * Waits for document's body to be available and ready.
  * @param {!Document} doc
- * @param {function()} callback
+ * @param {function():void} callback
  */
 export function waitForBodyOpen(doc, callback) {
   waitForChild(doc.documentElement, () => !!doc.body, callback);
@@ -85,7 +85,9 @@ export function waitForBodyOpen(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyOpenPromise(doc) {
-  return new Promise((resolve) => waitForBodyOpen(doc, resolve));
+  return new Promise((resolve) =>
+    waitForBodyOpen(doc, /** @type {function():void} */ (resolve))
+  );
 }
 
 /**
@@ -150,7 +152,7 @@ export function insertAtStart(root, element) {
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!JsonObject<string, string>} attributes
+ * @param {!Record<string, string>} attributes
  * @return {!Element} created element
  */
 export function addAttributesToElement(element, attributes) {
@@ -164,7 +166,7 @@ export function addAttributesToElement(element, attributes) {
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!JsonObject<string, string>} attributes
+ * @param {!Record<string, string>} attributes
  * @return {!Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
@@ -188,8 +190,8 @@ export function isConnectedNode(node) {
   let n = node;
   do {
     n = rootNodeFor(n);
-    if (n.host) {
-      n = n.host;
+    if (/** @type {!ShadowRoot} */ (n).host) {
+      n = /** @type {!ShadowRoot} */ (n).host;
     } else {
       break;
     }
@@ -200,12 +202,12 @@ export function isConnectedNode(node) {
 /**
  * Returns the root for a given node. Does not cross shadow DOM boundary.
  * @param {!Node} node
- * @return {!Node}
+ * @return {!ShadowRoot|!Document}
  */
 export function rootNodeFor(node) {
   if (Node.prototype.getRootNode) {
     // Type checker says `getRootNode` may return null.
-    return node.getRootNode() || node;
+    return /** @type {!ShadowRoot|!Document} */ (node.getRootNode() || node);
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
@@ -214,7 +216,7 @@ export function rootNodeFor(node) {
     !!n.parentNode && !isShadowRoot(/** @type {HTMLElement} */ (n));
     n = n.parentNode
   ) {}
-  return n;
+  return /** @type {!ShadowRoot|!Document} */ (n);
 }
 
 /**
@@ -281,7 +283,7 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
       return true;
     }
   } while (
-    (currentElement = currentElement.parentNode) &&
+    (currentElement = /** @type {?Element} */ (currentElement.parentNode)) &&
     currentElement != opt_stopNode
   );
   return false;
@@ -298,7 +300,7 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
  */
 export function templateContentClone(template) {
   if ('content' in template) {
-    return template.content.cloneNode(true);
+    return /** @type {!DocumentFragment} */ (template.content.cloneNode(true));
   } else {
     const content = template.ownerDocument.createDocumentFragment();
     copyChildren(template, content);
@@ -309,8 +311,8 @@ export function templateContentClone(template) {
 /**
  * Iterate over an array-like.
  * Test cases: https://jsbench.github.io/#f638cacc866a1b2d6e517e6cfa900d6b
- * @param {!IArrayLike<T>} iterable
- * @param {function(T, number)} cb
+ * @param {!ArrayLike<T>} iterable
+ * @param {function(T, number):void} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {
@@ -380,7 +382,7 @@ function escapeHtmlChar(c) {
 /**
  * Tries to focus on the given element; fails silently if browser throws an
  * exception.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  */
 export function tryFocus(element) {
   try {
@@ -525,7 +527,7 @@ export function containsNotSelf(parent, child) {
 
 /**
  * Helper method to get the json config from an element <script> tag
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @return {?JsonObject}
  * @throws {!Error} If element does not have exactly one <script> child
  * with type="application/json", or if the <script> contents are not valid JSON.
@@ -537,7 +539,7 @@ export function getChildJsonConfig(element) {
     throw new Error(`Found ${length} <script> children. Expected 1.`);
   }
 
-  const script = scripts[0];
+  const script = /** @type {!HTMLScriptElement} */ (scripts[0]);
   if (!isJsonScriptTag(script)) {
     throw new Error('<script> child must have type="application/json"');
   }
@@ -566,6 +568,7 @@ export function isServerRendered(element) {
  * @param {HTMLScriptElement} scriptEl
  */
 export function propagateNonce(doc, scriptEl) {
+  /** @type {?HTMLScriptElement} */
   const currentScript = doc.head.querySelector('script[nonce]');
   if (currentScript) {
     const nonce = currentScript.nonce || currentScript.getAttribute('nonce');

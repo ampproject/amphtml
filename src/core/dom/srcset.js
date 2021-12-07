@@ -109,7 +109,7 @@ export class Srcset {
       hasDpr = hasDpr || !!source.dpr;
     }
     userAssert(
-      !!(hasWidth ^ hasDpr),
+      !!(hasWidth !== hasDpr),
       'Srcset must have width or dpr sources, but not both'
     );
 

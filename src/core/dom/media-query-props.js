@@ -6,7 +6,7 @@ const TRUE_VALUE = '1';
 export class MediaQueryProps {
   /**
    * @param {!Window} win
-   * @param {function()} callback
+   * @param {function():void} callback
    */
   constructor(win, callback) {
     /** @private @const */
@@ -228,7 +228,7 @@ function resolveMediaQueryListExpr(expr) {
 
 /**
  * @param {!ExprDef} expr
- * @param {function()} callback
+ * @param {function():void} callback
  * @param {boolean} on
  */
 function toggleOnChange(expr, callback, on) {

@@ -14,9 +14,9 @@ import {
  * dip above 1 or below 0. This is an acceptable case for some curves. The
  * second argument is a boolean value that equals "true" for the completed
  * transition and "false" for ongoing.
- * @typedef {function(number, boolean):?|function(number):?}
+ * @template T
+ * @typedef {function(number, boolean=):T} TransitionDef
  */
-let TransitionDef;
 
 /** @type {!TransitionDef<null>} */
 export const NOOP = (unusedTime) => null;
@@ -40,9 +40,9 @@ export function concat(transitions, opt_delimiter = ' ') {
  * A transition that sets the CSS style of the specified element. The styles
  * a specified as a map from CSS property names to transition functions for
  * each of these properties.
- * @param {!Element} element
- * @param {!Object<string, !TransitionDef>} styles
- * @return {!TransitionDef<void>}
+ * @param {HTMLElement} element
+ * @param {Object<string, TransitionDef<?>>} styles
+ * @return {TransitionDef<void>}
  */
 export function setStyles(element, styles) {
   return (time, complete) => {

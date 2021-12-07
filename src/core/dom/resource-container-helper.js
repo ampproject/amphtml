@@ -44,7 +44,7 @@ export function unmountAll(containerOrContainers, includeSelf = true) {
  * @param {!Element|!Array<!Element>} containerOrContainers
  * @param {boolean} includeSelf
  * @param {boolean} deep
- * @param {function(!AmpElement)} callback
+ * @param {function(!AmpElement):void} callback
  */
 export function forAllWithin(
   containerOrContainers,
@@ -64,7 +64,7 @@ export function forAllWithin(
  * @param {!Element} container
  * @param {boolean} includeSelf
  * @param {boolean} deep
- * @param {function(!AmpElement)} callback
+ * @param {function(!AmpElement):void} callback
  */
 function forAllWithinInternal(container, includeSelf, deep, callback) {
   if (includeSelf && container.classList.contains(AMP_CLASS)) {
@@ -86,12 +86,12 @@ function forAllWithinInternal(container, includeSelf, deep, callback) {
   }
 
   const descendants =
-    /** @type {!HTMLCollection<!AmpElement>} */
+    /** @type {!HTMLCollection} */
     (container.getElementsByClassName(AMP_CLASS));
   /** @type {?Array<Element>} */
   let seen = null;
   for (let i = 0; i < descendants.length; i++) {
-    const descendant = descendants[i];
+    const descendant = /** @type {!AmpElement} */ (descendants[i]);
     if (deep) {
       // In deep search all elements will be covered.
       tryCallback(callback, descendant);

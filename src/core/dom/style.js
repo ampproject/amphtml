@@ -12,10 +12,12 @@ const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 const DISPLAY_STYLE_MESSAGE =
   '`display` style detected. You must use toggle instead.';
 
-const EMPTY_CSS_DECLARATION = /** @type {!CSSStyleDeclaration} */ ({
-  'getPropertyPriority': () => '',
-  'getPropertyValue': () => '',
-});
+const EMPTY_CSS_DECLARATION = /** @type {!CSSStyleDeclaration} */ (
+  /** @type {?} */ ({
+    'getPropertyPriority': () => '',
+    'getPropertyValue': () => '',
+  })
+);
 
 /**
  * @param {string} camelCase camel cased string
@@ -82,7 +84,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 /**
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {!Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
@@ -98,7 +100,7 @@ export function setImportantStyles(element, styles) {
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {?Element} element
+ * @param {?HTMLElement} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
@@ -113,9 +115,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   if (!propertyName) {
     return;
   }
-  const styleValue = /** @type {string} */ (
-    opt_units ? value + opt_units : value
-  );
+  const styleValue = opt_units ? value + opt_units : value;
   if (isVar(propertyName)) {
     element.style.setProperty(propertyName, styleValue);
   } else {
@@ -125,7 +125,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
 
 /**
  * Returns the value of the CSS style of the specified element.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {string} property
  * @param {boolean=} opt_bypassCache
  * @return {*}
@@ -148,7 +148,7 @@ export function getStyle(element, property, opt_bypassCache) {
 /**
  * Sets the CSS styles of the specified element. The styles
  * a specified as a map from CSS property names to their values.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {!Object<string, *>} styles
  */
 export function setStyles(element, styles) {
@@ -162,7 +162,7 @@ export function setStyles(element, styles) {
  * can set the initial display using CSS, YOU MUST.
  * DO NOT USE THIS TO ARBITRARILY SET THE DISPLAY STYLE AFTER INITIAL SETUP.
  *
- * @param {!Element} el
+ * @param {!HTMLElement} el
  * @param {string} value
  */
 export function setInitialDisplay(el, value) {
@@ -182,7 +182,7 @@ export function setInitialDisplay(el, value) {
 
 /**
  * Shows or hides the specified element.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {boolean=} opt_display
  */
 export function toggle(element, opt_display) {
@@ -282,17 +282,17 @@ export function removeAlphaFromColor(rgbaColor) {
  * the possible `null` value returned by a buggy Firefox.
  *
  * @param {!Window} win
- * @param {!Element} el
+ * @param {!HTMLElement} el
  * @return {!CSSStyleDeclaration}
  */
 export function computedStyle(win, el) {
-  const style = /** @type {?CSSStyleDeclaration} */ (win.getComputedStyle(el));
+  const style = win.getComputedStyle(el);
   return style || EMPTY_CSS_DECLARATION;
 }
 
 /**
  * Resets styles that were set dynamically (i.e. inline)
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {!Array<string>} properties
  */
 export function resetStyles(element, properties) {
@@ -303,8 +303,8 @@ export function resetStyles(element, properties) {
 
 /**
  * Propagates the object-fit/position element attributes as styles.
- * @param {!Element} fromEl ie: amp-img
- * @param {!Element} toEl ie: the img within amp-img
+ * @param {!HTMLElement} fromEl ie: amp-img
+ * @param {!HTMLElement} toEl ie: the img within amp-img
  */
 export function propagateObjectFitStyles(fromEl, toEl) {
   if (fromEl.hasAttribute('object-fit')) {

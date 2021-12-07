@@ -54,16 +54,17 @@ export function getHtml(win, selector, attrs) {
 }
 
 /**
- * @param {!Element} node - node to take content from
+ * @param {!Element} rootNode - node to take content from
  * @param {!Array<string>} attrs - tag attributes to be left in the stringified HTML
  * @param {!Array<string>} result
  */
-function appendToResult(node, attrs, result) {
-  const stack = [node];
+function appendToResult(rootNode, attrs, result) {
+  /** @type {!Array<string|!Element>} */
+  const stack = [rootNode];
   const allowedAttrs = attrs.filter((attr) => allowedAttributes.includes(attr));
 
   while (stack.length > 0) {
-    node = stack.pop();
+    const node = stack.pop();
 
     if (isString(node)) {
       result.push(node);
@@ -74,7 +75,7 @@ function appendToResult(node, attrs, result) {
       stack.push(`</${node.tagName.toLowerCase()}>`);
 
       for (let child = node.lastChild; child; child = child.previousSibling) {
-        stack.push(child);
+        stack.push(/** @type {!Element} */ (child));
       }
     }
   }

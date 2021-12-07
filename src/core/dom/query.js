@@ -23,26 +23,29 @@ function assertIsName(name) {
  * for user-agents that do not support native scoping.
  *
  * This method isn't required for modern builds, can be removed.
+  // TODO(#37136): This will fail if `root` is a `ShadowRoot`.
  *
- * @param {!Element|!ShadowRoot} root
+ * @param {!HTMLElement|!ShadowRoot} root
  * @param {string} selector
- * @return {!NodeList<!Element>}
+ * @return {!NodeList}
  */
 function scopedQuerySelectionFallback(root, selector) {
+  const {classList} = /** @type {!HTMLElement} */ (root);
+
   const unique = 'i-amphtml-scoped';
-  root.classList.add(unique);
+  classList.add(unique);
   const scopedSelector = prependSelectorsWith(selector, `.${unique}`);
   const elements = root./*OK*/ querySelectorAll(scopedSelector);
-  root.classList.remove(unique);
+  classList.remove(unique);
   return elements;
 }
 
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element|!ShadowRoot} root
+ * @param {!HTMLElement|!ShadowRoot} root
  * @param {string} selector
- * @return {?Element}
+ * @return {?HTMLElement}
  *
  * @suppress {suspiciousCode}
  */
@@ -52,16 +55,18 @@ export function scopedQuerySelector(root, selector) {
   }
 
   // Only IE.
-  const fallbackResult = scopedQuerySelectionFallback(root, selector);
-  return fallbackResult[0] === undefined ? null : fallbackResult[0];
+  const fallbackResult = /** @type {?HTMLElement} */ (
+    scopedQuerySelectionFallback(root, selector)[0]
+  );
+  return fallbackResult === undefined ? null : fallbackResult;
 }
 
 /**
  * Finds every element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element|!ShadowRoot} root
+ * @param {!HTMLElement|!ShadowRoot} root
  * @param {string} selector
- * @return {!NodeList<!Element>}
+ * @return {!NodeList}
  *
  * @suppress {suspiciousCode}
  */
@@ -78,7 +83,7 @@ export function scopedQuerySelectorAll(root, selector) {
 
 /**
  * Checks if the given element matches the selector
- * @param  {!Element} el The element to verify
+ * @param  {!HTMLElement} el The element to verify
  * @param  {string} selector The selector to check against
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
@@ -98,10 +103,10 @@ export function matches(el, selector) {
 /**
  * Finds the closest element that satisfies the callback from this element
  * up the DOM subtree.
- * @param {!Element} element
- * @param {function(!Element):boolean} callback
- * @param {Element=} opt_stopAt optional elemnt to stop the search at.
- * @return {?Element}
+ * @param {!HTMLElement} element
+ * @param {function(!HTMLElement):boolean} callback
+ * @param {HTMLElement=} opt_stopAt optional elemnt to stop the search at.
+ * @return {?HTMLElement}
  */
 export function closest(element, callback, opt_stopAt) {
   for (let el = element; el && el !== opt_stopAt; el = el.parentElement) {
@@ -131,9 +136,9 @@ export function closestNode(node, callback) {
 /**
  * Finds the closest ancestor element with the specified selector from this
  * element.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  * @param {string} selector
- * @return {?Element} closest ancestor if found.
+ * @return {?HTMLElement} closest ancestor if found.
  */
 export function closestAncestorElementBySelector(element, selector) {
   return element.closest
@@ -177,9 +182,10 @@ export function ancestorElementsByTag(child, tagName) {
  * Finds the first child element that satisfies the callback.
  * TODO(rcebulko): Can we start using generators in childElements and defer to
  * that here?
- * @param {!Element} parent
- * @param {function(!Element):boolean} callback
- * @return {?Element}
+ * @template {!Element} El
+ * @param {!El} parent
+ * @param {function(!El):boolean} callback
+ * @return {?El}
  */
 export function childElement(parent, callback) {
   for (
@@ -187,8 +193,8 @@ export function childElement(parent, callback) {
     child;
     child = child.nextElementSibling
   ) {
-    if (callback(child)) {
-      return child;
+    if (callback(/** @type {!El} */ (child))) {
+      return /** @type {!El} */ (child);
     }
   }
   return null;
@@ -215,9 +221,10 @@ export function lastChildElement(parent, callback) {
 
 /**
  * Finds all child elements that satisfy the callback.
- * @param {!Element} parent
- * @param {function(!Element):boolean} callback
- * @return {!Array<!Element>}
+ * @template {!Element} El
+ * @param {!El} parent
+ * @param {function(!El):boolean} callback
+ * @return {!Array<!El>}
  */
 export function childElements(parent, callback) {
   const children = [];
@@ -226,11 +233,11 @@ export function childElements(parent, callback) {
     child;
     child = child.nextElementSibling
   ) {
-    if (callback(child)) {
+    if (callback(/** @type {!El} */ (child))) {
       children.push(child);
     }
   }
-  return children;
+  return /** @type {!Array<!El>} */ (children);
 }
 
 /**
@@ -252,7 +259,7 @@ export function childNodes(parent, callback) {
 
 /**
  * Finds the first child element that has the specified attribute.
- * @param {!Element|!ShadowRoot} parent
+ * @param {!HTMLElement|!ShadowRoot} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -263,7 +270,7 @@ export function childElementByAttr(parent, attr) {
 
 /**
  * Finds the last child element that has the specified attribute.
- * @param {!Element} parent
+ * @param {!HTMLElement} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -276,9 +283,9 @@ export function lastChildElementByAttr(parent, attr) {
 
 /**
  * Finds all child elements that has the specified attribute.
- * @param {!Element|!ShadowRoot} parent
+ * @param {!HTMLElement|!ShadowRoot} parent
  * @param {string} attr
- * @return {!NodeList<!Element>}
+ * @return {!NodeList}
  */
 export function childElementsByAttr(parent, attr) {
   assertIsName(attr);
@@ -287,7 +294,7 @@ export function childElementsByAttr(parent, attr) {
 
 /**
  * Finds the first child element that has the specified tag name.
- * @param {!Element|!ShadowRoot} parent
+ * @param {!HTMLElement|!ShadowRoot} parent
  * @param {string} tagName
  * @return {?Element}
  */
@@ -298,9 +305,9 @@ export function childElementByTag(parent, tagName) {
 
 /**
  * Finds all child elements with the specified tag name.
- * @param {!Element|!ShadowRoot} parent
+ * @param {!HTMLElement|!ShadowRoot} parent
  * @param {string} tagName
- * @return {!NodeList<!Element>}
+ * @return {!NodeList}
  */
 export function childElementsByTag(parent, tagName) {
   assertIsName(tagName);
@@ -309,7 +316,7 @@ export function childElementsByTag(parent, tagName) {
 
 /**
  * Finds the first descendant element with the specified name.
- * @param {!Element|!Document|!ShadowRoot} element
+ * @param {!HTMLElement|!Document|!ShadowRoot} element
  * @param {string} tagName
  * @return {?Element}
  */
@@ -334,8 +341,9 @@ export function realChildNodes(element) {
  * Returns the original children of the custom element without any service
  * nodes that could have been added for markup.
  *
- * @param {!Element} element
- * @return {!Array<!Element>}
+ * @template {!Element} El
+ * @param {!El} element
+ * @return {!Array<!El>}
  */
 export function realChildElements(element) {
   return childElements(element, (element) => !isInternalOrServiceNode(element));
@@ -353,12 +361,12 @@ export function isInternalOrServiceNode(node) {
   if (node.nodeType !== Node.ELEMENT_NODE) {
     return false;
   }
-  devAssertElement(node);
 
+  const el = devAssertElement(node);
   return (
-    node.hasAttribute('placeholder') ||
-    node.hasAttribute('fallback') ||
-    node.hasAttribute('overflow')
+    el.hasAttribute('placeholder') ||
+    el.hasAttribute('fallback') ||
+    el.hasAttribute('overflow')
   );
 }
 

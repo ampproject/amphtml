@@ -153,17 +153,21 @@ export function isDisabled(element) {
  * @return {boolean}
  */
 export function isFieldDefault(field) {
+  const fieldAsSelect = /** @type {!HTMLSelectElement} */ (field);
+  const fieldAsInput = /** @type {!HTMLInputElement} */ (field);
   switch (field.type) {
     case 'select-multiple':
     case 'select-one':
-      return toArray(/** @type {!HTMLSelectElement} */ (field).options).every(
+      return toArray(fieldAsSelect.options).every(
         ({defaultSelected, selected}) => selected === defaultSelected
       );
     case 'checkbox':
     case 'radio':
-      return field.checked === field.defaultChecked;
+      const {checked, defaultChecked} = fieldAsInput;
+      return checked === defaultChecked;
     default:
-      return field.value === field.defaultValue;
+      const {defaultValue, value} = fieldAsInput;
+      return value === defaultValue;
   }
 }
 

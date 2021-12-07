@@ -57,7 +57,7 @@ export class Deferred {
  * Creates a promise resolved to the return value of fn.
  * If fn sync throws, it will cause the promise to reject.
  *
- * @param {function():T} fn
+ * @param {function():(T|Promise<T>)} fn
  * @return {!Promise<T>}
  * @template T
  */

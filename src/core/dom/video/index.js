@@ -91,7 +91,7 @@ let VideoOrBaseElementPlayableDef;
  *
  * @param {!HTMLMediaElement|VideoOrBaseElementPlayableDef} element
  * @param {boolean=} isAutoplay
- * @return {Promise<undefined>}
+ * @return {Promise<void>}
  */
 export function tryPlay(element, isAutoplay) {
   // Some browsers return undefined, some a boolean, and some a real promise.

@@ -31,9 +31,9 @@ let AddEventListenerOptsDef;
  *
  * @param {!EventTarget} element
  * @param {string} eventType
- * @param {function(!Event)} listener
+ * @param {function(!Event):void} listener
  * @param {!AddEventListenerOptsDef=} opt_evtListenerOpts
- * @return {!UnlistenDef}
+ * @return {!UnlistenCallback}
  */
 export function internalListenImplementation(
   element,
@@ -43,7 +43,7 @@ export function internalListenImplementation(
 ) {
   let localElement = element;
   let localListener = listener;
-  /** @type {?function(!Event)} */
+  /** @type {?function(!Event):void} */
   let wrapped = (event) => {
     try {
       return localListener(event);
@@ -92,6 +92,7 @@ export function detectEvtListenerOptsSupport() {
     const options = {
       get capture() {
         optsSupported = true;
+        return false;
       },
     };
     self.addEventListener('test-options', null, options);
@@ -122,14 +123,14 @@ export function supportsPassiveEventListener(win) {
 
   passiveSupported = false;
   try {
-    const options = {
+    const options = /** @type {!EventListenerOptions} */ ({
       get passive() {
         // This function will be called when the browser
         // attempts to access the passive property.
         passiveSupported = true;
         return false;
       },
-    };
+    });
 
     win.addEventListener('test-options', null, options);
     win.removeEventListener('test-options', null, options);

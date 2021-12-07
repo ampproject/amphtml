@@ -11,21 +11,19 @@ import {toArray} from '#core/types/array';
 
 /**
  * @typedef {{
- *   element: !Element,
+ *   element: !HTMLElement,
  *   prevValue: ?string,
- * }}
+ * }} HTMLElementAttributeInfoDef
  */
-let ElementAttributeInfoDef;
 
 /**
  * @typedef {{
- *   element: !Element,
- *   hiddenElementInfos: !Array<!ElementAttributeInfoDef>,
- *   focusableExternalElements: !Array<!Element>,
- *   focusableInternalElements: !Array<!Element>,
- * }}
+ *   element: !HTMLElement,
+ *   hiddenElementInfos: !Array<!HTMLElementAttributeInfoDef>,
+ *   focusableExternalElements: !Array<!HTMLElement>,
+ *   focusableInternalElements: !Array<!HTMLElement>,
+ * }} ModalEntryDef
  */
-let ModalEntryDef;
 
 /**
  * @type {!Array<!ModalEntryDef>}
@@ -39,8 +37,8 @@ const SAVED_TAB_INDEX = '__AMP_MODAL_SAVED_TAB_INDEX';
 
 /**
  * Given a target element, finds the Elements to hide for accessibility.
- * @param {!Element} element The target Element.
- * @return {!Array<!Element>} The Elements to add hide from accessibiluty.
+ * @param {!HTMLElement} element The target Element.
+ * @return {!Array<!HTMLElement>} The Elements to add hide from accessibiluty.
  * @package Visible for testing
  */
 export function getElementsToAriaHide(element) {
@@ -71,10 +69,16 @@ export function getElementsToAriaHide(element) {
 function getAncestors(element) {
   const ancestry = [];
 
-  for (let cur = element; cur; cur = cur.parentNode || cur.host) {
+  for (
+    let cur = element;
+    cur;
+    cur = cur.parentNode || /** @type {?} */ (cur).host
+  ) {
     ancestry.push(cur);
   }
 
+  // TODO(#37136): This typing is incorrect and may mask a bug. If `cur`
+  // can sometimes be a `ShadowRoot`, `ancestors` can contain non-elements.
   return ancestry;
 }
 
@@ -85,8 +89,8 @@ function getAncestors(element) {
  *
  * Note that some of these Elements may not be focusable (e.g. is a button
  * that is `disabled` or has an ancestor that is `display: none`).
- * @param {!Element} element
- * @return {!Array<!Element>}
+ * @param {!HTMLElement} element
+ * @return {!Array<!HTMLElement>}
  */
 function getPotentiallyFocusableElements(element) {
   const arr = [];
@@ -127,7 +131,7 @@ function getPotentiallyFocusableElements(element) {
 
 /**
  *
- * @param {!Element} element The Element top operate on.
+ * @param {!HTMLElement} element The Element top operate on.
  * @param {string} attribute  The name of the attribute.
  * @param {?string} value The value of the attribute.
  */
@@ -150,7 +154,7 @@ function restoreAttributeValue(element, attribute, value) {
  *
  * Note: this does not block click events on things outside of the modal. It is
  * assumed that a backdrop Element blocking clicks is present.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  */
 export function setModalAsOpen(element) {
   devAssert(modalEntryStack.every((info) => info.element !== element));
@@ -169,10 +173,12 @@ export function setModalAsOpen(element) {
   const focusableExternalElements = focusableElements.filter((e) => {
     return !element.contains(e) && e[SAVED_TAB_INDEX] === undefined;
   });
-  const hiddenElementInfos = elements.concat(ancestry).map((element) => ({
-    element,
-    prevValue: element.getAttribute('aria-hidden'),
-  }));
+  const hiddenElementInfos = elements
+    .concat(/** @type {!Array<!HTMLElement>} */ (ancestry))
+    .map((element) => ({
+      element,
+      prevValue: element.getAttribute('aria-hidden'),
+    }));
 
   // Unhide the ancestry, in case it was hidden from another modal.
   ancestry.forEach((e) => e.removeAttribute('aria-hidden'));
@@ -201,7 +207,7 @@ export function setModalAsOpen(element) {
 /**
  * Undoes the effectsof `setModalAsOpen`. This should only be called with the
  * currently open modal.
- * @param {!Element} element
+ * @param {!HTMLElement} element
  */
 export function setModalAsClosed(element) {
   const {

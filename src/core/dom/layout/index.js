@@ -202,7 +202,9 @@ export function getLengthUnits(length) {
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
-  const res = parseFloat(length);
+  // TS demands that we only pass a string to `parseFloat`, even though the spec
+  // allows anything.
+  const res = parseFloat(/** @type {?} */ (length));
   return isFiniteNumber(res) ? res : undefined;
 }
 

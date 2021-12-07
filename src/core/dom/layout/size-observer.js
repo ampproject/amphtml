@@ -6,6 +6,10 @@ import {getWin} from '#core/window';
 import {LayoutSizeDef} from './rect';
 
 /** @typedef {!LayoutSizeDef|!ResizeObserverSize} TargetSize */
+/**
+ * @template {!TargetSize} Size
+ * @typedef {function(!Size):void} SizeCallback
+ */
 
 /** @enum {number} */
 const Type_Enum = {
@@ -29,7 +33,7 @@ const observers = /* #__PURE__ */ new WeakMap();
 /**
  * @const {!WeakMap<!Element, !Array<{
  *   type: !Type_Enum,
- *   callback: (function(!LayoutSizeDef)|function(!ResizeObserverSize))
+ *   callback: !SizeCallback
  * }>>}
  */
 const targetObserverMultimap = /* #__PURE__ */ new WeakMap();
@@ -39,7 +43,7 @@ const targetEntryMap = /* #__PURE__ */ new WeakMap();
 
 /**
  * @param {!Element} element
- * @param {function(!LayoutSizeDef)} callback
+ * @param {!SizeCallback<LayoutSizeDef>} callback
  */
 export function observeContentSize(element, callback) {
   observeSize(element, Type_Enum.CONTENT, callback);
@@ -47,7 +51,7 @@ export function observeContentSize(element, callback) {
 
 /**
  * @param {!Element} element
- * @param {function(!LayoutSizeDef)} callback
+ * @param {!SizeCallback<LayoutSizeDef>} callback
  */
 export function unobserveContentSize(element, callback) {
   unobserveSize(element, Type_Enum.CONTENT, callback);
@@ -70,7 +74,7 @@ export function measureContentSize(element) {
 /**
  * Note: this method doesn't support multi-fragment border boxes.
  * @param {!Element} element
- * @param {function(!ResizeObserverSize)} callback
+ * @param {!SizeCallback<ResizeObserverSize>} callback
  */
 export function observeBorderBoxSize(element, callback) {
   observeSize(element, Type_Enum.BORDER_BOX, callback);
@@ -79,7 +83,7 @@ export function observeBorderBoxSize(element, callback) {
 /**
  * Note: this method doesn't support multi-fragment border boxes.
  * @param {!Element} element
- * @param {function(!ResizeObserverSize)} callback
+ * @param {!SizeCallback<ResizeObserverSize>} callback
  */
 export function unobserveBorderBoxSize(element, callback) {
   unobserveSize(element, Type_Enum.BORDER_BOX, callback);
@@ -103,7 +107,7 @@ export function measureBorderBoxSize(element) {
 /**
  * @param {!Element} element
  * @param {!Type_Enum} type
- * @param {function(!LayoutSizeDef)|function(!ResizeObserverSize)} callback
+ * @param {!SizeCallback<TargetSize>} callback
  */
 function observeSize(element, type, callback) {
   const win = element.ownerDocument.defaultView;
@@ -131,7 +135,7 @@ function observeSize(element, type, callback) {
 /**
  * @param {!Element} element
  * @param {!Type_Enum} type
- * @param {function(!LayoutSizeDef)|function(!ResizeObserverSize)} callback
+ * @param {!SizeCallback<TargetSize>} callback
  */
 function unobserveSize(element, type, callback) {
   const callbacks = targetObserverMultimap.get(element);
@@ -188,7 +192,7 @@ function processEntries(entries) {
 
 /**
  * @param {Type_Enum} type
- * @param {function(!LayoutSizeDef)|function(!ResizeObserverSize)} callback
+ * @param {!SizeCallback<TargetSize>} callback
  * @param {!ResizeObserverEntry} entry
  */
 function computeAndCall(type, callback, entry) {
@@ -197,7 +201,7 @@ function computeAndCall(type, callback, entry) {
     const {height, width} = contentRect;
     /** @type {!LayoutSizeDef} */
     const size = {width, height};
-    tryCallback(callback, size);
+    tryCallback(/** @type {SizeCallback<LayoutSizeDef>} */ (callback), size);
   } else if (type == Type_Enum.BORDER_BOX) {
     const {borderBoxSize: borderBoxSizeArray} = entry;
     /** @type {!ResizeObserverSize} */
@@ -218,7 +222,7 @@ function computeAndCall(type, callback, entry) {
       const {target} = entry;
       const win = getWin(target);
       const isVertical = VERTICAL_RE.test(
-        computedStyle(win, target)['writing-mode']
+        computedStyle(win, /** @type {!HTMLElement} */ (target))['writing-mode']
       );
       const {offsetHeight, offsetWidth} = /** @type {!HTMLElement} */ (target);
       let inlineSize, blockSize;
@@ -231,6 +235,9 @@ function computeAndCall(type, callback, entry) {
       }
       borderBoxSize = {inlineSize, blockSize};
     }
-    tryCallback(callback, borderBoxSize);
+    tryCallback(
+      /** @type {SizeCallback<ResizeObserverSize>} */ (callback),
+      borderBoxSize
+    );
   }
 }
