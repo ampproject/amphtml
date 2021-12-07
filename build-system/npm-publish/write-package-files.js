@@ -205,7 +205,7 @@ async function writeReactJs() {
  */
 async function copyCssToRoot() {
   try {
-    const extDir = path.join('extension', extension, '1.0');
+    const extDir = path.join('extensions', extension, '1.0');
     const preactCssDist = path.join(extDir, 'dist', 'styles.css');
     const preactCssRoot = path.join(extDir, 'styles.css');
     await copyFile(preactCssDist, preactCssRoot);
