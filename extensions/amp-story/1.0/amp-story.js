@@ -425,6 +425,7 @@ export class AmpStory extends AMP.BaseElement {
         'story-disable-animations-first-page'
       );
     }
+    // [i-amphtml-version] marks that the style was inlined in the doc server-side.
     if (
       this.getAmpDoc()
         .getRootNode()
@@ -432,7 +433,6 @@ export class AmpStory extends AMP.BaseElement {
           'style[amp-extension="amp-story"][i-amphtml-version]'
         )
     ) {
-      // Reports that a transformer inlined the amp-story CSS.
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-inline-css'
       );
