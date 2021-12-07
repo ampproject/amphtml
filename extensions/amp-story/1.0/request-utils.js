@@ -45,6 +45,9 @@ export function executeRequest(el, rawUrl, opts = {}) {
  * @return {!Promise}
  */
 export function getElementConfig(element) {
+  if (!element) {
+    return Promise.resolve();
+  }
   const rawUrl = element.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
   if (rawUrl) {
     const credentials = element.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
