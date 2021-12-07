@@ -92,6 +92,7 @@ import {isPreviewMode} from './embed-mode';
 import {isRTL, removeElement} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
+  isTransformed,
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
@@ -417,10 +418,23 @@ export class AmpStory extends AMP.BaseElement {
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
       isPreviewMode(this.win) ||
-      prefersReducedMotion(this.win)
+      prefersReducedMotion(this.win) ||
+      isTransformed(this.getAmpDoc())
     ) {
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-disable-animations-first-page'
+      );
+    }
+    // [i-amphtml-version] marks that the style was inlined in the doc server-side.
+    if (
+      this.getAmpDoc()
+        .getRootNode()
+        .documentElement.querySelector(
+          'style[amp-extension="amp-story"][i-amphtml-version]'
+        )
+    ) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-inline-css'
       );
     }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
