@@ -14,7 +14,6 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '#preact/context';
 import {
   cloneElement,
-  toChildArray,
   useCallback,
   useContext,
   useEffect,
@@ -24,7 +23,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {forwardRef} from '#preact/compat';
+import {Children, forwardRef} from '#preact/compat';
 import {isRTL} from '#core/dom';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {getWin} from '#core/window';
@@ -102,7 +101,7 @@ function BentoBaseCarouselWithRef(
   ref
 ) {
   const classes = useStyles();
-  const childrenArray = useMemo(() => toChildArray(children), [children]);
+  const childrenArray = useMemo(() => Children.toArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(
