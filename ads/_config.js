@@ -1375,6 +1375,7 @@ const adConfig = jsonConfiguration({
   'wunderkind': {
     preconnect: ['https://tag.wknd.ai', 'https://api.bounceexchange.com'],
     renderStartImplemented: true,
+    fullWidthHeightRatio: 4 / 3,
   },
 
   'xlift': {
