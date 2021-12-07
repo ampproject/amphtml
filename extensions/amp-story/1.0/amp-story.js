@@ -410,10 +410,9 @@ export class AmpStory extends AMP.BaseElement {
         this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
     }
+    const performanceService = Services.performanceFor(this.win);
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'story-load-first-page-only'
-      );
+      performanceService.addEnabledExperiment('story-load-first-page-only');
     }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
@@ -421,7 +420,7 @@ export class AmpStory extends AMP.BaseElement {
       prefersReducedMotion(this.win) ||
       isTransformed(this.getAmpDoc())
     ) {
-      Services.performanceFor(this.win).addEnabledExperiment(
+      performanceService.addEnabledExperiment(
         'story-disable-animations-first-page'
       );
     }
@@ -433,12 +432,10 @@ export class AmpStory extends AMP.BaseElement {
           'style[amp-extension="amp-story"][i-amphtml-version]'
         )
     ) {
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'story-inline-css'
-      );
+      performanceService.addEnabledExperiment('story-inline-css');
     }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
-      Services.performanceFor(this.win).addEnabledExperiment(
+      performanceService.addEnabledExperiment(
         'story-load-inactive-outside-viewport'
       );
       this.element.classList.add(
