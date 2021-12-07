@@ -62,7 +62,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @param {!Element} element */
+    /** @param {?Element} element */
     this.renderedEl_ = null;
   }
 
