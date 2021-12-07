@@ -11,20 +11,16 @@ import {Services} from '#service';
 import {devAssert} from '#utils/log';
 import {localize} from './amp-story-localization-service';
 
-/** @struct @typedef {{className: string, triggers: (string|undefined)}} */
+/** @struct @typedef {{className: string, triggers: string, label: string}} */
 let PaginationButtonStateDef;
 
 /** @const {!Object<string, !PaginationButtonStateDef>} */
-const BackButtonStates = {
+const ButtonStates = {
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
     label: LocalizedStringId_Enum.AMP_STORY_PREVIOUS_PAGE,
   },
-};
-
-/** @const {!Object<string, !PaginationButtonStateDef>} */
-const ForwardButtonStates = {
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
@@ -155,7 +151,7 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.forwardButton_ = new PaginationButton(
       doc,
-      ForwardButtonStates.NEXT_PAGE,
+      ButtonStates.NEXT_PAGE,
       this.storeService_,
       win
     );
@@ -163,7 +159,7 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.backButton_ = new PaginationButton(
       doc,
-      BackButtonStates.PREVIOUS_PAGE,
+      ButtonStates.PREVIOUS_PAGE,
       this.storeService_,
       win
     );
@@ -216,15 +212,15 @@ export class PaginationButtons {
     this.toggleEnabled_(this.backButton_, pageIndex > 0);
 
     if (pageIndex < totalPages - 1) {
-      this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
+      this.forwardButton_.updateState(ButtonStates.NEXT_PAGE);
     }
 
     if (pageIndex === totalPages - 1) {
       const viewer = Services.viewerForDoc(this.ampStory_.element);
       if (viewer.hasCapability('swipe')) {
-        this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+        this.forwardButton_.updateState(ButtonStates.NEXT_STORY);
       } else {
-        this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+        this.forwardButton_.updateState(ButtonStates.REPLAY);
       }
     }
   }
