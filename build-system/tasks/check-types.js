@@ -74,18 +74,10 @@ const CLOSURE_TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-core': CORE_SRCS_GLOBS,
-  'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-polyfills': [
-    'src/polyfills/**/*.js',
-    // Exclude fetch its dependencies are cleaned up/extracted to core.
-    '!src/polyfills/fetch.js',
-    ...CORE_SRCS_GLOBS,
-  ],
   'src-preact': {
     srcGlobs: ['src/preact/**/*.js', ...CORE_SRCS_GLOBS],
     warningLevel: 'QUIET',
