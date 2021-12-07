@@ -41,10 +41,13 @@ export function executeRequest(el, rawUrl, opts = {}) {
 
 /**
  * Gets the JSON config from the inline element or [src] url.
- * @param {!Element} element
- * @return {!Promise}
+ * @param {?Element} element
+ * @return {(!Promise<!JsonObject>|!Promise<null>)}
  */
 export function getElementConfig(element) {
+  if (!element) {
+    return Promise.resolve();
+  }
   const rawUrl = element.getAttribute(CONFIG_SRC_ATTRIBUTE_NAME);
   if (rawUrl) {
     const credentials = element.getAttribute(CREDENTIALS_ATTRIBUTE_NAME);
