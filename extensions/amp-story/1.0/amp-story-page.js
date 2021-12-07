@@ -1580,7 +1580,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (
       !attachmentEl ||
-      this.element.getElementsByTagName('amp-story-shopping-tag').length === 0
+      (attachmentEl &&
+        this.element.getElementsByTagName('amp-story-shopping-tag').length ===
+          0)
     ) {
       return;
     }
