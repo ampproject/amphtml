@@ -105,9 +105,6 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-move,
   filter: none !important;
   background-color: white !important;
   border-radius: 50% !important;
-  width: 48px !important;
-  height: 48px !important;
-  background-size: cover;
 }
 
 amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
