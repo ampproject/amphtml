@@ -37,7 +37,5 @@
     "window/**/*.js",
     "**/*.d.ts"
   ],
-  "exclude": [
-    "**/*.extern.js",
-  ]
+  "exclude": ["**/*.extern.js"]
 }
