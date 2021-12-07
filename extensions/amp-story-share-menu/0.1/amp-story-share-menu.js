@@ -77,11 +77,9 @@ const renderShareMenu = () => {
         >
           &times;
         </button>
-        <div class="i-amphtml-story-share-widget">
-          <ul class="i-amphtml-story-share-list">
-            <li class="i-amphtml-story-share-system" />
-          </ul>
-        </div>
+        <ul class="i-amphtml-story-share-list">
+          <li class="i-amphtml-story-share-system" />
+        </ul>
       </div>
     </div>
   );

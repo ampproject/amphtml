@@ -18,6 +18,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let shareMenu;
   let storeService;
   let win;
+  let storyEl;
 
   beforeEach(() => {
     win = env.win;
@@ -47,61 +48,51 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     });
 
     parentEl = win.document.createElement('div');
-    win.document.body.appendChild(parentEl);
+    storyEl = win.document.createElement('amp-story');
+    win.document.body.appendChild(storyEl);
+    storyEl.appendChild(parentEl);
     shareMenu = new AmpStoryShareMenu(parentEl, win);
 
     env.sandbox.mock();
   });
 
-  it('should build the sharing menu inside a shadow root', async () => {
-    await shareMenu.build();
-    expect(shareMenu.rootEl_).to.exist;
-  });
-
-  it('should append the sharing menu in the parentEl on build', async () => {
+  it('should build the sharing menu inside the parent element', async () => {
     await shareMenu.build();
 
-    expect(parentEl.childElementCount).to.equal(1);
+    expect(parentEl.querySelector('.i-amphtml-story-share-menu')).to.exist;
   });
 
-  it('should append the share widget when building the component', async () => {
-    const shareWidgetEl = win.document.createElement('div');
-    shareWidgetEl.classList.add('foo');
-
+  it('should show the share menu on store property update', async () => {
     await shareMenu.build();
-  });
-
-  it('should show the share menu on store property update', () => {
-    shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
-    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.rootEl_).to.have.class(VISIBLE_CLASS);
   });
 
-  it('should hide the share menu on click on the overlay', () => {
-    shareMenu.build();
+  it('should hide the share menu on click on the overlay', async () => {
+    await shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
-    shareMenu.element_.dispatchEvent(new Event('click'));
+    shareMenu.rootEl_.dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.rootEl_).not.to.have.class(VISIBLE_CLASS);
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
   });
 
-  it('should not hide the share menu on click on the widget container', () => {
-    shareMenu.build();
+  it('should not hide the share menu on click on the widget container', async () => {
+    await shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     parentEl
       .querySelector('.i-amphtml-story-share-menu-container')
       .dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.rootEl_).to.have.class(VISIBLE_CLASS);
   });
 
-  it('should hide the share menu on escape key press', () => {
-    shareMenu.build();
+  it('should hide the share menu on escape key press', async () => {
+    await shareMenu.build();
 
     const clickCallbackSpy = env.sandbox.spy();
     win.addEventListener('keyup', clickCallbackSpy);
