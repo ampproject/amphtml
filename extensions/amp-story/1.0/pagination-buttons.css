@@ -53,7 +53,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   background-color: transparent !important;
   background-position: center;
   /* Contrast protection. Make icons white. */
-  filter: invert(100%) drop-shadow(0 0 3px #0008) !important;
+  filter: invert(100%) drop-shadow(0 0 3px #000b) !important;
 }
 
 body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-story-desktop-one-panel) .i-amphtml-story-button-move {
@@ -114,11 +114,13 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {
-  height: 48px !important;
-  width: 48px !important;
+  height: 60px !important;
+  width: 60px !important;
   margin: auto 0 !important;
+  background-size: 90px;
+  background-position: center;
   background-color: transparent !important;
-  filter: invert(1) drop-shadow(0 0 6px #000)!important;
+  filter: invert(1) drop-shadow(0 0 6px #000b)!important;
   opacity: 1 !important;
 }
 
@@ -152,18 +154,14 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 
 .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M16.15 19.4a9.1 9.1 0 1 1-1.29 3.95"/><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M15.6 15.1v4.61M20 19.71h-4.4"/></svg>') !important;
-  background-position: center center;
 }
 
 .i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>') !important;
-  background-position: center center;
-  background-size: 32px 32px !important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M12 20a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm24 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm-12 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>') !important;
-  background-size: auto !important;
 }
 
 /* Do not display when hidden. */
