@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-interface Event {
-  data?: Object;
-}
+  interface Event {
+    data?: Object;
+  }
 }

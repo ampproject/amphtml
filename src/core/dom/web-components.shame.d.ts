@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-interface Element {
-  createShadowRoot;
-}
+  interface Element {
+    createShadowRoot;
+  }
 }

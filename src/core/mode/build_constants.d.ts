@@ -6,4 +6,3 @@ declare global {
   var IS_PROD: boolean;
   var INTERNAL_RUNTIME_VERSION: string;
 }
-

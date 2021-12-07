@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-interface Window {
-  msCrypto?: Crypto;
-}
+  interface Window {
+    msCrypto?: Crypto;
+  }
 }

@@ -6,20 +6,20 @@
 export {};
 
 declare global {
-interface Element {
-  requestFullScreen;
-  exitFullscreen;
-  cancelFullScreen;
-  webkitExitFullscreen;
-  webkitEnterFullscreen;
-  webkitCancelFullScreen;
-  webkitDisplayingFullscreen;
-  mozCancelFullScreen;
-  msExitFullscreen;
-}
+  interface Element {
+    requestFullScreen;
+    exitFullscreen;
+    cancelFullScreen;
+    webkitExitFullscreen;
+    webkitEnterFullscreen;
+    webkitCancelFullScreen;
+    webkitDisplayingFullscreen;
+    mozCancelFullScreen;
+    msExitFullscreen;
+  }
 
-interface Document {
-  cancelFullScreen;
-  webkitExitFullscreen;
-}
+  interface Document {
+    cancelFullScreen;
+    webkitExitFullscreen;
+  }
 }
