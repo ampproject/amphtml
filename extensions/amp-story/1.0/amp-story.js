@@ -432,6 +432,7 @@ export class AmpStory extends AMP.BaseElement {
           'style[amp-extension="amp-story"][i-amphtml-version]'
         )
     ) {
+      // Reports that a transformer inlined the amp-story CSS.
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-inline-css'
       );
