@@ -200,8 +200,8 @@ const api = await video.getApi();
     />
     <style>
       bento-youtube {
-        width: 375px;
-        height: 472px;
+        width: 320px;
+        height: 180px;
       }
     </style>
   </head>
@@ -373,6 +373,14 @@ Or via `className`:
 .custom-styles {
   height: 320px;
   width: 180px;
+}
+```
+
+You may use `aspect-ratio` to size it responsively:
+
+```css
+.custom-styles {
+  aspect-ratio: 16/9;
 }
 ```
 
