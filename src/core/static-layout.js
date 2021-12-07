@@ -18,8 +18,8 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
  * `hasNaturalDimensions` checks for membership in this set.
  * `getNaturalDimensions` determines the dimensions for an element in the
  *    set and caches it.
- * @type {!Object<string, ?import('./dom/layout').DimensionsDef>}
- * @private  Visible for testing only!
+ * @type {Object<string, ?import('./dom/layout').DimensionsDef>}
+ * @private  Visible for testing only
  */
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '0px', height: '0px'},
@@ -45,7 +45,7 @@ export function hasNaturalDimensions(tagName) {
  * different browser implementations, like <audio> for instance.
  * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
- * @param {!Element} element
+ * @param {Element} element
  * @return {import('./dom/layout').DimensionsDef}
  */
 export function getNaturalDimensions(element) {
@@ -54,7 +54,7 @@ export function getNaturalDimensions(element) {
   if (!naturalDimensions_[tagName]) {
     const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
-    const temp = /** @type {!HTMLElement} */ (
+    const temp = /** @type {HTMLElement} */ (
       doc.createElement(naturalTagName)
     );
 
@@ -90,8 +90,8 @@ export function getNaturalDimensions(element) {
  * any changes made to it must be made in coordination with caches that
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
- * @param {!AmpElement} element
- * @return {!Layout_Enum}
+ * @param {AmpElement} element
+ * @return {Layout_Enum}
  */
 export function applyStaticLayout(element) {
   // Check if the layout has already been done by server-side rendering or
@@ -100,7 +100,7 @@ export function applyStaticLayout(element) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout_Enum} */ (
+    const layout = /** @type {Layout_Enum} */ (
       devAssert(parseLayout(completedLayoutAttr))
     );
     if (
@@ -194,8 +194,8 @@ export function applyStaticLayout(element) {
 /**
  * Gets the effective layout for an element.
  *
- * @param {!Element} element
- * @return {!Layout_Enum}
+ * @param {Element} element
+ * @return {Layout_Enum}
  */
 export function getEffectiveLayout(element) {
   // Return the pre-existing value if layout has already been applied.
@@ -222,7 +222,7 @@ let InternalEffectiveLayoutDef;
  * If class 'i-amphtml-layout' is present, then directly use its value.
  * Else calculate layout based on element attributes and return the width/height.
  *
- * @param {!Element} element
+ * @param {Element} element
  * @return {InternalEffectiveLayoutDef}
  */
 function getEffectiveLayoutInternal(element) {

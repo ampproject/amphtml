@@ -57,7 +57,7 @@ export const ActionTrust_Enum = {
 };
 
 /**
- * @param {!ActionTrust_Enum} actionTrust
+ * @param {ActionTrust_Enum} actionTrust
  * @return {string}
  */
 export function actionTrustToString(actionTrust) {

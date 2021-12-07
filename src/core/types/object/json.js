@@ -16,19 +16,19 @@ let JSONScalarDef;
 
 /**
  * JSON object. It's a map with string keys and JSON values.
- * @typedef {!Object<string, ?*>} (* should be JSONValueDef)
+ * @typedef {Object<string, ?*>} (* should be JSONValueDef)
  */
 let JSONObjectDef;
 
 /**
  * JSON array. It's an array with JSON values.
- * @typedef {!Array<?*>} (* should be JSONValueDef)
+ * @typedef {Array<?*>} (* should be JSONValueDef)
  */
 let JSONArrayDef;
 
 /**
  * JSON value. It's either a scalar, an object or an array.
- * @typedef {!JSONScalarDef|!JSONObjectDef|!JSONArrayDef}
+ * @typedef {JSONScalarDef|JSONObjectDef|JSONArrayDef}
  */
 let JSONValueDef;
 
@@ -57,7 +57,7 @@ export function parseJson(json) {
  * Returns `undefined` if parsing fails.
  * Returns the `Object` corresponding to the JSON string when parsing succeeds.
  * @param {string} json JSON string to parse
- * @param {function(!Error)=} opt_onFailed Optional function that will be called
+ * @param {function(Error)=} opt_onFailed Optional function that will be called
  *     with the error if parsing fails.
  * @return {?JsonObject} May be extend to parse arrays.
  */
@@ -86,7 +86,7 @@ export function deepEquals(a, b, depth = 5) {
   if (a === b) {
     return true;
   }
-  /** @type {!Array<{a: JSONValueDef, b: JSONValueDef, depth: number}>} */
+  /** @type {Array<{a: JSONValueDef, b: JSONValueDef, depth: number}>} */
   const queue = [{a, b, depth}];
   while (queue.length > 0) {
     const {a, b, depth} = queue.shift();
@@ -130,11 +130,11 @@ export function deepEquals(a, b, depth = 5) {
  * configuration to be transformed into an efficient JSON-parsed representation
  * in the dist build. See https://v8.dev/blog/cost-of-javascript-2019#json
  *
- * @param {!Object} obj
- * @return {!JsonObject}
+ * @param {Object} obj
+ * @return {JsonObject}
  */
 export function jsonConfiguration(obj) {
-  return /** @type {!JsonObject} */ (obj);
+  return /** @type {JsonObject} */ (obj);
 }
 
 /**
@@ -142,17 +142,17 @@ export function jsonConfiguration(obj) {
  * This doesn't actually do any conversion, it only changes the closure type.
  *
  * @param {?JSONValueDef} value
- * @return {!InternalJsonLiteralTypeDef}
+ * @return {InternalJsonLiteralTypeDef}
  */
 export function jsonLiteral(value) {
-  return /** @type {!InternalJsonLiteralTypeDef} */ (value);
+  return /** @type {InternalJsonLiteralTypeDef} */ (value);
 }
 
 /**
  * Allows inclusion of a variable (that's wrapped in a jsonLiteral
  * call) to be included inside a jsonConfiguration.
  *
- * @param {!InternalJsonLiteralTypeDef} value
+ * @param {InternalJsonLiteralTypeDef} value
  * @return {*}
  */
 export function includeJsonLiteral(value) {

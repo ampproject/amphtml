@@ -26,7 +26,7 @@ import {toArray} from '#core/types/array';
  */
 
 /**
- * @type {!Array<!ModalEntryDef>}
+ * @type {Array<ModalEntryDef>}
  */
 const modalEntryStack = [];
 
@@ -37,8 +37,8 @@ const SAVED_TAB_INDEX = '__AMP_MODAL_SAVED_TAB_INDEX';
 
 /**
  * Given a target element, finds the Elements to hide for accessibility.
- * @param {!HTMLElement} element The target Element.
- * @return {!Array<!HTMLElement>} The Elements to add hide from accessibiluty.
+ * @param {HTMLElement} element The target Element.
+ * @return {Array<HTMLElement>} The Elements to add hide from accessibiluty.
  * @package Visible for testing
  */
 export function getElementsToAriaHide(element) {
@@ -52,7 +52,7 @@ export function getElementsToAriaHide(element) {
       continue;
     }
 
-    toArray(/** @type {!HTMLDocument|!HTMLElement} */ (cur.parentNode).children)
+    toArray(/** @type {HTMLDocument|HTMLElement} */ (cur.parentNode).children)
       .filter((c) => c != cur)
       .forEach((c) => arr.push(c));
   }
@@ -63,8 +63,8 @@ export function getElementsToAriaHide(element) {
 /**
  * Gets all ancestors of an Element, including ancestors of any ShadowRoot
  * hosts.
- * @param {!Element} element
- * @return {!Array<!Element>}
+ * @param {Element} element
+ * @return {Array<Element>}
  */
 function getAncestors(element) {
   const ancestry = [];
@@ -89,8 +89,8 @@ function getAncestors(element) {
  *
  * Note that some of these Elements may not be focusable (e.g. is a button
  * that is `disabled` or has an ancestor that is `display: none`).
- * @param {!HTMLElement} element
- * @return {!Array<!HTMLElement>}
+ * @param {HTMLElement} element
+ * @return {Array<HTMLElement>}
  */
 function getPotentiallyFocusableElements(element) {
   const arr = [];
@@ -123,7 +123,7 @@ function getPotentiallyFocusableElements(element) {
     );
     Array.prototype.push.apply(arr, potentiallyFocusable);
 
-    cur = /** @type {!ShadowRoot|?} */ (root).host;
+    cur = /** @type {ShadowRoot|?} */ (root).host;
   }
 
   return arr;
@@ -131,7 +131,7 @@ function getPotentiallyFocusableElements(element) {
 
 /**
  *
- * @param {!HTMLElement} element The Element top operate on.
+ * @param {HTMLElement} element The Element top operate on.
  * @param {string} attribute  The name of the attribute.
  * @param {?string} value The value of the attribute.
  */
@@ -154,7 +154,7 @@ function restoreAttributeValue(element, attribute, value) {
  *
  * Note: this does not block click events on things outside of the modal. It is
  * assumed that a backdrop Element blocking clicks is present.
- * @param {!HTMLElement} element
+ * @param {HTMLElement} element
  */
 export function setModalAsOpen(element) {
   devAssert(modalEntryStack.every((info) => info.element !== element));
@@ -174,7 +174,7 @@ export function setModalAsOpen(element) {
     return !element.contains(e) && e[SAVED_TAB_INDEX] === undefined;
   });
   const hiddenElementInfos = elements
-    .concat(/** @type {!Array<!HTMLElement>} */ (ancestry))
+    .concat(/** @type {Array<HTMLElement>} */ (ancestry))
     .map((element) => ({
       element,
       prevValue: element.getAttribute('aria-hidden'),
@@ -207,7 +207,7 @@ export function setModalAsOpen(element) {
 /**
  * Undoes the effectsof `setModalAsOpen`. This should only be called with the
  * currently open modal.
- * @param {!HTMLElement} element
+ * @param {HTMLElement} element
  */
 export function setModalAsClosed(element) {
   const {

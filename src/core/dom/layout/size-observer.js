@@ -5,10 +5,10 @@ import {getWin} from '#core/window';
 
 import {LayoutSizeDef} from './rect';
 
-/** @typedef {!LayoutSizeDef|!ResizeObserverSize} TargetSize */
+/** @typedef {LayoutSizeDef|ResizeObserverSize} TargetSize */
 /**
- * @template {!TargetSize} Size
- * @typedef {function(!Size):void} SizeCallback
+ * @template {TargetSize} Size
+ * @typedef {function(Size):void} SizeCallback
  */
 
 /** @enum {number} */
@@ -27,39 +27,39 @@ const Type_Enum = {
 
 const VERTICAL_RE = /vertical/;
 
-/** @const {!WeakMap<!Window, !ResizeObserver>} */
+/** @const {WeakMap<Window, ResizeObserver>} */
 const observers = /* #__PURE__ */ new WeakMap();
 
 /**
- * @const {!WeakMap<!Element, !Array<{
+ * @const {WeakMap<Element, Array<{
  *   type: !Type_Enum,
  *   callback: !SizeCallback
  * }>>}
  */
 const targetObserverMultimap = /* #__PURE__ */ new WeakMap();
 
-/** @const {!WeakMap<!Element, !ResizeObserverEntry>} */
+/** @const {WeakMap<Element, ResizeObserverEntry>} */
 const targetEntryMap = /* #__PURE__ */ new WeakMap();
 
 /**
- * @param {!Element} element
- * @param {!SizeCallback<LayoutSizeDef>} callback
+ * @param {Element} element
+ * @param {SizeCallback<LayoutSizeDef>} callback
  */
 export function observeContentSize(element, callback) {
   observeSize(element, Type_Enum.CONTENT, callback);
 }
 
 /**
- * @param {!Element} element
- * @param {!SizeCallback<LayoutSizeDef>} callback
+ * @param {Element} element
+ * @param {SizeCallback<LayoutSizeDef>} callback
  */
 export function unobserveContentSize(element, callback) {
   unobserveSize(element, Type_Enum.CONTENT, callback);
 }
 
 /**
- * @param {!Element} element
- * @return {!Promise<!LayoutSizeDef>}
+ * @param {Element} element
+ * @return {Promise<LayoutSizeDef>}
  */
 export function measureContentSize(element) {
   return new Promise((resolve) => {
@@ -73,8 +73,8 @@ export function measureContentSize(element) {
 
 /**
  * Note: this method doesn't support multi-fragment border boxes.
- * @param {!Element} element
- * @param {!SizeCallback<ResizeObserverSize>} callback
+ * @param {Element} element
+ * @param {SizeCallback<ResizeObserverSize>} callback
  */
 export function observeBorderBoxSize(element, callback) {
   observeSize(element, Type_Enum.BORDER_BOX, callback);
@@ -82,8 +82,8 @@ export function observeBorderBoxSize(element, callback) {
 
 /**
  * Note: this method doesn't support multi-fragment border boxes.
- * @param {!Element} element
- * @param {!SizeCallback<ResizeObserverSize>} callback
+ * @param {Element} element
+ * @param {SizeCallback<ResizeObserverSize>} callback
  */
 export function unobserveBorderBoxSize(element, callback) {
   unobserveSize(element, Type_Enum.BORDER_BOX, callback);
@@ -91,8 +91,8 @@ export function unobserveBorderBoxSize(element, callback) {
 
 /**
  * Note: this method doesn't support multi-fragment border boxes.
- * @param {!Element} element
- * @return {!Promise<!ResizeObserverSize>}
+ * @param {Element} element
+ * @return {Promise<ResizeObserverSize>}
  */
 export function measureBorderBoxSize(element) {
   return new Promise((resolve) => {
@@ -105,9 +105,9 @@ export function measureBorderBoxSize(element) {
 }
 
 /**
- * @param {!Element} element
- * @param {!Type_Enum} type
- * @param {!SizeCallback<TargetSize>} callback
+ * @param {Element} element
+ * @param {Type_Enum} type
+ * @param {SizeCallback<TargetSize>} callback
  */
 function observeSize(element, type, callback) {
   const win = element.ownerDocument.defaultView;
@@ -133,9 +133,9 @@ function observeSize(element, type, callback) {
 }
 
 /**
- * @param {!Element} element
- * @param {!Type_Enum} type
- * @param {!SizeCallback<TargetSize>} callback
+ * @param {Element} element
+ * @param {Type_Enum} type
+ * @param {SizeCallback<TargetSize>} callback
  */
 function unobserveSize(element, type, callback) {
   const callbacks = targetObserverMultimap.get(element);
@@ -154,8 +154,8 @@ function unobserveSize(element, type, callback) {
 }
 
 /**
- * @param {!Window} win
- * @return {!ResizeObserver}
+ * @param {Window} win
+ * @return {ResizeObserver}
  */
 function getObserver(win) {
   let observer = observers.get(win);
@@ -167,7 +167,7 @@ function getObserver(win) {
 }
 
 /**
- * @param {!Array<!ResizeObserverEntry>} entries
+ * @param {Array<ResizeObserverEntry>} entries
  */
 function processEntries(entries) {
   const seen = new Set();
@@ -192,19 +192,19 @@ function processEntries(entries) {
 
 /**
  * @param {Type_Enum} type
- * @param {!SizeCallback<TargetSize>} callback
- * @param {!ResizeObserverEntry} entry
+ * @param {SizeCallback<TargetSize>} callback
+ * @param {ResizeObserverEntry} entry
  */
 function computeAndCall(type, callback, entry) {
   if (type == Type_Enum.CONTENT) {
     const {contentRect} = entry;
     const {height, width} = contentRect;
-    /** @type {!LayoutSizeDef} */
+    /** @type {LayoutSizeDef} */
     const size = {width, height};
     tryCallback(/** @type {SizeCallback<LayoutSizeDef>} */ (callback), size);
   } else if (type == Type_Enum.BORDER_BOX) {
     const {borderBoxSize: borderBoxSizeArray} = entry;
-    /** @type {!ResizeObserverSize} */
+    /** @type {ResizeObserverSize} */
     let borderBoxSize;
     if (borderBoxSizeArray) {
       // `borderBoxSize` is supported. Only single-fragment border boxes are
@@ -212,7 +212,7 @@ function computeAndCall(type, callback, entry) {
       if (borderBoxSizeArray.length > 0) {
         borderBoxSize = borderBoxSizeArray[0];
       } else {
-        borderBoxSize = /** @type {!ResizeObserverSize} */ ({
+        borderBoxSize = /** @type {ResizeObserverSize} */ ({
           inlineSize: 0,
           blockSize: 0,
         });
@@ -222,9 +222,9 @@ function computeAndCall(type, callback, entry) {
       const {target} = entry;
       const win = getWin(target);
       const isVertical = VERTICAL_RE.test(
-        computedStyle(win, /** @type {!HTMLElement} */ (target))['writing-mode']
+        computedStyle(win, /** @type {HTMLElement} */ (target))['writing-mode']
       );
-      const {offsetHeight, offsetWidth} = /** @type {!HTMLElement} */ (target);
+      const {offsetHeight, offsetWidth} = /** @type {HTMLElement} */ (target);
       let inlineSize, blockSize;
       if (isVertical) {
         blockSize = offsetWidth;

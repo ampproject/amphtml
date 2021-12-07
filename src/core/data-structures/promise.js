@@ -5,7 +5,7 @@ let resolved;
  * Babel converts direct calls to Promise.resolve() (with no arguments) into
  * calls to this.
  *
- * @return {!Promise<undefined>}
+ * @return {Promise<undefined>}
  */
 export function resolvedPromise() {
   if (resolved) {
@@ -43,7 +43,7 @@ export function resolvedPromise() {
 export class Deferred {
   /** Constructor. */
   constructor() {
-    /** @const {!Promise<T>} */
+    /** @const {Promise<T>} */
     this.promise = new /*OK*/ Promise((res, rej) => {
       /** @const {function(T=)} */
       this.resolve = res;
@@ -58,7 +58,7 @@ export class Deferred {
  * If fn sync throws, it will cause the promise to reject.
  *
  * @param {function():(T|Promise<T>)} fn
- * @return {!Promise<T>}
+ * @return {Promise<T>}
  * @template T
  */
 export function tryResolve(fn) {
@@ -74,10 +74,10 @@ export function tryResolve(fn) {
  */
 export class LastAddedResolver {
   /**
-   * @param {!Array<!PromiseLike<T>>=} opt_promises
+   * @param {Array<PromiseLike<T>>=} opt_promises
    */
   constructor(opt_promises) {
-    /** @private @const {!Deferred<T>} */
+    /** @private @const {Deferred<T>} */
     this.deferred_ = new Deferred();
 
     /** @private */
@@ -92,8 +92,8 @@ export class LastAddedResolver {
 
   /**
    * Add a promise to possibly be resolved.
-   * @param {!PromiseLike<T>} promise
-   * @return {!Promise<T>}
+   * @param {PromiseLike<T>} promise
+   * @return {Promise<T>}
    */
   add(promise) {
     const countAtAdd = ++this.count_;

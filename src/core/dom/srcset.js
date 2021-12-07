@@ -21,8 +21,8 @@ const srcsetRegex = /(\S+)(?:\s+(?:(-?\d+(?:\.\d+)?)([a-zA-Z]*)))?\s*(?:,|$)/g;
 
 /**
  * Extracts `srcset` and fallbacks to `src` if not available.
- * @param {!Element} element
- * @return {!Srcset}
+ * @param {Element} element
+ * @return {Srcset}
  */
 export function srcsetFromElement(element) {
   const srcsetAttr = element.getAttribute('srcset');
@@ -43,7 +43,7 @@ export function srcsetFromElement(element) {
 /**
  * Creates a Srcset from a `src` attribute value.
  * @param {string} src
- * @return {!Srcset}
+ * @return {Srcset}
  */
 export function srcsetFromSrc(src) {
   return new Srcset([{url: src, width: undefined, dpr: 1}]);
@@ -54,7 +54,7 @@ export function srcsetFromSrc(src) {
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
  * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  * @param {string} s
- * @return {!Srcset}
+ * @return {Srcset}
  */
 export function parseSrcset(s) {
   const sources = [];
@@ -93,11 +93,11 @@ export function parseSrcset(s) {
  */
 export class Srcset {
   /**
-   * @param {!Array<!SrcsetSourceDef>} sources
+   * @param {Array<SrcsetSourceDef>} sources
    */
   constructor(sources) {
     userAssert(sources.length > 0, 'Srcset must have at least one source');
-    /** @private @const {!Array<!SrcsetSourceDef>} */
+    /** @private @const {Array<SrcsetSourceDef>} */
     this.sources_ = sources;
 
     // Only one type of source specified can be used - width or DPR.
@@ -213,7 +213,7 @@ export class Srcset {
 
   /**
    * Returns all URLs in the srcset.
-   * @return {!Array<string>}
+   * @return {Array<string>}
    */
   getUrls() {
     return this.sources_.map((s) => s.url);
@@ -247,8 +247,8 @@ export class Srcset {
 /**
  * Sorts by width
  *
- * @param {!SrcsetSourceDef} s1
- * @param {!SrcsetSourceDef} s2
+ * @param {SrcsetSourceDef} s1
+ * @param {SrcsetSourceDef} s2
  * @return {number}
  */
 function sortByWidth(s1, s2) {
@@ -259,8 +259,8 @@ function sortByWidth(s1, s2) {
 /**
  * Sorts by dpr
  *
- * @param {!SrcsetSourceDef} s1
- * @param {!SrcsetSourceDef} s2
+ * @param {SrcsetSourceDef} s1
+ * @param {SrcsetSourceDef} s2
  * @return {number}
  */
 function sortByDpr(s1, s2) {

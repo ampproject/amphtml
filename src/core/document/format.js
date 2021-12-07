@@ -1,7 +1,7 @@
 /**
  * Checks that the document is of an AMP format type.
- * @param {!Array<string>} formats
- * @param {!Document} doc
+ * @param {Array<string>} formats
+ * @param {Document} doc
  * @return {boolean}
  */
 function isAmpFormatType(formats, doc) {
@@ -11,7 +11,7 @@ function isAmpFormatType(formats, doc) {
 }
 
 /**
- * @param {!Document} doc
+ * @param {Document} doc
  * @return {boolean}
  */
 export function isAmp4Email(doc) {
@@ -19,7 +19,7 @@ export function isAmp4Email(doc) {
 }
 
 /**
- * @param {!Document} doc
+ * @param {Document} doc
  * @return {boolean}
  */
 export function isAmphtml(doc) {

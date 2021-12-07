@@ -12,15 +12,15 @@ import {getWin} from '#core/window';
  * support is better.
  */
 
-/** @type {WeakMap<!Element, !Deferred<!IntersectionObserverEntry>>} */
+/** @type {WeakMap<Element, Deferred<IntersectionObserverEntry>>} */
 let intersectionDeferreds;
 
-/** @type {WeakMap<!Window, !IntersectionObserver>} */
+/** @type {WeakMap<Window, IntersectionObserver>} */
 let intersectionObservers;
 
 /**
- * @param {!Window} win
- * @return {!IntersectionObserver}
+ * @param {Window} win
+ * @return {IntersectionObserver}
  */
 function getInOb(win) {
   if (!intersectionDeferreds) {
@@ -59,8 +59,8 @@ function getInOb(win) {
  * If multiple measures for the same element occur very quickly, they will
  * dedupe to the same promise.
  *
- * @param {!Element} el
- * @return {!Promise<!IntersectionObserverEntry>}
+ * @param {Element} el
+ * @return {Promise<IntersectionObserverEntry>}
  */
 export function measureIntersectionNoRoot(el) {
   if (intersectionDeferreds?.has(el)) {

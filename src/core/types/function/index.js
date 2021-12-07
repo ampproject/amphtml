@@ -31,7 +31,7 @@ export function once(fn) {
  * It throttles the calls so that no consequent calls have time interval
  * smaller than the given minimal interval.
  *
- * @param {!Window} win
+ * @param {Window} win
  * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
  * @return {function(...T)}
@@ -43,7 +43,7 @@ export function throttle(win, callback, minInterval) {
   let nextCallArgs = null;
 
   /**
-   * @param {!Object} args
+   * @param {Object} args
    */
   function fire(args) {
     nextCallArgs = null;
@@ -78,7 +78,7 @@ export function throttle(win, callback, minInterval) {
  * milliseconds must pass since the last call before the callback is actually
  * invoked.
  *
- * @param {!Window} win
+ * @param {Window} win
  * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
  * @return {function(...T)}

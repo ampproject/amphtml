@@ -149,7 +149,7 @@ export function trimStart(str) {
  * @param {string} str
  * @param {RegExp} regex
  * @param {Function|string} replacer
- * @return {!Promise<string>}
+ * @return {Promise<string>}
  */
 export function asyncStringReplace(str, regex, replacer) {
   if (isString(replacer)) {

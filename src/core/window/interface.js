@@ -6,8 +6,8 @@
 export class WindowInterface {
   /**
    * @static
-   * @param {!Window} win
-   * @return {!Window}
+   * @param {Window} win
+   * @return {Window}
    */
   static getTop(win) {
     return win.top;
@@ -15,8 +15,8 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
-   * @return {!Location}
+   * @param {Window} win
+   * @return {Location}
    */
   static getLocation(win) {
     return win.location;
@@ -24,7 +24,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getDocumentReferrer(win) {
@@ -33,7 +33,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getHostname(win) {
@@ -42,7 +42,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getUserAgent(win) {
@@ -51,7 +51,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getUserLanguage(win) {
@@ -71,7 +71,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean|undefined}
    */
   static getSendBeacon(win) {
@@ -83,7 +83,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {typeof XMLHttpRequest}
    */
   static getXMLHttpRequest(win) {
@@ -94,7 +94,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {typeof Image}
    */
   static getImage(win) {

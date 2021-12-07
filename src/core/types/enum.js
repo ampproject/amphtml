@@ -3,7 +3,7 @@ import {isProd} from '#core/mode/prod';
 /**
  * Checks whether `val` is a valid value of `enumObj`.
  *
- * @param {!Record<string, T>} enumObj
+ * @param {Record<string, T>} enumObj
  * @param {T} val
  * @return {boolean}
  * @template T
@@ -20,7 +20,7 @@ export function isEnumValue(enumObj, val) {
 /**
  * Returns all enum values of `enumObj`.
  *
- * @param {!Object} enumObj
+ * @param {Object} enumObj
  * @return {readonly T[]}
  * @template T
  */

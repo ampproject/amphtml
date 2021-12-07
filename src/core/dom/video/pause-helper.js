@@ -5,13 +5,13 @@ import {
 
 export class PauseHelper {
   /**
-   * @param {!HTMLElement & IPausable} element
+   * @param {HTMLElement & IPausable} element
    */
   constructor(element) {
     /**
      * @private
      * @const
-     * @type {!HTMLElement & IPausable}
+     * @type {HTMLElement & IPausable}
      */
     this.element_ = element;
 
@@ -44,7 +44,7 @@ export class PauseHelper {
   }
 
   /**
-   * @param {!ResizeObserverSize} size
+   * @param {ResizeObserverSize} size
    * @private
    */
   pauseWhenNoSize_({blockSize, inlineSize}) {

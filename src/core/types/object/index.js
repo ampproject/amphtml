@@ -34,13 +34,13 @@ export function map(opt_initial) {
  * https://github.com/google/closure-compiler/wiki/@struct-and-@dict-Annotations
  * for what a dict is type-wise.
  * The linter enforces that the argument is, in fact, at-dict like.
- * @param {!Object=} opt_initial
- * @return {!JsonObject}
+ * @param {Object=} opt_initial
+ * @return {JsonObject}
  */
 export function dict(opt_initial) {
   // We do not copy. The linter enforces that the passed in object is a literal
   // and thus the caller cannot have a reference to it.
-  return /** @type {!JsonObject} */ (opt_initial || {});
+  return /** @type {JsonObject} */ (opt_initial || {});
 }
 
 /**
@@ -74,11 +74,11 @@ export function ownProperty(obj, key) {
 /**
  * Deep merges source into target.
  *
- * @param {!Object} target
- * @param {!Object} source
+ * @param {Object} target
+ * @param {Object} source
  * @param {number} depth The maximum merge depth. If exceeded, Object.assign
  *                       will be used instead.
- * @return {!Object}
+ * @return {Object}
  * @throws {Error} If source contains a circular reference.
  * Note: Only nested objects are deep-merged, primitives and arrays are not.
  */
@@ -86,7 +86,7 @@ export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.
   const seen = [];
 
-  /** @type {!Array<{t: !Object, s: !Object, d: number}>} */
+  /** @type {Array<{t: Object, s: Object, d: number}>} */
   const queue = [];
   queue.push({t: target, s: source, d: 0});
 
@@ -122,9 +122,9 @@ export function deepMerge(target, source, depth = 10) {
 }
 
 /**
- * @param {!Object} o An object to remove properties from
- * @param {!Array<string>} props A list of properties to remove from the Object
- * @return {!Object} An object with the given properties removed
+ * @param {Object} o An object to remove properties from
+ * @param {Array<string>} props A list of properties to remove from the Object
+ * @return {Object} An object with the given properties removed
  */
 export function omit(o, props) {
   return Object.keys(o).reduce((acc, key) => {
@@ -136,8 +136,8 @@ export function omit(o, props) {
 }
 
 /**
- * @param {!Object|null|undefined} o1
- * @param {!Object|null|undefined} o2
+ * @param {Object|null|undefined} o1
+ * @param {Object|null|undefined} o2
  * @return {boolean}
  */
 export function objectsEqualShallow(o1, o2) {
@@ -178,8 +178,8 @@ export function memo(obj, prop, factory) {
 
 /**
  * Recreates objects with prototype-less copies.
- * @param {!JsonObject} obj
- * @return {!JsonObject}
+ * @param {JsonObject} obj
+ * @return {JsonObject}
  */
 export function recreateNonProtoObject(obj) {
   const copy = map();
@@ -190,7 +190,7 @@ export function recreateNonProtoObject(obj) {
     const v = obj[k];
     copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
   }
-  return /** @type {!JsonObject} */ (copy);
+  return /** @type {JsonObject} */ (copy);
 }
 
 /**
@@ -199,7 +199,7 @@ export function recreateNonProtoObject(obj) {
  * field in a chain does not exist or is not an object or array, the returned
  * value will be `undefined`.
  *
- * @param {!JsonObject} obj
+ * @param {JsonObject} obj
  * @param {string} expr
  * @return {*}
  */

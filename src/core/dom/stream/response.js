@@ -5,10 +5,10 @@ import {Deferred} from '#core/data-structures/promise';
  * Returns a promise that resolves when first bytes are received from the
  * response, or we learn that the response is empty.
  * This function should be replaced with transform stream when well supported.
- * @param {!Window} win
- * @param {!Response} response
- * @param {!import('./detached').DetachedDomStream} writer
- * @return {!Promise<boolean>} true if response has content, false if
+ * @param {Window} win
+ * @param {Response} response
+ * @param {import('./detached').DetachedDomStream} writer
+ * @return {Promise<boolean>} true if response has content, false if
  * the response is empty.
  */
 export function streamResponseToWriter(win, response, writer) {

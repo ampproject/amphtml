@@ -1,7 +1,7 @@
 /**
  * Sets the img src to the first url in the srcset if srcset is defined but
  * src is not for browsers that do not support srcset.
- * @param {!Element} img
+ * @param {Element} img
  */
 export function guaranteeSrcForSrcsetUnsupportedBrowsers(img) {
   // The <img> tag does not have a src and does not support srcset

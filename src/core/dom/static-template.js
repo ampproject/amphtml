@@ -7,11 +7,11 @@ let svgContainer;
 /**
  * Creates the html helper for the doc.
  *
- * @param {!HTMLElement|!Document} nodeOrDoc
- * @return {function(!ReadonlyArray<string>):!HTMLElement}
+ * @param {HTMLElement|Document} nodeOrDoc
+ * @return {function(ReadonlyArray<string>):HTMLElement}
  */
 export function htmlFor(nodeOrDoc) {
-  const doc = nodeOrDoc.ownerDocument || /** @type {!Document} */ (nodeOrDoc);
+  const doc = nodeOrDoc.ownerDocument || /** @type {Document} */ (nodeOrDoc);
   if (!htmlContainer || htmlContainer.ownerDocument !== doc) {
     htmlContainer = doc.createElement('div');
   }
@@ -22,11 +22,11 @@ export function htmlFor(nodeOrDoc) {
 /**
  * Creates the svg helper for the doc.
  *
- * @param {!HTMLElement|!Document} nodeOrDoc
- * @return {function(!ReadonlyArray<string>):!HTMLElement}
+ * @param {HTMLElement|Document} nodeOrDoc
+ * @return {function(ReadonlyArray<string>):HTMLElement}
  */
 export function svgFor(nodeOrDoc) {
-  const doc = nodeOrDoc.ownerDocument || /** @type {!Document} */ (nodeOrDoc);
+  const doc = nodeOrDoc.ownerDocument || /** @type {Document} */ (nodeOrDoc);
   if (!svgContainer || svgContainer.ownerDocument !== svgContainer) {
     svgContainer = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
   }
@@ -45,8 +45,8 @@ export function svgFor(nodeOrDoc) {
  * Only the root element and its subtree will be returned. DO NOT use this to
  * render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!ReadonlyArray<string>} strings
- * @return {!HTMLElement}
+ * @param {ReadonlyArray<string>} strings
+ * @return {HTMLElement}
  */
 function svg(strings) {
   return createNode(svgContainer, strings);
@@ -63,8 +63,8 @@ function svg(strings) {
  * Only the root element and its subtree will be returned. DO NOT use this to
  * render subtree's with dynamic content, it WILL result in an error!
  *
- * @param {!ReadonlyArray<string>} strings
- * @return {!HTMLElement}
+ * @param {ReadonlyArray<string>} strings
+ * @return {HTMLElement}
  */
 function html(strings) {
   return createNode(htmlContainer, strings);
@@ -72,15 +72,15 @@ function html(strings) {
 
 /**
  * Helper used by html and svg string literal functions.
- * @param {!HTMLElement} container
- * @param {!ReadonlyArray<string>} strings
- * @return {!HTMLElement}
+ * @param {HTMLElement} container
+ * @param {ReadonlyArray<string>} strings
+ * @return {HTMLElement}
  */
 function createNode(container, strings) {
   devAssert(strings.length === 1, 'Improper html template tag usage.');
   container./*OK*/ innerHTML = strings[0];
 
-  const el = /** @type {!HTMLElement} */ (container.firstElementChild);
+  const el = /** @type {HTMLElement} */ (container.firstElementChild);
   devAssert(el, 'No elements in template');
   devAssert(!el.nextElementSibling, 'Too many root elements in template');
 
@@ -95,8 +95,8 @@ function createNode(container, strings) {
  * the attribute afterwards.
  * Returns a named map of all ref elements.
  *
- * @param {!HTMLElement} root
- * @return {!Object<string, !HTMLElement>}
+ * @param {HTMLElement} root
+ * @return {Object<string, HTMLElement>}
  */
 export function htmlRefs(root) {
   const elements = root.querySelectorAll('[ref]');

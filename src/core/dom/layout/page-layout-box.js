@@ -1,8 +1,8 @@
 import {LayoutRectDef, layoutRectLtwh} from './rect';
 
 /**
- * @param {!HTMLElement} element
- * @return {!LayoutRectDef}
+ * @param {HTMLElement} element
+ * @return {LayoutRectDef}
  */
 export function getPageLayoutBoxBlocking(element) {
   const stop = element.ownerDocument.body;
@@ -11,7 +11,7 @@ export function getPageLayoutBoxBlocking(element) {
   for (
     let n = element;
     n && n != stop;
-    n = /** @type {!HTMLElement} */ (n./*OK*/ offsetParent)
+    n = /** @type {HTMLElement} */ (n./*OK*/ offsetParent)
   ) {
     left += n./*OK*/ offsetLeft;
     top += n./*OK*/ offsetTop;

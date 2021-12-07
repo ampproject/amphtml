@@ -17,7 +17,7 @@ export class AsyncInput {
   /**
    * Called to get the asynchronous value of an
    * AsyncInput field.
-   * @return {!Promise<string>}
+   * @return {Promise<string>}
    */
   getValue() {
     return Promise.resolve(''); // returned for tsc

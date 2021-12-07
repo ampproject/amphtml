@@ -2,7 +2,7 @@ import {removeElement} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 
 /**
- * @param {!Window} win
+ * @param {Window} win
  * @param {string} text
  * @return {boolean}
  */
@@ -11,7 +11,7 @@ export function copyTextToClipboard(win, text) {
   const doc = win.document;
 
   const textarea =
-    /** @type {!HTMLTextAreaElement} */
+    /** @type {HTMLTextAreaElement} */
     (doc.createElement('textarea'));
 
   setStyles(textarea, {
@@ -48,7 +48,7 @@ export function copyTextToClipboard(win, text) {
 }
 
 /**
- * @param {!Document} doc
+ * @param {Document} doc
  * @return {boolean}
  */
 export function isCopyingToClipboardSupported(doc) {

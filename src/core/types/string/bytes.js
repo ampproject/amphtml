@@ -5,7 +5,7 @@ import * as mode from '#core/mode';
  * Interpret a byte array as a UTF-8 string.
  * See https://developer.mozilla.org/en-US/docs/Web/API/BufferSource for more
  * details on this data-type.
- * @param {!BufferSource} bytes
+ * @param {BufferSource} bytes
  * @return {string}
  */
 export function utf8Decode(bytes) {
@@ -24,7 +24,7 @@ export function utf8Decode(bytes) {
 /**
  * Turn a string into UTF-8 bytes.
  * @param {string} string
- * @return {!Uint8Array}
+ * @return {Uint8Array}
  */
 export function utf8Encode(string) {
   if (typeof TextEncoder !== 'undefined') {
@@ -38,7 +38,7 @@ export function utf8Encode(string) {
  * into a Uint8Array with the corresponding bytes.
  * If you have a string of characters, you probably want to be using utf8Encode.
  * @param {string} str
- * @return {!Uint8Array}
+ * @return {Uint8Array}
  */
 export function stringToBytes(str) {
   const bytes = new Uint8Array(str.length);
@@ -52,7 +52,7 @@ export function stringToBytes(str) {
 
 /**
  * Converts a 8-bit bytes array into a string
- * @param {!Uint8Array} bytes
+ * @param {Uint8Array} bytes
  * @return {string}
  */
 export function bytesToString(bytes) {
@@ -68,7 +68,7 @@ export function bytesToString(bytes) {
 /**
  * Converts a 4-item byte array to an unsigned integer.
  * Assumes bytes are big endian.
- * @param {!Uint8Array} bytes
+ * @param {Uint8Array} bytes
  * @return {number}
  */
 export function bytesToUInt32(bytes) {
@@ -87,7 +87,7 @@ export function bytesToUInt32(bytes) {
 /**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
- * @param {!Window} win
+ * @param {Window} win
  * @param {number} length
  * @return {?Uint8Array}
  */

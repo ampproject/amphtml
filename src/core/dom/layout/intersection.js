@@ -5,15 +5,15 @@ import {getWin} from '#core/window';
 import {LayoutRectDef, layoutRectFromDomRect} from './rect';
 import {createViewportObserver} from './viewport-observer';
 
-/** @type {!WeakMap<!Element, !Deferred<!IntersectionObserverEntry>>|undefined} */
+/** @type {WeakMap<Element, Deferred<IntersectionObserverEntry>>|undefined} */
 let intersectionDeferreds;
 
-/** @type {!WeakMap<!Window, !IntersectionObserver>|undefined} */
+/** @type {WeakMap<Window, IntersectionObserver>|undefined} */
 let intersectionObservers;
 
 /**
- * @param {!Window} win
- * @return {!IntersectionObserver}
+ * @param {Window} win
+ * @return {IntersectionObserver}
  */
 function getInOb(win) {
   if (!intersectionDeferreds) {
@@ -52,8 +52,8 @@ function getInOb(win) {
  * If multiple measures for the same element occur very quickly, they will
  * dedupe to the same promise.
  *
- * @param {!Element} el
- * @return {!Promise<!IntersectionObserverEntry>}
+ * @param {Element} el
+ * @return {Promise<IntersectionObserverEntry>}
  */
 export function measureIntersection(el) {
   if (intersectionDeferreds && intersectionDeferreds.has(el)) {
@@ -71,8 +71,8 @@ export function measureIntersection(el) {
 /**
  * Convert an IntersectionObserverEntry to a regular object to make it serializable.
  *
- * @param {!IntersectionObserverEntry} entry
- * @return {!JsonObject}
+ * @param {IntersectionObserverEntry} entry
+ * @return {JsonObject}
  */
 export function intersectionEntryToJson(entry) {
   return dict({
@@ -92,5 +92,5 @@ function safeLayoutRectFromDomRect(rect) {
   if (rect === null) {
     return null;
   }
-  return layoutRectFromDomRect(/** @type {!ClientRect} */ (rect));
+  return layoutRectFromDomRect(/** @type {ClientRect} */ (rect));
 }

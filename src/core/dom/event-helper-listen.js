@@ -17,7 +17,7 @@ let passiveSupported;
  * @property {undefined|boolean} [capture]
  * @property {undefined|boolean} [once]
  * @property {undefined|boolean} [passive]
- * @property {undefined|!AbortSignal} [signal]
+ * @property {undefined|AbortSignal} [signal]
  * }}
  */
 let AddEventListenerOptsDef;
@@ -29,11 +29,11 @@ let AddEventListenerOptsDef;
  * dependency. Use `listen()` in either `event-helper` or
  * `#core/3p-frame-messaging`, depending on your use case.
  *
- * @param {!EventTarget} element
+ * @param {EventTarget} element
  * @param {string} eventType
- * @param {function(!Event):void} listener
- * @param {!AddEventListenerOptsDef=} opt_evtListenerOpts
- * @return {!UnlistenCallback}
+ * @param {function(Event):void} listener
+ * @param {AddEventListenerOptsDef=} opt_evtListenerOpts
+ * @return {UnlistenCallback}
  */
 export function internalListenImplementation(
   element,
@@ -43,7 +43,7 @@ export function internalListenImplementation(
 ) {
   let localElement = element;
   let localListener = listener;
-  /** @type {?function(!Event):void} */
+  /** @type {?function(Event):void} */
   let wrapped = (event) => {
     try {
       return localListener(event);
@@ -113,7 +113,7 @@ export function resetEvtListenerOptsSupportForTesting() {
 /**
  * Return boolean. if listener option is supported, return `true`.
  * if not supported, return `false`
- * @param {!Window} win
+ * @param {Window} win
  * @return {boolean}
  */
 export function supportsPassiveEventListener(win) {
@@ -123,7 +123,7 @@ export function supportsPassiveEventListener(win) {
 
   passiveSupported = false;
   try {
-    const options = /** @type {!EventListenerOptions} */ ({
+    const options = /** @type {EventListenerOptions} */ ({
       get passive() {
         // This function will be called when the browser
         // attempts to access the passive property.

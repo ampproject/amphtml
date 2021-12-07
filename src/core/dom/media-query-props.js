@@ -1,11 +1,11 @@
-/** @typedef {!Array<{query: ?MediaQueryList, value: string}>} */
+/** @typedef {Array<{query: ?MediaQueryList, value: string}>} */
 let ExprDef;
 
 const TRUE_VALUE = '1';
 
 export class MediaQueryProps {
   /**
-   * @param {!Window} win
+   * @param {Window} win
    * @param {function():void} callback
    */
   constructor(win, callback) {
@@ -15,10 +15,10 @@ export class MediaQueryProps {
     /** @private @const */
     this.callback_ = callback;
 
-    /** @private {!Object<string, !ExprDef>} */
+    /** @private {Object<string, ExprDef>} */
     this.exprMap_ = {};
 
-    /** @private {?Object<string, !ExprDef>} */
+    /** @private {?Object<string, ExprDef>} */
     this.prevExprMap_ = null;
   }
 
@@ -77,7 +77,7 @@ export class MediaQueryProps {
 
   /**
    * @param {string} exprString
-   * @param {function(!Window, string):!ExprDef} parser
+   * @param {function(Window, string):ExprDef} parser
    * @param {string} emptyExprValue
    * @return {string} value
    */
@@ -96,9 +96,9 @@ export class MediaQueryProps {
 }
 
 /**
- * @param {!Window} win
+ * @param {Window} win
  * @param {string} queryString
- * @return {!ExprDef}
+ * @return {ExprDef}
  */
 function parseMediaQueryMatchExpr(win, queryString) {
   const query = win.matchMedia(queryString);
@@ -109,9 +109,9 @@ function parseMediaQueryMatchExpr(win, queryString) {
 }
 
 /**
- * @param {!Window} win
+ * @param {Window} win
  * @param {string} exprString
- * @return {!ExprDef}
+ * @return {ExprDef}
  */
 function parseMediaQueryListExpr(win, exprString) {
   return (
@@ -213,7 +213,7 @@ function parseMediaQueryListExpr(win, exprString) {
 }
 
 /**
- * @param {!ExprDef} expr
+ * @param {ExprDef} expr
  * @return {string} value
  */
 function resolveMediaQueryListExpr(expr) {
@@ -227,7 +227,7 @@ function resolveMediaQueryListExpr(expr) {
 }
 
 /**
- * @param {!ExprDef} expr
+ * @param {ExprDef} expr
  * @param {function():void} callback
  * @param {boolean} on
  */
@@ -255,7 +255,7 @@ function toggleOnChange(expr, callback, on) {
  * Native animations will not run when a device is set up to reduced motion.
  * In that case, we need to disable all animation treatment, and whatever
  * setup changes that depend on an animation running later on.
- * @param {!Window} win
+ * @param {Window} win
  * @return {boolean}
  */
 export function prefersReducedMotion(win) {
