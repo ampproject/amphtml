@@ -209,7 +209,7 @@ export class PaginationButtons {
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
 
     // Hide back button if no previous page.
-    this.toggleEnabled_(this.backButton_, pageIndex > 0);
+    this.setEnabled_(this.backButton_, pageIndex > 0);
 
     if (pageIndex < totalPages - 1) {
       this.forwardButton_.updateState(ButtonStates.NEXT_PAGE);
@@ -231,7 +231,7 @@ export class PaginationButtons {
    * @param {boolean} isVisible
    * @private
    */
-  toggleEnabled_(paginationButton, isVisible) {
+  setEnabled_(paginationButton, isVisible) {
     const {element} = paginationButton;
     element.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
     element.querySelector('button')?.toggleAttribute('disabled', !isVisible);
@@ -243,7 +243,7 @@ export class PaginationButtons {
    * @private
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
-    this.toggleEnabled_(this.backButton_, isVisible);
-    this.toggleEnabled_(this.forwardButton_, isVisible);
+    this.setEnabled_(this.backButton_, isVisible);
+    this.setEnabled_(this.forwardButton_, isVisible);
   }
 }
