@@ -54,9 +54,7 @@ export function getNaturalDimensions(element) {
   if (!naturalDimensions_[tagName]) {
     const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
-    const temp = /** @type {HTMLElement} */ (
-      doc.createElement(naturalTagName)
-    );
+    const temp = /** @type {HTMLElement} */ (doc.createElement(naturalTagName));
 
     // For audio, should no-op elsewhere.
     /** @type {HTMLAudioElement} */ (temp).controls = true;

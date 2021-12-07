@@ -114,6 +114,12 @@ export class LastAddedResolver {
     return this.deferred_.promise;
   }
 
+  /**
+   * Bind handlers for when the last added promise resolves/rejects.
+   * @param {undefined|function(T):?} opt_resolve
+   * @param {undefined|function(?):?} opt_reject
+   * @return {Promise<?>}
+   */
   then(opt_resolve, opt_reject) {
     return this.deferred_.promise.then(opt_resolve, opt_reject);
   }
