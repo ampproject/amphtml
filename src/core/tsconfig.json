@@ -22,7 +22,7 @@
       "#core/types": ["./types"],
       "#core/types/*": ["./types/*"],
       "#core/window": ["./window"],
-      "#core/window/*": ["./window/*"],
+      "#core/window/*": ["./window/*"]
     },
   },
   "include": [
