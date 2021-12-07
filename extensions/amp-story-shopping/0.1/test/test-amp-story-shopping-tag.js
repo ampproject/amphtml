@@ -76,16 +76,21 @@ describes.realWin(
     it('should set active product in store service when shopping tag is clicked', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
+
+      const tagData = {
+        'product-tag-id': 'sunglasses',
+        'product-title': 'Spectacular Spectacles',
+        'product-price': '400',
+        'product-icon':
+          '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
+      };
+
+      shoppingTag.onClick_(tagData);
+
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
         expect(
           storeService.get(StateProperty.SHOPPING_DATA['activeProductData'])
-        ).to.deep.equal({
-          'product-tag-id': 'sunglasses',
-          'product-title': 'Spectacular Spectacles',
-          'product-price': '400',
-          'product-icon':
-            '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
-        });
+        ).to.deep.equal(tagData);
       });
     });
   }
