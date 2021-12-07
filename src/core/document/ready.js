@@ -1,4 +1,4 @@
-import {ReadyState} from '#core/constants/ready-state';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 
 /**
  * Whether the document is ready.
@@ -7,7 +7,7 @@ import {ReadyState} from '#core/constants/ready-state';
  */
 export function isDocumentReady(doc) {
   return (
-    doc.readyState != ReadyState.LOADING &&
+    doc.readyState != ReadyState_Enum.LOADING &&
     // IE11-only
     /** @type {string} */ (doc.readyState) != 'uninitialized'
   );
@@ -19,7 +19,7 @@ export function isDocumentReady(doc) {
  * @return {boolean}
  */
 function isDocumentComplete(doc) {
-  return doc.readyState == ReadyState.COMPLETE;
+  return doc.readyState == ReadyState_Enum.COMPLETE;
 }
 
 /**

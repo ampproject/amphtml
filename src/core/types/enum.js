@@ -20,8 +20,8 @@ export function isEnumValue(enumObj, val) {
 /**
  * Returns all enum values of `enumObj`.
  *
- * @param {!Object<T>} enumObj
- * @return {!Array<T>}
+ * @param {!Object} enumObj
+ * @return {readonly T[]}
  * @template T
  */
 export function enumValues(enumObj) {
