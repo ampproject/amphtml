@@ -138,7 +138,7 @@ export class StandardActions {
     } catch (e) {}
 
     // LocalStorage may not be accessible
-    return this.ampdoc.win.matchMedia('(prefers-color-scheme: dark)').matches;
+    return this.ampdoc.win?.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 
   /**
