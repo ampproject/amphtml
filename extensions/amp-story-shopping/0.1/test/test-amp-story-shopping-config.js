@@ -33,7 +33,7 @@ describes.realWin(
       });
 
       requestService = getRequestService(win);
-      registerServiceBuilder(win, 'story-store', function () {
+      registerServiceBuilder(win, 'story-request', function () {
         return requestService;
       });
 
@@ -80,7 +80,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       const expectedRemoteResult = JSON.parse(
-        '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love"},"k-pop":{"product-tag-id":"k-pop","product-title":"Gangnam Style"},"eurodance":{"product-tag-id":"eurodance","product-title":"Crystal King Battle"}}'
+        '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love","product-price": "19"}}'
       );
 
       expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(

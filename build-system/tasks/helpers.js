@@ -483,18 +483,25 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Object}
    */
   function remapDependenciesPlugin() {
-    const remapDependencies = {__proto__: null, ...options.remapDependencies};
+    const remaps = Object.entries(options.remapDependencies).map(
+      ([path, value]) => ({regex: new RegExp(`^${path}$`), value})
+    );
     const external = options.externalDependencies;
     return {
       name: 'remap-dependencies',
       setup(build) {
         build.onResolve({filter: /.*/}, (args) => {
-          const dep = args.path;
-          const remap = remapDependencies[dep];
-          if (remap) {
-            const isExternal = external.includes(remap);
+          const {path: importPath, resolveDir} = args;
+          const dep = importPath.startsWith('.')
+            ? path.posix.join(resolveDir, importPath)
+            : importPath;
+          for (const {regex, value} of remaps) {
+            if (!regex.test(dep)) {
+              continue;
+            }
+            const isExternal = external.includes(value);
             return {
-              path: isExternal ? remap : require.resolve(remap),
+              path: isExternal ? value : require.resolve(value),
               external: isExternal,
             };
           }
@@ -563,9 +570,7 @@ async function minify(code, map) {
       properties: {
         regex: '_AMP_PRIVATE_$',
         keep_quoted: /** @type {'strict'} */ ('strict'),
-        nth_identifier: mangleIdentifier,
       },
-      nth_identifier: mangleIdentifier,
     },
     compress: {
       // Settled on this count by incrementing number until there was no more
@@ -823,11 +828,8 @@ function massageSourcemaps(sourcemapsFile, options) {
  * @return {boolean}
  */
 function shouldUseClosure() {
-  // Normally setting this server-side experiment flag would be handled by
-  // the release process automatically. Since this experiment is actually on the build system
-  // itself instead of runtime, it is never run through babel (where the replacements usually happen).
-  // Therefore we must compute this one by hand.
-  return argv.define_experiment_constant !== 'ESBUILD_COMPILATION';
+  // TODO(samouri): cleanup closure build pipeline.
+  return false;
 }
 
 module.exports = {

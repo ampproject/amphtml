@@ -1,4 +1,4 @@
-import {options} from /*OK*/ 'preact';
+import {options, toChildArray} from /*OK*/ 'preact';
 
 import * as mode from '#core/mode';
 
@@ -72,3 +72,35 @@ export function forwardRef(Component) {
 
   return Forward;
 }
+
+/**
+ * @param {PreactDef.Renderable} children
+ * @return {!Array<PreactDef.Renderable>}
+ */
+function toArray(children) {
+  return toChildArray(children);
+}
+
+/**
+ * @param {PreactDef.Renderable} children
+ * @param {function(PreactDef.Renderable):R} fn
+ * @return {!Array<R>}
+ * @template R
+ */
+function map(children, fn) {
+  return toChildArray(children).map(fn);
+}
+
+/**
+ * @param {PreactDef.Renderable} children
+ * @return {number}
+ */
+function count(children) {
+  return toChildArray(children).length;
+}
+
+export const Children = {
+  toArray,
+  map,
+  count,
+};

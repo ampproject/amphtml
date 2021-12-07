@@ -99,8 +99,6 @@ In most cases you'll only create the required (req'd) files. If your element doe
 AMP runtime is currently in v0 major version. Extensions versions are maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you should release a new version of your extension. This would usually be by creating a [0.2 or 1.0](./spec/amp-versioning-policy.md#amp-extensions) directory next to your 0.1.
 
-When version 0.2 is under development, make sure that `latestVersion` is set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2 is ready to be released, `latestVersion` can be changed to 0.2.
-
 If your extension is still in experiments breaking changes usually are fine so you can just update the same version.
 
 Note that Bento upgrades to existing AMP components should go by one major version, meaning it should create a 1.0 directory next to an existing 0.1 or 0.2.
@@ -115,7 +113,6 @@ exports.extensionBundles = [
   {
     "name": "amp-carousel",
     "version": "0.1",
-    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -123,7 +120,6 @@ exports.extensionBundles = [
   {
     "name": "amp-kaltura-player",
     "version": "0.1",
-    "latestVersion": "0.1",
   },
 ...
 ];
@@ -137,7 +133,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
-    "latestVersion": "1.0",
     "options": {
 +     "npm": true,
 +     "wrapper": "bento"
@@ -155,7 +150,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "0.1",
-    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -163,7 +157,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
-+   "latestVersion": "0.1",
     "options": {
       "npm": true,
       "wrapper": "bento"

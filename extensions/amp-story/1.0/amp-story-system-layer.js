@@ -1,5 +1,5 @@
 import * as Preact from '#core/dom/jsx';
-import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {
   Action,
   StateProperty,
@@ -88,10 +88,12 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
 /**
  * @param {!Element} element
+ * @param {?Element=} children
  * @return {!Element}
  */
-const renderSystemLayerElement = (element) => (
+const renderSystemLayerElement = (element, children) => (
   <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
+    {children}
     <a class={String(ATTRIBUTION_CLASS)} target="_blank">
       <div class="i-amphtml-story-attribution-logo-container">
         <img alt="" class="i-amphtml-story-attribution-logo" />
@@ -253,9 +255,6 @@ export class SystemLayer {
     /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /**
      * Root element containing a shadow DOM root.
      * @private {?Element}
@@ -304,26 +303,24 @@ export class SystemLayer {
    * @param {string} initialPageId
    */
   build(initialPageId) {
-    if (this.isBuilt_) {
-      return this.getRoot();
+    if (this.root_) {
+      return this.root_;
     }
 
-    this.isBuilt_ = true;
-
-    this.root_ = this.win_.document.createElement('div');
-    this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderSystemLayerElement(this.parentEl_);
+    this.systemLayerEl_ = renderSystemLayerElement(
+      this.parentEl_,
+      this.progressBar_.build(initialPageId)
+    );
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
     this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
       Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
-    createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
-
-    this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(initialPageId),
-      this.systemLayerEl_.firstChild
+    this.root_ = createShadowRootWithStyle(
+      <div class="i-amphtml-system-layer-host"></div>,
+      this.systemLayerEl_,
+      CSS
     );
 
     this.buttonsContainer_ = this.systemLayerEl_.querySelector(
@@ -365,7 +362,7 @@ export class SystemLayer {
 
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
-    return this.getRoot();
+    return this.root_;
   }
 
   /** @private */
@@ -567,13 +564,6 @@ export class SystemLayer {
   /**
    * @return {!Element}
    */
-  getRoot() {
-    return dev().assertElement(this.root_);
-  }
-
-  /**
-   * @return {!Element}
-   */
   getShadowRoot() {
     return dev().assertElement(this.systemLayerEl_);
   }
@@ -737,7 +727,7 @@ export class SystemLayer {
    * @private
    */
   hideMessageInternal_(message) {
-    if (!this.isBuilt_) {
+    if (!this.root_) {
       return;
     }
     this.vsync_.mutate(() => {
@@ -931,9 +921,8 @@ export class SystemLayer {
           defaultConfig.selector
         );
       } else {
-        element = this.win_.document.createElement('button');
+        element = <button class="i-amphtml-story-button" />;
         this.vsync_.mutate(() => {
-          element.classList.add('i-amphtml-story-button');
           this.buttonsContainer_.appendChild(element);
         });
       }
