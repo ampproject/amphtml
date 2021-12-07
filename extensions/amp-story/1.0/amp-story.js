@@ -93,7 +93,6 @@ import {isRTL, removeElement} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
   isTransformed,
-  isTransformed,
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
@@ -416,19 +415,26 @@ export class AmpStory extends AMP.BaseElement {
         'story-load-first-page-only'
       );
     }
-    const isStoryTransformed = isTransformed(this.getAmpDoc());
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
       isPreviewMode(this.win) ||
       prefersReducedMotion(this.win) ||
-      isStoryTransformed
+      isTransformed(this.getAmpDoc())
     ) {
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-disable-animations-first-page'
       );
     }
-    if (isStoryTransformed) {
-      Services.performanceFor(this.win).addEnabledExperiment('transformed');
+    if (
+      this.getAmpDoc()
+        .getRootNode()
+        .documentElement.querySelector(
+          'style[amp-extension="amp-story"][i-amphtml-version]'
+        )
+    ) {
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-inline-css'
+      );
     }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
       Services.performanceFor(this.win).addEnabledExperiment(
