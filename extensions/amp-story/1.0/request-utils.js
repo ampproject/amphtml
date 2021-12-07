@@ -41,7 +41,7 @@ export function executeRequest(el, rawUrl, opts = {}) {
 
 /**
  * Gets the JSON config from the inline element or [src] url.
- * @param {!Element} element
+ * @param {?Element} element
  * @return {!Promise}
  */
 export function getElementConfig(element) {
