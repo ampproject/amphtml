@@ -4,10 +4,9 @@ import {useCallback, useState} from '#preact';
 const storage = window.localStorage;
 
 /**
- *
  * @param {string} key
  * @param {any} [defaultValue]
- * @return {[]}
+ * @return {{ "0": any, "1": function(any): void }}
  */
 export function useLocalStorage(key, defaultValue) {
   const [value, setValue] = useState(() => {

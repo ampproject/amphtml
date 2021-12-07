@@ -12,7 +12,7 @@ import {openWindowDialog} from '../../../../src/open-window-dialog';
 const OPEN_LINK_TIMEOUT = 1500;
 
 /**
- * @return {{openOrInstall: function, promise: Promise<Response>}|null}
+ * @return {{openOrInstall: function(): void, promise: Promise<Response>}|null}
  */
 export function getAndroidAppInfo() {
   const win = self.window;

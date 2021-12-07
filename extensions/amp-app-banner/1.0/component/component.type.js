@@ -5,7 +5,7 @@ var BentoAppBannerDef = {};
 
 /**
  * @typedef {{
- *   dismissButtonAriaLabel?: string,
+ *   dismissButtonAriaLabel: ?string,
  *   id: string,
  * }}
  */
@@ -13,12 +13,11 @@ BentoAppBannerDef.Props;
 
 /**
  * @typedef {{
- *   dismissButtonAriaLabel?: string,
+ *   dismissButtonAriaLabel: ?string,
  *   id: string,
  *   children: PreactDef.Renderable,
- *   dismissButtonAriaLabel?: string,
- *   onDismiss: () => void,
- *   onInstall: () => void,
+ *   onDismiss: function(): void,
+ *   onInstall: function(): void,
  * }}
  */
 BentoAppBannerDef.RawProps;

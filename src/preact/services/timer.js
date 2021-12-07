@@ -1,6 +1,6 @@
 class TimerService {
   /**
-   * @param {function} cb
+   * @param {function(): void} cb
    * @param {number} [timeout]
    */
   delay(cb, timeout = 0) {

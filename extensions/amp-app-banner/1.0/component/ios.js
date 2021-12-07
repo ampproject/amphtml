@@ -11,7 +11,11 @@ import {openWindowDialog} from '../../../../src/open-window-dialog';
 const OPEN_LINK_TIMEOUT = 1500;
 
 /**
- * @return {{openOrInstall: function, installAppUrl: string, openInAppUrl: string}|null}
+ * @return {{
+ *    openOrInstall: function(): void,
+ *    installAppUrl: string,
+ *    openInAppUrl: string,
+ * }|null}
  */
 export function getIOSAppInfo() {
   const canShowBuiltinBanner =
