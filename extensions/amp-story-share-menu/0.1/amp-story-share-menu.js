@@ -20,12 +20,12 @@ import {Toast} from './toast';
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {AmpSocialShare} from '../../amp-social-share/0.1/amp-social-share-impl';
-import {getRequestService} from '../../amp-story/1.0/amp-story-request-service';
 import {
   Action,
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {getElementConfig} from '../../amp-story/1.0/request-utils';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {string} Class to toggle the share menu. */
@@ -148,8 +148,6 @@ class AmpStoryShareMenu {
 
     /** @private {!Element} */
     this.storyEl_ = closestAncestorElementBySelector(element, 'amp-story');
-
-    this.requestService_ = getRequestService(win, element);
 
     this.vsync_ = Services.vsyncFor(win);
   }
@@ -312,7 +310,7 @@ class AmpStoryShareMenu {
       'amp-story-social-share, amp-story-bookend'
     );
 
-    this.requestService_.loadShareConfig(shareEl).then((config) => {
+    getElementConfig(shareEl).then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
