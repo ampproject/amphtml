@@ -116,8 +116,8 @@ export class LastAddedResolver {
 
   /**
    * Bind handlers for when the last added promise resolves/rejects.
-   * @param {undefined|function(T):?} opt_resolve
-   * @param {undefined|function(?):?} opt_reject
+   * @param {function(T):?} [opt_resolve]
+   * @param {function(?):?} [opt_reject]
    * @return {Promise<?>}
    */
   then(opt_resolve, opt_reject) {

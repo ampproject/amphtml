@@ -23,7 +23,7 @@
       "#core/types/*": ["./types/*"],
       "#core/window": ["./window"],
       "#core/window/*": ["./window/*"]
-    },
+    }
   },
   "include": [
     "*.js",
