@@ -557,3 +557,18 @@ export function getChildJsonConfig(element) {
 export function isServerRendered(element) {
   return element.hasAttribute('i-amphtml-ssr');
 }
+
+/**
+ * Propagate the nonce found in <head> to a new script element.
+ * Recent browsers force nonce to be accessed via property instead of attribute.
+ *
+ * @param {Document} doc
+ * @param {HTMLScriptElement} scriptEl
+ */
+export function propagateNonce(doc, scriptEl) {
+  const currentScript = doc.head.querySelector('script[nonce]');
+  if (currentScript) {
+    const nonce = currentScript.nonce || currentScript.getAttribute('nonce');
+    scriptEl.setAttribute('nonce', nonce);
+  }
+}

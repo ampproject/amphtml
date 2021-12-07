@@ -28,7 +28,15 @@ const renderShoppingTagTemplate = (tagData) => (
   <div class="amp-story-shopping-tag-inner">
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
-      <span class="amp-story-shopping-tag-pill-image"></span>
+      <span
+        class="amp-story-shopping-tag-pill-image"
+        style={
+          tagData['product-icon'] && {
+            backgroundImage: 'url(' + tagData['product-icon'] + ') !important',
+            backgroundSize: 'cover !important',
+          }
+        }
+      ></span>
       <span class="amp-story-shopping-tag-pill-text">
         {tagData['product-price']}
       </span>
