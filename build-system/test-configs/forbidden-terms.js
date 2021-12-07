@@ -632,7 +632,6 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'src/config.js',
-      'src/core/window/window.extern.js',
       'src/experiments/index.js',
       'src/experiments/shame.extern.js',
       'src/mode.js',
