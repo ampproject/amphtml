@@ -1,4 +1,4 @@
-import {Keys_Enum} from '#core/constants/key-codes';
+import {KeyCodes_Enum, Keys_Enum} from '#core/constants/key-codes';
 import {addAttributesToElement} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {closest, closestAncestorElementBySelector} from '#core/dom/query';
@@ -116,7 +116,7 @@ function buildProviderParams(opt_params) {
 /**
  * Share menu UI.
  */
-class AmpStoryShareMenu {
+export class AmpStoryShareMenu {
   /**
    * @param {!Element} element
    * @param {!Window} win
@@ -210,8 +210,7 @@ class AmpStoryShareMenu {
     });
     listen(linkShareButton, 'keyup', (e) => {
       const code = e.charCode || e.keyCode;
-      // Check if pressed Space or Enter to trigger button.
-      if (code === 32 || code === 13) {
+      if (code === KeyCodes_Enum.SPACE || code === KeyCodes_Enum.ENTER) {
         e.preventDefault();
         this.copyUrlToClipboard_();
       }
