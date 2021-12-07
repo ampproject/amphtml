@@ -1,5 +1,5 @@
-import {toggle} from '#core/dom/style';
-import {endsWith} from '#core/types/string';
+import {toggle} from 'core/dom/style';
+import {endsWith} from 'core/types/string';
 
 import {Services} from '#service';
 import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';

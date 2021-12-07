@@ -1,5 +1,5 @@
 import '../amp-onetap-google';
-import {createElementWithAttributes, waitForChild} from '#core/dom';
+import {createElementWithAttributes, waitForChild} from 'core/dom';
 
 import {Services} from '#service';
 import {AmpDoc} from '#service/ampdoc-impl';

@@ -1,8 +1,8 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {LogLevel_Enum, dev} from '#utils/log';
 import {Services} from '#service';
-import {removeChildren} from '#core/dom';
-import {toggle} from '#core/dom/style';
+import {removeChildren} from 'core/dom';
+import {toggle} from 'core/dom/style';
 import objstr from 'obj-str';
 
 /**

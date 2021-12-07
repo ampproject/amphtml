@@ -1,4 +1,4 @@
-import {px, resetStyles, setStyles, translate} from '#core/dom/style';
+import {px, resetStyles, setStyles, translate} from 'core/dom/style';
 
 /**
  * Centers a frame with a translate transition.

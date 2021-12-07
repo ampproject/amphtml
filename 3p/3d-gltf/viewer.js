@@ -1,6 +1,6 @@
 /* global THREE */
 
-import {setStyle} from '#core/dom/style';
+import {setStyle} from 'core/dom/style';
 
 import AnimationLoop from './animation-loop';
 

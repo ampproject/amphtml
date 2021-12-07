@@ -1,6 +1,6 @@
 import {BaseElement} from './base-element';
 __css_import__;
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 

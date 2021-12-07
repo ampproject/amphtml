@@ -1,13 +1,13 @@
-import {toggleAttribute} from '#core/dom';
+import {toggleAttribute} from 'core/dom';
 import {
   childElement,
   closestAncestorElementBySelector,
   elementByTag,
-} from '#core/dom/query';
-import {srcsetFromElement} from '#core/dom/srcset';
-import {toggle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
+} from 'core/dom/query';
+import {srcsetFromElement} from 'core/dom/srcset';
+import {toggle} from 'core/dom/style';
+import {toArray} from 'core/types/array';
+import {dict} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';

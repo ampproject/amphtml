@@ -1,8 +1,8 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {iterateCursor, removeElement} from '#core/dom';
-import {computedStyle, px, setStyle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
-import {throttle} from '#core/types/function';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {iterateCursor, removeElement} from 'core/dom';
+import {computedStyle, px, setStyle} from 'core/dom/style';
+import {toArray} from 'core/types/array';
+import {throttle} from 'core/types/function';
 
 import {Services} from '#service';
 

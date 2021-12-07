@@ -1,5 +1,5 @@
-import {devAssert, userAssert} from '#core/assert';
-import {USER_ERROR_SENTINEL} from '#core/error/message-helpers';
+import {devAssert, userAssert} from 'core/assert';
+import {USER_ERROR_SENTINEL} from 'core/error/message-helpers';
 
 describes.sandboxed('assertions', {}, () => {
   describe('devAssert', () => {

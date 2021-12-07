@@ -1,8 +1,8 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
 import {localize} from './amp-story-localization-service';
 
 /**

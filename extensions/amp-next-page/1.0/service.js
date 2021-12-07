@@ -1,20 +1,20 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
 import {
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
-} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
 import {
   childElementByAttr,
   childElementsByTag,
   scopedQuerySelector,
-} from '#core/dom/query';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {setStyles, toggle} from '#core/dom/style';
-import {findIndex, toArray} from '#core/types/array';
-import {tryParseJson} from '#core/types/object/json';
+} from 'core/dom/query';
+import {htmlFor, htmlRefs} from 'core/dom/static-template';
+import {setStyles, toggle} from 'core/dom/style';
+import {findIndex, toArray} from 'core/types/array';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

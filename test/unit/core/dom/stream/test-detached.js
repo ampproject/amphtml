@@ -1,4 +1,4 @@
-import {DetachedDomStream} from '#core/dom/stream';
+import {DetachedDomStream} from 'core/dom/stream';
 
 describes.fakeWin('DOM - stream - DetachedDomStream', {amp: true}, (env) => {
   let win;

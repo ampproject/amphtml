@@ -1,4 +1,4 @@
-import {tryResolve} from '#core/data-structures/promise';
+import {tryResolve} from 'core/data-structures/promise';
 
 import {userAssert} from '#utils/log';
 

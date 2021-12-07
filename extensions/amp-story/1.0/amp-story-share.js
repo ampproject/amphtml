@@ -1,13 +1,13 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
-} from '#core/window/clipboard';
+} from 'core/window/clipboard';
 import {devAssert, user} from '#utils/log';
-import {map} from '#core/types/object';
+import {map} from 'core/types/object';
 import {localize} from './amp-story-localization-service';
 import {getElementConfig} from './request-utils';
 import {isObject} from '#core/types';

@@ -16,10 +16,10 @@ import {Services} from '#service';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '#utils/log';
-import {findIndex} from '#core/types/array';
-import {isConnectedNode} from '#core/dom';
-import {matches} from '#core/dom/query';
-import {getWin} from '#core/window';
+import {findIndex} from 'core/types/array';
+import {isConnectedNode} from 'core/dom';
+import {matches} from 'core/dom/query';
+import {getWin} from 'core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */

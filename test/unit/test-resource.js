@@ -1,5 +1,5 @@
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {LayoutPriority_Enum} from 'core/dom/layout';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';

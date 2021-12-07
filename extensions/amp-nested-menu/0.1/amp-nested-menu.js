@@ -1,12 +1,12 @@
-import {Keys_Enum} from '#core/constants/key-codes';
-import {isRTL, tryFocus} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {isRTL, tryFocus} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
 import {
   closest,
   closestAncestorElementBySelector,
   scopedQuerySelector,
-} from '#core/dom/query';
-import {toArray} from '#core/types/array';
+} from 'core/dom/query';
+import {toArray} from 'core/types/array';
 
 import {Services} from '#service';
 

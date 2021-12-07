@@ -3,8 +3,8 @@
  * connection before the real request can be made.
  */
 
-import {whenDocumentComplete} from '#core/document/ready';
-import {htmlFor} from '#core/dom/static-template';
+import {whenDocumentComplete} from 'core/document/ready';
+import {htmlFor} from 'core/dom/static-template';
 
 import {Services} from '#service';
 

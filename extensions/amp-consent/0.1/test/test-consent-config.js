@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
 import {
   ConsentConfig,
   expandConsentEndpointUrl,
@@ -6,7 +6,7 @@ import {
 } from '../consent-config';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '#service';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {macroTask} from '#testing/helpers';
 
 describes.realWin('ConsentConfig', {amp: 1}, (env) => {

@@ -3,7 +3,7 @@ import {useCallback, useMemo, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {dispatchCustomEvent} from '#core/dom';
+import {dispatchCustomEvent} from 'core/dom';
 import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 import {useValueRef} from '#preact/component';
 

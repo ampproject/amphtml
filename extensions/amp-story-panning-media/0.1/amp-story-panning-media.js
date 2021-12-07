@@ -1,10 +1,10 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {Layout_Enum} from '#core/dom/layout';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {closest} from '#core/dom/query';
-import {setImportantStyles} from '#core/dom/style';
-import {deepEquals} from '#core/types/object/json';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import {Layout_Enum} from 'core/dom/layout';
+import {prefersReducedMotion} from 'core/dom/media-query-props';
+import {closest} from 'core/dom/query';
+import {setImportantStyles} from 'core/dom/style';
+import {deepEquals} from 'core/types/object/json';
 
 import {Services} from '#service';
 

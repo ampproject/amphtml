@@ -1,5 +1,5 @@
-import {isEnumValue} from '#core/types';
-import {parseQueryString} from '#core/types/string/url';
+import {isEnumValue} from 'core/types';
+import {parseQueryString} from 'core/types/string/url';
 
 /**
  * Embed mode for AMP story.  See ../embed-modes.md for details.

@@ -4,9 +4,9 @@ import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
-} from '#core/dom';
-import {matches} from '#core/dom/query';
-import {toArray} from '#core/types/array';
+} from 'core/dom';
+import {matches} from 'core/dom/query';
+import {toArray} from 'core/types/array';
 import {user} from '#utils/log';
 
 /** @const {!Array<string>} */

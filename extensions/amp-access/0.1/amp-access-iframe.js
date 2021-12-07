@@ -1,8 +1,8 @@
-import {Deferred} from '#core/data-structures/promise';
-import {toggle} from '#core/dom/style';
-import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+import {Deferred} from 'core/data-structures/promise';
+import {toggle} from 'core/dom/style';
+import {isArray} from 'core/types';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

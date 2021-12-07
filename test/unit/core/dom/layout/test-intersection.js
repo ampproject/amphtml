@@ -1,7 +1,7 @@
 import {
   intersectionEntryToJson,
   measureIntersection,
-} from '#core/dom/layout/intersection';
+} from 'core/dom/layout/intersection';
 
 describes.fakeWin('DOM - layout - intersection observer', {}, (env) => {
   function getInObConstructorStub() {

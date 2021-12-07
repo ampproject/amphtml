@@ -1,6 +1,6 @@
-import {removeElement} from '#core/dom';
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
-import {setStyles} from '#core/dom/style';
+import {removeElement} from 'core/dom';
+import {Layout_Enum, applyFillContent} from 'core/dom/layout';
+import {setStyles} from 'core/dom/style';
 
 import {Services} from '#service';
 

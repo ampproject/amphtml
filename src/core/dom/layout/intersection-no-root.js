@@ -1,7 +1,7 @@
-import {devAssert} from '#core/assert';
-import {Deferred} from '#core/data-structures/promise';
-import {createViewportObserver} from '#core/dom/layout/viewport-observer';
-import {getWin} from '#core/window';
+import {devAssert} from 'core/assert';
+import {Deferred} from 'core/data-structures/promise';
+import {createViewportObserver} from 'core/dom/layout/viewport-observer';
+import {getWin} from 'core/window';
 
 /**
  * @fileoverview

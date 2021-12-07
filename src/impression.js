@@ -1,6 +1,6 @@
-import {Deferred} from '#core/data-structures/promise';
-import {parseQueryString} from '#core/types/string/url';
-import {WindowInterface} from '#core/window/interface';
+import {Deferred} from 'core/data-structures/promise';
+import {parseQueryString} from 'core/types/string/url';
+import {WindowInterface} from 'core/window/interface';
 
 import {isExperimentOn} from '#experiments';
 

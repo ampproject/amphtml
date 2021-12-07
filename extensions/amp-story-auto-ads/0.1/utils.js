@@ -1,4 +1,4 @@
-import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
+import {getCryptoRandomBytesArray} from 'core/types/string/bytes';
 
 import {CtaTypes} from './story-ad-localization';
 

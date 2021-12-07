@@ -1,10 +1,10 @@
 /* eslint-disable import/no-deprecated */
 
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
+
 import {loadScript} from '#3p/3p';
 import {listenParent, nonSensitiveDataPostMessage} from '#3p/messaging';
-
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
 
 import {user} from '#utils/log';
 

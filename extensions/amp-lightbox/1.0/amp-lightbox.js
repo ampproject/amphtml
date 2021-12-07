@@ -1,13 +1,13 @@
 import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
-} from '#core/constants/action-constants';
+} from 'core/constants/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
-import {getWin} from '#core/window';
+import {getWin} from 'core/window';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */

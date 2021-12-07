@@ -1,4 +1,4 @@
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from 'core/types/object/json';
 
 /**
  * A unique identifier for each localized string.  Localized string IDs should:

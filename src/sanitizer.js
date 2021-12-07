@@ -1,5 +1,5 @@
-import {isAmp4Email} from '#core/document/format';
-import {dict} from '#core/types/object';
+import {isAmp4Email} from 'core/document/format';
+import {dict} from 'core/types/object';
 
 import {
   ALLOWLISTED_ATTRS,

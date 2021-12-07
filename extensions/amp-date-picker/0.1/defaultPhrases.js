@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 const calendarLabel = 'Calendar';
 const jumpToPrevMonth = 'Move backward to switch to the previous month.';

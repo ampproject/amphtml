@@ -1,10 +1,10 @@
 import '../amp-base-carousel';
 import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
-import {mod} from '#core/math';
-import {setStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {createElementWithAttributes, waitForChildPromise} from 'core/dom';
+import {mod} from 'core/math';
+import {setStyles} from 'core/dom/style';
+import {toArray} from 'core/types/array';
 import {toggleExperiment} from '#experiments';
 import {useStyles} from '../component.jss';
 import {waitFor, whenCalled} from '#testing/helpers/service';

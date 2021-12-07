@@ -14,8 +14,8 @@
  * the License.
  */
 
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {parseQueryString} from '#core/types/string/url';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {parseQueryString} from 'core/types/string/url';
 
 import {Services} from '#service';
 

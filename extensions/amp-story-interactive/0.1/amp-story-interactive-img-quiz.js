@@ -11,8 +11,8 @@ import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
 } from '../../amp-story/1.0/utils';
-import {htmlFor} from '#core/dom/static-template';
-import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {htmlFor} from 'core/dom/static-template';
+import {computedStyle, setImportantStyles} from 'core/dom/style';
 import objstr from 'obj-str';
 
 /**

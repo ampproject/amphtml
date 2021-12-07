@@ -1,5 +1,5 @@
 import '../amp-wordpress-embed';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 import {toggleExperiment} from '#experiments';
 

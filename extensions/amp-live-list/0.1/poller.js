@@ -1,7 +1,7 @@
 import {
   exponentialBackoffClock,
   getJitter,
-} from '#core/types/function/exponential-backoff';
+} from 'core/types/function/exponential-backoff';
 
 import {Services} from '#service';
 

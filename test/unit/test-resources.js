@@ -1,9 +1,8 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Signals} from '#core/data-structures/signals';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Signals} from 'core/data-structures/signals';
+import {LayoutPriority_Enum} from 'core/dom/layout';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';

@@ -1,4 +1,4 @@
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 import {AmpFxCollection} from '../amp-fx-collection';
 

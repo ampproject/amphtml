@@ -1,5 +1,5 @@
-import {isIframed} from '#core/dom';
-import {dict} from '#core/types/object';
+import {isIframed} from 'core/dom';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 import {FixedLayer} from '#service/fixed-layer';

@@ -1,8 +1,8 @@
-import {createElementWithAttributes} from '#core/dom';
-import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
-import * as query from '#core/dom/query';
-import {isElement} from '#core/types';
-import {toArray} from '#core/types/array';
+import {createElementWithAttributes} from 'core/dom';
+import {setScopeSelectorSupportedForTesting} from 'core/dom/css-selectors';
+import * as query from 'core/dom/query';
+import {isElement} from 'core/types';
+import {toArray} from 'core/types/array';
 
 import {loadPromise} from '#utils/event-helper';
 

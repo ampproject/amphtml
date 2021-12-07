@@ -1,5 +1,5 @@
-import {dict} from '#core/types/object';
-import {WindowInterface} from '#core/window/interface';
+import {dict} from 'core/types/object';
+import {WindowInterface} from 'core/window/interface';
 
 import {Services} from '#service';
 

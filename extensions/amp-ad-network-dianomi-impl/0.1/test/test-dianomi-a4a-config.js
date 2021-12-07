@@ -2,8 +2,7 @@
 import '../../../amp-ad/0.1/amp-ad-ui';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {expect} from 'chai';
-
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
 
 import {createElementWithAttributes} from 'src/core/dom';
 

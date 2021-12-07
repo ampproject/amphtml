@@ -1,5 +1,5 @@
-import {Loading_Enum} from '#core/constants/loading-instructions';
-import {ReadyState_Enum} from '#core/constants/ready-state';
+import {Loading_Enum} from 'core/constants/loading-instructions';
+import {ReadyState_Enum} from 'core/constants/ready-state';
 
 import * as Preact from '#preact';
 import {

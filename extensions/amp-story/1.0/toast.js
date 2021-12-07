@@ -1,7 +1,7 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {Services} from '#service';
-import {removeElement} from '#core/dom';
-import {getWin} from '#core/window';
+import {removeElement} from 'core/dom';
+import {getWin} from 'core/window';
 
 /**
  * The 'alert' role assertively announces toast content to screen readers.

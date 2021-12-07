@@ -1,4 +1,4 @@
-import {matches} from '#core/dom/query';
+import {matches} from 'core/dom/query';
 
 import {dev, userAssert} from '#utils/log';
 

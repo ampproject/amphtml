@@ -1,5 +1,5 @@
-import {LruCache} from '#core/data-structures/lru-cache';
-import * as mode from '#core/mode';
+import {LruCache} from 'core/data-structures/lru-cache';
+import * as mode from 'core/mode';
 
 import {urls} from '../config';
 import {registerServiceBuilderForDoc} from '../service-helpers';

@@ -3,7 +3,7 @@
  * presets.
  */
 
-import {mapRange} from '#core/math';
+import {mapRange} from 'core/math';
 
 import {Services} from '#service';
 

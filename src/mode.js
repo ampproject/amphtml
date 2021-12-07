@@ -1,5 +1,5 @@
-import * as coreMode from '#core/mode';
-import {getHashParams} from '#core/types/string/url';
+import * as coreMode from 'core/mode';
+import {getHashParams} from 'core/types/string/url';
 
 /**
  * @typedef {{

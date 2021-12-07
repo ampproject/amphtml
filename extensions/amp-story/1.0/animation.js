@@ -1,4 +1,4 @@
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
@@ -16,17 +16,17 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+import {assertDoesNotContainDisplay, setStyles} from 'core/dom/style';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '#core/dom';
-import {map, omit} from '#core/types/object';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {getChildJsonConfig} from 'core/dom';
+import {map, omit} from 'core/types/object';
+import {prefersReducedMotion} from 'core/dom/media-query-props';
 import {
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '#core/dom/query';
+} from 'core/dom/query';
 import {isTransformed, timeStrToMillis, unscaledClientRect} from './utils';
 import {isExperimentOn} from '#experiments';
 import {isPreviewMode} from './embed-mode';

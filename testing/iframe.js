@@ -1,5 +1,5 @@
-import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {deserializeMessage, isAmpMessage} from 'core/3p-frame-messaging';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
 
 import {install as installCustomElements} from '#polyfills/custom-elements';
 

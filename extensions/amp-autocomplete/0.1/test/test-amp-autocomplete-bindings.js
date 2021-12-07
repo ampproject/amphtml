@@ -1,7 +1,7 @@
 import '../amp-autocomplete';
 import {AutocompleteBindingInline} from '../autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from '../autocomplete-binding-single';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 describes.realWin(
   'amp-autocomplete bindings',

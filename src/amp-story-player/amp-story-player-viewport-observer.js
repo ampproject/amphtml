@@ -1,4 +1,4 @@
-import {throttle} from '#core/types/function';
+import {throttle} from 'core/types/function';
 
 /** @const {number} */
 const SCROLL_THROTTLE_MS = 500;

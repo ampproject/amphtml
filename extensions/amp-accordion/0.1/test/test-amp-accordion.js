@@ -1,10 +1,10 @@
 import '../amp-accordion';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {createElementWithAttributes, tryFocus} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {htmlFor} from '#core/dom/static-template';
-import {computedStyle} from '#core/dom/style';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {createElementWithAttributes, tryFocus} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import {htmlFor} from 'core/dom/static-template';
+import {computedStyle} from 'core/dom/style';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';

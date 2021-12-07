@@ -1,7 +1,7 @@
-import {Deferred} from '#core/data-structures/promise';
-import {rethrowAsync} from '#core/error';
-import * as mode from '#core/mode';
-import {map} from '#core/types/object';
+import {Deferred} from 'core/data-structures/promise';
+import {rethrowAsync} from 'core/error';
+import * as mode from 'core/mode';
+import {map} from 'core/types/object';
 
 /**
  * For type anotations where Element is a local variable.

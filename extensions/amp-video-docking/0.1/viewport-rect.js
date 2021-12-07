@@ -1,4 +1,4 @@
-import {LayoutRectDef, layoutRectLtwh} from '#core/dom/layout/rect';
+import {LayoutRectDef, layoutRectLtwh} from 'core/dom/layout/rect';
 
 /**
  * @param {function():T} get

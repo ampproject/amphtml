@@ -1,8 +1,8 @@
-import {getDataParamsFromAttributes} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
+import {getDataParamsFromAttributes} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

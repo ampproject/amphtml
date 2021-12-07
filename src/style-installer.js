@@ -1,9 +1,9 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {TickLabel_Enum} from '#core/constants/enums';
-import {insertAfterOrAtStart, waitForBodyOpenPromise} from '#core/dom';
-import {setStyles} from '#core/dom/style';
-import {rethrowAsync} from '#core/error';
-import {map} from '#core/types/object';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {TickLabel_Enum} from 'core/constants/enums';
+import {insertAfterOrAtStart, waitForBodyOpenPromise} from 'core/dom';
+import {setStyles} from 'core/dom/style';
+import {rethrowAsync} from 'core/error';
+import {map} from 'core/types/object';
 
 import {Services} from '#service';
 

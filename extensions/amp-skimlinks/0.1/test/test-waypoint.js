@@ -1,4 +1,4 @@
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import helpersFactory from './helpers';

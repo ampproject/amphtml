@@ -2,7 +2,7 @@ import {
   assertDoesNotContainDisplay,
   computedStyle,
   setStyles,
-} from '#core/dom/style';
+} from 'core/dom/style';
 
 import {Services} from '#service';
 

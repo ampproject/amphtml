@@ -2,7 +2,7 @@
  * @fileoverview Base layer from which other layers in a story page extend from.
  */
 
-import {Layout_Enum} from '#core/dom/layout';
+import {Layout_Enum} from 'core/dom/layout';
 
 /**
  * Base layer template.

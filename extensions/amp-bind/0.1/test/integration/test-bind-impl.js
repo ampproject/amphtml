@@ -4,11 +4,10 @@
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Deferred} from '#core/data-structures/promise';
-import {toArray} from '#core/types/array';
+import {RAW_OBJECT_ARGS_KEY} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Deferred} from 'core/data-structures/promise';
+import {toArray} from 'core/types/array';
 
 import {Services} from '#service';
 

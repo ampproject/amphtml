@@ -1,4 +1,4 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
 
 import {devAssert} from '#utils/log';
 

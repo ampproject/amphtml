@@ -3,7 +3,7 @@ import {
   loadAll,
   pauseAll,
   unmountAll,
-} from '#core/dom/resource-container-helper';
+} from 'core/dom/resource-container-helper';
 
 const INCLUDE_SELF = true;
 const DEEP = true;

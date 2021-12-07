@@ -1,10 +1,10 @@
-import {whenDocumentReady} from '#core/document/ready';
-import {moveLayoutRect} from '#core/dom/layout/rect';
-import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
-import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
-import {parseQueryString} from '#core/types/string/url';
+import {whenDocumentReady} from 'core/document/ready';
+import {moveLayoutRect} from 'core/dom/layout/rect';
+import {resetStyles, setInitialDisplay, setStyles} from 'core/dom/style';
+import {once} from 'core/types/function';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
+import {parseQueryString} from 'core/types/string/url';
 
 import {Services} from '#service';
 

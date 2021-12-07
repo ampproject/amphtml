@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 import {ScrollComponent} from './scroll-component';
 import {buildUrl, connectHostname} from './scroll-url';

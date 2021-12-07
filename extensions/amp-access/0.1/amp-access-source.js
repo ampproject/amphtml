@@ -1,7 +1,7 @@
-import {Deferred} from '#core/data-structures/promise';
-import {isEnumValue, isObject} from '#core/types';
-import {dict, getValueForExpr} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
+import {Deferred} from 'core/data-structures/promise';
+import {isEnumValue, isObject} from 'core/types';
+import {dict, getValueForExpr} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
 
 import {isExperimentOn} from '#experiments';
 

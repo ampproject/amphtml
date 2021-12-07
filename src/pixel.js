@@ -1,6 +1,6 @@
-import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
-import {WindowInterface} from '#core/window/interface';
+import {createElementWithAttributes} from 'core/dom';
+import {dict} from 'core/types/object';
+import {WindowInterface} from 'core/window/interface';
 
 import {user} from '#utils/log';
 

@@ -1,7 +1,7 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {Services} from '#service';
 import {dev} from '#utils/log';
-import {includes} from '#core/types/string';
+import {includes} from 'core/types/string';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.

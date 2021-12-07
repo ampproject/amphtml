@@ -3,9 +3,9 @@ import {
   deserializeMessage,
   listen,
   serializeMessage,
-} from '#core/3p-frame-messaging';
-import {Observable} from '#core/data-structures/observable';
-import {dict, map} from '#core/types/object';
+} from 'core/3p-frame-messaging';
+import {Observable} from 'core/data-structures/observable';
+import {dict, map} from 'core/types/object';
 
 import {getData} from '#utils/event-helper';
 import {dev} from '#utils/log';

@@ -1,4 +1,4 @@
-import {hasOwn, map} from '#core/types/object';
+import {hasOwn, map} from 'core/types/object';
 
 import {InsertionState} from './story-ad-page-manager';
 

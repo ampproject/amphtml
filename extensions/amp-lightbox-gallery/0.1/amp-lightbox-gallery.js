@@ -1,20 +1,19 @@
 import {prepareImageAnimation} from '@ampproject/animations';
-
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {getVerticalScrollbarWidth, toggleAttribute} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
 import {
   childElementByTag,
   closest,
   closestAncestorElementBySelector,
   elementByTag,
   scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyle, setStyles, toggle} from '#core/dom/style';
-import {clamp} from '#core/math';
-import {toArray} from '#core/types/array';
+} from 'core/dom/query';
+import {htmlFor} from 'core/dom/static-template';
+import {setStyle, setStyles, toggle} from 'core/dom/style';
+import {clamp} from 'core/math';
+import {toArray} from 'core/types/array';
 
 import {isExperimentOn} from '#experiments';
 

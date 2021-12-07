@@ -1,8 +1,8 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {toggleAttribute} from '#core/dom';
-import {svgFor} from '#core/dom/static-template';
-import {setStyle} from '#core/dom/style';
-import {dict} from '#core/types/object';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {toggleAttribute} from 'core/dom';
+import {svgFor} from 'core/dom/static-template';
+import {setStyle} from 'core/dom/style';
+import {dict} from 'core/types/object';
 
 import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {

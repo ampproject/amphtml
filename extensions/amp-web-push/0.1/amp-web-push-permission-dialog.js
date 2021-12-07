@@ -14,8 +14,8 @@
  * the License.
  */
 
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {parseQueryString, tryDecodeUriComponent} from 'core/types/string/url';
 
 import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';

@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 /**
  * Installs an alias used to mask credit cards and enable digit chunking.

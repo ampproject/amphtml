@@ -1,16 +1,16 @@
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {computedStyle, getVendorJsPropertyName} from '#core/dom/style';
-import {isEnumValue, isObject} from '#core/types';
-import {isArray, toArray} from '#core/types/array';
-import {map} from '#core/types/object';
-import {dashToCamelCase} from '#core/types/string';
+} from 'core/dom/query';
+import {computedStyle, getVendorJsPropertyName} from 'core/dom/style';
+import {isEnumValue, isObject} from 'core/types';
+import {isArray, toArray} from 'core/types/array';
+import {map} from 'core/types/object';
+import {dashToCamelCase} from 'core/types/string';
 
 import {isExperimentOn} from '#experiments';
 

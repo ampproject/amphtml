@@ -1,7 +1,7 @@
-import {removeElement} from '#core/dom';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
+import {removeElement} from 'core/dom';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {toggle} from 'core/dom/style';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

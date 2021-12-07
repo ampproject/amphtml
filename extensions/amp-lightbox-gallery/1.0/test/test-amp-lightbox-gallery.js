@@ -2,9 +2,9 @@ import '../amp-lightbox-gallery';
 import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
-} from '#core/constants/action-constants';
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+} from 'core/constants/action-constants';
+import {createElementWithAttributes} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 

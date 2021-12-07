@@ -1,7 +1,7 @@
-import {Deferred} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {setStyles} from '#core/dom/style';
+import {Deferred} from 'core/data-structures/promise';
+import {Signals} from 'core/data-structures/signals';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {setStyles} from 'core/dom/style';
 
 import {Services} from '#service';
 import {AmpDocFie} from '#service/ampdoc-impl';

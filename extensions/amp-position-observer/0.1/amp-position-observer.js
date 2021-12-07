@@ -1,16 +1,16 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {
   assertLength,
   getLengthNumeral,
   getLengthUnits,
   parseLength,
-} from '#core/dom/layout';
+} from 'core/dom/layout';
 import {
   RelativePositions_Enum,
   layoutRectLtwh,
   layoutRectsRelativePos,
-} from '#core/dom/layout/rect';
-import {dict} from '#core/types/object';
+} from 'core/dom/layout/rect';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';

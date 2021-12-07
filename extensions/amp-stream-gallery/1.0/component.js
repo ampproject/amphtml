@@ -8,8 +8,8 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {setStyle} from '#core/dom/style';
-import {getWin} from '#core/window';
+import {setStyle} from 'core/dom/style';
+import {getWin} from 'core/window';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 import {propName} from '#preact/utils';

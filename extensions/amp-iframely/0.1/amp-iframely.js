@@ -1,9 +1,9 @@
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {measureIntersection} from '#core/dom/layout/intersection';
-import {setStyle} from '#core/dom/style';
-import {omit} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {createElementWithAttributes, removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {measureIntersection} from 'core/dom/layout/intersection';
+import {setStyle} from 'core/dom/style';
+import {omit} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {getData, listen} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

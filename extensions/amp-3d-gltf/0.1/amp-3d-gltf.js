@@ -1,13 +1,13 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Deferred} from '#core/data-structures/promise';
-import {removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {Deferred} from 'core/data-structures/promise';
+import {removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {dict} from '#core/types/object';
+} from 'core/dom/layout/size-observer';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

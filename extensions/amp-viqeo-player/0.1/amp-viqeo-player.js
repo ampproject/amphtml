@@ -1,18 +1,18 @@
 /* eslint-disable no-unused-vars */
 
-import {Deferred} from '#core/data-structures/promise';
-import {removeElement} from '#core/dom';
+import {Deferred} from 'core/data-structures/promise';
+import {removeElement} from 'core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '#core/dom/fullscreen';
+} from 'core/dom/fullscreen';
 import {
   Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
-} from '#core/dom/layout';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
+} from 'core/dom/layout';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

@@ -1,5 +1,5 @@
 import '../../../amp-ad/0.1/amp-ad';
-import {waitForChild} from '#core/dom';
+import {waitForChild} from 'core/dom';
 
 import {Services} from '#service';
 

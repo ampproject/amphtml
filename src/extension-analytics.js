@@ -1,8 +1,8 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
-import {getWin} from '#core/window';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {createElementWithAttributes, removeElement} from 'core/dom';
+import {isArray} from 'core/types';
+import {dict} from 'core/types/object';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 

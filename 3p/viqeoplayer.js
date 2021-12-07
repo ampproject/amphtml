@@ -1,5 +1,5 @@
-import {tryPlay} from '#core/dom/video';
-import {tryDecodeUriComponent} from '#core/types/string/url';
+import {tryPlay} from 'core/dom/video';
+import {tryDecodeUriComponent} from 'core/types/string/url';
 
 import {getData} from '#utils/event-helper';
 

@@ -1,5 +1,5 @@
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
@@ -11,18 +11,18 @@ import {
 import {Services} from '#service';
 import {createCustomEvent, getDetail} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
   toggleAttribute,
-} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 import {isExperimentOn} from '#experiments';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {setStyle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {setStyle} from 'core/dom/style';
+import {toArray} from 'core/types/array';
 
 /** @enum {number} */
 const InsetArrowVisibility = {

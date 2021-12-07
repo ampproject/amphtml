@@ -1,6 +1,6 @@
 import '../amp-video';
-import {dispatchCustomEvent} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+import {dispatchCustomEvent} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/helpers/service';
 

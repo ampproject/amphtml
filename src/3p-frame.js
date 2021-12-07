@@ -1,8 +1,8 @@
-import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
-import {setStyle} from '#core/dom/style';
-import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {getOptionalSandboxFlags, getRequiredSandboxFlags} from 'core/3p-frame';
+import {setStyle} from 'core/dom/style';
+import * as mode from 'core/mode';
+import {dict} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
 

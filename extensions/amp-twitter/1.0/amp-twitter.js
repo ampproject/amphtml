@@ -1,9 +1,9 @@
 import {BaseElement} from './base-element';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '#core/assert';
+import {userAssert} from 'core/assert';
 
 /** @const {string} */
 const TAG = 'amp-twitter';

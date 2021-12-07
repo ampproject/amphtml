@@ -1,8 +1,8 @@
-import {DomFingerprint} from '#core/dom/fingerprint';
-import {getLengthNumeral} from '#core/dom/layout';
-import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
+import {DomFingerprint} from 'core/dom/fingerprint';
+import {getLengthNumeral} from 'core/dom/layout';
+import {getPageLayoutBoxBlocking} from 'core/dom/layout/page-layout-box';
+import * as mode from 'core/mode';
+import {dict} from 'core/types/object';
 
 import {experimentToggles, isCanary} from '#experiments';
 

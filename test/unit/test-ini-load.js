@@ -1,5 +1,5 @@
-import {Deferred} from '#core/data-structures/promise';
-import {removeItem} from '#core/types/array';
+import {Deferred} from 'core/data-structures/promise';
+import {removeItem} from 'core/types/array';
 
 import {Services} from '#service';
 

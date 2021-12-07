@@ -1,18 +1,18 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {bezierCurve} from '#core/data-structures/curve';
-import {dispatchCustomEvent, tryFocus} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import {closest, realChildElements} from '#core/dom/query';
-import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {bezierCurve} from 'core/data-structures/curve';
+import {dispatchCustomEvent, tryFocus} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import {closest, realChildElements} from 'core/dom/query';
+import {getStyle, setImportantStyles, setStyles} from 'core/dom/style';
 import {
   numeric,
   px,
   setStyles as setStylesTransition,
-} from '#core/dom/transition';
-import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+} from 'core/dom/transition';
+import {clamp} from 'core/math';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

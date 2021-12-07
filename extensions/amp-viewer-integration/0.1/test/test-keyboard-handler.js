@@ -1,4 +1,4 @@
-import {KeyCodes_Enum, Keys_Enum} from '#core/constants/key-codes';
+import {KeyCodes_Enum, Keys_Enum} from 'core/constants/key-codes';
 
 import {KeyboardHandler} from '../keyboard-handler';
 import {Messaging} from '../messaging/messaging';

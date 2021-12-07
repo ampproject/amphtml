@@ -3,7 +3,7 @@ import {BentoTwitter} from '../component';
 import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {mount} from 'enzyme';
-import {serializeMessage} from '#core/3p-frame-messaging';
+import {serializeMessage} from 'core/3p-frame-messaging';
 import {waitFor} from '#testing/helpers/service';
 
 describes.sandboxed('Twitter preact component v1.0', {}, (env) => {

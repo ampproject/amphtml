@@ -1,5 +1,5 @@
-import {getStyle} from '#core/dom/style';
-import {WindowInterface} from '#core/window/interface';
+import {getStyle} from 'core/dom/style';
+import {WindowInterface} from 'core/window/interface';
 
 import {poll} from '#testing/iframe';
 

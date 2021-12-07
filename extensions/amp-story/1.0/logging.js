@@ -1,6 +1,6 @@
 import {LogLevel_Enum, devAssert} from '#utils/log';
-import {scopedQuerySelectorAll} from '#core/dom/query';
-import {tryResolve} from '#core/data-structures/promise';
+import {scopedQuerySelectorAll} from 'core/dom/query';
+import {tryResolve} from 'core/data-structures/promise';
 
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
 let ElementPredicate_1_0_Def; // eslint-disable-line local/camelcase

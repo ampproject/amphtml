@@ -1,5 +1,5 @@
-import {waitForChildPromise} from '#core/dom';
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {waitForChildPromise} from 'core/dom';
+import {closestAncestorElementBySelector} from 'core/dom/query';
 
 import {Services} from '#service';
 

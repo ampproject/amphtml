@@ -1,6 +1,6 @@
-import {devAssert} from '#core/assert';
-import {rethrowAsync} from '#core/error';
-import {pushIfNotExist, removeItem} from '#core/types/array';
+import {devAssert} from 'core/assert';
+import {rethrowAsync} from 'core/error';
+import {pushIfNotExist, removeItem} from 'core/types/array';
 
 import {ContextPropDef} from './prop.type';
 import {deepScan, findParent} from './scan';

@@ -1,15 +1,15 @@
-import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
-
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {removeElement} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {realChildElements} from '#core/dom/query';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {removeElement} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import {realChildElements} from 'core/dom/query';
 import {
   computedStyle,
   removeAlphaFromColor,
   setStyle,
   toggle,
-} from '#core/dom/style';
+} from 'core/dom/style';
+
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 
 import {isExperimentOn} from '#experiments';
 

@@ -1,7 +1,7 @@
 import '../amp-mega-menu';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {tryFocus} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {tryFocus} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 
 describes.realWin(
   'amp-mega-menu',

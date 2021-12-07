@@ -1,17 +1,16 @@
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Messaging} from '@ampproject/viewer-messaging';
-
 // Source for this constant is css/amp-story-player-shadow.css
-import {devAssertElement} from '#core/assert';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Deferred} from '#core/data-structures/promise';
-import {isJsonScriptTag, tryFocus} from '#core/dom';
-import {resetStyles, setStyle, setStyles} from '#core/dom/style';
-import {findIndex, toArray} from '#core/types/array';
-import {isEnumValue} from '#core/types/enum';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
-import {parseQueryString} from '#core/types/string/url';
+import {devAssertElement} from 'core/assert';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Deferred} from 'core/data-structures/promise';
+import {isJsonScriptTag, tryFocus} from 'core/dom';
+import {resetStyles, setStyle, setStyles} from 'core/dom/style';
+import {findIndex, toArray} from 'core/types/array';
+import {isEnumValue} from 'core/types/enum';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
+import {parseQueryString} from 'core/types/string/url';
 
 import {createCustomEvent, listenOnce} from '#utils/event-helper';
 

@@ -1,4 +1,4 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
 import {loadScript, validateData} from '#3p/3p';
 
 const pubmineOptional = [

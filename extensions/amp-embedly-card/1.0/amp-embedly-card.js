@@ -1,5 +1,5 @@
-import {Layout_Enum} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {Layout_Enum} from 'core/dom/layout';
+import {dict} from 'core/types/object';
 
 import {isExperimentOn} from '#experiments';
 

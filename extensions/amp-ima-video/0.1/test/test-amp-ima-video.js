@@ -1,6 +1,6 @@
 import '../amp-ima-video';
-import {waitForChildPromise} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+import {waitForChildPromise} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 

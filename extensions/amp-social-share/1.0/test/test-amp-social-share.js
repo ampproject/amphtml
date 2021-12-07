@@ -1,5 +1,5 @@
 import '../amp-social-share';
-import {waitForChildPromise} from '#core/dom';
+import {waitForChildPromise} from 'core/dom';
 
 import {toggleExperiment} from '#experiments';
 

@@ -1,4 +1,4 @@
-import {remove} from '#core/types/array';
+import {remove} from 'core/types/array';
 
 import {BindExpression} from './bind-expression';
 import {BindMacro} from './bind-macro';

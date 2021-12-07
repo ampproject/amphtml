@@ -1,24 +1,24 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {ReadyState_Enum} from '#core/constants/ready-state';
-import {tryResolve} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import * as dom from '#core/dom';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {ReadyState_Enum} from 'core/constants/ready-state';
+import {tryResolve} from 'core/data-structures/promise';
+import {Signals} from 'core/data-structures/signals';
+import * as dom from 'core/dom';
 import {
   UPGRADE_TO_CUSTOMELEMENT_PROMISE,
   UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
-} from '#core/dom/amp-element-helpers';
+} from 'core/dom/amp-element-helpers';
 import {
   LayoutPriority_Enum,
   Layout_Enum,
   isLoadingAllowed,
-} from '#core/dom/layout';
-import {MediaQueryProps} from '#core/dom/media-query-props';
-import * as query from '#core/dom/query';
-import {setStyle} from '#core/dom/style';
-import {rethrowAsync} from '#core/error';
-import {applyStaticLayout} from '#core/static-layout';
-import {getWin} from '#core/window';
+} from 'core/dom/layout';
+import {MediaQueryProps} from 'core/dom/media-query-props';
+import * as query from 'core/dom/query';
+import {setStyle} from 'core/dom/style';
+import {rethrowAsync} from 'core/error';
+import {applyStaticLayout} from 'core/static-layout';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 import {ResourceState_Enum} from '#service/resource';

@@ -1,4 +1,4 @@
-import {Layout_Enum} from '#core/dom/layout';
+import {Layout_Enum} from 'core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 

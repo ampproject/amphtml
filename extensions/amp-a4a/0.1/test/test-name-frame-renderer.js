@@ -1,5 +1,5 @@
-import {parseJson} from '#core/types/object/json';
-import {utf8Encode} from '#core/types/string/bytes';
+import {parseJson} from 'core/types/object/json';
+import {utf8Encode} from 'core/types/string/bytes';
 
 import {NameFrameRenderer} from '../name-frame-renderer';
 

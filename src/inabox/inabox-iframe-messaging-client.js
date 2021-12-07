@@ -1,6 +1,6 @@
-import {IframeMessagingClient} from '#3p/iframe-messaging-client';
+import {tryParseJson} from 'core/types/object/json';
 
-import {tryParseJson} from '#core/types/object/json';
+import {IframeMessagingClient} from '#3p/iframe-messaging-client';
 
 import {canInspectWindow} from '../iframe-helper';
 import {

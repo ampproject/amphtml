@@ -1,6 +1,6 @@
-import * as dom from '#core/dom';
-import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
-import {toArray} from '#core/types/array';
+import * as dom from 'core/dom';
+import {setShadowDomSupportedVersionForTesting} from 'core/dom/web-components';
+import {toArray} from 'core/types/array';
 
 import {Services} from '#service';
 import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';

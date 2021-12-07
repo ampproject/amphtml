@@ -1,5 +1,5 @@
-import {htmlFor} from '#core/dom/static-template';
-import {naturalDimensions_} from '#core/static-layout';
+import {htmlFor} from 'core/dom/static-template';
+import {naturalDimensions_} from 'core/static-layout';
 
 import {AmpAudio} from '../amp-audio';
 

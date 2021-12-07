@@ -1,7 +1,7 @@
-import {setStyles} from '#core/dom/style';
-import {tryPlay} from '#core/dom/video';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+import {setStyles} from 'core/dom/style';
+import {tryPlay} from 'core/dom/video';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 

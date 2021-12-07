@@ -1,6 +1,6 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {setStyle} from '#core/dom/style';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {setStyle} from 'core/dom/style';
 
 import {toggleExperiment} from '#experiments';
 

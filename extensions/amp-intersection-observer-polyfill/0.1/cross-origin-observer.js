@@ -1,6 +1,6 @@
-import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {WindowInterface} from '#core/window/interface';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {WindowInterface} from 'core/window/interface';
 
 import {iframeMessagingClientFor} from '#inabox/inabox-iframe-messaging-client';
 

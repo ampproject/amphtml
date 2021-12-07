@@ -1,20 +1,20 @@
-import {playIgnoringError} from '#core/dom/video';
-import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {playIgnoringError} from 'core/dom/video';
+import {AMPDOC_SINGLETON_NAME_ENUM} from 'core/constants/enums';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {
   LayoutPriority_Enum,
   applyFillContent,
   isLayoutSizeDefined,
-} from '#core/dom/layout';
-import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+} from 'core/dom/layout';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
+import {PauseHelper} from 'core/dom/video/pause-helper';
 import {Services} from '#service';
-import {base64EncodeFromBytes} from '#core/types/string/base64';
+import {base64EncodeFromBytes} from 'core/types/string/base64';
 import {createCustomEvent, getData, listen} from '#utils/event-helper';
 import {user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {endsWith} from '#core/types/string';
+import {dict} from 'core/types/object';
+import {endsWith} from 'core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
@@ -23,13 +23,13 @@ import {
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '#experiments';
-import {parseJson} from '#core/types/object/json';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {removeElement} from '#core/dom';
+import {parseJson} from 'core/types/object/json';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import {removeElement} from 'core/dom';
 import {removeFragment} from '../../../src/url';
-import {setStyle} from '#core/dom/style';
+import {setStyle} from 'core/dom/style';
 import {urls} from '../../../src/config';
-import {utf8Encode} from '#core/types/string/bytes';
+import {utf8Encode} from 'core/types/string/bytes';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';

@@ -1,4 +1,4 @@
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {
   measureBorderBoxSize,
   measureContentSize,
@@ -6,8 +6,8 @@ import {
   observeContentSize,
   unobserveBorderBoxSize,
   unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {removeItem} from '#core/types/array';
+} from 'core/dom/layout/size-observer';
+import {removeItem} from 'core/types/array';
 
 describes.realWin('DOM - layout - size-observer', {}, (env) => {
   let win, doc;

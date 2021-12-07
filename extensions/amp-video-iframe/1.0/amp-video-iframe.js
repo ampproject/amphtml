@@ -1,5 +1,5 @@
-import {measureIntersection} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
+import {measureIntersection} from 'core/dom/layout/intersection';
+import {dict} from 'core/types/object';
 
 import {isExperimentOn} from '#experiments';
 

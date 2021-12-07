@@ -1,20 +1,20 @@
-import * as assertions from '#core/assert/base';
+import * as assertions from 'core/assert/base';
 import {
   createError,
   createExpectedError,
   duplicateErrorIfNecessary,
-} from '#core/error';
+} from 'core/error';
 import {
   USER_ERROR_EMBED_SENTINEL,
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
   isUserErrorMessage,
   stripUserError,
-} from '#core/error/message-helpers';
-import * as mode from '#core/mode';
-import {isArray, isString} from '#core/types';
-import {once} from '#core/types/function';
-import {getHashParams} from '#core/types/string/url';
+} from 'core/error/message-helpers';
+import * as mode from 'core/mode';
+import {isArray, isString} from 'core/types';
+import {once} from 'core/types/function';
+import {getHashParams} from 'core/types/string/url';
 
 import {urls} from '../config';
 import {getMode} from '../mode';

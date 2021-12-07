@@ -1,11 +1,11 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {realChildElements} from '#core/dom/query';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyle} from '#core/dom/style';
-import {clamp} from '#core/math';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
+import {realChildElements} from 'core/dom/query';
+import {htmlFor} from 'core/dom/static-template';
+import {setStyle} from 'core/dom/style';
+import {clamp} from 'core/math';
 
 import {Services} from '#service';
 

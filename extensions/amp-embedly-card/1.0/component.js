@@ -1,4 +1,4 @@
-import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
+import {MessageType_Enum, deserializeMessage} from 'core/3p-frame-messaging';
 
 import * as Preact from '#preact';
 import {useCallback, useContext, useState} from '#preact';

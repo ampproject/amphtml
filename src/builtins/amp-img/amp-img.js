@@ -1,15 +1,15 @@
-import {ReadyState_Enum} from '#core/constants/ready-state';
-import {isServerRendered, removeElement} from '#core/dom';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
+import {ReadyState_Enum} from 'core/constants/ready-state';
+import {isServerRendered, removeElement} from 'core/dom';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from 'core/dom/img';
 import {
   Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
-} from '#core/dom/layout';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {scopedQuerySelector} from '#core/dom/query';
-import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
-import * as mode from '#core/mode';
+} from 'core/dom/layout';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import {scopedQuerySelector} from 'core/dom/query';
+import {propagateObjectFitStyles, setImportantStyles} from 'core/dom/style';
+import * as mode from 'core/mode';
 
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';

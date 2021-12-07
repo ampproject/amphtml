@@ -1,4 +1,4 @@
-import {removeItem} from '#core/types/array';
+import {removeItem} from 'core/types/array';
 
 /**
  * This class helps to manage observers. Observers can be added, removed or

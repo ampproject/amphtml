@@ -1,17 +1,17 @@
-import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
-import {getPositionObserver} from '#ads/inabox/position-observer';
-
-import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {devAssert, devAssertElement} from '#core/assert';
-import {Observable} from '#core/data-structures/observable';
-import {isIframed} from '#core/dom';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
+import {devAssert, devAssertElement} from 'core/assert';
+import {Observable} from 'core/data-structures/observable';
+import {isIframed} from 'core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/dom/layout/rect';
-import {px, resetStyles, setImportantStyles} from '#core/dom/style';
-import {throttle} from '#core/types/function';
+} from 'core/dom/layout/rect';
+import {px, resetStyles, setImportantStyles} from 'core/dom/style';
+import {throttle} from 'core/types/function';
+
+import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
+import {getPositionObserver} from '#ads/inabox/position-observer';
 
 import {Services} from '#service';
 import {ViewportBindingDef} from '#service/viewport/viewport-binding-def';

@@ -3,8 +3,8 @@ import {
   devExpectedError,
   duplicateErrorIfNecessary,
   rethrowAsync,
-} from '#core/error';
-import {isUserErrorMessage} from '#core/error/message-helpers';
+} from 'core/error';
+import {isUserErrorMessage} from 'core/error/message-helpers';
 
 import {setReportError, user} from '#utils/log';
 

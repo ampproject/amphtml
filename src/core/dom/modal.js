@@ -1,7 +1,7 @@
-import {devAssert} from '#core/assert';
-import {isConnectedNode, rootNodeFor} from '#core/dom';
-import {isElement} from '#core/types';
-import {toArray} from '#core/types/array';
+import {devAssert} from 'core/assert';
+import {isConnectedNode, rootNodeFor} from 'core/dom';
+import {isElement} from 'core/types';
+import {toArray} from 'core/types/array';
 
 /**
  * @fileoverview Contains logic for implementing a11y and focus handling for

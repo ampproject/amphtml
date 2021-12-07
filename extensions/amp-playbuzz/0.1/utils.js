@@ -1,6 +1,6 @@
-import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+import {rethrowAsync} from 'core/error';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 

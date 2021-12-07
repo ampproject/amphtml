@@ -1,12 +1,12 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {isRTL, tryFocus} from '#core/dom';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {mod} from '#core/math';
-import {isEnumValue} from '#core/types';
-import {areEqualOrdered, toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {isRTL, tryFocus} from 'core/dom';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {mod} from 'core/math';
+import {isEnumValue} from 'core/types';
+import {areEqualOrdered, toArray} from 'core/types/array';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

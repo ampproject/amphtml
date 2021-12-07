@@ -1,9 +1,9 @@
 import {
   Loading_Enum,
   reducer as loadingReducer,
-} from '#core/constants/loading-instructions';
-import {contextProp} from '#core/context/prop';
-import {ContextPropDef} from '#core/context/prop.type';
+} from 'core/constants/loading-instructions';
+import {contextProp} from 'core/context/prop';
+import {ContextPropDef} from 'core/context/prop.type';
 
 /**
  * Defines whether a DOM subtree can be currently seen by the user. A subtree

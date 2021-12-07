@@ -9,7 +9,7 @@ import {EventType} from '../events';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {StoryAnalyticsEvent} from '../story-analytics';
-import {addAttributesToElement} from '#core/dom';
+import {addAttributesToElement} from 'core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {

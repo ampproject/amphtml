@@ -1,4 +1,4 @@
-import * as lr from '#core/dom/layout/rect';
+import * as lr from 'core/dom/layout/rect';
 
 describes.sandboxed('DOM - layout - LayoutRect', {}, () => {
   it('layoutRectLtwh', () => {

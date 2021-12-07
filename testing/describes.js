@@ -65,13 +65,12 @@
  * and `integration` below.
  */
 
+import {createElementWithAttributes} from 'core/dom';
+import {setStyles} from 'core/dom/style';
 import fetchMock from 'fetch-mock/es5/client-bundle';
 import sinon from /*OK*/ 'sinon';
 
 import {CSS} from '#build/amp-ad-0.1.css';
-
-import {createElementWithAttributes} from '#core/dom';
-import {setStyles} from '#core/dom/style';
 
 import {install as installCustomElements} from '#polyfills/custom-elements';
 import {install as installIntersectionObserver} from '#polyfills/intersection-observer';

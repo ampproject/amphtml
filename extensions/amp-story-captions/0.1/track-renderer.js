@@ -1,6 +1,6 @@
-import {removeChildren, removeElement} from '#core/dom';
-import {setStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+import {removeChildren, removeElement} from 'core/dom';
+import {setStyles} from 'core/dom/style';
+import {toArray} from 'core/types/array';
 
 import {listen} from '#utils/event-helper';
 

@@ -1,13 +1,13 @@
-import {TickLabel_Enum} from '#core/constants/enums';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Signals} from '#core/data-structures/signals';
-import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {computedStyle} from '#core/dom/style';
-import {debounce} from '#core/types/function';
-import {dict, map} from '#core/types/object';
-import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
-import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
+import {TickLabel_Enum} from 'core/constants/enums';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Signals} from 'core/data-structures/signals';
+import {whenDocumentComplete, whenDocumentReady} from 'core/document/ready';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {computedStyle} from 'core/dom/style';
+import {debounce} from 'core/types/function';
+import {dict, map} from 'core/types/object';
+import {base64UrlEncodeFromBytes} from 'core/types/string/base64';
+import {getCryptoRandomBytesArray} from 'core/types/string/bytes';
 
 import {Services} from '#service';
 

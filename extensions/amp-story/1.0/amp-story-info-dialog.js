@@ -1,4 +1,4 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -13,7 +13,7 @@ import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest, matches} from '#core/dom/query';
+import {closest, matches} from 'core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '#utils/log';
 import {localize} from './amp-story-localization-service';

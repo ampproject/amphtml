@@ -1,5 +1,5 @@
-import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Deferred} from 'core/data-structures/promise';
+import {PauseHelper} from 'core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoEvents_Enum} from '../../../src/video-interface';
 import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
@@ -11,17 +11,17 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
-} from '#core/dom';
+} from 'core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '#core/dom/fullscreen';
+} from 'core/dom/fullscreen';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
@@ -29,7 +29,7 @@ import {
 } from '../../../src/consent';
 import {getData, listen} from '#utils/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isLayoutSizeDefined} from 'core/dom/layout';
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';

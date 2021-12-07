@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-ad-0.1.css';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {getA4ARegistry} from '#ads/_a4a-config';
-import {hasOwn} from '#core/types/object';
+import {hasOwn} from 'core/types/object';
 import {userAssert} from '#utils/log';
 
 /**

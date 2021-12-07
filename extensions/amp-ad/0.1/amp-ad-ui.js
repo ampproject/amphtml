@@ -1,12 +1,12 @@
 import {Services} from '#service';
-import {ancestorElementsByTag} from '#core/dom/query';
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {dict} from '#core/types/object';
+import {ancestorElementsByTag} from 'core/dom/query';
+import {createElementWithAttributes, removeElement} from 'core/dom';
+import {dict} from 'core/types/object';
 import {user, userAssert} from '#utils/log';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '#utils/event-helper';
-import {setStyle, setStyles} from '#core/dom/style';
+import {setStyle, setStyles} from 'core/dom/style';
 
 const TAG = 'amp-ad-ui';
 

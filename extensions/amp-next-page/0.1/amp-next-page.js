@@ -1,12 +1,12 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {isJsonScriptTag, removeElement} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
+import {isJsonScriptTag, removeElement} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
 import {
   childElementsByAttr,
   childElementsByTag,
   elementByTag,
-} from '#core/dom/query';
-import {parseJson, tryParseJson} from '#core/types/object/json';
+} from 'core/dom/query';
+import {parseJson, tryParseJson} from 'core/types/object/json';
 
 import {isExperimentOn} from '#experiments';
 

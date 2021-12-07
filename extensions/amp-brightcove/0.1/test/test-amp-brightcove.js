@@ -1,14 +1,14 @@
 import '../amp-brightcove';
 import * as consent from '../../../../src/consent';
 import {BaseElement} from '../../../../src/base-element';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
 import {VideoEvents_Enum} from '../../../../src/video-interface';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 import {listenOncePromise} from '#utils/event-helper';
 import {macroTask} from '#testing/helpers';
 import {parseUrlDeprecated} from '../../../../src/url';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 
 describes.realWin(
   'amp-brightcove',

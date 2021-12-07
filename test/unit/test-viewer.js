@@ -1,4 +1,4 @@
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';

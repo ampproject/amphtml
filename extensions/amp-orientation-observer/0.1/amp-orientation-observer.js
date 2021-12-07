@@ -1,6 +1,6 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {clamp, sum} from '#core/math';
-import {dict} from '#core/types/object';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {clamp, sum} from 'core/math';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

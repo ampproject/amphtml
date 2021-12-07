@@ -1,8 +1,8 @@
-import {Keys_Enum} from '#core/constants/key-codes';
-import {getDataParamsFromAttributes} from '#core/dom';
-import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {getDataParamsFromAttributes} from 'core/dom';
+import {toggle} from 'core/dom/style';
+import {dict} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
 
 import {Services} from '#service';
 

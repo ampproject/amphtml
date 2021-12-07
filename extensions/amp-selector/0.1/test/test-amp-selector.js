@@ -1,8 +1,8 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {createElementWithAttributes} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {createElementWithAttributes} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';

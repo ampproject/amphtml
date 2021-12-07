@@ -1,4 +1,4 @@
-import {mod} from '#core/math';
+import {mod} from 'core/math';
 
 /**
  * @enum {number}

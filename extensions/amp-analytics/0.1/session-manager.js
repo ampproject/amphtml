@@ -4,9 +4,9 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {hasOwn, map} from '#core/types/object';
-import {isDocumentHidden} from '#core/document/visibility';
-import {isObject} from '#core/types';
+import {hasOwn, map} from 'core/types/object';
+import {isDocumentHidden} from 'core/document/visibility';
+import {isObject} from 'core/types';
 import {listen} from '#utils/event-helper';
 
 /** @const {string} */

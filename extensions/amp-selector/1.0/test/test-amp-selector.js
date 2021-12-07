@@ -1,6 +1,6 @@
 import '../amp-selector';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {htmlFor} from '#core/dom/static-template';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {htmlFor} from 'core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 

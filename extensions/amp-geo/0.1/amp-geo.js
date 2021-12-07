@@ -19,11 +19,11 @@
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Deferred} from '#core/data-structures/promise';
-import {isJsonScriptTag, iterateCursor} from '#core/dom';
-import {isArray, isObject} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
-import {getHashParams} from '#core/types/string/url';
+import {Deferred} from 'core/data-structures/promise';
+import {isJsonScriptTag, iterateCursor} from 'core/dom';
+import {isArray, isObject} from 'core/types';
+import {tryParseJson} from 'core/types/object/json';
+import {getHashParams} from 'core/types/string/url';
 
 import {isCanary, isExperimentOn} from '#experiments';
 

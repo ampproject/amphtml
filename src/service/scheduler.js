@@ -1,11 +1,7 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {
-  containsNotSelf,
-  hasNextNodeInDocumentOrder,
-  isIframed,
-} from '#core/dom';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {removeItem} from '#core/types/array';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {containsNotSelf, hasNextNodeInDocumentOrder, isIframed} from 'core/dom';
+import {LayoutPriority_Enum} from 'core/dom/layout';
+import {removeItem} from 'core/types/array';
 
 import {READY_SCAN_SIGNAL} from './resources-interface';
 

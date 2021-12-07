@@ -1,5 +1,5 @@
-import {Observable} from '#core/data-structures/observable';
-import {isElement} from '#core/types';
+import {Observable} from 'core/data-structures/observable';
+import {isElement} from 'core/types';
 
 import {Services} from '#service';
 

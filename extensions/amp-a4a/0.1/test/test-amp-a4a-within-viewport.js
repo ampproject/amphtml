@@ -4,8 +4,8 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {htmlFor} from '#core/dom/static-template';
-import {pushIfNotExist, removeItem} from '#core/types/array';
+import {htmlFor} from 'core/dom/static-template';
+import {pushIfNotExist, removeItem} from 'core/types/array';
 
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 

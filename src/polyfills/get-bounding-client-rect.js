@@ -5,9 +5,9 @@
  * @see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/106812/
  */
 
-import {isConnectedNode} from '#core/dom';
-import {LayoutRectDef, layoutRectLtwh} from '#core/dom/layout/rect';
-import * as mode from '#core/mode';
+import {isConnectedNode} from 'core/dom';
+import {LayoutRectDef, layoutRectLtwh} from 'core/dom/layout/rect';
+import * as mode from 'core/mode';
 
 /**
  * Stores the native getBoundingClientRect before we patch it, so that the

@@ -1,5 +1,5 @@
-import {toggle} from '#core/dom/style';
-import {dict, hasOwn} from '#core/types/object';
+import {toggle} from 'core/dom/style';
+import {dict, hasOwn} from 'core/types/object';
 
 import {ScrollComponent} from './scroll-component';
 

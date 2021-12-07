@@ -1,6 +1,6 @@
-import {Deferred} from '#core/data-structures/promise';
-import {isArray, isObject} from '#core/types';
-import {hasOwn} from '#core/types/object';
+import {Deferred} from 'core/data-structures/promise';
+import {isArray, isObject} from 'core/types';
+import {hasOwn} from 'core/types/object';
 
 import {Services} from '#service';
 

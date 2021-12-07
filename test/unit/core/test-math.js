@@ -6,7 +6,7 @@ import {
   mapRange,
   mod,
   sum,
-} from '#core/math';
+} from 'core/math';
 
 describes.sandboxed('math', {}, () => {
   describe('mapRange', () => {

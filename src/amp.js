@@ -5,9 +5,9 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {TickLabel_Enum} from '#core/constants/enums';
-import {whenDocumentComplete} from '#core/document/ready';
-import * as mode from '#core/mode';
+import {TickLabel_Enum} from 'core/constants/enums';
+import {whenDocumentComplete} from 'core/document/ready';
+import * as mode from 'core/mode';
 
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';

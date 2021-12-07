@@ -1,4 +1,4 @@
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
 
 import {useCallback, useRef} from '#preact';
 

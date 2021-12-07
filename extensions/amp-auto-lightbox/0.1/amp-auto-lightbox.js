@@ -6,14 +6,14 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {dispatchCustomEvent} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {toArray} from '#core/types/array';
-import {tryParseJson} from '#core/types/object/json';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {dispatchCustomEvent} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import {measureIntersectionNoRoot} from 'core/dom/layout/intersection-no-root';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {toArray} from 'core/types/array';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

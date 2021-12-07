@@ -1,11 +1,11 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Deferred} from '#core/data-structures/promise';
-import {removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {clamp} from '#core/math';
-import {isFiniteNumber, isObject} from '#core/types';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {Deferred} from 'core/data-structures/promise';
+import {removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {clamp} from 'core/math';
+import {isFiniteNumber, isObject} from 'core/types';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

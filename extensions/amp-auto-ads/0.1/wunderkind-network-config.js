@@ -1,6 +1,6 @@
-import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+import {dict} from 'core/types/object';
 
-import {dict} from '#core/types/object';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {Services} from '#service';
 

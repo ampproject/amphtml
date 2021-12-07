@@ -3,15 +3,15 @@ import {
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
-} from '#core/constants/action-constants';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {isAmp4Email} from '#core/document/format';
-import {isEnabled} from '#core/dom';
-import {isFiniteNumber} from '#core/types';
-import {isArray, toArray} from '#core/types/array';
-import {debounce, throttle} from '#core/types/function';
-import {dict, getValueForExpr, hasOwn, map} from '#core/types/object';
-import {getWin} from '#core/window';
+} from 'core/constants/action-constants';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {isAmp4Email} from 'core/document/format';
+import {isEnabled} from 'core/dom';
+import {isFiniteNumber} from 'core/types';
+import {isArray, toArray} from 'core/types/array';
+import {debounce, throttle} from 'core/types/function';
+import {dict, getValueForExpr, hasOwn, map} from 'core/types/object';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 

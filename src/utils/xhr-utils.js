@@ -1,6 +1,6 @@
-import {devAssert, userAssert} from '#core/assert';
-import {fromIterator, isArray} from '#core/types/array';
-import {dict, isObject, map} from '#core/types/object';
+import {devAssert, userAssert} from 'core/assert';
+import {fromIterator, isArray} from 'core/types/array';
+import {dict, isObject, map} from 'core/types/object';
 
 import {isExperimentOn} from '#experiments';
 

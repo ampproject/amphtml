@@ -6,13 +6,13 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {tryResolve} from '#core/data-structures/promise';
-import {isIframed} from '#core/dom';
-import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
-import {parseJson, tryParseJson} from '#core/types/object/json';
-import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
-import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
+import {tryResolve} from 'core/data-structures/promise';
+import {isIframed} from 'core/dom';
+import {rethrowAsync} from 'core/error';
+import {dict} from 'core/types/object';
+import {parseJson, tryParseJson} from 'core/types/object/json';
+import {base64UrlEncodeFromBytes} from 'core/types/string/base64';
+import {getCryptoRandomBytesArray} from 'core/types/string/bytes';
 
 import {isExperimentOn} from '#experiments';
 

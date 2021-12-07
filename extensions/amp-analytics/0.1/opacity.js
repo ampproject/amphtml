@@ -1,4 +1,4 @@
-import {computedStyle} from '#core/dom/style';
+import {computedStyle} from 'core/dom/style';
 
 /**
  *  Returns the min opacity found amongst the element and its ancestors

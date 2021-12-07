@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 import {postMessageWhenAvailable} from '../../src/iframe-video';
 import {addParamsToUrl} from '../../src/url';

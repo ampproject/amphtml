@@ -1,6 +1,6 @@
-import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {dict, map} from '#core/types/object';
-import {getHistoryState} from '#core/window/history';
+import {Deferred, tryResolve} from 'core/data-structures/promise';
+import {dict, map} from 'core/types/object';
+import {getHistoryState} from 'core/window/history';
 
 import {Services} from '#service';
 

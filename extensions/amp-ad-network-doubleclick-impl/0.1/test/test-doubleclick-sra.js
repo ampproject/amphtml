@@ -1,11 +1,12 @@
 import '../../../amp-ad/0.1/amp-ad';
+
+import {Deferred} from 'core/data-structures/promise';
+import {createElementWithAttributes} from 'core/dom';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {utf8Decode, utf8Encode} from 'core/types/string/bytes';
+
 import {MANUAL_EXPERIMENT_ID} from '#ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '#ads/google/a4a/utils';
-
-import {Deferred} from '#core/data-structures/promise';
-import {createElementWithAttributes} from '#core/dom';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 import {Xhr} from '#service/xhr-impl';
 

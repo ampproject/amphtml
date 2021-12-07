@@ -1,10 +1,10 @@
 import '#service/real-time-config/real-time-config-impl';
-import {Deferred} from '#core/data-structures/promise';
-import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import * as mode from '#core/mode';
-import {stringHash32} from '#core/types/string';
-import {WindowInterface} from '#core/window/interface';
+import {Deferred} from 'core/data-structures/promise';
+import {domFingerprintPlain} from 'core/dom/fingerprint';
+import {getPageLayoutBoxBlocking} from 'core/dom/layout/page-layout-box';
+import * as mode from 'core/mode';
+import {stringHash32} from 'core/types/string';
+import {WindowInterface} from 'core/window/interface';
 
 import {getBinaryType, isExperimentOn} from '#experiments';
 

@@ -1,9 +1,9 @@
 import '../amp-facebook';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {facebook} from '#3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
-import {serializeMessage} from '#core/3p-frame-messaging';
+import {serializeMessage} from 'core/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/helpers/service';

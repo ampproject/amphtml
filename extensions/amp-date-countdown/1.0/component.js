@@ -1,5 +1,5 @@
-import {getDate} from '#core/types/date';
-import {dict} from '#core/types/object';
+import {getDate} from 'core/types/date';
+import {dict} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {useEffect, useMemo, useRef, useState} from '#preact';

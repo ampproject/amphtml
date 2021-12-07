@@ -9,12 +9,12 @@ import {
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
-} from '#core/dom/query';
+} from 'core/dom/query';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 
-import {setStyle, toggle} from '#core/dom/style';
+import {setStyle, toggle} from 'core/dom/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

@@ -1,5 +1,5 @@
 import '../amp-nexxtv-player';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 import {listenOncePromise} from '#utils/event-helper';
 

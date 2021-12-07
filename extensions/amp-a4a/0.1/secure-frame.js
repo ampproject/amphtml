@@ -1,5 +1,5 @@
-import {createElementWithAttributes, escapeHtml} from '#core/dom';
-import {dict} from '#core/types/object';
+import {createElementWithAttributes, escapeHtml} from 'core/dom';
+import {dict} from 'core/types/object';
 
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 

@@ -1,23 +1,23 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Deferred} from '#core/data-structures/promise';
-import {isAmp4Email} from '#core/document/format';
-import {removeChildren, tryFocus} from '#core/dom';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Deferred} from 'core/data-structures/promise';
+import {isAmp4Email} from 'core/document/format';
+import {removeChildren, tryFocus} from 'core/dom';
 import {
   Layout_Enum,
   applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
   parseLayout,
-} from '#core/dom/layout';
+} from 'core/dom/layout';
 import {
   childElementByAttr,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
-import {isArray, toArray} from '#core/types/array';
-import {dict, getValueForExpr} from '#core/types/object';
+} from 'core/dom/query';
+import {px, setImportantStyles, setStyles, toggle} from 'core/dom/style';
+import {isArray, toArray} from 'core/types/array';
+import {dict, getValueForExpr} from 'core/types/object';
 
 import {isExperimentOn} from '#experiments';
 

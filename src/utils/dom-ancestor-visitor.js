@@ -1,5 +1,5 @@
-import {devAssert, devAssertElement} from '#core/assert';
-import {computedStyle} from '#core/dom/style';
+import {devAssert, devAssertElement} from 'core/assert';
+import {computedStyle} from 'core/dom/style';
 
 import {dev} from '#utils/log';
 

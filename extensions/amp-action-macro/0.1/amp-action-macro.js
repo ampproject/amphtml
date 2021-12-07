@@ -1,4 +1,4 @@
-import {LayoutPriority_Enum} from '#core/dom/layout';
+import {LayoutPriority_Enum} from 'core/dom/layout';
 
 import {Services} from '#service';
 

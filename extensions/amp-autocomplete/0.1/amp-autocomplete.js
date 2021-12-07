@@ -1,10 +1,10 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {Layout_Enum} from '#core/dom/layout';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {Layout_Enum} from 'core/dom/layout';
 import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -21,17 +21,17 @@ import {
   hasOwn,
   map,
   ownProperty,
-} from '#core/types/object';
+} from 'core/types/object';
 
-import {includes} from '#core/types/string';
-import {isArray, isEnumValue} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
+import {includes} from 'core/types/string';
+import {isArray, isEnumValue} from 'core/types';
+import {tryParseJson} from 'core/types/object/json';
 
-import {mod} from '#core/math';
-import {once} from '#core/types/function';
-import {removeChildren, tryFocus} from '#core/dom';
+import {mod} from 'core/math';
+import {once} from 'core/types/function';
+import {removeChildren, tryFocus} from 'core/dom';
 import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
-import {toggle} from '#core/dom/style';
+import {toggle} from 'core/dom/style';
 import fuzzysearch from '#third_party/fuzzysearch';
 
 /**

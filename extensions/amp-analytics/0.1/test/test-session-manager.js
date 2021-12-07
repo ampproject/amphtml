@@ -5,7 +5,7 @@ import {
   SessionManager,
   installSessionServiceForTesting,
 } from '../session-manager';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
 import {expect} from 'chai';
 import {installVariableServiceForTesting} from '../variables';
 import {

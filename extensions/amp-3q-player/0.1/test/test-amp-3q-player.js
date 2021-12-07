@@ -1,6 +1,6 @@
 import '../amp-3q-player';
-import {createElementWithAttributes} from '#core/dom';
-import * as fullscreen from '#core/dom/fullscreen';
+import {createElementWithAttributes} from 'core/dom';
+import * as fullscreen from 'core/dom/fullscreen';
 
 import {Services} from '#service';
 

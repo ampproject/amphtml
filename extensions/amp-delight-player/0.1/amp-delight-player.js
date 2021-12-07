@@ -1,11 +1,11 @@
-import {Deferred} from '#core/data-structures/promise';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyle} from '#core/dom/style';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
+import {Deferred} from 'core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
+import {htmlFor} from 'core/dom/static-template';
+import {setStyle} from 'core/dom/style';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

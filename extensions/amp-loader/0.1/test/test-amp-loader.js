@@ -1,4 +1,4 @@
-import {getStyle} from '#core/dom/style';
+import {getStyle} from 'core/dom/style';
 
 import {LoaderService} from '../amp-loader';
 

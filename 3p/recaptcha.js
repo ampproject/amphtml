@@ -1,8 +1,8 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import {dict, hasOwn} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+import {dict, hasOwn} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {
   dev,

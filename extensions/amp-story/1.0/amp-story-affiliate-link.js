@@ -1,4 +1,4 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 /**
  * @fileoverview Affiliate link component that expands when clicked.
  */

@@ -17,7 +17,7 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -30,12 +30,12 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
+import {dict, hasOwn} from 'core/types/object';
 import {getData} from '#utils/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {isArray, isEnumValue, isObject} from '#core/types';
-import {realChildElements} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
+import {isArray, isEnumValue, isObject} from 'core/types';
+import {realChildElements} from 'core/dom/query';
+import {toggle} from 'core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';

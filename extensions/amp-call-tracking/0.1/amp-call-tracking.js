@@ -1,4 +1,4 @@
-import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from 'core/dom/layout';
 
 import {Services} from '#service';
 

@@ -3,7 +3,7 @@ import {
   parseSrcset,
   srcsetFromElement,
   srcsetFromSrc,
-} from '#core/dom/srcset';
+} from 'core/dom/srcset';
 
 describes.sandboxed('DOM - srcset', {}, () => {
   describe('parseSrcset', () => {

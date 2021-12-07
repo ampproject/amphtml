@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 import {AmpA4A} from '../amp-a4a';
 

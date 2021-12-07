@@ -1,4 +1,4 @@
-import {devAssert} from '#core/assert';
+import {devAssert} from 'core/assert';
 
 /**
  * Key string in an action arguments map for an unparsed object literal string.

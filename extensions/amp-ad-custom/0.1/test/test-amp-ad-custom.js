@@ -1,6 +1,6 @@
 import '../../../amp-mustache/0.2/amp-mustache';
-import {tryParseJson} from '#core/types/object/json';
-import {utf8Encode} from '#core/types/string/bytes';
+import {tryParseJson} from 'core/types/object/json';
+import {utf8Encode} from 'core/types/string/bytes';
 
 import {getAmpAdTemplateHelper} from '../../../amp-a4a/0.1/amp-ad-template-helper';
 import {AMP_TEMPLATED_CREATIVE_HEADER_NAME} from '../../../amp-a4a/0.1/template-validator';

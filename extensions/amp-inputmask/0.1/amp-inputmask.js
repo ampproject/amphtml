@@ -1,5 +1,5 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {iterateCursor} from '#core/dom';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {iterateCursor} from 'core/dom';
 
 import {listen} from '#utils/event-helper';
 

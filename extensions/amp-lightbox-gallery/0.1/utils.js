@@ -1,7 +1,7 @@
 /**
  * @fileoverview Description of this file.
  */
-import {padStart} from '#core/types/string';
+import {padStart} from 'core/types/string';
 
 import {Services} from '#service';
 /**

@@ -1,5 +1,5 @@
-import {isArray, isObject} from '#core/types';
-import {dict} from '#core/types/object';
+import {isArray, isObject} from 'core/types';
+import {dict} from 'core/types/object';
 
 import {user} from '#utils/log';
 

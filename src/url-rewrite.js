@@ -1,4 +1,4 @@
-import {parseSrcset} from '#core/dom/srcset';
+import {parseSrcset} from 'core/dom/srcset';
 
 import {user} from '#utils/log';
 

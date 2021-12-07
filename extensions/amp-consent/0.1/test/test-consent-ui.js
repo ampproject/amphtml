@@ -5,11 +5,11 @@ import {
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {CONSENT_STRING_TYPE} from 'core/constants/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '#service';
-import {dict} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
+import {dict} from 'core/types/object';
+import {elementByTag} from 'core/dom/query';
 import {macroTask} from '#testing/helpers';
 import {
   registerServiceBuilder,

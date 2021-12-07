@@ -1,14 +1,14 @@
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {useMemo} from '#preact';
-import {dispatchCustomEvent} from '#core/dom';
+import {dispatchCustomEvent} from 'core/dom';
 import {
   DailymotionEvents,
   getDailymotionIframeSrc,
   makeDailymotionMessage,
 } from '../dailymotion-api';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 /**
  * @param {string} method

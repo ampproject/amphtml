@@ -1,10 +1,10 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {LayoutPriority_Enum} from '#core/dom/layout';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {LayoutPriority_Enum} from 'core/dom/layout';
 import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {createElementWithAttributes} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {isAdLike} from '../../../../src/iframe-helper';

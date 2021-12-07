@@ -1,4 +1,4 @@
-import {Curves_Enum, bezierCurve, getCurve} from '#core/data-structures/curve';
+import {Curves_Enum, bezierCurve, getCurve} from 'core/data-structures/curve';
 
 describes.sandboxed('data structures - Curve', {}, () => {
   it('bezierCurve', () => {

@@ -1,6 +1,6 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {iterateCursor} from '#core/dom';
-import {tryCallback} from '#core/error';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {iterateCursor} from 'core/dom';
+import {tryCallback} from 'core/error';
 
 import {listen} from '#utils/event-helper';
 import {devAssert} from '#utils/log';

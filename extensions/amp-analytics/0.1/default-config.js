@@ -1,4 +1,4 @@
-import {jsonConfiguration} from '#core/types/object/json';
+import {jsonConfiguration} from 'core/types/object/json';
 
 // TODO(zhouyx@: Rename file and object name)
 const defaultConfig = jsonConfiguration({

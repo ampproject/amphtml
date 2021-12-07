@@ -1,4 +1,4 @@
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 
 import {Services} from '#service';
 import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {setStyles} from '#core/dom/style';
+import {setStyles} from 'core/dom/style';
 
 import {loadScript} from './3p';
 

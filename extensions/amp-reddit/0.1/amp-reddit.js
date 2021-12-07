@@ -1,4 +1,4 @@
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 
 import {Services} from '#service';
 

@@ -2,11 +2,11 @@ import {
   MessageType_Enum,
   deserializeMessage,
   listen,
-} from '#core/3p-frame-messaging';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {isJsonScriptTag} from '#core/dom';
-import {isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+} from 'core/3p-frame-messaging';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {isJsonScriptTag} from 'core/dom';
+import {isObject} from 'core/types';
+import {parseJson} from 'core/types/object/json';
 
 import {HostServices} from '#inabox/host-services';
 

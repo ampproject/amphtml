@@ -2,8 +2,8 @@ import * as Preact from '#preact';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {BentoInlineGallery} from './component';
 import {PreactBaseElement} from '#preact/base-element';
-import {dict} from '#core/types/object';
-import {setProp} from '#core/context';
+import {dict} from 'core/types/object';
+import {setProp} from 'core/context';
 import {useContext, useLayoutEffect} from '#preact';
 
 export const TAG = 'bento-inline-gallery';

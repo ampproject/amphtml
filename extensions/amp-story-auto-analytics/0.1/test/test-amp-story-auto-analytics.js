@@ -1,5 +1,5 @@
 import '../amp-story-auto-analytics';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 describes.realWin(
   'amp-story-auto-analytics',

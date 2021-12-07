@@ -4,7 +4,7 @@ import {WithAmpContext} from '#preact/context';
 import {createRef} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {mount} from 'enzyme';
-import {omit} from '#core/types/object';
+import {omit} from 'core/types/object';
 
 import {useStyles as useAutoplayStyles} from '../autoplay.jss';
 

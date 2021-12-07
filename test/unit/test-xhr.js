@@ -1,4 +1,4 @@
-import {utf8Decode} from '#core/types/string/bytes';
+import {utf8Decode} from 'core/types/string/bytes';
 
 import {toggleExperiment} from '#experiments';
 

@@ -1,8 +1,8 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
 import {Services} from '#service';
-import {lastChildElement} from '#core/dom/query';
+import {lastChildElement} from 'core/dom/query';
 import {userAssert} from '#utils/log';
 
 /**

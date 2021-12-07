@@ -3,7 +3,7 @@ import {Services} from '#service';
 import {Toolbar} from '../toolbar';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '#testing/iframe';
-import {toArray} from '#core/types/array';
+import {toArray} from 'core/types/array';
 
 adopt(window);
 

@@ -1,17 +1,17 @@
-import {tryPlay} from '#core/dom/video';
+import {tryPlay} from 'core/dom/video';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {PauseHelper} from 'core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoEvents_Enum} from '../../../src/video-interface';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
 import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 import {
   childElement,
   childElementByTag,
   childElementsByTag,
   matches,
-} from '#core/dom/query';
+} from 'core/dom/query';
 import {descendsFromStory} from '#utils/story';
 import {dev, devAssert, user} from '#utils/log';
 import {
@@ -19,29 +19,29 @@ import {
   dispatchCustomEvent,
   insertAfterOrAtStart,
   removeElement,
-} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
 import {fetchCachedSources} from './video-cache';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '#core/dom/fullscreen';
+} from 'core/dom/fullscreen';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isExperimentOn} from '#experiments';
 import {listen, listenOncePromise} from '#utils/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
-} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+} from 'core/dom/style';
+import {toArray} from 'core/types/array';
 
 const TAG = 'amp-video';
 

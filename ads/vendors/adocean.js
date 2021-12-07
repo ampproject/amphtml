@@ -1,6 +1,6 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
 import {computeInMasterFrame, validateData, writeScript} from '#3p/3p';
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from 'core/types/object/json';
 
 /**
  * @const {Object<string, string>}

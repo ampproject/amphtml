@@ -1,6 +1,6 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Layout_Enum} from '#core/dom/layout';
-import {childElementByAttr} from '#core/dom/query';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Layout_Enum} from 'core/dom/layout';
+import {childElementByAttr} from 'core/dom/query';
 
 import {user, userAssert} from '#utils/log';
 

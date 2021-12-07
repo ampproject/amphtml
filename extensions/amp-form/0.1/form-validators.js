@@ -1,5 +1,5 @@
-import {iterateCursor} from '#core/dom';
-import {getWin} from '#core/window';
+import {iterateCursor} from 'core/dom';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 

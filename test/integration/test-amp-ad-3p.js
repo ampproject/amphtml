@@ -1,4 +1,4 @@
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 
 import {Services} from '#service';
 import {installPlatformService} from '#service/platform-impl';

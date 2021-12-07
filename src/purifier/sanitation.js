@@ -1,5 +1,5 @@
-import {isAmp4Email} from '#core/document/format';
-import {dict, map} from '#core/types/object';
+import {isAmp4Email} from 'core/document/format';
+import {dict, map} from 'core/types/object';
 
 import {isUrlAttribute} from '../url-rewrite';
 

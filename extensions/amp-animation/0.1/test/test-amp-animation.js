@@ -1,4 +1,4 @@
-import {DEFAULT_ACTION} from '#core/constants/action-constants';
+import {DEFAULT_ACTION} from 'core/constants/action-constants';
 
 import {AmpAnimation} from '../amp-animation';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';

@@ -1,7 +1,7 @@
-import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+import {Layout_Enum} from 'core/dom/layout';
+import {dict} from 'core/types/object';
 
-import {Layout_Enum} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {Services} from '#service';
 

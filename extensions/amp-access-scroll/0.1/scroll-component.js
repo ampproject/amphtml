@@ -1,6 +1,6 @@
-import {createElementWithAttributes} from '#core/dom';
-import {assertDoesNotContainDisplay, px, setStyles} from '#core/dom/style';
-import {hasOwn} from '#core/types/object';
+import {createElementWithAttributes} from 'core/dom';
+import {assertDoesNotContainDisplay, px, setStyles} from 'core/dom/style';
+import {hasOwn} from 'core/types/object';
 
 import {Services} from '#service';
 

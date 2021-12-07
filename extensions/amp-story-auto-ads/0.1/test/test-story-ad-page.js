@@ -1,4 +1,4 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
 
 import {macroTask} from '#testing/helpers';
 

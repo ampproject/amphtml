@@ -1,6 +1,6 @@
-import {Deferred} from '#core/data-structures/promise';
-import {rootNodeFor} from '#core/dom';
-import {scopedQuerySelector} from '#core/dom/query';
+import {Deferred} from 'core/data-structures/promise';
+import {rootNodeFor} from 'core/dom';
+import {scopedQuerySelector} from 'core/dom/query';
 
 import {userAssert} from '#utils/log';
 

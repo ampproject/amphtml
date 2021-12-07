@@ -1,13 +1,13 @@
 import '../../../amp-mustache/0.1/amp-mustache';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
 import {
   AsyncInputAttributes_Enum,
   AsyncInputClasses_Enum,
-} from '#core/constants/async-input';
-import {createElementWithAttributes} from '#core/dom';
-import {fromIterator} from '#core/types/array';
-import {parseQueryString} from '#core/types/string/url';
+} from 'core/constants/async-input';
+import {createElementWithAttributes} from 'core/dom';
+import {fromIterator} from 'core/types/array';
+import {parseQueryString} from 'core/types/string/url';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';

@@ -19,11 +19,11 @@
  * style without changing the layout/size.
  */
 
-import {removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {setStyle} from '#core/dom/style';
-import {isObject} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
+import {removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {setStyle} from 'core/dom/style';
+import {isObject} from 'core/types';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

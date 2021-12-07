@@ -1,11 +1,11 @@
-import {Deferred} from '#core/data-structures/promise';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {Deferred} from 'core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from 'core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '#core/dom/fullscreen';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+} from 'core/dom/fullscreen';
+import {isLayoutSizeDefined} from 'core/dom/layout';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

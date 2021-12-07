@@ -1,6 +1,6 @@
-import {LastAddedResolver} from '#core/data-structures/promise';
-import {iterateCursor} from '#core/dom';
-import {isFieldDefault} from '#core/dom/form';
+import {LastAddedResolver} from 'core/data-structures/promise';
+import {iterateCursor} from 'core/dom';
+import {isFieldDefault} from 'core/dom/form';
 
 import {user} from '#utils/log';
 

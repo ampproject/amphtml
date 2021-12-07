@@ -1,13 +1,13 @@
-import {devAssert} from '#core/assert';
-import {Loading_Enum} from '#core/constants/loading-instructions';
-import {rediscoverChildren, removeProp, setProp} from '#core/context';
+import {devAssert} from 'core/assert';
+import {Loading_Enum} from 'core/constants/loading-instructions';
+import {rediscoverChildren, removeProp, setProp} from 'core/context';
 import {
   loadAll,
   pauseAll,
   unmountAll,
-} from '#core/dom/resource-container-helper';
-import {isElement} from '#core/types';
-import {objectsEqualShallow} from '#core/types/object';
+} from 'core/dom/resource-container-helper';
+import {isElement} from 'core/types';
+import {objectsEqualShallow} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {useEffect, useLayoutEffect, useRef} from '#preact';

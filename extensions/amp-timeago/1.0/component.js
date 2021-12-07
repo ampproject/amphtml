@@ -1,6 +1,6 @@
-import {devAssertElement} from '#core/assert';
-import {getDate} from '#core/types/date';
-import {getWin} from '#core/window';
+import {devAssertElement} from 'core/assert';
+import {getDate} from 'core/types/date';
+import {getWin} from 'core/window';
 
 import * as Preact from '#preact';
 import {useCallback, useRef, useState} from '#preact';

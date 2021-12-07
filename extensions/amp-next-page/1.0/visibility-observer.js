@@ -1,5 +1,5 @@
-import {RelativePositions_Enum} from '#core/dom/layout/rect';
-import {throttle} from '#core/types/function';
+import {RelativePositions_Enum} from 'core/dom/layout/rect';
+import {throttle} from 'core/types/function';
 
 import {Services} from '#service';
 import {

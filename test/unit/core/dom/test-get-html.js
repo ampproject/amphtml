@@ -1,4 +1,4 @@
-import {getHtml} from '#core/dom/get-html';
+import {getHtml} from 'core/dom/get-html';
 
 const template = `<div id="wrapper">
   <div test="test" class="tmp">Lorem ipsum</div>

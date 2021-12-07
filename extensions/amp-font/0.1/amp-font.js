@@ -17,7 +17,7 @@
  * the amp-font element's layout type is nodisplay.
  */
 
-import {isFiniteNumber} from '#core/types';
+import {isFiniteNumber} from 'core/types';
 
 import {Services} from '#service';
 

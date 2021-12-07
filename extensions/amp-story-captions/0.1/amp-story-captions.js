@@ -1,5 +1,5 @@
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {toArray} from '#core/types/array';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {toArray} from 'core/types/array';
 
 import {listen} from '#utils/event-helper';
 

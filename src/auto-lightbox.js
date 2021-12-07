@@ -1,4 +1,4 @@
-import {isAmphtml} from '#core/document/format';
+import {isAmphtml} from 'core/document/format';
 
 import {Services} from '#service';
 

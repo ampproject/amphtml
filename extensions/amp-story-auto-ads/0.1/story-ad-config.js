@@ -1,6 +1,6 @@
-import {isJsonScriptTag} from '#core/dom';
-import {isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+import {isJsonScriptTag} from 'core/dom';
+import {isObject} from 'core/types';
+import {parseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

@@ -2,11 +2,11 @@ import {
   Layout_Enum,
   applyFillContent,
   isLayoutSizeFixed,
-} from '#core/dom/layout';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {realChildNodes} from '#core/dom/query';
-import {setStyle} from '#core/dom/style';
-import {tryPlay} from '#core/dom/video';
+} from 'core/dom/layout';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import {realChildNodes} from 'core/dom/query';
+import {setStyle} from 'core/dom/style';
+import {tryPlay} from 'core/dom/video';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {listen} from '#utils/event-helper';

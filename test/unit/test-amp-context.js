@@ -1,6 +1,6 @@
-import {AmpContext} from '#3p/ampcontext';
+import {MessageType_Enum, serializeMessage} from 'core/3p-frame-messaging';
 
-import {MessageType_Enum, serializeMessage} from '#core/3p-frame-messaging';
+import {AmpContext} from '#3p/ampcontext';
 
 import {Platform} from '#service/platform-impl';
 

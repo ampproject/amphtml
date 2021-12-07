@@ -1,9 +1,9 @@
-import {PriorityQueue} from '#core/data-structures/priority-queue';
-import {isIframed} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dict} from '#core/types/object';
-import {getWin} from '#core/window';
+import {PriorityQueue} from 'core/data-structures/priority-queue';
+import {isIframed} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {dict} from 'core/types/object';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 

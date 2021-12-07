@@ -1,6 +1,6 @@
 import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {createElementWithAttributes} from 'core/dom';
+import {dict, getValueForExpr} from 'core/types/object';
 
 /**
  * @param {!JsonObject} media

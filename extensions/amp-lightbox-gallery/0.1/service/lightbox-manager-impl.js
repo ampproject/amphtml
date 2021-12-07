@@ -1,15 +1,15 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {iterateCursor} from '#core/dom';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {iterateCursor} from 'core/dom';
 import {
   childElement,
   childElementByAttr,
   closestAncestorElementBySelector,
   elementByTag,
-} from '#core/dom/query';
-import {srcsetFromElement, srcsetFromSrc} from '#core/dom/srcset';
-import {toArray} from '#core/types/array';
-import {map} from '#core/types/object';
+} from 'core/dom/query';
+import {srcsetFromElement, srcsetFromSrc} from 'core/dom/srcset';
+import {toArray} from 'core/types/array';
+import {map} from 'core/types/object';
 
 import {Services} from '#service';
 

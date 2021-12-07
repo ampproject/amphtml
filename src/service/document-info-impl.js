@@ -1,6 +1,6 @@
-import {isArray} from '#core/types';
-import {map} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
+import {isArray} from 'core/types';
+import {map} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
 
 import {getRandomString64} from './cid-impl';
 

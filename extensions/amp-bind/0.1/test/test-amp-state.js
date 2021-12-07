@@ -1,5 +1,5 @@
 import '../amp-bind';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 
 import {Services} from '#service';
 

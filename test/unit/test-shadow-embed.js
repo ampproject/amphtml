@@ -2,8 +2,8 @@ import {
   ShadowDomVersion_Enum,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
-} from '#core/dom/web-components';
-import {toArray} from '#core/types/array';
+} from 'core/dom/web-components';
+import {toArray} from 'core/types/array';
 
 import {AmpDocShadow} from '#service/ampdoc-impl';
 

@@ -15,8 +15,8 @@
  */
 
 import '../amp-social-share';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {tryFocus} from '#core/dom';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {tryFocus} from 'core/dom';
 
 import {Services} from '#service';
 

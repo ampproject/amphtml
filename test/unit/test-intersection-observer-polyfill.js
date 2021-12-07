@@ -1,4 +1,4 @@
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 
 import {AmpDocService} from '#service/ampdoc-impl';
 import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';

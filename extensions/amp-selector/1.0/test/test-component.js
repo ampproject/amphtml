@@ -1,6 +1,5 @@
+import {Keys_Enum} from 'core/constants/key-codes';
 import {mount} from 'enzyme';
-
-import {Keys_Enum} from '#core/constants/key-codes';
 
 import * as Preact from '#preact';
 

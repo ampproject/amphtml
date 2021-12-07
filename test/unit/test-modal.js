@@ -7,9 +7,9 @@ import {
   getElementsToAriaHide,
   setModalAsClosed,
   setModalAsOpen,
-} from '#core/dom/modal';
-import {htmlFor} from '#core/dom/static-template';
-import {toArray} from '#core/types/array';
+} from 'core/dom/modal';
+import {htmlFor} from 'core/dom/static-template';
+import {toArray} from 'core/types/array';
 
 describes.fakeWin('modal', {}, (env) => {
   let win;

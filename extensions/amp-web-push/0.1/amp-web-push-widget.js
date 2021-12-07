@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {Layout_Enum} from '#core/dom/layout';
+import {Layout_Enum} from 'core/dom/layout';
 
 /**
  * @fileoverview

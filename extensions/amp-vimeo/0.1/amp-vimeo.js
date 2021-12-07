@@ -1,8 +1,8 @@
-import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {isAutoplaySupported} from '#core/dom/video';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {once} from '#core/types/function';
+import {dispatchCustomEvent, removeElement} from 'core/dom';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {isAutoplaySupported} from 'core/dom/video';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {once} from 'core/types/function';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

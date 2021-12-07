@@ -1,6 +1,6 @@
-import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/build-dom';
+import {applyStaticLayout} from 'core/static-layout';
 
-import {applyStaticLayout} from '#core/static-layout';
+import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/build-dom';
 
 import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/build-dom';
 

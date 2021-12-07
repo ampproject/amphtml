@@ -6,10 +6,10 @@ import '../../../amp-ad/0.1/amp-ad';
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
-import {toWin} from '#core/window';
+} from 'core/constants/consent-state';
+import {addAttributesToElement, createElementWithAttributes} from 'core/dom';
+import {utf8Decode, utf8Encode} from 'core/types/string/bytes';
+import {toWin} from 'core/window';
 
 import {forceExperimentBranch, toggleExperiment} from '#experiments';
 import * as experiments from '#experiments';

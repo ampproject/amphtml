@@ -1,10 +1,10 @@
-import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
 import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '#core/dom';
+import {removeElement} from 'core/dom';
 
 const TYPE = 'twitter';
 

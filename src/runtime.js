@@ -1,6 +1,6 @@
-import {waitForBodyOpenPromise} from '#core/dom';
-import {setStyle} from '#core/dom/style';
-import * as mode from '#core/mode';
+import {waitForBodyOpenPromise} from 'core/dom';
+import {setStyle} from 'core/dom/style';
+import * as mode from 'core/mode';
 
 import {isExperimentOn, toggleExperiment} from '#experiments';
 

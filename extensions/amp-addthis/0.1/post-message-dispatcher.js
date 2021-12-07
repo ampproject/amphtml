@@ -1,7 +1,7 @@
 import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
 import {getData} from '#utils/event-helper';
-import {isObject} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
+import {isObject} from 'core/types';
+import {tryParseJson} from 'core/types/object/json';
 
 export class PostMessageDispatcher {
   /**

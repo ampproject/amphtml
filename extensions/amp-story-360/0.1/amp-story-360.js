@@ -3,11 +3,11 @@
  * For local development, run amp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import * as Preact from '#core/dom/jsx';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {closest} from '#core/dom/query';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import * as Preact from 'core/dom/jsx';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {closest} from 'core/dom/query';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';

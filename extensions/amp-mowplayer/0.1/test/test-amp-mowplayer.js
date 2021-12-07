@@ -1,5 +1,5 @@
 import '../amp-mowplayer';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 import {Services} from '#service';
 

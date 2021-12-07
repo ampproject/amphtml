@@ -1,5 +1,5 @@
-import {getStyle} from '#core/dom/style';
-import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
+import {getStyle} from 'core/dom/style';
+import {setShadowDomSupportedVersionForTesting} from 'core/dom/web-components';
 
 import {Services} from '#service';
 import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';

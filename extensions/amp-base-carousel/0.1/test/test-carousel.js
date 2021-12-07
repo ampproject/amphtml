@@ -4,8 +4,8 @@
 
 import {Carousel} from '../carousel';
 import {dev} from '#utils/log';
-import {setInitialDisplay, setStyle, setStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+import {setInitialDisplay, setStyle, setStyles} from 'core/dom/style';
+import {toArray} from 'core/types/array';
 
 describes.realWin('carousel implementation', {}, (env) => {
   let win;

@@ -1,6 +1,6 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {getVendorJsPropertyName} from '#core/dom/style';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import {getVendorJsPropertyName} from 'core/dom/style';
 
 import {Services} from '#service';
 

@@ -1,5 +1,5 @@
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {map} from '#core/types/object';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {map} from 'core/types/object';
 
 import {dev, devAssert} from '#utils/log';
 

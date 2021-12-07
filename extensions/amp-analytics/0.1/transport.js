@@ -7,7 +7,7 @@ import {
 } from './transport-serializer';
 import {IframeTransport} from './iframe-transport';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from 'core/window/interface';
 import {
   assertHttpsUrl,
   checkCorsUrl,
@@ -21,9 +21,9 @@ import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service-helpers';
 
 import {loadPromise} from '#utils/event-helper';
-import {removeElement} from '#core/dom';
-import {getWin} from '#core/window';
-import {toggle} from '#core/dom/style';
+import {removeElement} from 'core/dom';
+import {getWin} from 'core/window';
+import {toggle} from 'core/dom/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';

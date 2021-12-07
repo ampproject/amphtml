@@ -1,5 +1,5 @@
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {mapRange} from '#core/math';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {mapRange} from 'core/math';
 
 import {DirectionX, RectDef} from './def';
 

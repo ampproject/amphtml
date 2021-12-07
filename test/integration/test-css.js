@@ -1,5 +1,5 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {computedStyle} from '#core/dom/style';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {computedStyle} from 'core/dom/style';
 
 import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';
 

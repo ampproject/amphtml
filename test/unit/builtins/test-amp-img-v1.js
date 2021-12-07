@@ -1,7 +1,7 @@
-import {AmpImg} from '#builtins/amp-img/amp-img';
+import {createElementWithAttributes, dispatchCustomEvent} from 'core/dom';
+import {LayoutPriority_Enum, Layout_Enum} from 'core/dom/layout';
 
-import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
-import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
+import {AmpImg} from '#builtins/amp-img/amp-img';
 
 import {testElementR1} from '#testing/element-v1';
 

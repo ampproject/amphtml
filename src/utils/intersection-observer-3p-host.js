@@ -1,10 +1,10 @@
-import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
 import {
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
-} from '#core/dom/layout/rect';
-import {dict} from '#core/types/object';
+} from 'core/dom/layout/rect';
+import {dict} from 'core/types/object';
 
 import {SubscriptionApi} from '../iframe-helper';
 

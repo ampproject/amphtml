@@ -1,5 +1,5 @@
-import {devAssert, userAssert} from '#core/assert';
-import {TimestampDef, parseDate} from '#core/types/date';
+import {devAssert, userAssert} from 'core/assert';
+import {TimestampDef, parseDate} from 'core/types/date';
 
 /** @typedef {function(string):TimestampDef} DateParserDef */
 

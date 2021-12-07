@@ -1,5 +1,5 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {closestAncestorElementBySelector} from 'core/dom/query';
 
 import {Services} from '#service';
 

@@ -24,11 +24,11 @@ import {
   useState,
 } from '#preact';
 import {Children, forwardRef} from '#preact/compat';
-import {isRTL} from '#core/dom';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {getWin} from '#core/window';
+import {isRTL} from 'core/dom';
+import {sequentialIdGenerator} from 'core/data-structures/id-generator';
+import {getWin} from 'core/window';
 import {useStyles} from './component.jss';
-import {mod} from '#core/math';
+import {mod} from 'core/math';
 
 /**
  * @enum {string}

@@ -1,4 +1,4 @@
-import {dispatchCustomEvent} from '#core/dom';
+import {dispatchCustomEvent} from 'core/dom';
 
 import {Services} from '#service';
 import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';

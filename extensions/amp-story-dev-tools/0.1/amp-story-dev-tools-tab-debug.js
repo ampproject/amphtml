@@ -1,5 +1,5 @@
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+import {createElementWithAttributes} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 
 import {Services} from '#service';
 

@@ -1,4 +1,4 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
@@ -6,17 +6,17 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
-import {closest} from '#core/dom/query';
+import {closest} from 'core/dom/query';
 import {dev} from '#utils/log';
-import {getHistoryState} from '#core/window/history';
+import {getHistoryState} from 'core/window/history';
 import {localize} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
 import {
   allowlistFormActions,
   setupResponseAttributeElements,
 } from './amp-story-form';
-import {removeElement} from '#core/dom';
-import {toggle} from '#core/dom/style';
+import {removeElement} from 'core/dom';
+import {toggle} from 'core/dom/style';
 
 import {triggerClickFromLightDom} from './utils';
 

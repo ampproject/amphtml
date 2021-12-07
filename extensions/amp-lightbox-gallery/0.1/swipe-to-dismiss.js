@@ -1,4 +1,4 @@
-import {setStyle, setStyles} from '#core/dom/style';
+import {setStyle, setStyles} from 'core/dom/style';
 
 import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';

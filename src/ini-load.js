@@ -1,4 +1,4 @@
-import {isIframed} from '#core/dom';
+import {isIframed} from 'core/dom';
 
 import {Services} from '#service';
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';

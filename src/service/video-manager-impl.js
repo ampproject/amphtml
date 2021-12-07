@@ -1,17 +1,17 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {measureIntersection} from '#core/dom/layout/intersection';
-import {createViewportObserver} from '#core/dom/layout/viewport-observer';
-import {toggle} from '#core/dom/style';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {dispatchCustomEvent, removeElement} from 'core/dom';
+import {measureIntersection} from 'core/dom/layout/intersection';
+import {createViewportObserver} from 'core/dom/layout/viewport-observer';
+import {toggle} from 'core/dom/style';
 import {
   getInternalVideoElementFor,
   isAutoplaySupported,
   tryPlay,
-} from '#core/dom/video';
-import {clamp} from '#core/math';
-import {isFiniteNumber} from '#core/types';
-import {once} from '#core/types/function';
-import {dict, map} from '#core/types/object';
+} from 'core/dom/video';
+import {clamp} from 'core/math';
+import {isFiniteNumber} from 'core/types';
+import {once} from 'core/types/function';
+import {dict, map} from 'core/types/object';
 
 import {Services} from '#service';
 

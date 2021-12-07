@@ -1,6 +1,6 @@
-import {Keys_Enum} from '#core/constants/key-codes';
-import {dict} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {dict} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
 
 import * as Preact from '#preact';
 import {Wrapper} from '#preact/component';

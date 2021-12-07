@@ -1,9 +1,8 @@
 import '../amp-nested-menu';
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {Keys_Enum} from '#core/constants/key-codes';
-import {tryFocus} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {tryFocus} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 
 const ANIMATION_TIMEOUT = 600;
 

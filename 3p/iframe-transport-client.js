@@ -1,8 +1,8 @@
 import {
   IframeTransportEventDef,
   MessageType_Enum,
-} from '#core/3p-frame-messaging';
-import {tryParseJson} from '#core/types/object/json';
+} from 'core/3p-frame-messaging';
+import {tryParseJson} from 'core/types/object/json';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
 

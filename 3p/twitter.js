@@ -1,6 +1,6 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {setStyles} from '#core/dom/style';
+import {setStyles} from 'core/dom/style';
 
 import {loadScript} from './3p';
 

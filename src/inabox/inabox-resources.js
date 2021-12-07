@@ -1,7 +1,7 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Observable} from '#core/data-structures/observable';
-import {Deferred} from '#core/data-structures/promise';
-import {hasNextNodeInDocumentOrder} from '#core/dom';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Observable} from 'core/data-structures/observable';
+import {Deferred} from 'core/data-structures/promise';
+import {hasNextNodeInDocumentOrder} from 'core/dom';
 
 import {Services} from '#service';
 import {Resource, ResourceState_Enum} from '#service/resource';

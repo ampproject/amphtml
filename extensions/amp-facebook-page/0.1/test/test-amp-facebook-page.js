@@ -1,8 +1,8 @@
 import '../amp-facebook-page';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 import {facebook} from '#3p/facebook';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
-import {serializeMessage} from '#core/3p-frame-messaging';
+import {serializeMessage} from 'core/3p-frame-messaging';
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 
 describes.realWin(

@@ -1,5 +1,5 @@
-import {Observable} from '#core/data-structures/observable';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+import {Observable} from 'core/data-structures/observable';
+import {assertDoesNotContainDisplay, setStyles} from 'core/dom/style';
 
 import {devAssert} from '#utils/log';
 

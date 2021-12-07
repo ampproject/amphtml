@@ -1,8 +1,7 @@
+import {Keys_Enum} from 'core/constants/key-codes';
+import {tryFocus} from 'core/dom';
+import {mod} from 'core/math';
 import objstr from 'obj-str';
-
-import {Keys_Enum} from '#core/constants/key-codes';
-import {tryFocus} from '#core/dom';
-import {mod} from '#core/math';
 
 import * as Preact from '#preact';
 import {

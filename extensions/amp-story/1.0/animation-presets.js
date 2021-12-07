@@ -6,7 +6,7 @@ import {
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
-import {px} from '#core/dom/style';
+import {px} from 'core/dom/style';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */

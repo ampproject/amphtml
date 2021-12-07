@@ -3,8 +3,8 @@ import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base'
 import {Services} from '#service';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {isArray} from '#core/types';
+import {dict} from 'core/types/object';
+import {isArray} from 'core/types';
 
 /**
  * Implments the remotel local subscriptions platform which uses

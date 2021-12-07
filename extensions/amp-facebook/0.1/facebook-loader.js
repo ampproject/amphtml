@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 
 /**
  * Common function to create the facebook loader logo for all amp-facebook-*

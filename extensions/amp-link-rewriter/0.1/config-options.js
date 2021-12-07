@@ -1,5 +1,5 @@
-import {getChildJsonConfig} from '#core/dom';
-import {hasOwn} from '#core/types/object';
+import {getChildJsonConfig} from 'core/dom';
+import {hasOwn} from 'core/types/object';
 import {user, userAssert} from '#utils/log';
 
 /**

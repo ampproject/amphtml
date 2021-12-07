@@ -1,4 +1,4 @@
-import {Observable} from '#core/data-structures/observable';
+import {Observable} from 'core/data-structures/observable';
 
 describes.sandboxed('data structures - Observable', {}, () => {
   let observable;

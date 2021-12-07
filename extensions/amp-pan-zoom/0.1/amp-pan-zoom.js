@@ -1,18 +1,18 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {bezierCurve} from '#core/data-structures/curve';
-import {dispatchCustomEvent} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {bezierCurve} from 'core/data-structures/curve';
+import {dispatchCustomEvent} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import {layoutRectFromDomRect, layoutRectLtwh} from 'core/dom/layout/rect';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {realChildElements} from '#core/dom/query';
-import {htmlFor} from '#core/dom/static-template';
-import {px, scale, setStyles, translate} from '#core/dom/style';
-import {numeric} from '#core/dom/transition';
-import {boundValue, distance, magnitude} from '#core/math';
-import {dict} from '#core/types/object';
+} from 'core/dom/layout/size-observer';
+import {realChildElements} from 'core/dom/query';
+import {htmlFor} from 'core/dom/static-template';
+import {px, scale, setStyles, translate} from 'core/dom/style';
+import {numeric} from 'core/dom/transition';
+import {boundValue, distance, magnitude} from 'core/math';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

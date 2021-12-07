@@ -1,5 +1,5 @@
-import {endsWith} from '#core/types/string';
-import {tryDecodeUriComponent} from '#core/types/string/url';
+import {endsWith} from 'core/types/string';
+import {tryDecodeUriComponent} from 'core/types/string/url';
 
 import {userAssert} from '#utils/log';
 

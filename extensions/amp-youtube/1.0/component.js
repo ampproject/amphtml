@@ -1,5 +1,5 @@
-import {dispatchCustomEvent} from '#core/dom';
-import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from 'core/dom';
+import {dict} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {useRef} from '#preact';

@@ -1,7 +1,7 @@
-import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
-import {endsWith} from '#core/types/string';
+import * as mode from 'core/mode';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
+import {endsWith} from 'core/types/string';
 
 import {
   initLogConstructor,

@@ -1,12 +1,12 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {Gestures} from '../../../src/gesture';
-import {Keys_Enum} from '#core/constants/key-codes';
+import {Keys_Enum} from 'core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {applyFillContent} from '#core/dom/layout';
+import {applyFillContent} from 'core/dom/layout';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -16,18 +16,18 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '#core/dom/style';
+} from 'core/dom/style';
 import {createCustomEvent} from '#utils/event-helper';
-import {debounce} from '#core/types/function';
+import {debounce} from 'core/types/function';
 import {dev, devAssert, user} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
+import {dict, hasOwn} from 'core/types/object';
 import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 import {isInFie} from '../../../src/iframe-helper';
-import {realChildElements} from '#core/dom/query';
-import {toArray} from '#core/types/array';
-import {tryFocus} from '#core/dom';
-import {unmountAll} from '#core/dom/resource-container-helper';
+import {realChildElements} from 'core/dom/query';
+import {toArray} from 'core/types/array';
+import {tryFocus} from 'core/dom';
+import {unmountAll} from 'core/dom/resource-container-helper';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';

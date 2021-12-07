@@ -1,7 +1,7 @@
-import * as dom from '#core/dom';
-import {setScopeSelectorSupportedForTesting} from '#core/dom/css-selectors';
-import {matches} from '#core/dom/query';
-import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
+import * as dom from 'core/dom';
+import {setScopeSelectorSupportedForTesting} from 'core/dom/css-selectors';
+import {matches} from 'core/dom/query';
+import {setShadowDomSupportedVersionForTesting} from 'core/dom/web-components';
 
 import {loadPromise} from '#utils/event-helper';
 

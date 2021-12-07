@@ -8,7 +8,7 @@ import {
   isString,
   padStart,
   trimEnd,
-} from '#core/types/string';
+} from 'core/types/string';
 
 describes.sandboxed('type helpers - strings', {}, () => {
   describe('dashToCamelCase', () => {

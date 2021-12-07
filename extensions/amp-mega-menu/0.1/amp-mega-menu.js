@@ -1,16 +1,16 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {isConnectedNode, isRTL, tryFocus} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {isConnectedNode, isRTL, tryFocus} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import {setModalAsClosed, setModalAsOpen} from 'core/dom/modal';
 import {
   closest,
   closestAncestorElementBySelector,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {mod} from '#core/math';
-import {toArray} from '#core/types/array';
+} from 'core/dom/query';
+import {mod} from 'core/math';
+import {toArray} from 'core/types/array';
 
 import {Services} from '#service';
 

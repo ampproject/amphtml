@@ -1,7 +1,7 @@
 import {
   IframeTransportEventDef,
   MessageType_Enum,
-} from '#core/3p-frame-messaging';
+} from 'core/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dev, devAssert} from '#utils/log';
 

@@ -1,14 +1,14 @@
 import {AmpAdUIHandler} from './amp-ad-ui';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {LayoutPriority_Enum, isLayoutSizeDefined} from '#core/dom/layout';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {LayoutPriority_Enum, isLayoutSizeDefined} from 'core/dom/layout';
 import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
 import {
   childElementByTag,
   closestAncestorElementBySelector,
-} from '#core/dom/query';
-import {hasOwn} from '#core/types/object';
-import {removeChildren} from '#core/dom';
+} from 'core/dom/query';
+import {hasOwn} from 'core/types/object';
+import {removeChildren} from 'core/dom';
 import {userAssert} from '#utils/log';
 
 /** @const {string} Tag name for custom ad implementation. */

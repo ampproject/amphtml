@@ -1,5 +1,5 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {LayoutPriority_Enum} from '#core/dom/layout';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {LayoutPriority_Enum} from 'core/dom/layout';
 
 import {Services} from '#service';
 import {getSchedulerForDoc} from '#service/scheduler';

@@ -1,13 +1,13 @@
-import {iterateCursor} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {setInitialDisplay, setStyle} from '#core/dom/style';
+import {iterateCursor} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {setInitialDisplay, setStyle} from 'core/dom/style';
 import {
   ShadowDomVersion_Enum,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-} from '#core/dom/web-components';
-import {toArray} from '#core/types/array';
-import {getWin, toWin} from '#core/window';
+} from 'core/dom/web-components';
+import {toArray} from 'core/types/array';
+import {getWin, toWin} from 'core/window';
 
 import {Services} from '#service';
 

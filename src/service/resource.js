@@ -1,14 +1,14 @@
-import {Deferred} from '#core/data-structures/promise';
-import {Layout_Enum} from '#core/dom/layout';
+import {Deferred} from 'core/data-structures/promise';
+import {Layout_Enum} from 'core/dom/layout';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
   layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
-} from '#core/dom/layout/rect';
-import {computedStyle, toggle} from '#core/dom/style';
-import {toWin} from '#core/window';
+} from 'core/dom/layout/rect';
+import {computedStyle, toggle} from 'core/dom/style';
+import {toWin} from 'core/window';
 
 import {Services} from '#service';
 

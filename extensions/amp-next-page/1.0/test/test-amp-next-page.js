@@ -1,7 +1,7 @@
 import '../amp-next-page';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyle} from '#core/dom/style';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {htmlFor} from 'core/dom/static-template';
+import {setStyle} from 'core/dom/style';
 
 import {Services} from '#service';
 

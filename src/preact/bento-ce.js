@@ -1,5 +1,5 @@
-import {isEsm} from '#core/mode';
-import {getWin} from '#core/window';
+import {isEsm} from 'core/mode';
+import {getWin} from 'core/window';
 
 /**
  * @param {T} klass

@@ -1,4 +1,4 @@
-import {toArray} from '#core/types/array';
+import {toArray} from 'core/types/array';
 
 /**
  * @param {!Window} win

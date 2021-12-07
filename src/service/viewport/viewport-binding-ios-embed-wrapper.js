@@ -1,8 +1,8 @@
-import {Observable} from '#core/data-structures/observable';
-import {whenDocumentReady} from '#core/document/ready';
-import {waitForBodyOpen} from '#core/dom';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {computedStyle, px, setImportantStyles} from '#core/dom/style';
+import {Observable} from 'core/data-structures/observable';
+import {whenDocumentReady} from 'core/document/ready';
+import {waitForBodyOpen} from 'core/dom';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {computedStyle, px, setImportantStyles} from 'core/dom/style';
 
 import {isExperimentOn} from '#experiments';
 

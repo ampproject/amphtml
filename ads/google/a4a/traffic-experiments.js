@@ -12,7 +12,7 @@ import {
   mergeExperimentIds,
 } from './utils';
 import {Services} from '#service';
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 /** @typedef {{
  *    control: string,

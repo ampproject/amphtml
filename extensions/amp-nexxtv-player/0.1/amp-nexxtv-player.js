@@ -1,13 +1,13 @@
-import {Deferred} from '#core/data-structures/promise';
-import {removeElement} from '#core/dom';
+import {Deferred} from 'core/data-structures/promise';
+import {removeElement} from 'core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '#core/dom/fullscreen';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
+} from 'core/dom/fullscreen';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

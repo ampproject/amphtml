@@ -1,8 +1,7 @@
+import {devAssertElement} from 'core/assert';
+import {isAmp4Email} from 'core/document/format';
+import {removeElement} from 'core/dom';
 import purify from 'dompurify';
-
-import {devAssertElement} from '#core/assert';
-import {isAmp4Email} from '#core/document/format';
-import {removeElement} from '#core/dom';
 
 import {user} from '#utils/log';
 

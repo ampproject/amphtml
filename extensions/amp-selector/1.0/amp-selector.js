@@ -1,6 +1,6 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {dict} from '#core/types/object';
-import {getWin} from '#core/window';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {dict} from 'core/types/object';
+import {getWin} from 'core/window';
 
 import {isExperimentOn} from '#experiments';
 

@@ -1,4 +1,4 @@
-import {areEqualOrdered} from '#core/types/array';
+import {areEqualOrdered} from 'core/types/array';
 
 /**
  * @param {!Object} sandbox

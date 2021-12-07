@@ -1,7 +1,7 @@
-import {deserializeMessage, serializeMessage} from '#core/3p-frame-messaging';
-import {DomFingerprint} from '#core/dom/fingerprint';
-import * as mode from '#core/mode';
-import {WindowInterface} from '#core/window/interface';
+import {deserializeMessage, serializeMessage} from 'core/3p-frame-messaging';
+import {DomFingerprint} from 'core/dom/fingerprint';
+import * as mode from 'core/mode';
+import {WindowInterface} from 'core/window/interface';
 
 import {toggleExperiment} from '#experiments';
 

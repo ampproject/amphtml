@@ -1,4 +1,4 @@
-import {map} from '#core/types/object';
+import {map} from 'core/types/object';
 
 import {user} from '#utils/log';
 

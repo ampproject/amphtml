@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
-import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
+import {MessageType_Enum, deserializeMessage} from 'core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {useCallback, useMemo, useState} from '#preact';
 import {useValueRef} from '#preact/component';

@@ -1,5 +1,5 @@
 __css_import__;
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from 'core/dom/layout';
 
 const TAG = 'amp-__component_name_hyphenated__';
 

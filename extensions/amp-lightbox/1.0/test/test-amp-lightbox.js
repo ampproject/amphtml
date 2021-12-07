@@ -3,8 +3,8 @@ import {ActionInvocation} from '#service/action-impl';
 import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
-} from '#core/constants/action-constants';
-import {htmlFor} from '#core/dom/static-template';
+} from 'core/constants/action-constants';
+import {htmlFor} from 'core/dom/static-template';
 import {poll} from '#testing/iframe';
 import {toggleExperiment} from '#experiments';
 import {whenCalled} from '#testing/helpers/service';

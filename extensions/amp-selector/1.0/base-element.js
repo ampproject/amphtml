@@ -1,12 +1,8 @@
-import {devAssert} from '#core/assert/dev';
-import {
-  createElementWithAttributes,
-  toggleAttribute,
-  tryFocus,
-} from '#core/dom';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
+import {devAssert} from 'core/assert/dev';
+import {createElementWithAttributes, toggleAttribute, tryFocus} from 'core/dom';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {toArray} from 'core/types/array';
+import {dict} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';

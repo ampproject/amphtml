@@ -4,11 +4,10 @@
 import '#polyfills';
 import './setup_chai_sinon';
 
+import {removeElement} from 'core/dom';
+import {resetEvtListenerOptsSupportForTesting} from 'core/dom/event-helper-listen';
 import {configure as configureEnzyme} from 'enzyme';
 import PreactEnzyme from 'enzyme-adapter-preact-pure';
-
-import {removeElement} from '#core/dom';
-import {resetEvtListenerOptsSupportForTesting} from '#core/dom/event-helper-listen';
 
 import {resetExperimentTogglesForTesting} from '#experiments';
 

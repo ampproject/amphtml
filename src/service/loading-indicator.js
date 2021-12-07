@@ -1,6 +1,6 @@
-import {removeElement} from '#core/dom';
-import {createViewportObserver} from '#core/dom/layout/viewport-observer';
-import {htmlFor} from '#core/dom/static-template';
+import {removeElement} from 'core/dom';
+import {createViewportObserver} from 'core/dom/layout/viewport-observer';
+import {htmlFor} from 'core/dom/static-template';
 
 import {createLoaderElement} from './loader-element';
 

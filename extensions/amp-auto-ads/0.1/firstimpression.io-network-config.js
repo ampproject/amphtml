@@ -1,7 +1,7 @@
-import {buildUrl} from '#ads/google/a4a/shared/url-builder';
+import {dict} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
 
-import {dict} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {Services} from '#service';
 

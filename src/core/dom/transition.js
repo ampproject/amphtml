@@ -1,4 +1,4 @@
-import {isString} from '#core/types';
+import {isString} from 'core/types';
 
 import {
   assertNotDisplay,

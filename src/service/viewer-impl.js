@@ -1,14 +1,14 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Observable} from '#core/data-structures/observable';
-import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {isIframed} from '#core/dom';
-import {duplicateErrorIfNecessary} from '#core/error';
-import {stripUserError} from '#core/error/message-helpers';
-import {isEnumValue} from '#core/types';
-import {findIndex} from '#core/types/array';
-import {map} from '#core/types/object';
-import {endsWith} from '#core/types/string';
-import {parseQueryString} from '#core/types/string/url';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Observable} from 'core/data-structures/observable';
+import {Deferred, tryResolve} from 'core/data-structures/promise';
+import {isIframed} from 'core/dom';
+import {duplicateErrorIfNecessary} from 'core/error';
+import {stripUserError} from 'core/error/message-helpers';
+import {isEnumValue} from 'core/types';
+import {findIndex} from 'core/types/array';
+import {map} from 'core/types/object';
+import {endsWith} from 'core/types/string';
+import {parseQueryString} from 'core/types/string/url';
 
 import {Services} from '#service';
 

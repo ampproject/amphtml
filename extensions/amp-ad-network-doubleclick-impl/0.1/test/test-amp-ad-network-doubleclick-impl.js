@@ -3,16 +3,17 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {Deferred} from '#core/data-structures/promise';
-import {createElementWithAttributes} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import * as bytesUtils from '#core/types/string/bytes';
+} from 'core/constants/consent-state';
+import {Deferred} from 'core/data-structures/promise';
+import {createElementWithAttributes} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import * as bytesUtils from 'core/types/string/bytes';
+
+import {AMP_EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '#ads/google/a4a/utils';
 
 import {toggleExperiment} from '#experiments';
 

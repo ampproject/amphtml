@@ -1,6 +1,6 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {isArray, isObject} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
+import {isArray, isObject} from 'core/types';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

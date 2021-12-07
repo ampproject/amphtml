@@ -1,17 +1,17 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Observable} from '#core/data-structures/observable';
-import {tryResolve} from '#core/data-structures/promise';
-import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Observable} from 'core/data-structures/observable';
+import {tryResolve} from 'core/data-structures/promise';
+import {getVerticalScrollbarWidth, isIframed} from 'core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/dom/layout/rect';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {computedStyle, setStyle} from '#core/dom/style';
-import {numeric} from '#core/dom/transition';
-import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
+} from 'core/dom/layout/rect';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {computedStyle, setStyle} from 'core/dom/style';
+import {numeric} from 'core/dom/transition';
+import {clamp} from 'core/math';
+import {dict} from 'core/types/object';
 
 import {isExperimentOn} from '#experiments';
 

@@ -1,7 +1,7 @@
-import {isAmp4Email} from '#core/document/format';
-import {isServerRendered} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {realChildElements} from '#core/dom/query';
+import {isAmp4Email} from 'core/document/format';
+import {isServerRendered} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {realChildElements} from 'core/dom/query';
 
 /**
  * @enum {string}

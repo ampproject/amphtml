@@ -1,4 +1,4 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {
   Action,
   EmbeddedComponentState,
@@ -16,8 +16,8 @@ import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
-import {tryFocus} from '#core/dom';
-import {closest, matches} from '#core/dom/query';
+import {tryFocus} from 'core/dom';
+import {closest, matches} from 'core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
@@ -28,7 +28,7 @@ import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from './amp-story-localization-service';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
-import {resetStyles, setImportantStyles} from '#core/dom/style';
+import {resetStyles, setImportantStyles} from 'core/dom/style';
 
 /** @private @const {string} */
 const LAUNCH_ICON_CLASS = 'i-amphtml-tooltip-action-icon-launch';

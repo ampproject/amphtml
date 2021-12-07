@@ -3,9 +3,9 @@
  * details.
  */
 
-import {userAssert} from '#core/assert';
-import {isFiniteNumber} from '#core/types';
-import {isEnumValue} from '#core/types/enum';
+import {userAssert} from 'core/assert';
+import {isFiniteNumber} from 'core/types';
+import {isEnumValue} from 'core/types/enum';
 
 /**
  * @enum {string}

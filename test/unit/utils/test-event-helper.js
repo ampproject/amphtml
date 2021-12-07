@@ -1,10 +1,10 @@
-import {Observable} from '#core/data-structures/observable';
+import {Observable} from 'core/data-structures/observable';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
   resetPassiveSupportedForTesting,
   supportsPassiveEventListener,
-} from '#core/dom/event-helper-listen';
+} from 'core/dom/event-helper-listen';
 
 import {
   MEDIA_LOAD_FAILURE_SRC_PROPERTY,

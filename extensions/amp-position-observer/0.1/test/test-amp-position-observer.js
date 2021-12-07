@@ -1,4 +1,4 @@
-import {RelativePositions_Enum, layoutRectLtwh} from '#core/dom/layout/rect';
+import {RelativePositions_Enum, layoutRectLtwh} from 'core/dom/layout/rect';
 
 import {AmpVisibilityObserver} from '../amp-position-observer';
 

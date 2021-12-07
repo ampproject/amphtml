@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
 
 import {dev, user, userAssert} from '#utils/log';
 

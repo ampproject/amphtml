@@ -1,7 +1,7 @@
-import {computedStyle} from '#core/dom/style';
-import {tryCallback} from '#core/error';
-import {remove} from '#core/types/array';
-import {getWin} from '#core/window';
+import {computedStyle} from 'core/dom/style';
+import {tryCallback} from 'core/error';
+import {remove} from 'core/types/array';
+import {getWin} from 'core/window';
 
 import {LayoutSizeDef} from './rect';
 

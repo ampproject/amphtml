@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 import {withDatePickerCommon} from './date-picker-common';
 import {DayPickerPhrases} from './defaultPhrases';

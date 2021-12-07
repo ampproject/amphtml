@@ -2,14 +2,14 @@ import {DEFAULT_CONFIG} from './default-config';
 import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '#service/extension-script';
-import {deepMerge, dict, hasOwn} from '#core/types/object';
+import {deepMerge, dict, hasOwn} from 'core/types/object';
 import {dev, user, userAssert} from '#utils/log';
-import {getChildJsonConfig} from '#core/dom';
+import {getChildJsonConfig} from 'core/dom';
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '#core/types';
+import {isArray, isObject} from 'core/types';
 import {isCanary} from '#experiments';
 
-import {toWin} from '#core/window';
+import {toWin} from 'core/window';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';

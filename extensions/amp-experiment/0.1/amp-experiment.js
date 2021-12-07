@@ -1,5 +1,5 @@
-import {Layout_Enum} from '#core/dom/layout';
-import {parseJson} from '#core/types/object/json';
+import {Layout_Enum} from 'core/dom/layout';
+import {parseJson} from 'core/types/object/json';
 
 import {dev, devAssert, userAssert} from '#utils/log';
 

@@ -1,5 +1,5 @@
 import '../amp-vk';
-import {Layout_Enum} from '#core/dom/layout';
+import {Layout_Enum} from 'core/dom/layout';
 
 import {Resource} from '#service/resource';
 

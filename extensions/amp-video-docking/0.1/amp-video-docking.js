@@ -1,20 +1,20 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {isRTL, removeElement} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {applyFillContent} from '#core/dom/layout';
-import {layoutRectEquals, rectIntersection} from '#core/dom/layout/rect';
-import {scopedQuerySelector} from '#core/dom/query';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {isRTL, removeElement} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {applyFillContent} from 'core/dom/layout';
+import {layoutRectEquals, rectIntersection} from 'core/dom/layout/rect';
+import {scopedQuerySelector} from 'core/dom/query';
+import {htmlFor, htmlRefs} from 'core/dom/static-template';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyles,
   toggle,
-} from '#core/dom/style';
-import {getInternalVideoElementFor} from '#core/dom/video';
-import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
+} from 'core/dom/style';
+import {getInternalVideoElementFor} from 'core/dom/video';
+import {once} from 'core/types/function';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

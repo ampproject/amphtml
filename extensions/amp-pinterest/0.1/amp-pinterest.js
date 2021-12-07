@@ -34,8 +34,8 @@
  * </code>
  */
 
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {htmlFor} from 'core/dom/static-template';
 
 import {Services} from '#service';
 

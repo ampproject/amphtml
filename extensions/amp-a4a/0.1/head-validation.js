@@ -1,6 +1,6 @@
-import {removeElement, rootNodeFor} from '#core/dom';
-import {map} from '#core/types/object';
-import {includes} from '#core/types/string';
+import {removeElement, rootNodeFor} from 'core/dom';
+import {map} from 'core/types/object';
+import {includes} from 'core/types/string';
 
 import {Services} from '#service';
 import {parseExtensionUrl} from '#service/extension-script';

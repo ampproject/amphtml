@@ -1,6 +1,6 @@
-import {removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {isFiniteNumber, isObject} from '#core/types';
+import {removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {isFiniteNumber, isObject} from 'core/types';
 
 import {getData, listen} from '#utils/event-helper';
 import {userAssert} from '#utils/log';

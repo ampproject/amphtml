@@ -2,7 +2,7 @@ import {
   USER_ERROR_SENTINEL,
   isUserErrorEmbedMessage,
   isUserErrorMessage,
-} from '#core/error/message-helpers';
+} from 'core/error/message-helpers';
 
 import {
   Log,

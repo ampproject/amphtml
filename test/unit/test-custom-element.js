@@ -1,8 +1,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {LOADING_ELEMENTS_ENUM, Layout_Enum} from '#core/dom/layout';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {LOADING_ELEMENTS_ENUM, Layout_Enum} from 'core/dom/layout';
 
 import {Services} from '#service';
 import {elementConnectedCallback} from '#service/custom-element-registry';

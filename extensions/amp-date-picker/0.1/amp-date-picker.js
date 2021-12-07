@@ -1,19 +1,19 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
-import {Deferred} from '#core/data-structures/promise';
-import {isRTL, iterateCursor, tryFocus} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {FiniteStateMachine} from 'core/data-structures/finite-state-machine';
+import {Deferred} from 'core/data-structures/promise';
+import {isRTL, iterateCursor, tryFocus} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {Layout_Enum, isLayoutSizeDefined} from 'core/dom/layout';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
-} from '#core/dom/query';
-import {computedStyle} from '#core/dom/style';
-import {once} from '#core/types/function';
-import {dict, map} from '#core/types/object';
-import {dashToCamelCase} from '#core/types/string';
+} from 'core/dom/query';
+import {computedStyle} from 'core/dom/style';
+import {once} from 'core/types/function';
+import {dict, map} from 'core/types/object';
+import {dashToCamelCase} from 'core/types/string';
 
 import {Services} from '#service';
 

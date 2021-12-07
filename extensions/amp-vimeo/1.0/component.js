@@ -1,4 +1,4 @@
-import {dispatchCustomEvent} from '#core/dom';
+import {dispatchCustomEvent} from 'core/dom';
 
 import * as Preact from '#preact';
 import {useCallback, useMemo, useRef} from '#preact';

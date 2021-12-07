@@ -1,7 +1,7 @@
 import {
   createViewportObserver,
   observeIntersections,
-} from '#core/dom/layout/viewport-observer';
+} from 'core/dom/layout/viewport-observer';
 
 describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
   describe('createViewportObserver', () => {

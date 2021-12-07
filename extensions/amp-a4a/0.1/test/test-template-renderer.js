@@ -1,5 +1,5 @@
 import '../../../amp-mustache/0.2/amp-mustache';
-import {utf8Encode} from '#core/types/string/bytes';
+import {utf8Encode} from 'core/types/string/bytes';
 
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 

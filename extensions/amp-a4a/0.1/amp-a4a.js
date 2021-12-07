@@ -1,25 +1,25 @@
-import {signingServerURLs} from '#ads/_a4a-config';
-
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {createElementWithAttributes} from '#core/dom';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
+import {Deferred, tryResolve} from 'core/data-structures/promise';
+import {createElementWithAttributes} from 'core/dom';
 import {
   LayoutPriority_Enum,
   Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
-} from '#core/dom/layout';
-import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
-import {setStyle} from '#core/dom/style';
-import {duplicateErrorIfNecessary} from '#core/error';
-import {isArray, isEnumValue, isObject} from '#core/types';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
-import {padStart} from '#core/types/string';
-import {utf8Decode} from '#core/types/string/bytes';
-import {tryDecodeUriComponent} from '#core/types/string/url';
+} from 'core/dom/layout';
+import {intersectionEntryToJson} from 'core/dom/layout/intersection';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
+import {DetachedDomStream, streamResponseToWriter} from 'core/dom/stream';
+import {setStyle} from 'core/dom/style';
+import {duplicateErrorIfNecessary} from 'core/error';
+import {isArray, isEnumValue, isObject} from 'core/types';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
+import {padStart} from 'core/types/string';
+import {utf8Decode} from 'core/types/string/bytes';
+import {tryDecodeUriComponent} from 'core/types/string/url';
+
+import {signingServerURLs} from '#ads/_a4a-config';
 
 import {isExperimentOn} from '#experiments';
 

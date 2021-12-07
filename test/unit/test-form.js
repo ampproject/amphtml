@@ -3,7 +3,7 @@ import {
   isDisabled,
   isFieldDefault,
   isFieldEmpty,
-} from '#core/dom/form';
+} from 'core/dom/form';
 
 describes.realWin('getFormAsObject', {}, (env) => {
   let form;

@@ -2,9 +2,9 @@
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {createElementWithAttributes} from '#core/dom';
-import {isFiniteNumber} from '#core/types';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
+import {createElementWithAttributes} from 'core/dom';
+import {isFiniteNumber} from 'core/types';
 
 import {Services} from '#service';
 import {

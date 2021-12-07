@@ -1,14 +1,14 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {duplicateErrorIfNecessary} from '#core/error';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {duplicateErrorIfNecessary} from 'core/error';
 import {
   USER_ERROR_SENTINEL,
   isUserErrorEmbedMessage,
   isUserErrorMessage,
-} from '#core/error/message-helpers';
-import * as mode from '#core/mode';
-import {findIndex} from '#core/types/array';
-import {exponentialBackoff} from '#core/types/function/exponential-backoff';
-import {dict} from '#core/types/object';
+} from 'core/error/message-helpers';
+import * as mode from 'core/mode';
+import {findIndex} from 'core/types/array';
+import {exponentialBackoff} from 'core/types/function/exponential-backoff';
+import {dict} from 'core/types/object';
 
 import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
 

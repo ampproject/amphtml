@@ -6,7 +6,7 @@
  */
 
 import './web-worker-polyfills';
-import {exponentialBackoff} from '#core/types/function/exponential-backoff';
+import {exponentialBackoff} from 'core/types/function/exponential-backoff';
 
 import {dev, initLogConstructor, setReportError} from '#utils/log';
 

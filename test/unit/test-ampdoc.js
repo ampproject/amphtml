@@ -1,12 +1,12 @@
-import {Signals} from '#core/data-structures/signals';
-import * as docready from '#core/document/ready';
-import * as dom from '#core/dom';
+import {Signals} from 'core/data-structures/signals';
+import * as docready from 'core/document/ready';
+import * as dom from 'core/dom';
 import {
   ShadowDomVersion_Enum,
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '#core/dom/web-components';
+} from 'core/dom/web-components';
 
 import {
   AmpDocFie,

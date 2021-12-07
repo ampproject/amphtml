@@ -1,11 +1,11 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
 import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
-import {createElementWithAttributes} from '#core/dom';
-import {setStyles} from '#core/dom/style';
-import {subscribe} from '#core/context';
+import {createElementWithAttributes} from 'core/dom';
+import {setStyles} from 'core/dom/style';
+import {subscribe} from 'core/context';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/helpers/service';
 

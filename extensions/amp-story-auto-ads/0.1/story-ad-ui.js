@@ -1,5 +1,5 @@
-import {createElementWithAttributes, iterateCursor} from '#core/dom';
-import {dict, map} from '#core/types/object';
+import {createElementWithAttributes, iterateCursor} from 'core/dom';
+import {dict, map} from 'core/types/object';
 
 import {getExperimentBranch} from '#experiments';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';

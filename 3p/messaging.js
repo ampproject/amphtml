@@ -1,4 +1,4 @@
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from 'core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 

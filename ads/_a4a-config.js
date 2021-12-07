@@ -1,4 +1,4 @@
-import {map} from '#core/types/object';
+import {map} from 'core/types/object';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.

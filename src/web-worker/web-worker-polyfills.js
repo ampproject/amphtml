@@ -3,7 +3,7 @@
  *     can be used in top-level scope in module dependencies.
  */
 
-import * as mode from '#core/mode';
+import * as mode from 'core/mode';
 
 import {install as installArrayIncludes} from '#polyfills/array-includes';
 import {install as installMathSign} from '#polyfills/math-sign';

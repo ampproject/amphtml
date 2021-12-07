@@ -1,4 +1,4 @@
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 /**
  * Updates the hashString with the dictionary<string, string> passed in

@@ -1,12 +1,12 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
-import {Deferred} from '#core/data-structures/promise';
-import {hasNextNodeInDocumentOrder} from '#core/dom';
-import {expandLayoutRect} from '#core/dom/layout/rect';
-import * as mode from '#core/mode';
-import {remove} from '#core/types/array';
-import {throttle} from '#core/types/function';
-import {dict} from '#core/types/object';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {FiniteStateMachine} from 'core/data-structures/finite-state-machine';
+import {Deferred} from 'core/data-structures/promise';
+import {hasNextNodeInDocumentOrder} from 'core/dom';
+import {expandLayoutRect} from 'core/dom/layout/rect';
+import * as mode from 'core/mode';
+import {remove} from 'core/types/array';
+import {throttle} from 'core/types/function';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

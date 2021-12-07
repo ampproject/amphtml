@@ -1,5 +1,5 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {once} from '#core/types/function';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {once} from 'core/types/function';
 
 import {Services} from '#service';
 

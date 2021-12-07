@@ -21,6 +21,7 @@
     "@ampproject/viewer-messaging": "1.1.2",
     "@ampproject/worker-dom": "0.32.1",
     "@webcomponents/webcomponentsjs": "2.6.0",
+    "core": "file:src/core",
     "dompurify": "2.3.3",
     "google-closure-library": "20210808.0.0",
     "intersection-observer": "0.12.0",

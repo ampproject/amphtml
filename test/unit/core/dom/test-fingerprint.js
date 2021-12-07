@@ -1,4 +1,4 @@
-import {DomFingerprint, domFingerprintPlain} from '#core/dom/fingerprint';
+import {DomFingerprint, domFingerprintPlain} from 'core/dom/fingerprint';
 
 describes.realWin('DOM - fingerprint', {}, (env) => {
   let body;

@@ -1,17 +1,17 @@
-import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Deferred} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import {isAmp4Email} from '#core/document/format';
-import {iterateCursor} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {isFiniteNumber, isObject} from '#core/types';
-import {findIndex, isArray, remove, toArray} from '#core/types/array';
-import {debounce} from '#core/types/function';
-import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
-import {deepEquals, parseJson} from '#core/types/object/json';
+import {RAW_OBJECT_ARGS_KEY} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Deferred} from 'core/data-structures/promise';
+import {Signals} from 'core/data-structures/signals';
+import {isAmp4Email} from 'core/document/format';
+import {iterateCursor} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {isFiniteNumber, isObject} from 'core/types';
+import {findIndex, isArray, remove, toArray} from 'core/types/array';
+import {debounce} from 'core/types/function';
+import {deepMerge, dict, getValueForExpr, map} from 'core/types/object';
+import {deepEquals, parseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

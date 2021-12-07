@@ -1,10 +1,7 @@
-import {iterateCursor} from '#core/dom';
-import {
-  closestAncestorElementBySelector,
-  realChildNodes,
-} from '#core/dom/query';
-import {htmlFor} from '#core/dom/static-template';
-import {toArray} from '#core/types/array';
+import {iterateCursor} from 'core/dom';
+import {closestAncestorElementBySelector, realChildNodes} from 'core/dom/query';
+import {htmlFor} from 'core/dom/static-template';
+import {toArray} from 'core/types/array';
 
 import {isExperimentOn} from '#experiments';
 

@@ -1,9 +1,9 @@
-import {removeChildren} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
-import {htmlFor} from '#core/dom/static-template';
-import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
+import {removeChildren} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import {setModalAsClosed, setModalAsOpen} from 'core/dom/modal';
+import {htmlFor} from 'core/dom/static-template';
+import {toggle} from 'core/dom/style';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';

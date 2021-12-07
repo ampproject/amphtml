@@ -1,4 +1,4 @@
-import {getWin} from '#core/window';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 

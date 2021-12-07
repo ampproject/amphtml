@@ -1,7 +1,7 @@
 import {
   Loading_Enum,
   reducer as loadingReducer,
-} from '#core/constants/loading-instructions';
+} from 'core/constants/loading-instructions';
 
 import * as Preact from '#preact';
 import {createContext, useContext, useMemo} from '#preact';

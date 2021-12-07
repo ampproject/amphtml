@@ -1,4 +1,4 @@
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {sequentialIdGenerator} from 'core/data-structures/id-generator';
 
 import * as Preact from '#preact';
 import {

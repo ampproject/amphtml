@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 import {dev, user, userAssert} from '#utils/log';
 

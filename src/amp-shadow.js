@@ -6,7 +6,7 @@
 // src/polyfills.js must be the first import.
 import './polyfills';
 
-import * as mode from '#core/mode';
+import * as mode from 'core/mode';
 
 import {installDocService} from '#service/ampdoc-impl';
 import {

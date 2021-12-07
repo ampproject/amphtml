@@ -1,11 +1,11 @@
 import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
-} from '#core/constants/action-constants';
-import {dispatchCustomEvent} from '#core/dom';
-import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
-import {isArray} from '#core/types';
-import {getWin} from '#core/window';
+} from 'core/constants/action-constants';
+import {dispatchCustomEvent} from 'core/dom';
+import {LayoutPriority_Enum, Layout_Enum} from 'core/dom/layout';
+import {isArray} from 'core/types';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 

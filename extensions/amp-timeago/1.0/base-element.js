@@ -1,4 +1,4 @@
-import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
+import {parseDateAttrs as parseDateAttrsBase} from 'core/dom/parse-date-attributes';
 
 import {PreactBaseElement} from '#preact/base-element';
 

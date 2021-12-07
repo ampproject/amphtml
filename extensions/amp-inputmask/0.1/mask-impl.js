@@ -1,5 +1,5 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {dict} from '#core/types/object';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {dict} from 'core/types/object';
 
 import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';

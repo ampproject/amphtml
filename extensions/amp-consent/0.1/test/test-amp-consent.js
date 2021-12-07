@@ -8,11 +8,11 @@ import {
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {CONSENT_STRING_TYPE} from 'core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {macroTask} from '#testing/helpers';
 import {
   registerServiceBuilder,

@@ -1,6 +1,6 @@
-import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+import {once} from 'core/types/function';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {dev} from '#utils/log';
 

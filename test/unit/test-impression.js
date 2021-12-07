@@ -1,6 +1,5 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from 'core/window/interface';
 
 import {toggleExperiment} from '#experiments';
 

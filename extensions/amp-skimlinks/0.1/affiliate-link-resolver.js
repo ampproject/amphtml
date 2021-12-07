@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
 import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';

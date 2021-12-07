@@ -1,7 +1,7 @@
-import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {dict} from '#core/types/object';
-import {includes} from '#core/types/string';
+import {getOptionalSandboxFlags, getRequiredSandboxFlags} from 'core/3p-frame';
+import {sequentialIdGenerator} from 'core/data-structures/id-generator';
+import {dict} from 'core/types/object';
+import {includes} from 'core/types/string';
 
 import * as Preact from '#preact';
 import {

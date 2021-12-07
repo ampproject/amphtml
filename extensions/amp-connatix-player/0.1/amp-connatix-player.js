@@ -1,17 +1,17 @@
 import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {Deferred} from '#core/data-structures/promise';
-import {removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+} from 'core/constants/consent-state';
+import {Deferred} from 'core/data-structures/promise';
+import {removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+} from 'core/dom/layout/size-observer';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {dict} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

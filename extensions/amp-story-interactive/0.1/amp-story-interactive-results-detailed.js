@@ -4,8 +4,8 @@ import {
   decideStrategy,
 } from './amp-story-interactive-results';
 import {CSS} from '../../../build/amp-story-interactive-results-detailed-0.1.css';
-import {htmlFor} from '#core/dom/static-template';
-import {setImportantStyles} from '#core/dom/style';
+import {htmlFor} from 'core/dom/static-template';
+import {setImportantStyles} from 'core/dom/style';
 
 /**
  * @typedef {{

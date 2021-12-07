@@ -1,7 +1,7 @@
-import {tryResolve} from '#core/data-structures/promise';
-import {rethrowAsync} from '#core/error';
-import {hasOwn} from '#core/types/object';
-import {trimStart} from '#core/types/string';
+import {tryResolve} from 'core/data-structures/promise';
+import {rethrowAsync} from 'core/error';
+import {hasOwn} from 'core/types/object';
+import {trimStart} from 'core/types/string';
 
 import {user} from '#utils/log';
 

@@ -1,7 +1,7 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Layout_Enum} from '#core/dom/layout';
-import {realChildElements, realChildNodes} from '#core/dom/query';
-import {setStyle} from '#core/dom/style';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {Layout_Enum} from 'core/dom/layout';
+import {realChildElements, realChildNodes} from 'core/dom/query';
+import {setStyle} from 'core/dom/style';
 
 import {Services} from '#service';
 

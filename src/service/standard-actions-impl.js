@@ -1,9 +1,9 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {tryFocus} from '#core/dom';
-import {Layout_Enum, getLayoutClass} from '#core/dom/layout';
-import {computedStyle, toggle} from '#core/dom/style';
-import {isFiniteNumber} from '#core/types';
-import {getWin} from '#core/window';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {tryFocus} from 'core/dom';
+import {Layout_Enum, getLayoutClass} from 'core/dom/layout';
+import {computedStyle, toggle} from 'core/dom/style';
+import {isFiniteNumber} from 'core/types';
+import {getWin} from 'core/window';
 
 import {Services} from '#service';
 

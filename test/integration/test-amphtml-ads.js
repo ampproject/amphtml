@@ -1,4 +1,4 @@
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 import {xhrServiceForTesting} from '#service/xhr-impl';
 

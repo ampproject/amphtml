@@ -1,10 +1,10 @@
 /* eslint-disable local/window-property-name */
 
-import {tryResolve} from '#core/data-structures/promise';
-import {isFiniteNumber} from '#core/types';
-import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {tryResolve} from 'core/data-structures/promise';
+import {isFiniteNumber} from 'core/types';
+import {once} from 'core/types/function';
+import {dict} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {getData, listen} from '#utils/event-helper';
 

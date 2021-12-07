@@ -1,4 +1,4 @@
-import {pushIfNotExist, removeItem} from '#core/types/array';
+import {pushIfNotExist, removeItem} from 'core/types/array';
 
 import {Services} from '#service';
 import {LoadingIndicatorImpl} from '#service/loading-indicator';

@@ -5,7 +5,7 @@ import {
   TimeBasedAdvancement,
 } from '../page-advancement';
 import {StateProperty} from '../amp-story-store-service';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 
 describes.realWin('page-advancement', {amp: true}, (env) => {
   let html;

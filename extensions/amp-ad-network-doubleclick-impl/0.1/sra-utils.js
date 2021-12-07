@@ -1,10 +1,10 @@
+import {tryResolve} from 'core/data-structures/promise';
+import {getPageLayoutBoxBlocking} from 'core/dom/layout/page-layout-box';
+import {isObject} from 'core/types';
+import {utf8Encode} from 'core/types/string/bytes';
+
 import {isInManualExperiment} from '#ads/google/a4a/traffic-experiments';
 import {getEnclosingContainerTypes} from '#ads/google/a4a/utils';
-
-import {tryResolve} from '#core/data-structures/promise';
-import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {isObject} from '#core/types';
-import {utf8Encode} from '#core/types/string/bytes';
 
 import {dev, devAssert} from '#utils/log';
 

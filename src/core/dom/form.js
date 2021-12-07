@@ -1,7 +1,7 @@
-import {iterateCursor} from '#core/dom';
-import {ancestorElementsByTag} from '#core/dom/query';
-import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
+import {iterateCursor} from 'core/dom';
+import {ancestorElementsByTag} from 'core/dom/query';
+import {toArray} from 'core/types/array';
+import {dict} from 'core/types/object';
 
 /**
  * Stub type until an AmpForm interface is available in typechecked-land.

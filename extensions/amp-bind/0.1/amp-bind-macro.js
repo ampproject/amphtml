@@ -1,4 +1,4 @@
-import {LayoutPriority_Enum} from '#core/dom/layout';
+import {LayoutPriority_Enum} from 'core/dom/layout';
 
 /**
  * The <amp-bind-macro> element is used to define an expression macro that can

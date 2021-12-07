@@ -1,4 +1,4 @@
-import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
 
 class FakeElement {
   constructor(tagName) {

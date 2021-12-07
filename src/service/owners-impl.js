@@ -1,4 +1,4 @@
-import {isArray} from '#core/types';
+import {isArray} from 'core/types';
 
 import {Services} from '#service';
 

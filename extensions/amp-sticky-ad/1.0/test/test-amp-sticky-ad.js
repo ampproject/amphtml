@@ -1,6 +1,6 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-sticky-ad';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 import {Services} from '#service';
 

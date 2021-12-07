@@ -1,4 +1,4 @@
-import {getHashParams, parseQueryString} from '#core/types/string/url';
+import {getHashParams, parseQueryString} from 'core/types/string/url';
 
 describes.sandboxed('type helpers - strings - urls', {}, () => {
   describe('parseQueryString', () => {

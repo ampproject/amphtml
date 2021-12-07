@@ -1,6 +1,5 @@
+import * as mode from 'core/mode';
 import {options, toChildArray} from /*OK*/ 'preact';
-
-import * as mode from '#core/mode';
 
 const REACT_FORWARD_SYMBOL =
   (typeof Symbol !== 'undefined' && Symbol.for?.('react.forward_ref')) || 0xf47;

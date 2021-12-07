@@ -14,18 +14,18 @@ import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
 import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {clamp, mod} from '#core/math';
+import {clamp, mod} from 'core/math';
 import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
-import {debounce} from '#core/types/function';
+import {debounce} from 'core/types/function';
 import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {
   getStyle,
   setImportantStyles,
   setStyle,
   setStyles,
-} from '#core/dom/style';
-import {iterateCursor} from '#core/dom';
+} from 'core/dom/style';
+import {iterateCursor} from 'core/dom';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last

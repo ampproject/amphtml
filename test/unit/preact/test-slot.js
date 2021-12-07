@@ -1,8 +1,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
+import {setIsRoot, subscribe} from 'core/context';
+import {createElementWithAttributes} from 'core/dom';
 import {mount} from 'enzyme';
-
-import {setIsRoot, subscribe} from '#core/context';
-import {createElementWithAttributes} from '#core/dom';
 
 import * as Preact from '#preact';
 import {createRef, useLayoutEffect, useRef} from '#preact';

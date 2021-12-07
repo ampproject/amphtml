@@ -1,20 +1,20 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Deferred} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import {isDocumentReady} from '#core/document/ready';
-import {escapeHtml} from '#core/dom';
-import {layoutRectLtwh, moveLayoutRect} from '#core/dom/layout/rect';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Deferred} from 'core/data-structures/promise';
+import {Signals} from 'core/data-structures/signals';
+import {isDocumentReady} from 'core/document/ready';
+import {escapeHtml} from 'core/dom';
+import {layoutRectLtwh, moveLayoutRect} from 'core/dom/layout/rect';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyle,
   setStyles,
-} from '#core/dom/style';
-import {rethrowAsync} from '#core/error';
-import * as mode from '#core/mode';
-import {getWin} from '#core/window';
+} from 'core/dom/style';
+import {rethrowAsync} from 'core/error';
+import * as mode from 'core/mode';
+import {getWin} from 'core/window';
 
 import {install as installAbortController} from '#polyfills/abort-controller';
 import {install as installCustomElements} from '#polyfills/custom-elements';

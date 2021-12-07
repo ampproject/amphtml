@@ -1,6 +1,6 @@
 import '../amp-truncate-text';
-import {setStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+import {setStyles} from 'core/dom/style';
+import {toArray} from 'core/types/array';
 
 import {toggleExperiment} from '#experiments';
 

@@ -1,5 +1,5 @@
 import '../amp-__component_name_hyphenated__';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/helpers/service';
 

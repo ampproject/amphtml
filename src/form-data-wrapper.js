@@ -1,6 +1,6 @@
-import {iterateCursor} from '#core/dom';
-import {getFormAsObject, getSubmitButtonUsed} from '#core/dom/form';
-import {map} from '#core/types/object';
+import {iterateCursor} from 'core/dom';
+import {getFormAsObject, getSubmitButtonUsed} from 'core/dom/form';
+import {map} from 'core/types/object';
 
 import {Services} from '#service';
 

@@ -1,7 +1,7 @@
-import {LruCache} from '#core/data-structures/lru-cache';
-import {createElementWithAttributes} from '#core/dom';
-import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
+import {LruCache} from 'core/data-structures/lru-cache';
+import {createElementWithAttributes} from 'core/dom';
+import {isArray} from 'core/types';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

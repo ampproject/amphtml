@@ -1,8 +1,8 @@
-import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
 import {Services} from '#service';
 import {SubscriptionApi} from '../../../src/iframe-helper';
-import {dict} from '#core/types/object';
-import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {dict} from 'core/types/object';
+import {intersectionEntryToJson} from 'core/dom/layout/intersection';
 
 /**
  * LegacyAdIntersectionObserverHost exists for backward compatibility to support

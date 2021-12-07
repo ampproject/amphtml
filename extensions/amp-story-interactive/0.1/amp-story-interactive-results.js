@@ -4,9 +4,9 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-0.1.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
-import {computedStyle, setStyle} from '#core/dom/style';
+import {computedStyle, setStyle} from 'core/dom/style';
 import {dev} from '#utils/log';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 
 /**
  * @typedef {{

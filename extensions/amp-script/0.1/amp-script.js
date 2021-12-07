@@ -1,16 +1,15 @@
 import {upgrade} from '@ampproject/worker-dom/dist/amp-production/main.mjs';
-
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {
   Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
-} from '#core/dom/layout';
-import {realChildElements} from '#core/dom/query';
-import * as mode from '#core/mode';
-import {dict, map} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
-import {utf8Encode} from '#core/types/string/bytes';
+} from 'core/dom/layout';
+import {realChildElements} from 'core/dom/query';
+import * as mode from 'core/mode';
+import {dict, map} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
+import {utf8Encode} from 'core/types/string/bytes';
 
 import {Purifier} from '#purifier';
 

@@ -1,4 +1,4 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {
   BranchToTimeValues,
   StoryAdSegmentExp,
@@ -11,14 +11,14 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '#core/types/function';
+import {debounce} from 'core/types/function';
 import {dev, devAssert} from '#utils/log';
-import {escapeCssSelectorNth} from '#core/dom/css-selectors';
+import {escapeCssSelectorNth} from 'core/dom/css-selectors';
 import {getExperimentBranch} from 'src/experiments';
-import {hasOwn, map} from '#core/types/object';
-import {removeChildren} from '#core/dom';
-import {scale, setImportantStyles} from '#core/dom/style';
-import {scopedQuerySelector} from '#core/dom/query';
+import {hasOwn, map} from 'core/types/object';
+import {removeChildren} from 'core/dom';
+import {scale, setImportantStyles} from 'core/dom/style';
+import {scopedQuerySelector} from 'core/dom/query';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the

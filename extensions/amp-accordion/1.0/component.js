@@ -1,10 +1,9 @@
-import objstr from 'obj-str';
-
 import {
   randomIdGenerator,
   sequentialIdGenerator,
-} from '#core/data-structures/id-generator';
-import {omit} from '#core/types/object';
+} from 'core/data-structures/id-generator';
+import {omit} from 'core/types/object';
+import objstr from 'obj-str';
 
 import * as Preact from '#preact';
 import {

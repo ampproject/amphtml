@@ -1,4 +1,4 @@
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';

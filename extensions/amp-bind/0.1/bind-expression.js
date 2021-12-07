@@ -1,7 +1,7 @@
-import {bindParser as parser} from '#build/parsers/bind-expr-impl';
+import {isArray, isObject} from 'core/types';
+import {dict, hasOwn, map} from 'core/types/object';
 
-import {isArray, isObject} from '#core/types';
-import {dict, hasOwn, map} from '#core/types/object';
+import {bindParser as parser} from '#build/parsers/bind-expr-impl';
 
 import {devAssert, user} from '#utils/log';
 

@@ -1,6 +1,6 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
-import {dict, map} from '#core/types/object';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {isDisabled, isFieldDefault, isFieldEmpty} from 'core/dom/form';
+import {dict, map} from 'core/types/object';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev} from '#utils/log';

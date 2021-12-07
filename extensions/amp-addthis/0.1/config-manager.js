@@ -1,7 +1,7 @@
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
 import {getAddThisMode} from './addthis-utils/mode';
 
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 /**
  * Configuration request status enum.

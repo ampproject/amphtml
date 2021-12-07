@@ -1,5 +1,5 @@
-import {devAssert} from '#core/assert';
-import {Deferred} from '#core/data-structures/promise';
+import {devAssert} from 'core/assert';
+import {Deferred} from 'core/data-structures/promise';
 
 /** @const {string} */
 export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';

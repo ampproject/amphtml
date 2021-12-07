@@ -1,9 +1,9 @@
 import * as Preact from '#preact';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
-import {dashToUnderline} from '#core/types/string';
-import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
+import {dashToUnderline} from 'core/types/string';
+import {MessageType_Enum, deserializeMessage} from 'core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from 'core/types/object/json';
 import {useCallback, useLayoutEffect, useMemo, useState} from '#preact';
 import {useValueRef} from '#preact/component';
 

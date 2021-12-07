@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from 'core/types/object';
 
 export class UrlBuilder {
   /**

@@ -1,4 +1,4 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
 
 import * as experiments from '#experiments';
 import {forceExperimentBranch, getExperimentBranch} from '#experiments';

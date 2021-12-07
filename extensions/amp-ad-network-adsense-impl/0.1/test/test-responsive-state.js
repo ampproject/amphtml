@@ -1,12 +1,12 @@
+import {addAttributesToElement, createElementWithAttributes} from 'core/dom';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {toWin} from 'core/window';
+
 import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
 } from '#ads/google/utils';
-
-import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {toWin} from '#core/window';
 
 import {forceExperimentBranch} from '#experiments';
 

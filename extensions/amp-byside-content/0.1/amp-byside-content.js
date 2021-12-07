@@ -16,11 +16,11 @@
  * </code>
  */
 
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {setStyles} from '#core/dom/style';
-import {debounce} from '#core/types/function';
-import {dict} from '#core/types/object';
+import {createElementWithAttributes, removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {setStyles} from 'core/dom/style';
+import {debounce} from 'core/types/function';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

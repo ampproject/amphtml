@@ -1,4 +1,4 @@
-import {streamResponseToWriter} from '#core/dom/stream';
+import {streamResponseToWriter} from 'core/dom/stream';
 
 import {macroTask} from '#testing/helpers';
 

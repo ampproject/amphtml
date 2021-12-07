@@ -11,12 +11,12 @@
  * </amp-megaphone>
  */
 
-import {removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {isObject} from '#core/types';
-import {dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeFixed} from 'core/dom/layout';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {isObject} from 'core/types';
+import {dict} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

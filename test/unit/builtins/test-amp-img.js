@@ -1,10 +1,10 @@
+import {LayoutPriority_Enum, Layout_Enum} from 'core/dom/layout';
+
 import {
   ATTRIBUTES_TO_PROPAGATE,
   AmpImg,
   installImg,
 } from '#builtins/amp-img/amp-img';
-
-import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 

@@ -1,5 +1,5 @@
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
 
 import {userAssert} from '#utils/log';
 

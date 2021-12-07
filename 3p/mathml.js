@@ -1,4 +1,4 @@
-import {setStyle} from '#core/dom/style';
+import {setStyle} from 'core/dom/style';
 
 import {userAssert} from '#utils/log';
 

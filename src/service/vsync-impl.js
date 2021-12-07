@@ -1,10 +1,10 @@
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '#core/document/visibility';
-import {rethrowAsync} from '#core/error';
+} from 'core/document/visibility';
+import {rethrowAsync} from 'core/error';
 
 import {Services} from '#service';
 

@@ -1,18 +1,18 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {Observable} from '#core/data-structures/observable';
-import {Deferred} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import {isDocumentReady, whenDocumentReady} from '#core/document/ready';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {Observable} from 'core/data-structures/observable';
+import {Deferred} from 'core/data-structures/promise';
+import {Signals} from 'core/data-structures/signals';
+import {isDocumentReady, whenDocumentReady} from 'core/document/ready';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
-} from '#core/document/visibility';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
-import {isEnumValue} from '#core/types';
-import {map} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
-import {WindowInterface} from '#core/window/interface';
+} from 'core/document/visibility';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from 'core/dom';
+import {isEnumValue} from 'core/types';
+import {map} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
+import {WindowInterface} from 'core/window/interface';
 
 import {dev, devAssert} from '#utils/log';
 

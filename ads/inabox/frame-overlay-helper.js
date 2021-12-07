@@ -2,13 +2,13 @@ import {
   LayoutRectDef,
   layoutRectFromDomRect,
   layoutRectLtwh,
-} from '#core/dom/layout/rect';
+} from 'core/dom/layout/rect';
 import {
   centerFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,
   expandFrameUnderVsyncMutate,
 } from './full-overlay-frame-helper';
-import {resetStyles, setImportantStyles} from '#core/dom/style';
+import {resetStyles, setImportantStyles} from 'core/dom/style';
 import {restrictedVsync, timer} from './util';
 
 const CENTER_TRANSITION_TIME_MS = 150;

@@ -1,12 +1,12 @@
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 import {devAssert, user} from '#utils/log';
 import {getMode} from '../../../src/mode';
-import {hasOwn} from '#core/types/object';
-import * as mode from '#core/mode';
-import {toggle} from '#core/dom/style';
+import {hasOwn} from 'core/types/object';
+import * as mode from 'core/mode';
+import {toggle} from 'core/dom/style';
 import {urls} from '../../../src/config';
-import {IframeTransportEventDef} from '#core/3p-frame-messaging';
+import {IframeTransportEventDef} from 'core/3p-frame-messaging';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport';

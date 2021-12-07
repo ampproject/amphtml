@@ -1,6 +1,6 @@
 import '../amp-embedly-card';
-import {createElementWithAttributes} from '#core/dom';
-import {computedStyle} from '#core/dom/style';
+import {createElementWithAttributes} from 'core/dom';
+import {computedStyle} from 'core/dom/style';
 
 import {toggleExperiment} from '#experiments';
 

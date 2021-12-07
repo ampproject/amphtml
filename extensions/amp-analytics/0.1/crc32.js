@@ -1,4 +1,4 @@
-import {utf8Encode} from '#core/types/string/bytes';
+import {utf8Encode} from 'core/types/string/bytes';
 
 /**
  * Standard key for CRC32

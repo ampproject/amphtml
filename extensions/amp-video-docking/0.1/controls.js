@@ -1,15 +1,15 @@
-import {iterateCursor} from '#core/dom';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {iterateCursor} from 'core/dom';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {closestAncestorElementBySelector} from 'core/dom/query';
+import {htmlFor, htmlRefs} from 'core/dom/static-template';
 import {
   resetStyles,
   setImportantStyles,
   toggle,
   translate,
-} from '#core/dom/style';
-import {tryPlay} from '#core/dom/video';
-import {once} from '#core/types/function';
+} from 'core/dom/style';
+import {tryPlay} from 'core/dom/video';
+import {once} from 'core/types/function';
 
 import {Services} from '#service';
 

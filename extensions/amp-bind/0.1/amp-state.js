@@ -1,10 +1,10 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Deferred} from '#core/data-structures/promise';
-import {isJsonScriptTag} from '#core/dom';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {toggle} from '#core/dom/style';
-import {dict, map} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {Deferred} from 'core/data-structures/promise';
+import {isJsonScriptTag} from 'core/dom';
+import {LayoutPriority_Enum} from 'core/dom/layout';
+import {toggle} from 'core/dom/style';
+import {dict, map} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

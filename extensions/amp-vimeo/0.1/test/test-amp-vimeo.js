@@ -1,5 +1,5 @@
 import '../amp-vimeo';
-import * as VideoUtils from '#core/dom/video';
+import * as VideoUtils from 'core/dom/video';
 
 describes.realWin(
   'amp-vimeo',

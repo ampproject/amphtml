@@ -1,12 +1,11 @@
 import '../amp-image-lightbox';
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Keys_Enum} from '#core/constants/key-codes';
-import * as dom from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {parseSrcset} from '#core/dom/srcset';
-import {WindowInterface} from '#core/window/interface';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {Keys_Enum} from 'core/constants/key-codes';
+import * as dom from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
+import {parseSrcset} from 'core/dom/srcset';
+import {WindowInterface} from 'core/window/interface';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';

@@ -1,5 +1,5 @@
-import {resetStyles, setStyle, setStyles} from '#core/dom/style';
-import {dict} from '#core/types/object';
+import {resetStyles, setStyle, setStyles} from 'core/dom/style';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

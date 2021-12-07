@@ -1,5 +1,5 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Observable} from '#core/data-structures/observable';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Observable} from 'core/data-structures/observable';
 
 import {toggleExperiment} from '#experiments';
 

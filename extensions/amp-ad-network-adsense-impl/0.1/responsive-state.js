@@ -1,3 +1,9 @@
+import {computedStyle, getStyle, setStyle} from 'core/dom/style';
+import {clamp} from 'core/math';
+import {hasOwn} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
+import {getWin} from 'core/window';
+
 import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 import {
   ADSENSE_MCRSPV_TAG,
@@ -5,12 +11,6 @@ import {
   ADSENSE_RSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '#ads/google/utils';
-
-import {computedStyle, getStyle, setStyle} from '#core/dom/style';
-import {clamp} from '#core/math';
-import {hasOwn} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
-import {getWin} from '#core/window';
 
 import {randomlySelectUnsetExperiments} from '#experiments';
 

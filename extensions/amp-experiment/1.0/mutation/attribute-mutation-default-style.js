@@ -1,6 +1,6 @@
-import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dict, hasOwn} from '#core/types/object';
+import {isAmpElement} from 'core/dom/amp-element-helpers';
+import {assertDoesNotContainDisplay, setStyles} from 'core/dom/style';
+import {dict, hasOwn} from 'core/types/object';
 
 import {dev, user} from '#utils/log';
 

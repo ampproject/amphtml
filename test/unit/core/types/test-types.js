@@ -1,4 +1,4 @@
-import {isFiniteNumber} from '#core/types';
+import {isFiniteNumber} from 'core/types';
 
 describes.sandboxed('type helpers', {}, () => {
   describe('isFiniteNumber', () => {

@@ -1,7 +1,7 @@
-import {setStyle} from '#core/dom/style';
-import {isEnumValue} from '#core/types/enum';
-import {dict} from '#core/types/object';
-import {dashToUnderline} from '#core/types/string';
+import {setStyle} from 'core/dom/style';
+import {isEnumValue} from 'core/types/enum';
+import {dict} from 'core/types/object';
+import {dashToUnderline} from 'core/types/string';
 
 import {devAssert} from '#utils/log';
 

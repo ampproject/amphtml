@@ -1,4 +1,4 @@
-import {closest} from '#core/dom/query';
+import {closest} from 'core/dom/query';
 
 import {Services} from '#service';
 

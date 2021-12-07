@@ -1,8 +1,8 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-auto-ads';
-import {getA4ARegistry} from '#ads/_a4a-config';
+import {waitForChild} from 'core/dom';
 
-import {waitForChild} from '#core/dom';
+import {getA4ARegistry} from '#ads/_a4a-config';
 
 import {toggleExperiment} from '#experiments';
 

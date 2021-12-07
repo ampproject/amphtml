@@ -1,5 +1,5 @@
-import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
+import {createElementWithAttributes} from 'core/dom';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

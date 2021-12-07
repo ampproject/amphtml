@@ -1,5 +1,5 @@
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {dict} from 'core/types/object';
 
 import {isExperimentOn} from '#experiments';
 

@@ -1,6 +1,5 @@
+import {dispatchCustomEvent} from 'core/dom';
 import {mount} from 'enzyme';
-
-import {dispatchCustomEvent} from '#core/dom';
 
 import * as Preact from '#preact';
 import {createRef} from '#preact';

@@ -1,11 +1,11 @@
 import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
 import {Services} from '#service';
-import {TickLabel_Enum} from '#core/constants/enums';
-import {asyncStringReplace} from '#core/types/string';
-import {base64UrlEncodeFromString} from '#core/types/string/base64';
+import {TickLabel_Enum} from 'core/constants/enums';
+import {asyncStringReplace} from 'core/types/string';
+import {base64UrlEncodeFromString} from 'core/types/string/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {getActiveExperimentBranches, getExperimentBranch} from '#experiments';
 import {
   getConsentMetadata,
@@ -17,7 +17,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {isArray, isFiniteNumber} from '#core/types';
+import {isArray, isFiniteNumber} from 'core/types';
 
 import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';

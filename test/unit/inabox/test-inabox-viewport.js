@@ -1,8 +1,8 @@
+import {Observable} from 'core/data-structures/observable';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+
 import {FrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
 import {PositionObserver} from '#ads/inabox/position-observer';
-
-import {Observable} from '#core/data-structures/observable';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {installIframeMessagingClient} from '#inabox/inabox-iframe-messaging-client';
 import {

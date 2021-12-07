@@ -2,7 +2,7 @@ import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
 } from '../../amp-story/1.0/story-analytics';
-import {clamp} from '#core/math';
+import {clamp} from 'core/math';
 import {
   Action,
   StateProperty,
@@ -15,22 +15,22 @@ import {
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-import {base64UrlEncodeFromString} from '#core/types/string/base64';
-import {assertDoesNotContainDisplay, setImportantStyles} from '#core/dom/style';
+import {base64UrlEncodeFromString} from 'core/types/string/base64';
+import {assertDoesNotContainDisplay, setImportantStyles} from 'core/dom/style';
 import {
   buildInteractiveDisclaimer,
   buildInteractiveDisclaimerIcon,
 } from './interactive-disclaimer';
-import {closest} from '#core/dom/query';
+import {closest} from 'core/dom/query';
 import {
   createShadowRootWithStyle,
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {emojiConfetti} from './interactive-confetti';
-import {toArray} from '#core/types/array';
+import {toArray} from 'core/types/array';
 import {isExperimentOn} from '#experiments/';
 import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
 

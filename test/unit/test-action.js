@@ -2,9 +2,9 @@ import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
-} from '#core/constants/action-constants';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {htmlFor} from '#core/dom/static-template';
+} from 'core/constants/action-constants';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {htmlFor} from 'core/dom/static-template';
 
 import {
   ActionInvocation,

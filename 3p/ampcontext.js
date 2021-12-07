@@ -1,9 +1,9 @@
-import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Deferred} from '#core/data-structures/promise';
-import {isObject} from '#core/types';
-import {dict, map} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Deferred} from 'core/data-structures/promise';
+import {isObject} from 'core/types';
+import {dict, map} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {dev, devAssert} from '#utils/log';
 

@@ -1,4 +1,4 @@
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 
 import {Services} from '#service';
 

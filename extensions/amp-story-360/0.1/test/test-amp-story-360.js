@@ -1,5 +1,5 @@
 import '../amp-story-360';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 import {LocalizationService} from '#service/localization';
 

@@ -1,6 +1,6 @@
-import {tryResolve} from '#core/data-structures/promise';
-import {tryParseJson} from '#core/types/object/json';
-import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
+import {tryResolve} from 'core/data-structures/promise';
+import {tryParseJson} from 'core/types/object/json';
+import {utf8Decode, utf8Encode} from 'core/types/string/bytes';
 
 import {dev, devAssert} from '#utils/log';
 

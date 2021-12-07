@@ -1,12 +1,12 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
-import {Layout_Enum} from '#core/dom/layout';
+import {Layout_Enum} from 'core/dom/layout';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
@@ -15,8 +15,8 @@ import {
   closest,
   closestAncestorElementBySelector,
   matches,
-} from '#core/dom/query';
-import {computedStyle, setImportantStyles} from '#core/dom/style';
+} from 'core/dom/query';
+import {computedStyle, setImportantStyles} from 'core/dom/style';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
@@ -24,10 +24,10 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '#utils/log';
-import {isArray} from '#core/types';
-import {isJsonScriptTag} from '#core/dom';
+import {isArray} from 'core/types';
+import {isJsonScriptTag} from 'core/dom';
 
-import {parseJson} from '#core/types/object/json';
+import {parseJson} from 'core/types/object/json';
 import {localize} from './amp-story-localization-service';
 import objstr from 'obj-str';
 

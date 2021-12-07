@@ -1,7 +1,7 @@
-import {Deferred} from '#core/data-structures/promise';
-import {toggle} from '#core/dom/style';
-import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
+import {Deferred} from 'core/data-structures/promise';
+import {toggle} from 'core/dom/style';
+import {rethrowAsync} from 'core/error';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 import {

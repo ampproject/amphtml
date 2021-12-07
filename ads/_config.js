@@ -1,4 +1,4 @@
-import {jsonConfiguration} from '#core/types/object/json';
+import {jsonConfiguration} from 'core/types/object/json';
 
 /**
  * @typedef {{

@@ -1,4 +1,4 @@
-import {listen} from '#core/3p-frame-messaging';
+import {listen} from 'core/3p-frame-messaging';
 
 import {getData} from '#utils/event-helper';
 

@@ -1,5 +1,5 @@
-import {createElementWithAttributes} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
+import {createElementWithAttributes} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
 import '../amp-story-shopping';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';

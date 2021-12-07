@@ -1,7 +1,7 @@
 import '../amp-tiktok';
-import * as dom from '#core/dom';
+import * as dom from 'core/dom';
 import {Services} from '#service';
-import {computedStyle} from '#core/dom/style';
+import {computedStyle} from 'core/dom/style';
 
 const VIDEOID = '6948210747285441798';
 

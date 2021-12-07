@@ -1,9 +1,9 @@
 import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
-} from '#core/constants/action-constants';
-import {createElementWithAttributes} from '#core/dom';
-import {elementByTag} from '#core/dom/query';
+} from 'core/constants/action-constants';
+import {createElementWithAttributes} from 'core/dom';
+import {elementByTag} from 'core/dom/query';
 
 import {isExperimentOn} from '#experiments';
 

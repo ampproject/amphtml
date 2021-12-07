@@ -1,9 +1,9 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {tryResolve} from '#core/data-structures/promise';
-import {Signals} from '#core/data-structures/signals';
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isArray} from '#core/types';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {tryResolve} from 'core/data-structures/promise';
+import {Signals} from 'core/data-structures/signals';
+import {createElementWithAttributes} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
+import {isArray} from 'core/types';
 
 import {Services} from '#service';
 

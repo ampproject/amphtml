@@ -4,11 +4,11 @@ import {
   isProxyOrigin,
   parseUrlDeprecated,
 } from '../../src/url';
-import {closest} from '#core/dom/query';
+import {closest} from 'core/dom/query';
 import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {openWindowDialog} from '../../src/open-window-dialog';
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 import {urls} from '../../src/config';
 
 /**

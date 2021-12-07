@@ -1,5 +1,5 @@
-import {devAssert, devAssertElement} from '#core/assert';
-import * as mode from '#core/mode';
+import {devAssert, devAssertElement} from 'core/assert';
+import * as mode from 'core/mode';
 
 import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 

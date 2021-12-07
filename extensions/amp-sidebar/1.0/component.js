@@ -1,9 +1,9 @@
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys_Enum} from '#core/constants/key-codes';
+import {Keys_Enum} from 'core/constants/key-codes';
 import {Side} from './sidebar-config';
 import {forwardRef} from '#preact/compat';
-import {isRTL} from '#core/dom';
+import {isRTL} from 'core/dom';
 import {
   useCallback,
   useEffect,

@@ -1,8 +1,8 @@
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
-import {tryPlay} from '#core/dom/video';
-import {Deferred} from '#core/data-structures/promise';
-import {Loading_Enum} from '#core/constants/loading-instructions';
+import {tryPlay} from 'core/dom/video';
+import {Deferred} from 'core/data-structures/promise';
+import {Loading_Enum} from 'core/constants/loading-instructions';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {
   MetadataDef,
@@ -11,10 +11,10 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {ReadyState_Enum} from '#core/constants/ready-state';
-import {dict} from '#core/types/object';
+import {ReadyState_Enum} from 'core/constants/ready-state';
+import {dict} from 'core/types/object';
 import {forwardRef} from '#preact/compat';
-import {once} from '#core/types/function';
+import {once} from 'core/types/function';
 import {useAmpContext, useLoading} from '#preact/context';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {

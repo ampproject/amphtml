@@ -1,4 +1,4 @@
-import {isString} from '#core/types';
+import {isString} from 'core/types';
 
 /**
  * Number between 0 and 1 that designates normalized time, as in "from start to

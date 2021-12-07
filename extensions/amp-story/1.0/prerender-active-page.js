@@ -1,6 +1,6 @@
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {parseQueryString} from '#core/types/string/url';
-import {getWin} from '#core/window';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {parseQueryString} from 'core/types/string/url';
+import {getWin} from 'core/window';
 
 /**
  * Returns true if the page should be prerendered (for being an active page or

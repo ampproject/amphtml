@@ -1,5 +1,5 @@
-import {removeElement} from '#core/dom';
-import {setStyles} from '#core/dom/style';
+import {removeElement} from 'core/dom';
+import {setStyles} from 'core/dom/style';
 
 import {Services} from '#service';
 

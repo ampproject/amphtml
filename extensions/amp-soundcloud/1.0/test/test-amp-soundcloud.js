@@ -1,5 +1,5 @@
 import '../amp-soundcloud';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 

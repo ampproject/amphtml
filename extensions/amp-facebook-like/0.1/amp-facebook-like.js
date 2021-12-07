@@ -1,12 +1,12 @@
 import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dashToUnderline} from '#core/types/string';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {dashToUnderline} from 'core/types/string';
 import {getData, listen} from '#utils/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isObject} from '#core/types';
+import {isObject} from 'core/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '#core/dom';
-import {tryParseJson} from '#core/types/object/json';
+import {removeElement} from 'core/dom';
+import {tryParseJson} from 'core/types/object/json';
 
 const TYPE = 'facebook';
 

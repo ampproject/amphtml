@@ -2,9 +2,9 @@ import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
   removeElement,
-} from '#core/dom';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+} from 'core/dom';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

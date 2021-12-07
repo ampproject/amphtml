@@ -1,6 +1,6 @@
-import {getValueForExpr} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
-import {WindowInterface} from '#core/window/interface';
+import {getValueForExpr} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
+import {WindowInterface} from 'core/window/interface';
 
 import {experimentToggles, isExperimentOn} from '#experiments';
 

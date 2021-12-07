@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {toggle} from '#core/dom/style';
+import {toggle} from 'core/dom/style';
 
 import {loadPromise} from '#utils/event-helper';
 

@@ -1,10 +1,10 @@
-import * as st from '#core/dom/style';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import * as st from 'core/dom/style';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 import {dev} from '#utils/log';
-import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {propagateObjectFitStyles} from '#core/dom/style';
+import {guaranteeSrcForSrcsetUnsupportedBrowsers} from 'core/dom/img';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import {propagateObjectFitStyles} from 'core/dom/style';
 
 const TAG = 'amp-anim';
 const BUILD_ATTRIBUTES = [

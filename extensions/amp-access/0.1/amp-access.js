@@ -1,11 +1,11 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {TickLabel_Enum} from '#core/constants/enums';
-import {Observable} from '#core/data-structures/observable';
-import {isJsonScriptTag} from '#core/dom';
-import {isArray} from '#core/types';
-import {dict, getValueForExpr} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {TickLabel_Enum} from 'core/constants/enums';
+import {Observable} from 'core/data-structures/observable';
+import {isJsonScriptTag} from 'core/dom';
+import {isArray} from 'core/types';
+import {dict, getValueForExpr} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

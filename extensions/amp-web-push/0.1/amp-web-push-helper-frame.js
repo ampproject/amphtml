@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 import {initLogConstructor, setReportError, user} from '#utils/log';
 

@@ -1,4 +1,4 @@
-import {getStyle} from '#core/dom/style';
+import {getStyle} from 'core/dom/style';
 
 import {isAnimationNone} from '#testing/helpers/service';
 import {createFixtureIframe, expectBodyToBecomeVisible} from '#testing/iframe';

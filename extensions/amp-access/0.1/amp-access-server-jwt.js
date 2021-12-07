@@ -1,6 +1,6 @@
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {isArray} from 'core/types';
+import {dict} from 'core/types/object';
 
 import {isExperimentOn} from '#experiments';
 

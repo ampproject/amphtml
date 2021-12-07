@@ -1,8 +1,8 @@
 import {BaseTemplate} from '../../../src/base-template';
 import {Purifier} from '#purifier';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
-import {iterateCursor, templateContentClone} from '#core/dom';
+import {iterateCursor, templateContentClone} from 'core/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {user} from '#utils/log';
 import mustache from '#third_party/mustache/mustache';

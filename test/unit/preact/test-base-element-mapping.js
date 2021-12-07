@@ -1,6 +1,6 @@
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {omit} from '#core/types/object';
+import {createElementWithAttributes} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
+import {omit} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';

@@ -1,5 +1,5 @@
-import {devAssert} from '#core/assert';
-import * as mode from '#core/mode';
+import {devAssert} from 'core/assert';
+import * as mode from 'core/mode';
 
 /**
  * Interpret a byte array as a UTF-8 string.

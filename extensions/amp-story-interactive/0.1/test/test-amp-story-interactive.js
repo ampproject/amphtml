@@ -22,9 +22,9 @@ import {
   getMockOutOfBoundsData,
   getMockScrambledData,
 } from './helpers';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {getBackendSpecs} from '../interactive-disclaimer';
-import {htmlFor} from '#core/dom/static-template';
+import {htmlFor} from 'core/dom/static-template';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments/';
 

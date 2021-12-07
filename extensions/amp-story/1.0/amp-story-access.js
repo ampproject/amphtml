@@ -1,15 +1,15 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {Layout_Enum} from '#core/dom/layout';
-import {copyChildren, removeChildren} from '#core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import {copyChildren, removeChildren} from 'core/dom';
 import {devAssert, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
-import {isArray, isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+import {isArray, isObject} from 'core/types';
+import {parseJson} from 'core/types/object/json';
 
 /** @const {string} */
 const TAG = 'amp-story-access';

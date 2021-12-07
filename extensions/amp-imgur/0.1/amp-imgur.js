@@ -11,11 +11,11 @@
  * </code>
  */
 
-import {Deferred} from '#core/data-structures/promise';
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {isObject} from '#core/types';
-import {tryParseJson} from '#core/types/object/json';
+import {Deferred} from 'core/data-structures/promise';
+import {createElementWithAttributes, removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {isObject} from 'core/types';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

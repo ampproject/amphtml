@@ -1,5 +1,5 @@
-import {dict} from '#core/types/object';
-import {deepEquals} from '#core/types/object/json';
+import {dict} from 'core/types/object';
+import {deepEquals} from 'core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 

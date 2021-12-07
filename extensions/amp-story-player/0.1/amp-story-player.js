@@ -1,4 +1,4 @@
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {isLayoutSizeDefined} from 'core/dom/layout';
 
 import {cssText} from '../../../build/amp-story-player.css';
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';

@@ -1,6 +1,6 @@
-import {subscribe} from '#core/context';
-import {removeElement} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+import {subscribe} from 'core/context';
+import {removeElement} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';

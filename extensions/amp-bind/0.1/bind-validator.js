@@ -1,5 +1,5 @@
-import {parseSrcset} from '#core/dom/srcset';
-import {hasOwn, ownProperty} from '#core/types/object';
+import {parseSrcset} from 'core/dom/srcset';
+import {hasOwn, ownProperty} from 'core/types/object';
 
 import {user} from '#utils/log';
 

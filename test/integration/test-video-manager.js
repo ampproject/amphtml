@@ -1,7 +1,7 @@
-import {dispatchCustomEvent, waitForChildPromise} from '#core/dom';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {isAutoplaySupported, resetIsAutoplaySupported} from '#core/dom/video';
-import {toArray} from '#core/types/array';
+import {dispatchCustomEvent, waitForChildPromise} from 'core/dom';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {isAutoplaySupported, resetIsAutoplaySupported} from 'core/dom/video';
+import {toArray} from 'core/types/array';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

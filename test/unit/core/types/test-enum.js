@@ -1,4 +1,4 @@
-import {isEnumValue} from '#core/types/enum';
+import {isEnumValue} from 'core/types/enum';
 
 describes.sandboxed('type helpers - enums', {}, () => {
   describe('isEnumValue', () => {

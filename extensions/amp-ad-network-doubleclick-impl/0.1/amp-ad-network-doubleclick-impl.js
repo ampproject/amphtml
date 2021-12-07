@@ -5,6 +5,30 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '#service/real-time-config/real-time-config-impl';
+
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from 'core/constants/consent-state';
+import {Deferred} from 'core/data-structures/promise';
+import {createElementWithAttributes, isRTL, removeElement} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {domFingerprintPlain} from 'core/dom/fingerprint';
+import {Layout_Enum, isLayoutSizeDefined} from 'core/dom/layout';
+import {getPageLayoutBoxBlocking} from 'core/dom/layout/page-layout-box';
+import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from 'core/dom/style';
+import {isArray} from 'core/types';
+import {deepMerge, dict} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
+import {stringHash32} from 'core/types/string';
+import {getCryptoRandomBytesArray, utf8Decode} from 'core/types/string/bytes';
+import {parseQueryString} from 'core/types/string/url';
+import {WindowInterface} from 'core/window/interface';
+
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
@@ -38,29 +62,6 @@ import {
   truncAndTimeUrl,
 } from '#ads/google/a4a/utils';
 import {getMultiSizeDimensions} from '#ads/google/utils';
-
-import {
-  CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {Deferred} from '#core/data-structures/promise';
-import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
-import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {
-  assertDoesNotContainDisplay,
-  setImportantStyles,
-  setStyles,
-} from '#core/dom/style';
-import {isArray} from '#core/types';
-import {deepMerge, dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
-import {stringHash32} from '#core/types/string';
-import {getCryptoRandomBytesArray, utf8Decode} from '#core/types/string/bytes';
-import {parseQueryString} from '#core/types/string/url';
-import {WindowInterface} from '#core/window/interface';
 
 import {
   getExperimentBranch,

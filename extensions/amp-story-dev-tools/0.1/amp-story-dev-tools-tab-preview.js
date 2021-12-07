@@ -1,8 +1,8 @@
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {observeContentSize} from '#core/dom/layout/size-observer';
-import {closest} from '#core/dom/query';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyles} from '#core/dom/style';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
+import {observeContentSize} from 'core/dom/layout/size-observer';
+import {closest} from 'core/dom/query';
+import {htmlFor} from 'core/dom/static-template';
+import {setStyles} from 'core/dom/style';
 
 import {
   addAttributeAfterTimeout,

@@ -3,7 +3,7 @@ import {
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
-} from '#core/dom/web-components';
+} from 'core/dom/web-components';
 
 describes.sandboxed('DOM - web components', {}, () => {
   beforeEach(() => {

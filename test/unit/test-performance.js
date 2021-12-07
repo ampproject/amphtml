@@ -1,7 +1,6 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {base64UrlDecodeToBytes} from '#core/types/string/base64';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {base64UrlDecodeToBytes} from 'core/types/string/base64';
 
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';

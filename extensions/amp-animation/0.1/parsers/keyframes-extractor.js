@@ -1,5 +1,5 @@
-import {endsWith} from '#core/types/string';
-import {getWin} from '#core/window';
+import {endsWith} from 'core/types/string';
+import {getWin} from 'core/window';
 
 /**
  * Finds and extracts keyframes definition for Web Animations from CSS styles.

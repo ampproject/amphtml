@@ -1,9 +1,9 @@
-import {getDataParamsFromAttributes} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
-import {parseQueryString} from '#core/types/string/url';
-import {getWin} from '#core/window';
+import {getDataParamsFromAttributes} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import {toggle} from 'core/dom/style';
+import {dict} from 'core/types/object';
+import {parseQueryString} from 'core/types/string/url';
+import {getWin} from 'core/window';
 
 import {isExperimentOn} from '#experiments';
 

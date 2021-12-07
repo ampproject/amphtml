@@ -1,7 +1,7 @@
-import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {createElementWithAttributes} from '#core/dom';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {htmlFor} from '#core/dom/static-template';
+import {Deferred, tryResolve} from 'core/data-structures/promise';
+import {createElementWithAttributes} from 'core/dom';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {htmlFor} from 'core/dom/static-template';
 
 import {Services} from '#service';
 

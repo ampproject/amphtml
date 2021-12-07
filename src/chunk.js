@@ -1,4 +1,4 @@
-import {PriorityQueue} from '#core/data-structures/priority-queue';
+import {PriorityQueue} from 'core/data-structures/priority-queue';
 
 import {Services} from '#service';
 

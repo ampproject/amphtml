@@ -1,4 +1,4 @@
-import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from 'core/types/string/url';
 
 import {BrowserController, RequestBank} from '#testing/helpers/service';
 

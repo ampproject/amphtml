@@ -21,12 +21,12 @@
  * the example above and will produce the correct aspect ratio.
  */
 
-import {CSS} from '#build/amp-playbuzz-0.1.css';
+import {removeElement} from 'core/dom';
+import {Layout_Enum, applyFillContent} from 'core/dom/layout';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
+import {dict} from 'core/types/object';
 
-import {removeElement} from '#core/dom';
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {dict} from '#core/types/object';
+import {CSS} from '#build/amp-playbuzz-0.1.css';
 
 import {Services} from '#service';
 

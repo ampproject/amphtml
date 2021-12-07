@@ -1,8 +1,8 @@
 import {Services} from '#service';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {getDataParamsFromAttributes} from '#core/dom';
+import {getDataParamsFromAttributes} from 'core/dom';
 import {getVariableService} from './variable-service';
-import {map} from '#core/types/object';
+import {map} from 'core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 import {triggerAnalyticsEvent} from '#utils/analytics';
 

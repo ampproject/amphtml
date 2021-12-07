@@ -1,4 +1,4 @@
-import * as st from '#core/dom/style';
+import * as st from 'core/dom/style';
 
 describes.sandboxed('DOM - style helpers', {}, (env) => {
   it('toggle', () => {

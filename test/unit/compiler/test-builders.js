@@ -1,6 +1,6 @@
-import {getBuilders} from '#compiler/builders';
+import {createElementWithAttributes} from 'core/dom';
 
-import {createElementWithAttributes} from '#core/dom';
+import {getBuilders} from '#compiler/builders';
 
 describes.fakeWin('getBuilders', {}, (env) => {
   let doc;

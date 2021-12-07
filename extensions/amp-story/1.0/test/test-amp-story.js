@@ -9,19 +9,19 @@ import {
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Keys_Enum} from '#core/constants/key-codes';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {Keys_Enum} from 'core/constants/key-codes';
 import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Performance} from '#service/performance-impl';
 import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {createElementWithAttributes} from '#core/dom';
+import {Signals} from 'core/data-structures/signals';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {createElementWithAttributes} from 'core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
-import {setImportantStyles} from '#core/dom/style';
+import {setImportantStyles} from 'core/dom/style';
 import {waitFor} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
 

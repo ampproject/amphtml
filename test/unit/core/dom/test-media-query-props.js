@@ -1,4 +1,4 @@
-import {MediaQueryProps} from '#core/dom/media-query-props';
+import {MediaQueryProps} from 'core/dom/media-query-props';
 
 import {waitFor} from '#testing/helpers/service';
 

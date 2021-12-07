@@ -1,4 +1,4 @@
-import {Signals} from '#core/data-structures/signals';
+import {Signals} from 'core/data-structures/signals';
 
 describes.sandboxed('data structures - Signals', {}, (env) => {
   let clock;

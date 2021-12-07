@@ -1,4 +1,4 @@
-import {findIndex} from '#core/types/array';
+import {findIndex} from 'core/types/array';
 
 import {devAssert} from '#utils/log';
 

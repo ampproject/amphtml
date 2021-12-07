@@ -1,8 +1,8 @@
 import '../amp-sidebar';
 import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {createElementWithAttributes} from 'core/dom';
+import {htmlFor} from 'core/dom/static-template';
 import {toggleExperiment} from '#experiments';
 import {waitFor, whenCalled} from '#testing/helpers/service';
 import {Services} from '#service/';

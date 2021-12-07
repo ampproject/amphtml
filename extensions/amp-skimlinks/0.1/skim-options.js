@@ -1,4 +1,4 @@
-import {getChildJsonConfig} from '#core/dom';
+import {getChildJsonConfig} from 'core/dom';
 
 import {userAssert} from '#utils/log';
 

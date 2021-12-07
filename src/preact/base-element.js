@@ -1,28 +1,28 @@
-import {devAssert} from '#core/assert';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {Loading_Enum} from '#core/constants/loading-instructions';
-import {ReadyState_Enum} from '#core/constants/ready-state';
+import {devAssert} from 'core/assert';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
+import {Loading_Enum} from 'core/constants/loading-instructions';
+import {ReadyState_Enum} from 'core/constants/ready-state';
 import {
   addGroup,
   discover,
   setGroupProp,
   setParent,
   subscribe,
-} from '#core/context';
-import {Deferred} from '#core/data-structures/promise';
-import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
+} from 'core/context';
+import {Deferred} from 'core/data-structures/promise';
+import {createElementWithAttributes, dispatchCustomEvent} from 'core/dom';
 import {
   Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
-} from '#core/dom/layout';
-import {MediaQueryProps} from '#core/dom/media-query-props';
-import {childElementByAttr, childElementByTag} from '#core/dom/query';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import * as mode from '#core/mode';
-import {isElement} from '#core/types';
-import {dict, hasOwn, map} from '#core/types/object';
+} from 'core/dom/layout';
+import {MediaQueryProps} from 'core/dom/media-query-props';
+import {childElementByAttr, childElementByTag} from 'core/dom/query';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import * as mode from 'core/mode';
+import {isElement} from 'core/types';
+import {dict, hasOwn, map} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {hydrate, render} from '#preact';

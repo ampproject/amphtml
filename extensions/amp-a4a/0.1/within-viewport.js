@@ -1,7 +1,7 @@
-import {Deferred} from '#core/data-structures/promise';
-import {isIframed} from '#core/dom';
-import {memo} from '#core/types/object';
-import {getWin} from '#core/window';
+import {Deferred} from 'core/data-structures/promise';
+import {isIframed} from 'core/dom';
+import {memo} from 'core/types/object';
+import {getWin} from 'core/window';
 
 import {getMode} from '../../../src/mode';
 

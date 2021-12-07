@@ -1,7 +1,7 @@
-import {removeElement} from '#core/dom';
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
-import {isEnumValue} from '#core/types';
-import {dict} from '#core/types/object';
+import {removeElement} from 'core/dom';
+import {Layout_Enum, applyFillContent} from 'core/dom/layout';
+import {isEnumValue} from 'core/types';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

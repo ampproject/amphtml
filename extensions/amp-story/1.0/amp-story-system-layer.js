@@ -1,4 +1,4 @@
-import * as Preact from '#core/dom/jsx';
+import * as Preact from 'core/dom/jsx';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {
   Action,
@@ -15,7 +15,7 @@ import {
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '#service';
-import {closest, matches, scopedQuerySelector} from '#core/dom/query';
+import {closest, matches, scopedQuerySelector} from 'core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
@@ -23,13 +23,13 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {dict} from 'core/types/object';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 
-import {setImportantStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
+import {setImportantStyles} from 'core/dom/style';
+import {toArray} from 'core/types/array';
 import {localize} from './amp-story-localization-service';
 
 /** @private @const {string} */

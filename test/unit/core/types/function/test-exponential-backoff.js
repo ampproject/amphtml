@@ -1,7 +1,7 @@
 import {
   exponentialBackoff,
   exponentialBackoffClock,
-} from '#core/types/function/exponential-backoff';
+} from 'core/types/function/exponential-backoff';
 
 describes.integration(
   'type helpers - functions - exponentialBackoff',

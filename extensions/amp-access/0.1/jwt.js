@@ -1,9 +1,9 @@
-import {tryParseJson} from '#core/types/object/json';
+import {tryParseJson} from 'core/types/object/json';
 import {
   base64DecodeToBytes,
   base64UrlDecodeToBytes,
-} from '#core/types/string/base64';
-import {stringToBytes, utf8Decode} from '#core/types/string/bytes';
+} from 'core/types/string/base64';
+import {stringToBytes, utf8Decode} from 'core/types/string/bytes';
 
 /**
  * @typedef {{

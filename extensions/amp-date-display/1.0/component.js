@@ -1,4 +1,4 @@
-import {getDate} from '#core/types/date';
+import {getDate} from 'core/types/date';
 
 import * as Preact from '#preact';
 import {useMemo} from '#preact';

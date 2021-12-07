@@ -7,7 +7,7 @@ import {
   mockWindowInterface,
 } from '#testing/helpers/service';
 import {Services} from '#service';
-import {hasOwn} from '#core/types/object';
+import {hasOwn} from 'core/types/object';
 import {macroTask} from '#testing/helpers';
 import VENDOR_REQUESTS from './vendor-requests.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 

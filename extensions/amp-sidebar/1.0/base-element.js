@@ -2,11 +2,11 @@ import * as Preact from '#preact';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '#preact/base-element';
 import {BentoSidebar} from './component';
-import {dict} from '#core/types/object';
-import {pauseAll} from '#core/dom/resource-container-helper';
-import {realChildNodes} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
-import {toggleAttribute} from '#core/dom';
+import {dict} from 'core/types/object';
+import {pauseAll} from 'core/dom/resource-container-helper';
+import {realChildNodes} from 'core/dom/query';
+import {toggle} from 'core/dom/style';
+import {toggleAttribute} from 'core/dom';
 import {useToolbarHook} from './sidebar-toolbar-hook';
 import {useValueRef} from '#preact/component';
 

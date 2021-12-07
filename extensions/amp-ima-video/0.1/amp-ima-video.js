@@ -1,17 +1,17 @@
-import {ImaPlayerData} from '#ads/google/ima/ima-player-data';
-
-import {Deferred} from '#core/data-structures/promise';
-import {dispatchCustomEvent, isJsonScriptTag, removeElement} from '#core/dom';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {Deferred} from 'core/data-structures/promise';
+import {dispatchCustomEvent, isJsonScriptTag, removeElement} from 'core/dom';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {childElementsByTag} from '#core/dom/query';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {isEnumValue, isObject} from '#core/types';
-import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
+} from 'core/dom/layout/size-observer';
+import {childElementsByTag} from 'core/dom/query';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {isEnumValue, isObject} from 'core/types';
+import {toArray} from 'core/types/array';
+import {dict} from 'core/types/object';
+
+import {ImaPlayerData} from '#ads/google/ima/ima-player-data';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';

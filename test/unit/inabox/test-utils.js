@@ -1,5 +1,5 @@
-import {Deferred} from '#core/data-structures/promise';
-import {createElementWithAttributes} from '#core/dom';
+import {Deferred} from 'core/data-structures/promise';
+import {createElementWithAttributes} from 'core/dom';
 
 import {getA4AId, registerIniLoadListener} from '#inabox/utils';
 

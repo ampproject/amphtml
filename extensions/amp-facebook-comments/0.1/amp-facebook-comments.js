@@ -1,13 +1,13 @@
 import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
 import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
-import {dashToUnderline} from '#core/types/string';
+import {dashToUnderline} from 'core/types/string';
 import {getData, listen} from '#utils/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isObject} from '#core/types';
+import {isObject} from 'core/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '#core/dom';
-import {tryParseJson} from '#core/types/object/json';
+import {removeElement} from 'core/dom';
+import {tryParseJson} from 'core/types/object/json';
 
 const TYPE = 'facebook';
 

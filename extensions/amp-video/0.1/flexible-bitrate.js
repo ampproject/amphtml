@@ -1,11 +1,11 @@
-import {tryPlay} from '#core/dom/video';
-import {DomBasedWeakRef} from '#core/data-structures/dom-based-weakref';
+import {tryPlay} from 'core/dom/video';
+import {DomBasedWeakRef} from 'core/data-structures/dom-based-weakref';
 import {Services} from '#service';
-import {childElement, childElementsByTag} from '#core/dom/query';
+import {childElement, childElementsByTag} from 'core/dom/query';
 import {dev, devAssert} from '#utils/log';
 import {isExperimentOn} from '#experiments';
 import {listen, listenOnce} from '#utils/event-helper';
-import {toArray} from '#core/types/array';
+import {toArray} from 'core/types/array';
 
 const TAG = 'amp-video';
 

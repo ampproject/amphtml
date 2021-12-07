@@ -1,5 +1,5 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 
 const t = describes.sandboxed.configure().ifChrome();
 

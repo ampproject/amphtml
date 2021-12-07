@@ -1,4 +1,4 @@
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';

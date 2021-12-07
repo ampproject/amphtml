@@ -4,8 +4,8 @@
  * Invariant: Service getters never return null for registered services.
  */
 
-import {Deferred} from '#core/data-structures/promise';
-import {getWin} from '#core/window';
+import {Deferred} from 'core/data-structures/promise';
+import {getWin} from 'core/window';
 
 import {dev, devAssert} from '#utils/log';
 

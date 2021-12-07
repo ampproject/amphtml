@@ -1,8 +1,7 @@
 import '../amp-mathml';
 
 import {expect} from 'chai';
-
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 
 import {toggleExperiment} from '#experiments';
 

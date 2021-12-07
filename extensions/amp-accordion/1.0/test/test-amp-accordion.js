@@ -1,7 +1,7 @@
 import '../amp-accordion';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {subscribe, unsubscribe} from '#core/context';
-import {htmlFor} from '#core/dom/static-template';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {subscribe, unsubscribe} from 'core/context';
+import {htmlFor} from 'core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 

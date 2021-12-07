@@ -6,11 +6,11 @@ import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import '../../../amp-ad/0.1/amp-ad';
 // The following namespaces are imported so that we can stub and spy on certain
 // methods in tests.
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {Signals} from '#core/data-structures/signals';
-import {createElementWithAttributes} from '#core/dom';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
+import {Signals} from 'core/data-structures/signals';
+import {createElementWithAttributes} from 'core/dom';
+import {LayoutPriority_Enum} from 'core/dom/layout';
+import {layoutRectLtwh, layoutSizeFromRect} from 'core/dom/layout/rect';
 
 import {toggleExperiment} from '#experiments';
 

@@ -1,6 +1,6 @@
 import '../amp-video-iframe';
-import {createElementWithAttributes} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {createElementWithAttributes} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 
 import {Services} from '#service';
 

@@ -1,6 +1,6 @@
-import {devAssert, devAssertElement} from '#core/assert';
-import * as mode from '#core/mode';
-import {pushIfNotExist, removeItem} from '#core/types/array';
+import {devAssert, devAssertElement} from 'core/assert';
+import * as mode from 'core/mode';
+import {pushIfNotExist, removeItem} from 'core/types/array';
 
 import {ContextPropDef} from './prop.type';
 import {throttleTail} from './scheduler';

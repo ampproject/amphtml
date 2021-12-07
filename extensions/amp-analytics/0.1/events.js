@@ -1,19 +1,19 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Deferred} from '#core/data-structures/promise';
-import {Observable} from '#core/data-structures/observable';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {Deferred} from 'core/data-structures/promise';
+import {Observable} from 'core/data-structures/observable';
 import {
   PlayingStates_Enum,
   VideoAnalyticsEvents_Enum,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {enumValues} from '#core/types/enum';
-import {deepMerge, dict, hasOwn} from '#core/types/object';
+import {enumValues} from 'core/types/enum';
+import {deepMerge, dict, hasOwn} from 'core/types/object';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getData} from '#utils/event-helper';
-import {getDataParamsFromAttributes} from '#core/dom';
-import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
-import {debounce} from '#core/types/function';
+import {getDataParamsFromAttributes} from 'core/dom';
+import {isAmpElement} from 'core/dom/amp-element-helpers';
+import {isArray, isEnumValue, isFiniteNumber} from 'core/types';
+import {debounce} from 'core/types/function';
 import {isExperimentOn} from '#experiments';
 
 const SCROLL_PRECISION_PERCENT = 5;

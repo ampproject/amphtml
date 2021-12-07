@@ -1,11 +1,11 @@
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Keys_Enum} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {Keys_Enum} from 'core/constants/key-codes';
 import {Services} from '#service';
 import {assertScreenReaderElement} from '#testing/helpers/service';
-import {clearModalStack, getModalStackLength} from '#core/dom/modal';
-import {createElementWithAttributes} from '#core/dom';
+import {clearModalStack, getModalStackLength} from 'core/dom/modal';
+import {createElementWithAttributes} from 'core/dom';
 import {toggleExperiment} from '#experiments';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key

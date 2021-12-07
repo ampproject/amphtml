@@ -1,4 +1,4 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
 
 import {Services} from '#service';
 import {stubElementsForDoc} from '#service/custom-element-registry';

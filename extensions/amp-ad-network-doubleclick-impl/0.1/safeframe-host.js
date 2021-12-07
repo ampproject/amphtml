@@ -1,8 +1,8 @@
-import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {getStyle, setStyles} from '#core/dom/style';
-import {throttle} from '#core/types/function';
-import {dict, hasOwn} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
+import {getPageLayoutBoxBlocking} from 'core/dom/layout/page-layout-box';
+import {getStyle, setStyles} from 'core/dom/style';
+import {throttle} from 'core/types/function';
+import {dict, hasOwn} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
 
 import {Services} from '#service';
 

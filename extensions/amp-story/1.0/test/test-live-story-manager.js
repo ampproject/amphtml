@@ -1,11 +1,11 @@
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {addAttributesToElement} from '#core/dom';
+import {addAttributesToElement} from 'core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(

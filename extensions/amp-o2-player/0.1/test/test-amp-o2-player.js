@@ -1,6 +1,6 @@
 import '../amp-o2-player';
-import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
+import {CONSENT_POLICY_STATE} from 'core/constants/consent-state';
 
 import * as iframeHelper from '../../../../src/iframe-helper';
 

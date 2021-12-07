@@ -1,4 +1,4 @@
-import {trimEnd} from '#core/types/string';
+import {trimEnd} from 'core/types/string';
 
 import {
   BinarySearchPreference,

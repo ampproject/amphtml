@@ -1,17 +1,17 @@
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
-import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {getWin} from '#core/window';
+import {MessageType_Enum} from 'core/3p-frame-messaging';
+import {getWin} from 'core/window';
 import {ContainWrapper} from '#preact/component';
 import {useIntersectionObserver} from '#preact/component/intersection-observer';
-import {setStyle} from '#core/dom/style';
+import {setStyle} from 'core/dom/style';
 import {useMergeRefs} from '#preact/utils';
 import {
   DEFAULT_THRESHOLD,
   cloneEntryForCrossOrigin,
 } from '#utils/intersection-observer-3p-host';
 import {postMessage} from '../../../src/iframe-helper';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 
 const NOOP = () => {};
 

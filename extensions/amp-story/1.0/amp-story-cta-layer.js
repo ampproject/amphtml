@@ -14,8 +14,8 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {removeElement} from '#core/dom';
-import {matches} from '#core/dom/query';
+import {removeElement} from 'core/dom';
+import {matches} from 'core/dom/query';
 import {user} from '#utils/log';
 
 /**

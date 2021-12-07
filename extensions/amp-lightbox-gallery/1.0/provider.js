@@ -1,6 +1,5 @@
+import {mod} from 'core/math';
 import objstr from 'obj-str';
-
-import {mod} from '#core/math';
 
 import * as Preact from '#preact';
 import {

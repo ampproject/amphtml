@@ -21,9 +21,9 @@ import {
   applyFillContent,
   getLengthNumeral,
   isLayoutSizeDefined,
-} from '#core/dom/layout';
+} from 'core/dom/layout';
 import {dev, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {
   extractTags,
   getPlatform,
@@ -32,9 +32,9 @@ import {
   setFullscreenOn,
 } from './utils';
 import {handleCompanionAds} from './monetization';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {px, setStyles} from '#core/dom/style';
-import {removeElement} from '#core/dom';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
+import {px, setStyles} from 'core/dom/style';
+import {removeElement} from 'core/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';

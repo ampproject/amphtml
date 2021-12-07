@@ -1,24 +1,24 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {Animation} from '#utils/animation';
 import {dev, user, userAssert} from '#utils/log';
-import {Keys_Enum} from '#core/constants/key-codes';
+import {Keys_Enum} from 'core/constants/key-codes';
 import {Services} from '#service';
 import {CarouselControls} from './carousel-controls';
-import {bezierCurve} from '#core/data-structures/curve';
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {bezierCurve} from 'core/data-structures/curve';
+import {closestAncestorElementBySelector} from 'core/dom/query';
 import {createCustomEvent, listen} from '#utils/event-helper';
-import {dict} from '#core/types/object';
-import {dispatchCustomEvent} from '#core/dom';
-import {getStyle, setStyle} from '#core/dom/style';
+import {dict} from 'core/types/object';
+import {dispatchCustomEvent} from 'core/dom';
+import {getStyle, setStyle} from 'core/dom/style';
 import {isExperimentOn} from '#experiments';
-import {isFiniteNumber} from '#core/types';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {numeric} from '#core/dom/transition';
+import {isFiniteNumber} from 'core/types';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {numeric} from 'core/dom/transition';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
+} from 'core/dom/layout/size-observer';
+import {observeIntersections} from 'core/dom/layout/viewport-observer';
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {
   ClassNames,

@@ -1,5 +1,5 @@
 import {Side} from './sidebar-config';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+import {assertDoesNotContainDisplay, setStyles} from 'core/dom/style';
 import {useLayoutEffect, useRef} from '#preact';
 import {useValueRef} from '#preact/component';
 

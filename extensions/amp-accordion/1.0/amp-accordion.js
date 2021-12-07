@@ -1,5 +1,5 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {getWin} from '#core/window';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {getWin} from 'core/window';
 
 import {isExperimentOn} from '#experiments';
 

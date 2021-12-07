@@ -1,4 +1,4 @@
-import {throttle} from '#core/types/function';
+import {throttle} from 'core/types/function';
 
 /**
  * Applies scroll and momentum to window by using touch events.

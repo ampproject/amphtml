@@ -1,4 +1,4 @@
-import {utf8Encode} from '#core/types/string/bytes';
+import {utf8Encode} from 'core/types/string/bytes';
 
 import {user} from '#utils/log';
 

@@ -1,6 +1,6 @@
 import {Services} from '#service';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyles} from '#core/dom/style';
+import {htmlFor} from 'core/dom/static-template';
+import {setStyles} from 'core/dom/style';
 
 /**
  * Generates the template for the confetti wrapper.

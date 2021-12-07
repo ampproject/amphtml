@@ -1,7 +1,7 @@
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
-import {getLengthNumeral, isLayoutSizeDefined} from '#core/dom/layout';
-import {px, setImportantStyles, setStyle, setStyles} from '#core/dom/style';
-import {throttle} from '#core/types/function';
+import {getLengthNumeral, isLayoutSizeDefined} from 'core/dom/layout';
+import {px, setImportantStyles, setStyle, setStyles} from 'core/dom/style';
+import {throttle} from 'core/types/function';
 import {buildDom, mirrorNode} from './build-dom';
 
 const TAG = 'amp-fit-text';

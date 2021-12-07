@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {hasOwn} from '#core/types/object';
+import {hasOwn} from 'core/types/object';
 import {loadScript, validateData} from '#3p/3p';
-import {setStyles} from '#core/dom/style';
+import {setStyles} from 'core/dom/style';
 
 /**
  * @param {!Object} theObject

@@ -1,9 +1,9 @@
 import {BaseElement} from '../../../../src/base-element';
 import {LegacyAdIntersectionObserverHost} from '../legacy-ad-intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
-import {deserializeMessage} from '#core/3p-frame-messaging';
+import {deserializeMessage} from 'core/3p-frame-messaging';
 import {getIntersectionChangeEntry} from '#utils/intersection-observer-3p-host';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 
 describes.sandboxed('IntersectionObserverHostForAd', {}, (env) => {
   const ElementClass = createAmpElementForTesting(window, BaseElement);

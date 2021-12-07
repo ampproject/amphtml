@@ -4,17 +4,17 @@ import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
-} from '#core/dom/query';
+} from 'core/dom/query';
 import {dev, user, userAssert} from '#utils/log';
-import {getDataParamsFromAttributes} from '#core/dom';
+import {getDataParamsFromAttributes} from 'core/dom';
 import {getMode} from '../../../src/mode';
-import {isArray} from '#core/types';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {map} from '#core/types/object';
+import {isArray} from 'core/types';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
+import {map} from 'core/types/object';
 
 import {provideVisibilityManager} from './visibility-manager';
 
-import {tryResolve} from '#core/data-structures/promise';
+import {tryResolve} from 'core/data-structures/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';

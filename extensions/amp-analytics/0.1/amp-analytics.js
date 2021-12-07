@@ -3,7 +3,7 @@ import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
 import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {
   ExpansionOptions,
   VariableService,
@@ -14,21 +14,21 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
-import {LayoutPriority_Enum} from '#core/dom/layout';
+import {LayoutPriority_Enum} from 'core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '#service';
 import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
 import {Transport} from './transport';
 import {dev, devAssert, user} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
-import {expandTemplate} from '#core/types/string';
+import {dict, hasOwn} from 'core/types/object';
+import {expandTemplate} from 'core/types/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
-import {isArray, isEnumValue} from '#core/types';
-import {rethrowAsync} from '#core/error';
+import {isArray, isEnumValue} from 'core/types';
+import {rethrowAsync} from 'core/error';
 
-import {isIframed} from '#core/dom';
+import {isIframed} from 'core/dom';
 import {isInFie} from '../../../src/iframe-helper';
 
 const TAG = 'amp-analytics';

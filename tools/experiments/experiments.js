@@ -1,13 +1,13 @@
 import '#polyfills';
 import '#service/timer-impl';
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {EXPERIMENTS} from './experiments-config';
 import {SameSite_Enum, getCookie, setCookie} from '../../src/cookies';
 import {devAssert, initLogConstructor, setReportError} from '#utils/log';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '#experiments';
 import {listenOnce} from '#utils/event-helper';
-import {onDocumentReady} from '#core/document/ready';
+import {onDocumentReady} from 'core/document/ready';
 import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
 import {reportError} from '../../src/error-reporting';

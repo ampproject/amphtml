@@ -1,6 +1,6 @@
 /** @fileoverview Installs polyfills depending on build environment. */
 
-import * as mode from '#core/mode';
+import * as mode from 'core/mode';
 
 import {install as installAbortController} from './abort-controller';
 import {install as installArrayIncludes} from './array-includes';

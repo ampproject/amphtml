@@ -1,4 +1,4 @@
-import {hasOwn} from '#core/types/object';
+import {hasOwn} from 'core/types/object';
 import {validateData} from '#3p/3p';
 
 /**

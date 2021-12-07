@@ -1,5 +1,5 @@
 import './access-vendor';
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 
 import {dev, userAssert} from '#utils/log';
 

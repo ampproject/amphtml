@@ -1,8 +1,8 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {getChildJsonConfig} from '#core/dom';
-import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
-import {clamp} from '#core/math';
-import {isFiniteNumber} from '#core/types';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {getChildJsonConfig} from 'core/dom';
+import {setInitialDisplay, setStyles, toggle} from 'core/dom/style';
+import {clamp} from 'core/math';
+import {isFiniteNumber} from 'core/types';
 
 import {Services} from '#service';
 

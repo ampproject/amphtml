@@ -1,4 +1,4 @@
-import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
+import {parseQueryString, tryDecodeUriComponent} from 'core/types/string/url';
 
 import {listen} from '#utils/event-helper';
 

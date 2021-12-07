@@ -1,6 +1,6 @@
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import {PauseHelper} from 'core/dom/video/pause-helper';
 
 import {Services} from '#service';
 

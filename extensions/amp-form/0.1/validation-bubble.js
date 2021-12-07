@@ -1,5 +1,5 @@
-import {removeChildren} from '#core/dom';
-import {setStyles, toggle} from '#core/dom/style';
+import {removeChildren} from 'core/dom';
+import {setStyles, toggle} from 'core/dom/style';
 
 import {Services} from '#service';
 

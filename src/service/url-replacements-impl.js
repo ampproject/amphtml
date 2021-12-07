@@ -1,7 +1,7 @@
-import * as mode from '#core/mode';
-import {hasOwn} from '#core/types/object';
-import {getHashParams, parseQueryString} from '#core/types/string/url';
-import {WindowInterface} from '#core/window/interface';
+import * as mode from 'core/mode';
+import {hasOwn} from 'core/types/object';
+import {getHashParams, parseQueryString} from 'core/types/string/url';
+import {WindowInterface} from 'core/window/interface';
 
 import {Services} from '#service';
 

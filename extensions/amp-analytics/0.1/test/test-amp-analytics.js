@@ -5,7 +5,7 @@ import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '#testing/helpers/service';
-import {LayoutPriority_Enum} from '#core/dom/layout';
+import {LayoutPriority_Enum} from 'core/dom/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '#service';
 import {SessionManager} from '../session-manager';

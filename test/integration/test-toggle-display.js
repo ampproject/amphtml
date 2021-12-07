@@ -1,4 +1,4 @@
-import {setInitialDisplay, toggle} from '#core/dom/style';
+import {setInitialDisplay, toggle} from 'core/dom/style';
 
 import {BrowserController} from '#testing/helpers/service';
 

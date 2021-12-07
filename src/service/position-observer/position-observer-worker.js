@@ -3,7 +3,7 @@ import {
   layoutRectLtwh,
   layoutRectsRelativePos,
   rectsOverlap,
-} from '#core/dom/layout/rect';
+} from 'core/dom/layout/rect';
 
 import {Services} from '#service';
 

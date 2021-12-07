@@ -1,7 +1,7 @@
-import {isServerRendered} from '#core/dom';
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
-import {realChildNodes} from '#core/dom/query';
-import {getEffectiveLayout} from '#core/static-layout';
+import {isServerRendered} from 'core/dom';
+import {Layout_Enum, applyFillContent} from 'core/dom/layout';
+import {realChildNodes} from 'core/dom/query';
+import {getEffectiveLayout} from 'core/static-layout';
 
 /**
  * @see amphtml/compiler/types.js for full description

@@ -1,4 +1,4 @@
-import {hasOwn} from '#core/types/object';
+import {hasOwn} from 'core/types/object';
 
 import {Services} from '#service';
 

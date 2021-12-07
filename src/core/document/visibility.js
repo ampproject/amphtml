@@ -1,5 +1,5 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {getVendorJsPropertyName} from '#core/dom/style';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {getVendorJsPropertyName} from 'core/dom/style';
 
 /**
  * @param {Document} doc

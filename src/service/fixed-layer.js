@@ -1,5 +1,5 @@
-import {domOrderComparator} from '#core/dom';
-import {closest, matches} from '#core/dom/query';
+import {domOrderComparator} from 'core/dom';
+import {closest, matches} from 'core/dom/query';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -10,9 +10,9 @@ import {
   setStyle,
   setStyles,
   toggle,
-} from '#core/dom/style';
-import {remove} from '#core/types/array';
-import {endsWith} from '#core/types/string';
+} from 'core/dom/style';
+import {remove} from 'core/types/array';
+import {endsWith} from 'core/types/string';
 
 import {Services} from '#service';
 

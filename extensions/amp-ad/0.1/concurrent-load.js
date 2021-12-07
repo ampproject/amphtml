@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {Deferred} from '#core/data-structures/promise';
+import {Deferred} from 'core/data-structures/promise';
 import {Services} from '#service';
 import {user, userAssert} from '#utils/log';
 

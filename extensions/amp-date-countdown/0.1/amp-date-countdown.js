@@ -1,6 +1,6 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {removeChildren} from '#core/dom';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {removeChildren} from 'core/dom';
+import {isLayoutSizeDefined} from 'core/dom/layout';
 
 import {Services} from '#service';
 

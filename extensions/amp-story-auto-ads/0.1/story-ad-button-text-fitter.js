@@ -1,4 +1,4 @@
-import {px, setStyle, setStyles} from '#core/dom/style';
+import {px, setStyle, setStyles} from 'core/dom/style';
 
 import {Services} from '#service';
 

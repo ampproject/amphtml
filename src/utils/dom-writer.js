@@ -1,6 +1,6 @@
-import {devAssert} from '#core/assert';
-import {iterateCursor, removeElement} from '#core/dom';
-import {childElementsByTag} from '#core/dom/query';
+import {devAssert} from 'core/assert';
+import {iterateCursor, removeElement} from 'core/dom';
+import {childElementsByTag} from 'core/dom/query';
 
 import {Services} from '#service';
 

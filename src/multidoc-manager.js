@@ -1,9 +1,9 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {isConnectedNode} from '#core/dom';
-import {childElementsByTag} from '#core/dom/query';
-import {setStyle} from '#core/dom/style';
-import {isArray, isObject} from '#core/types';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {isConnectedNode} from 'core/dom';
+import {childElementsByTag} from 'core/dom/query';
+import {setStyle} from 'core/dom/style';
+import {isArray, isObject} from 'core/types';
 
 import {Services} from '#service';
 import {parseExtensionUrl} from '#service/extension-script';

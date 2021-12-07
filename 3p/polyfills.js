@@ -2,7 +2,7 @@
  * @fileoverview Loads all polyfills needed by the AMP 3p integration frame.
  */
 
-import * as mode from '#core/mode';
+import * as mode from 'core/mode';
 
 // This list should not get longer without a very good reason.
 import {install as installMathSign} from '#polyfills/math-sign';

@@ -1,6 +1,5 @@
+import {dict} from 'core/types/object';
 import {mount} from 'enzyme';
-
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {Wrapper} from '#preact/component';

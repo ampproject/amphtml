@@ -1,4 +1,4 @@
-import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
 
 import {toggleExperiment} from '#experiments';
 

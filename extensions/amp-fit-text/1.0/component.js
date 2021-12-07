@@ -1,8 +1,8 @@
 import * as Preact from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {LINE_HEIGHT_EM_, useStyles} from './component.jss';
-import {px, resetStyles, setStyle, setStyles} from '#core/dom/style';
-import {getWin} from '#core/window';
+import {px, resetStyles, setStyle, setStyles} from 'core/dom/style';
+import {getWin} from 'core/window';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 
 /**

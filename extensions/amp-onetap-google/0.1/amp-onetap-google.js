@@ -26,12 +26,12 @@
  * </code>
  */
 
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {removeElement} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import {px, setStyle, toggle} from '#core/dom/style';
-import {isObject} from '#core/types';
-import {dict} from '#core/types/object';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {removeElement} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+import {px, setStyle, toggle} from 'core/dom/style';
+import {isObject} from 'core/types';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

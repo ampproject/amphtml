@@ -5,7 +5,7 @@ import {
   scale,
   setStyles,
   translate,
-} from '#core/dom/transition';
+} from 'core/dom/transition';
 
 describes.sandboxed('DOM - transition helpers', {}, () => {
   const numericLow = numeric(0, 10);

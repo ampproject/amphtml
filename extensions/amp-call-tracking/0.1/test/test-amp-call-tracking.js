@@ -1,5 +1,5 @@
 import '../amp-call-tracking';
-import {realChildElements} from '#core/dom/query';
+import {realChildElements} from 'core/dom/query';
 
 import {Services} from '#service';
 

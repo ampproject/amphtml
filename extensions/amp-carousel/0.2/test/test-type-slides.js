@@ -1,12 +1,12 @@
 import '../amp-carousel';
 import * as Listen from '#utils/event-helper';
 import {ActionService} from '#service/action-impl';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '#service';
 import {getDetail, listenOncePromise} from '#utils/event-helper';
 import {user} from '#utils/log';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 
 /**
  * @fileoverview Some simple tests for amp-carousel. Most of the functionality

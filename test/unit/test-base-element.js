@@ -1,6 +1,6 @@
-import {DEFAULT_ACTION} from '#core/constants/action-constants';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {DEFAULT_ACTION} from 'core/constants/action-constants';
+import {LayoutPriority_Enum} from 'core/dom/layout';
+import {layoutRectLtwh} from 'core/dom/layout/rect';
 
 import {Services} from '#service';
 import {Resource} from '#service/resource';

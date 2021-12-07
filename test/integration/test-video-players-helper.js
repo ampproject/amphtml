@@ -1,5 +1,5 @@
-import {removeElement} from '#core/dom';
-import {detectIsAutoplaySupported} from '#core/dom/video';
+import {removeElement} from 'core/dom';
+import {detectIsAutoplaySupported} from 'core/dom/video';
 
 import {toggleExperiment} from '#experiments';
 

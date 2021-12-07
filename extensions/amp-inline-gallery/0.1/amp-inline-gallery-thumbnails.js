@@ -1,12 +1,12 @@
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {createCustomEvent} from '#utils/event-helper';
-import {dict} from '#core/types/object';
-import {htmlFor} from '#core/dom/static-template';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {matches, scopedQuerySelector} from '#core/dom/query';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {setStyle} from '#core/dom/style';
+import {dict} from 'core/types/object';
+import {htmlFor} from 'core/dom/static-template';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {matches, scopedQuerySelector} from 'core/dom/query';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import {setStyle} from 'core/dom/style';
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.

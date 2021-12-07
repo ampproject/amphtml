@@ -1,8 +1,8 @@
-import {installImg} from '#builtins/amp-img/amp-img';
+import {createElementWithAttributes} from 'core/dom';
+import {applyStaticLayout} from 'core/static-layout';
+import {toArray} from 'core/types/array';
 
-import {createElementWithAttributes} from '#core/dom';
-import {applyStaticLayout} from '#core/static-layout';
-import {toArray} from '#core/types/array';
+import {installImg} from '#builtins/amp-img/amp-img';
 
 import {BrowserController} from '#testing/helpers/service';
 import {createIframePromise} from '#testing/iframe';

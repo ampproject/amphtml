@@ -1,4 +1,4 @@
-import {Observable} from '#core/data-structures/observable';
+import {Observable} from 'core/data-structures/observable';
 import {Services} from '#service';
 import {devAssert} from '#utils/log';
 

@@ -1,14 +1,14 @@
-import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
+import {AMPDOC_SINGLETON_NAME_ENUM} from 'core/constants/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {Priority_Enum} from '#service/navigation';
 import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+import {WindowInterface} from 'core/window/interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes} from 'core/dom';
 import {createLinker} from './linker';
-import {dict} from '#core/types/object';
+import {dict} from 'core/types/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
-import {isObject} from '#core/types';
+import {isObject} from 'core/types';
 import {user} from '#utils/log';
 
 /** @const {string} */

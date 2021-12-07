@@ -1,28 +1,28 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {bezierCurve} from '#core/data-structures/curve';
-import {Layout_Enum} from '#core/dom/layout';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
+import {bezierCurve} from 'core/data-structures/curve';
+import {Layout_Enum} from 'core/dom/layout';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/dom/layout/rect';
+} from 'core/dom/layout/rect';
 import {
   observeContentSize,
   unobserveContentSize,
-} from '#core/dom/layout/size-observer';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
+} from 'core/dom/layout/size-observer';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
 import {
   closestAncestorElementBySelector,
   elementByTag,
   realChildElements,
-} from '#core/dom/query';
-import {srcsetFromElement} from '#core/dom/srcset';
-import {setStyles} from '#core/dom/style';
-import * as st from '#core/dom/style';
-import * as tr from '#core/dom/transition';
-import {boundValue, distance, magnitude} from '#core/math';
-import {WindowInterface} from '#core/window/interface';
+} from 'core/dom/query';
+import {srcsetFromElement} from 'core/dom/srcset';
+import {setStyles} from 'core/dom/style';
+import * as st from 'core/dom/style';
+import * as tr from 'core/dom/transition';
+import {boundValue, distance, magnitude} from 'core/math';
+import {WindowInterface} from 'core/window/interface';
 
 import {Services} from '#service';
 

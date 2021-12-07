@@ -1,5 +1,5 @@
 import { getMode } from '../../../../../../../src/mode';
-import * as mode from '#core/mode';
+import * as mode from 'core/mode';
 
 const test = getMode().test;
 const localDev = getMode().localDev;

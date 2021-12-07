@@ -1,13 +1,13 @@
 import {COOKIELESS_API_SERVER} from '../constants';
 import {Services} from '#service';
 import {addParamsToUrl, parseUrlDeprecated} from '../../../../src/url';
-import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
+import {createElementWithAttributes} from 'core/dom';
+import {dict} from 'core/types/object';
 import {getData} from '#utils/event-helper';
-import {isObject} from '#core/types';
-import {parseJson} from '#core/types/object/json';
+import {isObject} from 'core/types';
+import {parseJson} from 'core/types/object/json';
 
-import {setStyles, toggle} from '#core/dom/style';
+import {setStyles, toggle} from 'core/dom/style';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';

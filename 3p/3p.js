@@ -5,9 +5,9 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
-import {rethrowAsync} from '#core/error';
-import {isArray} from '#core/types';
-import {hasOwn, map} from '#core/types/object';
+import {rethrowAsync} from 'core/error';
+import {isArray} from 'core/types';
+import {hasOwn, map} from 'core/types/object';
 
 import {devAssert, userAssert} from '#utils/log';
 

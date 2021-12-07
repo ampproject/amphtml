@@ -1,5 +1,5 @@
-import {isObject} from '#core/types';
-import {toArray} from '#core/types/array';
+import {isObject} from 'core/types';
+import {toArray} from 'core/types/array';
 
 import {userAssert} from '#utils/log';
 

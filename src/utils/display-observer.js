@@ -1,7 +1,7 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {containsNotSelf} from '#core/dom';
-import {rethrowAsync} from '#core/error';
-import {pushIfNotExist, removeItem} from '#core/types/array';
+import {VisibilityState_Enum} from 'core/constants/visibility-state';
+import {containsNotSelf} from 'core/dom';
+import {rethrowAsync} from 'core/error';
+import {pushIfNotExist, removeItem} from 'core/types/array';
 
 import {
   getServiceForDoc,

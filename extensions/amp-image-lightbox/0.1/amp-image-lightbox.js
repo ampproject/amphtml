@@ -1,19 +1,19 @@
-import {Keys_Enum} from '#core/constants/key-codes';
-import {bezierCurve} from '#core/data-structures/curve';
-import * as dom from '#core/dom';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {bezierCurve} from 'core/data-structures/curve';
+import * as dom from 'core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '#core/dom/layout/rect';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import * as query from '#core/dom/query';
-import {srcsetFromElement} from '#core/dom/srcset';
-import {setStyles, toggle} from '#core/dom/style';
-import * as st from '#core/dom/style';
-import * as tr from '#core/dom/transition';
-import {boundValue, clamp, distance, magnitude} from '#core/math';
-import {WindowInterface} from '#core/window/interface';
+} from 'core/dom/layout/rect';
+import {propagateAttributes} from 'core/dom/propagate-attributes';
+import * as query from 'core/dom/query';
+import {srcsetFromElement} from 'core/dom/srcset';
+import {setStyles, toggle} from 'core/dom/style';
+import * as st from 'core/dom/style';
+import * as tr from 'core/dom/transition';
+import {boundValue, clamp, distance, magnitude} from 'core/math';
+import {WindowInterface} from 'core/window/interface';
 
 import {Services} from '#service';
 

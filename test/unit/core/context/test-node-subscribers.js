@@ -1,6 +1,6 @@
-import {ContextNode} from '#core/context/node';
-import {contextProp} from '#core/context/prop';
-import {subscribe, unsubscribe} from '#core/context/subscriber';
+import {ContextNode} from 'core/context/node';
+import {contextProp} from 'core/context/prop';
+import {subscribe, unsubscribe} from 'core/context/subscriber';
 
 const NonRecursive = contextProp('NonRecursive');
 

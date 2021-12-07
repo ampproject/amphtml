@@ -1,7 +1,7 @@
-import {createElementWithAttributes} from '#core/dom';
-import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
-import {utf8Decode} from '#core/types/string/bytes';
+import {createElementWithAttributes} from 'core/dom';
+import {intersectionEntryToJson} from 'core/dom/layout/intersection';
+import {dict} from 'core/types/object';
+import {utf8Decode} from 'core/types/string/bytes';
 
 import {Renderer} from './amp-ad-type-defs';
 

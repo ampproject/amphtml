@@ -1,4 +1,4 @@
-import {USER_ERROR_SENTINEL} from '#core/error/message-helpers';
+import {USER_ERROR_SENTINEL} from 'core/error/message-helpers';
 
 import * as assertions from './base';
 

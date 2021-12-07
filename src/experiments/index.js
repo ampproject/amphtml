@@ -5,10 +5,10 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {isArray} from '#core/types';
-import {hasOwn, map} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
-import {parseQueryString} from '#core/types/string/url';
+import {isArray} from 'core/types';
+import {hasOwn, map} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
+import {parseQueryString} from 'core/types/string/url';
 
 import {dev, user} from '#utils/log';
 

@@ -1,5 +1,5 @@
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import * as Preact from '#preact';
 import {useCallback, useState} from '#preact';

@@ -11,9 +11,9 @@
  * </amp-soundcloud>
  */
 
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
+import {applyFillContent, isLayoutSizeDefined} from 'core/dom/layout';
+import {PauseHelper} from 'core/dom/video/pause-helper';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 

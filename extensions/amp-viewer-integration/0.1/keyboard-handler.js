@@ -1,5 +1,5 @@
-import {Keys_Enum} from '#core/constants/key-codes';
-import {dict} from '#core/types/object';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {dict} from 'core/types/object';
 
 import {listen} from '#utils/event-helper';
 

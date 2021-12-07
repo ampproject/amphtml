@@ -11,8 +11,8 @@
  * </code>
  */
 
-import {removeElement} from '#core/dom';
-import {Layout_Enum, applyFillContent} from '#core/dom/layout';
+import {removeElement} from 'core/dom';
+import {Layout_Enum, applyFillContent} from 'core/dom/layout';
 
 import {Services} from '#service';
 

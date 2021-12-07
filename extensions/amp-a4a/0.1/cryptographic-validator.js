@@ -1,6 +1,6 @@
-import {signingServerURLs} from '#ads/_a4a-config';
+import {utf8Decode} from 'core/types/string/bytes';
 
-import {utf8Decode} from '#core/types/string/bytes';
+import {signingServerURLs} from '#ads/_a4a-config';
 
 import {user} from '#utils/log';
 

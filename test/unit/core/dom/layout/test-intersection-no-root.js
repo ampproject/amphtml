@@ -1,4 +1,4 @@
-import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
+import {measureIntersectionNoRoot} from 'core/dom/layout/intersection-no-root';
 
 describes.fakeWin(
   'DOM - layout - intersection observer (no-root)',

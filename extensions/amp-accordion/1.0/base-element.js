@@ -1,8 +1,8 @@
-import {devAssert} from '#core/assert';
-import {toggleAttribute} from '#core/dom';
-import {childElementsByTag} from '#core/dom/query';
-import {toArray} from '#core/types/array';
-import {dict, memo} from '#core/types/object';
+import {devAssert} from 'core/assert';
+import {toggleAttribute} from 'core/dom';
+import {childElementsByTag} from 'core/dom/query';
+import {toArray} from 'core/types/array';
+import {dict, memo} from 'core/types/object';
 
 import * as Preact from '#preact';
 import {useLayoutEffect, useRef} from '#preact';

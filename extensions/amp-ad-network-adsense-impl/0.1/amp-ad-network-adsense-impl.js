@@ -5,6 +5,16 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from 'core/constants/consent-state';
+import {removeElement} from 'core/dom';
+import {domFingerprintPlain} from 'core/dom/fingerprint';
+import {computedStyle, setStyles} from 'core/dom/style';
+import {stringHash32} from 'core/types/string';
+import {utf8Decode} from 'core/types/string/bytes';
+
+import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
   isInManualExperiment,
@@ -27,16 +37,6 @@ import {
   maybeAppendErrorParameter,
   maybeInsertOriginTrialToken,
 } from '#ads/google/a4a/utils';
-
-import {
-  CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {removeElement} from '#core/dom';
-import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {computedStyle, setStyles} from '#core/dom/style';
-import {stringHash32} from '#core/types/string';
-import {utf8Decode} from '#core/types/string/bytes';
 
 import {
   getExperimentBranch,

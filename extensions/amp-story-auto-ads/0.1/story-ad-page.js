@@ -1,13 +1,13 @@
-import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from 'core/constants/common-signals';
 import {
   createElementWithAttributes,
   isJsonScriptTag,
   toggleAttribute,
-} from '#core/dom';
-import {elementByTag} from '#core/dom/query';
-import {setStyle} from '#core/dom/style';
-import {dict, map} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
+} from 'core/dom';
+import {elementByTag} from 'core/dom/query';
+import {setStyle} from 'core/dom/style';
+import {dict, map} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
 
 import {getExperimentBranch} from '#experiments';
 import {

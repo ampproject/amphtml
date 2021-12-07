@@ -1,5 +1,5 @@
-import {getDataParamsFromAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
+import {getDataParamsFromAttributes} from 'core/dom';
+import {dict} from 'core/types/object';
 
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 

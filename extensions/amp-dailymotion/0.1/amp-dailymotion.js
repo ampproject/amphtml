@@ -1,5 +1,5 @@
-import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
+import {Deferred} from 'core/data-structures/promise';
+import {PauseHelper} from 'core/dom/video/pause-helper';
 import {Services} from '#service';
 import {VideoEvents_Enum} from '../../../src/video-interface';
 import {
@@ -9,12 +9,12 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, devAssert, userAssert} from '#utils/log';
-import {dispatchCustomEvent, getDataParamsFromAttributes} from '#core/dom';
+import {dispatchCustomEvent, getDataParamsFromAttributes} from 'core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
-} from '#core/dom/fullscreen';
+} from 'core/dom/fullscreen';
 import {
   DailymotionEvents,
   getDailymotionIframeSrc,
@@ -22,8 +22,8 @@ import {
 } from '../dailymotion-api';
 import {getData, listen} from '#utils/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {parseQueryString} from '#core/types/string/url';
+import {isLayoutSizeDefined} from 'core/dom/layout';
+import {parseQueryString} from 'core/types/string/url';
 
 const TAG = 'amp-dailymotion';
 

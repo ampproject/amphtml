@@ -1,4 +1,4 @@
-import {fromIterator} from '#core/types/array';
+import {fromIterator} from 'core/types/array';
 
 import {Services} from '#service';
 

@@ -1,7 +1,6 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
-
-import {createElementWithAttributes} from '#core/dom';
-import {LayoutPriority_Enum} from '#core/dom/layout';
+import {createElementWithAttributes} from 'core/dom';
+import {LayoutPriority_Enum} from 'core/dom/layout';
 
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 import {Scheduler} from '#service/scheduler';

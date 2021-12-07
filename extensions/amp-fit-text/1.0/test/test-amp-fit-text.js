@@ -1,6 +1,6 @@
 import '../amp-fit-text';
-import {computedStyle} from '#core/dom/style';
-import {createElementWithAttributes} from '#core/dom';
+import {computedStyle} from 'core/dom/style';
+import {createElementWithAttributes} from 'core/dom';
 import {expect} from 'chai';
 import {toggleExperiment} from '#experiments';
 import {useStyles} from '../component.jss';

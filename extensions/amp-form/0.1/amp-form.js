@@ -1,30 +1,30 @@
-import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from 'core/constants/action-constants';
+import {AmpEvents_Enum} from 'core/constants/amp-events';
 import {
   AsyncInputAttributes_Enum,
   AsyncInputClasses_Enum,
-} from '#core/constants/async-input';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {isAmp4Email} from '#core/document/format';
+} from 'core/constants/async-input';
+import {Keys_Enum} from 'core/constants/key-codes';
+import {Deferred, tryResolve} from 'core/data-structures/promise';
+import {isAmp4Email} from 'core/document/format';
 import {
   createElementWithAttributes,
   iterateCursor,
   removeElement,
   tryFocus,
-} from '#core/dom';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+} from 'core/dom';
+import {escapeCssSelectorIdent} from 'core/dom/css-selectors';
 import {
   formOrNullForElement,
   getFormAsObject,
   setFormForElement,
-} from '#core/dom/form';
-import {ancestorElementsByTag, childElementByAttr} from '#core/dom/query';
-import {isArray, toArray} from '#core/types/array';
-import {deepMerge, dict} from '#core/types/object';
-import {tryParseJson} from '#core/types/object/json';
-import {parseQueryString} from '#core/types/string/url';
-import {toWin} from '#core/window';
+} from 'core/dom/form';
+import {ancestorElementsByTag, childElementByAttr} from 'core/dom/query';
+import {isArray, toArray} from 'core/types/array';
+import {deepMerge, dict} from 'core/types/object';
+import {tryParseJson} from 'core/types/object/json';
+import {parseQueryString} from 'core/types/string/url';
+import {toWin} from 'core/window';
 
 import {Services} from '#service';
 

@@ -1,6 +1,6 @@
 import {dev, user, userAssert} from '#utils/log';
 import {handleAutoscroll} from './autoscroll';
-import {toggle} from '#core/dom/style';
+import {toggle} from 'core/dom/style';
 
 /**
  * Class representing toolbar behavior in sidebar

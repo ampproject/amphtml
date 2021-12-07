@@ -1,8 +1,8 @@
+import {createElementWithAttributes} from 'core/dom';
+import {Layout_Enum} from 'core/dom/layout';
+
 import {AmpLayout} from '#builtins/amp-layout/amp-layout';
 import {buildDom} from '#builtins/amp-layout/build-dom';
-
-import {createElementWithAttributes} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
 
 describes.realWin('amp-layout', {amp: true}, (env) => {
   async function getAmpLayout(attrs, innerHTML) {

@@ -1,10 +1,10 @@
-import {devAssert} from '#core/assert';
-import {Loading_Enum} from '#core/constants/loading-instructions';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {parseBooleanAttribute} from '#core/dom';
-import {matches, realChildNodes} from '#core/dom/query';
-import {getDate} from '#core/types/date';
-import {dashToCamelCase} from '#core/types/string';
+import {devAssert} from 'core/assert';
+import {Loading_Enum} from 'core/constants/loading-instructions';
+import {sequentialIdGenerator} from 'core/data-structures/id-generator';
+import {parseBooleanAttribute} from 'core/dom';
+import {matches, realChildNodes} from 'core/dom/query';
+import {getDate} from 'core/types/date';
+import {dashToCamelCase} from 'core/types/string';
 
 import * as Preact from '#preact';
 

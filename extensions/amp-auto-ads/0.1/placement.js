@@ -1,14 +1,14 @@
-import {createElementWithAttributes} from '#core/dom';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {createElementWithAttributes} from 'core/dom';
+import {whenUpgradedToCustomElement} from 'core/dom/amp-element-helpers';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
-} from '#core/dom/layout/rect';
+} from 'core/dom/layout/rect';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {dict} from '#core/types/object';
+} from 'core/dom/query';
+import {dict} from 'core/types/object';
 
 import {Services} from '#service';
 
