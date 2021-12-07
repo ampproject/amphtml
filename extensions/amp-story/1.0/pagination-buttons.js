@@ -75,8 +75,8 @@ class PaginationButton {
       this.onClick_(e)
     );
 
-    /** @const {!Element} */
-    this.buttonElement = devAssert(this.element.firstElementChild);
+    /** @private @const {!Element} */
+    this.buttonElement_ = devAssert(this.element.firstElementChild);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
@@ -92,7 +92,7 @@ class PaginationButton {
     }
     this.element.classList.remove(this.state_.className);
     this.element.classList.add(state.className);
-    this.buttonElement.setAttribute(
+    this.buttonElement_.setAttribute(
       'aria-label',
       localize(this.win_.document, state.label)
     );
@@ -232,9 +232,9 @@ export class PaginationButtons {
    * @private
    */
   toggleEnabled_(paginationButton, isVisible) {
-    const {buttonElement, element} = paginationButton;
+    const {element} = paginationButton;
     element?.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
-    buttonElement?.toggleAttribute('disabled', !isVisible);
+    element?.querySelector('button')?.toggleAttribute('disabled', !isVisible);
   }
 
   /**
