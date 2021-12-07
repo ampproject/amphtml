@@ -64,6 +64,15 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
  */
 export default function (_options: OptionSet = {}): (tree: posthtml.Node) => void {
   return function (tree: posthtml.Node) {
-    tree.match({tag: 'head'}, prependAmpStyles);
+    let isAmp = false;
+      tree.match({tag: 'html'}, function(html: posthtml.Node): posthtml.Node {
+        if (html.attrs && ('amp' in html.attrs || '⚡' in html.attrs)) {
+          isAmp = true;
+        }
+        return html;
+      });
+    if (isAmp) {
+      tree.match({tag: 'head'}, prependAmpStyles);
+    }
   }
 }
