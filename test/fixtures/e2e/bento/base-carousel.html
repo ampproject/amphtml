@@ -3,17 +3,11 @@
   <head>
     <script src="https://cdn.ampproject.org/bento.js"></script>
     <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-base-carousel {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
     <script
       async
       src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
     ></script>
+    <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css">
     <style>
       bento-base-carousel,
       bento-base-carousel > div {
@@ -30,7 +24,7 @@
       }
     </style>
   </head>
-  <bento-base-carousel id="my-carousel" visible-count="3">
+  <bento-base-carousel id="my-carousel" visible-count="3" slide="3">
     <div class="red-gradient">A</div>
     <div class="blue-gradient">B</div>
     <div class="green-gradient">C</div>
@@ -50,9 +44,6 @@
       const carousel = document.querySelector('#my-carousel');
       await customElements.whenDefined('bento-base-carousel');
       const api = await carousel.getApi();
-
-      // programatically advance to next slide
-      api.next();
 
       // set up button actions
       document.querySelector('#prev-button').onclick = () => api.prev();
