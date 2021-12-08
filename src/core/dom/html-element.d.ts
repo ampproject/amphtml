@@ -4,9 +4,9 @@ declare global {
   interface HTMLElement {
     nonce?: string;
 
-    mozMatchesSelector?: (string) => boolean;
-    msMatchesSelector?: (string) => boolean;
-    oMatchesSelector?: (string) => boolean;
+    mozMatchesSelector?: (s: string) => boolean;
+    msMatchesSelector?: (s: string) => boolean;
+    oMatchesSelector?: (s: string) => boolean;
 
     createdCallback?: () => void;
   }

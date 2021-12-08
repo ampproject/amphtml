@@ -6,7 +6,7 @@ declare global {
     __AMP_ASSERTION_CHECK: undefined;
 
     // Global error reporting handler; only present in AMP pages.
-    __AMP_REPORT_ERROR?: (this: Window, Error, Element?) => void;
+    __AMP_REPORT_ERROR?: (this: Window, err: Error, el: Element?) => void;
 
     // Global property set by test some harnesses to signal a testing environment.
     __AMP_TEST?: boolean;
