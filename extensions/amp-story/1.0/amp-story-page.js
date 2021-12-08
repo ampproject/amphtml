@@ -244,11 +244,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.win
     );
 
-    // /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
-    // this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsServiceForDoc(
-    //   storyAmpdoc
-    // );
-
     /** @private {!Array<!HTMLMediaElement>} */
     this.performanceTrackedVideos_ = [];
 
