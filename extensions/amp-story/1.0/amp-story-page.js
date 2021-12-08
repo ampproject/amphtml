@@ -1579,9 +1579,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     if (
-      attachmentEl &&
-      attachmentEl.tagName === 'amp-story-shopping-attachment' &&
-      this.element.getElementsByTagName('amp-story-shopping-tag').length === 0
+      !attachmentEl ||
+      (attachmentEl &&
+        attachmentEl.tagName === 'amp-story-shopping-attachment' &&
+        this.element.getElementsByTagName('amp-story-shopping-tag').length ===
+          0)
     ) {
       return;
     }
