@@ -21,13 +21,16 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
     });
 
     describe('when manifest link is present', () => {
-      // Mock <link> manifest:
+      // Mock the <link> manifest:
       beforeEach(() => {
-        // Inject a tag like: <link rel="manifest" href="..." />
         const link = document.createElement('link');
+        link.setAttribute('id', 'TEST_LINK');
         link.setAttribute('rel', 'manifest');
         link.setAttribute('href', 'https://test.com/manifest');
         document.head.appendChild(link);
+      });
+      afterEach(() => {
+        document.getElementById('TEST_LINK').remove();
       });
 
       // Mock data fetching:

@@ -82,12 +82,6 @@ function AppBannerAndroid(props) {
   return <AppBanner {...props} onInstall={appInfo.openOrInstall} />;
 }
 
-const AppBannerForCurrentPlatform = platformService.isIos()
-  ? AppBannerIOS
-  : platformService.isAndroid()
-  ? AppBannerAndroid
-  : null;
-
 /**
  * @param {!BentoAppBanner.Props} props
  * @return {PreactDef.Renderable}
@@ -100,6 +94,12 @@ export function BentoAppBanner(props) {
   if (isDismissed) {
     return null;
   }
+
+  const AppBannerForCurrentPlatform = platformService.isIos()
+    ? AppBannerIOS
+    : platformService.isAndroid()
+    ? AppBannerAndroid
+    : null;
 
   if (!AppBannerForCurrentPlatform) {
     return null;

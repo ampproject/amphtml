@@ -14,12 +14,16 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       beforeEach(() => {
         // Inject a tag like: <meta name="apple-itunes-app" content="..." />
         const meta = document.createElement('meta');
+        meta.setAttribute('id', 'TEST_META');
         meta.setAttribute('name', 'apple-itunes-app');
         meta.setAttribute(
           'content',
           'app-id=11111111,app-argument=https://test.com/deep-link'
         );
         document.head.appendChild(meta);
+      });
+      afterEach(() => {
+        document.getElementById('TEST_META').remove();
       });
 
       it('should parse the meta header and determine appropriate urls', () => {
