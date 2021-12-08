@@ -27,7 +27,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {timeStrToMillis, unscaledClientRect} from './utils';
+import {isTransformed, timeStrToMillis, unscaledClientRect} from './utils';
 import {isExperimentOn} from '#experiments';
 import {isPreviewMode} from './embed-mode';
 
@@ -548,7 +548,8 @@ export class AnimationManager {
 
     const firstPageAnimationDisabled =
       isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
-      isPreviewMode(ampdoc.win);
+      isPreviewMode(ampdoc.win) ||
+      isTransformed(ampdoc);
 
     /** @private @const {bool} */
     this.skipAnimations_ =
