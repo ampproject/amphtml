@@ -8,7 +8,7 @@ const fastGlob = require('fast-glob');
 const marked = require('marked');
 const path = require('path');
 const posthtml = require('posthtml');
-const {copyFile, readFile} = require('fs-extra');
+const {copyFile, pathExists, readFile} = require('fs-extra');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
@@ -205,11 +205,13 @@ async function writeReactJs() {
  */
 async function copyCssToRoot() {
   try {
-    const extDir = path.join('extension', extension, '1.0');
+    const extDir = path.join('extensions', extension, '1.0');
     const preactCssDist = path.join(extDir, 'dist', 'styles.css');
-    const preactCssRoot = path.join(extDir, 'styles.css');
-    await copyFile(preactCssDist, preactCssRoot);
-    log('Copied', preactCssDist, 'to npm package root');
+    if (await pathExists(preactCssDist)) {
+      const preactCssRoot = path.join(extDir, 'styles.css');
+      await copyFile(preactCssDist, preactCssRoot);
+      log('Copied', preactCssDist, 'to npm package root');
+    }
   } catch (e) {
     log(e);
     process.exitCode = 1;

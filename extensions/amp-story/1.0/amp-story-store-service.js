@@ -74,6 +74,7 @@ export let InteractiveReactData;
  *   product-title: string,
  *   product-price: string,
  *   product-icon: string,
+ *   product-tag-text: ?string,
  * }}
  */
 export let ShoppingConfigDataDef;
