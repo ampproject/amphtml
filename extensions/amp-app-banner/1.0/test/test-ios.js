@@ -1,4 +1,5 @@
 import {platformService} from '#preact/services/platform';
+
 import {getIOSAppInfo} from '../component/ios';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
