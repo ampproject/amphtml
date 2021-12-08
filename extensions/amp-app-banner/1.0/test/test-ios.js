@@ -1,6 +1,7 @@
+import {platformService} from '#preact/services/platform';
 import {getIOSAppInfo} from '../component/ios';
 
-describes.sandboxed('BentoAppBanner preact component v1.0', {}, () => {
+describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   describe('getIOSAppInfo', () => {
     describe('when no meta header is present', () => {
       it('should return null when no meta header is present', () => {
@@ -29,6 +30,22 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, () => {
           'https://itunes.apple.com/us/app/id11111111'
         );
         expect(iosInfo.openInAppUrl).to.equal('https://test.com/deep-link');
+      });
+
+      it('should not show the banner if the built-in banner can be shown', () => {
+        env.sandbox.stub(platformService, 'isSafari').returns(true);
+        expect(getIOSAppInfo()).to.be.null;
+      });
+
+      it('should load the app when clicked', () => {
+        env.sandbox.stub(window, 'open');
+        const appInfo = getIOSAppInfo();
+        appInfo.openOrInstall();
+        expect(window.open).to.have.been.calledWith(
+          appInfo.openInAppUrl,
+          '_top',
+          undefined
+        );
       });
     });
   });

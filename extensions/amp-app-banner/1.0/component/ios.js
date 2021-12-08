@@ -39,9 +39,6 @@ export function getIOSAppInfo() {
     return null;
   }
   const {installAppUrl, openInAppUrl} = parseIOSMetaContent(metaContent);
-  if (!installAppUrl) {
-    return null;
-  }
 
   return {
     installAppUrl,
