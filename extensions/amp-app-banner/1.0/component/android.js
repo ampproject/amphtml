@@ -48,7 +48,7 @@ export function getAndroidAppInfo() {
   return {
     promise,
     openOrInstall: () => {
-      promise.then((manifest) => {
+      return promise.then((manifest) => {
         if (!manifest) {
           return;
         }
@@ -77,17 +77,17 @@ function parseManifest(manifestJson) {
   }
 
   const playApp = apps.find((a) => a['platform'] === 'play');
-  if (playApp) {
-    const installAppUrl = `https://play.google.com/store/apps/details?id=${playApp['id']}`;
-    const openInAppUrl = getAndroidIntentForUrl(playApp['id']);
-    return {installAppUrl, openInAppUrl};
+  if (!playApp) {
+    user().warn(
+      'BENTO-APP-BANNER',
+      'Could not find a platform=play app in manifest: %s'
+    );
+    return null;
   }
 
-  user().warn(
-    'BENTO-APP-BANNER',
-    'Could not find a platform=play app in manifest: %s'
-  );
-  return null;
+  const installAppUrl = `https://play.google.com/store/apps/details?id=${playApp['id']}`;
+  const openInAppUrl = getAndroidIntentForUrl(playApp['id']);
+  return {installAppUrl, openInAppUrl};
 }
 
 /**
