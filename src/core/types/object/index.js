@@ -71,6 +71,8 @@ export function ownProperty(obj, key) {
   }
 }
 
+/** @typedef {{t: Object, s: Object, d: number}} DeepMergeTuple */
+
 /**
  * Deep merges source into target.
  *
@@ -86,7 +88,6 @@ export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.
   const seen = [];
 
-  /** @typedef {{t: Object, s: Object, d: number}} DeepMergeTuple */
   /** @type {DeepMergeTuple[]} */
   const queue = [];
   queue.push({t: target, s: source, d: 0});

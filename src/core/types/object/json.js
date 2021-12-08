@@ -70,6 +70,8 @@ export function tryParseJson(json, opt_onFailed) {
   }
 }
 
+/** @typedef {{a: JSONValueDef, b: JSONValueDef, depth: number}} DeepEqTuple */
+
 /**
  * Deeply checks strict equality of items in nested arrays and objects.
  *
@@ -86,7 +88,7 @@ export function deepEquals(a, b, depth = 5) {
   if (a === b) {
     return true;
   }
-  /** @typedef {{a: JSONValueDef, b: JSONValueDef, depth: number}} DeepEqTuple */
+
   /** @type {DeepEqTuple[]} */
   const queue = [{a, b, depth}];
   while (queue.length > 0) {
