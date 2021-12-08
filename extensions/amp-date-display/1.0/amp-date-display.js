@@ -35,33 +35,22 @@ class AmpDateDisplay extends BaseElement {
 
   /** @override */
   checkPropsPostMutations() {
-    const templates =
-      this.templates_ ||
-      (this.templates_ = Services.templatesForDoc(this.element));
-    const template = templates.maybeFindTemplate(this.element);
-    if (template != this.template_) {
-      this.template_ = template;
-      if (template) {
-        // Only overwrite `render` when template is ready to minimize FOUC.
-        templates.whenReady(template).then(() => {
-          if (template != this.template_) {
-            // A new template has been set while the old one was initializing.
-            return;
+    const template = this.element.hasAttribute('template')
+      ? this.element.ownerDocument.getElementById(
+          this.element.getAttribute('template')
+        )
+      : this.element.querySelector('template');
+    this.mutateProps(
+      dict({
+        'render': (data) => {
+          let html = template.content.firstElementChild./*REVIEW*/ outerHTML;
+          for (const [key, value] of Object.entries(data)) {
+            html = html.replaceAll('${' + key + '}', value);
           }
-          this.mutateProps(
-            dict({
-              'render': (data) => {
-                return templates
-                  .renderTemplateAsString(dev().assertElement(template), data)
-                  .then((html) => dict({'__html': html}));
-              },
-            })
-          );
-        });
-      } else {
-        this.mutateProps(dict({'render': null}));
-      }
-    }
+          return dict({'__html': html});
+        },
+      })
+    );
   }
 
   /** @override */
