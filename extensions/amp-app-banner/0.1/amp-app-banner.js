@@ -472,18 +472,16 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       return;
     }
 
-    for (let i = 0; i < apps.length; i++) {
-      const app = apps[i];
-      if (app['platform'] == 'play') {
-        const installAppUrl = `https://play.google.com/store/apps/details?id=${app['id']}`;
-        const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-        this.setupOpenButton_(
-          dev().assertElement(this.openButton_),
-          openInAppUrl,
-          installAppUrl
-        );
-        return;
-      }
+    const playApp = apps.find((a) => a['platform'] === 'play');
+    if (playApp) {
+      const installAppUrl = `https://play.google.com/store/apps/details?id=${playApp['id']}`;
+      const openInAppUrl = this.getAndroidIntentForUrl_(playApp['id']);
+      this.setupOpenButton_(
+        dev().assertElement(this.openButton_),
+        openInAppUrl,
+        installAppUrl
+      );
+      return;
     }
 
     user().warn(

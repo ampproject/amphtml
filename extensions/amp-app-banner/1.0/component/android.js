@@ -76,13 +76,11 @@ function parseManifest(manifestJson) {
     return null;
   }
 
-  for (let i = 0; i < apps.length; i++) {
-    const app = apps[i];
-    if (app['platform'] === 'play') {
-      const installAppUrl = `https://play.google.com/store/apps/details?id=${app['id']}`;
-      const openInAppUrl = getAndroidIntentForUrl(app['id']);
-      return {installAppUrl, openInAppUrl};
-    }
+  const playApp = apps.find((a) => a['platform'] === 'play');
+  if (playApp) {
+    const installAppUrl = `https://play.google.com/store/apps/details?id=${playApp['id']}`;
+    const openInAppUrl = getAndroidIntentForUrl(playApp['id']);
+    return {installAppUrl, openInAppUrl};
   }
 
   user().warn(
