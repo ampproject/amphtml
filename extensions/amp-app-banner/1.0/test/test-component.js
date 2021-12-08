@@ -86,17 +86,27 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
         expect(wrapper.find('button[aria-label="Dismiss"]')).to.have.length(1);
       });
 
-      describe.skip("clicking 'dismiss'", () => {
-        it('should hide the component', () => {
-          //
+      describe("clicking 'dismiss'", () => {
+        // Mock localStorage:
+        beforeEach(() => {
+          env.sandbox.stub(window.localStorage, 'getItem');
+          env.sandbox.stub(window.localStorage, 'setItem');
         });
-        it('should be persisted', () => {
+        it('should hide the component', () => {
           const wrapper = renderWrapper();
-          const dismissButton = wrapper
-            .find('button[aria-label="Dismiss"]')
-            .get(0);
-
-          expect(dismissButton).to.be.true;
+          const dismissButton = wrapper.find('button[aria-label="Dismiss"]');
+          expect(wrapper.isEmptyRender()).to.be.false;
+          dismissButton.simulate('click');
+          expect(wrapper.isEmptyRender()).to.be.true;
+          expect(window.localStorage.setItem).to.have.been.calledWith(
+            'bento-app-banner:test',
+            'true'
+          );
+        });
+        it("should not be shown if it's already been dismissed", () => {
+          window.localStorage.getItem.returns('true');
+          const wrapper = renderWrapper();
+          expect(wrapper.isEmptyRender()).to.be.true;
         });
       });
     });
