@@ -86,11 +86,11 @@ export function deepEquals(a, b, depth = 5) {
   if (a === b) {
     return true;
   }
-  /** @typedef {{a: JSONValueDef, b: JSONValueDef, depth: number}} QueueTuple */
-  /** @type {QueueTuple[]} */
+  /** @typedef {{a: JSONValueDef, b: JSONValueDef, depth: number}} DeepEqTuple */
+  /** @type {DeepEqTuple[]} */
   const queue = [{a, b, depth}];
   while (queue.length > 0) {
-    const {a, b, depth} = /** @type {QueueTuple} */ (queue.shift());
+    const {a, b, depth} = /** @type {DeepEqTuple} */ (queue.shift());
     // Only check deep equality if depth > 0.
     if (depth > 0) {
       if (typeof a !== typeof b) {
@@ -143,7 +143,7 @@ export function jsonConfiguration(obj) {
  * This doesn't actually do any conversion, it only changes the closure type.
  *
  * @param {?JSONValueDef} value
- * @return {InternalJsonLiteralTypeDef}
+ * @return {InternalJsonLiterall}
  */
 export function jsonLiteral(value) {
   return /** @type {InternalJsonLiteralTypeDef} */ (value);

@@ -86,14 +86,14 @@ export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.
   const seen = [];
 
-  /** @typedef {{t: Object, s: Object, d: number}} QueueTuple */
-  /** @type {QueueTuple[]} */
+  /** @typedef {{t: Object, s: Object, d: number}} DeepMergeTuple */
+  /** @type {DeepMergeTuple[]} */
   const queue = [];
   queue.push({t: target, s: source, d: 0});
 
   // BFS to ensure objects don't have recursive references at shallower depths.
   while (queue.length > 0) {
-    const {d, s, t} = /** @type {QueueTuple} */ (queue.shift());
+    const {d, s, t} = /** @type {DeepMergeTuple} */ (queue.shift());
     if (seen.includes(s)) {
       throw new Error('Source object has a circular reference.');
     }
