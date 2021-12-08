@@ -50,10 +50,6 @@ describes.realWin(
       doc.body.appendChild(element);
       await element.buildInternal();
       await waitFor(() => element.isConnected, 'element connected');
-      await waitFor(
-        () => element.shadowRoot.querySelector('div'),
-        'shadow root ready'
-      );
       return element;
     }
 
