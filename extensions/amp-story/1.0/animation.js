@@ -27,8 +27,9 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {timeStrToMillis, unscaledClientRect} from './utils';
+import {isTransformed, timeStrToMillis, unscaledClientRect} from './utils';
 import {isExperimentOn} from '#experiments';
+import {isPreviewMode} from './embed-mode';
 
 const TAG = 'AMP-STORY';
 
@@ -545,10 +546,15 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    const firstPageAnimationDisabled =
+      isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
+      isPreviewMode(ampdoc.win) ||
+      isTransformed(ampdoc);
+
     /** @private @const {bool} */
     this.skipAnimations_ =
       prefersReducedMotion(ampdoc.win) ||
-      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+      (firstPageAnimationDisabled &&
         matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */

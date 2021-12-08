@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-inline-gallery-1.0.css"
+    />
+
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-inline-gallery id="inline-gallery">
+      <bento-inline-gallery-thumbnails
+        style="height: 100px"
+        loop
+      ></bento-inline-gallery-thumbnails>
+
+      <bento-base-carousel
+        style="height: 200px"
+        snap-align="center"
+        visible-count="3"
+        loop
+      >
+        <img
+          src="https://picsum.photos/id/237/640/480"
+          data-thumbnail-src="https://picsum.photos/id/237/64/48"
+        />
+        <img
+          src="https://picsum.photos/id/238/640/480"
+          data-thumbnail-src="https://picsum.photos/id/238/64/48"
+        />
+        <img
+          src="https://picsum.photos/id/239/640/480"
+          data-thumbnail-src="https://picsum.photos/id/239/64/48"
+        />
+        <img
+          src="https://picsum.photos/id/240/640/480"
+          data-thumbnail-src="https://picsum.photos/id/240/64/48"
+        />
+        <img
+          src="https://picsum.photos/id/241/640/480"
+          data-thumbnail-src="https://picsum.photos/id/241/64/48"
+        />
+        <img
+          src="https://picsum.photos/id/242/640/480"
+          data-thumbnail-src="https://picsum.photos/id/242/64/48"
+        />
+      </bento-base-carousel>
+
+      <bento-inline-gallery-pagination
+        style="height: 20px"
+      ></bento-inline-gallery-pagination>
+    </bento-inline-gallery>
+  </body>
+</html>

@@ -10,7 +10,7 @@ Renders an iframe that reports its position in the host document to the child wi
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/iframe
@@ -21,7 +21,17 @@ import {defineElement as defineBentoIframe} from '@bentoproject/iframe';
 defineBentoIframe();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-iframe-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-iframe-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-iframe-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -124,23 +134,11 @@ These attributes should all behave like they do on standard iframes.
 
 #### `sandbox` (optional) <a name="sandbox"></a>
 
-Iframes created by `bento-iframe` always have the `sandbox` attribute defined on
-them. By default, the value is empty, which means that they are "maximum
-sandboxed". By setting `sandbox` values, one can opt the iframe into being less
-sandboxed. All values supported by browsers are allowed. For example, setting
-`sandbox="allow-scripts"` allows the iframe to run JavaScript, or
-`sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript,
-make non-CORS XHRs, and read/write cookies.
+Iframes created by `bento-iframe` always have the `sandbox` attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting `sandbox` values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
 
-If you are iframing a document that was not specifically created with sandboxing
-in mind, you will most likely need to add `allow-scripts allow-same-origin` to
-the `sandbox` attribute and you might need to allow additional capabilities.
+If you are iframing a document that was not specifically created with sandboxing in mind, you will most likely need to add `allow-scripts allow-same-origin` to the `sandbox` attribute and you might need to allow additional capabilities.
 
-Note also, that the sandbox applies to all windows opened from a sandboxed
-iframe. This includes new windows created by a link with `target=_blank` (add
-`allow-popups` to allow this to happen). Adding `allow-popups-to-escape-sandbox`
-to the `sandbox` attribute, makes those new windows behave like non-sandboxed
-new windows. This is likely most of the time what you want and expect.
+Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with `target=_blank` (add `allow-popups` to allow this to happen). Adding `allow-popups-to-escape-sandbox` to the `sandbox` attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 
@@ -152,7 +150,7 @@ You may use the `bento-iframe` element selector to style the component.
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/iframe
@@ -190,13 +188,7 @@ These attributes all behave like they do on standard iframes.
 
 #### `sandbox` (optional) <a name="sandbox"></a>
 
-Iframes created by `<BentoIframe>` always have the `sandbox` attribute defined on
-them. By default, the value is empty, which means that they are "maximum
-sandboxed". By setting `sandbox` values, one can opt the iframe into being less
-sandboxed. All values supported by browsers are allowed. For example, setting
-`sandbox="allow-scripts"` allows the iframe to run JavaScript, or
-`sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript,
-make non-CORS XHRs, and read/write cookies.
+Iframes created by `<BentoIframe>` always have the `sandbox` attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting `sandbox` values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
 
 See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the `sandbox` attribute.
 

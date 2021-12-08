@@ -19,12 +19,33 @@ describes.sandboxed('BentoJwplayer preact component v1.0', {}, () => {
       `https://content.jwplatform.com/players/${mediaId}-${playerId}.html?backfill=true&isAMP=true`
     );
   });
+
   it("should not render if props aren't valid", () => {
     const wrapper = mountComp({});
     expect(wrapper.getDOMNode()).to.be.null;
     const wrapper2 = mountComp({player: 'playerId'});
     expect(wrapper2.getDOMNode()).to.be.null;
   });
+
+  it('should pass the loading attribute to the underlying iframe', () => {
+    const mediaId = 'BZ6tc0gy';
+    const playerId = 'uoIbMPm3';
+    const loading = 'lazy';
+    const wrapper = mountComp({mediaId, playerId, loading});
+    const iframeEl = wrapper.find('iframe');
+    expect(iframeEl).to.not.be.null;
+    expect(iframeEl.getDOMNode().getAttribute('loading')).to.equal('lazy');
+  });
+
+  it('should set data-loading="auto" if no value is specified', () => {
+    const mediaId = 'BZ6tc0gy';
+    const playerId = 'uoIbMPm3';
+    const wrapper = mountComp({mediaId, playerId});
+    const iframeEl = wrapper.find('iframe');
+    expect(iframeEl).to.not.be.null;
+    expect(iframeEl.getDOMNode().getAttribute('loading')).to.equal('auto');
+  });
+
   describe('makeJwplayerIframeSrc', () => {
     it('should prefer playlistId to mediaId', () => {
       const mediaId = 'BZ6tc0gy';
@@ -37,6 +58,7 @@ describes.sandboxed('BentoJwplayer preact component v1.0', {}, () => {
         `https://content.jwplatform.com/players/${playlistId}-${playerId}.html?backfill=true&isAMP=true`
       );
     });
+
     it('should handle "outstream" cid', () => {
       const mediaId = 'outstream';
       const cid = 'oi7pAMI1';
@@ -48,6 +70,7 @@ describes.sandboxed('BentoJwplayer preact component v1.0', {}, () => {
         `https://content.jwplatform.com/players/${cid}-${playerId}.html?backfill=true&isAMP=true`
       );
     });
+
     it('shoud append all query params', () => {
       const props = {
         mediaId: 'BZ6tc0gy',

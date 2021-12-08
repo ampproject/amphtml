@@ -196,9 +196,7 @@ function VideoIframeInternalWithRef(
         readyDeferred.resolve();
       }}
       onLoad={(event) => {
-        if (onIframeLoad) {
-          onIframeLoad(event);
-        }
+        onIframeLoad?.(event);
       }}
     />
   );

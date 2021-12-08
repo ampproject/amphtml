@@ -6,7 +6,7 @@ Embeds [Twitter](https://twitter.com) content like a Tweet or a Moment.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/twitter
@@ -17,7 +17,17 @@ import {defineElement as defineBentoTwitters} from '@bentoproject/twitter';
 defineBentoTwitters();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -31,14 +41,6 @@ defineBentoTwitters();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-twitter {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
     <script
       type="module"
       async
@@ -49,6 +51,11 @@ defineBentoTwitters();
       async
       src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+    />
     <style>
       bento-twitter {
         width: 375px;
@@ -57,23 +64,7 @@ defineBentoTwitters();
     </style>
   </head>
   <body>
-    <bento-twitter id="my-tweet" data-tweetid="885634330868850689">
-    </bento-twitter>
-    <div class="buttons" style="margin-top: 8px">
-      <button id="change-tweet">Change tweet</button>
-    </div>
-
-    <script>
-      (async () => {
-        const twitter = document.querySelector('#my-tweet');
-        await customElements.whenDefined('bento-twitter');
-
-        // set up button actions
-        document.querySelector('#change-tweet').onclick = () => {
-          twitter.setAttribute('data-tweetid', '495719809695621121');
-        };
-      })();
-    </script>
+    <bento-twitter id="my-tweet" data-tweetid="885634330868850689"></bento-twitter>
   </body>
 </html>
 ```
@@ -139,11 +130,70 @@ For details on the available options, see Twitter's docs <a href="https://develo
   </tr>
 </table>
 
+### Interactivity and API usage
+
+Programmatically changing any of the attribute values will automatically update the element. For example, changing the tweet id via `data-tweetid` will automatically load the new tweet:
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+    />
+    <style>
+      bento-twitter {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-twitter id="my-tweet" data-tweetid="885634330868850689">
+    </bento-twitter>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-tweet">Change tweet</button>
+    </div>
+
+    <script>
+      (async () => {
+        const twitter = document.querySelector('#my-tweet');
+
+        // set up button actions
+        document.querySelector('#change-tweet').onclick = () => {
+          twitter.setAttribute('data-tweetid', '495719809695621121');
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
+
 ---
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/twitter
@@ -214,17 +264,15 @@ Valid timeline source types include <code>profile</code>, <code>likes</code>, <c
     <td width="40%"><strong>options (optional)</strong></td>
     <td>You can specify options for the Tweet, Moment, or Timeline appearance by passing in an object to the <code>options</code> prop.
 For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>. Note: When passing in the `options` prop, make sure to optimize or memoize the object:
-<code>
-const TWITTER_OPTIONS = {
+<pre><code>const TWITTER_OPTIONS = {
   // make sure to define these once globally!
 };
-
 function MyComponent() {
-// etc
-return (
-<Twitter optionsProps={TWITTER_OPTIONS} />
-);
-}</code></td>
+  // etc
+  return (
+    &ltTwitter optionsProps={TWITTER_OPTIONS} /&gt;
+  );
+}</code></pre></td>
 
   </tr>
    <tr>

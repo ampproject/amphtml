@@ -1,7 +1,7 @@
-const _isEnumValue_exportedEnum = x => false || x === "A" || x === "B" || x === "C",
-      _isEnumValue_enumInFile = x => false || x === 1 || x === 100 || x === 2,
-      _isEnumValue_ = x => false || x === "FOO" || x === 100 || x === 2,
-      _isEnumValue_2 = x => false || x === "single-item";
+const _isEnumValue_exportedEnum = x => x === "A" || x === "B" || x === "C",
+      _isEnumValue_enumInFile = x => x === 1 || x === 100 || x === 2,
+      _isEnumValue_ = x => x === "FOO" || x === 100 || x === 2,
+      _isEnumValue_2 = x => x === "single-item";
 
 import { exportedEnum } from './exported.mjs';
 

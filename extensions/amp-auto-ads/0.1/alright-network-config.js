@@ -1,6 +1,6 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -57,7 +57,7 @@ export class AlrightNetworkConfig {
     const attributes = dict({
       'width': 300,
       'height': 250,
-      'layout': Layout.RESPONSIVE,
+      'layout': Layout_Enum.RESPONSIVE,
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'alright',

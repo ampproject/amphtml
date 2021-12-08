@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {createFixtureIframe} from '#testing/iframe';
 
@@ -22,7 +22,7 @@ describes.sandboxed('Configuration', {}, function () {
     config.errorReportingUrl = 'http://error.foo.com';
     config.geoApiUrl = 'http://geo.bar.com';
 
-    return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
+    return fixture.awaitEvent(AmpEvents_Enum.LOAD_START, 1).then(() => {
       expect(fixture.win.AMP.config.urls.cdn).to.equal(config.cdnUrl);
       expect(fixture.win.AMP.config.urls.thirdParty).to.equal(
         config.thirdPartyUrl

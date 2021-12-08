@@ -591,6 +591,12 @@ async function createEmptyBuild(browser) {
  * @return {Promise<void>}
  */
 async function visualDiff() {
+  if (!PUPPETEER_CHROMIUM_REVISION) {
+    throw new Error(
+      `${cyan('amp visual-diff')} is only available on Linux, Mac, and Windows`
+    );
+  }
+
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
   const browserFetcher = await loadBrowserFetcher();
@@ -696,12 +702,14 @@ visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {
   'main': 'Include a blank snapshot (baseline for skipped builds)',
   'empty': 'Create a dummy Percy build with only a blank snapshot',
+  'esm': 'uses the typescript server transforms which will serve the mjs files',
   'chrome_debug': 'Print debug info from Chrome',
   'webserver_debug': 'Print debug info from the local amp webserver',
   'percy_agent_debug': 'Print debug info from the @percy/agent instance',
   'debug': 'Set all debugging flags',
   'verbose': 'Print verbose log statements',
   'grep': 'Run tests that match the pattern',
+  'minified': 'Serve minified JS',
   'percy_token': 'Override the PERCY_TOKEN environment variable',
   'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':

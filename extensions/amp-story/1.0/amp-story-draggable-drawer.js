@@ -6,8 +6,8 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
+import {Layout_Enum} from '#core/dom/layout';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
@@ -114,7 +114,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.NODISPLAY;
+    return layout === Layout_Enum.NODISPLAY;
   }
 
   /** @override */
@@ -122,10 +122,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.element.classList.add('amp-story-draggable-drawer-root');
 
     const templateEl = renderDrawerElement();
-    const headerShadowRootEl = this.win.document.createElement('div');
     this.headerEl = renderHeaderElement();
-
-    createShadowRootWithStyle(headerShadowRootEl, this.headerEl, CSS);
 
     this.containerEl = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
@@ -136,17 +133,21 @@ export class DraggableDrawer extends AMP.BaseElement {
       )
     );
 
-    const spacerEl = this.win.document.createElement('button');
-    spacerEl.classList.add('i-amphtml-story-draggable-drawer-spacer');
-    spacerEl.classList.add('i-amphtml-story-system-reset');
-    spacerEl.setAttribute('role', 'button');
-    const localizedCloseString = localize(
-      this.element,
-      LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+    const spacerEl = (
+      <button
+        role="button"
+        class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
+        aria-label={localize(
+          this.element,
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+      ></button>
     );
-    spacerEl.setAttribute('aria-label', localizedCloseString);
+
     this.containerEl.insertBefore(spacerEl, this.contentEl);
-    this.contentEl.appendChild(headerShadowRootEl);
+    this.contentEl.appendChild(
+      createShadowRootWithStyle(<div />, this.headerEl, CSS)
+    );
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);
@@ -226,7 +227,6 @@ export class DraggableDrawer extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     const isMobile = uiState === UIType.MOBILE;
-
     isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
@@ -238,27 +238,33 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   startListeningForTouchEvents_() {
-    // If the element is a direct descendant of amp-story-page, authorize
-    // swiping up by listening to events at the page level. Otherwise, only
-    // authorize swiping down to close by listening to events at the current
-    // element level.
+    // If the element is a direct descendant of amp-story-page or a descendant
+    // of amp-story-shopping-attachment, authorize swiping up by listening to
+    // events at the page level. Otherwise, only authorize swiping down to
+    // close by listening to events at the current element level.
     const parentEl = this.element.parentElement;
-    const el = dev().assertElement(
-      parentEl.tagName === 'AMP-STORY-PAGE' ? parentEl : this.element
-    );
+
+    let targetEl;
+    if (parentEl.tagName === 'AMP-STORY-PAGE') {
+      targetEl = dev().assertElement(parentEl);
+    } else if (parentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT') {
+      targetEl = dev().assertElement(this.element.closest('amp-story-page'));
+    } else {
+      targetEl = dev().assertElement(this.element);
+    }
 
     this.touchEventUnlisteners_.push(
-      listen(el, 'touchstart', this.onTouchStart_.bind(this), {
+      listen(targetEl, 'touchstart', this.onTouchStart_.bind(this), {
         capture: true,
       })
     );
     this.touchEventUnlisteners_.push(
-      listen(el, 'touchmove', this.onTouchMove_.bind(this), {
+      listen(targetEl, 'touchmove', this.onTouchMove_.bind(this), {
         capture: true,
       })
     );
     this.touchEventUnlisteners_.push(
-      listen(el, 'touchend', this.onTouchEnd_.bind(this), {
+      listen(targetEl, 'touchend', this.onTouchEnd_.bind(this), {
         capture: true,
       })
     );

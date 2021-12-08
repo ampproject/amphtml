@@ -10,7 +10,7 @@
  */
 
 const dedent = require('dedent');
-const {action, base, channel, head, sha, timeParam} = require('minimist')(
+const {action, base, channel, head, sha, time} = require('minimist')(
   process.argv.slice(2),
   {
     string: ['head', 'base'],
@@ -29,14 +29,14 @@ const {publishRelease, rollbackRelease} = require('./update-release');
  * @return {Promise<void>}
  */
 async function _promote() {
-  const time = decodeURIComponent(timeParam);
+  const timeParam = decodeURIComponent(time);
   log(
     cyan(dedent`Release tagger triggered with inputs:
     action: ${magenta(action)}
     head: ${magenta(head)}
     base: ${magenta(base)}
     channel: ${magenta(channel)}
-    time: ${magenta(time)}
+    time: ${magenta(timeParam)}
     sha: ${magenta(sha)}`)
   );
 
@@ -68,7 +68,7 @@ async function _promote() {
     );
   }
 
-  await createOrUpdateTracker(head, base, channel, time);
+  await createOrUpdateTracker(head, base, channel, timeParam);
   log(
     'Updated issue tracker for release',
     magenta(head),

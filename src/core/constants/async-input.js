@@ -31,7 +31,7 @@ export class AsyncInput {
  *
  * @enum {string}
  */
-export const AsyncInputAttributes = {
+export const AsyncInputAttributes_Enum = {
   /**
    * data-name
    *
@@ -51,7 +51,7 @@ export const AsyncInputAttributes = {
  *
  * @enum {string}
  */
-export const AsyncInputClasses = {
+export const AsyncInputClasses_Enum = {
   /**
    * i-amphtml-async-input
    *
@@ -60,7 +60,7 @@ export const AsyncInputClasses = {
    * This will be used by other amp components to find
    * and use async-input elements.
    */
-  'ASYNC_INPUT': 'i-amphtml-async-input',
+  ASYNC_INPUT: 'i-amphtml-async-input',
   /**
    * i-async-require-action
    *
@@ -68,5 +68,5 @@ export const AsyncInputClasses = {
    * as a required action for the form. These calls will be
    * executed before the presubmit calls of all async inputs.
    */
-  'ASYNC_REQUIRED_ACTION': 'i-async-require-action',
+  ASYNC_REQUIRED_ACTION: 'i-async-require-action',
 };

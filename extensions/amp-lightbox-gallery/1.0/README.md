@@ -8,7 +8,7 @@ When the user interacts with the element, a modal expands to fill the viewport u
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. As a web component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox-gallery
@@ -19,7 +19,18 @@ import {defineElement as defineBentoLightboxGallery} from '@bentoproject/lightbo
 defineBentoLightboxGallery();
 ```
 
-### Example: Import via `<script>`
+### Import via `<script>`
+
+```html
+<script type="module" async src="https://cdn.ampproject.org/bento.mjs"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css"
+>
+<script type="module" async src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.mjs"></script>
+<script nomodule async src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"></script>
+```
+
+### Example
 
 <!--% example %-->
 
@@ -33,8 +44,11 @@ defineBentoLightboxGallery();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css"
+    />
     <script
       type="module"
       async
@@ -62,14 +76,11 @@ defineBentoLightboxGallery();
 </html>
 ```
 
-To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section,
-then add the `lightbox` attribute on an `<img>` or `<bento-carousel>` element.
+To use `bento-liightbox-gallery`, ensure the required script is included in your `<head>` section, then add the `lightbox` attribute on an `<img>` or `<bento-carousel>` element.
 
 ### Add Captions
 
-Optionally, you can specify a caption for each element in the lightbox. these
-fields are automatically read and displayed by the `<bento-lightbox-gallery>` in
-the following order of priority:
+Optionally, you can specify a caption for each element in the lightbox. these fields are automatically read and displayed by the `<bento-lightbox-gallery>` in the following order of priority:
 
 -   `figcaption` (if the lightboxed element is the child of a figure)
 -   `aria-describedby`
@@ -77,8 +88,7 @@ the following order of priority:
 -   `aria-label`
 -   `aria-labelledby`
 
-In the following example, `<bento-lightbox-gallery>` displays the `figcaption`
-value as its description, showing "toront's cn tower was ....".
+In the following example, `<bento-lightbox-gallery>` displays the `figcaption` value as its description, showing "toront's cn tower was ....".
 
 ```html
 <figure>
@@ -95,8 +105,7 @@ value as its description, showing "toront's cn tower was ....".
 </figure>
 ```
 
-In the following example, `<bento-lightbox-gallery>` displays the `alt` value as
-its description, showing "picture of cn tower".
+In the following example, `<bento-lightbox-gallery>` displays the `alt` value as its description, showing "picture of cn tower".
 
 ```html
 <img
@@ -109,7 +118,7 @@ its description, showing "picture of cn tower".
 
 ## Interactivity and API usage
 
-Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-lightbox-gallery');
@@ -168,7 +177,7 @@ Each bento component has a small css library you must include to guarantee prope
 
 The preact/react version of the bentolightboxgallery functions differently than the web component version. The following example will demonstrate the use of `<BentoLightboxGallery>` as a functional component.
 
-### Example: Import Via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox-gallery
