@@ -296,12 +296,14 @@ export class AmpIosAppBanner extends AbstractAppBanner {
    * @private
    */
   parseIosMetaContent_(metaContent) {
-    const parts = metaContent.replace(/\s/, '').split(',');
-    const config = {};
-    parts.forEach((part) => {
-      const keyValuePair = part.split('=');
-      config[keyValuePair[0]] = keyValuePair[1];
-    });
+    const config = metaContent
+      .replace(/\s/, '')
+      .split(',')
+      .reduce((result, part) => {
+        const [key, value] = part.split('=');
+        result[key] = value;
+        return result;
+      }, {});
 
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
