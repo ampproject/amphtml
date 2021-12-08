@@ -10,16 +10,23 @@ declare global {
     requestFullScreen;
     exitFullscreen;
     cancelFullScreen;
+    webkitRequestFullscreen;
     webkitExitFullscreen;
     webkitEnterFullscreen;
     webkitCancelFullScreen;
     webkitDisplayingFullscreen;
+    mozRequestFullscreen;
     mozCancelFullScreen;
+    msRequestFullscreen;
     msExitFullscreen;
   }
 
   interface Document {
     cancelFullScreen;
+    webkitCancelFullScreen;
     webkitExitFullscreen;
+    webkitCurrentFullscreenElement;
+    msExitFullscreen;
+    mozCancelFullScreen;
   }
 }
