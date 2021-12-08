@@ -15,6 +15,7 @@ describes.realWin('CountPagesAlgorithm', {amp: true}, (env) => {
   beforeEach(() => {
     storeService = getStoreService(env.win);
     const storyElement = env.win.document.createElement('amp-story');
+    env.win.document.body.append(storyElement);
     const ampStory = new AmpStory(storyElement);
     env.sandbox.stub(ampStory, 'getAmpDoc').returns(env.ampdoc);
     pageManager = new StoryAdPageManager(ampStory, {} /* config */);
