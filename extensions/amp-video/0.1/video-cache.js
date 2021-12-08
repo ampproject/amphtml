@@ -53,6 +53,7 @@ export function fetchCachedSources(
       const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
+        'amp_video_require_acao_header': 1,
       });
       return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
     })
