@@ -3,8 +3,9 @@ import {useEffect, useMemo, useRef} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useLocalStorage} from '#preact/hooks/useLocalStorage';
 import {platformService} from '#preact/services/platform';
+import {matches, scopedQuerySelector} from '#core/dom/query';
 
-import {userAssert} from '#utils/log';
+import {user, userAssert} from '#utils/log';
 
 import {getAndroidAppInfo} from './android';
 import {useStyles} from './component.jss';
@@ -28,12 +29,23 @@ export function AppBanner({
   const bannerRef = useRef(null);
   useEffect(() => {
     // We expect the children to include an open-button, like: <button open-button>Install App</button>
-    const button = bannerRef.current.querySelector('button[open-button]');
-    userAssert(
-      button,
-      '<button open-button> is required inside %s: %s',
-      'BentoAppBanner'
-    );
+    let button = bannerRef.current.querySelector('button[open-button]');
+
+    // When used as a web-component, we must search the slot for the open-button:
+    if (!button) {
+      const slot = bannerRef.current.querySelector('slot');
+      if (slot) {
+        button = querySelectorInSlot(slot, 'button[open-button]');
+      }
+    }
+
+    if (!button) {
+      user().error(
+        'BENTO-APP-BANNER',
+        'bento-app-banner should contain a <button open-button> child'
+      );
+      return;
+    }
 
     button.addEventListener('click', onInstall);
     return () => button.removeEventListener('click', onInstall);
@@ -120,4 +132,24 @@ export function BentoAppBanner(props) {
 function getStorageKey(id) {
   userAssert(id, 'bento-app-banner should have an id.');
   return 'bento-app-banner:' + id;
+}
+
+/**
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {Element|null}
+ */
+function querySelectorInSlot(slot, selector) {
+  const nodes = slot.assignedElements();
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      return node;
+    }
+    const child = scopedQuerySelector(node, selector);
+    if (child) {
+      return child;
+    }
+  }
+  return null;
 }
