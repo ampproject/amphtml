@@ -51,6 +51,18 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
           undefined
         );
       });
+
+      it('should warn if the app-argument is missing', () => {
+        document
+          .getElementById('TEST_META')
+          .setAttribute('content', 'app-id=11111111');
+        expectAsyncConsoleError(/... should contain app-argument to allow .../);
+        const appInfo = getIOSAppInfo();
+        expect(appInfo?.installAppUrl).to.equal(
+          'https://itunes.apple.com/us/app/id11111111'
+        );
+        expect(appInfo.openInAppUrl).to.equal(appInfo.installAppUrl);
+      });
     });
   });
 });
