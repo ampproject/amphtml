@@ -74,9 +74,6 @@ describes.realWin(
     });
 
     it('should set active product in store service when shopping tag is clicked', async () => {
-      shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
-      await shoppingDataDispatchStoreService();
-
       const tagData = {
         'product-tag-id': 'sunglasses',
         'product-title': 'Spectacular Spectacles',
