@@ -262,20 +262,17 @@ export class ShareWidget {
       'amp-story-social-share, amp-story-bookend'
     );
 
-    getElementConfig(shareEl)
-      .then((config) => {
-        const providers =
-          config &&
-          (config[SHARE_PROVIDERS_KEY] ||
-            config[DEPRECATED_SHARE_PROVIDERS_KEY]);
-        if (!providers) {
-          return;
-        }
-        for (const provider of providers) {
-          this.setProviders_(provider);
-        }
-      })
-      .catch(() => {});
+    getElementConfig(shareEl).then((config) => {
+      const providers =
+        config &&
+        (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
+      if (!providers) {
+        return;
+      }
+      for (const provider of providers) {
+        this.setProviders_(provider);
+      }
+    });
   }
 
   /**
