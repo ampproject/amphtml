@@ -66,9 +66,6 @@ const PAUSE_CLASS = 'i-amphtml-story-pause-control';
 const PLAY_CLASS = 'i-amphtml-story-play-control';
 
 /** @private @const {string} */
-const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
-
-/** @private @const {string} */
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
@@ -340,7 +337,6 @@ export class SystemLayer {
 
     this.maybeBuildAttribution_();
 
-    this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.root_;
   }
@@ -807,10 +803,6 @@ export class SystemLayer {
    */
   onAudioIconClick_(mute) {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
-    });
   }
 
   /**
