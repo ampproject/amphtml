@@ -153,7 +153,7 @@ async function writePackageJson() {
     main: './dist/web-component.js',
     module: './dist/web-component.module.js',
     exports,
-    files: ['dist/*', 'react.js'],
+    files: ['dist/*', 'react.js', 'styles.css'],
     repository: {
       type: 'git',
       url: 'https://github.com/ampproject/amphtml.git',
