@@ -43,28 +43,29 @@
         <amp-story-shopping-config layout="nodisplay">
           <script type="application/json">
             {
-                "items" : [
-                   {
-                    "product-tag-id": "hat",
-                    "product-title": "Hootenanny Hat",
-                    "product-price": "799",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
-                   },
-                   {
-                    "product-tag-id": "sunglasses",
-                    "product-title": "Spectacular Spectacles",
-                    "product-price": "400",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
-                   },
-                   {
-                    "product-tag-id": "backpack",
-                    "product-title": "Beastly Backpack",
-                    "product-price": "1000",
-                    "product-tag-text": "Beastly Backpack",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
-                   }
-                ]
-              }
+              "items" : [
+                 {
+                  "product-tag-id": "hat",
+                  "product-title": "Hootenanny Hat",
+                  "product-price": "799",
+                  "product-tag-text": "19th century painting",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                 },
+                 {
+                  "product-tag-id": "sunglasses",
+                  "product-title": "Spectacular Spectacles",
+                  "product-price": "400",
+                  "product-tag-text": "19th century painting of two kings laughing at king charles",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
+                 },
+                 {
+                  "product-tag-id": "backpack",
+                  "product-title": "Beastly Backpack",
+                  "product-price": "500",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
+                 }
+              ]
+            }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
@@ -103,6 +104,50 @@
           <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-light-theme-specs">
+        <!--
+          Example of
+          Inline config.
+          Multiple product tags with icon defined.
+        -->
+        <amp-story-shopping-config layout="nodisplay">
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "product-tag-id": "hata",
+                    "product-title": "Hootenanny Hat",
+                    "product-price": "799",
+                    "product-tag-text": "19th century painting",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                   },
+                   {
+                    "product-tag-id": "sunglassesa",
+                    "product-title": "Spectacular Spectacles",
+                    "product-price": "400",
+                    "product-tag-text": "19th century painting of two kings laughing at king charles",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
+                   },
+                   {
+                    "product-tag-id": "backpacka",
+                    "product-title": "Beastly Backpack",
+                    "product-price": "500",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-tag-id="hat" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="sunglasses" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="backpack" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
     </amp-story>
   </body>
