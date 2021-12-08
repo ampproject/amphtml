@@ -36,7 +36,7 @@ export class LruCache {
 
   /**
    * @param {number|string} key
-   * @return {T} The cached payload.
+   * @return {T|undefined} The cached payload.
    */
   get(key) {
     const cacheable = this.cache_[key];

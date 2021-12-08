@@ -5,6 +5,7 @@
     "noEmit": true,
     "downlevelIteration": true,
     "target": "es5",
+    "strictNullChecks": true,
     "lib": ["dom", "esnext", "es6"],
     "paths": {
       "#core/constants": ["./constants"],

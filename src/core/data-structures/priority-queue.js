@@ -13,7 +13,7 @@ export class PriorityQueue {
 
   /**
    * Returns the max priority item without dequeueing it.
-   * @return {T}
+   * @return {?T}
    */
   peek() {
     const l = this.length;
@@ -79,7 +79,7 @@ export class PriorityQueue {
   /**
    * Dequeues the max priority item.
    * Items with the same priority are dequeued in FIFO order.
-   * @return {T}
+   * @return {?T}
    */
   dequeue() {
     if (!this.length) {

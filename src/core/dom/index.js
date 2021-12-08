@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
@@ -205,9 +206,11 @@ export function isConnectedNode(node) {
  * @return {ShadowRoot|Document}
  */
 export function rootNodeFor(node) {
+  // https://developer.mozilla.org/en-US/docs/Web/API/Node/getRootNode
+  // @ts-ignore this always is truthy according to TS, but isn't in IE 11.
   if (Node.prototype.getRootNode) {
     // Type checker says `getRootNode` may return null.
-    return /** @type {ShadowRoot|Document} */ (node.getRootNode() || node);
+    return /** @type {ShadowRoot|Document} */ (node.getRootNode());
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
@@ -277,6 +280,7 @@ export function getDataParamsFromAttributes(
  * @return {boolean}
  */
 export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
+  /** @type {?Element} */
   let currentElement = element;
   do {
     if (currentElement.nextSibling) {
@@ -504,7 +508,7 @@ export function getVerticalScrollbarWidth(win) {
 export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const data = opt_data || {};
   // Constructors of events need to come from the correct window. Sigh.
-  const event = node.ownerDocument.createEvent('Event');
+  const event = devAssert(node.ownerDocument).createEvent('Event');
 
   // Technically .data is not a property of Event.
   event.data = data;
@@ -545,7 +549,7 @@ export function getChildJsonConfig(element) {
   }
 
   try {
-    return parseJson(script.textContent);
+    return parseJson(script.textContent ?? '');
   } catch {
     throw new Error('Failed to parse <script> contents. Is it valid JSON?');
   }
@@ -572,6 +576,6 @@ export function propagateNonce(doc, scriptEl) {
   const currentScript = doc.head.querySelector('script[nonce]');
   if (currentScript) {
     const nonce = currentScript.nonce || currentScript.getAttribute('nonce');
-    scriptEl.setAttribute('nonce', nonce);
+    scriptEl.setAttribute('nonce', nonce ?? '');
   }
 }

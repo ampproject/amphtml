@@ -10,13 +10,13 @@ export class Observable {
    * Creates an instance of Observable.
    */
   constructor() {
-    /** @type {?Array<function(TYPE):void>} */
+    /** @type {?Array<function(TYPE=):void>} */
     this.handlers_ = null;
   }
 
   /**
    * Adds the observer to this instance.
-   * @param {function(TYPE):void} handler Observer's handler.
+   * @param {function(TYPE=):void} handler Observer's handler.
    * @return {UnlistenCallback}
    */
   add(handler) {
@@ -31,7 +31,7 @@ export class Observable {
 
   /**
    * Removes the observer from this instance.
-   * @param {function(TYPE):void} handler Observer's instance.
+   * @param {function(TYPE=):void} handler Observer's instance.
    */
   remove(handler) {
     if (!this.handlers_) {

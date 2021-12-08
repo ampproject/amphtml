@@ -158,7 +158,9 @@ export function parseLength(s) {
  */
 export function assertLength(length) {
   userAssert(
-    /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
+    /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(
+      length ?? ''
+    ),
     'Invalid length value: %s',
     length
   );
@@ -189,7 +191,7 @@ export function assertLengthOrPercent(length) {
 export function getLengthUnits(length) {
   assertLength(length);
   const m = userAssert(
-    /[a-z]+/i.exec(length),
+    /[a-z]+/i.exec(length ?? ''),
     'Failed to read units from %s',
     length
   );

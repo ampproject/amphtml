@@ -20,7 +20,7 @@ export function once(fn) {
     if (!evaluated) {
       retValue = callback.apply(self, args);
       evaluated = true;
-      callback = null; // GC
+      /** @type {?} */ (callback) = null; // GC
     }
     return retValue;
   };

@@ -23,7 +23,7 @@ function assertIsName(name) {
  * for user-agents that do not support native scoping.
  *
  * This method isn't required for modern builds, can be removed.
-  // TODO(#37136): This will fail if `root` is a `ShadowRoot`.
+ * TODO(#37136): This will fail if `root` is a `ShadowRoot`.
  *
  * @param {HTMLElement|ShadowRoot} root
  * @param {string} selector
@@ -109,7 +109,8 @@ export function matches(el, selector) {
  * @return {?HTMLElement}
  */
 export function closest(element, callback, opt_stopAt) {
-  for (let el = element; el && el !== opt_stopAt; el = el.parentElement) {
+  /** @type {?HTMLElement} */ let el;
+  for (el = element; el && el !== opt_stopAt; el = el.parentElement) {
     if (callback(el)) {
       return el;
     }
@@ -125,7 +126,9 @@ export function closest(element, callback, opt_stopAt) {
  * @return {?Node}
  */
 export function closestNode(node, callback) {
-  for (let n = node; n; n = n.parentNode) {
+  /** @type {?Node} */
+  let n;
+  for (n = node; n; n = /** @type {?Node} */ (n.parentNode)) {
     if (callback(n)) {
       return n;
     }
@@ -376,7 +379,7 @@ export function isInternalOrServiceNode(node) {
  * @return {boolean}
  */
 function isInternalElement(nodeOrTagName) {
-  /** @type string */
+  /** @type {undefined|string} */
   let tagName;
   if (typeof nodeOrTagName == 'string') {
     tagName = nodeOrTagName;

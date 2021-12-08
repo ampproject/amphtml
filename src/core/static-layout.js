@@ -1,4 +1,10 @@
-import {devAssert, devAssertString, userAssert} from '#core/assert';
+import {
+  devAssert,
+  devAssertElement,
+  devAssertNumber,
+  devAssertString,
+  userAssert,
+} from '#core/assert';
 import {
   Layout_Enum,
   getLayoutClass,
@@ -107,7 +113,9 @@ export function applyStaticLayout(element) {
     ) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
-        element.querySelector('i-amphtml-sizer') || undefined;
+        /** @type {?HTMLElement} */ (
+          element.querySelector('i-amphtml-sizer')
+        ) || undefined;
       element.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
     } else if (layout == Layout_Enum.NODISPLAY) {
       toggle(element, false);
@@ -141,7 +149,10 @@ export function applyStaticLayout(element) {
     sizer.setAttribute('slot', 'i-amphtml-svc');
     setStyles(sizer, {
       paddingTop:
-        (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
+        (devAssertNumber(getLengthNumeral(height)) /
+          devAssertNumber(getLengthNumeral(width))) *
+          100 +
+        '%',
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
@@ -154,7 +165,7 @@ export function applyStaticLayout(element) {
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
-    const intrinsicSizer = sizer.firstElementChild;
+    const intrinsicSizer = devAssertElement(sizer.firstElementChild);
     intrinsicSizer.setAttribute(
       'src',
       `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
@@ -197,7 +208,7 @@ export function applyStaticLayout(element) {
  */
 export function getEffectiveLayout(element) {
   // Return the pre-existing value if layout has already been applied.
-  const completedLayout = parseLayout(element.getAttribute('layout'));
+  const completedLayout = parseLayout(element.getAttribute('layout') ?? '');
   if (completedLayout) {
     return completedLayout;
   }
@@ -208,8 +219,8 @@ export function getEffectiveLayout(element) {
 /**
  * @typedef {{
  *  layout: !Layout_Enum,
- *  height: (string|number|null),
- *  width: (string|number|null)
+ *  height: (string|number|null|undefined),
+ *  width: (string|number|null|undefined)
  * }}
  */
 let InternalEffectiveLayoutDef;

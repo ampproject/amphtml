@@ -1,5 +1,6 @@
-/** @typedef {Array<{query: ?MediaQueryList, value: string}>} */
-let ExprDef;
+import {devAssert} from '#core/assert';
+
+/** @typedef {Array<{query: ?MediaQueryList, value: string}>} ExprDef */
 
 const TRUE_VALUE = '1';
 
@@ -37,7 +38,7 @@ export class MediaQueryProps {
    */
   resolveMatchQuery(queryString) {
     // This will create a list query like this:
-    // `[{query: matchMedia(queryString), value: true}, {query: null, value: false}]`
+    // `[{query: matchMedia(queryHeadString), value: true}, {query: null, value: false}]`
     return (
       this.resolve_(queryString, parseMediaQueryMatchExpr, TRUE_VALUE) ===
       TRUE_VALUE
@@ -85,7 +86,8 @@ export class MediaQueryProps {
     if (!exprString.trim()) {
       return emptyExprValue;
     }
-    let expr = this.exprMap_[exprString] || this.prevExprMap_[exprString];
+    let expr =
+      this.exprMap_[exprString] || devAssert(this.prevExprMap_)[exprString];
     if (!expr) {
       expr = parser(this.win_, exprString);
       toggleOnChange(expr, this.callback_, true);
@@ -114,7 +116,7 @@ function parseMediaQueryMatchExpr(win, queryString) {
  * @return {ExprDef}
  */
 function parseMediaQueryListExpr(win, exprString) {
-  return (
+  return /** @type {ExprDef} */ (
     exprString
       .split(',')
       .map((part) => {

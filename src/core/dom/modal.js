@@ -215,7 +215,7 @@ export function setModalAsClosed(element) {
     focusableExternalElements,
     focusableInternalElements,
     hiddenElementInfos,
-  } = modalEntryStack.pop();
+  } = devAssert(modalEntryStack.pop());
 
   devAssert(isConnectedNode(element));
   devAssert(topModalElement === element);

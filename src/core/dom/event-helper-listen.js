@@ -68,8 +68,8 @@ export function internalListenImplementation(
       optsSupported ? opt_evtListenerOpts : capture
     );
     // Ensure these are GC'd
-    localListener = null;
-    localElement = null;
+    /** @type {?} */ (localListener) = null;
+    /** @type {?} */ (localElement) = null;
     wrapped = null;
   };
 }
@@ -95,8 +95,20 @@ export function detectEvtListenerOptsSupport() {
         return false;
       },
     };
-    self.addEventListener('test-options', null, options);
-    self.removeEventListener('test-options', null, options);
+    self.addEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
+    self.removeEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
   } catch (err) {
     // EventListenerOptions are not supported
   }
@@ -132,8 +144,20 @@ export function supportsPassiveEventListener(win) {
       },
     });
 
-    win.addEventListener('test-options', null, options);
-    win.removeEventListener('test-options', null, options);
+    win.addEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
+    win.removeEventListener(
+      'test-options',
+      /** @type {EventListenerOrEventListenerObject} */ (
+        /** @type {?} */ (null)
+      ),
+      options
+    );
   } catch (err) {
     // EventListenerOptions are not supported
   }

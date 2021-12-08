@@ -6,7 +6,7 @@
 export function guaranteeSrcForSrcsetUnsupportedBrowsers(img) {
   // The <img> tag does not have a src and does not support srcset
   if (!img.hasAttribute('src') && 'srcset' in img == false) {
-    const srcset = img.getAttribute('srcset');
+    const srcset = img.getAttribute('srcset') || '';
     const matches = /\S+/.exec(srcset);
     if (matches == null) {
       return;

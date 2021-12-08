@@ -7,7 +7,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {Window} win
-   * @return {Window}
+   * @return {?Window}
    */
   static getTop(win) {
     return win.top;
@@ -72,7 +72,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {Window} win
-   * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean|undefined}
+   * @return {undefined|function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean}
    */
   static getSendBeacon(win) {
     if (!win.navigator.sendBeacon) {

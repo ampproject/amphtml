@@ -31,7 +31,7 @@ export function copyTextToClipboard(win, text) {
   textarea.contentEditable = 'true';
 
   doc.body.appendChild(textarea);
-  win.getSelection().removeAllRanges();
+  win.getSelection()?.removeAllRanges();
 
   textarea./*OK*/ focus();
   textarea.setSelectionRange(0, text.length);

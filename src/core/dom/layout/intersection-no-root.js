@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {Deferred} from '#core/data-structures/promise';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
 import {getWin} from '#core/window';
@@ -12,10 +13,10 @@ import {getWin} from '#core/window';
  * support is better.
  */
 
-/** @type {WeakMap<Element, Deferred<IntersectionObserverEntry>>} */
+/** @type {undefined|WeakMap<Element, Deferred<IntersectionObserverEntry>>} */
 let intersectionDeferreds;
 
-/** @type {WeakMap<Window, IntersectionObserver>} */
+/** @type {undefined|WeakMap<Window, IntersectionObserver>} */
 let intersectionObservers;
 
 /**
@@ -28,7 +29,7 @@ function getInOb(win) {
     intersectionObservers = new WeakMap();
   }
 
-  let observer = intersectionObservers.get(win);
+  let observer = devAssert(intersectionObservers).get(win);
   if (!observer) {
     observer = createViewportObserver(
       (entries) => {
@@ -40,15 +41,15 @@ function getInOb(win) {
           }
           seen.add(target);
 
-          observer.unobserve(target);
-          intersectionDeferreds.get(target).resolve(entries[i]);
-          intersectionDeferreds.delete(target);
+          devAssert(observer).unobserve(target);
+          devAssert(intersectionDeferreds).get(target)?.resolve(entries[i]);
+          devAssert(intersectionDeferreds).delete(target);
         }
       },
       win,
       {needsRootBounds: false}
     );
-    intersectionObservers.set(win, observer);
+    devAssert(intersectionObservers).set(win, observer);
   }
   return observer;
 }
@@ -64,13 +65,13 @@ function getInOb(win) {
  */
 export function measureIntersectionNoRoot(el) {
   if (intersectionDeferreds?.has(el)) {
-    return intersectionDeferreds.get(el).promise;
+    return devAssert(intersectionDeferreds.get(el)).promise;
   }
 
   const inOb = getInOb(getWin(el));
   inOb.observe(el);
 
   const deferred = new Deferred();
-  intersectionDeferreds.set(el, deferred);
+  devAssert(intersectionDeferreds).set(el, deferred);
   return deferred.promise;
 }

@@ -64,12 +64,12 @@ function appendToResult(rootNode, attrs, result) {
   const allowedAttrs = attrs.filter((attr) => allowedAttributes.includes(attr));
 
   while (stack.length > 0) {
-    const node = stack.pop();
+    const node = /** @type {string|Element} */ (stack.pop());
 
     if (isString(node)) {
       result.push(node);
     } else if (node.nodeType === Node.TEXT_NODE) {
-      result.push(node.textContent);
+      result.push(node.textContent ?? '');
     } else if (isElement(node) && isApplicableNode(node)) {
       appendOpenTag(node, allowedAttrs, result);
       stack.push(`</${node.tagName.toLowerCase()}>`);

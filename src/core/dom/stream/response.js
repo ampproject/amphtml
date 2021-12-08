@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {Deferred} from '#core/data-structures/promise';
 
 /**
@@ -19,7 +20,7 @@ export function streamResponseToWriter(win, response, writer) {
     /** @type {?} */ (win).ReadableStream
   ) {
     let firstRead = true;
-    const reader = response.body.getReader();
+    const reader = devAssert(response.body).getReader();
     const decoder = new TextDecoder();
 
     reader.read().then(function handleChunk({done, value}) {

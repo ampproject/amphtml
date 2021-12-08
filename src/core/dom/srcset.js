@@ -1,15 +1,12 @@
 import {devAssert, userAssert} from '#core/assert';
 
+/** @typedef {{url: string, dpr?: undefined, width: number}} WidthSourceDef */
+/** @typedef {{url: string, dpr: number, width?: undefined}} DprSourceDef */
 /**
  * A single source within a srcset. Only one: width or DPR can be specified at
  * a time.
- * @typedef {{
- *   url: string,
- *   width: (number|undefined),
- *   dpr: (number|undefined)
- * }}
+ * @typedef {WidthSourceDef|DprSourceDef} SrcsetSourceDef
  */
-let SrcsetSourceDef;
 
 /**
  * General grammar: (URL [NUM[w|x]],)*
@@ -57,6 +54,7 @@ export function srcsetFromSrc(src) {
  * @return {Srcset}
  */
 export function parseSrcset(s) {
+  /** @type {SrcsetSourceDef[]} */
   const sources = [];
   let match;
   while ((match = srcsetRegex.exec(s))) {
@@ -75,7 +73,7 @@ export function parseSrcset(s) {
       // If no "w" or "x" specified, we assume it's "1x".
       dpr = 1;
     }
-    sources.push({url, width, dpr});
+    sources.push(/** @type {SrcsetSourceDef} */ ({url, width, dpr}));
   }
   return new Srcset(sources);
 }
@@ -90,20 +88,22 @@ export function parseSrcset(s) {
  * "select" method for details on how this selection is performed.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes
+ * @template {SrcsetSourceDef} SourceDef
  */
 export class Srcset {
   /**
-   * @param {Array<SrcsetSourceDef>} sources
+   * @param {Array<SourceDef>} sources
    */
   constructor(sources) {
     userAssert(sources.length > 0, 'Srcset must have at least one source');
-    /** @private @const {Array<SrcsetSourceDef>} */
+    /** @private @const {Array<SourceDef>} */
     this.sources_ = sources;
 
     // Only one type of source specified can be used - width or DPR.
     let hasWidth = false;
     let hasDpr = false;
     for (let i = 0; i < sources.length; i++) {
+      /** @type {?} */
       const source = sources[i];
       hasWidth = hasWidth || !!source.width;
       hasDpr = hasDpr || !!source.dpr;
@@ -114,7 +114,11 @@ export class Srcset {
     );
 
     // Source and assert duplicates.
-    sources.sort(hasWidth ? sortByWidth : sortByDpr);
+    sources.sort(
+      /** @type {function(SourceDef, SourceDef):number} */ (
+        /** @type {?} */ (hasWidth ? sortByWidth : sortByDpr)
+      )
+    );
 
     /** @private @const {boolean} */
     this.widthBased_ = hasWidth;
@@ -166,13 +170,13 @@ export class Srcset {
    * @private
    */
   selectByWidth_(width) {
-    const sources = this.sources_;
+    const sources = /** @type {Array<WidthSourceDef>} */ (this.sources_);
     let minIndex = 0;
     let minScore = Infinity;
     let minWidth = Infinity;
 
     for (let i = 0; i < sources.length; i++) {
-      const sWidth = sources[i].width;
+      const sWidth = sources[i].width ?? 0;
       const score = Math.abs(sWidth - width);
 
       // Select the one that is closer with a slight preference toward larger
@@ -195,7 +199,7 @@ export class Srcset {
    * @private
    */
   selectByDpr_(dpr) {
-    const sources = this.sources_;
+    const sources = /** @type {Array<DprSourceDef>} */ (this.sources_);
     let minIndex = 0;
     let minScore = Infinity;
 
@@ -234,9 +238,9 @@ export class Srcset {
         src = opt_mapper(src);
       }
       if (this.widthBased_) {
-        src += ` ${source.width}w`;
+        src += ` ${/** @type {WidthSourceDef} */ (source).width}w`;
       } else {
-        src += ` ${source.dpr}x`;
+        src += ` ${/** @type {DprSourceDef} */ (source).dpr}x`;
       }
       res.push(src);
     }
@@ -247,8 +251,8 @@ export class Srcset {
 /**
  * Sorts by width
  *
- * @param {SrcsetSourceDef} s1
- * @param {SrcsetSourceDef} s2
+ * @param {WidthSourceDef} s1
+ * @param {WidthSourceDef} s2
  * @return {number}
  */
 function sortByWidth(s1, s2) {
@@ -259,8 +263,8 @@ function sortByWidth(s1, s2) {
 /**
  * Sorts by dpr
  *
- * @param {SrcsetSourceDef} s1
- * @param {SrcsetSourceDef} s2
+ * @param {DprSourceDef} s1
+ * @param {DprSourceDef} s2
  * @return {number}
  */
 function sortByDpr(s1, s2) {
