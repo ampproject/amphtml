@@ -37,9 +37,8 @@ let JSONValueDef;
  *   YOU_MUST_USE: string,
  *   jsonLiteral: function():InternalJsonLiteralTypeDef,
  *   TO_MAKE_THIS_TYPE: string,
- * }}
+ * }} InternalJsonLiteralTypeDef
  */
-let InternalJsonLiteralTypeDef;
 
 /**
  * Simple wrapper around JSON.parse that casts the return value
@@ -145,7 +144,7 @@ export function jsonConfiguration(obj) {
  * This doesn't actually do any conversion, it only changes the closure type.
  *
  * @param {?JSONValueDef} value
- * @return {InternalJsonLiterall}
+ * @return {InternalJsonLiteralTypeDef}
  */
 export function jsonLiteral(value) {
   return /** @type {InternalJsonLiteralTypeDef} */ (value);
