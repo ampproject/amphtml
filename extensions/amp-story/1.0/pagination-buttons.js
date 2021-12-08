@@ -11,7 +11,7 @@ import {Services} from '#service';
 import {devAssert} from '#utils/log';
 import {localize} from './amp-story-localization-service';
 
-/** @struct @typedef {{className: string, triggers: string, label: string}} */
+/** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */
 let PaginationButtonStateDef;
 
 /** @const {!Object<string, !PaginationButtonStateDef>} */
