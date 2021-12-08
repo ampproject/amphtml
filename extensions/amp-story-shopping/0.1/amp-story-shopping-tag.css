@@ -69,10 +69,3 @@ amp-story-shopping-tag {
   font-size: 14px !important;
   padding: 0 6px 0 4px !important;
 }
-
-.amp-story-shopping-tag-pill-text::before {
-  content: '$' !important;
-  font-weight: 400 !important;
-  padding-inline-end: 3px !important;
-  font-size: 10px !important;
-}
