@@ -15,7 +15,7 @@ declare global {
     webkitEnterFullscreen;
     webkitCancelFullScreen;
     webkitDisplayingFullscreen;
-    mozRequestFullscreen;
+    mozRequestFullScreen;
     mozCancelFullScreen;
     msRequestFullscreen;
     msExitFullscreen;
@@ -25,8 +25,10 @@ declare global {
     cancelFullScreen;
     webkitCancelFullScreen;
     webkitExitFullscreen;
-    webkitCurrentFullscreenElement;
+    webkitFullscreenElement;
+    webkitCurrentFullScreenElement;
     msExitFullscreen;
+    mozFullScreenElement;
     mozCancelFullScreen;
   }
 }
