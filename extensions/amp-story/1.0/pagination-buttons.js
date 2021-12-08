@@ -213,9 +213,7 @@ export class PaginationButtons {
 
     if (pageIndex < totalPages - 1) {
       this.forwardButton_.updateState(ButtonStates.NEXT_PAGE);
-    }
-
-    if (pageIndex === totalPages - 1) {
+    } else {
       const viewer = Services.viewerForDoc(this.ampStory_.element);
       if (viewer.hasCapability('swipe')) {
         this.forwardButton_.updateState(ButtonStates.NEXT_STORY);
