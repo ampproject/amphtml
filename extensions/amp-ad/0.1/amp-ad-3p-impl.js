@@ -8,8 +8,8 @@ import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '#core/constants/consent-state';
 import {
-  Layout, // eslint-disable-line no-unused-vars
-  LayoutPriority,
+  LayoutPriority_Enum,
+  Layout_Enum, // eslint-disable-line no-unused-vars
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {Services} from '#service';
@@ -136,7 +136,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -150,7 +150,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @override
    */
   isLayoutSupported(layout) {

@@ -39,7 +39,7 @@ export const ValidAdContainerTypes = {
 };
 
 /**
- * See `VisibilityState` enum.
+ * See `VisibilityState_Enum` enum.
  * @const {!Object<string, string>}
  */
 const visibilityStateCodes = {
@@ -100,7 +100,7 @@ const CDN_PROXY_REGEXP =
 
 /** @const {string} */
 export const TOKEN_VALUE =
-  'A2dINGotLJuPqM6Wgp0s4V3te749O/VZEHqN0YsG4pfY+1pcjS5UaX1Bvcyz4aiShd8ZXPcT5spJazIzrbi5AwUAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2MzQwODMxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
+  'AxOH8+XUqIxXfDG7Bxf7YR6oBTF4f73xWZNTyqhrkvIEgEmpxrpX8rzEqe9/yOsCGW9ChT05U9t++yH/aCYKCAgAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
 
 /**
  * Inserts origin-trial token for `attribution-reporting` if not already
@@ -1090,7 +1090,7 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
  * than 32 capabilities to this enum.
  * @enum {number}
  */
-const Capability = {
+const Capability_Enum = {
   SVG_SUPPORTED: 1 << 0,
   SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
   SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
@@ -1105,17 +1105,17 @@ function getBrowserCapabilitiesBitmap(win) {
   let browserCapabilities = 0;
   const doc = win.document;
   if (win.SVGElement && doc.createElementNS) {
-    browserCapabilities |= Capability.SVG_SUPPORTED;
+    browserCapabilities |= Capability_Enum.SVG_SUPPORTED;
   }
   const iframeEl = doc.createElement('iframe');
   if (iframeEl.sandbox && iframeEl.sandbox.supports) {
     if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
     }
     if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
     }
   }
   return browserCapabilities;

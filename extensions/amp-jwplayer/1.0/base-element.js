@@ -1,37 +1,16 @@
 import {getDataParamsFromAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
+
 import {BentoJwplayer} from './component';
 
-import {
-  getConsentMetadata,
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {
   /** @override */
   init() {
     super.init();
-
-    const consentPolicy = this.getConsentPolicy();
-    if (consentPolicy) {
-      this.getConsentInfo().then((consentInfo) => {
-        const policyState = consentInfo[0];
-        const policyInfo = consentInfo[1];
-        const policyMetadata = consentInfo[2];
-        this.mutateProps(
-          dict({
-            'consentParams': {
-              'policyState': policyState,
-              'policyInfo': policyInfo,
-              'policyMetadata': policyMetadata,
-            },
-          })
-        );
-      });
-    }
 
     return dict({
       'queryParams': this.mergeQueryParams(
@@ -42,18 +21,6 @@ export class BaseElement extends VideoBaseElement {
         this.element.getAttribute('data-content-search')
       ),
     });
-  }
-
-  /**
-   * @param {string} policy
-   * @return {Promise}
-   */
-  getConsentInfo(policy) {
-    return Promise.all([
-      getConsentPolicyState(this.element, policy),
-      getConsentPolicyInfo(this.element, policy),
-      getConsentMetadata(this.element, policy),
-    ]);
   }
 
   /**
@@ -106,9 +73,12 @@ BaseElement['props'] = {
   'contentRecency': {attr: 'data-content-recency'},
   'contentBackfill': {attr: 'data-content-backfill', type: 'boolean'},
   'adCustParams': {attr: 'data-ad-cust-params'},
-  'adMacros': {attrPrefix: 'data-ad-macro-'},
-  'config': {attrPrefix: 'data-config-'},
+  'adMacros': createParseAttrsWithPrefix('data-ad-macro-'),
+  'config': createParseAttrsWithPrefix('data-config-'),
   'autoplay': {attr: 'autoplay', type: 'boolean'},
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
+  'loading': {attr: 'data-loading'},
   // TODO(wg-bento): These props have no internal implementation yet.
   'dock': {attr: 'dock', media: true},
 };
@@ -118,3 +88,6 @@ BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['loadable'] = true;

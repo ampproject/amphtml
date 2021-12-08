@@ -76,3 +76,13 @@ export function parseEmbedMode(str) {
     ? /** @type {!EmbedMode} */ (embedModeIndex)
     : EmbedMode.NOT_EMBEDDED;
 }
+
+/**
+ * Determine if the current embed mode is PREVIEW.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isPreviewMode(win) {
+  const embedMode = parseEmbedMode(win.location.hash);
+  return embedMode === EmbedMode.PREVIEW;
+}

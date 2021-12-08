@@ -8,6 +8,8 @@ import {
 
 import {dev} from '#utils/log';
 
+import {FakePerformance} from '#testing/fake-dom';
+
 describes.sandboxed('Storage', {}, (env) => {
   let storage;
   let binding;
@@ -37,6 +39,7 @@ describes.sandboxed('Storage', {}, (env) => {
         windowApi = {
           document: {},
           location: 'https://acme.com/document1',
+          performance: new FakePerformance(window),
         };
         ampdoc = new AmpDocSingle(windowApi);
 

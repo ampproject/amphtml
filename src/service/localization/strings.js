@@ -13,7 +13,7 @@ import {parseJson} from '#core/types/object/json';
  *
  * @const @enum {string}
  */
-export const LocalizedStringId = {
+export const LocalizedStringId_Enum = {
   // amp-story
   AMP_STORY_ACTIVATE_BUTTON_TEXT: '83',
   AMP_STORY_AUDIO_MUTE_BUTTON_LABEL: '66',
@@ -59,7 +59,6 @@ export const LocalizedStringId = {
   AMP_STORY_SHARING_PAGE_LABEL: '62',
   AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: '6',
   AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: '7',
-  AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
   AMP_STORY_SHARING_PROVIDER_NAME_LINE: '63',
   AMP_STORY_SHARING_PROVIDER_NAME_LINK: '9',
   AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: '10',
@@ -112,10 +111,14 @@ export const LocalizedStringId = {
   AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C: '73',
   AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D: '74',
 
+  // amp-story-shopping
+  AMP_STORY_SHOPPING_CTA_LABEL: '101',
+
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
   // DEPRECATED_AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL: '24',
   // DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
+  // DEPRECATED_AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
 };
 
 /**
@@ -127,7 +130,7 @@ export const LocalizedStringId = {
 export let LocalizedStringDef;
 
 /**
- * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
+ * @typedef {!Object<!LocalizedStringId_Enum, !LocalizedStringDef>}
  */
 export let LocalizedStringBundleDef;
 
@@ -160,7 +163,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (
+    const localizedStringId = /** @type {!LocalizedStringId_Enum} */ (
       localizedStringIdAsStr
     );
     const entry = localizedStringBundle[localizedStringId];

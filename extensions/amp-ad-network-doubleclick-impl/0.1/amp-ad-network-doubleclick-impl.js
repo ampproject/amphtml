@@ -47,7 +47,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {
   assertDoesNotContainDisplay,
@@ -417,7 +417,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
+    this.isFluidPrimaryRequest_ = layout == Layout_Enum.FLUID;
     this.isFluidRequest_ = this.isFluidRequest_ || this.isFluidPrimaryRequest_;
     return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }

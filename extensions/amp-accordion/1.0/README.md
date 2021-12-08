@@ -2,23 +2,19 @@
 
 Displays content sections that can be collapsed and expanded. This component provides a way for viewers to glance at the content outline and jump to any section. Effective use reduces scrolling needs on mobile devices.
 
--   A Bento Accordion accepts one or more `<section>` elements as its direct
-    children.
+-   A Bento Accordion accepts one or more `<section>` elements as its direct children.
 -   Each `<section>` must contain exactly two direct children.
--   The first child in a `<section>` is the heading for that section of the
-    Bento Accordion. It must be a heading element such as `<h1>-<h6>` or
-    `<header>`.
+-   The first child in a `<section>` is the heading for that section of the Bento Accordion. It must be a heading element such as `<h1>-<h6>` or `<header>`.
 -   The second child in a `<section>` is the expandable/collapsible content.
     -   It can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-html-format.md).
 -   A click or tap on a `<section>` heading expands or collapses the section.
--   A Bento Accordion with a defined `id` preserves the collapsed or expanded
-    state of each section while the user remains on your domain.
+-   A Bento Accordion with a defined `id` preserves the collapsed or expanded state of each section while the user remains on your domain.
 
 ## Web Component
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/accordion
@@ -29,7 +25,76 @@ import {defineElement as defineBentoAccordion} from '@bentoproject/accordion';
 defineBentoAccordion();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css" crossorigin="anonymous">
+```
+
+### Example
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-accordion id="my-accordion">
+      <section>
+        <h2>Section 1</h2>
+        <div>Content in section 1.</div>
+      </section>
+      <section>
+        <h2>Section 2</h2>
+        <div>Content in section 2.</div>
+      </section>
+       <!-- Expanded on page load due to attribute: -->
+      <section expanded>
+        <h2>Section 3</h2>
+        <div>Content in section 3.</div>
+      </section>
+    </bento-accordion>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+Bento components are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
+
+```javascript
+await customElements.whenDefined('bento-accordion');
+const api = await accordion.getApi();
+```
+
+#### API Example
 
 <!--% example %-->
 
@@ -91,23 +156,11 @@ defineBentoAccordion();
 </html>
 ```
 
-### Interactivity and API usage
-
-Bento enabled components in standalone use are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
-
-```javascript
-await customElements.whenDefined('bento-accordion');
-const api = await accordion.getApi();
-```
-
 #### Actions
 
 ##### toggle()
 
-The `toggle` action switches the `expanded` and `collapsed` states of
-`bento-accordion` sections. When called with no arguments, it toggles all sections
-of the accordion. To specify a specific section, add the `section` argument and
-use its corresponding `id` as the value.
+The `toggle` action switches the `expanded` and `collapsed` states of `bento-accordion` sections. When called with no arguments, it toggles all sections of the accordion. To specify a specific section, add the `section` argument and use its corresponding `id` as the value.
 
 ```html
 <bento-accordion id="myAccordion">
@@ -145,9 +198,7 @@ use its corresponding `id` as the value.
 
 ##### expand()
 
-The `expand` action expands the sections of the `bento-accordion`. If a section
-is already expanded, it stays expanded. When called with no arguments, it
-expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
+The `expand` action expands the sections of the `bento-accordion`. If a section is already expanded, it stays expanded. When called with no arguments, it expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
 
 ```html
 <bento-accordion id="myAccordion">
@@ -185,10 +236,7 @@ expands all sections of the accordion. To specify a section, add the `section` a
 
 ##### collapse()
 
-The `collapse` action collapses the sections of the `bento-accordion`. If a
-section is already collapsed, it stays collapsed. When called with no arguments,
-it collapses all sections of the accordion. To specify a section, add the
-`section` argument, and use its corresponding `id` as the value.
+The `collapse` action collapses the sections of the `bento-accordion`. If a section is already collapsed, it stays collapsed. When called with no arguments, it collapses all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
 
 ```html
 <bento-accordion id="myAccordion">
@@ -342,8 +390,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 
 #### animate
 
-Include the `animate` attribute in `<bento-accordion>` to add a "roll down"
-animation when the content is expanded and "roll up" animation when collapsed.
+Include the `animate` attribute in `<bento-accordion>` to add a "roll down" animation when the content is expanded and "roll up" animation when collapsed.
 
 This attribute can be configured to based on a [media query](./../../../docs/spec/amp-html-responsive-attributes.md).
 
@@ -412,26 +459,22 @@ Allow only one section to expand at a time by applying the `expand-single-sectio
 
 ### Styling
 
-You may use the `bento-accordion` element selector to style the accordion
-freely.
+You may use the `bento-accordion` element selector to style the accordion freely.
 
 Keep the following points in mind when you style an amp-accordion:
 
 -   `bento-accordion` elements are always `display: block`.
 -   `float` cannot style a `<section>`, heading, nor content elements.
--   An expanded section applies the `expanded` attribute to the `<section>`
-    element.
--   The content element is clear-fixed with `overflow: hidden` and hence cannot
-    have scrollbars.
--   Margins of the `<bento-accordion>`, `<section>`, heading, and content elements
-    are set to `0`, but can be overridden in custom styles.
+-   An expanded section applies the `expanded` attribute to the `<section>` element.
+-   The content element is clear-fixed with `overflow: hidden` and hence cannot have scrollbars.
+-   Margins of the `<bento-accordion>`, `<section>`, heading, and content elements are set to `0`, but can be overridden in custom styles.
 -   Both the header and content elements are `position: relative`.
 
 ---
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/accordion
@@ -512,10 +555,7 @@ The `BentoAccordion` API allows you to perform the following actions:
 
 ##### toggle()
 
-The `toggle` action switches the `expanded` and `collapsed` states of
-`bento-accordion` sections. When called with no arguments, it toggles all sections
-of the accordion. To specify a specific section, add the `section` argument and
-use its corresponding `id` as the value.
+The `toggle` action switches the `expanded` and `collapsed` states of `bento-accordion` sections. When called with no arguments, it toggles all sections of the accordion. To specify a specific section, add the `section` argument and use its corresponding `id` as the value.
 
 ```javascript
 ref.current.toggle();
@@ -524,9 +564,7 @@ ref.current.toggle('section1');
 
 ##### expand()
 
-The `expand` action expands the sections of the `bento-accordion`. If a section
-is already expanded, it stays expanded. When called with no arguments, it
-expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
+The `expand` action expands the sections of the `bento-accordion`. If a section is already expanded, it stays expanded. When called with no arguments, it expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
 
 ```javascript
 ref.current.expand();
@@ -535,10 +573,7 @@ ref.current.expand('section1');
 
 ##### collapse()
 
-The `collapse` action collapses the sections of the `bento-accordion`. If a
-section is already collapsed, it stays collapsed. When called with no arguments,
-it collapses all sections of the accordion. To specify a section, add the
-`section` argument, and use its corresponding `id` as the value.
+The `collapse` action collapses the sections of the `bento-accordion`. If a section is already collapsed, it stays collapsed. When called with no arguments, it collapses all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
 
 ```javascript
 ref.current.collapse();
@@ -636,24 +671,28 @@ Or via `className`:
 
 ##### animate
 
-If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse of each section
+If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse of each section.
+
 Default: `false`
 
 ##### expandSingleSection
 
-If true, then expanding 1 section will automatically collapse all other sections:
+If true, then expanding 1 section will automatically collapse all other sections.
+
 Default: `false`
 
 #### BentoAccordionSection
 
 ##### animate
 
-If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse the section
+If true, then uses "roll-down" / "roll-up" animation during the expansion and collapse the section.
+
 Default: `false`
 
 ##### expanded
 
 If true, expands the section.
+
 Default: `false`
 
 ##### onExpandStateChange

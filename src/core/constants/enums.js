@@ -11,7 +11,7 @@ export const AMPDOC_SINGLETON_NAME_ENUM = {
  * Enum for tick labels (used by Performance service)
  * @enum {string}
  */
-export const TickLabel = {
+export const TickLabel_Enum = {
   ACCESS_AUTHORIZATION: 'aaa',
   ACCESS_AUTHORIZATION_VISIBLE: 'aaav',
   CUMULATIVE_LAYOUT_SHIFT: 'cls',
