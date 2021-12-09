@@ -333,3 +333,12 @@ export const maybeMakeProxyUrl = (url, ampDoc) => {
   );
   return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
 };
+
+/**
+ * Whether the document is transformed
+ * @param {!AmpDoc} ampdoc
+ * @return {boolean}
+ */
+export function isTransformed(ampdoc) {
+  return ampdoc.getRootNode().documentElement.hasAttribute('transformed');
+}

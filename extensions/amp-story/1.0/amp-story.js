@@ -91,6 +91,7 @@ import {isPreviewMode} from './embed-mode';
 import {isRTL, removeElement} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
+  isTransformed,
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
@@ -408,22 +409,32 @@ export class AmpStory extends AMP.BaseElement {
         this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
     }
+    const performanceService = Services.performanceFor(this.win);
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'story-load-first-page-only'
-      );
+      performanceService.addEnabledExperiment('story-load-first-page-only');
     }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
       isPreviewMode(this.win) ||
-      prefersReducedMotion(this.win)
+      prefersReducedMotion(this.win) ||
+      isTransformed(this.getAmpDoc())
     ) {
-      Services.performanceFor(this.win).addEnabledExperiment(
+      performanceService.addEnabledExperiment(
         'story-disable-animations-first-page'
       );
     }
+    // [i-amphtml-version] marks that the style was inlined in the doc server-side.
+    if (
+      this.getAmpDoc()
+        .getRootNode()
+        .documentElement.querySelector(
+          'style[amp-extension="amp-story"][i-amphtml-version]'
+        )
+    ) {
+      performanceService.addEnabledExperiment('story-inline-css');
+    }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
-      Services.performanceFor(this.win).addEnabledExperiment(
+      performanceService.addEnabledExperiment(
         'story-load-inactive-outside-viewport'
       );
       this.element.classList.add(
