@@ -49,7 +49,7 @@ The [Getting Started End-to-End Guide](./getting-started-e2e.md) provides step-b
 
 The community has created a list of [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) specifically for new contributors to the project. Feel free to find one of the [unclaimed Good First Issues](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22good%20first%20issue%22%20-label%3A%22GFI%20Claimed!%22) that interests you, claim it by adding a comment to it and jump in!
 
-If you're interested in helping out but can't find a Good First Issue that matches your skills/interests, [sign up for our Slack](https://bit.ly/amp-slack-signup) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/) or send a Direct Message to [mrjoro](https://amphtml.slack.com/team/mrjoro/).
+If you're interested in helping out but can't find a Good First Issue that matches your skills/interests, [sign up for our Slack](https://bit.ly/amp-slack-signup) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/).
 
 If you run into any problems we have plenty of people who are willing to help; see the [How to get help](./getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
 
