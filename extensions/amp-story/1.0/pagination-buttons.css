@@ -66,15 +66,13 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-stor
   position: fixed!important;
   top: 0!important;
   bottom: 0!important;
-  margin: auto 40px!important;
-  width: 48px!important;
-  height: 48px!important;
+  margin: auto 12px!important;
+  width: 54px!important;
+  height: 54px!important;
   border: 0!important;
-  background-color: #fff!important;
   background-repeat: no-repeat!important;
   justify-content: center!important;
   align-items: center!important;
-  opacity: .5!important;
   transition: 150ms opacity linear, 350ms transform linear!important;
   cursor: pointer!important;
   pointer-events: all!important;
@@ -113,11 +111,11 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {
-  margin: auto 0 !important;
-  background-size: 90px;
-  background-position: center;
-  background-color: transparent !important;
-  filter: invert(1) drop-shadow(0 0 6px #000b)!important;
+  background-size: 100% !important;
+  background-position: center !important;
+  background-color: #fff2 !important;
+  border-radius: 50% !important;
+  filter: invert(1)!important;
   opacity: 1 !important;
 }
 
