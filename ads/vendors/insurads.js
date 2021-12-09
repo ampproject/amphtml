@@ -4,12 +4,14 @@ import {loadScript} from '#3p/3p';
  * @param {!Window} global
  */
 export function insurads(global) {
-
-  // Returns the first day of the current week
+  /**
+   * Create and modify a Date object to return the first day of the current week.
+   * @return {Date} The altered date.
+   */
   function getCacheBuster() {
     const t = new Date();
     t.setDate(t.getDate() - t.getDay());
-    t.setHours(0, 0, 0, 0) / 1000
+    t.setHours(0, 0, 0, 0) / 1000;
     return t;
   }
 
