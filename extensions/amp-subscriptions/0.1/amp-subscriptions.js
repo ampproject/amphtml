@@ -404,6 +404,7 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(platformKey, entitlement) {
+    console.log('resolving entitlement to store');
     this.platformStore_.resolveEntitlement(platformKey, entitlement);
     if (entitlement.decryptedDocumentKey) {
       this.cryptoHandler_.tryToDecryptDocument(
@@ -448,6 +449,10 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
+    console.log(
+      'fetching entitlement for platform: ' +
+        subscriptionPlatform.getPlatformKey()
+    );
     // Don't fetch entitlements on free pages.
     if (this.isPageFree_()) {
       return Promise.resolve();
@@ -649,6 +654,7 @@ export class SubscriptionService {
    * @private
    */
   handleGrantState_({granted, shouldActivatePlatform}) {
+    console.log('handling grant state: ' + granted);
     this.processGrantState_(granted);
     this.performPingback_();
 

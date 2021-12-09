@@ -37,7 +37,7 @@ export class PlatformStore {
     opt_Platforms,
     opt_externalOnEntitlementResolvedCallbacks
   ) {
-    console.log('constructing platform store!');
+    console.log('constructing platform store! opt_Platforms: ' + opt_Platforms);
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = opt_Platforms || dict();
 
@@ -110,6 +110,7 @@ export class PlatformStore {
   resetPlatformStore() {
     // Reset individual platforms to ensure their UX clears.
     for (const platformKey in this.subscriptionPlatforms_) {
+      console.log('resetting platform: ' + platformKey);
       this.subscriptionPlatforms_[platformKey].reset();
     }
 
@@ -225,7 +226,12 @@ export class PlatformStore {
    * @param {!./entitlement.Entitlement} entitlement
    */
   resolveEntitlement(platformKey, entitlement) {
-    console.log('resolving entitlement');
+    console.log(
+      'resolving entitlement for: ' +
+        platformKey +
+        '; granted: ' +
+        entitlement.granted
+    );
     if (entitlement) {
       entitlement.service = platformKey;
     }
@@ -363,12 +369,17 @@ export class PlatformStore {
     } else {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange((e) => {
-        console.log('executing one entilement callback!');
         const {entitlement} = e;
         if (entitlement.granted) {
+          console.log(
+            'executing entilement callback: resolves granted to true'
+          );
           this.grantStatusPromise_.resolve(true);
         } else if (this.areAllPlatformsResolved_()) {
           this.grantStatusPromise_.resolve(false);
+          console.log(
+            'executing entilement callback: resolves granted to false'
+          );
         }
       });
     }
@@ -648,6 +659,7 @@ export class PlatformStore {
    * @param {string} platformKey
    */
   reportPlatformFailureAndFallback(platformKey) {
+    console.log('reporting platform failure for platform: ' + platformKey);
     if (
       platformKey === this.getLocalPlatform_().getPlatformKey() &&
       this.fallbackEntitlement_

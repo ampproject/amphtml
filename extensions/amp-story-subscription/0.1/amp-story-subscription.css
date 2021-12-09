@@ -154,36 +154,56 @@ amp-story-subscription[type=blocking].i-amphtml-story-subscription-visible::befo
   margin-bottom: 35px;
 }
 
-.i-amphtml-story-subscription-button-container {
-
+.i-ampthml-story-subscription-button-container {
+  display: flex;
+  margin-top: 35px;
+  margin-bottom: 41px;
+  justify-content: center;
 }
 
 .i-ampthml-story-subscription-button-google {
-  margin: auto;
-  display:inline-block;
+  /* margin: auto; */
+  /* margin-top: 5px; */
+  /* margin-left: 5%; */
+  display: flex;
 }
 
 .i-amphtml-story-subscription-button-publisher {
-  margin: auto;
+  /* margin: auto; */
   background: #000000;
   margin-left: 20px;
   border-radius: 100px;
-  display: inline-block; 
+  /* display: inline-block;  */
   height: 40px;
   width: 142px;
   /* padding: 11px 8px; */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.i-amphtml-story-subscription-button-publisher a {
-  display: inline-block;
-  color: #FFFFFF;
-  /* padding: 11px 8px; */
-  margin: 0 0 0 10px;
+.i-amphtml-story-subscription-button-publisher div {
+  /* display: inline-block; */
 }
+
+.publisher-button-text {
+  z-index: 0;
+  margin-left: 5px;
+  margin-right: 5px;
+  color:#FFFFFF;
+  /* margin-bottom: 5px; */
+}
+
+/* .i-amphtml-story-subscription-button-publisher input#image-button{
+  background: #ccc url('icons/story-3p-icon.png') no-repeat top left;
+  padding-left: 16px;
+  height: 16px;
+} */
 
 .i-amphtml-story-subscription-logo {
-  padding-top: 10px;
-  display: inline-block;
+  /* padding-top: 10px; */
+  /* display: inline-block; */
   /* position: absolute !important;
   left: -8.33%;
   right: -4.17%;

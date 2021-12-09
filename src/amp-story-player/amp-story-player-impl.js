@@ -1300,6 +1300,7 @@ export class AmpStoryPlayer {
       VisibilityState_Enum.PRERENDER
     );
 
+    console.log('setting src of story iframe');
     iframe.setAttribute('src', href);
     if (story.title) {
       iframe.setAttribute('title', story.title);
@@ -1740,6 +1741,7 @@ export class AmpStoryPlayer {
    * @private
    */
   onTouchMove_(event) {
+    console.log('Reacts to touchmove events!');
     const coordinates = this.getClientTouchCoordinates_(event);
     if (!coordinates) {
       return;
@@ -1818,6 +1820,7 @@ export class AmpStoryPlayer {
    * @param {!Object} gesture
    */
   onSwipeX_(gesture) {
+    console.log('Reacts to horizontal swipe events!');
     if (this.stories_.length <= 1) {
       return;
     }

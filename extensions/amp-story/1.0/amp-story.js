@@ -1375,37 +1375,53 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    // Do we need this?
     if (this.subscriptionService_) {
       this.subscriptionService_.getGrantStatus().then((granted) => {
         this.granted_ = granted;
       });
     }
-    console.log('granted: ' + this.granted_);
+
+    setTimeout(() => {
+      console.log('after timeout for a second, granted: ' + this.granted_);
+    }, 1000);
+
     if (
       !this.granted_ &&
       targetPage.element.hasAttribute('subscriptions-section') &&
-      targetPage.element.getAttribute('subscriptions-section') == 'content' &&
-      !this.areSubscriptionsAuthorizationsCompleted_
+      targetPage.element.getAttribute('subscriptions-section') == 'content'
+      // !this.areSubscriptionsAuthorizationsCompleted_
     ) {
       if (this.navigateToPageAfterSubscriptionsAreGranted_) {
-        console.log('next page available and the page is locked!');
+        console.log('dialog should already be there and next page is locked!');
         return Promise.resolve();
       }
       console.log('next page has subscription-section with content');
+      this.subscriptionService_.selectAndActivatePlatform(); // activate any working platform.
       this.navigateToPageAfterSubscriptionsAreGranted_ = targetPage;
-      this.subscriptionService_.selectAndActivatePlatform();
       this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, true);
-      this.subscriptionService_.addOnEntitlementResolvedCallback(() => {
+
+      this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
+        const {entitlement} = e;
         console.log(
-          'subscriptionService onChange callbacks is called to toggle!'
+          'amp-story onEntitlement callback is called. entitlement: ' +
+            entitlement.granted
         );
-        this.areSubscriptionsAuthorizationsCompleted_ = true;
-        this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
-        this.switchTo_(
-          this.navigateToPageAfterSubscriptionsAreGranted_.element.id,
-          NavigationDirection.NEXT
-        );
-        this.navigateToPageAfterSubscriptionsAreGranted_ = null;
+        if (
+          this.navigateToPageAfterSubscriptionsAreGranted_ &&
+          entitlement.granted
+        ) {
+          console.log('new entitlement resolves to true!');
+          // this parameter should be removed and use granted_ instead.
+          // this.areSubscriptionsAuthorizationsCompleted_ = true;
+          this.granted_ = true;
+          this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
+          this.switchTo_(
+            this.navigateToPageAfterSubscriptionsAreGranted_.element.id,
+            NavigationDirection.NEXT
+          );
+          this.navigateToPageAfterSubscriptionsAreGranted_ = null;
+        }
       });
       return Promise.resolve();
     }

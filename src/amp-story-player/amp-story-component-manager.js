@@ -37,6 +37,7 @@ export class AmpStoryComponentManager {
    * @public
    */
   loadPlayers() {
+    console.log('load players');
     const doc = this.win_.document;
     const players = doc.getElementsByTagName('amp-story-player');
     initLogConstructor();

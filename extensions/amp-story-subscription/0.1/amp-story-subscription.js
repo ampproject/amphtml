@@ -1,5 +1,5 @@
 import {copyChildren, removeChildren} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {closest} from '#core/dom/query';
 
 // import {getStoryAttributeSrc} from './utils';
@@ -145,7 +145,7 @@ export class AmpStorySubscription extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /**
@@ -234,7 +234,7 @@ export class AmpStorySubscription extends AMP.BaseElement {
 
     // Closes the menu if click happened outside of the main container.
     if (!closest(el, (el) => el === this.containerEl_, this.element)) {
-      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
+      // this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
     }
   }
 
@@ -248,9 +248,8 @@ export class AmpStorySubscription extends AMP.BaseElement {
         'i-amphtml-story-subscription-visible',
         show
       );
-      if (show) {
-        // this.subscriptionService_.getDialog().open();
-      } else {
+      // Don't need to opne since SubscriptionService already opens the dialog when activiated.
+      if (!show) {
         this.subscriptionService_.getDialog().close();
       }
 
