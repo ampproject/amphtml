@@ -230,6 +230,7 @@ const forbiddenTermsGlobal = {
     message: privateServiceFactory,
     allowlist: [
       'src/amp.js',
+      'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
     ],
