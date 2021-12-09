@@ -41,11 +41,13 @@ export function calculateExtensionScriptUrl(
   version,
   opt_isLocalDev
 ) {
-  const fileExtension = mode.isEsm() ? '.mjs' : '.js';
+  // const fileExtension = mode.isEsm() ? '.mjs' : '.js';
+  const fileExtension = '.max.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   const extensionVersion = version ? '-' + version : '';
-  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
+  // return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
+  return `${base}/v0/${extensionId}${extensionVersion}${fileExtension}`;
 }
 
 /**
