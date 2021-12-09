@@ -13,6 +13,7 @@ import {
   installBuiltinElements,
   installRuntimeServices,
 } from '#service/core-services';
+import {installPerformanceService} from '#service/performance-impl';
 
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
@@ -28,6 +29,7 @@ installDocService(self, /* isSingleDoc */ false);
 
 // Core services.
 installRuntimeServices(self);
+installPerformanceService(self);
 
 // Impression tracking for PWA is not meaningful, but the dependent code
 // has to be unblocked.

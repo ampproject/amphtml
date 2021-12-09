@@ -17,11 +17,7 @@ import {isStoryDocument} from '#utils/story';
 
 import {whenContentIniLoad} from '../ini-load';
 import {getMode} from '../mode';
-import {
-  getService,
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-} from '../service-helpers';
+import {getService, registerServiceBuilder} from '../service-helpers';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -960,13 +956,6 @@ function getOutermostAmpElement(node) {
  */
 export function installPerformanceService(window) {
   registerServiceBuilder(window, 'performance', Performance);
-}
-
-/**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- */
-export function installPerformanceServiceForAmpDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'performance', Performance);
 }
 
 /**
