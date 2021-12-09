@@ -1,0 +1,64 @@
+
+
+amp-app-banner {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0;
+  width: 100%;
+  max-height: 100px !important;
+  box-sizing: border-box;
+  background: #fff;
+  z-index: 13;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+}
+
+i-amphtml-app-banner-top-padding {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  height: 4px;
+  /** Must be above the dismiss button to cover bottom shadow */
+  z-index: 15;
+}
+
+.amp-app-banner-dismiss-button {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  top: -28px;
+  right: 0;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="#4F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>');
+  background-size: 13px 13px;
+  background-position: 9px center;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  z-index: 14;
+  box-shadow: 0 -1px 1px 0 rgba(0,0,0, 0.2);
+  border: none;
+  border-radius: 12px 0 0 0;
+}
+
+/* Increase tapping area of the dismiss button */
+.amp-app-banner-dismiss-button:before {
+  position: absolute;
+  content: '';
+  top: -20px;
+  right: 0;
+  left: -20px;
+  bottom: 0;
+}
+
+[dir=rtl] .amp-app-banner-dismiss-button {
+  right: auto;
+  left: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 12px;
+  background-position: 6px center;
+}
+
+[dir=rtl] .amp-app-banner-dismiss-button:before {
+  right: -20px;
+  left: 0;
+}
