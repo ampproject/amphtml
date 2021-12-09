@@ -9,7 +9,7 @@ import {LocalizedStringId} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '#core/types/object';
-import {renderAsElement} from './simple-template';
+import {renderAsElementForStory} from './simple-template';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -157,7 +157,7 @@ export class AmpStoryHint {
     this.isBuilt_ = true;
 
     const root = this.document_.createElement('div');
-    this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
+    this.hintContainer_ = renderAsElementForStory(this.document_, TEMPLATE, this.parentEl_);
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(
