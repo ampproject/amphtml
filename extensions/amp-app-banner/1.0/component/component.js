@@ -1,9 +1,10 @@
+import {matches, scopedQuerySelector} from '#core/dom/query';
+
 import * as Preact from '#preact';
 import {useEffect, useMemo, useRef} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useLocalStorage} from '#preact/hooks/useLocalStorage';
 import {platformService} from '#preact/services/platform';
-import {matches, scopedQuerySelector} from '#core/dom/query';
 
 import {user, userAssert} from '#utils/log';
 

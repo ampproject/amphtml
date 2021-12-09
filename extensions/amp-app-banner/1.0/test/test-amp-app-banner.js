@@ -2,9 +2,10 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
-import '../amp-app-banner';
 import {platformService} from '#preact/services/platform';
+
 import {waitFor} from '#testing/helpers/service';
+import '../amp-app-banner';
 
 describes.realWin(
   'amp-app-banner-v1.0',
