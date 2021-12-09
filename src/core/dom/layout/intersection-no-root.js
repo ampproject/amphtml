@@ -29,7 +29,8 @@ function getInOb(win) {
     intersectionObservers = new WeakMap();
   }
 
-  let observer = devAssert(intersectionObservers).get(win);
+  devAssert(intersectionObservers);
+  let observer = intersectionObservers.get(win);
   if (!observer) {
     observer = createViewportObserver(
       (entries) => {
@@ -41,15 +42,17 @@ function getInOb(win) {
           }
           seen.add(target);
 
-          devAssert(observer).unobserve(target);
-          devAssert(intersectionDeferreds).get(target)?.resolve(entries[i]);
-          devAssert(intersectionDeferreds).delete(target);
+          devAssert(observer);
+          observer.unobserve(target);
+          devAssert(intersectionDeferreds);
+          intersectionDeferreds.get(target)?.resolve(entries[i]);
+          intersectionDeferreds.delete(target);
         }
       },
       win,
       {needsRootBounds: false}
     );
-    devAssert(intersectionObservers).set(win, observer);
+    intersectionObservers.set(win, observer);
   }
   return observer;
 }
@@ -64,14 +67,15 @@ function getInOb(win) {
  * @return {Promise<IntersectionObserverEntry>}
  */
 export function measureIntersectionNoRoot(el) {
-  if (intersectionDeferreds?.has(el)) {
-    return devAssert(intersectionDeferreds.get(el)).promise;
+  let deferred = intersectionDeferreds?.get(el);
+  if (!deferred) {
+    const inOb = getInOb(getWin(el));
+    devAssert(intersectionDeferreds);
+    inOb.observe(el);
+
+    deferred = new Deferred();
+    intersectionDeferreds.set(el, deferred);
   }
 
-  const inOb = getInOb(getWin(el));
-  inOb.observe(el);
-
-  const deferred = new Deferred();
-  devAssert(intersectionDeferreds).set(el, deferred);
   return deferred.promise;
 }

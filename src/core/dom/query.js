@@ -1,5 +1,6 @@
 import {devAssert, devAssertElement} from '#core/assert';
 import * as mode from '#core/mode';
+import {isElement, isString} from '#core/types';
 
 import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
@@ -365,11 +366,11 @@ export function isInternalOrServiceNode(node) {
     return false;
   }
 
-  const el = devAssertElement(node);
+  devAssertElement(node);
   return (
-    el.hasAttribute('placeholder') ||
-    el.hasAttribute('fallback') ||
-    el.hasAttribute('overflow')
+    node.hasAttribute('placeholder') ||
+    node.hasAttribute('fallback') ||
+    node.hasAttribute('overflow')
   );
 }
 
@@ -381,10 +382,10 @@ export function isInternalOrServiceNode(node) {
 function isInternalElement(nodeOrTagName) {
   /** @type {undefined|string} */
   let tagName;
-  if (typeof nodeOrTagName == 'string') {
+  if (isString(nodeOrTagName)) {
     tagName = nodeOrTagName;
-  } else if (nodeOrTagName.nodeType === Node.ELEMENT_NODE) {
-    tagName = devAssertElement(nodeOrTagName).tagName;
+  } else if (isElement(nodeOrTagName)) {
+    tagName = nodeOrTagName.tagName;
   }
 
   return !!tagName && tagName.toLowerCase().startsWith('i-');

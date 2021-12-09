@@ -508,9 +508,8 @@ export function getVerticalScrollbarWidth(win) {
 export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const data = opt_data || {};
   // Constructors of events need to come from the correct window. Sigh.
-  const event = devAssert(node.ownerDocument).createEvent('Event');
-
-  // Technically .data is not a property of Event.
+  devAssert(node.ownerDocument);
+  const event = node.ownerDocument.createEvent('Event');
   event.data = data;
 
   const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;

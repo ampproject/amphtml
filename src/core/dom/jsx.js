@@ -107,9 +107,10 @@ export function createElement(tag, props, ...children) {
  * @return {null}
  */
 export function Fragment() {
-  return devAssert(
+  devAssert(
     null,
     "Don't use Fragment (<></>) with #core/dom/jsx. " +
       'Use a root node or an array of nodes instead.'
   );
+  return null;
 }

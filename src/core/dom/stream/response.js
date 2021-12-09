@@ -20,7 +20,8 @@ export function streamResponseToWriter(win, response, writer) {
     /** @type {?} */ (win).ReadableStream
   ) {
     let firstRead = true;
-    const reader = devAssert(response.body).getReader();
+    devAssert(response.body);
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
     reader.read().then(function handleChunk({done, value}) {
