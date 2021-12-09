@@ -6,6 +6,10 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoDateDisplay} from './component';
 
+/**
+ * @param {string} str
+ * @return string with escaped backticks (`)
+ */
 function escapeBackticks(str) {
   return str.replaceAll('`', '\\`');
 }
@@ -18,6 +22,11 @@ export class BaseElement extends PreactBaseElement {
           this.element.getAttribute('template')
         )
       : this.element.querySelector('template');
+    if (!template) {
+      // show error
+      return;
+    }
+
     this.mutateProps(
       dict({
         'render': (data) => {
@@ -25,8 +34,10 @@ export class BaseElement extends PreactBaseElement {
           for (const [key, value] of Object.entries(data)) {
             destructure += `const ${key} = '${value}';`;
           }
-          const templateStr =
-            template.content.firstElementChild./*REVIEW*/ outerHTML;
+          let templateStr = '';
+          for (let i = 0; i < template.content.children.length; i++) {
+            templateStr += template.content.children[i]./*REVIEW*/ outerHTML;
+          }
           const templateFn = new Function(
             `${destructure} return \`${escapeBackticks(templateStr)}\`;`
           );
