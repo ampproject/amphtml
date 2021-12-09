@@ -19,7 +19,7 @@ You can optionally join the [design review Google Group](https://groups.google.c
 
 Because AMP contributors are located all over the world we rotate the design review times to accommodate people in different time zones. The time and date for a design review will be specified in that design review's issue.
 
-If none of the design review times are convenient for you and you have a design you would like to discuss please reach out on the [#contributing](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) channel in Slack.
+If none of the design review times are convenient for you and you have a design you would like to discuss please reach out on the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/) channel in Slack.
 
 ## Bringing your design to a design review
 
