@@ -4,7 +4,7 @@ const test = false;
 const localDev = false;
 const minified = true;
 const development = false;
-const namespaceVersion = "$internalRuntimeVersion$";
+const namespaceVersion = mode.version();
 
 function foo() {
   if (false == false) {
