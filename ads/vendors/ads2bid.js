@@ -14,39 +14,25 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../../3p/3p';
+import {validateData, loadScript} from '#3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function ads2bid(global, data) {
-  validateData(data, ['a2bSrc', 'a2bBlockId', 'a2bSiteId']);
-  const src = data['a2bSrc'];
-  createContainer(global, data);
-  loadScript(global, src);
+  validateData(data, ['src', 'blockId', 'siteId']);
+  const {src, siteId, blockId} = data;
+  const url = src + `/html/amp?site_id=${siteId}&blocks=${blockId}`;
+  createContainer(global);
+  loadScript(global, url);
 }
 
 /**
  * @param {!Window} global
- * @param {!Object} data
  */
-function createContainer(global, data) {
-  const d = global.document.createElement('div');
-  d.setAttribute('id', 'AAAtLtUaE');
-  d.setAttribute('style', `overflow-y: auto; overflow-x: hidden; height: ${window.innerHeight}px;`)
-  global.document.getElementById('c').appendChild(d);
-  pushBlock(global, data['a2bBlockId'], data['a2bSiteId']);
-}
-
-/**
- * @param {!Window} global
- * @param {!String} blockId
- * @param {!String} siteId
- */
-function pushBlock(global, blockId, siteId) {
-  if (!global['mtzBlocks']) {
-    global['mtzBlocks'] = [];
-  }
-  global['mtzBlocks'].push({id:'AAAtLtUaE',block:blockId, site_id:siteId});
+function createContainer(global) {
+  const div = global.document.createElement('div');
+  div.setAttribute('data-ads2bid', 1);
+  global.document.getElementById('c').appendChild(div);
 }

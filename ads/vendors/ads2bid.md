@@ -27,11 +27,11 @@ Provides support for [ads2.bid](https://ads2.bid/) widgets.
 ## Example
 
 ```html
-<amp-ad width="320"
-        height="320"
+<amp-ad width="690"
+        height="690"
         type="ads2bid"
-        data-a2b-site-id="11620"
-        data-a2b-block-id="123602"
-        data-a2b-src="https://kdunhltakb.ru/script.js?amp=1">
+        data-site-id="11620"
+        data-block-id="36261"
+        data-src="https://web.adsbid-stage.techhprof.ru/">
 </amp-ad>
 ```
