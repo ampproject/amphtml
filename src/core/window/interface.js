@@ -87,8 +87,6 @@ export class WindowInterface {
    * @return {typeof XMLHttpRequest}
    */
   static getXMLHttpRequest(win) {
-    // TODO(wg-performance): This and Image are globals, not part of the Window
-    // interface. Can we remove and simplify?
     return /** @type {any} */ (win).XMLHttpRequest;
   }
 
