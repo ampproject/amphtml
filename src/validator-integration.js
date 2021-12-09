@@ -1,3 +1,4 @@
+import {propagateNonce} from '#core/dom';
 import {getHashParams} from '#core/types/string/url';
 
 import {loadPromise} from '#utils/event-helper';
@@ -44,12 +45,7 @@ export function loadScript(doc, url) {
     doc.createElement('script')
   );
   script.src = url;
-
-  // Propagate nonce to all generated script tags.
-  const currentScript = doc.head.querySelector('script[nonce]');
-  if (currentScript) {
-    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
-  }
+  propagateNonce(doc, script);
 
   const promise = loadPromise(script).then(
     () => {

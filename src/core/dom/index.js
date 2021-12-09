@@ -548,3 +548,27 @@ export function getChildJsonConfig(element) {
     throw new Error('Failed to parse <script> contents. Is it valid JSON?');
   }
 }
+
+/**
+ * Returns true if an element was server rendered.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isServerRendered(element) {
+  return element.hasAttribute('i-amphtml-ssr');
+}
+
+/**
+ * Propagate the nonce found in <head> to a new script element.
+ * Recent browsers force nonce to be accessed via property instead of attribute.
+ *
+ * @param {Document} doc
+ * @param {HTMLScriptElement} scriptEl
+ */
+export function propagateNonce(doc, scriptEl) {
+  const currentScript = doc.head.querySelector('script[nonce]');
+  if (currentScript) {
+    const nonce = currentScript.nonce || currentScript.getAttribute('nonce');
+    scriptEl.setAttribute('nonce', nonce);
+  }
+}

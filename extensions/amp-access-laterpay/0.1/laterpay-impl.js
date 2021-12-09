@@ -53,7 +53,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let LaterpayConfig_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -66,7 +66,7 @@ let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camel
  *   validity_value: number
  * }}
  */
-let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseOption_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -77,7 +77,7 @@ let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camel
  *   subscriptions: (!Array<PurchaseOption_0_1_Def>|undefined)
  * }}
  */
-let PurchaseConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseConfig_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}

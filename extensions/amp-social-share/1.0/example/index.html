@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>bento-social-share</title>
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-social-share-1.0.css"
+    />
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-social-share-1.0.js"
+    ></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
+    ></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
+        background: #ecf1f3;
+        display: flex;
+        height: 100vh;
+      }
+
+      .social-share-group {
+        display: grid;
+        grid-template-columns: repeat(4, min-content);
+        gap: 8px;
+        margin: auto;
+      }
+
+      bento-social-share {
+        border-radius: 8.4px;
+        height: calc(8vw + 1.5em) !important;
+        width: calc(8vw + 1.5em) !important;
+        cursor: pointer;
+        box-shadow: 0 8px 16px 0 rgba(0, 43, 57, 0.15);
+        transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+          box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+      }
+
+      bento-social-share:hover {
+        transform: translateY(-0.125em);
+        box-shadow: 0 25px 20px -15px rgba(0, 43, 57, 0.15);
+      }
+
+      bento-social-share[type='email'] {
+        color: #002b39;
+        background: #fff;
+      }
+
+      bento-social-share[type='facebook'] {
+        color: #32529f;
+        background: #fff;
+        border-radius: 50%;
+      }
+
+      bento-social-share[type='twitter'] {
+        color: #fff;
+        background: #1da1f2;
+      }
+
+      bento-social-share[type='linkedin'] {
+        color: #fff;
+        background: #0077b5;
+      }
+
+      bento-social-share[type='pinterest'] {
+        color: #e60023;
+        background: #fff;
+        border-radius: 50%;
+      }
+
+      bento-social-share[type='tumblr'] {
+        color: #fff;
+        background: #3c5a77;
+      }
+
+      bento-social-share[type='whatsapp'] {
+        color: #fff;
+        background: #25d366;
+      }
+
+      bento-social-share[type='line'] {
+        color: #fff;
+        background: #52b448;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="social-share-group">
+      <bento-social-share
+        type="email"
+        aria-label="Share via email"
+      ></bento-social-share>
+      <bento-social-share
+        type="facebook"
+        aria-label="Share on Facebook"
+      ></bento-social-share>
+      <bento-social-share
+        type="twitter"
+        aria-label="Share on Twitter"
+      ></bento-social-share>
+      <bento-social-share
+        type="linkedin"
+        aria-label="Share on Linkedin"
+      ></bento-social-share>
+      <bento-social-share
+        type="pinterest"
+        aria-label="Share on pinterest"
+      ></bento-social-share>
+      <bento-social-share
+        type="tumblr"
+        aria-label="Share on tumblr"
+      ></bento-social-share>
+      <bento-social-share
+        type="whatsapp"
+        aria-label="Share on whatsapp"
+      ></bento-social-share>
+      <bento-social-share
+        type="line"
+        aria-label="Share on line"
+      ></bento-social-share>
+    </div>
+
+    <script>
+      (async () => {
+        await customElements.whenDefined('bento-social-share');
+      })();
+    </script>
+  </body>
+</html>

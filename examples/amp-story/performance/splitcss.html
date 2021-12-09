@@ -6,8 +6,8 @@
   <link rel="canonical" href="lcp.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <title>Boilerplate test</title>
-  <!-- <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-story" src ="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script> -->
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src ="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,6 +70,51 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical" preset="2021-foreground">
           <p style="color: dimgray">This text is positioned with an aspect-ratio layer</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="second">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?fit=crop&w=720&h=1280&q=30&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world" style="color: white">This page should not be visible</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="third">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1634295912158-9c847b6b3a40?fit=crop&w=720&h=1280&q=30&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world" style="color: white">This page should not be visible</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="forth">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            id="img1"
+            width="400"
+            height="750"
+            src="https://images.unsplash.com/photo-1634154369165-cadcd9af7100?fit=crop&w=720&h=1280&q=30&fm=webp"
+            layout="fill">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world" style="color: white">This page should not be visible and should not load</h1>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>

@@ -101,6 +101,13 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 Annotates the video as having no audio. This hides the equalizer icon that is displayed
 when the video has autoplay.
 
+[filter formats="stories"]
+
+### volume
+
+Sets the current volume of the video, where the value must be in the range [0.1, 1]. The default value is 1.
+[/filter]<!-- formats="stories" -->
+
 ### rotate-to-fullscreen
 
 If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../../docs/spec/amp-video-interface.md#rotate-to-fullscreen).

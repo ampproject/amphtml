@@ -92,7 +92,7 @@ The example below demonstrates `amp-__component_name_hyphenated__` component in 
 
 #### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+Bento components are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
 The `amp-__component_name_hyphenated__` component API is accessible by including the following script tag in your document:
 

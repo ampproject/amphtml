@@ -12,11 +12,26 @@
 /** Common */
 :root {
   --story-page-vw: 1vw !important;
-  --story-page-vh: 1vh !important;
+  --story-page-vh: var(--story-dvh, 1vh) !important;
   --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh)) !important;
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
+  --story-100dvh: calc(var(--story-dvh, 1vh) * 100) !important;
   font-size: calc(2.5 * var(--story-page-vh, 8px));
 }
+
+@supports (height: 1dvh) {
+  :root {
+    --story-dvh: 1dvh !important;
+  }
+}
+
+body {
+  animation:none !important;
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -ms-animation: none !important;
+}
+
 amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
@@ -189,7 +204,6 @@ amp-story .amp-video-eq:not(.amp-video-eq-play), .i-amphtml-story-no-audio-ui .a
 }
 
 /** Page level */
-.i-amphtml-story-media-query-matcher,
 amp-story-page {
   bottom: 0 !important;
   height: auto !important;
@@ -202,13 +216,6 @@ amp-story-page {
   touch-action: none !important;
   transition: none !important;
   z-index: 0 !important;
-}
-
-.i-amphtml-story-media-query-matcher {
-  height: inherit !important;
-  width: inherit !important;
-  border: 0 !important;
-  z-index: -1 !important;
 }
 
 amp-story-page[active] {
@@ -224,7 +231,7 @@ amp-story-page:not(:first-of-type):not([distance]):not([active]) {
   transform: translateY(1000vh) !important;
 }
 
-amp-story-page:not([active]) {
+amp-story-page[distance]:not([active]) {
   transform: translateY(1000vh) !important;
 }
 
@@ -233,15 +240,15 @@ amp-story-page:not([active]) {
  * update them in the ampdoc.css file.
  */
 amp-story-page[active],
-amp-story-page[distance="0"],
-amp-story-page[distance="1"] {
+amp-story-page[distance="0"][distance],
+amp-story-page[distance="1"][distance] {
   transform: translateY(0) !important;
 }
 
 amp-story.i-amphtml-experiment-story-load-inactive-outside-viewport:not([desktop])
   amp-story-page[distance="1"]:not(.i-amphtml-story-page-loaded):not(.i-amphtml-visited),
-amp-story-page[distance="2"] {
-  transform: translateY(100vh) !important;
+amp-story-page[distance="2"][distance] {
+  transform: translateY(var(--story-100dvh)) !important;
 }
 
 amp-story-page [data-text-background-color] {
@@ -277,6 +284,13 @@ amp-story-grid-layer {
   z-index: 2 !important;
   /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
+}
+
+/* Make the story element fullpage. */
+:root:not(.i-amphtml-story-vertical) amp-story {
+  position: absolute !important;
+  top: 0;
+  left: 0;
 }
 
 amp-story-grid-layer[anchor*="left"] {
@@ -353,22 +367,6 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   left: 0 !important;
 }
 
-.i-amphtml-expanded-mode .i-amphtml-embedded-component::after {
-  height: 0px !important;
-  width: 0px !important;
-}
-
-.i-amphtml-expanded-mode amp-story-grid-layer,
-.i-amphtml-expanded-mode amp-story-grid-layer * {
-  contain: none !important;
-  z-index: auto !important;
-}
-
-.i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
-  z-index: 1 !important;
-  transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-}
-
 .i-amphtml-story-grid-template-with-full-bleed-animation {
   position: absolute !important;
   display: block !important;
@@ -407,7 +405,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   margin: auto;
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);
-  font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
+  font-size: calc(var(--i-amphtml-story-layer-height) / 10);
   margin-left: calc((var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) * 0.5); /* Set margin to 1/2 of page-width - layer-width to center layer */
 
   --i-amphtml-aspect-ratio-float: calc(var(--aspect-ratio)) !important; /* Avoid fractions, which don't work with compilers that remove parenthesis */
@@ -459,15 +457,15 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
 }
 
 .i-amphtml-story-error-button {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#DB4437"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#DB4437"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm5 13.6L15.6 17 12 13.4 8.4 17 7 15.6l3.6-3.6L7 8.4 8.4 7l3.6 3.6L15.6 7 17 8.4 13.4 12l3.6 3.6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
 }
 
 .i-amphtml-story-warning-button {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFC107"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFC107"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
 }
 
 .i-amphtml-story-success-button {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>') !important;
 }
 
 amp-story[standalone] .i-amphtml-story-developer-log {
@@ -500,7 +498,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 }
 
 .i-amphtml-story-developer-log-close {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFF" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
   flex-grow: 0 !important;
   flex-shrink: 0 !important;
 }
@@ -539,15 +537,15 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 }
 
 .i-amphtml-story-developer-log-entry-error::before {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#DB4437"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#DB4437"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm5 13.6L15.6 17 12 13.4 8.4 17 7 15.6l3.6-3.6L7 8.4 8.4 7l3.6 3.6L15.6 7 17 8.4 13.4 12l3.6 3.6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
 }
 
 .i-amphtml-story-developer-log-entry-warning::before {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFC107"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFC107"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
 }
 
 .i-amphtml-story-developer-log-entry-success::before {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>') !important;
 }
 
 .i-amphtml-story-toast {
@@ -596,7 +594,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 }
 
 .i-amphtml-story-copy-successful {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#ffffff"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#fff"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"/></svg>') !important;
   background-repeat: no-repeat !important;
   background-size: 16px 16px !important;
   padding-left: 24px !important;
@@ -763,28 +761,6 @@ amp-story .amp-video-eq,
   z-index: 10000 !important;
 }
 
-.i-amphtml-story-expanded-view-overflow {
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  background-color: rgba(0, 0, 0, 1) !important;
-  position: absolute !important;
-}
-
-.i-amphtml-expanded-view-close-button {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  margin: 12px !important;
-  height: 24px !important;
-  width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.8)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
-  cursor: pointer !important;
-  text-align: center !important;
-  background-color: transparent !important; /* Resets default button background-color. */
-}
-
 @keyframes play-button-fly-in {
   0% {
     opacity: 0;
@@ -820,11 +796,11 @@ amp-story .amp-video-eq,
 }
 
 .i-amphtml-story-page-error-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>') !important;
 }
 
 .i-amphtml-story-page-play-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4a20 20 0 1 0 0 40 20 20 0 0 0 0-40zm-4 29V15l12 9-12 9z"/></svg>') !important;
 }
 
 .i-amphtml-story-page-attachment-active::after {

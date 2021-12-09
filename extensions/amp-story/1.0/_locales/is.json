@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Fá tengil"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Strjúktu upp"
-  },
-  "36": {
-    "string": "Stækka tíst"
   },
   "62": {
     "string": "Deila frá og með þessari síðu"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Opnast"
+  },
+  "98": {
+    "string": "Eyðublað ekki sent inn, reyndu aftur"
+  },
+  "99": {
+    "string": "Eyðublað sent inn"
   }
 }

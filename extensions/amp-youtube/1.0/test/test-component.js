@@ -177,6 +177,35 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
     expect(ref.current.currentTime).to.equal(12.3);
     expect(ref.current.duration).to.equal(420);
   });
+
+  it('should pass the loading attribute to the underlying iframe', () => {
+    const wrapper = mount(
+      <BentoYoutube
+        videoid="IAvf-rkzNck"
+        shortcode="B8QaZW4AQY_"
+        style={{width: 500, height: 600}}
+        loading="eager"
+      />,
+      {attachTo: document.body}
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    expect(iframe.getAttribute('loading')).to.equal('eager');
+  });
+
+  it('should set data-loading="auto" if no value is specified', () => {
+    const wrapper = mount(
+      <BentoYoutube
+        videoid="IAvf-rkzNck"
+        shortcode="B8QaZW4AQY_"
+        style={{width: 500, height: 600}}
+      />,
+      {attachTo: document.body}
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    expect(iframe.getAttribute('loading')).to.equal('auto');
+  });
 });
 
 function mockMessage(win, source, data) {
