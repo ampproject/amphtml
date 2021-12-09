@@ -102,7 +102,7 @@ export const getMediaPerformanceMetricsService = (win) => {
  */
 export class MediaPerformanceMetricsService {
   /**
-   * @param {!Window=} win
+   * @param {!Window} win
    */
   constructor(win) {
     /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */

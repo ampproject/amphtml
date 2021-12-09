@@ -372,16 +372,6 @@ export class Services {
     );
   }
 
-  // /**
-  //  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-  //  * @return {!./service/performance-impl.Performance}
-  //  */
-  //  static performanceForDoc(elementOrAmpDoc) {
-  //   return /** @type {!./service/performance-impl.Performance}*/ (
-  //     getServiceForDoc(elementOrAmpDoc, 'performance')
-  //   );
-  // }
-
   /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
@@ -532,17 +522,6 @@ export class Services {
       (getExistingServiceOrNull(win, 'media-performance-metrics'))
     );
   }
-
-  // /**
-  //  * @param {!Element} element
-  //  * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
-  //  */
-  //  static mediaPerformanceMetricsServiceForDoc(element) {
-  //   return (
-  //     /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
-  //     (getServiceForDocOrNull(element, 'media-performance-metrics'))
-  //   );
-  // }
 
   /**
    * @param {!Element} el
