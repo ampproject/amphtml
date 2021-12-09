@@ -1,5 +1,5 @@
-import {TimestampDef} from '#core/types/date';
-import {map} from '#core/types/object';
+import {TimestampDef} from 'core/types/date';
+import {map} from 'core/types/object';
 
 import {Deferred} from './promise';
 

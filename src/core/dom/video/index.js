@@ -1,7 +1,7 @@
-import {devAssertElement} from '#core/assert';
-import {tryResolve} from '#core/data-structures/promise';
-import {setStyles} from '#core/dom/style';
-import {devExpectedError} from '#core/error';
+import {devAssertElement} from 'core/assert';
+import {tryResolve} from 'core/data-structures/promise';
+import {setStyles} from 'core/dom/style';
+import {devExpectedError} from 'core/error';
 
 /**
  * @param {Window} win

@@ -1,6 +1,6 @@
-import {elementStringOrPassThru} from '#core/error/message-helpers';
-import {isArray, isElement, isString} from '#core/types';
-import {remove} from '#core/types/array';
+import {elementStringOrPassThru} from 'core/error/message-helpers';
+import {isArray, isElement, isString} from 'core/types';
+import {remove} from 'core/types/array';
 
 /**
  * @fileoverview This file provides the base implementation for assertion

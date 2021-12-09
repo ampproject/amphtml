@@ -1,4 +1,4 @@
-import {isElement, isString} from '#core/types';
+import {isElement, isString} from 'core/types';
 
 /** @type {Array<string>} */
 const excludedTags = ['script', 'style'];

@@ -1,7 +1,7 @@
-import {devAssert} from '#core/assert';
-import {Deferred} from '#core/data-structures/promise';
-import {dict} from '#core/types/object';
-import {getWin} from '#core/window';
+import {devAssert} from 'core/assert';
+import {Deferred} from 'core/data-structures/promise';
+import {dict} from 'core/types/object';
+import {getWin} from 'core/window';
 
 import {LayoutRectDef, layoutRectFromDomRect} from './rect';
 import {createViewportObserver} from './viewport-observer';

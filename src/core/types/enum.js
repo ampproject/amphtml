@@ -1,4 +1,4 @@
-import {isProd} from '#core/mode/prod';
+import {isProd} from 'core/mode/prod';
 
 /**
  * Checks whether `val` is a valid value of `enumObj`.

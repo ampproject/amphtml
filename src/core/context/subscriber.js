@@ -1,5 +1,5 @@
-import {tryCallback} from '#core/error';
-import {arrayOrSingleItemToArray} from '#core/types/array';
+import {tryCallback} from 'core/error';
+import {arrayOrSingleItemToArray} from 'core/types/array';
 
 import {ContextNode} from './node';
 import {ContextPropDef} from './prop.type';

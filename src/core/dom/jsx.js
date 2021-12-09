@@ -3,7 +3,7 @@
  * Minimal implementation of JSX that outputs DOM nodes.
  *
  * Usage:
- *   import * as Preact from '#core/dom/jsx';
+ *   import * as Preact from 'core/dom/jsx';
  *
  * This library is nicer than templates in bundles that do not include Preact,
  * but it does not attempt to implement JSX fully.
@@ -29,7 +29,7 @@
  *     If you absolutely need it, get in touch with `@alanorozco` to consider
  *     enabling support.
  */
-import {devAssert} from '#core/assert';
+import {devAssert} from 'core/assert';
 
 /**
  * @typedef {Node|Object|string|number|bigint|boolean|null|undefined}

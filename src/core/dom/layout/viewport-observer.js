@@ -1,6 +1,6 @@
-import {isIframed} from '#core/dom';
-import {removeItem} from '#core/types/array';
-import {getWin} from '#core/window';
+import {isIframed} from 'core/dom';
+import {removeItem} from 'core/types/array';
+import {getWin} from 'core/window';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.

@@ -1,4 +1,4 @@
-import {devAssert} from '#core/assert';
+import {devAssert} from 'core/assert';
 
 /** @typedef {Array<{query: ?MediaQueryList, value: string}>} ExprDef */
 

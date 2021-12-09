@@ -1,5 +1,5 @@
-import {devAssert} from '#core/assert';
-import {Deferred} from '#core/data-structures/promise';
+import {devAssert} from 'core/assert';
+import {Deferred} from 'core/data-structures/promise';
 
 /**
  * Decodes readable stream from response and writes to given writeable stream.

@@ -1,5 +1,5 @@
-import {isElement} from '#core/types';
-import {stringHash32} from '#core/types/string';
+import {isElement} from 'core/types';
+import {stringHash32} from 'core/types/string';
 
 /**
  * Gets a string of concatenated element names and relative positions

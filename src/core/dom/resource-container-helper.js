@@ -1,5 +1,5 @@
-import {tryCallback} from '#core/error';
-import {arrayOrSingleItemToArray} from '#core/types/array';
+import {tryCallback} from 'core/error';
+import {arrayOrSingleItemToArray} from 'core/types/array';
 
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;

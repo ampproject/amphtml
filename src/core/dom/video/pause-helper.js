@@ -1,7 +1,7 @@
 import {
   observeBorderBoxSize,
   unobserveBorderBoxSize,
-} from '#core/dom/layout/size-observer';
+} from 'core/dom/layout/size-observer';
 
 export class PauseHelper {
   /**

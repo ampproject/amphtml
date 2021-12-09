@@ -1,4 +1,4 @@
-import * as mode from '#core/mode';
+import * as mode from 'core/mode';
 
 import * as assertions from './base';
 

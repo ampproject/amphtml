@@ -1,4 +1,4 @@
-import {isElement} from '#core/types';
+import {isElement} from 'core/types';
 
 /**
  * Triple zero width space.

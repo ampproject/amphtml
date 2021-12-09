@@ -1,4 +1,4 @@
-import {ReadyState_Enum} from '#core/constants/ready-state';
+import {ReadyState_Enum} from 'core/constants/ready-state';
 
 /**
  * Whether the document is ready.

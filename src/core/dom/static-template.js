@@ -1,5 +1,5 @@
-import {devAssert} from '#core/assert';
-import {map} from '#core/types/object';
+import {devAssert} from 'core/assert';
+import {map} from 'core/types/object';
 
 let htmlContainer;
 let svgContainer;

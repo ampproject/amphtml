@@ -4,7 +4,7 @@ import {
   devAssertNumber,
   devAssertString,
   userAssert,
-} from '#core/assert';
+} from 'core/assert';
 import {
   Layout_Enum,
   getLayoutClass,
@@ -13,9 +13,9 @@ import {
   isLayoutSizeDefined,
   parseLayout,
   parseLength,
-} from '#core/dom/layout';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyle, setStyles, toggle} from '#core/dom/style';
+} from 'core/dom/layout';
+import {htmlFor} from 'core/dom/static-template';
+import {setStyle, setStyles, toggle} from 'core/dom/style';
 
 /**
  * The set of elements with natural dimensions, that is, elements

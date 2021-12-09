@@ -1,4 +1,4 @@
-import {devAssert, userAssert} from '#core/assert';
+import {devAssert, userAssert} from 'core/assert';
 
 /** @typedef {{url: string, dpr?: undefined, width: number}} WidthSourceDef */
 /** @typedef {{url: string, dpr: number, width?: undefined}} DprSourceDef */

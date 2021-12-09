@@ -1,8 +1,8 @@
-import {devAssert} from '#core/assert';
-import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
-import {parseJson} from '#core/types/object/json';
-import {getWin} from '#core/window';
+import {devAssert} from 'core/assert';
+import * as mode from 'core/mode';
+import {dict} from 'core/types/object';
+import {parseJson} from 'core/types/object/json';
+import {getWin} from 'core/window';
 
 import {childElementsByTag, matches} from './query';
 
