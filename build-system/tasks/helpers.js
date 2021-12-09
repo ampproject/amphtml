@@ -15,6 +15,7 @@ const {
 } = require('../compile/internal-version');
 const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('kleur/colors');
+const {generateBentoRuntimeEntrypoint} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {getSourceRoot} = require('../compile/helpers');
@@ -132,6 +133,23 @@ async function compileCoreRuntime(options) {
 }
 
 /**
+ * @param {!Object} options
+ * @return {Promise<void>}
+ */
+async function compileBentoRuntime(options) {
+  const {srcDir, srcFilename} = jsBundles['bento.js'];
+  const filename = `${srcDir}/${srcFilename}`;
+  const fileSource = generateBentoRuntimeEntrypoint();
+  await fs.outputFile(filename, fileSource);
+  await doBuildJs(jsBundles, 'bento.js', {
+    ...options,
+    // The pre-closure babel step wants the entry file to be generated earlier.
+    // Much simpler to generate it here and use esbuild instead.
+    esbuild: true,
+  });
+}
+
+/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  *
@@ -148,7 +166,7 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    doBuildJs(jsBundles, 'bento.js', options),
+    compileBentoRuntime(options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -829,12 +847,14 @@ function massageSourcemaps(sourcemapsFile, options) {
  */
 function shouldUseClosure() {
   // TODO(samouri): cleanup closure build pipeline.
+  // If restoring, ensure that it continues returning false if options.bento
   return false;
 }
 
 module.exports = {
   bootstrapThirdPartyFrames,
   compileAllJs,
+  compileBentoRuntime,
   compileCoreRuntime,
   compileJs,
   esbuildCompile,

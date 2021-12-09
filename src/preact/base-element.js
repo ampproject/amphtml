@@ -858,22 +858,6 @@ function wrapRefProperty(baseElement, api, key) {
   });
 }
 
-/**
- * Returns the upgraded imperative API object, once Preact has actually mounted.
- *
- * This technically works with both Bento and Legacy components, returning the
- * BaseElement instance in the later case.
- *
- * @param {!Element} el
- * @return {!Promise<!Object>}
- */
-export function whenUpgraded(el) {
-  return el.ownerDocument.defaultView.customElements
-    .whenDefined(el.localName)
-    .then(() => el.getImpl())
-    .then((impl) => impl.getApi());
-}
-
 // Ideally, these would be Static Class Fields. But Closure can't even.
 
 /**
