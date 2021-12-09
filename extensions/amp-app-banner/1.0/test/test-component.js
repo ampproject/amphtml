@@ -24,18 +24,22 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
     it('should render the banner', () => {
       expect(wrapper.find(AppBanner)).to.have.lengthOf(1);
     });
+
     it('should render the header', () => {
       expect(wrapper.find('h2')).to.have.lengthOf(1);
     });
+
     it('should render the dismiss and the open buttons', () => {
       expect(wrapper.find('button')).to.have.lengthOf(2);
     });
+
     it('clicking the open button should trigger onInstall', () => {
       const openButton = wrapper.find('button[open-button]');
       expect(openButton).to.have.lengthOf(1);
       openButton.simulate('click');
       expect(onInstall).to.have.callCount(1);
     });
+
     it('clicking the dismiss button should trigger onDismiss', () => {
       const dismissButton = wrapper.find({'aria-label': 'Dismiss'});
       expect(dismissButton).to.have.lengthOf(1);
@@ -92,6 +96,7 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
           env.sandbox.stub(window.localStorage, 'getItem');
           env.sandbox.stub(window.localStorage, 'setItem');
         });
+
         it('should hide the component', () => {
           const wrapper = renderWrapper();
           const dismissButton = wrapper.find('button[aria-label="Dismiss"]');
@@ -103,6 +108,7 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
             'true'
           );
         });
+
         it("should not be shown if it's already been dismissed", () => {
           window.localStorage.getItem.returns('true');
           const wrapper = renderWrapper();
