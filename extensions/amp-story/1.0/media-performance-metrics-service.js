@@ -96,26 +96,6 @@ export const getMediaPerformanceMetricsService = (win) => {
   return service;
 };
 
-// /**
-//  * Util function to retrieve the media performance metrics service for a given
-//  * AMP document. Ensures we can retrieve the service synchronously from the
-//  * amp-story codebase without running into race conditions.
-//  * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-//  * @return {!MediaPerformanceMetricsService}
-//  */
-//  export const getMediaPerformanceMetricsServiceForDoc = (elementOrAmpDoc) => {
-//   let service = Services.mediaPerformanceMetricsServiceForDoc(elementOrAmpDoc);
-
-//   if (!service) {
-//     service = new MediaPerformanceMetricsService(undefined /* win */, elementOrAmpDoc);
-//     registerServiceBuilderForDoc(elementOrAmpDoc, 'media-performance-metrics', function () {
-//       return service;
-//     });
-//   }
-
-//   return service;
-// };
-
 /**
  * Media performance metrics service.
  * @final
@@ -123,15 +103,13 @@ export const getMediaPerformanceMetricsService = (win) => {
 export class MediaPerformanceMetricsService {
   /**
    * @param {!Window=} win
-   * @param {!Element=} elementOrAmpDoc
    */
-  constructor(win = undefined, elementOrAmpDoc = undefined) {
+  constructor(win) {
     /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */
     this.mediaMap_ = new WeakMap();
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
-    this.performanceService_ =
-        elementOrAmpDoc ? Services.performanceForDoc(elementOrAmpDoc) : Services.performanceFor(win);
+    this.performanceService_ = Services.performanceFor(win);
   }
 
   /**
