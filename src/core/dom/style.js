@@ -31,7 +31,7 @@ export function camelCaseToTitleCase(camelCase) {
   Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {Object} style
+ * @param {Object<string, *>} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
@@ -49,7 +49,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @param {Object} style
+ * @param {any} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
@@ -119,7 +119,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   if (isVar(propertyName)) {
     element.style.setProperty(propertyName, styleValue);
   } else {
-    element.style[propertyName] = styleValue;
+    /** @type {any} */ (element.style)[propertyName] = styleValue;
   }
 }
 
@@ -142,7 +142,7 @@ export function getStyle(element, property, opt_bypassCache) {
   if (isVar(propertyName)) {
     return element.style.getPropertyValue(propertyName);
   }
-  return element.style[propertyName];
+  return /** @type {any} */ (element.style)[propertyName];
 }
 
 /**

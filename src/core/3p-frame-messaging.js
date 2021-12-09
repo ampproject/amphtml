@@ -128,8 +128,7 @@ export function isAmpMessage(message) {
   );
 }
 
-/** @typedef {{creativeId: string, message: string}} */
-export let IframeTransportEventDef;
+/** @typedef {{creativeId: string, message: string}} IframeTransportEventDef */
 // An event, and the transport ID of the amp-analytics tags that
 // generated it. For instance if the creative with transport
 // ID 2 sends "hi", then an IframeTransportEventDef would look like:

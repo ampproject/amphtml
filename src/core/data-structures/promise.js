@@ -1,3 +1,4 @@
+/** @type {undefined|Promise<undefined>}| */
 let resolved;
 
 /**
@@ -69,7 +70,7 @@ export function tryResolve(fn) {
 
 /**
  * Resolves with the result of the last promise added.
- * @implements {PromiseLike}
+ * @implements {PromiseLike<T>}
  * @template T
  */
 export class LastAddedResolver {

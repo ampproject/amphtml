@@ -59,9 +59,9 @@ export function hasOwn(obj, key) {
  * Returns obj[key] iff key is obj's own property (is not inherited).
  * Otherwise, returns undefined.
  *
- * @param {Object} obj
+ * @param {Object<string, any>} obj
  * @param {string} key
- * @return {*}
+ * @return {any}
  */
 export function ownProperty(obj, key) {
   if (hasOwn(obj, key)) {
@@ -86,6 +86,7 @@ export function ownProperty(obj, key) {
  */
 export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.
+  /** @type {Object[]} */
   const seen = [];
 
   /** @type {DeepMergeTuple[]} */
@@ -107,39 +108,39 @@ export function deepMerge(target, source, depth = 10) {
       continue;
     }
     for (const key of Object.keys(s)) {
-      const newValue = s[key];
+      const newValue = /** @type {any} */ (s)[key];
       // Perform a deep merge IFF both target and source have the same key
       // whose corresponding values are objects.
       if (hasOwn(t, key)) {
-        const oldValue = t[key];
+        const oldValue = /** @type {any} */ (t)[key];
         if (isObject(newValue) && isObject(oldValue)) {
           queue.push({t: oldValue, s: newValue, d: d + 1});
           continue;
         }
       }
-      t[key] = newValue;
+      /** @type {any} */ (t)[key] = newValue;
     }
   }
   return target;
 }
 
 /**
- * @param {Object} o An object to remove properties from
+ * @param {Object<string, any>} o An object to remove properties from
  * @param {Array<string>} props A list of properties to remove from the Object
- * @return {Object} An object with the given properties removed
+ * @return {Object<string, any>} An object with the given properties removed
  */
 export function omit(o, props) {
   return Object.keys(o).reduce((acc, key) => {
     if (!props.includes(key)) {
-      acc[key] = o[key];
+      /** @type {*} */ (acc)[key] = o[key];
     }
     return acc;
   }, {});
 }
 
 /**
- * @param {Object|null|undefined} o1
- * @param {Object|null|undefined} o2
+ * @param {any} o1
+ * @param {any} o2
  * @return {boolean}
  */
 export function objectsEqualShallow(o1, o2) {
@@ -163,19 +164,20 @@ export function objectsEqualShallow(o1, o2) {
 }
 
 /**
- * @param {T} obj
+ * @param {{[prop:string]: R|undefined}} obj
  * @param {string} prop
- * @param {function(T, string):R} factory
+ * @param {(obj:{[prop:string]:R|undefined}, str:string) => R} factory
  * @return {R}
- * @template T,R
+ *
+ * @template {any} R
  */
 export function memo(obj, prop, factory) {
-  let result = /** @type {undefined|R} */ (obj[prop]);
+  let result = obj[prop];
   if (result === undefined) {
     result = factory(obj, prop);
     obj[prop] = result;
   }
-  return /** @type {R} */ (result);
+  return result;
 }
 
 /**

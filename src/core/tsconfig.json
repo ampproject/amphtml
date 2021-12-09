@@ -6,6 +6,7 @@
     "downlevelIteration": true,
     "target": "es5",
     "strictNullChecks": true,
+    "noImplicitAny": true,
     "lib": ["dom", "esnext", "es6"],
     "paths": {
       "#core": ["."],

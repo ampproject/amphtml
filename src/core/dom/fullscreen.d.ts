@@ -7,28 +7,28 @@ export {};
 
 declare global {
   interface Element {
-    requestFullScreen;
-    exitFullscreen;
-    cancelFullScreen;
-    webkitRequestFullscreen;
-    webkitExitFullscreen;
-    webkitEnterFullscreen;
-    webkitCancelFullScreen;
-    webkitDisplayingFullscreen;
-    mozRequestFullScreen;
-    mozCancelFullScreen;
-    msRequestFullscreen;
-    msExitFullscreen;
+    requestFullScreen: any;
+    exitFullscreen: any;
+    cancelFullScreen: any;
+    webkitRequestFullscreen: any;
+    webkitExitFullscreen: any;
+    webkitEnterFullscreen: any;
+    webkitCancelFullScreen: any;
+    webkitDisplayingFullscreen: any;
+    mozRequestFullScreen: any;
+    mozCancelFullScreen: any;
+    msRequestFullscreen: any;
+    msExitFullscreen: any;
   }
 
   interface Document {
-    cancelFullScreen;
-    webkitCancelFullScreen;
-    webkitExitFullscreen;
-    webkitFullscreenElement;
-    webkitCurrentFullScreenElement;
-    msExitFullscreen;
-    mozFullScreenElement;
-    mozCancelFullScreen;
+    cancelFullScreen:any;
+    webkitCancelFullScreen:any;
+    webkitExitFullscreen:any;
+    webkitFullscreenElement:any;
+    webkitCurrentFullScreenElement:any;
+    msExitFullscreen:any;
+    mozFullScreenElement:any;
+    mozCancelFullScreen:any;
   }
 }

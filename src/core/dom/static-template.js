@@ -1,7 +1,10 @@
 import {devAssert} from '#core/assert';
 import {map} from '#core/types/object';
 
+/** @type {HTMLElement} */
 let htmlContainer;
+
+/** @type {SVGSVGElement} */
 let svgContainer;
 
 /**
@@ -72,7 +75,7 @@ function html(strings) {
 
 /**
  * Helper used by html and svg string literal functions.
- * @param {HTMLElement} container
+ * @param {HTMLElement | SVGSVGElement} container
  * @param {readonly string[]} strings
  * @return {HTMLElement}
  */

@@ -18,5 +18,13 @@ declare global {
     sizerElement?: HTMLElement;
 
     getPlaceholder: () => null | Element;
+
+    unmount: () => Promise<void>;
+    ensureLoaded: () => Promise<void>;
+  }
+
+  interface HTMLElement {
+    '__AMP_UPG_PRM'?: Promise<AmpElement>,
+    '__AMP_UPG_RES'?: (res:Function) => void,
   }
 }

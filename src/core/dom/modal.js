@@ -42,7 +42,7 @@ const SAVED_TAB_INDEX = '__AMP_MODAL_SAVED_TAB_INDEX';
  * @package Visible for testing
  */
 export function getElementsToAriaHide(element) {
-  const arr = [];
+  const arr = /** @type {HTMLElement[]} */ ([]);
   const ancestors = getAncestors(element);
 
   for (let i = 0; i < ancestors.length; i++) {
@@ -54,7 +54,7 @@ export function getElementsToAriaHide(element) {
 
     toArray(/** @type {HTMLDocument|HTMLElement} */ (cur.parentNode).children)
       .filter((c) => c != cur)
-      .forEach((c) => arr.push(c));
+      .forEach((c) => arr.push(/** @type {HTMLElement} */ (c)));
   }
 
   return arr;
@@ -93,7 +93,7 @@ function getAncestors(element) {
  * @return {Array<HTMLElement>}
  */
 function getPotentiallyFocusableElements(element) {
-  const arr = [];
+  const arr = /** @type {HTMLElement[]}*/ ([]);
   let cur = element;
 
   while (cur) {
@@ -133,10 +133,10 @@ function getPotentiallyFocusableElements(element) {
  *
  * @param {HTMLElement} element The Element top operate on.
  * @param {string} attribute  The name of the attribute.
- * @param {?string} value The value of the attribute.
+ * @param {?string|undefined} value The value of the attribute.
  */
 function restoreAttributeValue(element, attribute, value) {
-  if (value === null) {
+  if (value === null || value == undefined) {
     element.removeAttribute(attribute);
   } else {
     element.setAttribute(attribute, value);
