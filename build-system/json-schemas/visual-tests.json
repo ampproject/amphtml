@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Visual tests JSON config",
+  "type": "object",
+  "required": [
+    "webpages"
+  ],
+  "properties": {
+    "webpages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "url",
+          "name"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "loading_incomplete_selectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "loading_complete_selectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "loading_complete_delay_ms": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "viewport": {
+            "type": "object",
+            "required": [
+              "width",
+              "height"
+            ],
+            "properties": {
+              "width": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "interactive_tests": {
+            "type": "string"
+          },
+          "flaky": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "enable_percy_javascript": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "no_base_test": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

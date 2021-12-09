@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-mathml-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-mathml-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-mathml-1.0.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
+
+        background: #ecf1f3;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>The Quadratic Formula</h2>
+    <bento-mathml
+      style="height: 40px"
+      data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+    ></bento-mathml>
+
+    <h2>Inline formula</h2>
+    <p>
+      This is an example of a formula,
+      <bento-mathml
+        style="height: 40px; width: 147px"
+        inline
+        data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+      ></bento-mathml>
+      placed inline in the middle of a block of text.
+    </p>
+  </body>
+</html>

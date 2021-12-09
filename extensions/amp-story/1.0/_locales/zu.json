@@ -17,9 +17,6 @@
   "7": {
     "string": "U-Facebook"
   },
-  "8": {
-    "string": "U-Google"
-  },
   "9": {
     "string": "Thola Isixhumanisi"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Swayiphela phezulu"
-  },
-  "36": {
-    "string": "Khulisa i-Tweet"
   },
   "62": {
     "string": "Ukwabelana kuqala kuleli khasi"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Iyavula"
+  },
+  "98": {
+    "string": "Ifomu alithunyelwanga, zama futhi"
+  },
+  "99": {
+    "string": "Ifomu lithunyelwe ngempumelelo"
   }
 }

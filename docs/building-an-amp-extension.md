@@ -516,13 +516,13 @@ Consider showing a loading indicator if your element is expected to take
 a long time to load (for example, loading a GIF, video or iframe). AMP
 has a built-in mechanism to show a loading indicator simply by
 listing your element so it's allowed to show it. You can do that inside the `layout.js`
-file in the `LOADING_ELEMENTS_` object.
+file in the `LOADING_ELEMENTS_ENUM` object.
 
 ```javascript
-export const LOADING_ELEMENTS_ = {
+export const LOADING_ELEMENTS_ENUM = {
   ...
-  'AMP-YOUTUBE': true,
-  'AMP-MY-ELEMENT': true,
+  AMP_YOUTUBE: 'AMP-YOUTUBE',
+  AMP_MY_ELEMENT: 'AMP-MY-ELEMENT',
 }
 ```
 
@@ -757,8 +757,8 @@ extension, its files and its examples. You will need to add an entry in the top-
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-kaltura-player', version: '0.1', latestVersion: '0.1'},
-  {name: 'amp-carousel', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
+  {name: 'amp-kaltura-player', version: '0.1'},
+  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
 ...
 ];
 ```
@@ -770,10 +770,6 @@ maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you
 should version your extension. This would usually be by creating a 0.2
 directory next to your 0.1.
-
-When version 0.2 is under development, make sure that `latestVersion` is
-set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2
-is ready to be released, `latestVersion` can be changed to 0.2.
 
 If your extension is still in experiments breaking changes usually are
 fine so you can just update the same version.

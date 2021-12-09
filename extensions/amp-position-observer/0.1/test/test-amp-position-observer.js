@@ -1,4 +1,4 @@
-import {RelativePositions, layoutRectLtwh} from '#core/dom/layout/rect';
+import {RelativePositions_Enum, layoutRectLtwh} from '#core/dom/layout/rect';
 
 import {AmpVisibilityObserver} from '../amp-position-observer';
 
@@ -51,14 +51,14 @@ describes.sandboxed('amp-position-observer', {}, (env) => {
   function setPosition(top) {
     const viewportRect = layoutRectLtwh(0, 0, 500, 1000);
     let positionRect = layoutRectLtwh(0, top, 500, 200);
-    let relativePos = RelativePositions.INSIDE;
+    let relativePos = RelativePositions_Enum.INSIDE;
 
     if (top > 1000 + 200) {
       positionRect = null;
-      relativePos = RelativePositions.BOTTOM;
+      relativePos = RelativePositions_Enum.BOTTOM;
     } else if (top < -200) {
       positionRect = null;
-      relativePos = RelativePositions.TOP;
+      relativePos = RelativePositions_Enum.TOP;
     }
     const entry = {
       viewportRect,

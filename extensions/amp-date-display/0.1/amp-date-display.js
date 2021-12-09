@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {dashToCamelCase} from '#core/types/string';
@@ -371,7 +371,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
       const event = createCustomEvent(
         this.win,
-        AmpEvents.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );
