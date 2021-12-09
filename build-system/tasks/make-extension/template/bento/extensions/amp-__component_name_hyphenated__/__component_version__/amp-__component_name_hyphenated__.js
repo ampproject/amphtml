@@ -1,4 +1,4 @@
-import {BaseElement} from './base-element';
+import {PreactBaseElement} from '#preact/base-element';
 __css_import__;
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
@@ -7,7 +7,7 @@ import {userAssert} from '#utils/log';
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';
 
-class Amp__component_name_pascalcase__ extends BaseElement {
+class Amp__component_name_pascalcase__ extends PreactBaseElement {
   /** @override */
   init() {
     // __do_not_submit__: This is example code only.
