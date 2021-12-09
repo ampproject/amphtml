@@ -14,7 +14,7 @@ const jobName = 'visual-diff-tests.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp visual-diff --main');
+  timedExecOrDie('amp visual-diff --esm --minified --main');
 }
 
 /**

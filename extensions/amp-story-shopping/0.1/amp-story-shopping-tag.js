@@ -38,7 +38,7 @@ const renderShoppingTagTemplate = (tagData) => (
         }
       ></span>
       <span class="amp-story-shopping-tag-pill-text">
-        {tagData['product-price']}
+        {tagData['product-tag-text'] || '$' + tagData['product-price']}
       </span>
     </span>
   </div>

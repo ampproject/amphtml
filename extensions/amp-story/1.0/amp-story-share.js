@@ -9,7 +9,7 @@ import {
 import {devAssert, user} from '#utils/log';
 import {map} from '#core/types/object';
 import {localize} from './amp-story-localization-service';
-import {getRequestService} from './amp-story-request-service';
+import {getElementConfig} from './request-utils';
 import {isObject} from '#core/types';
 
 /**
@@ -149,9 +149,6 @@ export class ShareWidget {
 
     /** @protected {?Element} */
     this.root = null;
-
-    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = getRequestService(this.win, storyEl);
   }
 
   /**
@@ -265,7 +262,7 @@ export class ShareWidget {
       'amp-story-social-share, amp-story-bookend'
     );
 
-    this.requestService_.loadShareConfig(shareEl).then((config) => {
+    getElementConfig(shareEl).then((config) => {
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
