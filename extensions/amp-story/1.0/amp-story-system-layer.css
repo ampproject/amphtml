@@ -116,7 +116,7 @@
 }
 
 .i-amphtml-story-button:active {
-  background-color: #0003 !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 .i-amphtml-story-progress-bar {
