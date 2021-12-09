@@ -41,7 +41,7 @@
   transform: translate3d(100%, 0, 0);
 }
 
-.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position='-1']{
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="-1"]{
   transform: translate3d(-100%, 0, 0);
 }
 

@@ -112,11 +112,9 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {
   background-size: 100% !important;
-  background-position: center !important;
   background-color: #fff2 !important;
   border-radius: 50% !important;
   filter: invert(1)!important;
-  opacity: 1 !important;
 }
 
 .prev-container > .i-amphtml-story-button-move,
