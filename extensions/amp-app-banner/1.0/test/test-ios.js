@@ -27,6 +27,11 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
         document.getElementById('TEST_META').remove();
       });
 
+      let clock;
+      beforeEach(() => {
+        clock = env.sandbox.useFakeTimers();
+      });
+
       it('should parse the meta header and determine appropriate urls', () => {
         const iosInfo = getIOSAppInfo();
         expect(iosInfo).to.not.be.null;
@@ -46,11 +51,12 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
         env.sandbox.stub(window, 'open');
         const appInfo = getIOSAppInfo();
         appInfo.openOrInstall();
-        expect(window.open).to.have.been.calledWith(
-          appInfo.openInAppUrl,
-          '_top',
-          undefined
-        );
+        expect(window.open).to.have.callCount(1);
+        expect(window.open).to.have.calledWith(appInfo.openInAppUrl, '_top');
+
+        clock.tick(5_000);
+        expect(window.open).to.have.callCount(2);
+        expect(window.open).to.have.calledWith(appInfo.installAppUrl, '_top');
       });
 
       it('should warn if the app-argument is missing', () => {

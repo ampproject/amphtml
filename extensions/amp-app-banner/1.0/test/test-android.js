@@ -1,5 +1,6 @@
 import {docInfoService} from '#preact/services/document';
 import {platformService} from '#preact/services/platform';
+import {timerService} from '#preact/services/timer';
 import {xhrService} from '#preact/services/xhr';
 
 import {getAndroidAppInfo} from '../component/android';
@@ -66,15 +67,17 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
 
       it('clicking "Open" should open the app URL', async () => {
         env.sandbox.stub(window, 'open');
+        // We cannot stub the `window.top.location.assign` method, so we can only stub this:
+        env.sandbox.stub(timerService, 'delay');
 
         const appInfo = getAndroidAppInfo();
-        const manifestInfo = await appInfo.promise;
+        const manifest = await appInfo.promise;
         await appInfo.openOrInstall();
-        expect(window.open).to.have.been.calledWith(
-          manifestInfo.openInAppUrl,
-          '_top',
-          undefined
-        );
+        expect(window.open)
+          .to.have.callCount(1)
+          .calledWith(manifest.openInAppUrl, '_top');
+
+        expect(timerService.delay).to.have.callCount(1);
       });
 
       it('should not show a banner if the manifest is missing data', async () => {
