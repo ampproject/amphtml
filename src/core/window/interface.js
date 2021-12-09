@@ -6,8 +6,8 @@
 export class WindowInterface {
   /**
    * @static
-   * @param {!Window} win
-   * @return {!Window}
+   * @param {Window} win
+   * @return {?Window}
    */
   static getTop(win) {
     return win.top;
@@ -15,8 +15,8 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
-   * @return {!Location}
+   * @param {Window} win
+   * @return {Location}
    */
   static getLocation(win) {
     return win.location;
@@ -24,7 +24,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getDocumentReferrer(win) {
@@ -33,7 +33,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getHostname(win) {
@@ -42,7 +42,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getUserAgent(win) {
@@ -51,7 +51,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getUserLanguage(win) {
@@ -71,8 +71,8 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
-   * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean|undefined}
+   * @param {Window} win
+   * @return {undefined|function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean}
    */
   static getSendBeacon(win) {
     if (!win.navigator.sendBeacon) {
@@ -83,19 +83,19 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {typeof XMLHttpRequest}
    */
   static getXMLHttpRequest(win) {
-    return win.XMLHttpRequest;
+    return /** @type {any} */ (win).XMLHttpRequest;
   }
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {typeof Image}
    */
   static getImage(win) {
-    return win.Image;
+    return /** @type {any} */ (win).Image;
   }
 }

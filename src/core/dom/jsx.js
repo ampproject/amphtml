@@ -37,28 +37,28 @@ import {devAssert} from '#core/assert';
 let DomJsxChildDef;
 
 /**
- * @param {!Element} parent
- * @param {!DomJsxChildDef|Array<!DomJsxChildDef>} child
+ * @param {Element} parent
+ * @param {DomJsxChildDef|Array<DomJsxChildDef>} child
  */
 function appendChild(parent, child) {
   if (!!child === child || child == null) {
     return;
   }
   if (Array.isArray(child)) {
-    const children = /** @type {!Array<!DomJsxChildDef>} */ (child);
+    const children = /** @type {Array<DomJsxChildDef>} */ (child);
     children.forEach((child) => {
       appendChild(parent, child);
     });
     return;
   }
-  const maybeNode = /** @type {!Node} */ (child);
+  const maybeNode = /** @type {Node} */ (child);
   parent.appendChild(
     maybeNode.nodeType ? maybeNode : self.document.createTextNode(String(child))
   );
 }
 
 /**
- * @param {!Element} element
+ * @param {Element} element
  * @param {string} name
  * @param {*} value
  */
@@ -75,10 +75,10 @@ function setAttribute(element, name, value) {
 }
 
 /**
- * @param {string|function(T):!Element} tag
+ * @param {string|function(T):Element} tag
  * @param {T} props
  * @param {...*} children
- * @return {!Element}
+ * @return {Element}
  * @template T
  */
 export function createElement(tag, props, ...children) {
