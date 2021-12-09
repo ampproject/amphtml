@@ -6,6 +6,10 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoDateDisplay} from './component';
 
+function escapeBackticks(str) {
+  return str.replaceAll('`', '\\`');
+}
+
 export class BaseElement extends PreactBaseElement {
   /** @override */
   checkPropsPostMutations() {
@@ -17,12 +21,16 @@ export class BaseElement extends PreactBaseElement {
     this.mutateProps(
       dict({
         'render': (data) => {
-          let html = template.content.firstElementChild./*REVIEW*/ outerHTML;
+          let destructure = '';
           for (const [key, value] of Object.entries(data)) {
-            html = html.replaceAll('${' + key + '}', value);
+            destructure += `const ${key} = '${value}';`;
           }
-          console.log(template.content, data, html);
-          return dict({'__html': html});
+          const templateStr =
+            template.content.firstElementChild./*REVIEW*/ outerHTML;
+          const templateFn = new Function(
+            `${destructure} return \`${escapeBackticks(templateStr)}\`;`
+          );
+          return dict({'__html': templateFn()});
         },
       })
     );
