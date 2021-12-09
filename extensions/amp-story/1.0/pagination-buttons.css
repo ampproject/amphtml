@@ -51,7 +51,7 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   pointer-events: none !important;
   background-repeat: no-repeat !important;
   background-color: transparent !important;
-  background-position: center;
+  background-position: center !important;
   /* Contrast protection. Make icons white. */
   filter: invert(100%) drop-shadow(0 0 3px #000b) !important;
 }
@@ -130,11 +130,11 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 [dir=rtl] .i-amphtml-story-fwd-next > .i-amphtml-story-button-move {
   left: 0!important;
   right: auto !important;
-  transform: rotate(180deg);
+  transform: rotate(180deg) !important;
 }
 
 [dir="rtl"] .prev-container > .i-amphtml-story-button-move {
-  transform: none;
+  transform: none !important;
 }
 
 .i-amphtml-story-fwd-next > .i-amphtml-story-button-move,

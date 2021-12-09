@@ -31,20 +31,17 @@
 }
 
 .i-amphtml-story-player-main-container iframe:nth-of-type(1),
-.i-amphtml-story-player-main-container
-  .story-player-iframe[i-amphtml-iframe-position='0'] {
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="0"] {
   transform: translate3d(0, 0, 1px);
 }
 
 .i-amphtml-story-player-main-container iframe:nth-of-type(2),
 .i-amphtml-story-player-main-container iframe:nth-of-type(3),
-.i-amphtml-story-player-main-container
-  .story-player-iframe[i-amphtml-iframe-position='1'] {
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="1"] {
   transform: translate3d(100%, 0, 0);
 }
 
-.i-amphtml-story-player-main-container
-  .story-player-iframe[i-amphtml-iframe-position='-1'] {
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position='-1']{
   transform: translate3d(-100%, 0, 0);
 }
 
@@ -88,32 +85,17 @@
 
 .i-amphtml-story-player-panel {
   --i-amphtml-story-player-panel-ratio: 69 / 116;
-  --i-amphtml-story-player-panel-responsive-margin: max(
-    74px,
-    calc(var(--i-amphtml-story-player-height) * 0.0825)
-  );
+  --i-amphtml-story-player-panel-responsive-margin: max(74px, calc(var(--i-amphtml-story-player-height) * .0825));
   /** Calculates panel height by subtracting responsive vertical margin. */
-  --i-amphtml-story-player-panel-height: calc(
-    var(--i-amphtml-story-player-height) -
-      var(--i-amphtml-story-player-panel-responsive-margin) * 2
-  );
-  --i-amphtml-story-player-panel-width: calc(
-    var(--i-amphtml-story-player-panel-height) *
-      var(--i-amphtml-story-player-panel-ratio)
-  );
-  --i-amphtml-story-player-panel-button-margin: max(
-    10px,
-    calc(50vw - 145px - var(--i-amphtml-story-player-panel-width) / 2)
-  );
+  --i-amphtml-story-player-panel-height: calc(var(--i-amphtml-story-player-height) - var(--i-amphtml-story-player-panel-responsive-margin) * 2);
+  --i-amphtml-story-player-panel-width: calc(var(--i-amphtml-story-player-panel-height) * var(--i-amphtml-story-player-panel-ratio));
+  --i-amphtml-story-player-panel-button-margin: max(10px, calc(50vw - 145px - var(--i-amphtml-story-player-panel-width) / 2));
 }
 
 /* Override if iframe height is less than 756px. */
 .i-amphtml-story-player-panel.i-amphtml-story-player-panel-medium {
   --i-amphtml-story-player-panel-responsive-margin: 0px;
-  --i-amphtml-story-player-panel-width: calc(
-    var(--i-amphtml-story-player-height) *
-      var(--i-amphtml-story-player-panel-ratio)
-  );
+  --i-amphtml-story-player-panel-width: calc(var(--i-amphtml-story-player-height) * var(--i-amphtml-story-player-panel-ratio));
 }
 
 /* Override if iframe height is less than 538px. */
@@ -140,7 +122,7 @@
 
 .i-amphtml-story-player-panel-prev[disabled],
 .i-amphtml-story-player-panel-next[disabled] {
-  opacity: 0.1;
+  opacity: .1;
   cursor: initial;
 }
 
@@ -166,11 +148,11 @@
   right: 0;
 }
 
-[dir='rtl'].i-amphtml-story-player-panel-prev {
+[dir="rtl"].i-amphtml-story-player-panel-prev {
   right: 0;
 }
 
-[dir='rtl'].i-amphtml-story-player-panel-next {
+[dir="rtl"].i-amphtml-story-player-panel-next {
   left: 0;
   transform: translateY(-50%) rotate(180deg);
 }
