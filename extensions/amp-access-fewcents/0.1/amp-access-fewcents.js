@@ -24,7 +24,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
     'fewcents',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-     * @return {*} return type
+     * @return {../../amp-access/0.1/access-vendor.AccessVendor}
      */
     function (ampdoc) {
       const element = ampdoc.getHeadNode();
