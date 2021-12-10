@@ -17,237 +17,65 @@ teaser:
 
 # amp-access-fewcents
 
-<!--
-  If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple content blocks and code samples.
--->
+-   The amp-access-fewcents component is based on, and requires amp-access.
+-   amp-access-fewcents is built for amp pages
+-   amp-access-fewcents component internally uses amp-access to provide a behavior similar to amp-access, but built in such a way that it can be used with Fewcents.
+-   amp-access-fewcents component does not require an authorization, pingback or login configuration, because it is pre-configured to work with the Fewcents.
+-   You just need to pass or configure the extension according to your need.
+-   Publisher's can have their logo on the paywall
+-   This component also relies on Access Content Markup to show and hide content.
 
 ## Usage
 
-One to three paragraphs explaining the component usage. List important functionality. Explain why developers care about it.
+The configuration on the pulisher end will look like this
 
-[filter formats=“websites”]
-
-Below is an example for websites.
-
-[example preview="inline" playground="true" imports="amp-access-fewcents"]
-
-```html
-<amp-access-fewcents required-attribute>
-  I am a hello world inline executable code sample for websites!
-</amp-access-fewcents>
+```
+    <script id="amp-access" type="application/json">
+      {
+        "vendor": "fewcents",
+        "fewcents": {
+          "publisherLogoUrl" : "logoUrl",
+          "contentSelector" : "amp-access-fewcents-dialog",
+          "primaryColor" : "",
+          "accessKey" : "samplehost",
+          "category": "paywall",
+          "articleIdentifier": "sampleidentifier"
+        }
+      }
+    </script>
 ```
 
-[/example][/filter]
-
-<!--
-  * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
-  * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
- -->
-
-[filter formats=“ads”]
-
-Below is an example for ads.
-
-[example preview=“inline” playground=“true” imports="amp-access-fewcents"]
-
-```html
-<amp-access-fewcents required-attribute>
-  I am a hello world inline executable code sample for ads!
-</amp-access-fewcents>
-```
-
-[/example][/filter]
-
-### Standalone use outside valid AMP documents (optional)
-
-<!-- TODO: Remove backticks from link when guide is live -->
-
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
-
-#### Example
+### Example
 
 The example below demonstrates `amp-access-fewcents` component in standalone use.
 
-[example preview="top-frame" playground="false"]
-
 ```
-<head>
-...
-<script async src="https://cdn.ampproject.org/v0.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-access-fewcents-0.1.css">
-<script async custom-element="amp-access-fewcents" src="https://cdn.ampproject.org/v0/amp-access-fewcents-0.1.js"></script>
-...
-</head>
-<amp-access-fewcents>
-  ...
-</amp-access-fewcents>
-<button id="element-id">
-  Event Trigger
-</button>
-<script>
-  example of one API usage
-</script>
+  <section amp-access="NOT access OR flash" amp-access-hide>
+      <div id="amp-access-fewcents-dialog"></div>
+    </section>
+
+    <section amp-access="error" amp-access-hide class="error-section">
+      Oops... Something broke.
+    </section>
+
+    <div amp-access="access" amp-access-hide>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur
+        ullamcorper turpis vel commodo scelerisque. Phasellus luctus nunc ut
+        elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit
+        bibendum et sit amet erat. Suspendisse potenti.
+      </p>
+    </div>
 ```
 
-[/example]
-
-#### Interactivity and API usage
-
-Bento components are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
-
-The `amp-access-fewcents` component API is accessible by including the following script tag in your document:
-
-```
-await customElements.whenDefined('amp-access-fewcents-component');
-const api = await AccessFewcents.getApi();
-```
-
-The `amp-access-fewcents` API allows you to register and respond to the following events:
-
-**event 1**
-Explanation of event, proper syntax/arguments.
-
-```
-example
-```
-
-**event 2**
-Explanation of event, proper syntax/arguments.
-
-```
-example
-```
-
-**action 1**
-Explanation of action, proper syntax/arguments.
-
-```
-example
-```
-
-#### Layout and style
-
-Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+### Layout and style
 
 ```
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-access-fewcents-0.1.css">
 ```
-
-Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
-
-**Container type**
-
-The `amp-access-fewcents` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
-
-```css
-example
-```
-
-**style/layout guidelines 2 (optional)**
-
-Information on how to layout and style `amp-access-fewcents`.
-
-```
-example
-```
-
-### Behavior users should be aware of (optional)
-
-What to do if they want behavior. How to work around it.
-
-```html
-<amp-access-fewcents required-attribute>
-  Code sample of behavior or behavior workaround.
-</amp-access-fewcents>
-```
-
-### Behavior restrictions
-
-What is allowed, what isn't.
-
-## Attributes
-
-### `attribute-name`
-
-Description of attribute. Use cases for this attribute.
-
--   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-access-fewcents`.
--   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-access-fewcents`.
-
-### `optional-attribute-name` (optional)
-
-Here, I write what `optional-attribute-name` will do to `amp-access-fewcents`.
-
-## Actions (optional)
-
-### `action-name`
-
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-access-fewcents` needs to be identified with an `id` to work.
-
-## Events (optional)
-
-### `event-name`
-
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-access-fewcents` needs to be identified with an `id` to work.
-
-#### Valid AMP
-
-Syntax and argument details for use in fully valid AMP pages.
-
-[example preview=”top-frame” playground=”true”]
-
-```html
-<head>
-  <script
-    custom-element="amp-access-fewcents"
-    async
-    src="https://cdn.ampproject.org/v0/amp-access-fewcents-latest.js"
-  ></script>
-</head>
-<body>
-  <amp-access-fewcents
-    required-attribute
-    on="event-name: my-button.show"
-  >
-    Hello World!
-  </amp-access-fewcents>
-  <button id="my-button" hidden>
-    Here I am!
-  </button>
-</body>
-```
-
-[/example]
-
-#### Bento mode
-
-Syntax and argument details for use in Bento mode.
-
-```
-Bento example
-```
-
-## Styling (optional)
-
-Explain how to style the element.
-
-## Analytics (optional)
-
-Explain analytics.
-
-```html
-"configuration": {}
-```
-
-## Accessibility (optional)
-
-Accessibility information related to `amp-access-fewcents`.
 
 ## Version notes (optional)
 
 Information on version differences and migration notes.
 
 ## Validation
-
-See [amp-access-fewcents rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access-fewcents/validator-amp-access-fewcents.protoascii) in the AMP validator specification.
