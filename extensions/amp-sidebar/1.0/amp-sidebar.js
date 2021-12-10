@@ -1,13 +1,29 @@
-import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 import {Services} from '#service/';
+import {dict} from '#core/types/object';
+import {
+  Component,
+  afterClose,
+  beforeOpen,
+  deferredMount,
+  mutationObserverCallback,
+  props,
+  shadowCss,
+  updatePropsForRendering,
+  usesShadowDom,
+} from './element';
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
-class AmpSidebar extends BaseElement {
+class AmpSidebar extends AmpPreactBaseElement {
+  /** @override */
+  static deferredMount(unusedElement) {
+    deferredMount(unusedElement);
+  }
   /** @override */
   constructor(element) {
     super(element);
@@ -17,6 +33,9 @@ class AmpSidebar extends BaseElement {
 
     /** @private {number|null} */
     this.historyId_ = null;
+
+    /** @private {boolean} */
+    this.open_ = false;
   }
 
   /** @override */
@@ -27,7 +46,16 @@ class AmpSidebar extends BaseElement {
     this.registerApiAction('open', (api) => api./*OK*/ open());
     this.registerApiAction('close', (api) => api./*OK*/ close());
 
-    return super.init();
+    return dict({
+      'onBeforeOpen': () => this.beforeOpen(),
+      'onAfterOpen': () => this.afterOpen(),
+      'onAfterClose': () => this.afterClose(),
+    });
+  }
+
+  /** @override */
+  updatePropsForRendering(props) {
+    updatePropsForRendering(props, this.element);
   }
 
   /** @override */
@@ -55,9 +83,13 @@ class AmpSidebar extends BaseElement {
     return true;
   }
 
+  /** @protected */
+  beforeOpen() {
+    this.open_ = beforeOpen(this.element);
+  }
+
   /** @override */
   afterOpen() {
-    super.afterOpen();
     const sidebar = this.element.shadowRoot.querySelector('[part=sidebar]');
     this.setAsContainer?.(sidebar);
 
@@ -68,7 +100,7 @@ class AmpSidebar extends BaseElement {
 
   /** @override */
   afterClose() {
-    super.afterClose();
+    this.open_ = afterClose(this.element);
     this.removeAsContainer?.();
 
     if (this.historyId_ != null) {
@@ -78,10 +110,32 @@ class AmpSidebar extends BaseElement {
   }
 
   /** @override */
+  mutationObserverCallback() {
+    this.open_ = mutationObserverCallback(
+      this.element,
+      this.open_,
+      () => this.api().open(),
+      () => this.api().close()
+    );
+  }
+
+  /** @override */
   unmountCallback() {
     this.removeAsContainer?.();
   }
 }
+
+/** @override */
+AmpSidebar['Component'] = Component;
+
+/** @override */
+AmpSidebar['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpSidebar['shadowCss'] = shadowCss;
+
+/** @override */
+AmpSidebar['props'] = props;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSidebar, CSS);
