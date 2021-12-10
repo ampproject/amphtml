@@ -1,0 +1,19 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "description": "The core runtime for building Fastish HTML",
+  "main": "",
+  "dependencies": {
+    "css.escape": "1.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ampproject/amphtml.git"
+  },
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ampproject/amphtml/issues"
+  },
+  "homepage": "https://github.com/ampproject/amphtml#readme"
+}

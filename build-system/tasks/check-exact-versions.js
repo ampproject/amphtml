@@ -22,7 +22,8 @@ function check(file) {
     const deps = json[key];
     for (const dep in deps) {
       const version = deps[dep];
-      if (!semver.clean(version)) {
+      // TODO(#36461): Remove support for local packages once CORE is published to NPM.
+      if (!semver.clean(version) && !version.startsWith('file:')) {
         return false;
       }
     }

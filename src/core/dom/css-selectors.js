@@ -1,7 +1,6 @@
-import {devAssert} from '#core/assert';
-import * as mode from '#core/mode';
-
-import {cssEscape} from '#third_party/css-escape/css-escape';
+import {devAssert} from 'core/assert';
+import * as mode from 'core/mode';
+import cssEscape from 'css.escape';
 
 /**
  * @type {boolean|undefined}
