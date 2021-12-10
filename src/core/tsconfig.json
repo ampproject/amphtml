@@ -16,9 +16,5 @@
     "**/*.js",
     "**/*.d.ts"
   ],
-  "exclude": [
-    "context/index.js",
-
-    "**/*.extern.js"
-  ]
+  "exclude": ["**/*.extern.js"]
 }
