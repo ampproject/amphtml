@@ -1,20 +1,17 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoWordPressEmbed} from './component';
+import {Component, layoutSizeDefined, props, usesShadowDom} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoWordPressEmbed;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  url: {attr: 'data-url', default: ''},
-  title: {attr: 'title'},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
