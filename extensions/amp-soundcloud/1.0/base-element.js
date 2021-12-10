@@ -1,32 +1,32 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoSoundcloud} from './component';
+import {
+  Component,
+  layoutSizeDefined,
+  loadable,
+  preconnects,
+  props,
+  usesShadowDom,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
   static getPreconnects() {
-    return ['https://api.soundcloud.com/'];
+    return preconnects;
   }
 }
 
 /** @override */
-BaseElement['Component'] = BentoSoundcloud;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  'children': {passthroughNonEmpty: true},
-  'color': {attr: 'data-color'},
-  'playlistId': {attr: 'data-playlistid'},
-  'secretToken': {attr: 'data-secret-token'},
-  'trackId': {attr: 'data-trackid'},
-  'visual': {attr: 'data-visual', type: 'boolean', default: false},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['loadable'] = true;
+BaseElement['loadable'] = loadable;
