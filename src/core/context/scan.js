@@ -1,4 +1,4 @@
-/** @typedef {{parent?: ContextNode, children?: ContextNode[]}} ContextNode */
+/** @typedef {import('./types.d').ContextNode} ContextNode */
 
 /**
  * Performs the `closest()` scan through context nodes to find the one that

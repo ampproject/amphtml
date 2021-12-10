@@ -1,5 +1,11 @@
 import {devAssert} from '#core/assert';
 
+/**
+ * @template T, DEP
+ * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp<T, DEP>
+ */
+
+/** @type {IContextProp<*, *>[]} */
 const EMPTY_DEPS = [];
 
 /**
@@ -8,16 +14,16 @@ const EMPTY_DEPS = [];
  * @param {string} key
  * @param {{
  *   type?: Object,
- *   deps?: IContextProp<DEP>[],
- *   recursive?: (boolean | (function(T[]):boolean),
- *   compute?: (function(Node, T[], ...DEP):(T | undefined)),
+ *   deps?: IContextProp<DEP, *>[],
+ *   recursive?: boolean | (function(T[]):boolean),
+ *   compute?: function(Node, T[], ...DEP):(T | undefined),
  *   defaultValue?: T,
  * }} opt_spec
  * @return {IContextProp<T, DEP>}
- * @template T
- * @template DEP
+ * @template T, DEP
  */
 export function contextProp(key, opt_spec) {
+  const x = {};
   const prop = /** @type {IContextProp<T, DEP>} */ ({
     key,
     // Default values.
