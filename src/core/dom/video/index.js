@@ -75,7 +75,9 @@ export function resetIsAutoplaySupported(win) {
  * @return {Element}
  */
 export function getInternalVideoElementFor(element) {
-  return devAssertElement(element.querySelector('video, iframe'));
+  const el = element.querySelector('video, iframe');
+  devAssertElement(el);
+  return el;
 }
 
 /**

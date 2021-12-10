@@ -29,8 +29,9 @@ export function srcsetFromElement(element) {
   // We can't push `src` via `parseSrcset` because URLs in `src` are not always
   // RFC compliant and can't be easily parsed as an `srcset`. For instance,
   // they sometimes contain space characters.
-  const srcAttr = userAssert(
-    element.getAttribute('src'),
+  const srcAttr = element.getAttribute('src');
+  userAssert(
+    srcAttr,
     'Either non-empty "srcset" or "src" attribute must be specified: %s',
     element
   );
