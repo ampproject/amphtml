@@ -1,11 +1,13 @@
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {BentoLightbox} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 import {dict} from '#core/types/object';
-import {toggle} from '#core/dom/style';
-import {toggleAttribute} from '#core/dom';
-import {unmountAll} from '#core/dom/resource-container-helper';
-
+import {
+  Component,
+  afterLightboxClose,
+  beforeLightboxOpen,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -19,32 +21,24 @@ export class BaseElement extends PreactBaseElement {
   init() {
     return dict({
       'onBeforeOpen': () => this.beforeOpen(),
-      'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
     });
   }
 
   /** @protected */
   beforeOpen() {
-    this.open_ = true;
-    toggleAttribute(this.element, 'open', true);
-    toggle(this.element, true);
-    this.triggerEvent(this.element, 'open');
+    this.open_ = beforeLightboxOpen(
+      this.element,
+      this.triggerEvent.bind(this) // eslint-disable-line local/restrict-this-access
+    );
   }
 
   /** @protected */
-  afterOpen() {}
-
-  /** @protected */
   afterClose() {
-    this.open_ = false;
-    toggleAttribute(this.element, 'open', false);
-    toggle(this.element, false);
-    this.triggerEvent(this.element, 'close');
-
-    // Unmount all children when the lightbox is closed. They will automatically
-    // remount when the lightbox is opened again.
-    unmountAll(this.element, /* includeSelf */ false);
+    this.open_ = afterLightboxClose(
+      this.element,
+      this.triggerEvent.bind(this) // eslint-disable-line local/restrict-this-access
+    );
   }
 
   /** @override */
@@ -59,17 +53,13 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = BentoLightbox;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  'animation': {attr: 'animation', media: true, default: 'fade-in'},
-  'closeButtonAs': {selector: '[slot="close-button"]', single: true, as: true},
-  'children': {passthrough: true},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
+BaseElement['shadowCss'] = shadowCss;
