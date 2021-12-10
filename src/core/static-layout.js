@@ -104,9 +104,9 @@ export function applyStaticLayout(element) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {Layout_Enum} */ (
-      devAssert(parseLayout(completedLayoutAttr))
-    );
+    const layout = parseLayout(completedLayoutAttr);
+    devAssert(layout);
+
     if (
       (layout == Layout_Enum.RESPONSIVE || layout == Layout_Enum.INTRINSIC) &&
       element.firstElementChild
@@ -147,12 +147,12 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout_Enum.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     sizer.setAttribute('slot', 'i-amphtml-svc');
+    const heightNumeral = getLengthNumeral(height);
+    const widthNumeral = getLengthNumeral(width);
+    devAssertNumber(heightNumeral);
+    devAssertNumber(widthNumeral);
     setStyles(sizer, {
-      paddingTop:
-        (devAssertNumber(getLengthNumeral(height)) /
-          devAssertNumber(getLengthNumeral(width))) *
-          100 +
-        '%',
+      paddingTop: (heightNumeral / widthNumeral) * 100 + '%',
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
@@ -165,7 +165,8 @@ export function applyStaticLayout(element) {
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
-    const intrinsicSizer = devAssertElement(sizer.firstElementChild);
+    const intrinsicSizer = sizer.firstElementChild;
+    devAssertElement(intrinsicSizer);
     intrinsicSizer.setAttribute(
       'src',
       `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`

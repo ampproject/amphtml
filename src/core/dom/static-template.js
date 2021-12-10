@@ -104,7 +104,8 @@ export function htmlRefs(root) {
 
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
-    const ref = devAssert(element.getAttribute('ref'), 'Empty ref attr');
+    const ref = element.getAttribute('ref');
+    devAssert(ref, 'Empty ref attr');
     element.removeAttribute('ref');
     devAssert(refs[ref] === undefined, 'Duplicate ref');
     refs[ref] = element;

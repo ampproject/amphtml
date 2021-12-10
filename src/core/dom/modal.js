@@ -210,12 +210,14 @@ export function setModalAsOpen(element) {
  * @param {HTMLElement} element
  */
 export function setModalAsClosed(element) {
+  const next = modalEntryStack.pop();
+  devAssert(next);
   const {
     element: topModalElement,
     focusableExternalElements,
     focusableInternalElements,
     hiddenElementInfos,
-  } = devAssert(modalEntryStack.pop());
+  } = next;
 
   devAssert(isConnectedNode(element));
   devAssert(topModalElement === element);

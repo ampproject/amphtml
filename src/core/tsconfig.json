@@ -8,6 +8,8 @@
     "strictNullChecks": true,
     "lib": ["dom", "esnext", "es6"],
     "paths": {
+      "#core/assert": ["./assert"],
+      "#core/assert/*": ["./assert/*"],
       "#core/constants": ["./constants"],
       "#core/constants/*": ["./constants/*"],
       "#core/data-structures": ["./data-structures"],
@@ -28,6 +30,7 @@
   },
   "include": [
     "*.js",
+    "assert/**/*.js",
     "constants/**/*.js",
     "data-structures/**/*.js",
     "document/**/*.js",
