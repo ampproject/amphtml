@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Hent lenke"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Sveip opp"
-  },
-  "36": {
-    "string": "Utvid Tweet"
   },
   "62": {
     "string": "Del med start fra denne siden"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Åpner"
+  },
+  "98": {
+    "string": "Skjema ikke sendt inn. Prøv igjen"
+  },
+  "99": {
+    "string": "Skjema sendt inn"
   }
 }

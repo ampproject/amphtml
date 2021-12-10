@@ -463,6 +463,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments/index.js',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',
       'testing/init-tests.js',
       'testing/fake-dom.js',
@@ -633,7 +634,6 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'src/config.js',
-      'src/core/window/window.extern.js',
       'src/experiments/index.js',
       'src/experiments/shame.extern.js',
       'src/mode.js',
@@ -854,6 +854,7 @@ const forbiddenTermsSrcInclusive = {
       'use tryDecodeUriComponent from src/url.js',
     allowlist: [
       '3p/integration-lib.js',
+      'build-system/release-tagger/index.js',
       'examples/pwa/pwa.js',
       'validator/js/engine/parse-url.js',
       'validator/js/engine/validator.js',
@@ -1046,7 +1047,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',
-      'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
   'onLayoutMeasure': {
@@ -1064,7 +1064,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'extensions/amp-script/0.1/amp-script.js',
-      'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
   '\\.getIntersectionElementLayoutBox': {

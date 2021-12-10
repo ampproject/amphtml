@@ -1,0 +1,42 @@
+name: CDN config sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - build-system/global-configs/versioning.json
+
+jobs:
+  sync:
+    if: github.repository == 'ampproject/amphtml'
+    name: versioning.json
+    runs-on: ubuntu-latest
+    environment: wrangler
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Install Dependencies
+        run: npm i -g @cloudflare/wrangler
+
+      - name: ⭐ Sync versioning.json to the CDN ⭐
+        run: |
+          for CHANNEL in $(jq 'keys[]' build-system/global-configs/versioning.json --raw-output)
+          do
+            RTV=$(jq ".[\"${CHANNEL}\"]" build-system/global-configs/versioning.json --raw-output)
+            if [[ "${RTV}" != "null" ]]
+            then
+              echo "Setting ${CHANNEL} to ${RTV}"
+              wrangler kv:key put "${CHANNEL}" "${RTV}" --config .github/workflows/wrangler.toml --binding RTV
+            else
+              echo "Unsetting ${CHANNEL}"
+              wrangler kv:key delete "${CHANNEL}" --config .github/workflows/wrangler.toml --binding RTV --force
+            fi
+          done
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

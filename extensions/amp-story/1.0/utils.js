@@ -84,6 +84,7 @@ export function ampMediaElementFor(el) {
  * @param  {!Element} container
  * @param  {!Element} element
  * @param  {string} css
+ * @return {!Element}
  */
 export function createShadowRootWithStyle(container, element, css) {
   const style = self.document.createElement('style');
@@ -95,6 +96,7 @@ export function createShadowRootWithStyle(container, element, css) {
 
   containerToUse.appendChild(style);
   containerToUse.appendChild(element);
+  return container;
 }
 
 /**
@@ -331,3 +333,12 @@ export const maybeMakeProxyUrl = (url, ampDoc) => {
   );
   return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
 };
+
+/**
+ * Whether the document is transformed
+ * @param {!AmpDoc} ampdoc
+ * @return {boolean}
+ */
+export function isTransformed(ampdoc) {
+  return ampdoc.getRootNode().documentElement.hasAttribute('transformed');
+}

@@ -5,7 +5,7 @@ let resolved;
  * Babel converts direct calls to Promise.resolve() (with no arguments) into
  * calls to this.
  *
- * @return {!Promise<undefined>}
+ * @return {Promise<undefined>}
  */
 export function resolvedPromise() {
   if (resolved) {
@@ -43,7 +43,7 @@ export function resolvedPromise() {
 export class Deferred {
   /** Constructor. */
   constructor() {
-    /** @const {!Promise<T>} */
+    /** @const {Promise<T>} */
     this.promise = new /*OK*/ Promise((res, rej) => {
       /** @const {function(T=)} */
       this.resolve = res;
@@ -57,8 +57,8 @@ export class Deferred {
  * Creates a promise resolved to the return value of fn.
  * If fn sync throws, it will cause the promise to reject.
  *
- * @param {function():T} fn
- * @return {!Promise<T>}
+ * @param {function():(T|Promise<T>)} fn
+ * @return {Promise<T>}
  * @template T
  */
 export function tryResolve(fn) {
@@ -69,14 +69,15 @@ export function tryResolve(fn) {
 
 /**
  * Resolves with the result of the last promise added.
- * @implements {IThenable}
+ * @implements {PromiseLike}
+ * @template T
  */
 export class LastAddedResolver {
   /**
-   * @param {!Array<!IThenable>=} opt_promises
+   * @param {Array<PromiseLike<T>>=} opt_promises
    */
   constructor(opt_promises) {
-    /** @private @const {!Deferred} */
+    /** @private @const {Deferred<T>} */
     this.deferred_ = new Deferred();
 
     /** @private */
@@ -91,8 +92,8 @@ export class LastAddedResolver {
 
   /**
    * Add a promise to possibly be resolved.
-   * @param {!IThenable} promise
-   * @return {!Promise}
+   * @param {PromiseLike<T>} promise
+   * @return {Promise<T>}
    */
   add(promise) {
     const countAtAdd = ++this.count_;
@@ -113,7 +114,12 @@ export class LastAddedResolver {
     return this.deferred_.promise;
   }
 
-  /** @override */
+  /**
+   * Bind handlers for when the last added promise resolves/rejects.
+   * @param {function(T):?} [opt_resolve]
+   * @param {function(?):?} [opt_reject]
+   * @return {Promise<?>}
+   */
   then(opt_resolve, opt_reject) {
     return this.deferred_.promise.then(opt_resolve, opt_reject);
   }

@@ -1,9 +1,9 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {getVendorJsPropertyName} from '#core/dom/style';
 
 /**
- * @param {!Document} doc
- * @return {!VisibilityState}
+ * @param {Document} doc
+ * @return {VisibilityState_Enum}
  */
 export function getDocumentVisibilityState(doc) {
   // New API: `document.visibilityState` property.
@@ -19,26 +19,28 @@ export function getDocumentVisibilityState(doc) {
   // Old API: `document.hidden` property.
   const hiddenProp = getVendorJsPropertyName(doc, 'hidden', true);
   if (doc[hiddenProp]) {
-    return doc[hiddenProp] ? VisibilityState.HIDDEN : VisibilityState.VISIBLE;
+    return doc[hiddenProp]
+      ? VisibilityState_Enum.HIDDEN
+      : VisibilityState_Enum.VISIBLE;
   }
 
-  return VisibilityState.VISIBLE;
+  return VisibilityState_Enum.VISIBLE;
 }
 
 /**
  * Returns the value of "document.hidden" property. The reasons why it may
  * not be visible include document in a non-active tab or when the document
  * is being pre-rendered via link with rel="prerender".
- * @param {!Document} doc
+ * @param {Document} doc
  * @return {boolean}
  */
 export function isDocumentHidden(doc) {
-  return getDocumentVisibilityState(doc) != VisibilityState.VISIBLE;
+  return getDocumentVisibilityState(doc) != VisibilityState_Enum.VISIBLE;
 }
 
 /**
- * @param {!Document} doc
- * @param {function()} handler
+ * @param {Document} doc
+ * @param {function():void} handler
  */
 export function addDocumentVisibilityChangeListener(doc, handler) {
   if (!doc.addEventListener) {
@@ -51,8 +53,8 @@ export function addDocumentVisibilityChangeListener(doc, handler) {
 }
 
 /**
- * @param {!Document} doc
- * @param {function()} handler
+ * @param {Document} doc
+ * @param {function():void} handler
  */
 export function removeDocumentVisibilityChangeListener(doc, handler) {
   if (!doc.removeEventListener) {
@@ -65,7 +67,7 @@ export function removeDocumentVisibilityChangeListener(doc, handler) {
 }
 
 /**
- * @param {!Document} doc
+ * @param {Document} doc
  * @return {?string}
  */
 function getVisibilityChangeEvent(doc) {

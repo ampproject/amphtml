@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Kry skakel"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Vee opwaarts"
-  },
-  "36": {
-    "string": "Vou twiet uit"
   },
   "62": {
     "string": "Deel vanaf hierdie bladsy"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Wird geöffnet"
+  },
+  "98": {
+    "string": "Vorm nie ingedien nie, probeer weer"
+  },
+  "99": {
+    "string": "Vorm suksesvol ingedien"
   }
 }

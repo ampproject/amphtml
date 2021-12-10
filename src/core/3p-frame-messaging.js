@@ -14,7 +14,7 @@ export const CONSTANTS = {
 };
 
 /** @enum {string} */
-export const MessageType = {
+export const MessageType_Enum = {
   // For amp-ad
   SEND_EMBED_STATE: 'send-embed-state',
   EMBED_STATE: 'embed-state',
@@ -55,11 +55,11 @@ export const MessageType = {
 
 /**
  * Listens for the specified event on the element.
- * @param {!EventTarget} element
+ * @param {EventTarget} element
  * @param {string} eventType
- * @param {function(!Event)} listener
+ * @param {function(Event):void} listener
  * @param {Object=} opt_evtListenerOpts
- * @return {!UnlistenDef}
+ * @return {UnlistenCallback}
  */
 export function listen(element, eventType, listener, opt_evtListenerOpts) {
   return internalListenImplementation(

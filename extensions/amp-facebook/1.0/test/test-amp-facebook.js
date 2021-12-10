@@ -288,5 +288,34 @@ describes.realWin(
       win.dispatchEvent(mockEvent);
       expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
+
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-loading': 'lazy',
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('lazy');
+    });
+
+    it('should set data-loading="auto" if no value is specified', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('auto');
+    });
   }
 );

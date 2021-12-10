@@ -31,11 +31,14 @@ async function defaultTask() {
   printConfigHelp('amp');
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
+
+  const options = {fortesting: true, minify: argv.minified, watch: true};
   if (argv.minified) {
-    await runPreDistSteps(/* watch */ true);
+    await runPreDistSteps(options);
   } else {
-    await runPreBuildSteps(/* watch */ true);
+    await runPreBuildSteps(options);
   }
+
   await doServe(/* lazyBuild */ true);
   log(green('JS and extensions will be lazily built when requested...'));
 }
@@ -44,7 +47,7 @@ module.exports = {
   defaultTask,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 defaultTask.description =
   'Start the dev server, lazily build JS when requested, and watch for changes';

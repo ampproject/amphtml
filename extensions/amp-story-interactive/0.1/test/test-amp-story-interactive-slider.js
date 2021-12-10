@@ -2,9 +2,8 @@ import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {LocalizationService} from '#service/localization';
-import {getSliderInteractiveData} from './helpers';
+import {MOCK_URL, getSliderInteractiveData} from './helpers';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   MID_SELECTION_CLASS,
@@ -20,7 +19,8 @@ describes.realWin(
     let win;
     let ampStorySlider;
     let storyEl;
-    let requestService;
+    let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
@@ -45,9 +45,13 @@ describes.realWin(
 
       ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = new AmpStoryRequestService(win);
-      registerServiceBuilder(win, 'story-request', function () {
-        return requestService;
+      const xhr = Services.xhrFor(env.win);
+      xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
       });
 
       const localizationService = new LocalizationService(win.document.body);
@@ -149,10 +153,8 @@ describes.realWin(
     });
 
     it('should show post-selection state when backend replies with user selection', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getSliderInteractiveData());
-      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      xhrJson = getSliderInteractiveData();
+      ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       expect(ampStorySlider.getRootElement()).to.have.class(
@@ -178,10 +180,8 @@ describes.realWin(
     });
 
     it('should display the average indicator in the correct position', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getSliderInteractiveData());
-      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      xhrJson = getSliderInteractiveData();
+      ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       expect(

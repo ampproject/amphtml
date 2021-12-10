@@ -46,6 +46,7 @@ const getExtensionSrcPaths = () =>
 const TSC_TYPECHECK_TARGETS = {
   'compiler': 'src/compiler',
   'carousel': 'extensions/amp-carousel/0.1',
+  'core': 'src/core',
 };
 
 /**
@@ -73,18 +74,10 @@ const CLOSURE_TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-core': CORE_SRCS_GLOBS,
-  'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-polyfills': [
-    'src/polyfills/**/*.js',
-    // Exclude fetch its dependencies are cleaned up/extracted to core.
-    '!src/polyfills/fetch.js',
-    ...CORE_SRCS_GLOBS,
-  ],
   'src-preact': {
     srcGlobs: ['src/preact/**/*.js', ...CORE_SRCS_GLOBS],
     warningLevel: 'QUIET',
@@ -324,7 +317,7 @@ module.exports = {
   checkTypes,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: 'Set the number of concurrent invocations of closure',

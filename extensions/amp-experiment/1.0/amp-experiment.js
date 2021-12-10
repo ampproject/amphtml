@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
@@ -33,7 +33,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+    return layout == Layout_Enum.NODISPLAY || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */

@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Gauti nuorodą"
   },
@@ -79,9 +76,6 @@
   },
   "35": {
     "string": "Perbraukti aukštyn"
-  },
-  "36": {
-    "string": "Išskleisti „Twitter“ įrašą"
   },
   "62": {
     "string": "Bendrinti pradedant šiuo puslapiu"
@@ -184,5 +178,11 @@
   },
   "97": {
     "string": "Atidaromas"
+  },
+  "98": {
+    "string": "Forma nepateikta, bandykite dar kartą"
+  },
+  "99": {
+    "string": "Forma sėkmingai pateikta"
   }
 }

@@ -50,11 +50,10 @@ function getTestConfig() {
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
-    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-react-constant-elements',
     '@babel/plugin-transform-classes',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
   const testPresets = [presetEnv];
