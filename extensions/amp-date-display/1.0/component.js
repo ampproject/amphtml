@@ -2,7 +2,8 @@ import {getDate} from '#core/types/date';
 
 import * as Preact from '#preact';
 import {useMemo} from '#preact';
-import {Wrapper, useRenderer} from '#preact/component';
+import {Wrapper} from '#preact/component';
+import {useRenderer} from '#preact/component/renderer';
 import {useResourcesNotify} from '#preact/utils';
 
 import {user} from '#utils/log';

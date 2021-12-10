@@ -170,7 +170,10 @@ function setExtensionsToBuildFromDocuments(examples) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild(preBuild = false) {
-  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
+  extensionsToBuild =
+    argv.core_runtime_only || argv.bento_runtime_only
+      ? []
+      : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -452,10 +455,10 @@ async function buildExtension(name, version, hasCss, options, extraGlobs) {
     return;
   }
 
-  if (options.bento) {
-    await buildBentoExtensionJs(extDir, name, options);
-  }
-  await buildExtensionJs(extDir, name, options);
+  await Promise.all([
+    maybeBuildBentoExtensionJs(extDir, name, options),
+    buildExtensionJs(extDir, name, {...options, bento: false}),
+  ]);
 }
 
 /**
@@ -661,11 +664,20 @@ function buildBinaries(extDir, binaries, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildBentoExtensionJs(dir, name, options) {
+async function maybeBuildBentoExtensionJs(dir, name, options) {
+  if (!options.bento) {
+    return;
+  }
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
+    // Use esbuild since Closure does not use a different babel config for
+    // Bento elements.
+    esbuild: true,
     wrapper: 'bento',
+    babelCaller: options.minify
+      ? 'bento-element-minified'
+      : 'bento-element-unminified',
     filename: await getBentoBuildFilename(
       dir,
       bentoName,

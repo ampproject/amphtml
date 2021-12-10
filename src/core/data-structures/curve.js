@@ -20,7 +20,7 @@ export let CurveDef;
  * @param {number} y1 Y coordinate of the first control point.
  * @param {number} x2 X coordinate of the second control point.
  * @param {number} y2 Y coordinate of the second control point.
- * @return {!CurveDef}
+ * @return {CurveDef}
  */
 export function bezierCurve(x1, y1, x2, y2) {
   return (xVal) =>
@@ -198,13 +198,13 @@ class Bezier {
 /**
  * A collection of common curves.
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function
- * @enum {!CurveDef}
+ * @enum {CurveDef}
  */
 export const Curves_Enum = {
   /**
    * linear
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   LINEAR(xVal) {
     return xVal;
@@ -212,8 +212,8 @@ export const Curves_Enum = {
 
   /**
    * ease
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.25, 0.1, 0.25, 1.0, 1, 1);
@@ -221,8 +221,8 @@ export const Curves_Enum = {
 
   /**
    * ease-in: slow out, fast in
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_IN(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 1.0, 1.0, 1, 1);
@@ -230,8 +230,8 @@ export const Curves_Enum = {
 
   /**
    * ease-out: fast out, slow in
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.0, 0.0, 0.58, 1.0, 1, 1);
@@ -239,8 +239,8 @@ export const Curves_Enum = {
 
   /**
    * ease-in-out
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_IN_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 0.58, 1.0, 1, 1);
@@ -248,7 +248,7 @@ export const Curves_Enum = {
 };
 
 /**
- * @const {!Object<string, !CurveDef>}
+ * @const {Object<string, CurveDef>}
  */
 const NAME_MAP = {
   'linear': Curves_Enum.LINEAR,
@@ -287,5 +287,5 @@ export function getCurve(curve) {
     }
     return NAME_MAP[curve];
   }
-  return /** @type {!CurveDef} */ (curve);
+  return /** @type {CurveDef} */ (curve);
 }

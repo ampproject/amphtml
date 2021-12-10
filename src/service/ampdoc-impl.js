@@ -615,16 +615,22 @@ export class AmpDoc {
 
     if (this.visibilityState_ != visibilityState) {
       if (visibilityState == VisibilityState_Enum.VISIBLE) {
-        let visibleTime;
         const {performance} = this.win;
-        if (this.visibilityState_ == null) {
-          // If the doc was initialized in the visible state, then prefer the
-          // timeOrigin of the document over when the JS actually initializes.
-          visibleTime = Math.floor(
-            performance.timeOrigin ?? performance.timing.navigationStart
-          );
-        } else {
-          visibleTime = Math.floor(performance.now());
+        // We use the initial loading time of the document as the base
+        // visibleTime. If we are initialized in visible mode, then this is
+        // accounts for the time that user saw a blank page waiting for JS
+        // execution.
+        let visibleTime = Math.floor(
+          performance.timeOrigin ?? performance.timing.navigationStart
+        );
+        if (this.visibilityState_ != null) {
+          // We're transitioning into visible mode (instead of being
+          // initialized in it). In this case, we want to adjust the
+          // visibleTime to the current timestamp, because the user hasn't
+          // actually been waiting for the page to load. Remember that
+          // performance.now() is relative to the load time of the document, so
+          // the current timestamp is actually load+now.
+          visibleTime += Math.floor(performance.now());
         }
         this.lastVisibleTime_ = visibleTime;
         this.signals_.signal(AmpDocSignals_Enum.FIRST_VISIBLE, visibleTime);

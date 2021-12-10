@@ -15,7 +15,7 @@ export class Signals {
     /**
      * A mapping from a signal name to the signal response: either time or
      * an error.
-     * @private @const {!Object<string, (!TimestampDef|!Error)>}
+     * @private @const {Object<string, (TimestampDef|Error)>}
      */
     this.map_ = map();
 
@@ -35,7 +35,7 @@ export class Signals {
    * Returns the current known value of the signal. If signal is not yet
    * available, `null` is returned.
    * @param {string} name
-   * @return {number|!Error|null}
+   * @return {number|Error|null}
    */
   get(name) {
     const v = this.map_[name];
@@ -46,7 +46,7 @@ export class Signals {
    * Returns the promise that's resolved when the signal is triggered. The
    * resolved value is the time of the signal.
    * @param {string} name
-   * @return {!Promise<!TimestampDef>}
+   * @return {Promise<TimestampDef>}
    */
   whenSignal(name) {
     let promiseStruct = this.promiseMap_?.[name];
@@ -77,7 +77,7 @@ export class Signals {
    * optional; if not provided, the current time is used. The associated
    * promise is resolved with the resulting TimestampDef.
    * @param {string} name
-   * @param {!TimestampDef=} opt_time
+   * @param {TimestampDef=} opt_time
    */
   signal(name, opt_time) {
     if (this.map_[name] != null) {
@@ -98,7 +98,7 @@ export class Signals {
    * Rejects the signal. Indicates that the signal will never succeed. The
    * associated signal is rejected.
    * @param {string} name
-   * @param {!Error} error
+   * @param {Error} error
    */
   rejectSignal(name, error) {
     if (this.map_[name] != null) {
