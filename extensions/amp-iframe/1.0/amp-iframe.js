@@ -1,8 +1,9 @@
-import {BaseElement} from './base-element';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {measureIntersection} from '#core/dom/layout/intersection';
+import {Component, layoutSizeDefined, props, usesShadowDom} from './element';
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
 
 /** @const {string} */
 const TAG = 'amp-iframe';
@@ -11,7 +12,7 @@ const MINIMUM_DISTANCE_FROM_TOP_PX = 600;
 /** @const {number} */
 const MINIMUM_VIEWPORT_PROPORTION = 0.75;
 
-class AmpIframe extends BaseElement {
+class AmpIframe extends AmpPreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -88,6 +89,18 @@ class AmpIframe extends BaseElement {
     });
   }
 }
+
+/** @override */
+AmpIframe['Component'] = Component;
+
+/** @override */
+AmpIframe['props'] = props;
+
+/** @override */
+AmpIframe['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpIframe['usesShadowDom'] = usesShadowDom;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpIframe);
