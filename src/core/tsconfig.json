@@ -20,9 +20,7 @@
     "context/index.js",
     "context/node.js",
     "context/prop.js",
-    "context/prop.type.js",
     "context/scan.js",
-    "context/scheduler.js",
     "context/subscriber.js",
     "context/values.js",
 
