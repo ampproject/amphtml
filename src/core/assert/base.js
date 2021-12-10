@@ -98,17 +98,19 @@ function assertType_(
   opt_message
 ) {
   if (isArray(opt_message)) {
-    return /** @type {AssertionFunctionArrayDef} */ (assertFn)(
+    /** @type {AssertionFunctionArrayDef} */ (assertFn)(
       shouldBeTruthy,
       /** @type {Array} */ (opt_message).concat([subject])
     );
   } else {
-    return /** @type {AssertionFunctionStringDef} */ (assertFn)(
+    /** @type {AssertionFunctionStringDef} */ (assertFn)(
       shouldBeTruthy,
       `${opt_message || defaultMessage}: %s`,
       subject
     );
   }
+
+  return /** @type {void} */ (subject);
 }
 
 /**
