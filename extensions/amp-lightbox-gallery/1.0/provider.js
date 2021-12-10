@@ -50,6 +50,7 @@ export function BentoLightboxGalleryProviderWithRef(
     onBeforeOpen,
     onToggleCaption,
     onViewGrid,
+    open: isOpen = false,
     render,
   },
   ref
@@ -132,6 +133,9 @@ export function BentoLightboxGalleryProviderWithRef(
     },
     [renderElements]
   );
+  const close = useCallback(() => {
+    lightboxRef.current?.close();
+  }, []);
 
   const context = {
     deregister,
@@ -172,12 +176,18 @@ export function BentoLightboxGalleryProviderWithRef(
     ref,
     () => ({
       open,
-      close: () => {
-        lightboxRef.current?.close();
-      },
+      close,
     }),
-    [open]
+    [open, close]
   );
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      open();
+    } else {
+      close();
+    }
+  }, [isOpen, open, close]);
 
   return (
     <>

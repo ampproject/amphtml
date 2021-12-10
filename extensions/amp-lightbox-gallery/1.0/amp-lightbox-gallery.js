@@ -4,15 +4,28 @@ import {
 } from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
+import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {
+  Component,
+  afterLightboxGalleryClose,
+  beforeLightboxGalleryOpen,
+  checkNumInstancesOnMount,
+  checkNumInstancesOnUnmount,
+  getLightboxElements,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
 
@@ -22,7 +35,7 @@ const TAG = 'amp-lightbox-gallery';
 /** @const {string} */
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
-class AmpLightboxGallery extends BaseElement {
+class AmpLightboxGallery extends AmpPreactBaseElement {
   /** @override */
   constructor(element) {
     super(element);
@@ -48,7 +61,18 @@ class AmpLightboxGallery extends BaseElement {
       (api, invocation) => this.openAction(api, invocation),
       ActionTrust_Enum.HIGH
     );
-    return super.init();
+    const lightboxElements = getLightboxElements(
+      this.element.ownerDocument,
+      (opt_index, opt_group) => this.api().open(opt_index, opt_group)
+    );
+    return dict({
+      'onBeforeOpen': () => this.beforeOpen(),
+      'onAfterOpen': () => this.afterOpen(),
+      'onAfterClose': () => this.afterClose(),
+      'onViewGrid': () => this.onViewGrid(),
+      'onToggleCaption': () => this.onToggleCaption(),
+      'render': () => lightboxElements,
+    });
   }
 
   /**
@@ -74,11 +98,15 @@ class AmpLightboxGallery extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
+  /** @protected */
+  beforeOpen() {
+    beforeLightboxGalleryOpen(this.element);
+  }
+
   /** @override */
   afterOpen() {
-    super.afterOpen();
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
-    this.setAsContainer?.(scroller);
+    this.setAsContainer(scroller);
     triggerAnalyticsEvent(this.element, 'lightboxOpened');
 
     this.history_
@@ -88,8 +116,8 @@ class AmpLightboxGallery extends BaseElement {
 
   /** @override */
   afterClose() {
-    super.afterClose();
-    this.removeAsContainer?.();
+    afterLightboxGalleryClose(this.element);
+    this.removeAsContainer();
 
     if (this.historyId_ != null) {
       this.history_.pop(this.historyId_);
@@ -99,22 +127,37 @@ class AmpLightboxGallery extends BaseElement {
 
   /** @override */
   onViewGrid() {
-    super.onViewGrid();
     triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled');
   }
 
   /** @override */
   onToggleCaption() {
-    super.onToggleCaption();
     triggerAnalyticsEvent(this.element, 'descriptionOverflowToggled');
   }
 
   /** @override */
+  mountCallback() {
+    checkNumInstancesOnMount(this.element);
+  }
+
+  /** @override */
   unmountCallback() {
-    super.unmountCallback();
-    this.removeAsContainer?.();
+    checkNumInstancesOnUnmount();
+    this.removeAsContainer();
   }
 }
+
+/** @override */
+AmpLightboxGallery['Component'] = Component;
+
+/** @override */
+AmpLightboxGallery['props'] = props;
+
+/** @override */
+AmpLightboxGallery['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpLightboxGallery['shadowCss'] = shadowCss;
 
 /**
  * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a

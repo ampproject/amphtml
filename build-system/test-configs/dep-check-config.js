@@ -214,8 +214,8 @@ exports.rules = [
       'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-base-carousel/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
-      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
+      'extensions/amp-lightbox-gallery/1.0/element.js->extensions/amp-lightbox/1.0/component.jss.js',
+      'extensions/amp-lightbox-gallery/1.0/element.js->extensions/amp-base-carousel/1.0/component.jss.js',
 
       // <amp-date-display> versions share these date format helpers
       'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
