@@ -1,19 +1,22 @@
-import * as Preact from '#preact';
-import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '#preact/base-element';
-import {BentoSidebar} from './component';
 import {dict} from '#core/types/object';
-import {pauseAll} from '#core/dom/resource-container-helper';
-import {realChildNodes} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
-import {toggleAttribute} from '#core/dom';
-import {useToolbarHook} from './sidebar-toolbar-hook';
-import {useValueRef} from '#preact/component';
+import {
+  Component,
+  afterClose,
+  afterOpen,
+  beforeOpen,
+  deferredMount,
+  mutationObserverCallback,
+  props,
+  shadowCss,
+  updatePropsForRendering,
+  usesShadowDom,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
   static deferredMount(unusedElement) {
-    return false;
+    deferredMount(unusedElement);
   }
 
   /** @param {!AmpElement} element */
@@ -35,76 +38,38 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   updatePropsForRendering(props) {
-    realChildNodes(this.element).map((child) => {
-      if (
-        child.nodeName === 'NAV' &&
-        child.hasAttribute('toolbar') &&
-        child.hasAttribute('toolbar-target')
-      ) {
-        props['children'].push(
-          <ToolbarShim
-            toolbar={child.getAttribute('toolbar')}
-            toolbarTarget={child.getAttribute('toolbar-target')}
-            domElement={child}
-          ></ToolbarShim>
-        );
-      }
-    });
+    updatePropsForRendering(props, this.element);
   }
 
   /** @protected */
   beforeOpen() {
-    this.open_ = true;
-    toggleAttribute(this.element, 'open', true);
-    toggle(this.element, true);
+    this.open_ = beforeOpen(this.element);
   }
 
   /** @protected */
-  afterOpen() {}
+  afterOpen() {
+    afterOpen();
+  }
 
   /** @protected */
   afterClose() {
-    this.open_ = false;
-    toggleAttribute(this.element, 'open', false);
-    toggle(this.element, false);
-
-    pauseAll(this.element, /* includeSelf */ false);
+    this.open_ = afterClose(this.element);
   }
 
   /** @override */
   mutationObserverCallback() {
-    const open = this.element.hasAttribute('open');
-    if (open === this.open_) {
-      return;
-    }
-    this.open_ = open;
-    open ? this.api().open() : this.api().close();
+    this.open_ = mutationObserverCallback(this.element, this.open_);
   }
 }
 
 /** @override */
-BaseElement['Component'] = BentoSidebar;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
+BaseElement['shadowCss'] = shadowCss;
 
 /** @override */
-BaseElement['props'] = {
-  'children': {passthrough: true},
-  'side': {attr: 'side'},
-};
-
-/**
- * @param {!BentoSidebarDef.ToolbarShimProps} props
- */
-function ToolbarShim({
-  domElement,
-  toolbar: mediaQueryProp,
-  toolbarTarget: toolbarTargetProp,
-}) {
-  const ref = useValueRef(domElement);
-  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
-}
+BaseElement['props'] = props;
