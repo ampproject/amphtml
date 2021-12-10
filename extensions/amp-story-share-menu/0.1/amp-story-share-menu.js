@@ -7,7 +7,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {user} from '#utils/log';
 
-import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
+import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {ShareWidget} from '../../amp-story/1.0/amp-story-share';
