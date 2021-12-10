@@ -23,7 +23,6 @@ const EMPTY_DEPS = [];
  * @template T, DEP
  */
 export function contextProp(key, opt_spec) {
-  const x = {};
   const prop = /** @type {IContextProp<T, DEP>} */ ({
     key,
     // Default values.

@@ -1,4 +1,4 @@
-import {devAssert, devAssertElement} from '#core/assert';
+import {devAssert} from '#core/assert';
 import * as mode from '#core/mode';
 import {isElement} from '#core/types';
 import {pushIfNotExist, removeItem} from '#core/types/array';
@@ -18,7 +18,6 @@ const AMP_PREFIX = 'AMP-';
 
 // Relevant node types.
 // See https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType.
-const ELEMENT_NODE = 1;
 const DOCUMENT_NODE = 9;
 // Includes shadow root, template, etc.
 const FRAGMENT_NODE = 11;
