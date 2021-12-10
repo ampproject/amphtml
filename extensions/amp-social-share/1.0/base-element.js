@@ -1,36 +1,34 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoSocialShare} from './component';
-import {CSS as COMPONENT_CSS} from './component.jss';
+import {
+  Component,
+  delegatesFocus,
+  layoutSizeDefined,
+  props,
+  shadowCss,
+  staticProps,
+  usesShadowDom,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoSocialShare;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['delegatesFocus'] = true;
+BaseElement['delegatesFocus'] = delegatesFocus;
 
 /** @override */
-BaseElement['props'] = {
-  'children': {passthroughNonEmpty: true},
-  'height': {attr: 'height'},
-  'tabIndex': {attr: 'tabindex'},
-  'type': {attr: 'type'},
-  'width': {attr: 'width'},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['staticProps'] = {
-  'color': 'currentColor',
-  'background': 'inherit',
-};
+BaseElement['staticProps'] = staticProps;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
+BaseElement['shadowCss'] = shadowCss;
