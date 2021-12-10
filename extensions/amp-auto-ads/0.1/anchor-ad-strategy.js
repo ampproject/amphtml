@@ -119,6 +119,7 @@ export class AnchorAdStrategy {
         })
       )
     );
+    delete attributes.sticky; // To ensure that no sticky attribute will be wrapped inside an amp-sticky-ad element.
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
     const stickyAd = createElementWithAttributes(
