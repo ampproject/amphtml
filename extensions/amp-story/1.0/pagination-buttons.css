@@ -73,7 +73,7 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-stor
   background-repeat: no-repeat!important;
   justify-content: center!important;
   align-items: center!important;
-  transition: 150ms opacity linear, 350ms transform linear!important;
+  transition: 150ms opacity linear!important;
   cursor: pointer!important;
   pointer-events: all!important;
 }
