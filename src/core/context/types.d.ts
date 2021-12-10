@@ -53,7 +53,7 @@ export interface IContextProp<T, DEP> {
 
 // Temporary stub type until node.js passes typechecking
 export interface ContextNode {
-  values: any;
+  values: import('./values').Values;
   node: Node;
   root?: any;
   parent?: ContextNode;

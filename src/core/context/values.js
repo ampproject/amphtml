@@ -605,12 +605,14 @@ export class Values {
       used.parentContextNode = newParentContextNode;
       used.parentValue = undefined;
 
+      devAssert(pingParent);
       if (oldParentContextNode) {
-        oldParentContextNode.values.unsubscribe(prop, devAssert(pingParent));
+        oldParentContextNode.values.unsubscribe(prop, pingParent);
       }
 
       if (newParentContextNode) {
-        newParentContextNode.values.subscribe(prop, devAssert(pingParent));
+        devAssert(pingParent);
+        newParentContextNode.values.subscribe(prop, pingParent);
       }
     }
   }
@@ -624,6 +626,7 @@ export class Values {
  * @return {boolean}
  */
 function scan(contextNode, prop) {
+  // @ts-ignore private access
   return contextNode.values.scan(prop);
 }
 
@@ -636,6 +639,7 @@ function scan(contextNode, prop) {
  * @return {string[]}
  */
 function scanAll(contextNode, unusedArg, state) {
+  // @ts-ignore private access
   return contextNode.values.scanAll(state);
 }
 
