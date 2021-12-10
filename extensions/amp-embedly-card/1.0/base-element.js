@@ -1,40 +1,19 @@
-import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoEmbedlyCard} from './component';
-import {BentoEmbedlyContext} from './embedly-context';
+import {Component, layoutSizeDefined, props, usesShadowDom} from './element';
 
 export const BENTO_TAG = 'bento-embedly-card';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoEmbedlyCardWithContext;
-
-/**
- * @param {!BentoEmbedlyCardDef.Props} props
- * @return {PreactDef.Renderable}
- */
-function BentoEmbedlyCardWithContext(props) {
-  // Extract Embedly Key
-  const ampEmbedlyKeyElement = document.querySelector('amp-embedly-key');
-  const apiKey = ampEmbedlyKeyElement?.getAttribute('value') || '';
-
-  return (
-    <BentoEmbedlyContext.Provider value={apiKey}>
-      <BentoEmbedlyCard {...props}></BentoEmbedlyCard>
-    </BentoEmbedlyContext.Provider>
-  );
-}
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  'title': {attr: 'title'},
-  'url': {attr: 'data-url'},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
