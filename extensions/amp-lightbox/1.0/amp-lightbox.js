@@ -2,19 +2,28 @@ import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
 } from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
 import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
+import {dict} from '#core/types/object';
+import {
+  Component,
+  afterLightboxClose,
+  beforeLightboxOpen,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends BaseElement {
+class AmpLightbox extends AmpPreactBaseElement {
   /** @override */
   constructor(element) {
     super(element);
@@ -38,7 +47,11 @@ class AmpLightbox extends BaseElement {
     this.registerApiAction('open', (api) => api.open(), ActionTrust_Enum.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust_Enum.LOW);
 
-    return super.init();
+    return dict({
+      'onBeforeOpen': () => this.beforeOpen(),
+      'onAfterOpen': () => this.afterOpen(),
+      'onAfterClose': () => this.afterClose(),
+    });
   }
 
   /** @override */
@@ -68,9 +81,13 @@ class AmpLightbox extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 
+  /** @protected */
+  beforeOpen() {
+    this.open_ = beforeLightboxOpen(this.element, this.triggerEvent.bind(this));
+  }
+
   /** @override */
   afterOpen() {
-    super.afterOpen();
     const scroller = this.element.shadowRoot.querySelector('[part=scroller]');
     this.setAsContainer?.(scroller);
 
@@ -81,7 +98,7 @@ class AmpLightbox extends BaseElement {
 
   /** @override */
   afterClose() {
-    super.afterClose();
+    this.open_ = afterLightboxClose(this.element, this.triggerEvent.bind(this));
     this.removeAsContainer?.();
 
     if (this.historyId_ != null) {
@@ -91,10 +108,32 @@ class AmpLightbox extends BaseElement {
   }
 
   /** @override */
+  mutationObserverCallback() {
+    const open = this.element.hasAttribute('open');
+    if (open === this.open_) {
+      return;
+    }
+    this.open_ = open;
+    open ? this.api().open() : this.api().close();
+  }
+
+  /** @override */
   unmountCallback() {
     this.removeAsContainer?.();
   }
 }
+
+/** @override */
+AmpLightbox['Component'] = Component;
+
+/** @override */
+AmpLightbox['props'] = props;
+
+/** @override */
+AmpLightbox['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpLightbox['shadowCss'] = shadowCss;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox, CSS);
