@@ -1,16 +1,24 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {Services} from '#service';
 import {createCustomEvent} from '#utils/event-helper';
 import {isExperimentOn} from '#experiments';
 import {getWin} from '#core/window';
 import {userAssert} from '#utils/log';
+import {
+  Component,
+  elementInit,
+  layoutSizeDefined,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
 
 /** @const {string} */
 const TAG = 'amp-stream-gallery';
 
-class AmpStreamGallery extends BaseElement {
+class AmpStreamGallery extends AmpPreactBaseElement {
   /** @override */
   init() {
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust_Enum.LOW);
@@ -24,7 +32,7 @@ class AmpStreamGallery extends BaseElement {
       ActionTrust_Enum.LOW
     );
 
-    return super.init();
+    return elementInit(this.element, this.triggerEvent.bind(this));
   }
 
   /** @override */
@@ -54,6 +62,21 @@ class AmpStreamGallery extends BaseElement {
     super.triggerEvent(element, eventName, detail);
   }
 }
+
+/** @override */
+AmpStreamGallery['Component'] = Component;
+
+/** @override */
+AmpStreamGallery['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpStreamGallery['props'] = props;
+
+/** @override */
+AmpStreamGallery['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpStreamGallery['shadowCss'] = shadowCss;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpStreamGallery, CSS);
