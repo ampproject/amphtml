@@ -1,27 +1,30 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoInstagram} from './component';
+import {
+  Component,
+  layoutSizeDefined,
+  loadable,
+  props,
+  unloadOnPause,
+  usesShadowDom,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoInstagram;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['loadable'] = true;
+BaseElement['loadable'] = loadable;
 
 /** @override */
-BaseElement['unloadOnPause'] = true;
+BaseElement['unloadOnPause'] = unloadOnPause;
 
 /** @override */
-BaseElement['props'] = {
-  'captioned': {attr: 'data-captioned'},
-  'shortcode': {attr: 'data-shortcode'},
-  'title': {attr: 'title'},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
