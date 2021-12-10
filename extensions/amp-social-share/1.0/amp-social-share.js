@@ -7,11 +7,21 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {
+  Component,
+  delegatesFocus,
+  layoutSizeDefined,
+  props,
+  shadowCss,
+  staticProps,
+  usesShadowDom,
+} from './element';
 import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
@@ -115,7 +125,7 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   return typeConfig;
 };
 
-class AmpSocialShare extends BaseElement {
+class AmpSocialShare extends AmpPreactBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -211,6 +221,27 @@ class AmpSocialShare extends BaseElement {
       });
   }
 }
+
+/** @override */
+AmpSocialShare['Component'] = Component;
+
+/** @override */
+AmpSocialShare['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpSocialShare['delegatesFocus'] = delegatesFocus;
+
+/** @override */
+AmpSocialShare['props'] = props;
+
+/** @override */
+AmpSocialShare['staticProps'] = staticProps;
+
+/** @override */
+AmpSocialShare['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpSocialShare['shadowCss'] = shadowCss;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare, CSS);
