@@ -367,10 +367,11 @@ export class ContextNode {
    * Add or update a subscriber with a specified ID. If subscriber doesn't
    * yet exist, it will be created using the specified factory. The use
    * of factory is important to reduce bundling costs for context node.
+   * If `func` returns a function, that function is called on cleanup.
    *
    * @param {SID} id
-   * @param {typeof ./subscriber.Subscriber} Ctor
-   * @param {function(...DEP):void} func
+   * @param {typeof import('./subscriber').Subscriber} Ctor
+   * @param {import('./subscriber').SubscribeCallback<DEP>} func
    * @param {IContextProp<DEP, ?>[]} deps
    * @template DEP
    */
@@ -378,7 +379,13 @@ export class ContextNode {
     const subscribers = this.subscribers_ || (this.subscribers_ = new Map());
     let subscriber = subscribers.get(id);
     if (!subscriber) {
-      subscriber = new Ctor(this, func, deps);
+      subscriber = new Ctor(
+        /** @type {ContextNode<function(...DEP):void>} */ (
+          /** @type {?} */ (this)
+        ),
+        func,
+        deps
+      );
       subscribers.set(id, subscriber);
     }
   }

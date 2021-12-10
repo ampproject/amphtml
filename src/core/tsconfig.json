@@ -18,7 +18,6 @@
   ],
   "exclude": [
     "context/index.js",
-    "context/subscriber.js",
 
     "**/*.extern.js"
   ]
