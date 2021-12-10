@@ -1,23 +1,16 @@
-import {BentoIframe} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+import {Component, layoutSizeDefined, props, usesShadowDom} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoIframe;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  'src': {attr: 'src'},
-  'srcdoc': {attr: 'srcdoc'},
-  'sandbox': {attr: 'sandbox'},
-  'allowFullScreen': {attr: 'allowfullscreen'},
-  'allowPaymentRequest': {attr: 'allowpaymentrequest'},
-  'referrerPolicy': {attr: 'referrerpolicy'},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
