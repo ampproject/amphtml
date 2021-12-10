@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '#core/dom';
 import {dict} from '#core/types/object';
 
 import {dev, user} from '#utils/log';
@@ -135,7 +136,7 @@ export class AmpAccessFewcents {
    * @private
    */
   createElement_(name) {
-    return this.ampdoc.win.document.createElement(name);
+    return createElementWithAttributes(this.ampdoc.win.document, name, {});
   }
 
   /**
