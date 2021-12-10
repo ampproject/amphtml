@@ -640,9 +640,7 @@ const adConfig = jsonConfiguration({
   },
 
   'insurads': {
-    prefetch: [
-      'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-    ],
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
     preconnect: [
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
@@ -652,7 +650,7 @@ const adConfig = jsonConfiguration({
       'https://messaging.insurads.com',
     ],
     renderStartImplemented: true,
-    consentHandlingOverride: true
+    consentHandlingOverride: true,
   },
 
   'invibes': {
