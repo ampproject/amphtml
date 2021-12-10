@@ -12,7 +12,7 @@ export function insurads(global) {
     const t = new Date();
     t.setDate(t.getDate() - t.getDay());
     t.setHours(0, 0, 0, 0) / 1000;
-    return t;
+    return Number(t);
   }
 
   // For simplicity and flexibility, all validations are performed in the
