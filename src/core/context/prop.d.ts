@@ -12,7 +12,7 @@ declare global {
      * An optional type object that can be used for a using system. E.g.
      * this could be a Preact's Context object.
      */
-    type: Object | null;
+    type?: Object;
 
     /**
      * An array of dependencies that are required for the `compute` callback.
@@ -46,7 +46,7 @@ declare global {
      * 3. If it's a recursive property, the parent value.
      * 4. If `deps` are specified - the dep values.
      */
-    compute: (node: Node, inputs: T[], ...deps: DEP[]) => (T | undefined);
+    compute?: (node: Node, inputs: T[], ...deps: DEP[]) => (T | undefined);
 
     /**
      * The default value of a recursive property.

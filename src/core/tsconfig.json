@@ -19,7 +19,6 @@
   "exclude": [
     "context/index.js",
     "context/node.js",
-    "context/prop.js",
     "context/scan.js",
     "context/subscriber.js",
     "context/values.js",
