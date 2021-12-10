@@ -1,52 +1,26 @@
-import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
-
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoDateCountdown} from './component';
+import {
+  Component,
+  layoutSizeDefined,
+  lightDomTag,
+  props,
+  usesTemplate,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoDateCountdown;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['lightDomTag'] = 'div';
+BaseElement['lightDomTag'] = lightDomTag;
 
 /** @override */
-BaseElement['usesTemplate'] = true;
+BaseElement['usesTemplate'] = usesTemplate;
 
 /** @override */
-BaseElement['props'] = {
-  'datetime': {
-    attrs: [
-      'end-date',
-      'timeleft-ms',
-      'timestamp-ms',
-      'timestamp-seconds',
-      'offset-seconds',
-    ],
-    parseAttrs: parseDateAttrs,
-  },
-  'whenEnded': {attr: 'when-ended'},
-  'locale': {attr: 'locale'},
-  'biggestUnit': {attr: 'biggest-unit'},
-  'countUp': {attr: 'count-up', type: 'boolean'},
-};
-
-/**
- * @param {!Element} element
- * @return {?number}
- * @throws {UserError} when attribute values are missing or invalid.
- * @visibleForTesting
- */
-export function parseDateAttrs(element) {
-  return parseDateAttrsBase(element, [
-    'end-date',
-    'timeleft-ms',
-    'timestamp-ms',
-    'timestamp-seconds',
-  ]);
-}
+BaseElement['props'] = props;
