@@ -8,8 +8,7 @@ import {throttleTail} from './scheduler';
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
 
-/** @typedef {import('./types.d').ContextNode} ContextNode */
-
+/** @typedef {import('./node').ContextNode<?>} ContextNode */
 /**
  * @template T, DEP
  * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp

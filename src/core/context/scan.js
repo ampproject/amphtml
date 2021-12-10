@@ -1,4 +1,4 @@
-/** @typedef {import('./types.d').ContextNode} ContextNode */
+/** @typedef {import('./node').ContextNode<?>} ContextNode */
 
 /**
  * Performs the `closest()` scan through context nodes to find the one that

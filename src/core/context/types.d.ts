@@ -51,15 +51,6 @@ export interface IContextProp<T, DEP> {
   defaultValue?: T;
 }
 
-// Temporary stub type until node.js passes typechecking
-export interface ContextNode {
-  values: import('./values').Values;
-  node: Node;
-  root?: any;
-  parent?: ContextNode;
-  children?: ContextNode[];
-}
-
 /**
  * The structure for a property's inputs. It's important that `values` are
  * easily available as an array to pass them to the `recursive` and
@@ -82,7 +73,7 @@ export interface IContextPropUsed<T, DEP> {
   counter: number;
   depValues: DEP[];
   parentValue: T;
-  parentContextNode: null | ContextNode;
+  parentContextNode: null | import('./node').ContextNode<?>;
   ping: (refreshParent: boolean) => void
   pingDep: ((dep: DEP) => void)[]
   pingParent: null | ((parentValue: T) => void)
