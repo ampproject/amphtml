@@ -170,7 +170,7 @@ export class ShareWidget {
       <div class="i-amphtml-story-share-widget">
         <ul class="i-amphtml-story-share-list">
           {this.maybeRenderLinkShareButton_()}
-          <li>{this.maybeRenderSystemShareButton_()}</li>
+          <li></li>
         </ul>
       </div>
     );
@@ -221,21 +221,6 @@ export class ShareWidget {
   }
 
   /**
-   * @return {?Element}
-   * @private
-   */
-  maybeRenderSystemShareButton_() {
-    if (!this.isSystemShareSupported()) {
-      // `amp-social-share` will hide `system` buttons when not supported, but
-      // we also need to avoid adding it for rendering reasons.
-      return null;
-    }
-
-    this.loadRequiredExtensions();
-    return buildProvider(this.win.document, 'system');
-  }
-
-  /**
    * NOTE(alanorozco): This is a duplicate of the logic in the
    * `amp-social-share` component.
    * @return {boolean} Whether the browser supports native system sharing.
@@ -256,8 +241,6 @@ export class ShareWidget {
    * @protected
    */
   loadProviders() {
-    this.loadRequiredExtensions();
-
     const shareEl = this.storyEl_.querySelector(
       'amp-story-social-share, amp-story-bookend'
     );
@@ -316,14 +299,5 @@ export class ShareWidget {
     // `lastElementChild` is the system share button container, which should
     // always be last in list
     list.insertBefore(item, list.lastElementChild);
-  }
-
-  /**
-   */
-  loadRequiredExtensions() {
-    Services.extensionsFor(this.win).installExtensionForDoc(
-      this.getAmpDoc_(),
-      'amp-social-share'
-    );
   }
 }

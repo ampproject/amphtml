@@ -1,8 +1,11 @@
+import {devAssert} from '#core/assert';
 import {Keys_Enum} from '#core/constants/key-codes';
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {user} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
 import {getAmpdoc} from '../../../src/service-helpers';
@@ -23,6 +26,8 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
+
+const TAG = 'amp-story-share-menu';
 
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
@@ -142,7 +147,6 @@ export class ShareMenu {
    * @return {!Element}
    */
   buildForSystemSharing_() {
-    this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
     this.element_ = renderAmpSocialShareSystemElement();
     return this.element_;
   }
@@ -160,6 +164,11 @@ export class ShareMenu {
       this.parentEl_,
       () => this.close_(),
       shareWidgetElement
+    );
+    // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' directly.
+    Services.extensionsFor(this.win_).installExtensionForDoc(
+      getAmpdoc(this.parentEl_),
+      'amp-social-share'
     );
 
     // Only listen for closing when system share is unsupported, since the
@@ -205,7 +214,7 @@ export class ShareMenu {
     if (this.isSystemShareSupported_ && isOpen) {
       // Dispatches a click event on the amp-social-share button to trigger the
       // native system sharing UI. This has to be done upon user interaction.
-      this.element_.dispatchEvent(new Event('click'));
+      this.openSystemShare_();
 
       // There is no way to know when the user dismisses the native system share
       // menu, so we pretend it is closed on the story end, and let the native
@@ -246,4 +255,33 @@ export class ShareMenu {
   close_() {
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
   }
+
+  /**
+   * Opens the sharing dialog of native browsers.
+   * @private
+   */
+  openSystemShare_() {
+    const {navigator} = this.win_;
+    devAssert(navigator.share);
+    const shareData = {
+      url: Services.documentInfoForDoc(this.parentEl_).canonicalUrl,
+      text: this.win_.document.title,
+    };
+    navigator.share(shareData).catch((e) => {
+      user().warn(TAG, e.message, shareData);
+    });
+  }
 }
+
+// AMP.extension('amp-story-share-menu', '0.1', (AMP) => {
+//   AMP.ampdoc.whenReady().then(() => {
+//     const element = AMP.ampdoc
+//       .getRootNode()
+//       .querySelector('.i-amphtml-story-share-menu');
+//     if (!element) {
+//       return;
+//     }
+//     const shareMenu = new ShareMenu(element, AMP.ampdoc.win);
+//     shareMenu.build();
+//   });
+// });
