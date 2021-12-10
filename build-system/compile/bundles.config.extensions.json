@@ -886,6 +886,14 @@
     }
   },
   {
+    "name": "amp-story-share-menu",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-story-shopping",
     "version": "0.1",
     "options": {

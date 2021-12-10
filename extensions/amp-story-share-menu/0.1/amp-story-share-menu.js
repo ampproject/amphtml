@@ -1,23 +1,25 @@
+import {Keys_Enum} from '#core/constants/key-codes';
 import * as Preact from '#core/dom/jsx';
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
+import {getAmpdoc} from '../../../src/service-helpers';
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
+import {ShareWidget} from '../../amp-story/1.0/amp-story-share';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {ShareWidget} from './amp-story-share';
-import {createShadowRootWithStyle} from './utils';
-import {getAmpdoc} from '../../../src/service-helpers';
-import {localize} from './amp-story-localization-service';
+} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from '../../amp-story/1.0/story-analytics';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
