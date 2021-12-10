@@ -165,7 +165,7 @@ export class ShareMenu {
       () => this.close_(),
       shareWidgetElement
     );
-    // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' directly.
+    // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' when this file is lazy loaded.
     Services.extensionsFor(this.win_).installExtensionForDoc(
       getAmpdoc(this.parentEl_),
       'amp-social-share'
@@ -272,16 +272,3 @@ export class ShareMenu {
     });
   }
 }
-
-// AMP.extension('amp-story-share-menu', '0.1', (AMP) => {
-//   AMP.ampdoc.whenReady().then(() => {
-//     const element = AMP.ampdoc
-//       .getRootNode()
-//       .querySelector('.i-amphtml-story-share-menu');
-//     if (!element) {
-//       return;
-//     }
-//     const shareMenu = new ShareMenu(element, AMP.ampdoc.win);
-//     shareMenu.build();
-//   });
-// });
