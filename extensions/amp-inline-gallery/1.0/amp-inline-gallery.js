@@ -1,3 +1,4 @@
+import * as Preact from '#preact';
 import {
   AmpInlineGalleryPagination,
   TAG as PAGINATION_TAG,
@@ -6,16 +7,26 @@ import {
   AmpInlineGalleryThumbnails,
   TAG as THUMBNAILS_TAG,
 } from './amp-inline-gallery-thumbnails';
-import {BaseElement} from './base-element';
 import {Layout_Enum} from '#core/dom/layout';
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 
+import {Component, ContextExporter, detached, props} from './element';
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
+import {dict} from '#core/types/object';
+
 /** @const {string} */
 const TAG = 'amp-inline-gallery';
 
-class AmpInlineGallery extends BaseElement {
+class AmpInlineGallery extends AmpPreactBaseElement {
+  /** @override */
+  init() {
+    return dict({
+      'children': <ContextExporter shimDomElement={this.element} />,
+    });
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -26,6 +37,15 @@ class AmpInlineGallery extends BaseElement {
     return layout == Layout_Enum.CONTAINER;
   }
 }
+
+/** @override */
+AmpInlineGallery['Component'] = Component;
+
+/** @override */
+AmpInlineGallery['detached'] = detached;
+
+/** @override */
+AmpInlineGallery['props'] = props;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpInlineGallery);
