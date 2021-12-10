@@ -2,7 +2,7 @@ import {devAssert} from '#core/assert';
 
 /**
  * @template T, DEP
- * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp<T, DEP>
+ * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp
  */
 
 /** @type {IContextProp<*, *>[]} */

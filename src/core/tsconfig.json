@@ -20,7 +20,6 @@
     "context/index.js",
     "context/node.js",
     "context/subscriber.js",
-    "context/values.js",
 
     "**/*.extern.js"
   ]

@@ -43,7 +43,7 @@ export interface IContextProp<T, DEP> {
    * 3. If it's a recursive property, the parent value.
    * 4. If `deps` are specified - the dep values.
    */
-  compute?: (node: Node, inputs: T[], ...deps: DEP[]) => (T | undefined);
+  compute: (node: Node, inputs: T[], ...deps: DEP[]) => (T | undefined);
 
   /**
    * The default value of a recursive property.
@@ -53,7 +53,37 @@ export interface IContextProp<T, DEP> {
 
 // Temporary stub type until node.js passes typechecking
 export interface ContextNode {
+  values: any;
+  node: Node;
+  root?: any;
   parent?: ContextNode;
   children?: ContextNode[];
 }
 
+/**
+ * The structure for a property's inputs. It's important that `values` are
+ * easily available as an array to pass them to the `recursive` and
+ * `compute` callbacks without reallocation.
+ */
+export interface IContextPropInput<T> {
+  values: T[];
+  setters: ((value: T) => void)[];
+}
+
+// TODO(rcebulko): Solve enum challenge bridging JS/TS
+export type PendingEnumValue = number;
+
+/** The structure for a property's computed values and subscribers. */
+export interface IContextPropUsed<T, DEP> {
+  prop: IContextProp<T, DEP>
+  subscribers: ((value: T) => void)[];
+  value: T;
+  pending: PendingEnumValue;
+  counter: number;
+  depValues: DEP[];
+  parentValue: T;
+  parentContextNode: null | ContextNode;
+  ping: (refreshParent: boolean) => void
+  pingDep: ((dep: DEP) => void)[]
+  pingParent: null | ((parentValue: T) => void)
+}
