@@ -16,10 +16,10 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
-    <amp-access-fewcents
-      layout="responsive"
-      width="150"
-      height="80"
-    ></amp-access-fewcents>
+    <section amp-access="NOT access" amp-access-hide>
+      <div id="amp-access-fewcents-dialog"></div>
+    </section>
+    <section amp-access="error" amp-access-hide class="error-section"></section>
+    <div amp-access="access" amp-access-hide></div>
   </body>
 </html>
