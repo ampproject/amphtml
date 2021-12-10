@@ -1,31 +1,17 @@
-import {createParseAttrsWithPrefix} from '#preact/parse-props';
+import {Component, loadable, props, usesShadowDom} from './element';
 
-import {BentoYoutube} from './component';
+import {BaseElement as BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
 
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
-
-export class BaseElement extends VideoBaseElement {}
+export class BaseElement extends BentoVideoBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoYoutube;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['loadable'] = true;
+BaseElement['loadable'] = loadable;
 
 /** @override */
-BaseElement['props'] = {
-  'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'loop': {attr: 'loop', type: 'boolean'},
-  'controls': {attr: 'controls', type: 'boolean'},
-  'videoid': {attr: 'data-videoid'},
-  'liveChannelid': {attr: 'data-live-channelid'},
-  'dock': {attr: 'dock', media: true},
-  'credentials': {attr: 'credentials'},
-  // TODO(wg-components): Current behavior defaults to loading="auto".
-  // Refactor to make loading="lazy" as the default.
-  'loading': {attr: 'data-loading'},
-  'params': createParseAttrsWithPrefix('data-param-'),
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;

@@ -4,21 +4,31 @@ import {isExperimentOn} from '#experiments';
 
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {
+  Component,
+  getJwplayerProps,
+  layoutSizeDefined,
+  loadable,
+  props,
+  usesShadowDom,
+} from './element';
 
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-jwplayer';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
-class AmpJwplayer extends BaseElement {
+class AmpJwplayer extends AmpVideoBaseElement {
   /** @override */
   init() {
+    super.init();
+
     const consentPolicy = this.getConsentPolicy();
     if (consentPolicy) {
       this.getConsentInfo().then((consentInfo) => {
@@ -37,7 +47,7 @@ class AmpJwplayer extends BaseElement {
       });
     }
 
-    return super.init();
+    return getJwplayerProps(this.element);
   }
 
   /**
@@ -62,6 +72,21 @@ class AmpJwplayer extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 }
+
+/** @override */
+AmpJwplayer['Component'] = Component;
+
+/** @override */
+AmpJwplayer['props'] = props;
+
+/** @override */
+AmpJwplayer['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpJwplayer['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpJwplayer['loadable'] = loadable;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpJwplayer);

@@ -1,8 +1,17 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+
+import {
+  Component,
+  layoutSizeDefined,
+  loadable,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
-export class VideoBaseElement extends BaseElement {
+export class AmpVideoBaseElement extends AmpPreactBaseElement {
   /** @override */
   init() {
     this.registerApiAction_('play', (api) => api.play());
@@ -41,3 +50,33 @@ export class VideoBaseElement extends BaseElement {
     );
   }
 }
+
+/** @override */
+AmpVideoBaseElement['Component'] = Component;
+
+/** @override */
+AmpVideoBaseElement['loadable'] = loadable;
+
+/** @override */
+AmpVideoBaseElement['layoutSizeDefined'] = layoutSizeDefined;
+
+/**
+ * Defaults to `{component: 'video'}` from `BentoVideo` component.
+ * Subclasses may set:
+ * ```
+ *   AmpMyPlayer['staticProps'] = dict({
+ *     'component': MyPlayerComponent,
+ *   });
+ * ```
+ * @override
+ */
+AmpVideoBaseElement['staticProps'];
+
+/** @override */
+AmpVideoBaseElement['props'] = props;
+
+/** @override */
+AmpVideoBaseElement['shadowCss'] = shadowCss;
+
+/** @override */
+AmpVideoBaseElement['usesShadowDom'] = usesShadowDom;

@@ -6,7 +6,9 @@ import {isExperimentOn} from '#experiments';
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {AmpVideoBaseElement} from 'extensions/amp-video/1.0/video-base-element';
+
+import {Component, loadable, props, usesShadowDom} from './element';
 
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
 import {postMessageWhenAvailable} from '../../../src/iframe-video';
@@ -30,7 +32,7 @@ function getIntersectionRatioMinAutoplay(element) {
   );
 }
 
-class AmpVideoIframe extends BaseElement {
+class AmpVideoIframe extends AmpVideoBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -105,6 +107,19 @@ const makeMethodMessage = (method) =>
     'method': method.toLowerCase(),
   });
 
+/** @override */
+AmpVideoIframe['Component'] = Component;
+
+/** @override */
+AmpVideoIframe['props'] = props;
+
+/** @override */
+AmpVideoIframe['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpVideoIframe['loadable'] = loadable;
+
+/** @override */
 AmpVideoIframe['staticProps'] = dict({
   'onMessage': onMessage,
   'makeMethodMessage': makeMethodMessage,
