@@ -1,3 +1,4 @@
+import {Keys_Enum} from '#core/constants/key-codes';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
@@ -163,8 +164,8 @@ class AmpCarousel extends AMP.BaseElement {
         this.onScrollPositionChanged_();
       }
     );
-    this.prevButton_.addEventListener('click', () => this.interactionPrev());
-    this.nextButton_.addEventListener('click', () => this.interactionNext());
+    this.setupButtonInteraction(this.nextButton_, () => this.interactionNext());
+    this.setupButtonInteraction(this.prevButton_, () => this.interactionPrev());
     this.handlePropagationInViewer_();
 
     const owners = Services.ownersForDoc(element);
@@ -206,6 +207,22 @@ class AmpCarousel extends AMP.BaseElement {
     }
 
     return this.mutateElement(() => {});
+  }
+
+  /**
+   * @param {!HTMLDivElement} button
+   * @param {*} onInteraction
+   */
+  setupButtonInteraction(button, onInteraction) {
+    button.onkeydown = (event) => {
+      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
+        if (!event.defaultPrevented) {
+          event.preventDefault();
+          onInteraction();
+        }
+      }
+    };
+    button.onclick = onInteraction;
   }
 
   /** @override */
