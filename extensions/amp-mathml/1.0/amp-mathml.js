@@ -1,8 +1,16 @@
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {
+  Component,
+  layoutSizeDefined,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
 import {TYPE} from './utils';
 
 import {CSS} from '../../../build/amp-mathml-1.0.css';
@@ -11,7 +19,7 @@ import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 /** @const {string} */
 const TAG = 'amp-mathml';
 
-class AmpMathml extends BaseElement {
+class AmpMathml extends AmpPreactBaseElement {
   /** @override @nocollapse */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
@@ -35,6 +43,21 @@ class AmpMathml extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 }
+
+/** @override */
+AmpMathml['Component'] = Component;
+
+/** @override */
+AmpMathml['props'] = props;
+
+/** @override */
+AmpMathml['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpMathml['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpMathml['shadowCss'] = shadowCss;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpMathml, CSS);
