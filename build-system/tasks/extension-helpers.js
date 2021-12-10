@@ -4,7 +4,7 @@ const debounce = require('../common/debounce');
 const dedent = require('dedent');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const legacyLatestVersions = require('../compile/bundles.legacy-latest-versions');
+const legacyLatestVersions = require('../compile/bundles.legacy-latest-versions.json');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {

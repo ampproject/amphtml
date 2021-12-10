@@ -1,0 +1,6 @@
+Exports an extension-version map for all of the '-latest' binaries that we
+should produce. This object should never be modified, as we have
+intentionally deprecated the concept of '-latest' binaries.
+
+See the I2D for full context: https://github.com/ampproject/amphtml/issues/36749
+

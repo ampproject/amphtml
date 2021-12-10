@@ -1,4 +1,4 @@
-const latestVersions = require('./bundles.legacy-latest-versions');
+const latestVersions = require('./bundles.legacy-latest-versions.json');
 const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
