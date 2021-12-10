@@ -1,26 +1,25 @@
 import {PreactBaseElement} from '#preact/base-element';
-import {createParseAttrsWithPrefix} from '#preact/parse-props';
-import {BentoTwitter} from './component';
+import {
+  Component,
+  layoutSizeDefined,
+  loadable,
+  props,
+  usesShadowDom,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoTwitter;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  'title': {attr: 'title'}, // Needed for Preact component
-  // TODO(wg-components): Current behavior defaults to loading="auto".
-  // Refactor to make loading="lazy" as the default.
-  'loading': {attr: 'data-loading'},
-  'options': createParseAttrsWithPrefix('data-'), // Needed to render componoent upon mutation
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['loadable'] = true;
+BaseElement['loadable'] = loadable;
