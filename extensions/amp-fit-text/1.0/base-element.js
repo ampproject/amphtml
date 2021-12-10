@@ -1,24 +1,25 @@
-import {CSS} from './component.jss';
-import {BentoFitText} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+import {
+  Component,
+  layoutSizeDefined,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoFitText;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  'children': {passthrough: true},
-  'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
-  'maxFontSize': {attr: 'max-font-size', type: 'number', media: true},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['shadowCss'] = CSS;
+BaseElement['shadowCss'] = shadowCss;
