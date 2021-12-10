@@ -1,28 +1,26 @@
-import {BentoVimeo} from './component';
+import {
+  Component,
+  layoutSizeDefined,
+  loadable,
+  props,
+  usesShadowDom,
+} from './element';
 
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {BaseElement as BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
 
-export class BaseElement extends VideoBaseElement {}
-
-/** @override */
-BaseElement['Component'] = BentoVimeo;
-
-/** @override */
-BaseElement['props'] = {
-  'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'controls': {attr: 'controls', type: 'boolean'},
-  'videoid': {attr: 'data-videoid'},
-  'doNotTrack': {attr: 'do-not-track'},
-  // TODO(wg-components): Current behavior defaults to loading="auto".
-  // Refactor to make loading="lazy" as the default.
-  'loading': {attr: 'data-loading'},
-};
+export class BaseElement extends BentoVideoBaseElement {}
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['loadable'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+BaseElement['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+BaseElement['loadable'] = loadable;

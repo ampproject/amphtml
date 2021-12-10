@@ -3,17 +3,18 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-brightcove-1.0.css';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 import {Services} from '#service';
+import {Component, layoutSizeDefined, props, usesShadowDom} from './element';
+import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';
 
-class AmpBrightcove extends BaseElement {
+class AmpBrightcove extends AmpVideoBaseElement {
   /** @override @nocollapse */
   static getPreconnects() {
     return ['https://players.brightcove.net'];
@@ -62,6 +63,24 @@ class AmpBrightcove extends BaseElement {
   }
 }
 
+/** @override */
+AmpBrightcove['Component'] = Component;
+
+/** @override */
+AmpBrightcove['props'] = {
+  ...props,
+  'referrer': {
+    attrs: ['data-referrer'],
+    parseAttrs: getReferrerFromElement,
+  },
+};
+
+/** @override */
+AmpBrightcove['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpBrightcove['usesShadowDom'] = usesShadowDom;
+
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpBrightcove, CSS);
 });
@@ -77,11 +96,3 @@ function getReferrerFromElement(element) {
       )
     : undefined;
 }
-
-AmpBrightcove['props'] = {
-  ...BaseElement['props'],
-  'referrer': {
-    attrs: ['data-referrer'],
-    parseAttrs: getReferrerFromElement,
-  },
-};
