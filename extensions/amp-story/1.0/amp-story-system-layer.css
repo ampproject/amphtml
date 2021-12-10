@@ -289,7 +289,8 @@
 }
 
 .i-amphtml-story-info-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><rect width="2.2" height="6.7" x="22.9" y="22.6" fill="#fff" rx="1.1"/><path stroke="#fff" stroke-width="1.9" d="M31.7 24a7.7 7.7 0 1 1-15.4 0 7.7 7.7 0 0 1 15.4 0Z"/><circle cx="24" cy="20.2" r="1.2" fill="#fff"/></svg>') !important;  display: none !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><rect width="2.2" height="6.7" x="22.9" y="22.6" fill="#fff" rx="1.1"/><path stroke="#fff" stroke-width="1.9" d="M31.7 24a7.7 7.7 0 1 1-15.4 0 7.7 7.7 0 0 1 15.4 0Z"/><circle cx="24" cy="20.2" r="1.2" fill="#fff"/></svg>') !important;
+  display: none !important;
   background-size: auto !important;
 }
 
