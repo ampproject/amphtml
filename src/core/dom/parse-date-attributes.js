@@ -1,12 +1,11 @@
 import {devAssert, userAssert} from '#core/assert';
 import {TimestampDef, parseDate} from '#core/types/date';
 
-/** @typedef {function(string):!TimestampDef} */
-let DateParserDef;
+/** @typedef {function(string):TimestampDef} DateParserDef */
 
 /**
  * Map from attribute names to their parsers.
- * @type {Object<string, !DateParserDef>}
+ * @type {Object<string, DateParserDef>}
  */
 const dateAttrParsers = {
   'datetime': (datetime) =>
@@ -19,8 +18,8 @@ const dateAttrParsers = {
 };
 
 /**
- * @param {!Element} element
- * @param {!Array<string>} dateAttrs list of attribute names
+ * @param {Element} element
+ * @param {Array<string>} dateAttrs list of attribute names
  * @return {?TimestampDef}
  */
 export function parseDateAttrs(element, dateAttrs) {
@@ -38,15 +37,15 @@ export function parseDateAttrs(element, dateAttrs) {
 /**
  * Parse epoch from list of possible element attributes, returning the first one
  * that is truthy.
- * @param {!Element} element
- * @param {!Array<string>} dateAttrs list of attribute names
+ * @param {Element} element
+ * @param {Array<string>} dateAttrs list of attribute names
  * @return {?TimestampDef}
  */
 function parseEpoch(element, dateAttrs) {
   // Validate provided dateAttrs outside the loop so it will fail when an
   // invalid attr is provided, even if that attribute isn't present on the
   // element.
-  /** @type {!Array<!DateParserDef>} */
+  /** @type {Array<DateParserDef>} */
   const parsers = dateAttrs.map((attrName) =>
     devAssert(
       dateAttrParsers[attrName],
