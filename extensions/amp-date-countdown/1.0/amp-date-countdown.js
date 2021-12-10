@@ -3,16 +3,24 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {
+  Component,
+  layoutSizeDefined,
+  lightDomTag,
+  props,
+  usesTemplate,
+} from './element';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
 
-class AmpDateCountdown extends BaseElement {
+class AmpDateCountdown extends AmpPreactBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -75,6 +83,21 @@ class AmpDateCountdown extends BaseElement {
     return true;
   }
 }
+
+/** @override */
+AmpDateCountdown['Component'] = Component;
+
+/** @override */
+AmpDateCountdown['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpDateCountdown['lightDomTag'] = lightDomTag;
+
+/** @override */
+AmpDateCountdown['usesTemplate'] = usesTemplate;
+
+/** @override */
+AmpDateCountdown['props'] = props;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpDateCountdown);
