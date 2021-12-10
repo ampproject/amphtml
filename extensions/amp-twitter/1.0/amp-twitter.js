@@ -1,15 +1,22 @@
-import {BaseElement} from './base-element';
 import {dict} from '#core/types/object';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {htmlFor} from '#core/dom/static-template';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#core/assert';
+import {
+  Component,
+  layoutSizeDefined,
+  loadable,
+  props,
+  usesShadowDom,
+} from './element';
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
 
 /** @const {string} */
 const TAG = 'amp-twitter';
 const TYPE = 'twitter';
 
-class AmpTwitter extends BaseElement {
+class AmpTwitter extends AmpPreactBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -72,6 +79,21 @@ class AmpTwitter extends BaseElement {
     return super.isLayoutSupported(layout);
   }
 }
+
+/** @override */
+AmpTwitter['Component'] = Component;
+
+/** @override */
+AmpTwitter['props'] = props;
+
+/** @override */
+AmpTwitter['layoutSizeDefined'] = layoutSizeDefined;
+
+/** @override */
+AmpTwitter['usesShadowDom'] = usesShadowDom;
+
+/** @override */
+AmpTwitter['loadable'] = loadable;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpTwitter);
