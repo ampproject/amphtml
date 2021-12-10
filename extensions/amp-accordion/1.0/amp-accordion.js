@@ -3,12 +3,14 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {Component, detached, elementInit, props} from './element';
 
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 
@@ -16,7 +18,7 @@ import {CSS} from '../../../build/amp-accordion-1.0.css';
 const TAG = 'amp-accordion';
 
 /** @extends {PreactBaseElement<BentoAccordionDef.AccordionApi>} */
-class AmpAccordion extends BaseElement {
+class AmpAccordion extends AmpPreactBaseElement {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api, invocation) =>
@@ -29,7 +31,11 @@ class AmpAccordion extends BaseElement {
       api./*OK*/ collapse(invocation.args && invocation.args['section'])
     );
 
-    return super.init();
+    return elementInit(
+      this.element,
+      this.mutateProps.bind(this),
+      this.triggerEvent.bind(this)
+    );
   }
 
   /** @override */
@@ -59,6 +65,12 @@ class AmpAccordion extends BaseElement {
     return true;
   }
 }
+/** @override */
+AmpAccordion['Component'] = Component;
+/** @override */
+AmpAccordion['props'] = props;
+/** @override */
+AmpAccordion['detached'] = detached;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpAccordion, CSS);
