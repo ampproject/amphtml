@@ -1,25 +1,26 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoMathml} from './component';
-import {CSS as COMPONENT_CSS} from './component.jss';
+import {
+  Component,
+  layoutSizeDefined,
+  props,
+  shadowCss,
+  usesShadowDom,
+} from './element';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = BentoMathml;
+BaseElement['Component'] = Component;
 
 /** @override */
-BaseElement['props'] = {
-  'inline': {attr: 'inline', type: 'boolean', default: false},
-  'formula': {attr: 'data-formula'},
-  'title': {attr: 'title'},
-};
+BaseElement['props'] = props;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['layoutSizeDefined'] = layoutSizeDefined;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BaseElement['usesShadowDom'] = usesShadowDom;
 
 /** @override */
-BaseElement['shadowCss'] = COMPONENT_CSS;
+BaseElement['shadowCss'] = shadowCss;
