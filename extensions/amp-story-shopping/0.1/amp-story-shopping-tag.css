@@ -13,6 +13,14 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
+
+.amp-story-shopping-tag-currency-symbol {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 10px !important;
+  padding-right: 2px !important;
+}
+
 .amp-story-shopping-tag-inner {
   height: 36px !important;
   display: flex !important;
