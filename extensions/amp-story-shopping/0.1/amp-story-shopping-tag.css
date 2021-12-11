@@ -52,6 +52,7 @@ amp-story-shopping-tag {
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   padding: 0 6px !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
+  padding: 8px 12px 8px 4px !important;
 }
 
 .amp-story-shopping-tag-pill-image {
@@ -70,9 +71,9 @@ amp-story-shopping-tag {
 
 .amp-story-shopping-tag-pill-text {
   overflow: hidden !important;
+  padding: 0px 12px 0px 4px !important;
   font-size: 14px !important;
-  line-height: 13px !important;
-  padding: 8px 12px 8px 4px !important;
+  line-height: 18px !important;
   text-overflow: ellipsis !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
