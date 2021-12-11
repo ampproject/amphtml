@@ -13,6 +13,11 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
+.amp-story-shopping-product-tag-text {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 200 !important;
+}
+
 .amp-story-shopping-tag-inner {
   height: 36px !important;
   display: flex !important;
