@@ -8,7 +8,7 @@ amp-story-shopping-tag {
   /* Height and width ensures layoutCallback is called. */
   min-height: 1px !important;
   min-width: 1px !important;
-  height: 48px !important;
+  height: 36px !important;
 
   --i-amphtml-shopping-tag-bg-color: rgba(0, 0, 0, 0.3);
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
@@ -50,9 +50,8 @@ amp-story-shopping-tag {
   border-radius: 18px !important;
   height: 100% !important;
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
-  padding: 0 6px !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
-  padding: 8px 12px 8px 4px !important;
+  padding: 4px 12px 4px 4px !important;
 }
 
 .amp-story-shopping-tag-pill-image {
