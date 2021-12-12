@@ -1,45 +1,33 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
 import {Messaging} from '@ampproject/viewer-messaging';
 
 // Source for this constant is css/amp-story-player-shadow.css
 import {devAssertElement} from '#core/assert';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, tryFocus} from '#core/dom';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
+import {isEnumValue} from '#core/types/enum';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
+import {createCustomEvent, listenOnce} from '#utils/event-helper';
+
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
+import {AMP_STORY_PLAYER_EVENT} from './event';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
 import {urls} from '../config';
-import {createCustomEvent, listenOnce} from '../event-helper';
 import {getMode} from '../mode';
 import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
+  parseUrlDeprecated,
   parseUrlWithA,
   removeFragment,
   removeSearch,
@@ -47,14 +35,14 @@ import {
 } from '../url';
 
 /** @enum {string} */
-const LoadStateClass = {
+const LOAD_STATE_CLASS_ENUM = {
   LOADING: 'i-amphtml-story-player-loading',
   LOADED: 'i-amphtml-story-player-loaded',
   ERROR: 'i-amphtml-story-player-error',
 };
 
 /** @enum {number} */
-const StoryPosition = {
+const STORY_POSITION_ENUM = {
   PREVIOUS: -1,
   CURRENT: 0,
   NEXT: 1,
@@ -67,7 +55,7 @@ const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 const SANDBOX_MIN_LIST = ['allow-top-navigation'];
 
 /** @enum {number} */
-const SwipingState = {
+const SWIPING_STATE_ENUM = {
   NOT_SWIPING: 0,
   SWIPING_TO_LEFT: 1,
   SWIPING_TO_RIGHT: 2,
@@ -83,40 +71,38 @@ const TOGGLE_THRESHOLD_PX = 50;
 const FETCH_STORIES_THRESHOLD = 2;
 
 /** @enum {string} */
-const DEPRECATED_BUTTON_TYPES = {
+const DEPRECATED_BUTTON_TYPES_ENUM = {
   BACK: 'back-button',
   CLOSE: 'close-button',
 };
 
 /** @enum {string} */
-const DEPRECATED_BUTTON_CLASSES = {
+const DEPRECATED_BUTTON_CLASSES_ENUM = {
   BASE: 'amp-story-player-exit-control-button',
   HIDDEN: 'amp-story-player-hide-button',
-  [DEPRECATED_BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
-  [DEPRECATED_BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
+  BACK: 'amp-story-player-back-button',
+  CLOSE: 'amp-story-player-close-button',
 };
 
 /** @enum {string} */
-const DEPRECATED_EVENT_NAMES = {
-  [DEPRECATED_BUTTON_TYPES.BACK]: 'amp-story-player-back',
-  [DEPRECATED_BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
+const DEPRECATED_EVENT_NAMES_ENUM = {
+  BACK: 'amp-story-player-back',
+  CLOSE: 'amp-story-player-close',
 };
 
 /** @enum {string} */
-const STORY_STATE_TYPE = {
+const STORY_STATE_TYPE_ENUM = {
   PAGE_ATTACHMENT_STATE: 'page-attachment',
 };
 
 /** @enum {string} */
-const STORY_MESSAGE_STATE_TYPE = {
+const STORY_MESSAGE_STATE_TYPE_ENUM = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
+  UI_STATE: 'UI_STATE',
   MUTED_STATE: 'MUTED_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
 };
-
-/** @const {string} */
-export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
 
 /** @const {string} */
 const CLASS_NO_NAVIGATION_TRANSITION =
@@ -183,20 +169,15 @@ export let ViewerControlDef;
 const TAG = 'amp-story-player';
 
 /** @enum {string} */
-const LOG_TYPE = {
+const LOG_TYPE_ENUM = {
   DEV: 'amp-story-player-dev',
 };
-
-/**
- * Flag to show or hide the desktop panels player experiment.
- * @const {boolean}
- */
 
 /**
  * NOTE: If udpated here, update in amp-story.js
  * @private @const {number}
  */
-const DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
+const PANEL_ASPECT_RATIO_THRESHOLD = 3 / 4;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -229,8 +210,8 @@ export class AmpStoryPlayer {
     /** @private {number} */
     this.currentIdx_ = 0;
 
-    /** @private {!SwipingState} */
-    this.swipingState_ = SwipingState.NOT_SWIPING;
+    /** @private {!SWIPING_STATE_ENUM} */
+    this.swipingState_ = SWIPING_STATE_ENUM.NOT_SWIPING;
 
     /** @private {?ConfigDef} */
     this.playerConfig_ = null;
@@ -271,14 +252,6 @@ export class AmpStoryPlayer {
 
     /** @private {?Element} */
     this.nextButton_ = null;
-
-    /**
-     * Shows or hides the desktop panels player experiment.
-     * Variable is set on window for unit testing new features.
-     * @private {?boolean}
-     */
-    this.isDesktopPanelExperimentOn_ =
-      this.win_.DESKTOP_PANEL_STORY_PLAYER_EXP_ON;
 
     return this.element_;
   }
@@ -391,7 +364,7 @@ export class AmpStoryPlayer {
 
     this.updateVisibilityState_(
       currentStory,
-      paused ? VisibilityState.PAUSED : VisibilityState.VISIBLE
+      paused ? VisibilityState_Enum.PAUSED : VisibilityState_Enum.VISIBLE
     );
   }
 
@@ -428,9 +401,7 @@ export class AmpStoryPlayer {
     this.initializeAttribution_();
     this.initializePageScroll_();
     this.initializeCircularWrapping_();
-    if (this.isDesktopPanelExperimentOn_) {
-      this.initializeDesktopStoryControlUI_();
-    }
+    this.initializeDesktopStoryControlUI_();
     this.signalReady_();
     this.element_.isBuilt_ = true;
   }
@@ -507,19 +478,30 @@ export class AmpStoryPlayer {
    */
   initializeButton_() {
     const option = this.element_.getAttribute('exit-control');
-    if (!Object.values(DEPRECATED_BUTTON_TYPES).includes(option)) {
+    if (!isEnumValue(DEPRECATED_BUTTON_TYPES_ENUM, option)) {
       return;
     }
 
     const button = this.doc_.createElement('button');
     this.rootEl_.appendChild(button);
 
-    button.classList.add(DEPRECATED_BUTTON_CLASSES[option]);
-    button.classList.add(DEPRECATED_BUTTON_CLASSES.BASE);
+    const isBack = option === DEPRECATED_BUTTON_TYPES_ENUM.BACK;
+    button.classList.add(
+      isBack
+        ? DEPRECATED_BUTTON_CLASSES_ENUM.BACK
+        : DEPRECATED_BUTTON_CLASSES_ENUM.CLOSE
+    );
+    button.classList.add(DEPRECATED_BUTTON_CLASSES_ENUM.BASE);
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, DEPRECATED_EVENT_NAMES[option], dict({}))
+        createCustomEvent(
+          this.win_,
+          isBack
+            ? DEPRECATED_EVENT_NAMES_ENUM.BACK
+            : DEPRECATED_EVENT_NAMES_ENUM.CLOSE,
+          dict({})
+        )
       );
     });
   }
@@ -637,19 +619,26 @@ export class AmpStoryPlayer {
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE}),
+            dict({
+              'state': STORY_MESSAGE_STATE_TYPE_ENUM.PAGE_ATTACHMENT_STATE,
+            }),
             false
           );
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID}),
+            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.CURRENT_PAGE_ID}),
             false
           );
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE.MUTED_STATE})
+            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE})
+          );
+
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE})
           );
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
@@ -722,17 +711,17 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeLoadingListeners_(iframeEl) {
-    this.rootEl_.classList.add(LoadStateClass.LOADING);
+    this.rootEl_.classList.add(LOAD_STATE_CLASS_ENUM.LOADING);
 
     iframeEl.onload = () => {
-      this.rootEl_.classList.remove(LoadStateClass.LOADING);
-      this.rootEl_.classList.add(LoadStateClass.LOADED);
-      this.element_.classList.add(LoadStateClass.LOADED);
+      this.rootEl_.classList.remove(LOAD_STATE_CLASS_ENUM.LOADING);
+      this.rootEl_.classList.add(LOAD_STATE_CLASS_ENUM.LOADED);
+      this.element_.classList.add(LOAD_STATE_CLASS_ENUM.LOADED);
     };
     iframeEl.onerror = () => {
-      this.rootEl_.classList.remove(LoadStateClass.LOADING);
-      this.rootEl_.classList.add(LoadStateClass.ERROR);
-      this.element_.classList.add(LoadStateClass.ERROR);
+      this.rootEl_.classList.remove(LOAD_STATE_CLASS_ENUM.LOADING);
+      this.rootEl_.classList.add(LOAD_STATE_CLASS_ENUM.ERROR);
+      this.element_.classList.add(LOAD_STATE_CLASS_ENUM.ERROR);
     };
   }
 
@@ -747,36 +736,36 @@ export class AmpStoryPlayer {
     new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
       this.visibleDeferred_.resolve()
     );
-    if (this.isDesktopPanelExperimentOn_) {
-      if (this.win_.ResizeObserver) {
-        new this.win_.ResizeObserver((e) => {
-          const {height, width} = e[0].contentRect;
-          this.onPlayerResize_(height, width);
-        }).observe(this.element_);
-      } else {
-        // Set size once as fallback for browsers not supporting ResizeObserver.
-        const {height, width} = this.element_./*OK*/ getBoundingClientRect();
+
+    if (this.win_.ResizeObserver) {
+      new this.win_.ResizeObserver((e) => {
+        const {height, width} = e[0].contentRect;
         this.onPlayerResize_(height, width);
-      }
+      }).observe(this.element_);
+    } else {
+      // Set size once as fallback for browsers not supporting ResizeObserver.
+      const {height, width} = this.element_./*OK*/ getBoundingClientRect();
+      this.onPlayerResize_(height, width);
     }
+
     this.render_();
 
     this.element_.isLaidOut_ = true;
   }
 
   /**
-   * Builds desktop "previous" and "next" story UI.
+   * Builds panel mode "previous" and "next" story UI.
    * @private
    */
   initializeDesktopStoryControlUI_() {
     this.prevButton_ = this.doc_.createElement('button');
-    this.prevButton_.classList.add('i-amphtml-story-player-desktop-panel-prev');
+    this.prevButton_.classList.add('i-amphtml-story-player-panel-prev');
     this.prevButton_.addEventListener('click', () => this.previous_());
     this.prevButton_.setAttribute('aria-label', 'previous story');
     this.rootEl_.appendChild(this.prevButton_);
 
     this.nextButton_ = this.doc_.createElement('button');
-    this.nextButton_.classList.add('i-amphtml-story-player-desktop-panel-next');
+    this.nextButton_.classList.add('i-amphtml-story-player-panel-next');
     this.nextButton_.addEventListener('click', () => this.next_());
     this.nextButton_.setAttribute('aria-label', 'next story');
     this.rootEl_.appendChild(this.nextButton_);
@@ -785,7 +774,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Toggles disabled attribute on desktop "previous" and "next" buttons.
+   * Toggles disabled attribute on panel mode "previous" and "next" buttons.
    * @private
    */
   checkButtonsDisabled_() {
@@ -807,26 +796,22 @@ export class AmpStoryPlayer {
    * @private
    */
   onPlayerResize_(height, width) {
-    const isDesktopOnePanel =
-      width / height > DESKTOP_ONE_PANEL_ASPECT_RATIO_THRESHOLD;
+    const isPanel = width / height > PANEL_ASPECT_RATIO_THRESHOLD;
 
-    this.rootEl_.classList.toggle(
-      'i-amphtml-story-player-desktop-panel',
-      isDesktopOnePanel
-    );
+    this.rootEl_.classList.toggle('i-amphtml-story-player-panel', isPanel);
 
-    if (isDesktopOnePanel) {
+    if (isPanel) {
       setStyles(this.rootEl_, {
         '--i-amphtml-story-player-height': `${height}px`,
       });
 
       this.rootEl_.classList.toggle(
-        'i-amphtml-story-player-desktop-panel-medium',
+        'i-amphtml-story-player-panel-medium',
         height < 756
       );
 
       this.rootEl_.classList.toggle(
-        'i-amphtml-story-player-desktop-panel-small',
+        'i-amphtml-story-player-panel-small',
         height < 538
       );
     }
@@ -931,7 +916,7 @@ export class AmpStoryPlayer {
    */
   getStoryState(storyStateType) {
     switch (storyStateType) {
-      case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
+      case STORY_STATE_TYPE_ENUM.PAGE_ATTACHMENT_STATE:
         this.getPageAttachmentState_();
         break;
       default:
@@ -965,11 +950,49 @@ export class AmpStoryPlayer {
       'remaining': remaining,
     };
 
-    if (this.isDesktopPanelExperimentOn_) {
-      this.checkButtonsDisabled_();
-    }
+    this.checkButtonsDisabled_();
+    this.getUiState_().then((uiTypeNumber) =>
+      this.onUiStateUpdate_(uiTypeNumber)
+    );
+
     this.signalNavigation_(navigation);
     this.maybeFetchMoreStories_(remaining);
+  }
+
+  /**
+   * Gets UI state from active story.
+   * @private
+   * @return {Promise}
+   */
+  getUiState_() {
+    const story = this.stories_[this.currentIdx_];
+
+    return new Promise((resolve) => {
+      story.messagingPromise.then((messaging) => {
+        messaging
+          .sendRequest(
+            'getDocumentState',
+            {state: STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE},
+            true
+          )
+          .then((event) => resolve(event.value));
+      });
+    });
+  }
+
+  /**
+   * Shows or hides one panel UI on state update.
+   * @param {number} uiTypeNumber
+   * @private
+   */
+  onUiStateUpdate_(uiTypeNumber) {
+    const isFullbleed =
+      uiTypeNumber === 2 /** DESKTOP_FULLBLEED */ ||
+      uiTypeNumber === 0; /** MOBILE */
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-player-full-bleed-story',
+      isFullbleed
+    );
   }
 
   /**
@@ -1126,10 +1149,10 @@ export class AmpStoryPlayer {
   updatePosition_(story) {
     const position =
       story.distance === 0
-        ? StoryPosition.CURRENT
+        ? STORY_POSITION_ENUM.CURRENT
         : story.idx > this.currentIdx_
-        ? StoryPosition.NEXT
-        : StoryPosition.PREVIOUS;
+        ? STORY_POSITION_ENUM.NEXT
+        : STORY_POSITION_ENUM.PREVIOUS;
 
     requestAnimationFrame(() => {
       const {iframe} = story;
@@ -1157,7 +1180,7 @@ export class AmpStoryPlayer {
     if (this.currentStoryLoadDeferred_) {
       // Cancel previous story load promise.
       this.currentStoryLoadDeferred_.reject(
-        `[${LOG_TYPE.DEV}] Cancelling previous story load promise.`
+        `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
       );
     }
 
@@ -1214,11 +1237,11 @@ export class AmpStoryPlayer {
           // 4. Update the visibility state of the story.
           .then(() => {
             if (story.distance === 0 && this.playing_) {
-              this.updateVisibilityState_(story, VisibilityState.VISIBLE);
+              this.updateVisibilityState_(story, VisibilityState_Enum.VISIBLE);
             }
 
             if (oldDistance === 0 && story.distance === 1) {
-              this.updateVisibilityState_(story, VisibilityState.INACTIVE);
+              this.updateVisibilityState_(story, VisibilityState_Enum.INACTIVE);
             }
           })
           // 5. Finally update the story position.
@@ -1230,7 +1253,7 @@ export class AmpStoryPlayer {
             }
           })
           .catch((err) => {
-            if (err.includes(LOG_TYPE.DEV)) {
+            if (err.includes(LOG_TYPE_ENUM.DEV)) {
               return;
             }
             console /*OK*/
@@ -1272,7 +1295,10 @@ export class AmpStoryPlayer {
    */
   setSrc_(story, url) {
     const {iframe} = story;
-    const {href} = this.getEncodedLocation_(url, VisibilityState.PRERENDER);
+    const {href} = this.getEncodedLocation_(
+      url,
+      VisibilityState_Enum.PRERENDER
+    );
 
     iframe.setAttribute('src', href);
     if (story.title) {
@@ -1307,12 +1333,18 @@ export class AmpStoryPlayer {
   maybeGetCacheUrl_(url) {
     const ampCache = this.element_.getAttribute('amp-cache');
 
-    if (
-      !ampCache ||
-      isProxyOrigin(url) ||
-      !SUPPORTED_CACHES.includes(ampCache)
-    ) {
+    if (!ampCache || !SUPPORTED_CACHES.includes(ampCache)) {
       return Promise.resolve(url);
+    }
+
+    if (isProxyOrigin(url)) {
+      // Ensures serving type is 'viewer' (/v/) when publishers provide their
+      // own cached URL.
+      const location = parseUrlDeprecated(url);
+      if (location.pathname.startsWith('/c/')) {
+        location.pathname = '/v/' + location.pathname.substr(3);
+      }
+      return Promise.resolve(location.toString());
     }
 
     return ampToolboxCacheUrl
@@ -1325,11 +1357,11 @@ export class AmpStoryPlayer {
   /**
    * Gets encoded url for player usage.
    * @param {string} href
-   * @param {VisibilityState=} visibilityState
+   * @param {VisibilityState_Enum=} visibilityState
    * @return {!Location}
    * @private
    */
-  getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
+  getEncodedLocation_(href, visibilityState = VisibilityState_Enum.INACTIVE) {
     const playerFragmentParams = {
       'visibilityState': visibilityState,
       'origin': this.win_.origin,
@@ -1368,7 +1400,7 @@ export class AmpStoryPlayer {
   /**
    * Updates the visibility state of the story inside the iframe.
    * @param {!StoryDef} story
-   * @param {!VisibilityState} visibilityState
+   * @param {!VisibilityState_Enum} visibilityState
    * @private
    */
   updateVisibilityState_(story, visibilityState) {
@@ -1399,7 +1431,7 @@ export class AmpStoryPlayer {
   updateMutedState_(story, mutedValue) {
     this.updateStoryState_(
       story,
-      STORY_MESSAGE_STATE_TYPE.MUTED_STATE,
+      STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE,
       mutedValue
     );
   }
@@ -1415,7 +1447,7 @@ export class AmpStoryPlayer {
       messaging
         .sendRequest(
           'getDocumentState',
-          {state: STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE},
+          {state: STORY_MESSAGE_STATE_TYPE_ENUM.PAGE_ATTACHMENT_STATE},
           true
         )
         .then((event) => this.dispatchPageAttachmentEvent_(event.value));
@@ -1511,17 +1543,21 @@ export class AmpStoryPlayer {
    */
   onDocumentStateUpdate_(data, messaging) {
     switch (data.state) {
-      case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
+      case STORY_MESSAGE_STATE_TYPE_ENUM.PAGE_ATTACHMENT_STATE:
         this.onPageAttachmentStateUpdate_(/** @type {boolean} */ (data.value));
         break;
-      case STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID:
+      case STORY_MESSAGE_STATE_TYPE_ENUM.CURRENT_PAGE_ID:
         this.onCurrentPageIdUpdate_(
           /** @type {string} */ (data.value),
           messaging
         );
         break;
-      case STORY_MESSAGE_STATE_TYPE.MUTED_STATE:
+      case STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE:
         this.onMutedStateUpdate_(/** @type {string} */ (data.value));
+        break;
+      case STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE:
+        // Handles UI state updates on window resize.
+        this.onUiStateUpdate_(/** @type {number} */ (data.value));
         break;
       case AMP_STORY_PLAYER_EVENT:
         this.onPlayerEvent_(/** @type {string} */ (data.value));
@@ -1571,7 +1607,7 @@ export class AmpStoryPlayer {
     messaging
       .sendRequest(
         'getDocumentState',
-        dict({'state': STORY_MESSAGE_STATE_TYPE.STORY_PROGRESS}),
+        dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.STORY_PROGRESS}),
         true
       )
       .then((progress) => {
@@ -1613,8 +1649,8 @@ export class AmpStoryPlayer {
     }
 
     isVisible
-      ? button.classList.remove(DEPRECATED_BUTTON_CLASSES.HIDDEN)
-      : button.classList.add(DEPRECATED_BUTTON_CLASSES.HIDDEN);
+      ? button.classList.remove(DEPRECATED_BUTTON_CLASSES_ENUM.HIDDEN)
+      : button.classList.add(DEPRECATED_BUTTON_CLASSES_ENUM.HIDDEN);
   }
 
   /**
@@ -1774,7 +1810,7 @@ export class AmpStoryPlayer {
     this.touchEventState_.startY = 0;
     this.touchEventState_.lastX = 0;
     this.touchEventState_.isSwipeX = null;
-    this.swipingState_ = SwipingState.NOT_SWIPING;
+    this.swipingState_ = SWIPING_STATE_ENUM.NOT_SWIPING;
   }
 
   /**
@@ -1791,14 +1827,14 @@ export class AmpStoryPlayer {
     if (gesture.last === true) {
       const delta = Math.abs(deltaX);
 
-      if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
+      if (this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_LEFT) {
         delta > TOGGLE_THRESHOLD_PX &&
         (this.getSecondaryStory_() || this.isCircularWrappingEnabled_)
           ? this.next_()
           : this.resetStoryStyles_();
       }
 
-      if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
+      if (this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_RIGHT) {
         delta > TOGGLE_THRESHOLD_PX &&
         (this.getSecondaryStory_() || this.isCircularWrappingEnabled_)
           ? this.previous_()
@@ -1840,7 +1876,7 @@ export class AmpStoryPlayer {
    */
   getSecondaryStory_() {
     const nextStoryIdx =
-      this.swipingState_ === SwipingState.SWIPING_TO_LEFT
+      this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_LEFT
         ? this.currentIdx_ + 1
         : this.currentIdx_ - 1;
 
@@ -1935,10 +1971,10 @@ export class AmpStoryPlayer {
     let secondaryTranslate;
 
     if (deltaX < 0) {
-      this.swipingState_ = SwipingState.SWIPING_TO_LEFT;
+      this.swipingState_ = SWIPING_STATE_ENUM.SWIPING_TO_LEFT;
       secondaryTranslate = `translate3d(calc(100% + ${deltaX}px), 0, 0)`;
     } else {
-      this.swipingState_ = SwipingState.SWIPING_TO_RIGHT;
+      this.swipingState_ = SWIPING_STATE_ENUM.SWIPING_TO_RIGHT;
       secondaryTranslate = `translate3d(calc(${deltaX}px - 100%), 0, 0)`;
     }
 

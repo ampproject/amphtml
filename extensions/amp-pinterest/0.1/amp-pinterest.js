@@ -34,14 +34,18 @@
  * </code>
  */
 
-import {CSS} from '../../../build/amp-pinterest-0.1.css';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {user, userAssert} from '#utils/log';
+
 import {FollowButton} from './follow-button';
 import {PinWidget} from './pin-widget';
 import {SaveButton} from './save-button';
-import {Services} from '#service';
-import {htmlFor} from '#core/dom/static-template';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {user, userAssert} from '../../../src/log';
+
+import {CSS} from '../../../build/amp-pinterest-0.1.css';
 
 /**
  * AMP Pinterest

@@ -7,22 +7,6 @@ teaser:
 experimental: true
 ---
 
-<!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-tiktok
 
 ## Usage
@@ -63,6 +47,13 @@ If you choose to set the width to a value which is greater than 325px, the `ifra
 
 If you choose to set the height of to a value which is which is greater than the height the height will remain the height of the `iframe`.
 
+## Placeholder
+
+There are two ways to set a placeholder image:
+
+-   Pointing the `data-src` attribute to the image URL
+-   Pointing the TikTok provided `cite` attribute, made available through `blockquote`, to the image URL.
+
 ## Attributes
 
 ### `data-src`
@@ -81,7 +72,7 @@ Example with video-id
 ></amp-tiktok>
 ```
 
-[\example]
+[/example]
 
 Example with source url:
 
@@ -89,15 +80,15 @@ Example with source url:
 
 ```html
 <amp-tiktok
-  width="325 "
+  width="325"
   height="575"
   data-src="https://www.tiktok.com/@scout2015/video/6948210747285441798"
 ></amp-tiktok>
 ```
 
-[\example]
+[/example]
 
-In liu of the `data-src` attribute, `amp-tiktok` also allows the use of the TikTok generated embed code to display.
+In lieu of the `data-src` attribute, `amp-tiktok` also allows the use of the TikTok generated embed code to display.
 
 To use this method copy the blockquote from the TikTok Embed code:
 
@@ -139,9 +130,9 @@ To use this method copy the blockquote from the TikTok Embed code:
 </amp-tiktok>
 ```
 
-[\example]
+[/example]
 
 ## Accessibility
 
 If the user provides an `aria-label` then that label will be propogated to the `iframe`.
-Otherwise the `aria-label` will default to 'TikTok'.
+If the user proides an oEmbed source URL as the `data-src` then the TikTok's caption will be used as the `aria-label` with the format 'Tiktok: "Caption"'. Otherwise the `aria-label` will default to 'TikTok'.

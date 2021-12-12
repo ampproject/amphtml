@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {devAssert} from '#core/assert';
 
 /**
@@ -25,7 +9,9 @@ import {devAssert} from '#core/assert';
  * The action service delegates parsing of object literals to the corresponding
  * extension (in the example above, amp-bind).
  *
- * @see ./service/action-impl.ActionInfoDef
+ * See ./service/action-impl.ActionInfoDef
+ * TODO(rcebulko): Revert to @see once type is available
+ *
  * @const {string}
  */
 export const RAW_OBJECT_ARGS_KEY = '__AMP_OBJECT_STRING__';
@@ -43,7 +29,7 @@ export const DEFAULT_ACTION = 'activate';
  *
  * @enum {number}
  */
-export const ActionTrust = {
+export const ActionTrust_Enum = {
   /**
    * Events that are triggered without a user gesture, or triggered by a user
    * gesture with weak intent (e.g. scroll) are "low trust".
@@ -71,17 +57,17 @@ export const ActionTrust = {
 };
 
 /**
- * @param {!ActionTrust} actionTrust
+ * @param {ActionTrust_Enum} actionTrust
  * @return {string}
  */
 export function actionTrustToString(actionTrust) {
   switch (actionTrust) {
-    case ActionTrust.LOW:
+    case ActionTrust_Enum.LOW:
       return 'low';
-    case ActionTrust.HIGH:
+    case ActionTrust_Enum.HIGH:
       return 'high';
     default:
-      devAssert(actionTrust === ActionTrust.DEFAULT);
+      devAssert(actionTrust === ActionTrust_Enum.DEFAULT);
       return 'default';
   }
 }

@@ -1,28 +1,12 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
 import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {buildImgTemplate} from './utils';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
@@ -97,10 +81,10 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
 
     // Localize the answer choice options
     this.localizedAnswerChoices_ = [
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
-      LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
     ].map((choice) => this.localizationService.getLocalizedString(choice));
     const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-img-option-container'
@@ -130,7 +114,6 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
-    // TODO: Rewrite image URL (https://github.com/ampproject/amphtml/pull/35043#discussion_r660874389)
     setImportantStyles(
       convertedOption.querySelector(
         '.i-amphtml-story-interactive-img-option-img'

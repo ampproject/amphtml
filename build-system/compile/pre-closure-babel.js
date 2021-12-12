@@ -1,28 +1,13 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const babel = require('@babel/core');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
 const tempy = require('tempy');
 const {BABEL_SRC_GLOBS} = require('./sources');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 
@@ -62,7 +47,11 @@ function getBabelOutputDir() {
  * @return {!Array<string>}
  */
 function getFilesToTransform() {
-  return globby.sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/']);
+  return fastGlob.sync([
+    ...BABEL_SRC_GLOBS,
+    '!node_modules/**',
+    '!third_party/**',
+  ]);
 }
 
 /**
@@ -92,24 +81,28 @@ async function preClosureBabel(file, outputFilename, options) {
   }
   const transformedFile = path.join(outputDir, file);
   if (!filesToTransform.includes(file)) {
-    if (!(await fs.exists(transformedFile))) {
+    if (!(await fs.pathExists(transformedFile))) {
       await fs.copy(file, transformedFile);
     }
     return transformedFile;
   }
   try {
     debug(CompilationLifecycles['pre-babel'], file);
-    const babelOptions =
-      babel.loadOptions({caller: {name: 'pre-closure'}}) || {};
-    const optionsHash = md5(
-      JSON.stringify({babelOptions, argv: process.argv.slice(2)})
+    const callerName = 'pre-closure';
+    const babelOptions = babel.loadOptions({caller: {name: callerName}}) || {};
+    const {contents, hash} = await batchedRead(file);
+    const rehash = md5(
+      JSON.stringify({
+        callerName,
+        filename: file,
+        hash,
+        babelOptions,
+        argv: process.argv.slice(2),
+      })
     );
-    const {contents, hash} = await batchedRead(file, optionsHash);
-    const cachedPromise = transformCache.get(hash);
+    const cachedPromise = transformCache.get(rehash);
     if (cachedPromise) {
-      if (!(await fs.exists(transformedFile))) {
-        await fs.outputFile(transformedFile, await cachedPromise);
-      }
+      await cachedPromise;
     } else {
       const transformPromise = babel
         .transformAsync(contents, {
@@ -118,10 +111,23 @@ async function preClosureBabel(file, outputFilename, options) {
           filenameRelative: path.basename(file),
           sourceFileName: path.relative(process.cwd(), file),
         })
-        .then((result) => result?.code);
-      transformCache.set(hash, transformPromise);
-      await fs.outputFile(transformedFile, await transformPromise);
-      debug(CompilationLifecycles['pre-closure'], transformedFile);
+        .then((result) => {
+          const {code, map} = result || {};
+          debug(
+            CompilationLifecycles['pre-closure'],
+            transformedFile,
+            code,
+            map
+          );
+          return code + `\n// ${file}`;
+        })
+        .then(async (code) => {
+          await fs.outputFile(transformedFile, code);
+          return code;
+        });
+      transformCache.set(rehash, transformPromise);
+
+      await transformPromise;
     }
   } catch (err) {
     const reason = handlePreClosureError(err, outputFilename, options);

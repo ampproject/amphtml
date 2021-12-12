@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const crypto = require('crypto');
 const fs = require('fs-extra');
 const path = require('path');
@@ -67,7 +51,7 @@ class TransformCache {
    */
   set(hash, transformPromise) {
     if (this.transformMap.has(hash)) {
-      throw new Error('Read race: Attempting to transform a file twice.');
+      throw new Error(`Read race: Attempting to transform ${hash} file twice.`);
     }
     this.transformMap.set(hash, transformPromise);
     const filepath = path.join(this.cacheDir, hash) + this.fileExtension;
@@ -90,10 +74,14 @@ function md5(...args) {
 }
 
 /**
+ * @typedef {{hash: string, contents: string}} ReadResult
+ */
+
+/**
  * Used to cache file reads, since some (esbuild) will have multiple "loads" per
  * file. This batches consecutive reads into a single, and then clears its cache
  * item for the next load.
- * @private @const {!Map<string, Promise<{hash: string, contents: string}>>}
+ * @private @const {!Map<string, Promise<ReadResult>>}
  */
 const readCache = new Map();
 
@@ -103,17 +91,16 @@ const readCache = new Map();
  * completed, the result will be reused.
  *
  * @param {string} path
- * @param {string=} optionsHash
- * @return {{contents: string, hash: string}}
+ * @return {Promise<ReadResult>}
  */
-function batchedRead(path, optionsHash) {
+function batchedRead(path) {
   let read = readCache.get(path);
   if (!read) {
     read = fs
       .readFile(path)
       .then((contents) => ({
         contents,
-        hash: md5(contents, optionsHash ?? ''),
+        hash: md5(contents),
       }))
       .finally(() => {
         readCache.delete(path);

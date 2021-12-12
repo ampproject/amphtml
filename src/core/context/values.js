@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {devAssert} from '#core/assert';
 import {rethrowAsync} from '#core/error';
 import {pushIfNotExist, removeItem} from '#core/types/array';
@@ -26,7 +10,7 @@ const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
 
 /** @enum {number} */
-const Pending = {
+const Pending_Enum = {
   NOT_PENDING: 0,
   PENDING: 1,
   PENDING_REFRESH_PARENT: 2,
@@ -59,7 +43,7 @@ UsedDef.prototype.prop;
 UsedDef.prototype.subscribers;
 /** @type {T} */
 UsedDef.prototype.value;
-/** @type {!Pending} */
+/** @type {!Pending_Enum} */
 UsedDef.prototype.pending;
 /** @type {number} */
 UsedDef.prototype.counter;
@@ -397,7 +381,7 @@ export class Values {
         prop,
         subscribers: [],
         value: undefined,
-        pending: Pending.NOT_PENDING,
+        pending: Pending_Enum.NOT_PENDING,
         counter: 0,
         depValues: deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY,
         parentValue: undefined,
@@ -407,8 +391,8 @@ export class Values {
         ping: (refreshParent) => {
           if (this.isConnected_()) {
             const pending = refreshParent
-              ? Pending.PENDING_REFRESH_PARENT
-              : Pending.PENDING;
+              ? Pending_Enum.PENDING_REFRESH_PARENT
+              : Pending_Enum.PENDING;
             used.pending = Math.max(used.pending, pending);
             this.checkUpdates_();
           }
@@ -492,13 +476,13 @@ export class Values {
     do {
       updated = 0;
       usedByKey.forEach((used) => {
-        if (used.pending != Pending.NOT_PENDING) {
+        if (used.pending != Pending_Enum.NOT_PENDING) {
           const {key} = used.prop;
           used.counter++;
           if (used.counter > 5) {
             // A simple protection from infinte loops.
             rethrowAsync(`cyclical prop: ${key}`);
-            used.pending = Pending.NOT_PENDING;
+            used.pending = Pending_Enum.NOT_PENDING;
             return;
           }
           updated++;
@@ -515,7 +499,7 @@ export class Values {
   tryUpdate_(used) {
     // The value is not pending anymore. If any of the dependencies will remain
     // unresolved, we will simply need to recomputed it.
-    const refreshParent = used.pending == Pending.PENDING_REFRESH_PARENT;
+    const refreshParent = used.pending == Pending_Enum.PENDING_REFRESH_PARENT;
 
     let newValue;
     try {
@@ -529,7 +513,7 @@ export class Values {
 
     // Reset pending flag. It's good to reset it after the calculation to
     // ensure that deps are automatically covered.
-    used.pending = Pending.NOT_PENDING;
+    used.pending = Pending_Enum.NOT_PENDING;
 
     // Check if the value has been updated.
     this.maybeUpdated_(used, newValue);

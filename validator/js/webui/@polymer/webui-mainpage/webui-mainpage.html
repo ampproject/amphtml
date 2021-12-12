@@ -1,18 +1,3 @@
-<!--
-  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS-IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the license.
--->
 <!-- The main contents of the page, which instantiates the
      custom elements defined in the other files. -->
 <link rel="import" href="../polymer/polymer.html">
@@ -32,7 +17,7 @@
   <script>
     var minimumValidAmp =
       '\x3C!--\n' +
-      '     This is the minimum valid AMP HTML document. Type away\n' +
+      '     This is the minimum valid JavaScript AMP HTML document. Type away\n' +
       '     here and the AMP Validator will re-check your document on the fly.\n' +
       '-->\n' +
       '\x3C!doctype html>\n' +
@@ -49,7 +34,7 @@
 
     var minimumValidAmp4Ads =
       '\x3C!--\n' +
-      '     This is the minimum valid AMP4ADS document. Type away\n' +
+      '     This is the minimum valid JavaScript AMP Ads document. Type away\n' +
       '     here and the AMP Validator will re-check your document on the fly.\n' +
       '-->\n' +
       '\x3C!doctype html>\n' +
@@ -65,7 +50,7 @@
 
     var minimumValidAmp4Email =
       '\x3C!--\n' +
-      '     This is the minimum valid AMP4EMAIL document. Type away\n' +
+      '     This is the minimum valid JavaScript AMP Email document. Type away\n' +
       '     here and the AMP Validator will re-check your document on the fly.\n' +
       '-->\n' +
       '\x3C!doctype html>\n' +
@@ -113,8 +98,8 @@
           amp.validator.init().then(function() {
             isValidatorReady = true;
             // In most times, the initilization of AMP validator is slower than
-            // the code that fills the minimal valid AMP doc as the default
-            // value in the input box. The `refreshEditorAndErrors` call
+            // the code that fills the minimal valid JavaScript AMP doc as the
+            // default value in the input box. The `refreshEditorAndErrors` call
             // triggered by input box default value returns early because
             // `isValidatorReady` is `false` at that time. We need to call
             // `refreshEditorAndErrors` again here to ensure that the validator
@@ -303,7 +288,7 @@
           // Load doc fromm url
           this.$.urlForm.setURLAndValidate(params['url']);
         } else {
-          // Use minimal valid AMP doc
+          // Use minimal valid JavaScript AMP doc
           if (incomingHtmlFormat === 'AMP4ADS') {
             editor.setEditorValue(minimumValidAmp4Ads);
           } else if (incomingHtmlFormat === 'AMP4EMAIL') {

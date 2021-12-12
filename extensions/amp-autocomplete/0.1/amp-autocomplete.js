@@ -1,36 +1,20 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AutocompleteBindingDef} from './autocomplete-binding-def';
 import {AutocompleteBindingInline} from './autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
-import {Keys} from '#core/constants/key-codes';
-import {Layout} from '#core/dom/layout';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {Layout_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
 import {addParamToUrl} from '../../../src/url';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
 import {
   dict,
   getValueForExpr,
@@ -40,18 +24,13 @@ import {
 } from '#core/types/object';
 
 import {includes} from '#core/types/string';
-import {isAmp4Email} from '../../../src/format';
 import {isArray, isEnumValue} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
 import {mod} from '#core/math';
 import {once} from '#core/types/function';
 import {removeChildren, tryFocus} from '#core/dom';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
 import {toggle} from '#core/dom/style';
 import fuzzysearch from '#third_party/fuzzysearch';
 
@@ -245,15 +224,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.templates_ = Services.templatesForDoc(this.element);
-
-    const doc = this.element.ownerDocument;
-    const isEmail = doc && isAmp4Email(doc);
-    userAssert(
-      !isEmail ||
-        doc.documentElement.hasAttribute('data-amp-autocomplete-opt-in'),
-      '<amp-autocomplete> is not currently available in AMP4Email.'
-    );
-
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
@@ -453,7 +423,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
     this.maybeSetSrcFromInput_();
     if (this.isSsr_) {
@@ -1179,7 +1149,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.element,
       selectName,
       selectEvent,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     // Ensure native change listeners are triggered
@@ -1325,7 +1295,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     switch (event.key) {
-      case Keys.DOWN_ARROW:
+      case Keys_Enum.DOWN_ARROW:
         event.preventDefault();
         if (this.areResultsDisplayed_()) {
           // Disrupt loop around to display user input.
@@ -1339,7 +1309,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.autocomplete_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
         });
-      case Keys.UP_ARROW:
+      case Keys_Enum.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
         if (this.activeIndex_ === 0) {
@@ -1347,7 +1317,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           return Promise.resolve();
         }
         return this.updateActiveItem_(-1);
-      case Keys.ENTER:
+      case Keys_Enum.ENTER:
         const shouldPreventDefault = this.binding_.shouldPreventDefaultOnEnter(
           !!this.activeElement_
         );
@@ -1366,7 +1336,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return this.mutateElement(() => {
           this.toggleResults_(false);
         });
-      case Keys.ESCAPE:
+      case Keys_Enum.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
           if (!this.fallbackDisplayed_) {
@@ -1375,7 +1345,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.toggleResults_(false);
           }
         });
-      case Keys.TAB:
+      case Keys_Enum.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
           const {selectedObject, selectedText} =
@@ -1385,7 +1355,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           });
         }
         return Promise.resolve();
-      case Keys.BACKSPACE:
+      case Keys_Enum.BACKSPACE:
         this.detectBackspace_ = this.shouldSuggestFirst_;
         return Promise.resolve();
       default:
@@ -1416,7 +1386,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 }
 

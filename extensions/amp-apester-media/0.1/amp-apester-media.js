@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {
@@ -22,7 +22,7 @@ import {
   getLengthNumeral,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {
   extractTags,
@@ -32,10 +32,7 @@ import {
   setFullscreenOn,
 } from './utils';
 import {handleCompanionAds} from './monetization';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {px, setStyles} from '#core/dom/style';
 import {removeElement} from '#core/dom';
 
@@ -106,6 +103,9 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.unlisteners_ = [];
     /** @private {?IntersectionObserver3pHost} */
     this.intersectionObserverHostApi_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -286,8 +286,8 @@ class AmpApesterMedia extends AMP.BaseElement {
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
     const vsync = Services.vsyncFor(this.win);
-    return this.queryMedia_().then(
-      (response) => {
+    return this.queryMedia_()
+      .then((response) => {
         if (!response || response['status'] === 204) {
           dev().warn(TAG, 'Display', 'No Content for provided tag');
           return this.unlayoutCallback();
@@ -320,64 +320,58 @@ class AmpApesterMedia extends AMP.BaseElement {
             this.element.appendChild(iframe);
             handleCompanionAds(media, this.element);
           })
-          .then(() => {
-            return this.loadPromise(iframe).then(() => {
-              return vsync.mutatePromise(() => {
-                if (this.iframe_) {
-                  this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
-                  const campaignData = media['campaignData'];
-                  if (campaignData) {
-                    const bottomAdOptions = campaignData['bottomAdOptions'];
-                    if (bottomAdOptions && bottomAdOptions.enabled) {
-                      this.hasBottomAd_ = true;
-                      const ampdoc = this.getAmpDoc();
-                      Services.extensionsFor(
-                        this.win
-                      )./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
-                      this.iframe_.contentWindow./*OK*/ postMessage(
-                        BOTTOM_AD_MESSAGE,
-                        '*'
-                      );
-                    }
+          .then(() => this.loadPromise(iframe))
+          .then(() =>
+            vsync.mutatePromise(() => {
+              if (this.iframe_) {
+                this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
+
+                const campaignData = media['campaignData'];
+                if (campaignData) {
+                  const bottomAdOptions = campaignData['bottomAdOptions'];
+                  if (bottomAdOptions?.enabled) {
+                    this.hasBottomAd_ = true;
+                    const ampdoc = this.getAmpDoc();
+                    Services.extensionsFor(
+                      this.win
+                    )./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
                     this.iframe_.contentWindow./*OK*/ postMessage(
-                      /** @type {JsonObject} */ ({
-                        type: 'campaigns',
-                        data: campaignData,
-                      }),
+                      BOTTOM_AD_MESSAGE,
                       '*'
                     );
                   }
+
+                  this.iframe_.contentWindow./*OK*/ postMessage(
+                    /** @type {JsonObject} */ ({
+                      type: 'campaigns',
+                      data: campaignData,
+                    }),
+                    '*'
+                  );
                 }
-                let height = 0;
-                if (media && media['data'] && media['data']['size']) {
-                  height = media['data']['size']['height'];
+              }
+
+              const height = media?.['data']?.['size']?.['height'] ?? 0;
+              if (height != this.height_) {
+                this.height_ = height;
+                if (this.random_) {
+                  this.attemptChangeHeight(height);
+                } else {
+                  this.forceChangeHeight(height);
                 }
-                if (height != this.height_) {
-                  this.height_ = height;
-                  if (this.random_) {
-                    this.attemptChangeHeight(height);
-                  } else {
-                    this.forceChangeHeight(height);
-                  }
-                }
-              });
-            });
-          })
+              }
+            })
+          )
           .then(() => {
-            observeWithSharedInOb(this.element, (inViewport) =>
-              this.viewportCallback_(inViewport)
+            this.unobserveIntersections_ = observeIntersections(
+              this.element,
+              ({isIntersecting}) => this.viewportCallback_(isIntersecting)
             );
-          })
-          .catch((error) => {
-            dev().error(TAG, 'Display', error);
-            return undefined;
           });
-      },
-      (error) => {
-        dev().error(TAG, 'Display', error);
-        return undefined;
-      }
-    );
+      })
+      .catch((error) => {
+        user().error(TAG, 'Display', error);
+      });
   }
 
   /** @override */
@@ -412,7 +406,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;

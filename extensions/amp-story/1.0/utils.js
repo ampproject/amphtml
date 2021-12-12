@@ -1,20 +1,5 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Services} from '#service';
+import {StateProperty} from './amp-story-store-service';
 import {
   assertHttpsUrl,
   getSourceOrigin,
@@ -26,7 +11,7 @@ import {
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {createShadowRoot} from '../../../src/shadow-embed';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 
 import {setStyle, toggle} from '#core/dom/style';
@@ -99,6 +84,7 @@ export function ampMediaElementFor(el) {
  * @param  {!Element} container
  * @param  {!Element} element
  * @param  {string} css
+ * @return {!Element}
  */
 export function createShadowRootWithStyle(container, element, css) {
   const style = self.document.createElement('style');
@@ -110,6 +96,7 @@ export function createShadowRootWithStyle(container, element, css) {
 
   containerToUse.appendChild(style);
   containerToUse.appendChild(element);
+  return container;
 }
 
 /**
@@ -252,9 +239,13 @@ export function resolveImgSrc(win, url) {
 /**
  * Whether a Story should show the URL info dialog.
  * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
+ * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
  * @return {boolean}
  */
-export function shouldShowStoryUrlInfo(viewer) {
+export function shouldShowStoryUrlInfo(viewer, storeService) {
+  if (!storeService.get(StateProperty.CAN_SHOW_STORY_URL_INFO)) {
+    return false;
+  }
   const showStoryUrlInfo = viewer.getParam('showStoryUrlInfo');
   return showStoryUrlInfo ? showStoryUrlInfo !== '0' : viewer.isEmbedded();
 }
@@ -322,4 +313,32 @@ export function triggerClickFromLightDom(anchorElement, domElement) {
   domElement.appendChild(outerAnchor);
   outerAnchor.click();
   outerAnchor.remove();
+}
+
+/**
+ * Makes a proxy URL if document is served from a proxy origin. No-op otherwise.
+ * @param {string} url
+ * @param {!AmpDoc} ampDoc
+ * @return {string}
+ */
+export const maybeMakeProxyUrl = (url, ampDoc) => {
+  const urlService = Services.urlForDoc(ampDoc);
+  const loc = ampDoc.win.location;
+  if (!urlService.isProxyOrigin(loc.origin) || urlService.isProxyOrigin(url)) {
+    return url;
+  }
+  const resolvedRelativeUrl = urlService.resolveRelativeUrl(
+    url,
+    urlService.getSourceOrigin(loc.href)
+  );
+  return loc.origin + '/i/s/' + resolvedRelativeUrl.replace(/https?:\/\//, '');
+};
+
+/**
+ * Whether the document is transformed
+ * @param {!AmpDoc} ampdoc
+ * @return {boolean}
+ */
+export function isTransformed(ampdoc) {
+  return ampdoc.getRootNode().documentElement.hasAttribute('transformed');
 }

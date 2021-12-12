@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {isString} from '#core/types';
 
 /**
@@ -36,7 +20,7 @@ export let CurveDef;
  * @param {number} y1 Y coordinate of the first control point.
  * @param {number} x2 X coordinate of the second control point.
  * @param {number} y2 Y coordinate of the second control point.
- * @return {!CurveDef}
+ * @return {CurveDef}
  */
 export function bezierCurve(x1, y1, x2, y2) {
   return (xVal) =>
@@ -214,13 +198,13 @@ class Bezier {
 /**
  * A collection of common curves.
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function
- * @enum {!CurveDef}
+ * @enum {CurveDef}
  */
-export const Curves = {
+export const Curves_Enum = {
   /**
    * linear
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   LINEAR(xVal) {
     return xVal;
@@ -228,8 +212,8 @@ export const Curves = {
 
   /**
    * ease
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.25, 0.1, 0.25, 1.0, 1, 1);
@@ -237,8 +221,8 @@ export const Curves = {
 
   /**
    * ease-in: slow out, fast in
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_IN(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 1.0, 1.0, 1, 1);
@@ -246,8 +230,8 @@ export const Curves = {
 
   /**
    * ease-out: fast out, slow in
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.0, 0.0, 0.58, 1.0, 1, 1);
@@ -255,8 +239,8 @@ export const Curves = {
 
   /**
    * ease-in-out
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_IN_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 0.58, 1.0, 1, 1);
@@ -264,14 +248,14 @@ export const Curves = {
 };
 
 /**
- * @const {!Object<string, !CurveDef>}
+ * @const {Object<string, CurveDef>}
  */
 const NAME_MAP = {
-  'linear': Curves.LINEAR,
-  'ease': Curves.EASE,
-  'ease-in': Curves.EASE_IN,
-  'ease-out': Curves.EASE_OUT,
-  'ease-in-out': Curves.EASE_IN_OUT,
+  'linear': Curves_Enum.LINEAR,
+  'ease': Curves_Enum.EASE,
+  'ease-in': Curves_Enum.EASE_IN,
+  'ease-out': Curves_Enum.EASE_OUT,
+  'ease-in-out': Curves_Enum.EASE_IN_OUT,
 };
 
 /**
@@ -303,5 +287,5 @@ export function getCurve(curve) {
     }
     return NAME_MAP[curve];
   }
-  return /** @type {!CurveDef} */ (curve);
+  return /** @type {CurveDef} */ (curve);
 }

@@ -1,25 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.2.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
@@ -27,10 +11,10 @@ import {
   closestAncestorElementBySelector,
   realChildElements,
 } from '#core/dom/query';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {debounce} from '#core/types/function';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {descendsFromStory} from '#utils/story';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '#experiments';
@@ -40,10 +24,10 @@ import {
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {removeFragment} from '../../../src/url';
-import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
+import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {setStyles, toggle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {unmountAll} from '../../../src/utils/resource-container-helper';
+import {unmountAll} from '#core/dom/resource-container-helper';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
@@ -144,7 +128,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.win,
       (cb) => this.mutateElement(cb),
       // The sidebar is already animated by swipe to dismiss, so skip animation.
-      () => this.dismiss_(true, ActionTrust.HIGH)
+      () => this.dismiss_(true, ActionTrust_Enum.HIGH)
     );
 
     this.onResized_ = this.onResized_.bind(this);
@@ -208,7 +192,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.maybeBuildNestedMenu_();
     // Nested menu may not be present during buildCallback if it is rendered
     // dynamically with amp-list, in which case listen for dom update.
-    element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    element.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
       this.maybeBuildNestedMenu_();
     });
 
@@ -225,9 +209,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.documentElement_.addEventListener('keydown', (event) => {
       // Close sidebar on ESC.
-      if (event.key == Keys.ESCAPE) {
+      if (event.key == Keys_Enum.ESCAPE) {
         // Keypress is high trust.
-        if (this.close_(ActionTrust.HIGH)) {
+        if (this.close_(ActionTrust_Enum.HIGH)) {
           event.preventDefault();
         }
       }
@@ -281,7 +265,7 @@ export class AmpSidebar extends AMP.BaseElement {
           }
           if (tgtLoc.hash) {
             // Click gesture is high trust.
-            this.close_(ActionTrust.HIGH);
+            this.close_(ActionTrust_Enum.HIGH);
           }
         }
       },
@@ -378,7 +362,7 @@ export class AmpSidebar extends AMP.BaseElement {
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
       // Click gesture is high trust.
-      this.close_(ActionTrust.HIGH);
+      this.close_(ActionTrust_Enum.HIGH);
     });
 
     return screenReaderCloseButton;
@@ -422,7 +406,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Updates the sidebar while it is animating to the opened state.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   updateForOpening_(trust) {
     toggle(this.element, /* display */ true);
@@ -448,7 +432,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Updates the sidebar for when it has finished opening.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   updateForOpened_(trust) {
@@ -476,7 +460,7 @@ export class AmpSidebar extends AMP.BaseElement {
   /**
    * Updates the sidebar for when it is animating to the closed state.
    * @param {boolean} immediate
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   updateForClosing_(immediate, trust) {
@@ -496,7 +480,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Updates the sidebar for when it has finished closing.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   updateForClosed_(trust) {
@@ -523,7 +507,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Reveals the sidebar.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {?Element} openerElement
    * @private
    */
@@ -551,7 +535,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Hides the sidebar.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
@@ -564,7 +548,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * Dismisses the sidebar.
    * @param {boolean} immediate Whether sidebar should close immediately,
    *     without animation.
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
@@ -661,7 +645,7 @@ export class AmpSidebar extends AMP.BaseElement {
       mask.classList.add('amp-sidebar-mask', 'i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
         // Click gesture is high trust.
-        this.close_(ActionTrust.HIGH);
+        this.close_(ActionTrust_Enum.HIGH);
       });
       this.getAmpDoc().getBody().appendChild(mask);
       mask.addEventListener('touchmove', (e) => {
@@ -720,7 +704,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * @param {string} name
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerEvent_(name, trust) {

@@ -1,25 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
@@ -67,8 +51,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
   it('should build the sharing menu', () => {
     shareMenu.build();
-
-    expect(shareMenu.isBuilt()).to.be.true;
     expect(shareMenu.element_).to.exist;
   });
 
@@ -85,9 +67,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
       .returns(win.document.createElement('div'));
 
     shareMenu.build();
-
-    expect(shareMenu.isBuilt()).to.be.true;
-
     shareWidgetMock.verify();
   });
 
@@ -125,7 +104,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
-    shareMenu.innerContainerEl_.dispatchEvent(new Event('click'));
+    parentEl
+      .querySelector('.i-amphtml-story-share-menu-container')
+      .dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
   });
@@ -139,7 +120,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     // Create escape keyup event.
     const keyupEvent = new Event('keyup');
-    keyupEvent.keyCode = Keys.ESCAPE;
+    keyupEvent.keyCode = Keys_Enum.ESCAPE;
     win.dispatchEvent(keyupEvent);
 
     expect(clickCallbackSpy).to.have.been.calledOnce;

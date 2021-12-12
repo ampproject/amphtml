@@ -1,31 +1,18 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {devAssertElement} from '#core/assert';
+import {tryResolve} from '#core/data-structures/promise';
 import {setStyles} from '#core/dom/style';
+import {devExpectedError} from '#core/error';
 
 /**
- * @param {!Window} win
- * @return {!Promise<boolean>}
+ * @param {Window} win
+ * @return {Promise<boolean>}
  */
 export function detectIsAutoplaySupported(win) {
   // To detect autoplay, we create a video element and call play on it, if
   // `paused` is true after `play()` call, autoplay is supported. Although
   // this is unintuitive, it works across browsers and is currently the lightest
   // way to detect autoplay without using a data source.
-  const detectionElement = /** @type {!HTMLVideoElement} */ (
+  const detectionElement = /** @type {HTMLVideoElement} */ (
     win.document.createElement('video')
   );
 
@@ -52,10 +39,7 @@ export function detectIsAutoplaySupported(win) {
 
   // Promise wrapped this way to catch both sync throws and async rejections.
   // More info: https://github.com/tc39/proposal-promise-try
-  new Promise((resolve) => resolve(detectionElement.play())).catch(() => {
-    // Suppress any errors, useless to report as they are expected.
-  });
-
+  playIgnoringError(detectionElement);
   return Promise.resolve(!detectionElement.paused);
 }
 
@@ -68,8 +52,8 @@ const AUTOPLAY_SUPPORTED_WIN_PROP = '__AMP_AUTOPLAY';
  * autoplay to save data / battery. This detects both platfrom support and
  * when autoplay has been disabled by the user.
  *
- * @param {!Window} win
- * @return {!Promise<boolean>}
+ * @param {Window} win
+ * @return {Promise<boolean>}
  */
 export function isAutoplaySupported(win) {
   if (win[AUTOPLAY_SUPPORTED_WIN_PROP] == null) {
@@ -79,7 +63,7 @@ export function isAutoplaySupported(win) {
 }
 
 /**
- * @param {!Window} win
+ * @param {Window} win
  * @visibleForTesting
  */
 export function resetIsAutoplaySupported(win) {
@@ -87,9 +71,56 @@ export function resetIsAutoplaySupported(win) {
 }
 
 /**
- * @param {!Element} element
- * @return {!Element}
+ * @param {Element} element
+ * @return {Element}
  */
 export function getInternalVideoElementFor(element) {
-  return devAssertElement(element.querySelector('video, iframe'));
+  const el = element.querySelector('video, iframe');
+  devAssertElement(el);
+  return el;
+}
+
+/**
+ * @typedef {{
+ *   play: (function(boolean): Promise<undefined>|undefined)
+ * }}
+ */
+let VideoOrBaseElementPlayableDef;
+
+/**
+ * Tries to play the media element, marking any rejected error as an expected
+ * error for reproting.
+ *
+ * @param {HTMLMediaElement|VideoOrBaseElementPlayableDef} element
+ * @param {boolean=} isAutoplay
+ * @return {Promise<void>}
+ */
+export function tryPlay(element, isAutoplay) {
+  // Some browsers return undefined, some a boolean, and some a real promise.
+  // Using tryResolve coerces all of those into a real promise.
+  const promise = tryResolve(() => element.play(!!isAutoplay));
+  // Fork the promise chain to report any rejected error as expected. We don't
+  // return the promise returned by `.catch()` so that we don't
+  // introduce any new microtasks.
+  promise.catch((err) => {
+    devExpectedError('TRYPLAY', err);
+  });
+  return promise;
+}
+
+/**
+ * Plays the media element, discarding any error without reporting it.
+ *
+ * @param {HTMLMediaElement} element
+ */
+export function playIgnoringError(element) {
+  // Some browsers return undefined, some a boolean, and some a real promise.
+  // Using tryResolve coerces all of those into a real promise.
+  tryResolve(() => element.play()).catch(() => {
+    // Empty catch to prevent useless unhandled promise rejection logging.
+    // Play can fail for many reasons such as video getting paused before
+    // play() is finished.
+    // We use events to know the state of the video and do not care about
+    // the success or failure of the play()'s returned promise.
+  });
 }

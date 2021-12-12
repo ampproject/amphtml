@@ -1,21 +1,5 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Loading} from '#core/constants/loading-instructions';
-import {ReadyState} from '#core/constants/ready-state';
+import {Loading_Enum} from '#core/constants/loading-instructions';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 
 import * as Preact from '#preact';
 import {
@@ -50,7 +34,6 @@ export function IframeEmbedWithRef(
   {
     allow,
     allowFullScreen,
-    allowTransparency,
     iframeStyle,
     name,
     title,
@@ -67,7 +50,7 @@ export function IframeEmbedWithRef(
 ) {
   const {playable} = useAmpContext();
   const loading = useLoading(loadingProp);
-  const mount = loading !== Loading.UNLOAD;
+  const mount = loading !== Loading_Enum.UNLOAD;
 
   const loadedRef = useRef(false);
   // The `onReadyStateRef` is passed via a ref to avoid the changed values
@@ -78,7 +61,9 @@ export function IframeEmbedWithRef(
       if (value !== loadedRef.current) {
         loadedRef.current = value;
         const onReadyState = onReadyStateRef.current;
-        onReadyState?.(value ? ReadyState.COMPLETE : ReadyState.LOADING);
+        onReadyState?.(
+          value ? ReadyState_Enum.COMPLETE : ReadyState_Enum.LOADING
+        );
       }
     },
     [onReadyStateRef]
@@ -92,7 +77,9 @@ export function IframeEmbedWithRef(
     () => ({
       // Standard Bento
       get readyState() {
-        return loadedRef.current ? ReadyState.COMPLETE : ReadyState.LOADING;
+        return loadedRef.current
+          ? ReadyState_Enum.COMPLETE
+          : ReadyState_Enum.LOADING;
       },
       get node() {
         return iframeRef.current;
@@ -157,7 +144,6 @@ export function IframeEmbedWithRef(
         <iframe
           allow={allow}
           allowFullScreen={allowFullScreen}
-          allowTransparency={allowTransparency}
           frameborder="0"
           loading={loading}
           name={name}

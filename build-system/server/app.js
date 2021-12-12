@@ -1,18 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
@@ -53,7 +38,7 @@ const {
 } = require('./recaptcha-router');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
-const {red} = require('../common/colors');
+const {red} = require('kleur/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
 
 /**
@@ -88,10 +73,7 @@ app.use(bodyParser.text());
 // Middleware is executed in order, so this must be at the top.
 // TODO(#24333): Migrate all server URL handlers to new-server/router and
 // deprecate app.js.
-// TODO(erwinmombay, #32865): Make visual diff tests use the new server
-if (!argv._.includes('visual-diff')) {
-  app.use(require('./new-server/router'));
-}
+app.use(require('./new-server/router'));
 
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
@@ -124,7 +106,7 @@ app.use((req, res, next) => {
  */
 function isValidServeMode(serveMode) {
   return (
-    ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
+    ['default', 'minified', 'cdn', 'esm'].includes(serveMode) ||
     isRtvMode(serveMode)
   );
 }
@@ -149,7 +131,7 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (argv._.includes('integration') && !argv.nobuild) {
-  setServeMode('compiled');
+  setServeMode('minified');
 }
 
 if (!(argv._.includes('unit') || argv._.includes('integration'))) {
@@ -158,7 +140,7 @@ if (!(argv._.includes('unit') || argv._.includes('integration'))) {
 }
 
 // Changes the current serve mode via query param
-// e.g. /serve_mode_change?mode=(default|compiled|cdn|<RTV_NUMBER>)
+// e.g. /serve_mode_change?mode=(default|minified|cdn|<RTV_NUMBER>)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
   const {mode} = req.query;
@@ -579,7 +561,7 @@ const liveListDocs = Object.create(null);
 app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   const mode = SERVE_MODE;
   let liveListDoc = liveListDocs[req.baseUrl];
-  if (mode != 'compiled' && mode != 'default') {
+  if (mode != 'minified' && mode != 'default') {
     // Only handle compile(prev min)/default (prev max) mode
     next();
     return;
@@ -1351,7 +1333,7 @@ app.use('/subscription/register', (req, res) => {
   meteringStateStore[req.body.ampReaderId] = {
     id: meteringStateId,
     standardAttributes: {
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       registered_user: {
         timestamp: registrationTimestamp, // In seconds.
       },
@@ -1443,7 +1425,7 @@ window.addEventListener('beforeunload', (evt) => {
 }
 
 app.get('/dist/ww.(m?js)', async (req, res, next) => {
-  // Special case for entry point script url. Use compiled for testing
+  // Special case for entry point script url. Use minified for testing
   const mode = SERVE_MODE;
   const fileName = path.basename(req.path);
   if (await passthroughServeModeCdn(res, fileName)) {
@@ -1560,7 +1542,7 @@ function generateInfo(filePath) {
     '<h3></h3>' +
     '<h3><a href = /serve_mode=default>' +
     'Change to DEFAULT mode (unminified JS)</a></h3>' +
-    '<h3><a href = /serve_mode=compiled>' +
+    '<h3><a href = /serve_mode=minified>' +
     'Change to COMPILED mode (minified JS)</a></h3>' +
     '<h3><a href = /serve_mode=cdn>' +
     'Change to CDN mode (prod JS)</a></h3>'

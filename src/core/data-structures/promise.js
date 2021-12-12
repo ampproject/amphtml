@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 let resolved;
 
 /**
@@ -21,7 +5,7 @@ let resolved;
  * Babel converts direct calls to Promise.resolve() (with no arguments) into
  * calls to this.
  *
- * @return {!Promise<undefined>}
+ * @return {Promise<undefined>}
  */
 export function resolvedPromise() {
   if (resolved) {
@@ -59,7 +43,7 @@ export function resolvedPromise() {
 export class Deferred {
   /** Constructor. */
   constructor() {
-    /** @const {!Promise<T>} */
+    /** @const {Promise<T>} */
     this.promise = new /*OK*/ Promise((res, rej) => {
       /** @const {function(T=)} */
       this.resolve = res;
@@ -73,8 +57,8 @@ export class Deferred {
  * Creates a promise resolved to the return value of fn.
  * If fn sync throws, it will cause the promise to reject.
  *
- * @param {function():T} fn
- * @return {!Promise<T>}
+ * @param {function():(T|Promise<T>)} fn
+ * @return {Promise<T>}
  * @template T
  */
 export function tryResolve(fn) {
@@ -85,14 +69,15 @@ export function tryResolve(fn) {
 
 /**
  * Resolves with the result of the last promise added.
- * @implements {IThenable}
+ * @implements {PromiseLike}
+ * @template T
  */
 export class LastAddedResolver {
   /**
-   * @param {!Array<!IThenable>=} opt_promises
+   * @param {Array<PromiseLike<T>>=} opt_promises
    */
   constructor(opt_promises) {
-    /** @private @const {!Deferred} */
+    /** @private @const {Deferred<T>} */
     this.deferred_ = new Deferred();
 
     /** @private */
@@ -107,8 +92,8 @@ export class LastAddedResolver {
 
   /**
    * Add a promise to possibly be resolved.
-   * @param {!IThenable} promise
-   * @return {!Promise}
+   * @param {PromiseLike<T>} promise
+   * @return {Promise<T>}
    */
   add(promise) {
     const countAtAdd = ++this.count_;
@@ -129,7 +114,12 @@ export class LastAddedResolver {
     return this.deferred_.promise;
   }
 
-  /** @override */
+  /**
+   * Bind handlers for when the last added promise resolves/rejects.
+   * @param {function(T):?} [opt_resolve]
+   * @param {function(?):?} [opt_reject]
+   * @return {Promise<?>}
+   */
   then(opt_resolve, opt_reject) {
     return this.deferred_.promise.then(opt_resolve, opt_reject);
   }

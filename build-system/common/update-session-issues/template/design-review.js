@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const sessionDurationHours = 1;
 
 /**
@@ -24,10 +8,16 @@ const sessionDurationHours = 1;
 const timeRotationUtc = [
   [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
   [/* wed */ 3, '21:00', 'Americas'],
+  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
+  [/* wed */ 3, '21:00', 'Americas'],
+  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
+  [/* wed */ 3, '21:00', 'Americas'],
+  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
+  [/* wed */ 3, '21:00', 'Americas'],
   [/* thu */ 4, '01:00', 'Asia/Oceania'],
 ];
 
-const timeRotationStart = new Date('2021-04-14');
+const timeRotationStart = new Date('2021-12-01');
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
@@ -52,7 +42,7 @@ If you are interested in bringing your design to design review, read the [design
 
 When attending a design review please read through the designs _before_ the design review starts. This allows us to spend more time on discussion of the design.
 
-We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and we will find a time that works for you.
+We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let us know in the \`#contributing\` channel on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and we will find a time that works for you.
 `;
 
 module.exports = /** @type {import('../types').TemplateDef} */ ({

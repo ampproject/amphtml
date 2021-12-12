@@ -1,35 +1,23 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '#ads/google/utils';
-import {Services} from '#service';
-import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
-import {clamp} from '#core/math';
+
 import {computedStyle, getStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert, user} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
+import {clamp} from '#core/math';
 import {hasOwn} from '#core/types/object';
-import {randomlySelectUnsetExperiments} from '#experiments';
-import {toWin} from '#core/window';
 import {tryParseJson} from '#core/types/object/json';
+import {getWin} from '#core/window';
+
+import {randomlySelectUnsetExperiments} from '#experiments';
+
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -77,7 +65,7 @@ export class ResponsiveState {
     this.isContainerWidth_ = !!isContainerWidth;
 
     /** @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
+    this.win_ = getWin(element);
   }
 
   /**
@@ -165,7 +153,7 @@ export class ResponsiveState {
    * @return {!Promise<?ResponsiveState>} a promise that return container width responsive state.
    */
   static convertToContainerWidth(element) {
-    const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
+    const vsync = Services.vsyncFor(getWin(element));
 
     return vsync
       .runPromise(
@@ -213,7 +201,7 @@ export class ResponsiveState {
     const savePromise = new Promise((resolve) => {
       promiseResolver = resolve;
     });
-    const win = toWin(element.ownerDocument.defaultView);
+    const win = getWin(element);
 
     const listener = (event) => {
       const data = getData(event);

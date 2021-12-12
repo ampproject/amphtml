@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
@@ -31,11 +15,25 @@ import {
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
+import {once} from '#core/types/function';
+import {getRandomString64} from '#service/cid-impl';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'CONSENT-STATE-MANAGER';
+
+/**
+ * Returns a promise for a service for the given id and ampdoc. Also expects
+ * a service that has the actual implementation. The promise resolves when
+ * the implementation loaded.
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} element
+ * @return {!Promise<!Object>}
+ */
+export function getConsentStateManager(element) {
+  return getServicePromiseForDoc(element, 'consentStateManager');
+}
 
 export class ConsentStateManager {
   /**
@@ -71,6 +69,9 @@ export class ConsentStateManager {
 
     /** @private {!Promise} */
     this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
+
+    /** @public @const {function():string} */
+    this.consentPageViewId64 = once(() => getRandomString64(this.ampdoc_.win));
   }
 
   /**
@@ -230,11 +231,15 @@ export class ConsentStateManager {
   }
 
   /**
-   * Sets the dirty bit so current consent info won't be used for
-   * decision making on next visit
+   * Set dirtyBit to current consent info. Refresh stored consent value with
+   * dirtyBit
+   * @param {boolean=} dirty
+   * @return {Promise<void>}
+   * TODO(alanorozco): Remove `dirty` argument and always set to true once
+   * we remove clearDirtyBitOnResponse_dontUseThisItMightBeRemoved.
    */
-  setDirtyBit() {
-    this.instance_.setDirtyBit();
+  setDirtyBit(dirty = true) {
+    return this.instance_.setDirtyBit(dirty);
   }
 
   /**
@@ -319,14 +324,17 @@ export class ConsentInstance {
   /**
    * Set dirtyBit to current consent info. Refresh stored consent value with
    * dirtyBit
-   * @return {*} TODO(#23582): Specify return type
+   * @param {boolean=} dirty
+   * @return {Promise<void>}
+   * TODO(alanorozco): Remove `dirty` argument and always set to true once
+   * we remove clearDirtyBitOnResponse_dontUseThisItMightBeRemoved.
    */
-  setDirtyBit() {
-    // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptNext'
+  setDirtyBit(dirty = true) {
+    // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptOnNext'
     // is set to true and we need to set dirtyBit for next visit.
-    this.hasDirtyBitNext_ = true;
+    this.hasDirtyBitNext_ = dirty;
     return this.get().then((info) => {
-      if (hasDirtyBit(info)) {
+      if (hasDirtyBit(info) === dirty) {
         // Current stored value has dirtyBit and is no longer valid.
         // No need to update with dirtyBit
         return;
@@ -336,7 +344,7 @@ export class ConsentInstance {
         info['consentString'],
         info['purposeConsents'],
         info['consentMetadata'],
-        true
+        dirty
       );
     });
   }

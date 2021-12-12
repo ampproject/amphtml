@@ -1,20 +1,4 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * Interactive components support a disclaimer bubble that tells users where their data is being sent to.
  * Disclaimers will retrieve the information from the lookup dictionary in disclaimer-backends-list.json.
@@ -22,7 +6,7 @@
  * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
  */
 
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
 import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {createShadowRootWithStyle} from 'extensions/amp-story/1.0/utils';
@@ -94,7 +78,7 @@ export function buildInteractiveDisclaimer(interactive, attrs = {}) {
     linkEl.remove();
   }
   noteEl.textContent = interactive.localizationService.getLocalizedString(
-    LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+    LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
   );
 
   // Set the described-by for a11y.

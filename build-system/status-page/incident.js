@@ -1,20 +1,4 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * Sync status.amp.dev with cherry-pick progress
  */
@@ -23,7 +7,10 @@ const fetch = require('node-fetch');
 const {getChannels, getFormats, steps} = require('./common');
 const {log} = require('../common/logging');
 
-const [number, body, before, after] = process.argv.slice(2);
+const [number] = process.argv.slice(2);
+const body = process.env.BODY || '';
+const after = process.env.COMMENT_AFTER || '';
+const before = process.env.COMMENT_BEFORE || '';
 
 const apiUrl = `https://api.statuspage.io/v1/pages/${process.env.STATUS_PAGE_ID}`;
 const headers = {

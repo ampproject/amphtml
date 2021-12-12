@@ -1,24 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-youtube';
 import {Services} from '#service';
-import {VideoEvents} from '../../../../src/video-interface';
+
+import {listenOncePromise} from '#utils/event-helper';
+
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {listenOncePromise} from '../../../../src/event-helper';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
@@ -111,9 +98,9 @@ describes.realWin(
         });
         const iframe = yt.querySelector('iframe');
         expect(iframe.src).to.contain('myParam=hello%20world');
-        // data-param-autoplay is black listed in favor of just autoplay
+        // data-param-autoplay is disallowed in favor of just autoplay
         expect(iframe.src).to.not.contain('autoplay=1');
-        // data-param-loop is black listed in favor of just loop for single videos
+        // data-param-loop is disallowed in favor of just loop for single videos
         expect(iframe.src).to.not.contain('loop=1');
         // playsinline should default to 1 if not provided.
         expect(iframe.src).to.contain('playsinline=1');
@@ -182,28 +169,28 @@ describes.realWin(
         const yt = await getYt({'data-videoid': datasource});
         const iframe = yt.querySelector('iframe');
         await Promise.resolve();
-        const p1 = listenOncePromise(yt, VideoEvents.MUTED);
+        const p1 = listenOncePromise(yt, VideoEvents_Enum.MUTED);
         await sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
         await p1;
-        const p2 = listenOncePromise(yt, VideoEvents.PLAYING);
+        const p2 = listenOncePromise(yt, VideoEvents_Enum.PLAYING);
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
         await p2;
-        const p3 = listenOncePromise(yt, VideoEvents.PAUSE);
+        const p3 = listenOncePromise(yt, VideoEvents_Enum.PAUSE);
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
         await p3;
-        const p4 = listenOncePromise(yt, VideoEvents.UNMUTED);
+        const p4 = listenOncePromise(yt, VideoEvents_Enum.UNMUTED);
         await sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
         await p4;
         // Should not send the unmute event twice if already sent once.
-        const p5 = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
+        const p5 = listenOncePromise(yt, VideoEvents_Enum.UNMUTED).then(() => {
           assert.fail('Should not have dispatch unmute message twice');
         });
         await sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
         const successTimeout = timer.promise(10);
         await Promise.race([p5, successTimeout]);
         // Make sure pause and end are triggered when video ends.
-        const pEnded = listenOncePromise(yt, VideoEvents.ENDED);
-        const pPause = listenOncePromise(yt, VideoEvents.PAUSE);
+        const pEnded = listenOncePromise(yt, VideoEvents_Enum.ENDED);
+        const pPause = listenOncePromise(yt, VideoEvents_Enum.PAUSE);
         await sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
         return Promise.all([pEnded, pPause]);
       });

@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';
@@ -22,7 +6,7 @@ const APP = '__AMPHTML__';
 /**
  * @enum {string}
  */
-const MessageType = {
+const MessageType_Enum = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -315,9 +299,9 @@ export class Messaging {
       this.logError_(TAG + ': handleMessage_ error: ', 'invalid token');
       return;
     }
-    if (message.type === MessageType.REQUEST) {
+    if (message.type === MessageType_Enum.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.type === MessageType.RESPONSE) {
+    } else if (message.type === MessageType_Enum.RESPONSE) {
       this.handleResponse_(message);
     }
   }
@@ -341,7 +325,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.REQUEST,
+        type: MessageType_Enum.REQUEST,
         name: messageName,
         data: messageData,
         rsvp: awaitResponse,
@@ -362,7 +346,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MessageType_Enum.RESPONSE,
         name: messageName,
         data: messageData,
       })
@@ -385,7 +369,7 @@ export class Messaging {
       /** @type {!AmpViewerMessage} */ ({
         app: APP,
         requestid: requestId,
-        type: MessageType.RESPONSE,
+        type: MessageType_Enum.RESPONSE,
         name: messageName,
         data: null,
         error: errString,

@@ -1,21 +1,7 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {devAssert} from '#core/assert';
 import {Deferred} from '#core/data-structures/promise';
 import {createViewportObserver} from '#core/dom/layout/viewport-observer';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * @fileoverview
@@ -27,15 +13,15 @@ import {toWin} from '#core/window';
  * support is better.
  */
 
-/** @type {WeakMap<!Element, !Deferred<!IntersectionObserverEntry>>} */
+/** @type {undefined|WeakMap<Element, Deferred<IntersectionObserverEntry>>} */
 let intersectionDeferreds;
 
-/** @type {WeakMap<!Window, !IntersectionObserver>} */
+/** @type {undefined|WeakMap<Window, IntersectionObserver>} */
 let intersectionObservers;
 
 /**
- * @param {!Window} win
- * @return {!IntersectionObserver}
+ * @param {Window} win
+ * @return {IntersectionObserver}
  */
 function getInOb(win) {
   if (!intersectionDeferreds) {
@@ -43,6 +29,7 @@ function getInOb(win) {
     intersectionObservers = new WeakMap();
   }
 
+  devAssert(intersectionObservers);
   let observer = intersectionObservers.get(win);
   if (!observer) {
     observer = createViewportObserver(
@@ -55,8 +42,10 @@ function getInOb(win) {
           }
           seen.add(target);
 
+          devAssert(observer);
           observer.unobserve(target);
-          intersectionDeferreds.get(target).resolve(entries[i]);
+          devAssert(intersectionDeferreds);
+          intersectionDeferreds.get(target)?.resolve(entries[i]);
           intersectionDeferreds.delete(target);
         }
       },
@@ -74,18 +63,19 @@ function getInOb(win) {
  * If multiple measures for the same element occur very quickly, they will
  * dedupe to the same promise.
  *
- * @param {!Element} el
- * @return {!Promise<!IntersectionObserverEntry>}
+ * @param {Element} el
+ * @return {Promise<IntersectionObserverEntry>}
  */
 export function measureIntersectionNoRoot(el) {
-  if (intersectionDeferreds?.has(el)) {
-    return intersectionDeferreds.get(el).promise;
+  let deferred = intersectionDeferreds?.get(el);
+  if (!deferred) {
+    const inOb = getInOb(getWin(el));
+    devAssert(intersectionDeferreds);
+    inOb.observe(el);
+
+    deferred = new Deferred();
+    intersectionDeferreds.set(el, deferred);
   }
 
-  const inOb = getInOb(toWin(el.ownerDocument.defaultView));
-  inOb.observe(el);
-
-  const deferred = new Deferred();
-  intersectionDeferreds.set(el, deferred);
   return deferred.promise;
 }

@@ -2,40 +2,40 @@ workspace(name = "validator")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "40825ef029f05038008b6217e34d00c09e506f99cb91fb97a2f2fd20143fb849",
+    strip_prefix = "protobuf-master",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
+)
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+protobuf_deps()
+
 # rules_cc defines rules for generating C++ code from Protocol Buffers.
 http_archive(
     name = "rules_cc",
-    strip_prefix = "rules_cc-master",
-    urls = ["https://github.com/bazelbuild/rules_cc/archive/master.zip"],
+    sha256 = "7e7b3ffb2cdda7488c53ac266b23fe7fbc3cc7d072f164cdf88ee2e20ebb076e",
+    strip_prefix = "rules_cc-f84656686987ce254481cc33efa3b6645d4254c3",
+    urls = ["https://github.com/bazelbuild/rules_cc/archive/f84656686987ce254481cc33efa3b6645d4254c3.zip"],
 )
+load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies")
+rules_cc_dependencies()
 
 # rules_proto defines abstract rules for building Protocol Buffers.
 http_archive(
     name = "rules_proto",
-    sha256 = "e0cab008a9cdc2400a1d6572167bf9c5afc72e19ee2b862d18581051efab42c9",
-    strip_prefix = "rules_proto-c0b62f2f46c85c16cb3b5e9e921f0d00e3101934",
+    sha256 = "83c8798f5a4fe1f6a13b5b6ae4267695b71eed7af6fbf2b6ec73a64cf01239ab",
+    strip_prefix = "rules_proto-b22f78685bf62775b80738e766081b9e4366cdf0",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/c0b62f2f46c85c16cb3b5e9e921f0d00e3101934.tar.gz",
-        "https://github.com/bazelbuild/rules_proto/archive/c0b62f2f46c85c16cb3b5e9e921f0d00e3101934.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/b22f78685bf62775b80738e766081b9e4366cdf0.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/b22f78685bf62775b80738e766081b9e4366cdf0.tar.gz",
     ],
 )
-
-http_archive(
-    name = "com_google_protobuf",
-    strip_prefix = "protobuf-master",
-    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
-)
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-protobuf_deps()
-
-load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies")
-rules_cc_dependencies()
-
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
 rules_proto_dependencies()
 rules_proto_toolchains()
 
 local_repository(
     name = "amphtml-extensions",
-    path = "../extensions")
+    path = "../extensions",
+)

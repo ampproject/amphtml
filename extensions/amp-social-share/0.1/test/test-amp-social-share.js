@@ -15,9 +15,10 @@
  */
 
 import '../amp-social-share';
-import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
+
+import {Services} from '#service';
 
 const STRINGS = {
   'text': 'Hello world',
@@ -358,11 +359,11 @@ describes.realWin(
 
       const nonActivationEvent = {
         preventDefault: () => {},
-        key: Keys.RIGHT_ARROW,
+        key: Keys_Enum.RIGHT_ARROW,
       };
       const activationEvent = {
         preventDefault: () => {},
-        key: Keys.SPACE,
+        key: Keys_Enum.SPACE,
       };
       impl.handleKeyPress_(nonActivationEvent);
       expect(impl.win.open).to.not.have.been.called;

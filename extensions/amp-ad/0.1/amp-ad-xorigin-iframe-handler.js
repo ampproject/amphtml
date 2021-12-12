@@ -1,21 +1,5 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CONSTANTS, MessageType_Enum} from '#core/3p-frame-messaging';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '#service';
@@ -26,9 +10,9 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {applyFillContent} from '#core/dom/layout';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getHtml} from '#core/dom/get-html';
 import {isExperimentOn} from '#experiments';
 import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';
@@ -43,6 +27,9 @@ const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 
 /** @type {string} */
 const TAG = 'amp-ad-xorigin-iframe';
+
+/** @type {number} */
+const MSEC_REPEATED_REQUEST_DELAY = 500;
 
 export class AmpAdXOriginIframeHandler {
   /**
@@ -63,6 +50,15 @@ export class AmpAdXOriginIframeHandler {
 
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
+
+    /* This variable keeps keeps track when an invalid resize request is made, and
+     * is associated with each iframe. If the request is invalid, then a new request
+     * cannot be made until a certain amount of time has passed, 500 ms by default
+     * (see MSEC_REPEATED_REQUEST_DELAY). Once the timer has cooled down,
+     * a new request can be made.
+     */
+    /** @private {number} */
+    this.lastRejectedResizeTime_ = 0;
 
     /** @private {?LegacyAdIntersectionObserverHost} */
     this.legacyIntersectionObserverApiHost_ = null;
@@ -129,7 +125,7 @@ export class AmpAdXOriginIframeHandler {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
         this.iframe,
-        MessageType.SEND_POSITIONS,
+        MessageType_Enum.SEND_POSITIONS,
         true,
         () => {
           // TODO(@zhouyx): Make sendPosition_ only send to
@@ -145,7 +141,7 @@ export class AmpAdXOriginIframeHandler {
       this.element_.creativeId = info.data['id'];
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_HTML, (payload) => {
+    this.handleOneTimeRequest_(MessageType_Enum.GET_HTML, (payload) => {
       const selector = payload['selector'];
       const attributes = payload['attributes'];
       let content = '';
@@ -155,7 +151,7 @@ export class AmpAdXOriginIframeHandler {
       return Promise.resolve(content);
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
+    this.handleOneTimeRequest_(MessageType_Enum.GET_CONSENT_STATE, () => {
       return this.baseInstance_.getConsentState().then((consentState) => {
         return {consentState};
       });
@@ -170,34 +166,34 @@ export class AmpAdXOriginIframeHandler {
           if (!!data['hasOverflow']) {
             this.element_.warnOnMissingOverflow = false;
           }
-          this.handleResize_(
-            data['id'],
-            data['height'],
-            data['width'],
-            source,
-            origin,
-            event
-          );
+          if (
+            Date.now() - this.lastRejectedResizeTime_ >=
+            MSEC_REPEATED_REQUEST_DELAY
+          ) {
+            this.handleResize_(
+              data['id'],
+              data['height'],
+              data['width'],
+              source,
+              origin,
+              event
+            );
+          } else {
+            // need to wait 500ms until next resize request is allowed.
+            this.sendEmbedSizeResponse_(
+              false,
+              data['id'],
+              data['width'],
+              data['height'],
+              source,
+              origin
+            );
+          }
         },
         true,
         true
       )
     );
-
-    if (this.uiHandler_.isStickyAd()) {
-      setStyle(iframe, 'pointer-events', 'none');
-      this.unlisteners_.push(
-        listenFor(
-          this.iframe,
-          'signal-interactive',
-          () => {
-            setStyle(iframe, 'pointer-events', 'auto');
-          },
-          true,
-          true
-        )
-      );
-    }
 
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
@@ -208,7 +204,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       listenFor(
         this.iframe,
-        MessageType.USER_ERROR_IN_IFRAME,
+        MessageType_Enum.USER_ERROR_IN_IFRAME,
         (data) => {
           this.userErrorForAnalytics_(
             data['message'],
@@ -277,11 +273,13 @@ export class AmpAdXOriginIframeHandler {
     // Wait for initial load signal. Notice that this signal is not
     // used to resolve the final layout promise because iframe may still be
     // consuming significant network and CPU resources.
-    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
-      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
-      // received here as well.
-      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
-    });
+    listenForOncePromise(this.iframe, CommonSignals_Enum.INI_LOAD, true).then(
+      () => {
+        // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
+        // received here as well.
+        this.baseInstance_.signals().signal(CommonSignals_Enum.INI_LOAD);
+      }
+    );
 
     this.element_.appendChild(this.iframe);
     if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
@@ -455,7 +453,13 @@ export class AmpAdXOriginIframeHandler {
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
           (info) => {
-            this.uiHandler_.onResizeSuccess();
+            if (!info.success) {
+              // invalid request parameters, disable requests for 500ms
+              this.lastRejectedResizeTime_ = Date.now();
+            } else {
+              this.lastRejectedResizeTime_ = 0;
+            }
+            this.uiHandler_.adjustPadding();
             this.sendEmbedSizeResponse_(
               info.success,
               id,
@@ -553,7 +557,7 @@ export class AmpAdXOriginIframeHandler {
     this.sendPositionPending_ = true;
     this.getIframePositionPromise_().then((position) => {
       this.sendPositionPending_ = false;
-      this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
     });
   }
 
@@ -572,7 +576,7 @@ export class AmpAdXOriginIframeHandler {
           this.win_,
           () => {
             this.getIframePositionPromise_().then((position) => {
-              this.inaboxPositionApi_.send(MessageType.POSITION, position);
+              this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
             });
           },
           MIN_INABOX_POSITION_EVENT_INTERVAL
@@ -582,7 +586,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       this.viewport_.onResize(() => {
         this.getIframePositionPromise_().then((position) => {
-          this.inaboxPositionApi_.send(MessageType.POSITION, position);
+          this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
         });
       })
     );

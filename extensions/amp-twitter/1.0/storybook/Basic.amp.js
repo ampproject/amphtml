@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
@@ -155,6 +139,38 @@ export const MutatedTweetId = () => {
         data-tweetid="1356304203044499462"
         data-amp-bind-data-tweetid="tweetid"
       ></amp-twitter>
+    </>
+  );
+};
+
+export const SwapPlaceholder = () => {
+  return (
+    <>
+      <button on="tap:AMP.setState({tweetid: '495719809695621121'})">
+        Load tweet
+      </button>
+      <amp-state id="tweetid">
+        <script type="application/json">1356304203044499462</script>
+      </amp-state>
+      <amp-twitter
+        width="375"
+        height="472"
+        layout="responsive"
+        data-amp-bind-data-tweetid="tweetid"
+      >
+        <blockquote placeholder class="twitter-tweet" data-lang="en">
+          <p>Placeholder is shown until the tweet is loaded.</p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+            aliquip ex ea commodo consequat. Duis aute irure dolor in
+            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+            culpa qui officia deserunt mollit anim id est laborum.
+          </p>
+        </blockquote>
+      </amp-twitter>
     </>
   );
 };

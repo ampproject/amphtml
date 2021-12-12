@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
@@ -26,13 +10,13 @@ import {
   realChildElements,
 } from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
-import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {createCustomEvent, getDetail, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
 /**
  * @enum {string}
@@ -67,7 +51,7 @@ class AmpCarousel extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'toggleAutoplay',
@@ -77,8 +61,10 @@ class AmpCarousel extends AMP.BaseElement {
         const toggle = args ? args['toggleOn'] : undefined;
         this.toggleAutoplay_(toggle);
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    this.action_.addToAllowlist('AMP-CAROUSEL', 'goToSlide', ['email']);
   }
 
   /** @param {!AmpElement} element */
@@ -345,12 +331,12 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
+   * Gets the ActionSource to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust >= ActionTrust.DEFAULT
+    return trust >= ActionTrust_Enum.DEFAULT
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }
@@ -573,7 +559,7 @@ class AmpCarousel extends AMP.BaseElement {
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
     const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);

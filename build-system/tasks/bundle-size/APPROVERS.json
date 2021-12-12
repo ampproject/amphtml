@@ -14,7 +14,7 @@
   },
   "dist/v0/amp-analytics-?.?.?(m)js": {
     "approvers": [
-      "ampproject/wg-analytics",
+      "ampproject/wg-components",
       "ampproject/wg-performance"
     ],
     "threshold": 0.1

@@ -1,18 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const minimist = require('minimist');
@@ -75,9 +60,10 @@ const argv = minimist(process.argv.slice(2), {
  * The version number can be manually overridden by passing --version_override
  * to the `amp build`/`amp dist` command.
  *
+ * @param {string} ref
  * @return {string} AMP version number (always 13 digits long)
  */
-function getVersion() {
+function getVersion(ref = 'HEAD') {
   if (argv.version_override) {
     const version = String(argv.version_override);
     if (!/^\d{13}$/.test(version)) {
@@ -86,7 +72,7 @@ function getVersion() {
     return version;
   }
 
-  const numberOfCherryPicks = gitCherryMain().length;
+  const numberOfCherryPicks = gitCherryMain(ref).length;
   if (numberOfCherryPicks > 999) {
     throw new Error(
       `This branch has ${numberOfCherryPicks} cherry-picks, which is more ` +
@@ -96,7 +82,7 @@ function getVersion() {
   }
 
   const lastCommitFormattedTime = gitCommitFormattedTime(
-    `HEAD~${numberOfCherryPicks}`
+    `${ref}~${numberOfCherryPicks}`
   ).slice(0, -2);
 
   const numberOfCherryPicksStr = String(numberOfCherryPicks).padStart(3, '0');
@@ -104,4 +90,9 @@ function getVersion() {
 }
 
 // Used to e.g. references the ads binary from the runtime to get version lock.
-exports.VERSION = getVersion();
+const VERSION = getVersion();
+
+module.exports = {
+  VERSION,
+  getVersion,
+};

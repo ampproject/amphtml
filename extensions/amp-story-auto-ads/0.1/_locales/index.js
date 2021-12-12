@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import LocalizedStringaf from './af.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringam from './am.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringar from './ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -25,10 +9,10 @@ import LocalizedStringcs from './cs.json' assert {type: 'json'}; // lgtm[js/synt
 import LocalizedStringda from './da.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringde from './de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringel from './el.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringen from './en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringenGB from './en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringes from './es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringen from './en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringes419 from './es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringes from './es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringet from './et.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringeu from './eu.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringfa from './fa.json' assert {type: 'json'}; // lgtm[js/syntax-error]

@@ -1,34 +1,22 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview "Unit" test for bind-impl.js. Runs as an integration test
  * because it requires building web-worker binary.
  */
 
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '#core/constants/amp-events';
-import {Bind} from '../../bind-impl';
-import {BindEvents} from '../../bind-events';
-import {Deferred} from '#core/data-structures/promise';
+
 import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
-import {Services} from '#service';
-import {chunkInstanceForTesting} from '../../../../../src/chunk';
-import {dev, user} from '../../../../../src/log';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Deferred} from '#core/data-structures/promise';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
+
+import {chunkInstanceForTesting} from '../../../../../src/chunk';
+import {BindEvents} from '../../bind-events';
+import {Bind} from '../../bind-impl';
 
 /**
  * @param {!Object} env
@@ -209,7 +197,7 @@ function waitForEvent(env, name) {
 }
 
 const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
-  type: AmpEvents.FORM_VALUE_CHANGE,
+  type: AmpEvents_Enum.FORM_VALUE_CHANGE,
   bubbles: true,
 };
 const chromed = describes.sandboxed.configure().ifChrome();
@@ -626,7 +614,7 @@ chromed.run('Bind', {}, function () {
               });
               dynamicTag.appendChild(element);
               dynamicTag.dispatchEvent(
-                new Event(AmpEvents.DOM_UPDATE, {bubbles: true})
+                new Event(AmpEvents_Enum.DOM_UPDATE, {bubbles: true})
               );
               return waitForEvent(env, BindEvents.RESCAN_TEMPLATE);
             })
@@ -1545,7 +1533,7 @@ chromed.run('Bind', {}, function () {
           });
         });
 
-        describe('AmpEvents.FORM_VALUE_CHANGE', () => {
+        describe('AmpEvents_Enum.FORM_VALUE_CHANGE', () => {
           it('should dispatch FORM_VALUE_CHANGE on <input [value]> changes', () => {
             const element = createElement(env, container, '[value]="foo"', {
               tag: 'input',
@@ -1591,7 +1579,7 @@ chromed.run('Bind', {}, function () {
               () => {
                 expect(spy).to.have.been.calledOnce;
                 expect(spy).calledWithMatch({
-                  type: AmpEvents.FORM_VALUE_CHANGE,
+                  type: AmpEvents_Enum.FORM_VALUE_CHANGE,
                   bubbles: true,
                 });
               }
@@ -1608,7 +1596,7 @@ chromed.run('Bind', {}, function () {
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AmpEvents.FORM_VALUE_CHANGE,
+                type: AmpEvents_Enum.FORM_VALUE_CHANGE,
                 bubbles: true,
               });
             });

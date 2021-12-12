@@ -1,0 +1,86 @@
+PASS
+|  <!--
+|    Test Description:
+|    Tests for the amp-render functionality inside amp-story.
+|  -->
+|  <!DOCTYPE html>
+|  <html amp lang="en">
+|    <head>
+|      <meta charset="utf-8" />
+|      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|      <script async custom-element="amp-story"
+|        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+|      <script async custom-element="amp-render"
+|        src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+|      <script async custom-template="amp-mustache"
+|        src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+|      <script async custom-element="amp-bind"
+|        src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|      <title>amp-render</title>
+|      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1"/>
+|      <link rel="canonical" href="index.html" />
+|      <style amp-boilerplate>
+|        body{
+|          -webkit-animation:-amp-start 8s steps(1, end) 0s 1 normal both;
+|          -moz-animation:-amp-start 8s steps(1, end) 0s 1 normal both;
+|          -ms-animation:-amp-start 8s steps(1, end) 0s 1 normal both;
+|          animation:-amp-start 8s steps(1, end) 0s 1 normal both
+|        }
+|        @-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+|        @-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+|        @-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+|        @-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+|        @keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}
+|      </style>
+|      <noscript>
+|        <style amp-boilerplate>
+|          body{
+|            -webkit-animation:none;
+|            -moz-animation:none;
+|            -ms-animation:none;
+|            animation:none
+|          }
+|        </style>
+|      </noscript>
+|    </head>
+|
+|    <body>
+|      <amp-story standalone title="My Story" publisher="Me"
+|        publisher-logo-src="http://me.com/logo.png"
+|        poster-portrait-src="http://me.com/poster.jpg">
+|        <amp-story-page id="page-rendering">
+|          <amp-story-grid-layer template="vertical">
+|            <!-- Valid: amp-render within amp-story-page -->
+|            <amp-render
+|              layout="fixed-height"
+|              height="100"
+|              src="/examples/images.json"
+|              binding="no">
+|              <template id="my-page-template" type="amp-mustache">
+|                <div>{{#images}}<b><a href="{{urls.picsum}}">{{author}}</a></b>{{/images}}</div>
+|              </template>
+|              <div placeholder>Loading ...</div>
+|              <div fallback>Failed to load data.</div>
+|            </amp-render>
+|          </amp-story-grid-layer>
+|        </amp-story-page>
+|
+|        <amp-story-page id="attachment-rendering">
+|          <amp-story-page-attachment layout="nodisplay">
+|            <h1>Page Attachment</h1>
+|            <!-- Valid: amp-render within amp-story-page-attachment -->
+|            <amp-render
+|              layout="fixed-height"
+|              height="100"
+|              src="/examples/images.json"
+|              binding="no"
+|              template="my-attachment-template">
+|            </amp-render>
+|            <template id="my-attachment-template" type="amp-mustache">
+|              <div>{{#images}}<b><a href="{{urls.picsum}}">{{author}}</a></b>{{/images}}</div>
+|            </template>
+|          </amp-story-page-attachment>
+|        </amp-story-page>
+|      </amp-story>
+|    </body>
+|  </html>

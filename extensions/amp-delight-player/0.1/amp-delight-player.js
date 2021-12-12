@@ -1,47 +1,35 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {
-  createFrameFor,
-  objOrParseJson,
-  originMatches,
-  redispatch,
-} from '../../../src/iframe-video';
-import {dict} from '#core/types/object';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen, listenOncePromise} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '#core/dom/static-template';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {setStyle} from '#core/dom/style';
-import {userAssert} from '../../../src/log';
+  createFrameFor,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
+import {
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-delight-player';
@@ -145,6 +133,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -181,9 +172,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(
+    this.unobserveIntersections_ = observeIntersections(
       this.element,
-      (isInViewport) => (this.isInViewport_ = isInViewport)
+      ({isIntersecting}) => (this.isInViewport_ = isIntersecting)
     );
     const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);
@@ -203,7 +194,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.element.hasAttribute(VideoAttributes.DOCK)) {
+    if (this.element.hasAttribute(VideoAttributes_Enum.DOCK)) {
       return false; // do nothing, do not relayout
     }
 
@@ -220,7 +211,8 @@ class AmpDelightPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     this.unregisterEventHandlers_();
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.pauseHelper_.updatePlaying(false);
 
     return true;
@@ -302,13 +294,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     const redispatched = redispatch(element, data['type'], {
-      [DelightEvent.PLAYING]: VideoEvents.PLAYING,
-      [DelightEvent.PAUSED]: VideoEvents.PAUSE,
-      [DelightEvent.ENDED]: VideoEvents.ENDED,
-      [DelightEvent.MUTED]: VideoEvents.MUTED,
-      [DelightEvent.UNMUTED]: VideoEvents.UNMUTED,
-      [DelightEvent.AD_START]: VideoEvents.AD_START,
-      [DelightEvent.AD_END]: VideoEvents.AD_END,
+      [DelightEvent.PLAYING]: VideoEvents_Enum.PLAYING,
+      [DelightEvent.PAUSED]: VideoEvents_Enum.PAUSE,
+      [DelightEvent.ENDED]: VideoEvents_Enum.ENDED,
+      [DelightEvent.MUTED]: VideoEvents_Enum.MUTED,
+      [DelightEvent.UNMUTED]: VideoEvents_Enum.UNMUTED,
+      [DelightEvent.AD_START]: VideoEvents_Enum.AD_START,
+      [DelightEvent.AD_END]: VideoEvents_Enum.AD_END,
     });
 
     if (redispatched) {
@@ -333,7 +325,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         break;
       }
       case DelightEvent.READY: {
-        dispatchCustomEvent(element, VideoEvents.LOAD);
+        dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
         this.playerReadyResolver_(this.iframe_);
         break;
       }
@@ -383,7 +375,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   dispatchCustomAnalyticsEvent_(eventType, vars) {
     dispatchCustomEvent(
       this.element,
-      VideoEvents.CUSTOM_TICK,
+      VideoEvents_Enum.CUSTOM_TICK,
       dict({
         'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
         'vars': vars,

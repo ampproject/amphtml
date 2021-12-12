@@ -1,25 +1,12 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-carousel';
-import * as Listen from '../../../../src/event-helper';
-import {ActionTrust} from '#core/constants/action-constants';
+import * as Listen from '#utils/event-helper';
+import {ActionService} from '#service/action-impl';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {Services} from '#service';
-import {getDetail, listenOncePromise} from '../../../../src/event-helper';
+import {getDetail, listenOncePromise} from '#utils/event-helper';
+import {user} from '#utils/log';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /**
  * @fileoverview Some simple tests for amp-carousel. Most of the functionality
@@ -306,7 +293,7 @@ describes.realWin(
         await afterIndexUpdate(carousel);
 
         expect(event.data.index).to.equal(1);
-        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        expect(event.data.actionTrust).to.equal(ActionTrust_Enum.HIGH);
       });
     });
 
@@ -319,7 +306,7 @@ describes.realWin(
         impl.executeAction({
           method: 'goToSlide',
           args: {index: 1},
-          trust: ActionTrust.HIGH,
+          trust: ActionTrust_Enum.HIGH,
           satisfiesTrust: () => true,
         });
         await afterIndexUpdate(carousel);
@@ -328,7 +315,7 @@ describes.realWin(
           carousel,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
       });
 
@@ -340,7 +327,7 @@ describes.realWin(
         impl.executeAction({
           method: 'goToSlide',
           args: {index: 1},
-          trust: ActionTrust.LOW,
+          trust: ActionTrust_Enum.LOW,
           satisfiesTrust: () => true,
         });
         await afterIndexUpdate(carousel);
@@ -349,7 +336,7 @@ describes.realWin(
           carousel,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
-          ActionTrust.LOW
+          ActionTrust_Enum.LOW
         );
       });
 
@@ -361,7 +348,7 @@ describes.realWin(
         impl.executeAction({
           method: 'goToSlide',
           args: {index: '1'},
-          trust: ActionTrust.LOW,
+          trust: ActionTrust_Enum.LOW,
           satisfiesTrust: () => true,
         });
         await afterIndexUpdate(carousel);
@@ -370,7 +357,7 @@ describes.realWin(
           carousel,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
-          ActionTrust.LOW
+          ActionTrust_Enum.LOW
         );
       });
 
@@ -384,7 +371,7 @@ describes.realWin(
             impl.executeAction({
               method: 'goToSlide',
               args: {index: 'one'},
-              trust: ActionTrust.LOW,
+              trust: ActionTrust_Enum.LOW,
               satisfiesTrust: () => true,
             });
           });
@@ -394,6 +381,68 @@ describes.realWin(
           return;
         }
         expect.fail();
+      });
+
+      it('should be allowlisted in email', async () => {
+        env.win.document.documentElement.setAttribute('amp4email', '');
+        const action = new ActionService(env.ampdoc, env.win.document);
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+        const carousel = await getCarousel({loop: false});
+        env.sandbox.spy(carousel, 'enqueAction');
+        env.sandbox.stub(carousel, 'getDefaultActionAlias');
+        await whenUpgradedToCustomElement(carousel);
+        await carousel.whenBuilt();
+
+        action.execute(
+          carousel,
+          'goToSlide',
+          {},
+          'source',
+          'caller',
+          'event',
+          ActionTrust_Enum.HIGH
+        );
+
+        expect(carousel.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: {},
+            caller: 'caller',
+            event: 'event',
+            method: 'goToSlide',
+            node: carousel,
+            source: 'source',
+            trust: ActionTrust_Enum.HIGH,
+          })
+        );
+      });
+    });
+
+    describe('toggleAutoplay action', () => {
+      it('should not be allowlisted in email', async () => {
+        env.win.document.documentElement.setAttribute('amp4email', '');
+        const action = new ActionService(env.ampdoc, env.win.document);
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+        const carousel = await getCarousel({loop: false});
+        const userErrorStub = env.sandbox.stub(user(), 'error');
+        env.sandbox.stub(carousel, 'getDefaultActionAlias');
+        await whenUpgradedToCustomElement(carousel);
+        await carousel.whenBuilt();
+
+        action.execute(
+          carousel,
+          'toggleAutoplay',
+          {},
+          'source',
+          'caller',
+          'event',
+          ActionTrust_Enum.HIGH
+        );
+
+        expect(userErrorStub).to.be.calledOnce;
+        expect(userErrorStub.args[0][1]).to.match(
+          /"AMP-CAROUSEL.toggleAutoplay" is not allowlisted/
+        );
       });
     });
 
