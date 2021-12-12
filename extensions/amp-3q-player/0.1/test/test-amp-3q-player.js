@@ -1,26 +1,14 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-3q-player';
-import * as fullscreen from '#core/dom/fullscreen';
-import {Services} from '#service';
-import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
+import * as fullscreen from '#core/dom/fullscreen';
+
+import {Services} from '#service';
+
+import {listenOncePromise} from '#utils/event-helper';
+
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {listenOncePromise} from '../../../../src/event-helper';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-3q-player',
@@ -128,16 +116,16 @@ describes.realWin(
         const impl = await player.getImpl();
         const iframe = player.querySelector('iframe');
         await Promise.resolve();
-        const p1 = listenOncePromise(player, VideoEvents.MUTED);
+        const p1 = listenOncePromise(player, VideoEvents_Enum.MUTED);
         sendFakeMessage(impl, iframe, 'muted');
         await p1;
-        const p2 = listenOncePromise(player, VideoEvents.PLAYING);
+        const p2 = listenOncePromise(player, VideoEvents_Enum.PLAYING);
         sendFakeMessage(impl, iframe, 'playing');
         await p2;
-        const p3 = listenOncePromise(player, VideoEvents.PAUSE);
+        const p3 = listenOncePromise(player, VideoEvents_Enum.PAUSE);
         sendFakeMessage(impl, iframe, 'paused');
         await p3;
-        const p4 = listenOncePromise(player, VideoEvents.UNMUTED);
+        const p4 = listenOncePromise(player, VideoEvents_Enum.UNMUTED);
         sendFakeMessage(impl, iframe, 'unmuted');
         const successTimeout = timer.promise(10);
         return Promise.race([p4, successTimeout]);

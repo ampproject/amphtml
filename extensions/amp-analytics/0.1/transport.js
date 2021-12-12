@@ -1,19 +1,3 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   BatchSegmentDef,
   RequestDef,
@@ -31,14 +15,14 @@ import {
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service-helpers';
 
-import {loadPromise} from '../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 import {removeElement} from '#core/dom';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {toggle} from '#core/dom/style';
 
 /** @const {string} */
@@ -170,7 +154,7 @@ export class Transport {
     }
 
     // In the case of FIE rendering, we should be using the parent doc win.
-    const topWin = getTopWindow(toWin(element.ownerDocument.defaultView));
+    const topWin = getTopWindow(getWin(element));
     const type = element.getAttribute('type');
     // In inabox there is no amp-ad element.
     const ampAdResourceId = this.isInabox_

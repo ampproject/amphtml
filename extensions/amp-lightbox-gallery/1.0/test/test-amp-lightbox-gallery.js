@@ -1,29 +1,22 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-lightbox-gallery';
-import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
-import {installLightboxGallery} from '../amp-lightbox-gallery';
-import * as analytics from '../../../../src/analytics';
-import {poll} from '#testing/iframe';
+
 import {toggleExperiment} from '#experiments';
-import {waitFor, whenCalled} from '#testing/test-helper';
+
+import {Services} from '#service/';
+import {ActionInvocation} from '#service/action-impl';
+
+import * as analytics from '#utils/analytics';
+
+import {waitFor, whenCalled} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
+
+import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';
 
@@ -39,6 +32,8 @@ describes.realWin(
     let doc;
     let html;
     let element;
+    let historyPopSpy;
+    let historyPushSpy;
 
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
@@ -50,7 +45,7 @@ describes.realWin(
       const source = null;
       const caller = null;
       const event = null;
-      const trust = ActionTrust.HIGH;
+      const trust = ActionTrust_Enum.HIGH;
       return new ActionInvocation(
         element,
         method,
@@ -67,6 +62,19 @@ describes.realWin(
       doc = win.document;
       html = htmlFor(doc);
       toggleExperiment(win, 'bento-lightbox-gallery', true, true);
+
+      historyPopSpy = env.sandbox.spy();
+      historyPushSpy = env.sandbox.spy();
+      env.sandbox.stub(Services, 'historyForDoc').returns({
+        push() {
+          historyPushSpy();
+          return Promise.resolve(11);
+        },
+        pop() {
+          historyPopSpy();
+          return Promise.resolve(11);
+        },
+      });
     });
 
     afterEach(() => {
@@ -168,6 +176,8 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
           'lightboxOpened'
@@ -200,6 +210,9 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledOnce;
@@ -218,6 +231,8 @@ describes.realWin(
 
         expect(element.setAsContainerInternal).to.be.calledOnce;
         expect(element.removeAsContainerInternal).to.be.calledOnce;
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.be.calledOnce;
       });
     });
 
@@ -255,6 +270,8 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
           'lightboxOpened'
@@ -289,6 +306,8 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
         expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
           element,
           'lightboxOpened'
@@ -372,6 +391,9 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -403,6 +425,9 @@ describes.realWin(
         expect(renderedImgs[2].srcset).to.equal('img3.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -434,6 +459,9 @@ describes.realWin(
         expect(renderedImgs[2].srcset).to.equal('img7.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);
@@ -461,6 +489,9 @@ describes.realWin(
         expect(renderedImgs[0].srcset).to.equal('img4.jpg 1x');
 
         await whenCalled(element.setAsContainerInternal);
+        expect(historyPushSpy).to.be.calledOnce;
+        expect(historyPopSpy).to.have.not.been.called;
+
         const scroller = element.shadowRoot.querySelector('[part=scroller]');
         expect(scroller).not.to.be.null;
         expect(element.setAsContainerInternal).to.be.calledWith(scroller);

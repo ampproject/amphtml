@@ -1,19 +1,3 @@
-<!---
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 <!--
   Run to insert missing sections:
     amp check-analytics-vendors-list --fix
@@ -77,6 +61,12 @@ Adds support for Alexa Certified Site Metrics. The `atrk_acct` and `domain` vari
 
 Type attribute value: `amplitude`
 
+### AppsFlyer
+
+Type attribute value: `appsflyer`
+
+Adds support for AppsFlyer. More details for adding AppsFlyer support can be found at [appsflyer.com](https://support.appsflyer.com/hc/en-us/articles/360001610038#amp-support)
+
 ### AT Internet
 
 Type attribute value: `atinternet`
@@ -119,7 +109,11 @@ Type attribute value: `blueconic`
 
 Type attribute value: `bluetriangle`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for blue Triangle. More details can be found at [help.bluetriangle.com](https://help.bluetriangle.com/hc/en-us/articles/1500006133061).
+
+<!-- markdown-link-check-enable -->
 
 ### Browsi
 
@@ -194,7 +188,7 @@ Adds support for Eulerian Technologies Analytics. Requires defining _var_ `analy
 
 Type attribute value: `facebookpixel`
 
-Adds support for the [Facebook Pixel](https://www.facebook.com/business/a/facebook-pixel). In your [`amp-analytics`](./amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Facebook Pixel developer documentation](https://developers.facebook.com/docs/ads-for-websites/pixel-events).
+Adds support for the [Facebook Pixel](https://www.facebook.com/business/a/facebook-pixel). In your [`amp-analytics`](./amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Facebook Pixel developer documentation](https://developers.facebook.com/docs/facebook-pixel).
 
 ### Gemius
 
@@ -272,6 +266,20 @@ Additionally, the following variables must be defined:
 
 More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
 
+### INFOnline base
+
+Type attribute value: `infonline_base`
+
+Additionally, the following variables must be defined:
+
+-   `st`: offer ID
+-   `co`: comment
+-   `cp`: code
+-   `url`: HTTPS location of `amp.html` on the service platform or sub domain
+-   `dn`: The relay domain name
+
+More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
+
 ### ip-label
 
 Type attribute value: `iplabel`
@@ -291,7 +299,11 @@ Use `extraUrlParams` to add more data. Configuration details can be found at [ke
 
 Type attribute value: `kenshoo`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Kenshoo. More information and configuration details can be found at [helpcenter.kenshoo.com](https://helpcenter.kenshoo.com/hc/en-us/articles/360025260592).
+
+<!-- markdown-link-check-enable -->
 
 ### Krux
 
@@ -581,7 +593,7 @@ Adds support for Rambler/TOP-100. Configuration details can be found at [top100.
 
 Type attribute value: `topmailru`
 
-Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru Help](https://help.mail.ru/top/amp-analytics).
+Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru Help](https://top.mail.ru/help/en/code/amp).
 
 ### Treasure Data
 
@@ -607,7 +619,7 @@ Adds support for Vpon Analytics. Configuration details can be found at [Vpon Ana
 
 ### Webengage
 
-Type attribute value: `webengage`
+Type attribute value: `webengage`.
 
 <!--
 ### webtrekk (deprecated, see below)
@@ -624,5 +636,3 @@ Type attribute value: `webtrekk_v2`
 <span style="text-decoration: line-through;">`webtrekk`</span> is deprecated. **Use `webtrekk_v2` instead.**
 
 [/tip]
-
-Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).

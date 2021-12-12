@@ -1,24 +1,11 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {LayoutPriority} from '#core/dom/layout';
+
+import {createElementWithAttributes} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 import {Scheduler} from '#service/scheduler';
-import {createElementWithAttributes} from '#core/dom';
+
 import {installIntersectionObserverStub} from '#testing/intersection-observer-stub';
 
 describes.realWin('Scheduler', {amp: true}, (env) => {
@@ -71,7 +58,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     element.deferredMount = () => options.deferredMount || false;
     element.prerenderAllowed = () => options.prerenderAllowed || false;
     element.getBuildPriority = () =>
-      options.buildPriority || LayoutPriority.CONTENT;
+      options.buildPriority || LayoutPriority_Enum.CONTENT;
     element.mountInternal = env.sandbox.stub();
     return element;
   }
@@ -388,7 +375,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     it('should run deferred METADATA at low priority', () => {
       const element = createAmpElement({
         deferredMount: true,
-        buildPriority: LayoutPriority.METADATA,
+        buildPriority: LayoutPriority_Enum.METADATA,
       });
       scheduler.schedule(element);
       intersectionObserverStub.notifySync({
@@ -405,7 +392,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     it('should run non-deferred METADATA at low priority', () => {
       const element = createAmpElement({
         deferredMount: false,
-        buildPriority: LayoutPriority.METADATA,
+        buildPriority: LayoutPriority_Enum.METADATA,
       });
       scheduler.schedule(element);
       clock.tick(1);
@@ -418,7 +405,7 @@ describes.realWin('Scheduler', {amp: true}, (env) => {
     it('should run asap METADATA at high priority', () => {
       const element = createAmpElement({
         deferredMount: false,
-        buildPriority: LayoutPriority.METADATA,
+        buildPriority: LayoutPriority_Enum.METADATA,
       });
       scheduler.scheduleAsap(element);
       clock.tick(1);

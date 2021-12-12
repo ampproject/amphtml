@@ -1,23 +1,8 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
+import {tryPlay} from '#core/dom/video';
 import {Deferred} from '#core/data-structures/promise';
-import {Loading} from '#core/constants/loading-instructions';
+import {Loading_Enum} from '#core/constants/loading-instructions';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {
   MetadataDef,
@@ -26,7 +11,7 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {ReadyState} from '#core/constants/ready-state';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 import {dict} from '#core/types/object';
 import {forwardRef} from '#preact/compat';
 import {once} from '#core/types/function';
@@ -41,7 +26,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useResourcesNotify} from '#preact/utils';
+import {propName, useResourcesNotify} from '#preact/utils';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 
@@ -82,7 +67,6 @@ const getMetadata = (player, props) =>
 function VideoWrapperWithRef(
   {
     autoplay = false,
-    className,
     component: Component = 'video',
     controls = false,
     loading: loadingProp,
@@ -95,6 +79,7 @@ function VideoWrapperWithRef(
     sources,
     src,
     style,
+    [propName('class')]: className,
     ...rest
   },
   ref
@@ -102,7 +87,7 @@ function VideoWrapperWithRef(
   useResourcesNotify();
   const {playable} = useAmpContext();
   const loading = useLoading(loadingProp);
-  const load = loading !== Loading.UNLOAD;
+  const load = loading !== Loading_Enum.UNLOAD;
 
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying_] = useState(false);
@@ -118,7 +103,7 @@ function VideoWrapperWithRef(
   // <source>s change.
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const readyStateRef = useRef(ReadyState.LOADING);
+  const readyStateRef = useRef(ReadyState_Enum.LOADING);
   // The `onReadyStateRef` is passed via a ref to avoid the changed values
   // of `onReadyState` re-triggering the side effects.
   const onReadyStateRef = useValueRef(onReadyState);
@@ -157,7 +142,7 @@ function VideoWrapperWithRef(
   }, [load, setPlayingState]);
 
   const play = useCallback(() => {
-    return readyDeferred.promise.then(() => playerRef.current.play());
+    return readyDeferred.promise.then(() => tryPlay(playerRef.current));
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
@@ -180,7 +165,9 @@ function VideoWrapperWithRef(
   useLayoutEffect(() => {
     const readyState = playerRef.current?.readyState;
     if (readyState != null) {
-      setReadyState(readyState > 0 ? ReadyState.COMPLETE : ReadyState.LOADING);
+      setReadyState(
+        readyState > 0 ? ReadyState_Enum.COMPLETE : ReadyState_Enum.LOADING
+      );
     }
   }, [setReadyState]);
 
@@ -261,7 +248,7 @@ function VideoWrapperWithRef(
   return (
     <ContainWrapper
       contentRef={wrapperRef}
-      className={className}
+      class={className}
       style={style}
       size
       layout
@@ -277,7 +264,7 @@ function VideoWrapperWithRef(
           controls={controls && (!autoplay || hasUserInteracted)}
           onCanPlay={() => {
             readyDeferred.resolve();
-            setReadyState(ReadyState.COMPLETE);
+            setReadyState(ReadyState_Enum.COMPLETE);
           }}
           onLoadedMetadata={() => {
             if (mediasession) {
@@ -285,16 +272,16 @@ function VideoWrapperWithRef(
                 setMetadata(getMetadata(playerRef.current, rest));
               });
             }
-            setReadyState(ReadyState.COMPLETE);
+            setReadyState(ReadyState_Enum.COMPLETE);
           }}
           onPlaying={() => setPlayingState(true)}
           onPause={() => setPlayingState(false)}
           onEnded={() => setPlayingState(false)}
           onError={(e) => {
-            setReadyState(ReadyState.ERROR, e);
+            setReadyState(ReadyState_Enum.ERROR, e);
             readyDeferred.reject(e);
           }}
-          className={classes.fillStretch}
+          class={classes.fillStretch}
           src={src}
           poster={poster}
         >
@@ -366,7 +353,7 @@ function Autoplay({
     <>
       {displayIcon && (
         <div
-          className={objstr({
+          class={objstr({
             [autoplayClasses.eq]: true,
             [autoplayClasses.eqPlaying]: playing,
           })}
@@ -378,8 +365,8 @@ function Autoplay({
       {displayOverlay && (
         <button
           aria-label={(metadata && metadata.title) || 'Unmute video'}
-          tabindex="0"
-          className={objstr({
+          tabIndex="0"
+          class={objstr({
             [autoplayClasses.autoplayMaskButton]: true,
             [classes.fillContentOverlay]: true,
           })}
@@ -393,12 +380,14 @@ function Autoplay({
 const AutoplayIconContent = /** @type {function():!PreactDef.Renderable} */ (
   once(() => {
     const classes = useAutoplayStyles();
-    return [1, 2, 3, 4].map((i) => (
-      <div className={classes.eqCol} key={i}></div>
-    ));
+    return [1, 2, 3, 4].map((i) => <div class={classes.eqCol} key={i}></div>);
   })
 );
 
 const VideoWrapper = forwardRef(VideoWrapperWithRef);
 VideoWrapper.displayName = 'VideoWrapper'; // Make findable for tests.
+
+// VideoWrapper is used by many video component implementations, but we also
+// provide it as BentoVideo using default props.
 export {VideoWrapper};
+export {VideoWrapper as BentoVideo};

@@ -1,29 +1,13 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {assertScreenReaderElement} from '#testing/test-helper';
-import {clearModalStack, getModalStackLength} from '../../../../src/modal';
+import {assertScreenReaderElement} from '#testing/helpers/service';
+import {clearModalStack, getModalStackLength} from '#core/dom/modal';
 import {createElementWithAttributes} from '#core/dom';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
@@ -153,7 +137,7 @@ describes.realWin(
     }
 
     /** Helper for invoking open/close/toggle actions on amp-sidebar. */
-    function execute(impl, method, trust = ActionTrust.HIGH) {
+    function execute(impl, method, trust = ActionTrust_Enum.HIGH) {
       impl.executeAction({
         method,
         trust,
@@ -447,7 +431,7 @@ describes.realWin(
         if (eventObj.initEvent) {
           eventObj.initEvent('keydown', true, true);
         }
-        eventObj.key = Keys.ESCAPE;
+        eventObj.key = Keys_Enum.ESCAPE;
         eventObj.which = KEYBOARD_EVENT_WHICH_ESCAPE;
         const el = doc.documentElement;
         el.dispatchEvent
@@ -790,7 +774,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
@@ -801,7 +785,7 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ActionTrust.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });

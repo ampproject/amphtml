@@ -1,20 +1,4 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * An interface to interact with browser window object.
  * Mainly used to mock out read only APIs in test.
  * See test-helper.js#mockWindowInterface
@@ -22,8 +6,8 @@
 export class WindowInterface {
   /**
    * @static
-   * @param {!Window} win
-   * @return {!Window}
+   * @param {Window} win
+   * @return {?Window}
    */
   static getTop(win) {
     return win.top;
@@ -31,8 +15,8 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
-   * @return {!Location}
+   * @param {Window} win
+   * @return {Location}
    */
   static getLocation(win) {
     return win.location;
@@ -40,7 +24,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getDocumentReferrer(win) {
@@ -49,7 +33,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getHostname(win) {
@@ -58,7 +42,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getUserAgent(win) {
@@ -67,7 +51,7 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {string}
    */
   static getUserLanguage(win) {
@@ -87,8 +71,8 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
-   * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean|undefined}
+   * @param {Window} win
+   * @return {undefined|function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean}
    */
   static getSendBeacon(win) {
     if (!win.navigator.sendBeacon) {
@@ -99,19 +83,19 @@ export class WindowInterface {
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {typeof XMLHttpRequest}
    */
   static getXMLHttpRequest(win) {
-    return win.XMLHttpRequest;
+    return /** @type {any} */ (win).XMLHttpRequest;
   }
 
   /**
    * @static
-   * @param {!Window} win
+   * @param {Window} win
    * @return {typeof Image}
    */
   static getImage(win) {
-    return win.Image;
+    return /** @type {any} */ (win).Image;
   }
 }

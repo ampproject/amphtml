@@ -5,7 +5,7 @@
   rules: [
     {
       owners: [
-        {name: 'ampproject/wg-analytics'},
+        {name: 'ampproject/wg-components'},
         {name: 'avimehta', requestReviews: false},
       ],
     },

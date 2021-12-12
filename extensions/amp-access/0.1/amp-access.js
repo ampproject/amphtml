@@ -1,38 +1,26 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AccessSource, AccessType} from './amp-access-source';
-import {AccessVars} from './access-vars';
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpAccessEvaluator} from './access-expr';
-import {AmpEvents} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-access-0.1.css';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {TickLabel_Enum} from '#core/constants/enums';
 import {Observable} from '#core/data-structures/observable';
-import {Services} from '#service';
-import {TickLabel} from '#core/constants/enums';
-import {cancellation} from '../../../src/error-reporting';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '#core/types/object';
-import {getSourceOrigin} from '../../../src/url';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {isArray} from '#core/types';
 import {isJsonScriptTag} from '#core/dom';
-import {listenOnce} from '../../../src/event-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isArray} from '#core/types';
+import {dict, getValueForExpr} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {listenOnce} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
+import {AmpAccessEvaluator} from './access-expr';
+import {AccessVars} from './access-vars';
+import {AccessSource, AccessType} from './amp-access-source';
+
+import {CSS} from '../../../build/amp-access-0.1.css';
+import {cancellation} from '../../../src/error-reporting';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {getSourceOrigin} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-access';
@@ -134,9 +122,9 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tick(TickLabel_Enum.ACCESS_AUTHORIZATION);
         this.performance_.tickSinceVisible(
-          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+          TickLabel_Enum.ACCESS_AUTHORIZATION_VISIBLE
         );
         this.performance_.flush();
       }
@@ -145,7 +133,10 @@ export class AccessService {
     // Re-authorize newly added sections.
     ampdoc
       .getRootNode()
-      .addEventListener(AmpEvents.DOM_UPDATE, this.onDomUpdate_.bind(this));
+      .addEventListener(
+        AmpEvents_Enum.DOM_UPDATE,
+        this.onDomUpdate_.bind(this)
+      );
   }
 
   /** @override from AccessVars */
@@ -705,7 +696,7 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'login') {

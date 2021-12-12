@@ -1,36 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {
-  addUnsafeAllowAutoplay,
-  createFrameFor,
-  isJsonOrObj,
-  mutedOrUnmutedEvent,
-  objOrParseJson,
-  originMatches,
-  redispatch,
-} from '../../../src/iframe-video';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
@@ -41,11 +9,30 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '#core/dom/static-template';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
+import {
+  addUnsafeAllowAutoplay,
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  originMatches,
+  redispatch,
+} from '../../../src/iframe-video';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-youtube';
 
@@ -260,7 +247,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    // Listening for VideoEvents.LOAD in AutoFullscreenManager.register may
+    // Listening for VideoEvents_Enum.LOAD in AutoFullscreenManager.register may
     // introduce race conditions which may break elements e.g. amp-ima-video
     Services.videoManagerForDoc(this.element).register(this);
 
@@ -273,7 +260,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.isLoop_ && !this.isPlaylist_) {
       this.unlistenLooping_ = listen(
         this.element,
-        VideoEvents.ENDED,
+        VideoEvents_Enum.ENDED,
         (unusedEvent) => this.play(false /** unusedIsAutoplay */)
       );
     }
@@ -290,7 +277,7 @@ class AmpYoutube extends AMP.BaseElement {
       .then(() => {
         // Tell YT that we want to receive messages
         this.listenToFrame_();
-        dispatchCustomEvent(this.element, VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
       });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -435,10 +422,10 @@ class AmpYoutube extends AMP.BaseElement {
       }
 
       redispatch(element, playerState.toString(), {
-        [PlayerStates.PLAYING]: VideoEvents.PLAYING,
-        [PlayerStates.PAUSED]: VideoEvents.PAUSE,
+        [PlayerStates.PLAYING]: VideoEvents_Enum.PLAYING,
+        [PlayerStates.PAUSED]: VideoEvents_Enum.PAUSE,
         // YT does not fire pause and ended together.
-        [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+        [PlayerStates.ENDED]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
       });
       return;
     }
@@ -455,7 +442,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     if (eventType == 'initialDelivery') {
       this.info_ = info;
-      dispatchCustomEvent(element, VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(element, VideoEvents_Enum.LOADEDMETADATA);
       return;
     }
 

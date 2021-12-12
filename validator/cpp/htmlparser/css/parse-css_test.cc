@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 #include "css/parse-css.h"
 
 #include <memory>
@@ -2434,6 +2418,23 @@ TEST(ParseCssTest, ExtractUrls_InvalidArgumentsInsideUrlFunctionYieldsError) {
 
 TEST(ParseCssTest, ParseMediaQueries_SemicolonTerminatedQuery) {
   vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints("@media ;");
+  vector<unique_ptr<ErrorToken>> parse_errors;
+  vector<unique_ptr<Token>> tokens =
+      Tokenize(&css, /*line=*/1, /*col=*/0, &parse_errors);
+  unique_ptr<Stylesheet> stylesheet =
+      ParseAStylesheet(&tokens, AmpCssParsingConfig(), &parse_errors);
+  EXPECT_EQ(JsonFromList(parse_errors), "[]");
+
+  std::vector<unique_ptr<ErrorToken>> media_errors;
+  std::vector<unique_ptr<Token>> media_types, media_features;
+  ParseMediaQueries(*stylesheet, &media_types, &media_features, &media_errors);
+  EXPECT_EQ(media_errors.size(), 0);
+}
+
+TEST(ParseCssTest, ParseMediaQueries_IncludesFunction) {
+  // https://github.com/ampproject/amphtml/issues/35793
+  vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(
+      "@media (min-width: calc(840px - 48px));");
   vector<unique_ptr<ErrorToken>> parse_errors;
   vector<unique_ptr<Token>> tokens =
       Tokenize(&css, /*line=*/1, /*col=*/0, &parse_errors);

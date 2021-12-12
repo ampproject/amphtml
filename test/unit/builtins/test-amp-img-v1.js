@@ -1,24 +1,11 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpImg} from '#builtins/amp-img/amp-img';
-import {BaseElement} from '../../../src/base-element';
-import {Layout, LayoutPriority} from '#core/dom/layout';
+
 import {createElementWithAttributes, dispatchCustomEvent} from '#core/dom';
+import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
+
 import {testElementR1} from '#testing/element-v1';
+
+import {BaseElement} from '../../../src/base-element';
 
 describes.realWin('amp-img R1', {amp: true}, (env) => {
   let win, doc;
@@ -77,7 +64,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
   });
 
   it('getBuildPriority', () => {
-    expect(AmpImg.getBuildPriority()).to.equal(LayoutPriority.CONTENT);
+    expect(AmpImg.getBuildPriority()).to.equal(LayoutPriority_Enum.CONTENT);
   });
 
   it('should load an img', async () => {
@@ -606,7 +593,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout fixed', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FIXED,
+          layout: Layout_Enum.FIXED,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -623,7 +610,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout responsive', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.RESPONSIVE,
+          layout: Layout_Enum.RESPONSIVE,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -640,7 +627,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout fixed-height', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FIXED_HEIGHT,
+          layout: Layout_Enum.FIXED_HEIGHT,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -657,7 +644,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout fill', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FILL,
+          layout: Layout_Enum.FILL,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -674,7 +661,7 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     it('should generate correct sizes for layout flex-item', async () => {
       const ampImg = await getStubbedImg(
         {
-          layout: Layout.FLEX_ITEM,
+          layout: Layout_Enum.FLEX_ITEM,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,

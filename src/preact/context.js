@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
-  Loading,
+  Loading_Enum,
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
 
@@ -42,7 +26,7 @@ function getAmpContext() {
     (context = createContext({
       renderable: true,
       playable: true,
-      loading: Loading.AUTO,
+      loading: Loading_Enum.AUTO,
     }))
   );
 }
@@ -64,7 +48,7 @@ export function WithAmpContext({
   const renderable = renderableProp && parent.renderable;
   const playable = renderable && playableProp && parent.playable;
   const loading = loadingReducer(
-    renderable ? Loading.AUTO : Loading.LAZY,
+    renderable ? Loading_Enum.AUTO : Loading_Enum.LAZY,
     loadingReducer(loadingProp, parent.loading)
   );
   const notify = notifyProp || parent.notify;
@@ -93,7 +77,7 @@ export function useAmpContext() {
 /**
  * Whether the calling component should currently be in the loaded state.
  *
- * @param {!Loading|string} loadingProp
+ * @param {!Loading_Enum|string} loadingProp
  * @return {boolean}
  */
 export function useLoading(loadingProp) {

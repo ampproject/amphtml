@@ -1,25 +1,12 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Layout_Enum} from '#core/dom/layout';
+
+import {Services} from '#service';
+
 import {
   DomAncestorVisitor,
   VisitorCallbackTypeDef,
-} from '../../../src/utils/dom-ancestor-visitor';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {dev} from '../../../src/log';
+} from '#utils/dom-ancestor-visitor';
+import {dev} from '#utils/log';
 
 /** @const @enum {number} */
 const FULL_WIDTH_SIGNALS = {
@@ -38,13 +25,13 @@ function getElementWidthVisitor(setWidth) {
   return (element, style) => {
     const layout = element.getAttribute('layout');
     switch (layout) {
-      case Layout.FIXED:
+      case Layout_Enum.FIXED:
         setWidth(parseInt(element.getAttribute('width'), 10) || 0);
         return true;
-      case Layout.RESPONSIVE:
-      case Layout.FILL:
-      case Layout.FIXED_HEIGHT:
-      case Layout.FLUID:
+      case Layout_Enum.RESPONSIVE:
+      case Layout_Enum.FILL:
+      case Layout_Enum.FIXED_HEIGHT:
+      case Layout_Enum.FLUID:
         // The above layouts determine the width of the element by the
         // containing element, or by CSS max-width property.
         const maxWidth = parseInt(style.maxWidth, 10);
@@ -53,15 +40,15 @@ function getElementWidthVisitor(setWidth) {
           return true;
         }
         break;
-      case Layout.CONTAINER:
+      case Layout_Enum.CONTAINER:
         // Container layout allows the container's size to be determined by
         // the children within it, so in principle we can grow as large as the
         // viewport.
         const viewport = Services.viewportForDoc(dev().assertElement(element));
         setWidth(viewport.getSize().width);
         return true;
-      case Layout.NODISPLAY:
-      case Layout.FLEX_ITEM:
+      case Layout_Enum.NODISPLAY:
+      case Layout_Enum.FLEX_ITEM:
         setWidth(0);
         return true;
       default:

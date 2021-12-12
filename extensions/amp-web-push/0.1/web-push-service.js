@@ -14,7 +14,14 @@
  * the License.
  */
 
-import {CSS} from '../../../build/amp-web-push-0.1.css';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
+
+import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {IFrameHost} from './iframehost';
 import {
   NotificationPermission,
@@ -23,16 +30,13 @@ import {
   TAG,
   WIDGET_TAG,
 } from './vars';
-import {Services} from '#service';
-import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
-import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+
+import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {getMode} from '../../../src/mode';
+import {openWindowDialog} from '../../../src/open-window-dialog';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {openWindowDialog} from '../../../src/open-window-dialog';
-import {parseQueryString} from '#core/types/string/url';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{

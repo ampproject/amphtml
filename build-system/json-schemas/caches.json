@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "List of known AMP caches",
+  "type": "object",
+  "required": [
+    "caches"
+  ],
+  "properties": {
+    "caches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "docs",
+          "cacheDomain",
+          "updateCacheApiDomainSuffix",
+          "thirdPartyFrameDomainSuffix"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "docs": {
+            "type": "string",
+            "format": "uri"
+          },
+          "cacheDomain": {
+            "type": "string"
+          },
+          "updateCacheApiDomainSuffix": {
+            "type": "string"
+          },
+          "thirdPartyFrameDomainSuffix": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

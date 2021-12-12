@@ -1,19 +1,3 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 #include "css/parse-css.h"
 
 #include <deque>
@@ -29,7 +13,6 @@
 #include "logging.h"
 #include "strings.h"
 
-using absl::c_find;
 using absl::make_unique;
 using absl::StrCat;
 using absl::WrapUnique;
@@ -39,7 +22,10 @@ using std::vector;
 
 namespace htmlparser::css {
 
+static constexpr int kMaximumCssRecursion = 100;
+
 namespace internal {
+
 std::string_view StripVendorPrefix(absl::string_view prefixed_string) {
   // Checking for '-' is an optimization.
   if (!prefixed_string.empty() && prefixed_string[0] == '-') {
@@ -966,7 +952,7 @@ unique_ptr<ErrorToken> CreateParseErrorTokenAt(
 //
 TokenStream::TokenStream(vector<unique_ptr<Token>> tokens)
     : tokens_(std::move(tokens)), pos_(-1) {
-  CHECK(tokens_.size() > 0, "empty tokens");
+  CHECK(!tokens_.empty(), "empty tokens");
   CHECK(tokens_.back()->Type() == TokenType::EOF_TOKEN, tokens_.back()->Type());
 
   // Since the last element in |tokens| may get released, we make a
@@ -1228,8 +1214,6 @@ class Canonicalizer {
     declarations->emplace_back(std::move(decl));
   }
 
-  static constexpr int kMaximumCssRecursion = 100;
-
   // Consumes one or more tokens from |s|, appending them to |tokens|.
   // If exceeds depth, returns false;
   static bool ConsumeAComponentValue(TokenStream* s,
@@ -1443,7 +1427,7 @@ class UrlFunctionVisitor : public RuleVisitor {
   void LeaveAtRule(const AtRule& at_rule) override { at_rule_scope_.clear(); }
 
   void VisitDeclaration(const Declaration& declaration) override {
-    CHECK(declaration.value().size() > 0, "");
+    CHECK(!declaration.value().empty(), "");
     CHECK(declaration.value().back()->Type() == TokenType::EOF_TOKEN, "");
     for (int ii = 0; ii < declaration.value().size() - 1;) {
       const Token& token = *declaration.value()[ii];
@@ -1576,6 +1560,28 @@ class MediaQueryVisitor : public RuleVisitor {
     return false;
   }
 
+  // token_stream->Current() must be a FUNCTION_TOKEN. Consumes all Tokens up
+  // to and including the matching closing paren for that FUNCTION_TOKEN.
+  // If false, recursion exceeded maximum depth.
+  bool ConsumeAFunction(TokenStream* token_stream, int depth = 0) {
+    if (depth > kMaximumCssRecursion) return false;
+    if (token_stream->Current().Type() != TokenType::FUNCTION_TOKEN)
+      return false;
+    token_stream->Consume();  // FUNCTION_TOKEN
+    while (token_stream->Current().Type() != TokenType::EOF_TOKEN) {
+      TokenType::Code type = token_stream->Current().Type();
+      if (type == TokenType::FUNCTION_TOKEN) {
+        if (!ConsumeAFunction(token_stream, depth + 1)) return false;
+      } else if (type == TokenType::CLOSE_PAREN) {
+        token_stream->Consume();
+        return true;
+      } else {
+        token_stream->Consume();
+      }
+    }
+    return false;  // EOF before function CLOSE_PAREN
+  }
+
   bool ParseAMediaExpression(TokenStream* token_stream) {
     //  : '(' S* media_feature S* [ ':' S* expr ]? ')' S*
     //  ;
@@ -1598,9 +1604,16 @@ class MediaQueryVisitor : public RuleVisitor {
       // "Media features only accept single values: one keyword, one number,
       // or a number with a unit identifier. (The only exceptions are the
       // ‘aspect-ratio’ and ‘device-aspect-ratio’ media features.)
-      while (token_stream->Current().Type() != TokenType::EOF_TOKEN &&
-             token_stream->Current().Type() != TokenType::CLOSE_PAREN)
-        token_stream->Consume();
+      while (token_stream->Current().Type() != TokenType::EOF_TOKEN) {
+        TokenType::Code type = token_stream->Current().Type();
+        if (type == TokenType::CLOSE_PAREN) {
+          break;
+        } else if (type == TokenType::FUNCTION_TOKEN) {
+          if (!ConsumeAFunction(token_stream)) return false;
+        } else {
+          token_stream->Consume();
+        }
+      }
     }
     if (token_stream->Current().Type() != TokenType::CLOSE_PAREN) return false;
     token_stream->Consume();  // ')'
@@ -2399,7 +2412,8 @@ ErrorTokenOr<SimpleSelectorSequence> ParseASimpleSelectorSequence(
           start.CopyStartPositionTo(error.get());
           return error;
         }
-        // If no type selector is given then the universal selector is implied.
+        // If no type selector is given then the universal selector is
+        // implied.
         type_selector = make_unique<TypeSelector>(
             /*namespace_prefix=*/nullptr, /*element_name=*/"*");
         start.CopyStartPositionTo(type_selector.get());

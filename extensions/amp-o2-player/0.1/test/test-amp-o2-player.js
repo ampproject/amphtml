@@ -1,23 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-o2-player';
-import * as iframeHelper from '../../../../src/iframe-helper';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {MessageType} from '../../../../src/3p-frame-messaging';
+
+import * as iframeHelper from '../../../../src/iframe-helper';
 
 describes.realWin(
   'amp-o2-player',
@@ -181,7 +166,7 @@ describes.realWin(
       };
       const resData = {
         sentinel: 'amp',
-        type: MessageType.CONSENT_DATA,
+        type: MessageType_Enum.CONSENT_DATA,
       };
 
       it('sends a consent-data CONSENT_POLICY_STATE.SUFFICIENT message', async function () {
@@ -205,7 +190,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 
@@ -247,7 +232,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 
@@ -292,7 +277,7 @@ describes.realWin(
         env.sandbox
           .stub(iframeHelper, 'listenFor')
           .callsFake((iframe, message, callback) => {
-            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            expect(message).to.equal(MessageType_Enum.SEND_CONSENT_DATA);
             callback('', resSource, resOrigin);
           });
 

@@ -1,20 +1,4 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * TODO(rcebulko): Migrate the actual ViewportInterface into core or an extern.
  * @typedef {{
  *   getHeight: function(this:ViewportInterfaceDef):number,
@@ -78,13 +62,13 @@ export let LayoutMarginsDef;
 export let LayoutMarginsChangeDef;
 
 /**
- * RelativePositions
+ * RelativePositions_Enum
  *
  * Describes the relative position of an element to another (whether the
  * first is inside the second, on top of the second or on the bottom
  * @enum {string}
  */
-export const RelativePositions = {
+export const RelativePositions_Enum = {
   INSIDE: 'inside',
   TOP: 'top',
   BOTTOM: 'bottom',
@@ -97,7 +81,7 @@ export const RelativePositions = {
  * @param {number} top
  * @param {number} width
  * @param {number} height
- * @return {!LayoutRectDef}
+ * @return {LayoutRectDef}
  */
 export function layoutRectLtwh(left, top, width, height) {
   return {
@@ -115,8 +99,8 @@ export function layoutRectLtwh(left, top, width, height) {
 /**
  * Creates a layout rect based on the DOMRect, e.g. obtained from calling
  * getBoundingClientRect.
- * @param {!ClientRect} rect
- * @return {!LayoutRectDef}
+ * @param {ClientRect} rect
+ * @return {LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {
   return layoutRectLtwh(
@@ -129,8 +113,8 @@ export function layoutRectFromDomRect(rect) {
 
 /**
  * Returns true if the specified two rects overlap by a single pixel.
- * @param {!LayoutRectDef|!ClientRect} r1
- * @param {!LayoutRectDef|!ClientRect} r2
+ * @param {LayoutRectDef|ClientRect} r1
+ * @param {LayoutRectDef|ClientRect} r2
  * @return {boolean}
  */
 export function rectsOverlap(r1, r2) {
@@ -173,27 +157,27 @@ export function rectIntersection(var_args) {
 
 /**
  * Returns the position of r2 relative to r1
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
- * @return {!RelativePositions}
+ * @param {LayoutRectDef} r1
+ * @param {LayoutRectDef} r2
+ * @return {RelativePositions_Enum}
  */
 export function layoutRectsRelativePos(r1, r2) {
   if (r1.top < r2.top) {
-    return RelativePositions.TOP;
+    return RelativePositions_Enum.TOP;
   } else if (r1.bottom > r2.bottom) {
-    return RelativePositions.BOTTOM;
+    return RelativePositions_Enum.BOTTOM;
   } else {
-    return RelativePositions.INSIDE;
+    return RelativePositions_Enum.INSIDE;
   }
 }
 
 /**
  * Determines if any portion of a layoutBox would be onscreen in the given
  * viewport, when scrolled to the specified position.
- * @param {!LayoutRectDef} layoutBox
- * @param {!ViewportInterfaceDef} viewport
+ * @param {LayoutRectDef} layoutBox
+ * @param {ViewportInterfaceDef} viewport
  * @param {number} scrollPos
- * @return {!RelativePositions}
+ * @return {RelativePositions_Enum}
  */
 export function layoutPositionRelativeToScrolledViewport(
   layoutBox,
@@ -201,7 +185,7 @@ export function layoutPositionRelativeToScrolledViewport(
   scrollPos
 ) {
   const scrollLayoutBox = layoutRectFromDomRect(
-    /** @type {!ClientRect} */ ({
+    /** @type {ClientRect} */ ({
       top: scrollPos,
       bottom: scrollPos + viewport.getHeight(),
       left: 0,
@@ -209,7 +193,7 @@ export function layoutPositionRelativeToScrolledViewport(
     })
   );
   if (rectsOverlap(layoutBox, scrollLayoutBox)) {
-    return RelativePositions.INSIDE;
+    return RelativePositions_Enum.INSIDE;
   } else {
     return layoutRectsRelativePos(layoutBox, scrollLayoutBox);
   }
@@ -217,10 +201,10 @@ export function layoutPositionRelativeToScrolledViewport(
 
 /**
  * Expand the layout rect using multiples of width and height.
- * @param {!LayoutRectDef} rect Original rect.
+ * @param {LayoutRectDef} rect Original rect.
  * @param {number} dw Expansion in width, specified as a multiple of width.
  * @param {number} dh Expansion in height, specified as a multiple of height.
- * @return {!LayoutRectDef}
+ * @return {LayoutRectDef}
  */
 export function expandLayoutRect(rect, dw, dh) {
   return layoutRectLtwh(
@@ -233,10 +217,10 @@ export function expandLayoutRect(rect, dw, dh) {
 
 /**
  * Moves the layout rect using dx and dy.
- * @param {!LayoutRectDef} rect Original rect.
+ * @param {LayoutRectDef} rect Original rect.
  * @param {number} dx Move horizontally with this value.
  * @param {number} dy Move vertically with this value.
- * @return {!LayoutRectDef}
+ * @return {LayoutRectDef}
  */
 export function moveLayoutRect(rect, dx, dy) {
   if ((dx == 0 && dy == 0) || (rect.width == 0 && rect.height == 0)) {
@@ -246,8 +230,8 @@ export function moveLayoutRect(rect, dx, dy) {
 }
 
 /**
- * @param {!LayoutMarginsDef} margins
- * @param {!LayoutMarginsChangeDef} change
+ * @param {LayoutMarginsDef} margins
+ * @param {LayoutMarginsChangeDef} change
  * @return {boolean}
  */
 export function areMarginsChanged(margins, change) {
@@ -260,8 +244,8 @@ export function areMarginsChanged(margins, change) {
 }
 
 /**
- * @param {!LayoutRectDef} from
- * @param {!LayoutRectDef} to
+ * @param {LayoutRectDef} from
+ * @param {LayoutRectDef} to
  * @return {boolean}
  */
 export function layoutRectSizeEquals(from, to) {
@@ -302,8 +286,8 @@ export function cloneLayoutMarginsChangeDef(marginsChange) {
 }
 
 /**
- * @param {!LayoutRectDef|!ClientRect|!DOMRect} rect
- * @return {!LayoutSizeDef}
+ * @param {LayoutRectDef|ClientRect|DOMRect} rect
+ * @return {LayoutSizeDef}
  */
 export function layoutSizeFromRect(rect) {
   const {height, width} = rect;

@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {devAssert} from '#core/assert';
-import {Loading} from '#core/constants/loading-instructions';
+import {Loading_Enum} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {parseBooleanAttribute} from '#core/dom';
 import {matches, realChildNodes} from '#core/dom/query';
@@ -32,8 +16,8 @@ import {Slot, createSlot} from './slot';
  *   an attribute maps to a component prop 1:1.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
- * - `attrPrefix` can be specified when multiple attributes with the same prefix
- *   map to a single prop object. The prefix cannot equal the attribute name.
+ * - `attrMatches` and `parseAttrs` can be specified when multiple attributes
+ *   map to a single prop.
  * - `selector` can be specified for children of a certain shape and structure
  *   according to ChildDef.
  * - `passthrough` can be specified to slot children using a single
@@ -47,7 +31,7 @@ import {Slot, createSlot} from './slot';
  * @typedef {{
  *   attr: (string|undefined),
  *   type: (string|undefined),
- *   attrPrefix: (string|undefined),
+ *   attrMatches: (function(string):boolean|undefined),
  *   attrs: (!Array<string>|undefined),
  *   parseAttrs: ((function(!Element):*)|undefined),
  *   media: (boolean|undefined),
@@ -82,6 +66,9 @@ const SIZE_DEFINED_STYLE = {
   'height': '100%',
 };
 
+/** @const {string} */
+const FILL_CONTENT_CLASS = 'i-amphtml-fill-content';
+
 /**
  * This is an internal property that marks light DOM nodes that were rendered
  * by AMP/Preact bridge and thus must be ignored by the mutation observer to
@@ -92,15 +79,14 @@ const RENDERED_PROP = '__AMP_RENDERED';
 const childIdGenerator = sequentialIdGenerator();
 
 const ONE_OF_ERROR_MESSAGE =
-  'Only one of "attr", "attrs", "attrPrefix", "passthrough", ' +
-  '"passthroughNonEmpty", or "selector" must be given';
+  'Only one of "attr", "attrs", "attrMatches", "passthrough", "passthroughNonEmpty", or "selector" must be given';
 
 /**
  * @param {!Object<string, !AmpElementPropDef>} propDefs
  * @param {function(!AmpElementPropDef):boolean} cb
  * @return {boolean}
  */
-function checkPropsFor(propDefs, cb) {
+export function checkPropsFor(propDefs, cb) {
   return Object.values(propDefs).some(cb);
 }
 
@@ -108,7 +94,7 @@ function checkPropsFor(propDefs, cb) {
  * @param {!AmpElementPropDef} def
  * @return {boolean}
  */
-const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
+export const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
 
 /**
  * @param {Node} node
@@ -116,20 +102,6 @@ const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
  */
 const IS_EMPTY_TEXT_NODE = (node) =>
   node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0;
-
-/**
- * @param {null|string} attributeName
- * @param {string|undefined} attributePrefix
- * @return {boolean}
- */
-function matchesAttrPrefix(attributeName, attributePrefix) {
-  return (
-    attributeName !== null &&
-    attributePrefix !== undefined &&
-    attributeName.startsWith(attributePrefix) &&
-    attributeName !== attributePrefix
-  );
-}
 
 /**
  * @param {typeof PreactBaseElement} Ctor
@@ -147,7 +119,6 @@ export function collectProps(
   mediaQueryProps
 ) {
   const {
-    'className': className,
     'layoutSizeDefined': layoutSizeDefined,
     'lightDomTag': lightDomTag,
     'props': propDefs,
@@ -166,18 +137,13 @@ export function collectProps(
     props['as'] = lightDomTag;
   }
 
-  // Class.
-  if (className) {
-    props['className'] = className;
-  }
-
   // Common styles.
   if (layoutSizeDefined) {
     if (Ctor['usesShadowDom']) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
-      props['className'] =
-        `i-amphtml-fill-content ${className || ''}`.trim() || null;
+      // `class` is preferred to `className` for Preact
+      props['class'] = FILL_CONTENT_CLASS;
     }
   }
 
@@ -259,7 +225,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     devAssert(
       !!def.attr +
         !!def.attrs +
-        !!def.attrPrefix +
+        !!def.attrMatches +
         !!def.selector +
         !!def.passthrough +
         !!def.passthroughNonEmpty <=
@@ -271,37 +237,22 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = [<Slot loading={Loading.LAZY} />];
+      value = [<Slot loading={Loading_Enum.LAZY} />];
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
       value = realChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
-        : [<Slot loading={Loading.LAZY} />];
+        : [<Slot loading={Loading_Enum.LAZY} />];
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
         value = mediaQueryProps.resolveListQuery(String(value));
       }
     } else if (def.parseAttrs) {
-      devAssert(def.attrs);
+      devAssert(def.attrs || def.attrMatches);
       value = def.parseAttrs(element);
-    } else if (def.attrPrefix) {
-      const currObj = {};
-      let objContains = false;
-      const attrs = element.attributes;
-      for (let i = 0; i < attrs.length; i++) {
-        const attrib = attrs[i];
-        if (matchesAttrPrefix(attrib.name, def.attrPrefix)) {
-          currObj[dashToCamelCase(attrib.name.slice(def.attrPrefix.length))] =
-            attrib.value;
-          objContains = true;
-        }
-      }
-      if (objContains) {
-        value = currObj;
-      }
     }
     if (value == null) {
       if (def.default != null) {
@@ -313,8 +264,6 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
           ? parseFloat(value)
           : def.type == 'boolean'
           ? parseBooleanAttribute(/** @type {string} */ (value))
-          : def.type == 'date'
-          ? getDate(value)
           : value;
       props[name] = v;
     }
@@ -358,4 +307,59 @@ function matchChild(element, defs) {
     }
   }
   return null;
+}
+
+/**
+ * @param {string} name
+ * @param {function(string): T} parse
+ * @return {{attrs: Array<string>, parseAttrs: function(!Element):(?T|undefined)}}
+ * @template T
+ */
+export function createParseAttr(name, parse) {
+  const attrs = [name];
+  const parseAttrs = (element) => {
+    const attr = element.getAttribute(name);
+    return attr && parse(attr);
+  };
+  return {
+    'attrs': attrs,
+    'parseAttrs': parseAttrs,
+  };
+}
+
+/**
+ * @param {string} name
+ * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(?number|undefined)}}
+ */
+export function createParseDateAttr(name) {
+  return createParseAttr(name, getDate);
+}
+
+/**
+ * Maps multiple attributes with the same prefix to a single prop object.
+ * The prefix cannot equal the attribute name.
+ * @param {string} prefix
+ * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(undefined|Object<string, string>)}}
+ */
+export function createParseAttrsWithPrefix(prefix) {
+  const attrMatches = (name) => name?.startsWith(prefix) && name !== prefix;
+  const parseAttrs = (element) => {
+    let currObj;
+    const attrs = element.attributes;
+    for (let i = 0; i < attrs.length; i++) {
+      const attrib = attrs[i];
+      if (attrMatches(attrib.name)) {
+        if (!currObj) {
+          currObj = {};
+        }
+        currObj[dashToCamelCase(attrib.name.slice(prefix.length))] =
+          attrib.value;
+      }
+    }
+    return currObj;
+  };
+  return {
+    'attrMatches': attrMatches,
+    'parseAttrs': parseAttrs,
+  };
 }

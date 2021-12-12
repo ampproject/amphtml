@@ -70,29 +70,12 @@ Start with a rules file, `validator-amp-cat.protoascii`. First, a complete rules
 file, followed by line-by-line explanations of what's inside.
 
 ```js
-#
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
-
 tags: {  # amp-cat
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-cat"
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -126,27 +109,6 @@ This rules file specifies the rules for two tags:
 2.  The `<amp-cat>` tag itself.
 
 Let's see it broken down:
-
-```js
-#
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS-IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the license.
-#
-```
-
-This is the AMP HTML license statement required at the top of every AMP
-file.
 
 ### amp-cat extended component
 
@@ -190,12 +152,11 @@ as well as a link to documentation on ampproject.org for all error messages.
 
 ```js
     version: "0.1"
-    version: "latest"
   }
 ```
 
 These fields define a list of all allowed version numbers. Currently, almost all
-extended components are at version `0.1`, and we also allow `latest` to be specified.
+extended components are at version `0.1`.
 
 The combination of the `version` and `name` fields of the
 `extension_spec` define the allowed values of the `src` attribute in the

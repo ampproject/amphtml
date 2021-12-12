@@ -1,29 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
 
 import {
   LocalizedStringBundleDef,
-  // The LocalizedStringId type is imported even though it is not used because
+  // The LocalizedStringId_Enum type is imported even though it is not used because
   // the compiler does not output types for enums, but we want to distinguish
-  // between LocalizedStringId enum values and any other strings.
+  // between LocalizedStringId_Enum enum values and any other strings.
   // eslint-disable-next-line no-unused-vars
-  LocalizedStringId,
+  LocalizedStringId_Enum,
 } from './strings';
 
 /**
@@ -42,7 +27,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * specified.
  * @param {!Object<string, !LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
- * @param {!LocalizedStringId} localizedStringId
+ * @param {!LocalizedStringId_Enum} localizedStringId
  * @return {?string}
  */
 function findLocalizedString(
@@ -50,21 +35,15 @@ function findLocalizedString(
   languageCodes,
   localizedStringId
 ) {
-  let localizedString = null;
-
-  languageCodes.some((languageCode) => {
-    const localizedStringBundle = localizedStringBundles[languageCode];
-    if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
-      localizedString =
-        localizedStringBundle[localizedStringId].string ||
-        localizedStringBundle[localizedStringId].fallback;
-      return !!localizedString;
+  for (const code of languageCodes) {
+    const entry = localizedStringBundles[code]?.[localizedStringId];
+    if (entry != null) {
+      // In unminified builds, this is an object {"string": "foo", ...}.
+      // In minified builds, this is the actual string "foo".
+      return entry['string'] || entry;
     }
-
-    return false;
-  });
-
-  return localizedString;
+  }
+  return null;
 }
 
 /**
@@ -150,7 +129,7 @@ export class LocalizationService {
   }
 
   /**
-   * @param {!LocalizedStringId} localizedStringId
+   * @param {!LocalizedStringId_Enum} localizedStringId
    * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if

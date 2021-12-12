@@ -1,24 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {getVendorJsPropertyName} from '#core/dom/style';
 
 import {Services} from '#service';
-import {VisibilityState} from '#core/constants/visibility-state';
-import {createCustomEvent} from '../../src/event-helper';
-import {getVendorJsPropertyName} from '#core/dom/style';
-import {whenUpgradedToCustomElement} from '../../src/amp-element-helpers';
+
+import {createCustomEvent} from '#utils/event-helper';
 
 const t = describes.sandboxed
   .configure()
@@ -172,10 +158,10 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('does layout when going to PRERENDER', async () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.PAUSED,
+              state: VisibilityState_Enum.PAUSED,
             });
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.PRERENDER,
+              state: VisibilityState_Enum.PRERENDER,
             });
             await waitForNextPass();
             expect(layoutCallback).to.have.been.called;
@@ -186,7 +172,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('calls layout when going to VISIBLE', async () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.VISIBLE,
+              state: VisibilityState_Enum.VISIBLE,
             });
             await waitForNextPass();
             expect(layoutCallback).to.have.been.called;
@@ -197,7 +183,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('calls callbacks when going to HIDDEN', async () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.VISIBLE,
+              state: VisibilityState_Enum.VISIBLE,
             });
             changeVisibility('hidden');
             await waitForNextPass();
@@ -208,7 +194,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('does not call callbacks when going to INACTIVE', () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.INACTIVE,
+              state: VisibilityState_Enum.INACTIVE,
             });
             return waitForNextPass().then(() => {
               expect(layoutCallback).not.to.have.been.called;
@@ -220,7 +206,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('does not call callbacks when going to PAUSED', () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.PAUSED,
+              state: VisibilityState_Enum.PAUSED,
             });
             return waitForNextPass().then(() => {
               expect(layoutCallback).not.to.have.been.called;
@@ -247,7 +233,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('calls layout when going to VISIBLE', () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.VISIBLE,
+              state: VisibilityState_Enum.VISIBLE,
             });
             return waitForNextPass().then(() => {
               expect(layoutCallback).to.have.been.called;
@@ -259,7 +245,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('calls callbacks when going to HIDDEN', () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.VISIBLE,
+              state: VisibilityState_Enum.VISIBLE,
             });
             changeVisibility('hidden');
             return waitForNextPass().then(() => {
@@ -276,7 +262,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('does not call callbacks when going to INACTIVE', () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.INACTIVE,
+              state: VisibilityState_Enum.INACTIVE,
             });
             return waitForNextPass().then(() => {
               expect(layoutCallback).not.to.have.been.called;
@@ -288,7 +274,7 @@ t.run('Viewer Visibility State', {}, () => {
 
           it('does not call callbacks when going to PAUSED', () => {
             viewer.receiveMessage('visibilitychange', {
-              state: VisibilityState.PAUSED,
+              state: VisibilityState_Enum.PAUSED,
             });
             return waitForNextPass().then(() => {
               expect(layoutCallback).not.to.have.been.called;
@@ -303,7 +289,7 @@ t.run('Viewer Visibility State', {}, () => {
       describe('from in the VISIBLE state', () => {
         beforeEach(() => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.VISIBLE,
+            state: VisibilityState_Enum.VISIBLE,
           });
           return waitForNextPass().then(setupSpys);
         });
@@ -329,7 +315,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('calls unload when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.INACTIVE,
+            state: VisibilityState_Enum.INACTIVE,
           });
           return waitForNextPass().then(() => {
             expect(unlayoutCallback).to.have.been.called;
@@ -340,7 +326,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('calls pause when going to PAUSED', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.PAUSED,
+            state: VisibilityState_Enum.PAUSED,
           });
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
@@ -354,7 +340,7 @@ t.run('Viewer Visibility State', {}, () => {
       describe('from in the HIDDEN state', () => {
         beforeEach(() => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.VISIBLE,
+            state: VisibilityState_Enum.VISIBLE,
           });
           return waitForNextPass()
             .then(() => {
@@ -385,7 +371,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('calls unload when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.INACTIVE,
+            state: VisibilityState_Enum.INACTIVE,
           });
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
@@ -398,7 +384,7 @@ t.run('Viewer Visibility State', {}, () => {
         it('calls pause when going to PAUSED', () => {
           changeVisibility('visible');
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.PAUSED,
+            state: VisibilityState_Enum.PAUSED,
           });
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
@@ -412,12 +398,12 @@ t.run('Viewer Visibility State', {}, () => {
       describe('from in the INACTIVE state', () => {
         beforeEach(() => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.VISIBLE,
+            state: VisibilityState_Enum.VISIBLE,
           });
           return waitForNextPass()
             .then(() => {
               viewer.receiveMessage('visibilitychange', {
-                state: VisibilityState.INACTIVE,
+                state: VisibilityState_Enum.INACTIVE,
               });
               return waitForNextPass();
             })
@@ -426,7 +412,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('calls layout and resume when going to VISIBLE', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.VISIBLE,
+            state: VisibilityState_Enum.VISIBLE,
           });
           return waitForNextPass().then(() => {
             expect(layoutCallback).to.have.been.called;
@@ -438,7 +424,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('calls resume when going to HIDDEN', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.VISIBLE,
+            state: VisibilityState_Enum.VISIBLE,
           });
           changeVisibility('hidden');
           return waitForNextPass().then(() => {
@@ -455,7 +441,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('does not call callbacks when going to PAUSED', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.PAUSED,
+            state: VisibilityState_Enum.PAUSED,
           });
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
@@ -469,12 +455,12 @@ t.run('Viewer Visibility State', {}, () => {
       describe('from in the PAUSED state', () => {
         beforeEach(() => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.VISIBLE,
+            state: VisibilityState_Enum.VISIBLE,
           });
           return waitForNextPass()
             .then(() => {
               viewer.receiveMessage('visibilitychange', {
-                state: VisibilityState.PAUSED,
+                state: VisibilityState_Enum.PAUSED,
               });
               return waitForNextPass();
             })
@@ -483,7 +469,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('calls resume when going to VISIBLE', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.VISIBLE,
+            state: VisibilityState_Enum.VISIBLE,
           });
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;
@@ -505,7 +491,7 @@ t.run('Viewer Visibility State', {}, () => {
 
         it('calls unlayout when going to INACTIVE', () => {
           viewer.receiveMessage('visibilitychange', {
-            state: VisibilityState.INACTIVE,
+            state: VisibilityState_Enum.INACTIVE,
           });
           return waitForNextPass().then(() => {
             expect(layoutCallback).not.to.have.been.called;

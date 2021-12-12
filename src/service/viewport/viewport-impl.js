@@ -1,20 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {tryResolve} from '#core/data-structures/promise';
 import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
@@ -25,6 +9,7 @@ import {
 } from '#core/dom/layout/rect';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle, setStyle} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
 import {clamp} from '#core/math';
 import {dict} from '#core/types/object';
 
@@ -32,20 +17,20 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {dev, devAssert} from '#utils/log';
+
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
 
-import {Animation} from '../../animation';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {dev, devAssert} from '../../log';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service-helpers';
-import {numeric} from '../../transition';
 
 const TAG_ = 'Viewport';
 const SCROLL_POS_TO_BLOCK = {
@@ -54,6 +39,52 @@ const SCROLL_POS_TO_BLOCK = {
   'bottom': 'end',
 };
 const SMOOTH_SCROLL_DELAY_ = 300;
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {string=} property
+ * @return {number}
+ */
+function getComputedStylePropertyPixels(win, element, property) {
+  const value = parseInt(computedStyle(win, element)[property], 10);
+  return isNaN(value) ? 0 : value;
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {string=} property
+ * @return {number}
+ */
+function getScrollPadding(win, element, property) {
+  // Due to https://bugs.webkit.org/show_bug.cgi?id=106133, WebKit browsers use
+  // use `body` and NOT `documentElement` for scrolling purposes.
+  // (We get this node from `ViewportBindingNatural`.)
+  // However, `scroll-padding-*` properties are effective only on the `html`
+  // selector across browsers, thus we use the `documentElement`.
+  const effectiveElement =
+    element === win.document.body ? win.document.documentElement : element;
+  return getComputedStylePropertyPixels(win, effectiveElement, property);
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {number}
+ */
+function getScrollPaddingTop(win, element) {
+  return getScrollPadding(win, element, 'scrollPaddingTop');
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {number}
+ */
+function getScrollPaddingBottom(win, element) {
+  return getScrollPadding(win, element, 'scrollPaddingBottom');
+}
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -297,8 +328,8 @@ export class ViewportImpl {
       // Only report when the visibility is "visible" or "prerender".
       const visibilityState = this.ampdoc.getVisibilityState();
       if (
-        visibilityState == VisibilityState.PRERENDER ||
-        visibilityState == VisibilityState.VISIBLE
+        visibilityState == VisibilityState_Enum.PRERENDER ||
+        visibilityState == VisibilityState_Enum.VISIBLE
       ) {
         if (Math.random() < 0.01) {
           dev().error(TAG_, 'viewport has zero dimensions');
@@ -434,8 +465,9 @@ export class ViewportImpl {
    */
   scrollIntoViewInternal_(element, parent) {
     const elementTop = this.binding_.getLayoutRect(element).top;
+    const scrollPaddingTop = getScrollPaddingTop(this.ampdoc.win, parent);
     const newScrollTopPromise = tryResolve(() =>
-      Math.max(0, elementTop - this.paddingTop_)
+      Math.max(0, elementTop - this.paddingTop_ - scrollPaddingTop)
     );
 
     newScrollTopPromise.then((newScrollTop) =>
@@ -484,17 +516,18 @@ export class ViewportImpl {
       ? this.getSize()
       : this.getLayoutRect(parent);
 
-    let offset;
-    switch (pos) {
-      case 'bottom':
-        offset = -parentHeight + elementRect.height;
-        break;
-      case 'center':
-        offset = -parentHeight / 2 + elementRect.height / 2;
-        break;
-      default:
-        offset = 0;
-        break;
+    const {win} = this.ampdoc;
+    const scrollPaddingTop = getScrollPaddingTop(win, parent);
+    const scrollPaddingBottom = getScrollPaddingBottom(win, parent);
+
+    let offset = -scrollPaddingTop; // default pos === 'top'
+
+    if (pos === 'bottom') {
+      offset = -parentHeight + scrollPaddingBottom + elementRect.height;
+    } else if (pos === 'center') {
+      const effectiveParentHeight =
+        parentHeight - scrollPaddingTop - scrollPaddingBottom;
+      offset = -effectiveParentHeight / 2 + elementRect.height / 2;
     }
 
     return this.getElementScrollTop_(parent).then((curScrollTop) => {
@@ -1175,7 +1208,7 @@ function createViewport(ampdoc) {
   let binding;
   if (
     ampdoc.isSingleDoc() &&
-    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED &&
+    getViewportType(win, viewer) == ViewportType_Enum.NATURAL_IOS_EMBED &&
     !IS_SXG
   ) {
     binding = new ViewportBindingIosEmbedWrapper_(win);
@@ -1189,7 +1222,7 @@ function createViewport(ampdoc) {
  * The type of the viewport.
  * @enum {string}
  */
-const ViewportType = {
+const ViewportType_Enum = {
   /**
    * Viewer leaves sizing and scrolling up to the AMP document's window.
    */
@@ -1215,7 +1248,7 @@ function getViewportType(win, viewer) {
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
   if (getMode(win).test && isIframedIos) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return ViewportType_Enum.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
@@ -1224,9 +1257,9 @@ function getViewportType(win, viewer) {
     viewer.isEmbedded() &&
     !viewer.hasCapability('iframeScroll')
   ) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return ViewportType_Enum.NATURAL_IOS_EMBED;
   }
-  return ViewportType.NATURAL;
+  return ViewportType_Enum.NATURAL;
 }
 
 /**

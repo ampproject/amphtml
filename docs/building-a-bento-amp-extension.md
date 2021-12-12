@@ -25,6 +25,7 @@ Read this document to learn how to create a new Bento AMP component.
     -   [Actions and events](#actions-and-events)
     -   [PreactBaseElement callbacks](#preactbaseelement-callbacks)
     -   [Element and Component classes](#element-and-component-classes)
+    -   [Loading state](#loading-state)
     -   [Element styling](#element-styling)
     -   [Layouts supported in your element](#layouts-supported-in-your-element)
     -   [Register element with AMP](#register-element-with-amp)
@@ -98,8 +99,6 @@ In most cases you'll only create the required (req'd) files. If your element doe
 AMP runtime is currently in v0 major version. Extensions versions are maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you should release a new version of your extension. This would usually be by creating a [0.2 or 1.0](./spec/amp-versioning-policy.md#amp-extensions) directory next to your 0.1.
 
-When version 0.2 is under development, make sure that `latestVersion` is set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2 is ready to be released, `latestVersion` can be changed to 0.2.
-
 If your extension is still in experiments breaking changes usually are fine so you can just update the same version.
 
 Note that Bento upgrades to existing AMP components should go by one major version, meaning it should create a 1.0 directory next to an existing 0.1 or 0.2.
@@ -114,7 +113,6 @@ exports.extensionBundles = [
   {
     "name": "amp-carousel",
     "version": "0.1",
-    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -122,7 +120,6 @@ exports.extensionBundles = [
   {
     "name": "amp-kaltura-player",
     "version": "0.1",
-    "latestVersion": "0.1",
   },
 ...
 ];
@@ -136,7 +133,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
-    "latestVersion": "1.0",
     "options": {
 +     "npm": true,
 +     "wrapper": "bento"
@@ -154,7 +150,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "0.1",
-    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -162,7 +157,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
-+   "latestVersion": "0.1",
     "options": {
       "npm": true,
       "wrapper": "bento"
@@ -201,13 +195,6 @@ The configurations which bridge the Preact implementation of the component and i
 -   **Default**: Optional.
 -   **Override**: Almost always.
 -   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will not update or re-render the component on DOM mutation. Can be used in lieu of init().
--   **Example Usage**: n/a
-
-#### PreactBaseElement['className']
-
--   **Default**: Optional.
--   **Override**: Rarely.
--   **Usage**: Specify an exact className prop to Preact.
 -   **Example Usage**: n/a
 
 #### PreactBaseElement['layoutSizeDefined']
@@ -324,6 +311,27 @@ You must document your element's actions and events in its own reference documen
 -   **Usage**: If your extension 'props' definition is not sufficient, or when registering AMP actions and events.
 -   **Example Usage**: `amp-base-carousel`, `amp-lightbox`
 
+#### handleOnLoading
+
+-   **Default**: Optional.
+-   **Override**: Sometimes
+-   **Usage**: Method to override to customize the display of the Placeholder/Fallback/Loader
+-   **Example Usage**: `amp-render`
+
+#### handleOnLoad
+
+-   **Default**: Optional.
+-   **Override**: Sometimes
+-   **Usage**: Method to override to customize the display of the Placeholder/Fallback/Loader
+-   **Example Usage**: `amp-render`, `amp-iframe`
+
+#### handleOnError
+
+-   **Default**: Optional.
+-   **Override**: Sometimes
+-   **Usage**: Method to override to customize the display of the Placeholder/Fallback/Loader
+-   **Example Usage**: `amp-render`
+
 #### mutationObserverCallback
 
 -   **Default**: Optional.
@@ -419,6 +427,22 @@ export function MyElement({propName1, propName2, ...rest}) {
 }
 ```
 
+### Loading state
+
+For components that may load asynchronously, be sure to support `onLoading`, `onLoad`, and `onError` callbacks as props on your Preact component to allow components to fail gracefully.
+
+By default, `PreactBaseElement` provides callbacks which do the following from the AMP layer:
+
+-   `onLoading` toggles on a loader
+-   `onLoad` toggles off any loaders, placeholders, or fallbacks
+-   `onError` toggles on the fallpack (or, if unavailable, the placeholder)
+
+Your Preact component **must** invoke the `onLoad()` callback once your component has loaded. This is especially important for components that display content dynamically, for example through an iframe or after fetching remote data, because they may take time to load which would affect perceived performance.
+
+Your Preact component _should_ invoke the `onLoading()` and `onError()` callbacks so document authors in any environment can implement graceful behavior when appropriate.
+
+Your AMP extension may customize this behavior by overriding the `handleOnLoading()` / `handleOnLoad()` / `handleOnError()` methods in your AMP extension's class.
+
 ### Element styling
 
 You can write a stylesheet to style your element to provide a minimal visual appeal. Your element structure should account for whether you want users (publishers and developers using your element) to customize the default styling you're providing and allow for easy CSS classes and/or well-structure DOM elements.
@@ -449,7 +473,8 @@ amp-my-element:not(.i-amphtml-built) {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-my-element:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+amp-my-element:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }

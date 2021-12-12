@@ -1,31 +1,15 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * Possible versions of Shadow DOM spec
  * @enum {string}
  */
-export const ShadowDomVersion = {
+export const ShadowDomVersion_Enum = {
   NONE: 'none',
   V0: 'v0',
   V1: 'v1',
 };
 
 /**
- * @type {!ShadowDomVersion|undefined}
+ * @type {ShadowDomVersion_Enum|undefined}
  * @visibleForTesting
  */
 let shadowDomSupportedVersion;
@@ -37,7 +21,7 @@ let shadowDomSupportedVersion;
 let shadowCssSupported;
 
 /**
- * @param {!ShadowDomVersion|undefined} val
+ * @param {ShadowDomVersion_Enum|undefined} val
  * @visibleForTesting
  */
 export function setShadowDomSupportedVersionForTesting(val) {
@@ -57,7 +41,7 @@ export function setShadowCssSupportedForTesting(val) {
  * @return {boolean}
  */
 export function isShadowDomSupported() {
-  return getShadowDomSupportedVersion() != ShadowDomVersion.NONE;
+  return getShadowDomSupportedVersion() != ShadowDomVersion_Enum.NONE;
 }
 
 /**
@@ -88,7 +72,7 @@ function isNative(func) {
 /**
  * Returns the supported version of Shadow DOM spec.
  * @param {typeof Element=} opt_elementClass optional for testing
- * @return {!ShadowDomVersion}
+ * @return {ShadowDomVersion_Enum}
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
@@ -102,14 +86,14 @@ export function getShadowDomSupportedVersion(opt_elementClass) {
 /**
  * Returns shadow dom version.
  *
- * @param {!typeof Element} element
- * @return {!ShadowDomVersion}
+ * @param {typeof Element} element
+ * @return {ShadowDomVersion_Enum}
  */
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {
-    return ShadowDomVersion.V1;
+    return ShadowDomVersion_Enum.V1;
   } else if (!!element.prototype.createShadowRoot) {
-    return ShadowDomVersion.V0;
+    return ShadowDomVersion_Enum.V0;
   }
-  return ShadowDomVersion.NONE;
+  return ShadowDomVersion_Enum.NONE;
 }

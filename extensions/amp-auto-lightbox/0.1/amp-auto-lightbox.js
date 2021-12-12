@@ -1,20 +1,4 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Detects <amp-img> elements to set the `lightbox` attribute
  * automatically.
  *
@@ -22,18 +6,21 @@
  * Instead, the runtime loads it when encountering an <amp-img>.
  */
 
-import {AmpEvents} from '#core/constants/amp-events';
-import {AutoLightboxEvents} from '../../../src/auto-lightbox';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Services} from '#service';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {dev} from '../../../src/log';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {dispatchCustomEvent} from '#core/dom';
-import {loadPromise} from '../../../src/event-helper';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {measureIntersectionNoRoot} from '#core/dom/layout/intersection-no-root';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {tryParseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '../../../src/amp-element-helpers';
+
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {AutoLightboxEvents_Enum} from '../../../src/auto-lightbox';
 
 const TAG = 'amp-auto-lightbox';
 
@@ -301,7 +288,7 @@ function whenLoaded(element) {
     return loadPromise(element);
   }
   return whenUpgradedToCustomElement(element).then((element) =>
-    element.signals().whenSignal(CommonSignals.LOAD_END)
+    element.signals().whenSignal(CommonSignals_Enum.LOAD_END)
   );
 }
 
@@ -437,7 +424,7 @@ export function apply(ampdoc, element) {
       REQUIRED_EXTENSION
     );
 
-    dispatchCustomEvent(element, AutoLightboxEvents.NEWLY_SET);
+    dispatchCustomEvent(element, AutoLightboxEvents_Enum.NEWLY_SET);
 
     return element;
   });
@@ -455,7 +442,7 @@ export function runCandidates(ampdoc, candidates) {
         ({boundingClientRect}) => {
           if (
             candidate.tagName !== 'IMG' &&
-            !candidate.signals().get(CommonSignals.LOAD_END)
+            !candidate.signals().get(CommonSignals_Enum.LOAD_END)
           ) {
             // <amp-img> will change the img's src inline data on unlayout and
             // remove it from DOM.
@@ -492,7 +479,7 @@ export function scan(ampdoc, opt_root) {
 AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, (e) => {
+    ampdoc.getRootNode().addEventListener(AmpEvents_Enum.DOM_UPDATE, (e) => {
       const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });

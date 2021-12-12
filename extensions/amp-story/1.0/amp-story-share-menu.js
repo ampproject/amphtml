@@ -1,19 +1,4 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -26,17 +11,13 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
-import {Keys} from '#core/constants/key-codes';
-import {LocalizedStringId} from '#service/localization/strings';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {ShareWidget} from './amp-story-share';
-import {closest} from '#core/dom/query';
 import {createShadowRootWithStyle} from './utils';
-import {dev, devAssert} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
-import {setStyles} from '#core/dom/style';
+import {localize} from './amp-story-localization-service';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
@@ -44,26 +25,55 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 /**
  * Quick share template, used as a fallback if native sharing is not supported.
  * @param {!Element} element
+ * @param {function(Event)} close
+ * @param {?Array<?Element|?string>|?Element|?string|undefined} children
  * @return {!Element}
  */
-const getTemplate = (element) => {
-  return htmlFor(element)`
-    <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
+const renderForFallbackSharing = (element, close, children) => {
+  return (
+    <div
+      class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
+      aria-hidden="true"
+      role="alert"
+      onClick={(event) => {
+        // Close if click occurred directly on this element.
+        if (event.target === event.currentTarget) {
+          close(event);
+        }
+      }}
+    >
       <div class="i-amphtml-story-share-menu-container">
-        <button class="i-amphtml-story-share-menu-close-button" aria-label="close" role="button">
+        <button
+          class="i-amphtml-story-share-menu-close-button"
+          aria-label={localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+          )}
+          role="button"
+          onClick={close}
+        >
           &times;
         </button>
+        {children}
       </div>
-    </div>`;
+    </div>
+  );
 };
 
 /**
  * System amp-social-share button template.
- * @param {!Element} element
  * @return {!Element}
  */
-const getAmpSocialSystemShareTemplate = (element) => {
-  return htmlFor(element)`<amp-social-share type="system"></amp-social-share>`;
+const renderAmpSocialShareSystemElement = () => {
+  return (
+    <amp-social-share
+      type="system"
+      // TODO(alanorozco): This style attr would be nicer as an object.
+      // We need to enable babel-plugin-jsx-style-object in the testing config
+      // so that we can verify results of style objects.
+      style="visibility:hidden;pointer-events:none;z-index:-1"
+    ></amp-social-share>
+  );
 };
 
 /**
@@ -80,15 +90,6 @@ export class ShareMenu {
 
     /** @private {?Element} */
     this.element_ = null;
-
-    /** @private {?Element} */
-    this.closeButton_ = null;
-
-    /** @private {?Element} */
-    this.innerContainerEl_ = null;
-
-    /** @private {boolean} */
-    this.isBuilt_ = false;
 
     /** @private {boolean} */
     this.isSystemShareSupported_ = false;
@@ -115,89 +116,64 @@ export class ShareMenu {
    * UI.
    */
   build() {
-    if (this.isBuilt()) {
+    if (this.element_) {
       return;
     }
 
-    this.isBuilt_ = true;
+    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported();
 
-    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported(
-      getAmpdoc(this.parentEl_)
-    );
-
-    this.isSystemShareSupported_
+    const child = this.isSystemShareSupported_
       ? this.buildForSystemSharing_()
       : this.buildForFallbackSharing_();
-  }
 
-  /**
-   * Whether the element has been built.
-   * @return {boolean}
-   */
-  isBuilt() {
-    return this.isBuilt_;
+    this.initializeListeners_();
+
+    this.vsync_.mutate(() => {
+      this.parentEl_.appendChild(child);
+    });
   }
 
   /**
    * Builds a hidden amp-social-share button that triggers the native system
    * sharing UI.
    * @private
+   * @return {!Element}
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ = getAmpSocialSystemShareTemplate(this.parentEl_);
-
-    this.initializeListeners_();
-
-    this.vsync_.mutate(() => {
-      setStyles(dev().assertElement(this.element_), {
-        'visibility': 'hidden',
-        'pointer-events': 'none',
-        'z-index': -1,
-      });
-      this.parentEl_.appendChild(this.element_);
-    });
+    this.element_ = renderAmpSocialShareSystemElement();
+    return this.element_;
   }
 
   /**
    * Builds and appends the fallback UI.
    * @private
+   * @return {!Element}
    */
   buildForFallbackSharing_() {
-    const root = this.win_.document.createElement('div');
-    root.classList.add('i-amphtml-story-share-menu-host');
-
-    this.element_ = getTemplate(this.parentEl_);
-    createShadowRootWithStyle(root, this.element_, CSS);
-
-    this.closeButton_ = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
+    const shareWidgetElement = this.shareWidget_.build(
+      getAmpdoc(this.parentEl_)
     );
-    const localizationService = getLocalizationService(
-      devAssert(this.parentEl_)
+    this.element_ = renderForFallbackSharing(
+      this.parentEl_,
+      () => this.close_(),
+      shareWidgetElement
     );
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      this.closeButton_.setAttribute('aria-label', localizedCloseString);
-    }
 
-    this.initializeListeners_();
-
-    this.vsync_.run({
-      measure: () => {
-        this.innerContainerEl_ = this.element_./*OK*/ querySelector(
-          '.i-amphtml-story-share-menu-container'
-        );
-      },
-      mutate: () => {
-        this.parentEl_.appendChild(root);
-        // Preloads and renders the share widget content.
-        const shareWidget = this.shareWidget_.build(getAmpdoc(this.parentEl_));
-        this.innerContainerEl_.appendChild(shareWidget);
-      },
+    // Only listen for closing when system share is unsupported, since the
+    // native layer would handle all the UI interactions.
+    this.win_.addEventListener('keyup', (event) => {
+      if (event.key == Keys_Enum.ESCAPE) {
+        event.preventDefault();
+        this.close_();
+      }
     });
+
+    return createShadowRootWithStyle(
+      <div class="i-amphtml-story-share-menu-host"></div>,
+      this.element_,
+      CSS
+    );
   }
 
   /**
@@ -215,21 +191,6 @@ export class ShareMenu {
     this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
       this.onShareMenuStateUpdate_(isOpen);
     });
-
-    // Don't listen to click events if the system share is supported, since the
-    // native layer handles all the UI interactions.
-    if (!this.isSystemShareSupported_) {
-      this.element_.addEventListener('click', (event) =>
-        this.onShareMenuClick_(event)
-      );
-
-      this.win_.addEventListener('keyup', (event) => {
-        if (event.key == Keys.ESCAPE) {
-          event.preventDefault();
-          this.close_();
-        }
-      });
-    }
   }
 
   /**
@@ -261,23 +222,6 @@ export class ShareMenu {
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element_
     );
-  }
-
-  /**
-   * Handles click events and maybe closes the menu for the fallback UI.
-   * @param  {!Event} event
-   */
-  onShareMenuClick_(event) {
-    const el = dev().assertElement(event.target);
-
-    if (el === this.closeButton_) {
-      this.close_();
-    }
-
-    // Closes the menu if click happened outside of the menu main container.
-    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
-      this.close_();
-    }
   }
 
   /**

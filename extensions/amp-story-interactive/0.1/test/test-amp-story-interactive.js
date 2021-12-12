@@ -1,24 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from '../amp-story-interactive-abstract';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {
   AmpStoryStoreService,
   StateProperty,
@@ -31,6 +15,7 @@ import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {
+  MOCK_URL,
   addConfigToInteractive,
   getMockIncompleteData,
   getMockInteractiveData,
@@ -96,8 +81,9 @@ describes.realWin(
     let storyEl;
     let analytics;
     let analyticsVars;
-    let requestService;
     let storeService;
+    let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
@@ -110,6 +96,7 @@ describes.realWin(
         'amp-story-interactive'
       );
       ampStoryInteractiveEl.id = 'TEST_interactiveId';
+      ampStoryInteractiveEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryInteractiveEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 
@@ -121,14 +108,20 @@ describes.realWin(
       registerServiceBuilder(win, 'story-analytics', function () {
         return analytics;
       });
-      requestService = new AmpStoryRequestService(win);
-      registerServiceBuilder(win, 'story-request', function () {
-        return requestService;
-      });
       storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+
+      const xhr = Services.xhrFor(env.win);
+      xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
+      });
+
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationServiceForOrNull')
@@ -218,14 +211,9 @@ describes.realWin(
     });
 
     it('should update the quiz when the user has already reacted', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
+      xhrJson = getMockInteractiveData();
       addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.element.setAttribute(
-        'endpoint',
-        'http://localhost:8000'
-      );
+      ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
 
@@ -240,14 +228,9 @@ describes.realWin(
     it('should select the correct option if the backend responds with scrambled data', async () => {
       const NUM_OPTIONS = 4;
       const scrambledData = getMockScrambledData();
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(scrambledData);
+      xhrJson = scrambledData;
       addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
-      ampStoryInteractive.element.setAttribute(
-        'endpoint',
-        'http://localhost:8000'
-      );
+      ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
 
@@ -273,14 +256,9 @@ describes.realWin(
     it('should select the correct option if the backend responds with incomplete data', async () => {
       const NUM_OPTIONS = 4;
       const incompleteData = getMockIncompleteData();
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(incompleteData);
+      xhrJson = incompleteData;
       addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
-      ampStoryInteractive.element.setAttribute(
-        'endpoint',
-        'http://localhost:8000'
-      );
+      ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
 
@@ -306,14 +284,9 @@ describes.realWin(
     it('should select the correct option if the backend responds with out of bounds data', async () => {
       const NUM_OPTIONS = 4;
       const outOfBoundsData = getMockOutOfBoundsData();
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(outOfBoundsData);
+      xhrJson = outOfBoundsData;
       addConfigToInteractive(ampStoryInteractive, NUM_OPTIONS);
-      ampStoryInteractive.element.setAttribute(
-        'endpoint',
-        'http://localhost:8000'
-      );
+      ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
       await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
 
@@ -342,7 +315,7 @@ describes.realWin(
       const responseData = dict({'wrongKey': []});
       allowConsoleError(() => {
         expect(() =>
-          ampStoryInteractive.handleSuccessfulDataRetrieval_(responseData)
+          ampStoryInteractive.onDataRetrieved_(responseData)
         ).to.throw();
       });
     });
@@ -406,14 +379,9 @@ describes.realWin(
       });
 
       it('should create the dialog when the disclaimer icon is clicked', async () => {
-        env.sandbox
-          .stub(requestService, 'executeRequest')
-          .resolves(getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
         addConfigToInteractive(ampStoryInteractive);
-        ampStoryInteractive.element.setAttribute(
-          'endpoint',
-          'https://notabackend.com'
-        );
+        ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
         await ampStoryInteractive.buildCallback();
         await ampStoryInteractive.layoutCallback();
 
@@ -430,14 +398,9 @@ describes.realWin(
       });
 
       it('should destroy the dialog when the close button is clicked', async () => {
-        env.sandbox
-          .stub(requestService, 'executeRequest')
-          .resolves(getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
         addConfigToInteractive(ampStoryInteractive);
-        ampStoryInteractive.element.setAttribute(
-          'endpoint',
-          'https://notabackend.com'
-        );
+        ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
         await ampStoryInteractive.buildCallback();
         await ampStoryInteractive.layoutCallback();
 
@@ -454,15 +417,10 @@ describes.realWin(
       });
 
       it('should set the url of the disclaimer to the backend url', async () => {
-        env.sandbox
-          .stub(requestService, 'executeRequest')
-          .resolves(getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
 
         addConfigToInteractive(ampStoryInteractive);
-        ampStoryInteractive.element.setAttribute(
-          'endpoint',
-          'https://notabackend.com'
-        );
+        ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
         await ampStoryInteractive.buildCallback();
         await ampStoryInteractive.layoutCallback();
 
@@ -475,19 +433,14 @@ describes.realWin(
           storyEl.querySelector(
             '.i-amphtml-story-interactive-disclaimer-dialog .i-amphtml-story-interactive-disclaimer-url'
           ).textContent
-        ).to.be.equal('notabackend.com');
+        ).to.be.equal('amp.dev');
       });
 
       it('should remove learn more link when backend is not on list', async () => {
-        env.sandbox
-          .stub(requestService, 'executeRequest')
-          .resolves(getMockInteractiveData());
+        xhrJson = getMockInteractiveData();
 
         addConfigToInteractive(ampStoryInteractive);
-        ampStoryInteractive.element.setAttribute(
-          'endpoint',
-          'https://notabackend.com'
-        );
+        ampStoryInteractive.element.setAttribute('endpoint', MOCK_URL);
 
         await ampStoryInteractive.buildCallback();
         await ampStoryInteractive.layoutCallback();

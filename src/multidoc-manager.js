@@ -1,33 +1,20 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {isConnectedNode} from '#core/dom';
+import {childElementsByTag} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {isArray, isObject} from '#core/types';
 
-import {CommonSignals} from './core/constants/common-signals';
-import {VisibilityState} from './core/constants/visibility-state';
-import {isConnectedNode} from './core/dom';
-import {childElementsByTag} from './core/dom/query';
-import {setStyle} from './core/dom/style';
-import {isArray, isObject} from './core/types';
-import {dev, user} from './log';
+import {Services} from '#service';
+import {parseExtensionUrl} from '#service/extension-script';
+
+import {dev, user} from '#utils/log';
+
 import {getMode} from './mode';
-import {Services} from './service';
 import {
   disposeServicesForDoc,
   getServicePromiseOrNullForDoc,
 } from './service-helpers';
-import {parseExtensionUrl} from './service/extension-script';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -114,7 +101,7 @@ export class MultidocManager {
 
     /**
      * Sets the document's visibility state.
-     * @param {!VisibilityState} state
+     * @param {!VisibilityState_Enum} state
      */
     amp['setVisibilityState'] = function (state) {
       ampdoc.overrideVisibilityState(state);
@@ -130,13 +117,13 @@ export class MultidocManager {
      */
     amp['postMessage'] = viewer.receiveMessage.bind(viewer);
 
-    /** @type {function(string, *, boolean):(!Promise<*>|undefined)} */
+    /** @type {?function(string, *, boolean):(!Promise<*>|undefined)|undefined} */
     let onMessage;
 
     /**
      * Provides a message delivery mechanism by which AMP document can send
      * messages to the viewer.
-     * @param {function(string, *, boolean):(!Promise<*>|undefined)} callback
+     * @param {?function(string, *, boolean):(!Promise<*>|undefined)} callback
      */
     amp['onMessage'] = function (callback) {
       onMessage = callback;
@@ -150,9 +137,7 @@ export class MultidocManager {
       }
 
       // All other messages.
-      if (onMessage) {
-        return onMessage(eventType, data, awaitResponse);
-      }
+      return onMessage?.(eventType, data, awaitResponse);
     }, origin);
 
     /**
@@ -209,7 +194,7 @@ export class MultidocManager {
     builder(amp, shadowRoot, ampdoc).then(() => {
       // Document is ready.
       ampdoc.setReady();
-      ampdoc.signals().signal(CommonSignals.RENDER_START);
+      ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
     });
 
@@ -256,7 +241,7 @@ export class MultidocManager {
         // specifically, we have to wait for stubbing to complete, which may
         // take awhile due to importNode.
         setTimeout(() => {
-          ampdoc.signals().signal(CommonSignals.RENDER_START);
+          ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
           setStyle(hostElement, 'visibility', 'visible');
         }, 50);
 
@@ -307,7 +292,7 @@ export class MultidocManager {
           if (!renderStarted) {
             renderStarted = true;
             setTimeout(() => {
-              ampdoc.signals().signal(CommonSignals.RENDER_START);
+              ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
               setStyle(hostElement, 'visibility', 'visible');
             }, 50);
           }
@@ -504,7 +489,7 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
+    ampdoc.overrideVisibilityState(VisibilityState_Enum.INACTIVE);
     disposeServicesForDoc(ampdoc);
 
     // There is a race between the visibility state change finishing and

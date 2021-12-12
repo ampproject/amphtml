@@ -1,34 +1,9 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {prepareImageAnimation} from '@ampproject/animations';
 
-import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {CommonSignals} from '#core/constants/common-signals';
-import {
-  ELIGIBLE_TAP_TAGS,
-  LightboxManager,
-  LightboxThumbnailDataDef,
-  VIDEO_TAGS,
-} from './service/lightbox-manager-impl';
-import {Gestures} from '../../../src/gesture';
-import {Keys} from '#core/constants/key-codes';
-import {LightboxCaption, OverflowState} from './lightbox-caption';
-import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
-import {Services} from '#service';
-import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {SwipeToDismiss} from './swipe-to-dismiss';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   childElementByTag,
   closest,
@@ -36,23 +11,38 @@ import {
   elementByTag,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle, setStyles, toggle} from '#core/dom/style';
 import {clamp} from '#core/math';
+import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {getData, getDetail, isLoaded, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
+import {LightboxCaption, OverflowState} from './lightbox-caption';
+import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
+import {
+  ELIGIBLE_TAP_TAGS,
+  LightboxManager,
+  LightboxThumbnailDataDef,
+  VIDEO_TAGS,
+} from './service/lightbox-manager-impl';
+import {SwipeToDismiss} from './swipe-to-dismiss';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
+
+import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
-import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error-reporting';
-import {setStyle, setStyles, toggle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {Gestures} from '../../../src/gesture';
+import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -72,7 +62,7 @@ const LightboxControlsModes = {
   CONTROLS_HIDDEN: 0,
 };
 
-// Use S Curves for entry and exit animations
+// Use S Curves_Enum for entry and exit animations
 const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
 
 // Keep in sync with [i-amphtml-lbg-fade]'s animation duration
@@ -771,7 +761,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.setupGestures_();
         this.setupEventListeners_();
 
-        return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
+        return this.carousel_.signals().whenSignal(CommonSignals_Enum.LOAD_END);
       })
       .then(() => this.openLightboxForElement_(element, expandDescription))
       .then(() => {
@@ -930,13 +920,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     };
 
     const mutate = () => {
-      if (enter) {
-        Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
-          this.element,
-          this.carousel_
-        );
-      }
-
       toggle(carousel, enter);
       // Undo opacity 0 from `openLightboxGallery_`
       setStyle(this.element, 'opacity', '');
@@ -1043,7 +1026,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.getCurrentElement_()
       .imageViewer.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => this.transitionImgIn_(sourceElement));
   }
 
@@ -1196,13 +1179,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.ESCAPE:
+      case Keys_Enum.ESCAPE:
         this.close_();
         break;
-      case Keys.LEFT_ARROW:
+      case Keys_Enum.LEFT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ -1);
         break;
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:

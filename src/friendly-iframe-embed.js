@@ -1,55 +1,43 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {urls} from './config';
-import {CommonSignals} from './core/constants/common-signals';
-import {VisibilityState} from './core/constants/visibility-state';
-import {Deferred} from './core/data-structures/promise';
-import {Signals} from './core/data-structures/signals';
-import {isDocumentReady} from './core/document-ready';
-import {escapeHtml} from './core/dom';
-import {layoutRectLtwh, moveLayoutRect} from './core/dom/layout/rect';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+import {isDocumentReady} from '#core/document/ready';
+import {escapeHtml} from '#core/dom';
+import {layoutRectLtwh, moveLayoutRect} from '#core/dom/layout/rect';
 import {
   px,
   resetStyles,
   setImportantStyles,
   setStyle,
   setStyles,
-} from './core/dom/style';
-import {rethrowAsync} from './core/error';
-import {toWin} from './core/window';
-import {loadPromise} from './event-helper';
+} from '#core/dom/style';
+import {rethrowAsync} from '#core/error';
+import * as mode from '#core/mode';
+import {getWin} from '#core/window';
+
+import {install as installAbortController} from '#polyfills/abort-controller';
+import {install as installCustomElements} from '#polyfills/custom-elements';
+import {install as installDocContains} from '#polyfills/document-contains';
+import {installForChildWin as installIntersectionObserver} from '#polyfills/intersection-observer';
+import {installForChildWin as installResizeObserver} from '#polyfills/resize-observer';
+
+import {Services} from '#service';
+import {installAmpdocServicesForEmbed} from '#service/core-services';
+import {installTimerInEmbedWindow} from '#service/timer-impl';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
+import {urls} from './config';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
-import {dev, devAssert, userAssert} from './log';
 import {getMode} from './mode';
-import {install as installAbortController} from './polyfills/abort-controller';
-import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDocContains} from './polyfills/document-contains';
-import {install as installDOMTokenList} from './polyfills/domtokenlist';
-import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
-import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
-import {Services} from './service';
 import {
   disposeServicesForEmbed,
   getTopWindow,
   setParentWindow,
 } from './service-helpers';
-import {installAmpdocServicesForEmbed} from './service/core-services';
-import {installTimerInEmbedWindow} from './service/timer-impl';
 import {installStylesForDoc} from './style-installer';
 
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -152,7 +140,7 @@ export function installFriendlyIframeEmbed(
   opt_preinstallCallback // TODO(#22733): remove "window" argument.
 ) {
   /** @const {!Window} */
-  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
+  const win = getTopWindow(getWin(iframe));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensionsService = Services.extensionsFor(win);
   /** @const {!./service/ampdoc-impl.AmpDocService} */
@@ -448,7 +436,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   whenRenderStarted() {
-    return this.signals_.whenSignal(CommonSignals.RENDER_START);
+    return this.signals_.whenSignal(CommonSignals_Enum.RENDER_START);
   }
 
   /**
@@ -467,7 +455,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   whenIniLoaded() {
-    return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+    return this.signals_.whenSignal(CommonSignals_Enum.INI_LOAD);
   }
 
   /**
@@ -492,7 +480,7 @@ export class FriendlyIframeEmbed {
    */
   pause() {
     if (this.ampdoc) {
-      this.ampdoc.overrideVisibilityState(VisibilityState.PAUSED);
+      this.ampdoc.overrideVisibilityState(VisibilityState_Enum.PAUSED);
     }
   }
 
@@ -501,7 +489,7 @@ export class FriendlyIframeEmbed {
    */
   resume() {
     if (this.ampdoc) {
-      this.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+      this.ampdoc.overrideVisibilityState(VisibilityState_Enum.VISIBLE);
     }
   }
 
@@ -513,7 +501,7 @@ export class FriendlyIframeEmbed {
     if (this.host) {
       this.host.renderStarted();
     } else {
-      this.signals_.signal(CommonSignals.RENDER_START);
+      this.signals_.signal(CommonSignals_Enum.RENDER_START);
     }
 
     // TODO(ccordry): remove when no-signing launched.
@@ -549,7 +537,7 @@ export class FriendlyIframeEmbed {
       this.whenRenderComplete(),
       whenContentIniLoad(this.ampdoc, this.win, rect),
     ]).then(() => {
-      this.signals_.signal(CommonSignals.INI_LOAD);
+      this.signals_.signal(CommonSignals_Enum.INI_LOAD);
     });
   }
 
@@ -696,14 +684,13 @@ export class FriendlyIframeEmbed {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  if (!IS_ESM) {
+  if (!mode.isEsm()) {
     installDocContains(childWin);
-    installDOMTokenList(childWin);
+    installCustomElements(childWin, class {});
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   if (!IS_SXG) {
-    installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
     installResizeObserver(parentWin, childWin);
     installAbortController(childWin);
@@ -736,7 +723,7 @@ export class Installers {
     opt_installComplete
   ) {
     const childWin = ampdoc.win;
-    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    const parentWin = getWin(childWin.frameElement);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
 
@@ -747,7 +734,7 @@ export class Installers {
       })
       .then(getDelayPromise)
       .then(() => {
-        if (IS_ESM) {
+        if (mode.isEsm()) {
           // TODO: This is combined (ampdoc + shared), not just shared
           // const css = parentWin.document.querySelector('style[amp-runtime]')
           // .textContent;

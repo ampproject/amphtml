@@ -1,20 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Curves, bezierCurve, getCurve} from '#core/data-structures/curve';
+import {Curves_Enum, bezierCurve, getCurve} from '#core/data-structures/curve';
 
 describes.sandboxed('data structures - Curve', {}, () => {
   it('bezierCurve', () => {
@@ -39,11 +23,11 @@ describes.sandboxed('data structures - Curve', {}, () => {
     expect(getCurve(func)).to.equal(func);
 
     // String is translated.
-    expect(getCurve('linear')).to.equal(Curves.LINEAR);
-    expect(getCurve('ease')).to.equal(Curves.EASE);
-    expect(getCurve('ease-in')).to.equal(Curves.EASE_IN);
-    expect(getCurve('ease-out')).to.equal(Curves.EASE_OUT);
-    expect(getCurve('ease-in-out')).to.equal(Curves.EASE_IN_OUT);
+    expect(getCurve('linear')).to.equal(Curves_Enum.LINEAR);
+    expect(getCurve('ease')).to.equal(Curves_Enum.EASE);
+    expect(getCurve('ease-in')).to.equal(Curves_Enum.EASE_IN);
+    expect(getCurve('ease-out')).to.equal(Curves_Enum.EASE_OUT);
+    expect(getCurve('ease-in-out')).to.equal(Curves_Enum.EASE_IN_OUT);
   });
 
   it('getCurve on cubic-bezier curves', () => {

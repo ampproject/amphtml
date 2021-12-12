@@ -1,51 +1,38 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {waitForBodyOpenPromise} from '#core/dom';
+import {setStyle} from '#core/dom/style';
 import * as mode from '#core/mode';
 
-import {BaseElement} from './base-element';
-import {startupChunk} from './chunk';
-import {config} from './config';
-import {waitForBodyOpenPromise} from './core/dom';
-import {setStyle} from './core/dom/style';
-import {reportErrorForWin} from './error-reporting';
-import {isExperimentOn, toggleExperiment} from './experiments';
-import {internalRuntimeVersion} from './internal-version';
+import {isExperimentOn, toggleExperiment} from '#experiments';
+
+import {shouldLoadPolyfill as shouldLoadInObPolyfill} from '#polyfills/stubs/intersection-observer-stub';
+import {shouldLoadPolyfill as shouldLoadResObPolyfill} from '#polyfills/stubs/resize-observer-stub';
+
+import {Services} from '#service';
 import {
-  LogLevel, // eslint-disable-line no-unused-vars
+  installAmpdocServices,
+  installRuntimeServices,
+} from '#service/core-services';
+import {stubElementsForDoc} from '#service/custom-element-registry';
+import {
+  installExtensionsService,
+  stubLegacyElements,
+} from '#service/extensions-impl';
+
+import {
+  LogLevel_Enum, // eslint-disable-line no-unused-vars
   dev,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
-} from './log';
+} from '#utils/log';
+
+import {BaseElement} from './base-element';
+import {startupChunk} from './chunk';
+import {config} from './config';
+import {reportErrorForWin} from './error-reporting';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
-import {shouldLoadPolyfill as shouldLoadInObPolyfill} from './polyfills/stubs/intersection-observer-stub';
-import {shouldLoadPolyfill as shouldLoadResObPolyfill} from './polyfills/stubs/resize-observer-stub';
 import {hasRenderDelayingServices} from './render-delaying-services';
-import {Services} from './service';
-import {
-  installAmpdocServices,
-  installRuntimeServices,
-} from './service/core-services';
-import {stubElementsForDoc} from './service/custom-element-registry';
-import {
-  installExtensionsService,
-  stubLegacyElements,
-} from './service/extensions-impl';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -63,7 +50,7 @@ const TAG = 'runtime';
  *  canonicalUrl: (string|undefined),
  *  head: (Element|undefined),
  *  ampdoc: (!./service/ampdoc-impl.AmpDoc | undefined),
- *  setVisibilityState: (function(!VisibilityState)|undefined),
+ *  setVisibilityState: (function(!VisibilityState_Enum)|undefined),
  *  postMessage: (function()|undefined),
  *  onMessage: (function()|undefined),
  *  close: (function()|undefined),
@@ -162,7 +149,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!LogLevel} level
+   * @param {!LogLevel_Enum} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 
@@ -371,7 +358,7 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     const style = global.document.querySelector('style[amp-runtime]');
     global.AMP.combinedCss = style ? style.textContent : '';
   } else {
@@ -444,7 +431,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
     return false;
   }
 
-  if (IS_ESM) {
+  if (mode.isEsm()) {
     // If we're in a module runtime, trying to execute a nomodule extension
     // simply remove the nomodule extension so that it is not executed.
     if (!fnOrStruct.m) {
@@ -462,7 +449,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
   // in the config that is fully determined by the primary binary.
-  if (internalRuntimeVersion() == v) {
+  if (mode.version() == v) {
     return false;
   }
   Services.extensionsFor(win).reloadExtension(

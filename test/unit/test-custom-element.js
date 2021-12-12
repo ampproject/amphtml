@@ -1,34 +1,22 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpEvents} from '#core/constants/amp-events';
-import {BaseElement} from '../../src/base-element';
-import {CommonSignals} from '#core/constants/common-signals';
-import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '#core/dom/layout';
-import {Resource, ResourceState} from '#service/resource';
+
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {LOADING_ELEMENTS_ENUM, Layout_Enum} from '#core/dom/layout';
+
 import {Services} from '#service';
+import {elementConnectedCallback} from '#service/custom-element-registry';
+import {Resource, ResourceState_Enum} from '#service/resource';
+
+import {BaseElement} from '../../src/base-element';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
   getImplSyncForTesting,
+  markUnresolvedElements,
+  resetUnresolvedElementsForTesting,
 } from '../../src/custom-element';
-import {elementConnectedCallback} from '#service/custom-element-registry';
-import {toggleExperiment} from '#experiments';
+import {ElementStub} from '../../src/element-stub';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -167,6 +155,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       afterEach(() => {
         clock.uninstall();
         resourcesMock.verify();
+        resetUnresolvedElementsForTesting();
       });
 
       function skipMicroTask() {
@@ -204,7 +193,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.upgradeState_).to.equal(/* NOT_UPGRADED */ 1);
         expect(element.readyState).to.equal('upgrading');
         expect(element.everAttached).to.equal(false);
-        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
 
         container.appendChild(element);
         expect(element).to.have.class('i-amphtml-element');
@@ -229,7 +218,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isUpgraded()).to.equal(false);
         expect(element.readyState).to.equal('upgrading');
         expect(element.everAttached).to.equal(false);
-        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
 
         container.appendChild(element);
         expect(element).to.have.class('i-amphtml-element');
@@ -355,15 +344,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           .callsFake(() => true);
         element.layoutCount_ = 10;
         element.isFirstLayoutCompleted_ = true;
-        element.signals().signal(CommonSignals.RENDER_START);
-        element.signals().signal(CommonSignals.LOAD_END);
+        element.signals().signal(CommonSignals_Enum.RENDER_START);
+        element.signals().signal(CommonSignals_Enum.LOAD_END);
         container.appendChild(element);
         return buildPromise.then(() => {
           expect(buildStub).to.be.called;
           expect(element.layoutCount_).to.equal(0);
           expect(element.isFirstLayoutCompleted_).to.be.false;
-          expect(element.signals().get(CommonSignals.RENDER_START)).to.be.null;
-          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          expect(element.signals().get(CommonSignals_Enum.RENDER_START)).to.be
+            .null;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
         });
       });
 
@@ -379,14 +369,14 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           .callsFake(() => false);
         element.layoutCount_ = 10;
         element.isFirstLayoutCompleted_ = true;
-        element.signals().signal(CommonSignals.RENDER_START);
-        expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
-        element.signals().signal(CommonSignals.LOAD_END);
+        element.signals().signal(CommonSignals_Enum.RENDER_START);
+        expect(element.signals().get(CommonSignals_Enum.RENDER_START)).to.be.ok;
+        element.signals().signal(CommonSignals_Enum.LOAD_END);
         container.appendChild(element);
         expect(element.layoutCount_).to.equal(10);
         expect(element.isFirstLayoutCompleted_).to.be.true;
-        expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
-        expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
+        expect(element.signals().get(CommonSignals_Enum.RENDER_START)).to.be.ok;
+        expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.ok;
       });
 
       it('Element - getIntersectionChangeEntry', () => {
@@ -427,7 +417,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           allowConsoleError(() => {
             element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
             expect(element.getLayoutSize()).to.be.ok;
-            expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
+            expect(errorStub).to.be.calledWith(
+              AmpEvents_Enum.ERROR,
+              'intentional'
+            );
           });
         });
       });
@@ -448,7 +441,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.readyState).to.equal('building');
         const impl = getImplSyncForTesting(element);
         expect(impl).to.be.instanceOf(TestElement);
-        expect(impl.getLayout()).to.equal(Layout.FILL);
+        expect(impl.getLayout()).to.equal(Layout_Enum.FILL);
         expect(element.isBuilt()).to.equal(false);
       });
 
@@ -587,10 +580,11 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('Element - build allowed', () => {
         const element = new ElementClass();
+        const getSizerStub = env.sandbox.stub(element, 'getSizer_');
 
         expect(element.isBuilt()).to.equal(false);
         expect(testElementBuildCallback).to.have.not.been.called;
-        expect(element.signals().get(CommonSignals.BUILT)).to.not.be.ok;
+        expect(element.signals().get(CommonSignals_Enum.BUILT)).to.not.be.ok;
 
         clock.tick(1);
         container.appendChild(element);
@@ -599,8 +593,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(element).to.not.have.class('i-amphtml-notbuilt');
           expect(element).to.not.have.class('amp-notbuilt');
           expect(element).to.have.class('i-amphtml-built');
+          expect(getSizerStub).to.be.calledOnce;
           expect(testElementBuildCallback).to.be.calledOnce;
-          expect(element.signals().get(CommonSignals.BUILT)).to.be.ok;
+          expect(element.signals().get(CommonSignals_Enum.BUILT)).to.be.ok;
           return element.whenBuilt(); // Should eventually resolve.
         });
       });
@@ -704,15 +699,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         );
       });
 
-      describe('granular consent experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-granular-consent', false);
-        });
-
+      describe('consent', () => {
         describe('getPurposeConsent_', () => {
           let element;
           beforeEach(() => {
@@ -943,17 +930,17 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
         container.appendChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.getLayout()).to.equal(Layout.FILL);
-        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
         expect(getImplSyncForTesting(element).getLayout()).to.equal(
-          Layout.FILL
+          Layout_Enum.FILL
         );
       });
 
@@ -961,25 +948,25 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new StubElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         container.appendChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.getLayout()).to.equal(Layout.FILL);
-        // Not upgraded yet!
-        expect(element).to.have.class('amp-unresolved');
-        expect(element).to.have.class('i-amphtml-unresolved');
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
+        // Not upgraded yet, but extension hasn't failed.
+        expect(element).not.to.have.class('amp-unresolved');
+        expect(element).not.to.have.class('i-amphtml-unresolved');
 
         // Upgrade
         resourcesMock.expects('upgraded').withExactArgs(element).once();
         element.upgrade(TestElement);
 
-        expect(element.getLayout()).to.equal(Layout.FILL);
-        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
         expect(getImplSyncForTesting(element).getLayout()).to.equal(
-          Layout.FILL
+          Layout_Enum.FILL
         );
 
         // Now it's called.
@@ -987,11 +974,49 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element).to.not.have.class('i-amphtml-unresolved');
       });
 
+      it('StubElement - attachedCallback after failed to load', () => {
+        const element = new StubElementClass();
+        markUnresolvedElements('amp-stub');
+        element.setAttribute('layout', 'fill');
+        expect(element.everAttached).to.equal(false);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
+
+        resourcesMock.expects('add').withExactArgs(element).atLeast(1);
+        container.appendChild(element);
+
+        expect(element.everAttached).to.equal(true);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
+        // Extension already failed before attachedCallback
+        expect(element).to.have.class('amp-unresolved');
+        expect(element).to.have.class('i-amphtml-unresolved');
+      });
+
+      it('StubElement - attachedCallback before failed to load', () => {
+        const element = new StubElementClass();
+        element.setAttribute('layout', 'fill');
+        expect(element.everAttached).to.equal(false);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
+
+        resourcesMock.expects('add').withExactArgs(element).atLeast(1);
+        container.appendChild(element);
+
+        expect(element.everAttached).to.equal(true);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
+        // Not upgraded yet, but extension hasn't failed.
+        expect(element).not.to.have.class('amp-unresolved');
+        expect(element).not.to.have.class('i-amphtml-unresolved');
+
+        // Now it's called.
+        markUnresolvedElements('amp-stub');
+        expect(element).to.have.class('amp-unresolved');
+        expect(element).to.have.class('i-amphtml-unresolved');
+      });
+
       it('Element - detachedCallback', () => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
@@ -1001,9 +1026,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.removeChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
         expect(getImplSyncForTesting(element).getLayout()).to.equal(
-          Layout.FILL
+          Layout_Enum.FILL
         );
       });
 
@@ -1011,7 +1036,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout_Enum.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
@@ -1024,9 +1049,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.removeChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout_Enum.FILL);
         expect(getImplSyncForTesting(element).getLayout()).to.equal(
-          Layout.FILL
+          Layout_Enum.FILL
         );
       });
 
@@ -1084,15 +1109,15 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
           const p = element.layoutCallback();
           expect(testElementLayoutCallback).to.be.calledOnce;
-          expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
-          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.be.ok;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
           setTimeout(() => {
             expect(testElementPreconnectCallback).to.have.callCount(2);
             expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
           }, 0);
           return p.then(() => {
             expect(element.readyState).to.equal('complete');
-            expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
+            expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.ok;
           });
         });
       });
@@ -1109,14 +1134,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           controller.abort();
           const p = element.layoutCallback(controller.signal);
           expect(testElementLayoutCallback).not.to.be.called;
-          expect(element.signals().get(CommonSignals.LOAD_START)).to.be.null;
-          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.be
+            .null;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
           setTimeout(() => {
             expect(testElementPreconnectCallback).to.have.callCount(1);
           }, 0);
           return expect(p).to.be.rejected.then(() => {
             expect(element.readyState).to.equal('loading');
-            expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+            expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be
+              .null;
           });
         });
       });
@@ -1137,15 +1164,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             });
           const p = element.layoutCallback(controller.signal);
           expect(testElementLayoutCallback).not.to.be.called;
-          expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
-          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.be.ok;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
           setTimeout(() => {
             expect(testElementPreconnectCallback).to.have.callCount(2);
           }, 0);
           return expect(p).to.be.rejected.then(() => {
             expect(stub).to.have.been.called;
             expect(element.readyState).to.equal('loading');
-            expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+            expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be
+              .null;
           });
         });
       });
@@ -1167,15 +1195,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             });
           const p = element.layoutCallback(controller.signal);
           expect(testElementLayoutCallback).not.to.be.called;
-          expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
-          expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_START)).to.be.ok;
+          expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be.null;
           setTimeout(() => {
             expect(testElementPreconnectCallback).to.have.callCount(2);
           }, 0);
           return expect(p).to.be.rejected.then(() => {
             expect(stub).to.have.been.called;
             expect(element.readyState).to.equal('loading');
-            expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+            expect(element.signals().get(CommonSignals_Enum.LOAD_END)).to.be
+              .null;
           });
         });
       });
@@ -1504,7 +1533,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should reset sizer for responsive layout', () => {
         const element = new ElementClass();
-        element.layout_ = Layout.RESPONSIVE;
+        element.layout_ = Layout_Enum.RESPONSIVE;
         const sizer = doc.createElement('div');
         element.sizerElement = sizer;
         element.applySize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
@@ -1514,7 +1543,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should reset sizer for intrinsic layout', () => {
         const element = new ElementClass();
-        element.layout_ = Layout.INTRINSIC;
+        element.layout_ = Layout_Enum.INTRINSIC;
         const sizer = doc.createElement('i-amphtml-sizer');
         const intrinsicSizer = doc.createElement('img');
         intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
@@ -1558,7 +1587,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('should dispatch custom event size-changed when size changed', () => {
         const element = new ElementClass();
         const spyDispatchEvent = env.sandbox.spy();
-        element.addEventListener(AmpEvents.SIZE_CHANGED, spyDispatchEvent);
+        element.addEventListener(AmpEvents_Enum.SIZE_CHANGED, spyDispatchEvent);
         element.applySize();
         expect(spyDispatchEvent).to.be.calledOnce;
       });
@@ -2017,7 +2046,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
   it('toggleFallback should toggle unsupported class', () => {
     element.resource = {
       getState: () => {
-        return ResourceState.LAYOUT_COMPLETE;
+        return ResourceState_Enum.LAYOUT_COMPLETE;
       },
     };
     element.resources_ = {
@@ -2041,7 +2070,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
   it('toggleFallback should toggle unsupported class on R1 elements', () => {
     element.resource = {
       getState: () => {
-        return ResourceState.NOT_LAID_OUT;
+        return ResourceState_Enum.NOT_LAID_OUT;
       },
     };
     element.resources_ = {
@@ -2066,7 +2095,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
   });
 
   it('toggleFallback should not display fallback before element layout', () => {
-    let resourceState = ResourceState.NOT_LAID_OUT;
+    let resourceState = ResourceState_Enum.NOT_LAID_OUT;
     element.resource = {
       getState: () => {
         return resourceState;
@@ -2084,10 +2113,10 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');
-    resourceState = ResourceState.READY_FOR_LAYOUT;
+    resourceState = ResourceState_Enum.READY_FOR_LAYOUT;
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');
-    resourceState = ResourceState.LAYOUT_COMPLETE;
+    resourceState = ResourceState_Enum.LAYOUT_COMPLETE;
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
   });
@@ -2130,13 +2159,13 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         ElementClass = createAmpElementForTesting(win, TestElement);
         win.customElements.define('amp-test-loader', ElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;
-        LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
+        LOADING_ELEMENTS_ENUM.AMP_TEST_LOADER = 'AMP-TEST-LOADER';
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
         resourcesMock = env.sandbox.mock(resources);
         element = new ElementClass();
         element.layoutWidth_ = 300;
-        element.layout_ = Layout.FIXED;
+        element.layout_ = Layout_Enum.FIXED;
         element.setAttribute('layout', 'fixed');
         element.resources_ = resources;
         vsync = Services.vsyncFor(win);
@@ -2185,7 +2214,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
 
         it('should disable when element is not allowlisted', () => {
-          LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
+          delete LOADING_ELEMENTS_ENUM.AMP_TEST_LOADER;
           element.toggleLoading(true);
           expect(loadingIndicatorServiceStub.track).to.not.be.called;
         });
@@ -2203,20 +2232,20 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
 
         it('should disable when element is layout=nodisplay', () => {
-          element.layout_ = Layout.NODISPLAY;
+          element.layout_ = Layout_Enum.NODISPLAY;
           element.toggleLoading(true);
           expect(loadingIndicatorServiceStub.track).to.not.be.called;
         });
 
         it('should enable when element is layout=container', () => {
-          element.layout_ = Layout.CONTAINER;
+          element.layout_ = Layout_Enum.CONTAINER;
           element.toggleLoading(true);
           expect(loadingIndicatorServiceStub.track).to.be.calledOnce;
         });
 
         it('should ignore loading-on if already rendered', () => {
           clock.tick(1);
-          element.signals().signal(CommonSignals.RENDER_START);
+          element.signals().signal(CommonSignals_Enum.RENDER_START);
           element.toggleLoading(true);
           expect(loadingIndicatorServiceStub.track).to.not.be.called;
         });
@@ -2231,7 +2260,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           clock.tick(1);
           const stub = env.sandbox.stub(element, 'toggleLoading');
           element.renderStarted();
-          expect(element.signals().get(CommonSignals.RENDER_START)).to.be.ok;
+          expect(element.signals().get(CommonSignals_Enum.RENDER_START)).to.be
+            .ok;
           expect(stub).to.be.calledOnce.calledWith(false);
         });
 
@@ -2342,7 +2372,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, (env) => {
     element = new ElementClass();
     element.ampdoc_ = doc;
     element.layoutWidth_ = 300;
-    element.layout_ = Layout.FIXED;
+    element.layout_ = Layout_Enum.FIXED;
     element.mutator_ = mutator;
     overflowElement = doc.createElement('div');
     overflowElement.setAttribute('overflow', '');

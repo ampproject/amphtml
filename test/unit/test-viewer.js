@@ -1,27 +1,16 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
-import {ViewerImpl} from '#service/viewer-impl';
-import {dev} from '../../src/log';
 import {installDocService} from '#service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
 import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
-import {parseQueryString} from '#core/types/string/url';
+import {ViewerImpl} from '#service/viewer-impl';
+
+import {dev} from '#utils/log';
+
+import {FakePerformance} from '#testing/fake-dom';
+
 import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, (env) => {
@@ -79,6 +68,7 @@ describes.sandboxed('Viewer', {}, (env) => {
       ancestorOrigins: null,
       search: '',
     };
+    windowApi.performance = new FakePerformance(window);
     windowApi.addEventListener = (type, listener) => {
       events[type] = listener;
     };
@@ -331,8 +321,9 @@ describes.sandboxed('Viewer', {}, (env) => {
   it('should initialize firstVisibleTime when doc becomes visible', () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
-    expect(ampdoc.getLastVisibleTime()).to.equal(0);
+    // We don't live during the unix epoch, so time is always positive.
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
+    expect(ampdoc.getLastVisibleTime()).to.equal(1);
 
     // Becomes invisible.
     clock.tick(1);
@@ -340,8 +331,8 @@ describes.sandboxed('Viewer', {}, (env) => {
       state: 'hidden',
     });
     expect(ampdoc.isVisible()).to.be.false;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
-    expect(ampdoc.getLastVisibleTime()).to.equal(0);
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
+    expect(ampdoc.getLastVisibleTime()).to.equal(1);
 
     // Back to visible.
     clock.tick(1);
@@ -349,7 +340,7 @@ describes.sandboxed('Viewer', {}, (env) => {
       state: 'visible',
     });
     expect(ampdoc.isVisible()).to.be.true;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
     expect(ampdoc.getLastVisibleTime()).to.equal(2);
 
     // Back to invisible again.
@@ -358,7 +349,7 @@ describes.sandboxed('Viewer', {}, (env) => {
       state: 'hidden',
     });
     expect(ampdoc.isVisible()).to.be.false;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
     expect(ampdoc.getLastVisibleTime()).to.equal(2);
   });
 

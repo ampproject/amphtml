@@ -1,22 +1,11 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {devAssert} from '#core/assert';
-import {Loading} from '#core/constants/loading-instructions';
+import {Loading_Enum} from '#core/constants/loading-instructions';
 import {rediscoverChildren, removeProp, setProp} from '#core/context';
+import {
+  loadAll,
+  pauseAll,
+  unmountAll,
+} from '#core/dom/resource-container-helper';
 import {isElement} from '#core/types';
 import {objectsEqualShallow} from '#core/types/object';
 
@@ -25,12 +14,6 @@ import {useEffect, useLayoutEffect, useRef} from '#preact';
 
 import {useAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
-
-import {
-  loadAll,
-  pauseAll,
-  unmountAll,
-} from '../utils/resource-container-helper';
 
 const EMPTY = {};
 
@@ -107,13 +90,13 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/constants/loading-instructions.Loading} */ (
+      /** @type {!./core/constants/loading-instructions.Loading_Enum} */ (
         context.loading
       )
     );
 
     if (!context.playable) {
-      execute(slot, pauseAll);
+      execute(slot, pauseAll, true);
     }
 
     return () => {
@@ -134,13 +117,13 @@ export function useSlotContext(ref, opt_props) {
 
     // Mount children, unless lazy loading requested. If so the element should
     // use `BaseElement.setAsContainer`.
-    if (loading != Loading.LAZY) {
+    if (loading != Loading_Enum.LAZY) {
       // TODO(#31915): switch to `mount`.
-      execute(slot, loadAll);
+      execute(slot, loadAll, true);
     }
 
     return () => {
-      execute(slot, unmountAll);
+      execute(slot, unmountAll, false);
     };
   }, [ref, loading]);
 }
@@ -148,12 +131,18 @@ export function useSlotContext(ref, opt_props) {
 /**
  * @param {!Element} slot
  * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
+ * @param {boolean} schedule
  */
-function execute(slot, action) {
+function execute(slot, action, schedule) {
   const assignedElements = slot.assignedElements
     ? slot.assignedElements()
     : slot;
   if (Array.isArray(assignedElements) && assignedElements.length == 0) {
+    return;
+  }
+
+  if (!schedule) {
+    action(assignedElements);
     return;
   }
 

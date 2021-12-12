@@ -1,20 +1,4 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This file contains experiment configurations that are
  * used in experiment.js. If you are launching a new feature, you should
  * add an experiment block below including a descriptive id string, a
@@ -63,6 +47,11 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
+    id: 'analytics-browser-events',
+    name: 'Allows tracking of a custom set of browser events',
+    spec: 'https://github.com/ampproject/amphtml/pull/35193',
   },
   {
     id: 'ios-fixed-no-transfer',
@@ -139,14 +128,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'adsense-ad-size-optimization',
-    name:
-      'Per publisher server side settings for changing the ad size ' +
-      'to responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/23568',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -169,29 +150,14 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
   },
   {
-    id: 'layout-aspect-ratio-css',
-    name: 'Responsive layouts implemented via aspect-ratio CSS',
-    spec: 'https://github.com/ampproject/amphtml/issues/30291',
-  },
-  {
-    id: 'tcf-post-message-proxy-api',
-    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
-    spec: 'https://github.com/ampproject/amphtml/issues/30385',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
   },
   {
-    id: 'amp-consent-granular-consent',
-    name: 'Client-side granular consent',
-    spec: 'https://github.com/ampproject/amphtml/issues/31607',
-  },
-  {
-    id: 'amp-story-page-attachment-ui-v2',
-    name: 'New UI for all new page attachments in stories format',
-    spec: 'https://github.com/ampproject/amphtml/projects/123',
+    id: 'amp-story-desktop-one-panel',
+    name: 'New desktop one-panel UI with background blur for stories.',
+    spec: 'https://github.com/ampproject/amphtml/projects/128',
   },
   {
     id: 'flexible-bitrate',
@@ -207,5 +173,10 @@ export const EXPERIMENTS = [
     id: 'story-ad-auto-advance',
     name: 'Auto advancing story ads',
     spec: 'https://github.com/ampproject/amphtml/issues/33969',
+  },
+  {
+    id: 'story-ad-page-outlink',
+    name: 'Story ad CTA page outlink',
+    spec: 'https://github.com/ampproject/amphtml/pull/35867',
   },
 ];

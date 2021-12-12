@@ -1,30 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpDocService} from '#service/ampdoc-impl';
-import {AmpEvents} from '#core/constants/amp-events';
-import {AmpList} from '../amp-list';
-import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
 import {resetExperimentTogglesForTesting, toggleExperiment} from '#experiments';
-import {whenUpgradedToCustomElement} from '../../../../src/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+import {AmpDocService} from '#service/ampdoc-impl';
+
+import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
+import {AmpList} from '../amp-list';
 
 describes.repeated(
   'amp-list',
@@ -470,7 +457,7 @@ describes.repeated(
             return list.layoutCallback().then(() => {
               expect(spy).to.have.been.calledOnce;
               expect(spy).calledWithMatch({
-                type: AmpEvents.DOM_UPDATE,
+                type: AmpEvents_Enum.DOM_UPDATE,
                 bubbles: true,
               });
             });
@@ -675,7 +662,7 @@ describes.repeated(
               list.element,
               'fetch-error',
               env.sandbox.match.any,
-              ActionTrust.LOW
+              ActionTrust_Enum.LOW
             );
           });
 
@@ -1592,7 +1579,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction).to.be.calledWith(
           env.sandbox.match({
@@ -1603,7 +1590,7 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ActionTrust.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });
