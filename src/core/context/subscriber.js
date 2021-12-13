@@ -64,24 +64,42 @@ export class Subscriber {
    * @param {IContextProp<DEP, ?>[]} deps
    */
   constructor(contextNode, func, deps) {
-    /** @package @const {ContextNode<SubscribeCallback<DEP>>} */
+    /**
+     * @package
+     * @const
+     * @type {ContextNode<SubscribeCallback<DEP>>}
+     */
     this.contextNode = contextNode;
 
-    /** @private @const {function(DEP):void} */
+    /**
+     * @private
+     * @const
+     * @type {function(DEP):void}
+     */
     this.func_ = func;
 
-    /** @private @const {IContextProp<DEP, ?>[]} */
+    /**
+     * @private
+     * @const
+     * @type {IContextProp<DEP, ?>[]}
+     */
     this.deps_ = deps;
 
     /**
-     * @private @const {(DEP|undefined)[]}
+     * @private
+     * @const
+     * @type {(DEP|undefined)[]}
      *
      * Start with a pre-allocated array filled with `undefined`. The filling
      * is important to ensure the correct `Array.every` execution.
      */
     this.depValues_ = deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY;
 
-    /** @private @const {(function(DEP):void)[]} */
+    /**
+     * @private
+     * @const
+     * @type {(function(DEP):void)[]}
+     */
     this.depSubscribers_ =
       deps.length > 0
         ? deps.map((unusedDep, index) => (value) => {
@@ -90,14 +108,24 @@ export class Subscriber {
           })
         : EMPTY_ARRAY;
 
-    /** @private {boolean} */
+    /**
+     * @private
+     * @type {boolean}
+     */
     this.running_ = false;
 
-    /** @private {?function():void} */
+    /**
+     * @private
+     * @type {null|void|function():void}
+     */
     this.runCleanup_ = null;
 
     // Schedulers.
-    /** @private @const {function():void} */
+    /**
+     * @private
+     * @const
+     * @type {function():void}
+     */
     this.update_ = throttleTail(this.update_.bind(this), setTimeout);
 
     // Subscribe to all dependencies.

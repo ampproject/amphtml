@@ -175,10 +175,17 @@ export class ContextNode {
    * @param {?string} name
    */
   constructor(node, name) {
-    /** @const {Node} */
+    /**
+     * @const
+     * @type {Node}
+     */
     this.node = node;
 
-    /** @const @package {?string} */
+    /**
+     * @const
+     * @package
+     * @type {?string}
+     */
     this.name = name;
 
     /**
@@ -186,7 +193,8 @@ export class ContextNode {
      * considered as roots. But other nodes can become roots as well
      * (e.g. shadow roots) via `setIsRoot()` API.
      *
-     * @package {boolean}
+     * @package
+     * @type {boolean}
      */
     this.isRoot = node.nodeType == DOCUMENT_NODE;
 
@@ -194,7 +202,8 @@ export class ContextNode {
      * The root context node. Always available for a DOM node connected to a
      * root node after the discovery phase.
      *
-     * @package {?ContextNode}
+     * @package
+     * @type {?ContextNode}
      */
     this.root = this.isRoot ? this : null;
 
@@ -205,30 +214,48 @@ export class ContextNode {
      * why the API is declared as package-private. However, it needs to be
      * unobfuscated to avoid cross-binary issues.
      *
-     * @package {?ContextNode}
+     * @package
+     * @type {?ContextNode}
      */
     this.parent = null;
 
     /**
      * See `parent` description.
      *
-     * @package {?ContextNode[]}
+     * @package
+     * @type {?ContextNode[]}
      */
     this.children = null;
 
-    /** @package {?{[key: string]: GroupDef}} */
+    /**
+     * @package
+     * @type {?Map<string, GroupDef>}
+     */
     this.groups = null;
 
-    /** @package {!Values} */
+    /**
+     * @package
+     * @type {!Values}
+     */
     this.values = new Values(this);
 
-    /** @private {?{[key: SID]: ./subscriber.Subscriber}} */
+    /**
+     * @private
+     * @type {?Map<SID, import('./subscriber').Subscriber>}
+     */
     this.subscribers_ = null;
 
-    /** @private {boolean} */
+    /**
+     * @private
+     * @type {boolean}
+     */
     this.parentOverridden_ = false;
 
-    /** @const @private {function():} */
+    /**
+     * @const
+     * @private
+     * @type {function():void}
+     */
     this.scheduleDiscover_ = throttleTail(
       this.discover_.bind(this),
       setTimeout

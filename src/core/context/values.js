@@ -39,17 +39,31 @@ export class Values {
    * @param {ContextNode} contextNode
    */
   constructor(contextNode) {
-    /** @private @const {ContextNode} */
+    /**
+     * @private
+     * @const
+     * @type {ContextNode}
+     */
     this.contextNode_ = contextNode;
 
-    /** @private {?{[key: string]: IContextPropInput}} */
+    /**
+     * @private
+     * @type {?Map<string, IContextPropInput<?>>}}
+     */
     this.inputsByKey_ = null;
 
-    /** @private {?{[key: string]: IContextPropUsed}} */
+    /**
+     * @private
+     * @type {?Map<string, IContextPropUsed<?, ?>>}}
+     */
     this.usedByKey_ = null;
 
     // Schedulers.
-    /** @private @const {function():void} */
+    /**
+     * @private
+     * @const
+     * @type {function():void}
+     */
     this.checkUpdates_ = throttleTail(
       this.checkUpdates_.bind(this),
       setTimeout
@@ -669,7 +683,7 @@ function isRecursive(prop) {
  * Whether the parent value is required to calculate the used value.
  *
  * @param {IContextProp<T, ?>} prop
- * @param {?T[]} inputs
+ * @param {T[]|undefined} inputs
  * @return {boolean}
  * @template T
  */
