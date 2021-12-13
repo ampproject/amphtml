@@ -27,7 +27,7 @@ export function htmlFor(nodeOrDoc) {
  */
 export function svgFor(nodeOrDoc) {
   const doc = nodeOrDoc.ownerDocument || /** @type {Document} */ (nodeOrDoc);
-  if (!svgContainer || svgContainer.ownerDocument !== svgContainer) {
+  if (!svgContainer || svgContainer.ownerDocument !== doc) {
     svgContainer = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
   }
 
