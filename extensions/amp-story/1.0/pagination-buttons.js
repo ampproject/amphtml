@@ -98,12 +98,12 @@ class PaginationButton {
     }
     this.element.classList.remove(this.state_.className);
     this.element.classList.add(state.className);
-    state.label
-      ? this.buttonElement_.setAttribute(
-          'aria-label',
-          localize(this.win_.document, state.label)
-        )
-      : this.buttonElement_.removeAttribute('aria-label');
+    // state.label
+    //   ? this.buttonElement_.setAttribute(
+    //       'aria-label',
+    //       localize(this.element, state.label)
+    //     )
+    //   : this.buttonElement_.removeAttribute('aria-label');
 
     this.state_ = state;
   }

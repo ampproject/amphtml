@@ -425,15 +425,15 @@ export class AmpStory extends AMP.BaseElement {
       );
     }
     // [i-amphtml-version] marks that the style was inlined in the doc server-side.
-    if (
-      this.getAmpDoc()
-        .getRootNode()
-        .documentElement.querySelector(
-          'style[amp-extension="amp-story"][i-amphtml-version]'
-        )
-    ) {
-      performanceService.addEnabledExperiment('story-inline-css');
-    }
+    // if (
+    //   this.getAmpDoc()
+    //     .getRootNode()
+    //     .documentElement.querySelector(
+    //       'style[amp-extension="amp-story"][i-amphtml-version]'
+    //     )
+    // ) {
+    //   performanceService.addEnabledExperiment('story-inline-css');
+    // }
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
       performanceService.addEnabledExperiment(
         'story-load-inactive-outside-viewport'
