@@ -9,12 +9,9 @@
     "lib": ["dom", "esnext", "es6"],
     "paths": {
       "#core": ["."],
-      "#core/*": ["./*"],
+      "#core/*": ["./*"]
     }
   },
-  "include": [
-    "**/*.js",
-    "**/*.d.ts"
-  ],
+  "include": ["**/*.js", "**/*.d.ts"],
   "exclude": ["**/*.extern.js"]
 }
