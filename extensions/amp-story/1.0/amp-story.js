@@ -53,7 +53,7 @@ import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '#service';
-import {ShareMenu} from './amp-story-share-menu';
+import {ShareMenu} from '../../amp-story-share-menu/0.1/amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
