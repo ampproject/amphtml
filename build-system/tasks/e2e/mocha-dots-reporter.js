@@ -10,7 +10,7 @@ const {
   EVENT_TEST_PENDING,
 } = Mocha.Runner.constants;
 const {Base} = Mocha.reporters;
-const {green, red, yellow} = require('../../common/colors');
+const {green, red, yellow} = require('kleur/colors');
 const {icon, nbDotsPerLine} =
   require('../../test-configs/karma.conf').superDotsReporter;
 

@@ -168,14 +168,12 @@ The `amp-story-interactive-slider` element provides a voting experience for valu
 
 Displays the percentage selected, or an emoji via the attribute `option-1-text`. Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
-<amp-img alt="An example of an interactive slider: 'How much do you like this product?' with a percentage slider with a custom accent color" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/slider-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img alt="An example of an interactive slider: 'How much do you like this product?' with a percentage slider with a custom accent color" src="https://github.com/ampproject/amphtml/raw/main/extensions/amp-story-interactive/img/slider-raw.png" layout="intrinsic" width="506" height="215">
 
 [sourcecode:html]
 <amp-story-interactive-slider
     style="--interactive-accent-color: #651ffe"
     prompt-text="How much do you like this product?"
-    align-self="center"
-    justify-self="center"
     endpoint="https://backend.com/v1/interactives">
 </amp-story-interactive-slider>
 [/sourcecode]
@@ -209,6 +207,8 @@ Response: {
 }
 [/sourcecode]
 
+Quizzes and polls support up to 4 options (corresponding to the answers), sliders support 101 options (corresponoding to the percentages 0-100).
+
 [sourcecode:js]
 // Posting the vote for an interactive. Client param is required.
 
@@ -219,6 +219,18 @@ Response: No response necessary
 [/sourcecode]
 
 Backends need to be specified on the necessary components (binary-poll, poll, quiz), and can be deployed by publishers, tools or others.
+
+### User information dialog
+
+The amp-story-interactive component reports aggregated user response statistics to a backend service. An information dialog explains to users how their responses are handled and aggregated.
+
+The information dialog shows the domain of the url passed in the endpoint attribute by default. Backend owners may add their domain into a lookup file to provide users with clearer information with regards to how their data is being used and collected, but it is not required for the backend to work. When using a listed backend, the information dialog displays a string representing the entity that receives the data and a “Learn more” link.
+Backend owners can include their information for users in the [disclaimer-backends-list.json](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-interactive/0.1/disclaimer-backends-list.json) by submitting a pull request on GitHub.
+
+Valid information fields are:
+
+-   `learnMoreUrl`: The URL of a page that includes more information on data collection by the backend.
+-   `entityName`: A string that represents the entity that receives the data.
 
 ## Attributes
 

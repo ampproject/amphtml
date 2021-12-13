@@ -1,5 +1,7 @@
 import {findIndex} from '#core/types/array';
 
+import {devAssert} from '#utils/log';
+
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -9,12 +11,8 @@ import {ButtonTextFitter} from './story-ad-button-text-fitter';
 import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 
-import {devAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {
-  StateProperty,
-  getStoreService,
-} from '../../amp-story/1.0/amp-story-store-service';
+import {getStoreService} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page-manager';
@@ -90,11 +88,11 @@ export class StoryAdPageManager {
    * Called when ad has failed or been placed and we should move to next ad.
    */
   discardCurrentAd() {
+    this.adsConsumed_++;
     this.analyticsEvent_(AnalyticsEvents.AD_DISCARDED, {
       [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
       [AnalyticsVars.AD_DISCARDED]: Date.now(),
     });
-    this.adsConsumed_++;
   }
 
   /**
@@ -166,20 +164,8 @@ export class StoryAdPageManager {
    * @return {!Promise<!InsertionState>}
    */
   maybeInsertPageAfter(pageBeforeAdId, nextAdPage) {
-    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
-    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
-    if (!pageAfterAd) {
-      return Promise.resolve(InsertionState.DELAYED);
-    }
-
-    if (this.isDesktopView_()) {
-      // If we are in desktop view the ad must be inserted 2 pages away because
-      // the next page will already be in view
-      pageBeforeAdId = pageAfterAd.element.id;
-      pageBeforeAd = pageAfterAd;
-      pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
-    }
-
+    const pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+    const pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
     if (!pageAfterAd) {
       return Promise.resolve(InsertionState.DELAYED);
     }
@@ -230,19 +216,11 @@ export class StoryAdPageManager {
    *
    */
   currentAdInserted_() {
+    this.adsConsumed_++;
     this.analyticsEvent_(AnalyticsEvents.AD_INSERTED, {
       [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
       [AnalyticsVars.AD_INSERTED]: Date.now(),
     });
-    this.adsConsumed_++;
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  isDesktopView_() {
-    return !!this.storeService_.get(StateProperty.DESKTOP_STATE);
   }
 
   /**

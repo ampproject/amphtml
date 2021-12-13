@@ -1,11 +1,8 @@
 import * as st from '#core/dom/style';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {propagateObjectFitStyles} from '#core/dom/style';
 
@@ -29,6 +26,9 @@ export class AmpAnim extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.img_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -81,8 +81,9 @@ export class AmpAnim extends AMP.BaseElement {
     );
     guaranteeSrcForSrcsetUnsupportedBrowsers(img);
     return this.loadPromise(img).then(() => {
-      observeWithSharedInOb(this.element, (inViewport) =>
-        this.viewportCallback_(inViewport)
+      this.unobserveIntersections_ = observeIntersections(
+        this.element,
+        ({isIntersecting}) => this.viewportCallback_(isIntersecting)
       );
     });
   }
@@ -94,7 +95,8 @@ export class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.viewportCallback_(false);
     // Release memory held by the image - animations are typically large.
     this.img_.src = SRC_PLACEHOLDER;

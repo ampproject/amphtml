@@ -1,7 +1,7 @@
 import '../amp-timeago';
 import {toggleExperiment} from '#experiments';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-timeago 1.0',

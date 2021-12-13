@@ -2,7 +2,7 @@ import {childElementByAttr} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
 
-import {dev} from '../../../../src/log';
+import {dev} from '#utils/log';
 
 export class LoadMoreService {
   /**

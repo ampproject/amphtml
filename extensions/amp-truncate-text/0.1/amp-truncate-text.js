@@ -10,12 +10,13 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {createShadowRoot} from './shadow-utils';
 import {truncateText} from './truncate-text';
 
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
-import {dev} from '../../../src/log';
 
 /**
  * TODO(sparhami) List of stuff to do / consider:

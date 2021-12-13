@@ -1,5 +1,3 @@
-import {boolean, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {
@@ -12,7 +10,10 @@ import {
 export default {
   title: 'Accordion',
   component: BentoAccordion,
-  decorators: [withKnobs],
+  args: {
+    expandSingleSection: false,
+    animate: false,
+  },
 };
 
 /**
@@ -44,15 +45,10 @@ function AccordionWithActions(props) {
   );
 }
 
-export const _default = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const _default = (args) => {
   return (
     <main>
-      <AccordionWithActions
-        expandSingleSection={expandSingleSection}
-        animate={animate}
-      >
+      <AccordionWithActions {...args}>
         <BentoAccordionSection id="section1" key={1}>
           <BentoAccordionHeader>
             <h2>Section 1</h2>
@@ -139,15 +135,10 @@ function AccordionWithEvents(props) {
   );
 }
 
-export const events = () => {
-  const expandSingleSection = boolean('expandSingleSection', false);
-  const animate = boolean('animate', false);
+export const events = (args) => {
   return (
     <main>
-      <AccordionWithEvents
-        expandSingleSection={expandSingleSection}
-        animate={animate}
-      ></AccordionWithEvents>
+      <AccordionWithEvents {...args}></AccordionWithEvents>
     </main>
   );
 };

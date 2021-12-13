@@ -2,7 +2,7 @@ import * as Preact from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {LINE_HEIGHT_EM_, useStyles} from './component.jss';
 import {px, resetStyles, setStyle, setStyles} from '#core/dom/style';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 
 /**
@@ -43,7 +43,7 @@ export function BentoFitText({
     if (!container || !content) {
       return;
     }
-    const win = toWin(container.ownerDocument.defaultView);
+    const win = getWin(container);
     if (!win) {
       return undefined;
     }

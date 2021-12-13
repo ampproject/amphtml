@@ -3,7 +3,7 @@ import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
 import {hasOwn, map} from '#core/types/object';
 import {isEnumValue, isObject} from '#core/types';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /**
  * Event status is only defined for addEventListener command.

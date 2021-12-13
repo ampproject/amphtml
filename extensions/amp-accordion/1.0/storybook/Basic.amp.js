@@ -18,7 +18,7 @@ export default {
 export const _default = (args) => {
   return (
     <main>
-      <amp-accordion id="accordion" {...args}>
+      <amp-accordion style={{background: 'red'}} id="accordion" {...args}>
         <section id="section1">
           <h2>Section 1</h2>
           <div>Puppies are cute.</div>

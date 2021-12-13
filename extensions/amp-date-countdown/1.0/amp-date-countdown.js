@@ -5,9 +5,9 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
-import {BaseElement} from './base-element';
+import {dev, userAssert} from '#utils/log';
 
-import {dev, userAssert} from '../../../src/log';
+import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

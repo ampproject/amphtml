@@ -1,4 +1,7 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 
@@ -6,11 +9,12 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox-gallery';
@@ -37,12 +41,12 @@ class AmpLightboxGallery extends BaseElement {
     this.registerApiAction(
       DEFAULT_ACTION,
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     this.registerApiAction(
       'open',
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     return super.init();
   }

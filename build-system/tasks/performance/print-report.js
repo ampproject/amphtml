@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
-const {cyan} = require('../../common/colors');
+const {cyan} = require('kleur/colors');
 const {percent, trimmedMean} = require('./stats');
 
 const HEADER_COLUMN = 26;

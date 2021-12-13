@@ -7,7 +7,7 @@ import {
   setupAMPCors,
   setupInit,
   setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
+} from '#utils/xhr-utils';
 
 describes.sandboxed('utils/xhr-utils', {}, (env) => {
   describe('setupAMPCors', () => {

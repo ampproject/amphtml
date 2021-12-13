@@ -1,10 +1,10 @@
 import * as Preact from '#preact';
-import {Sidebar, SidebarToolbar} from '../component';
+import {BentoSidebar, BentoSidebarToolbar} from '../component';
 import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'Sidebar',
-  component: Sidebar,
+  component: BentoSidebar,
   decorators: [withKnobs],
 };
 
@@ -12,13 +12,13 @@ export default {
  * @param {!Object} props
  * @return {*}
  */
-function SidebarWithActions(props) {
+function BentoSidebarWithActions(props) {
   // TODO(#30447): replace imperative calls with "button" knobs when the
   // Storybook 6.1 is released.
   const ref = Preact.useRef();
   return (
     <>
-      <Sidebar ref={ref} {...props}>
+      <BentoSidebar ref={ref} {...props}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
@@ -34,7 +34,7 @@ function SidebarWithActions(props) {
           <button onClick={() => ref.current.close()}>close</button>
           {props.children}
         </div>
-      </Sidebar>
+      </BentoSidebar>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.toggle()}>toggle</button>
         <button onClick={() => ref.current.open()}>open</button>
@@ -54,7 +54,7 @@ export const _default = () => {
 
   return (
     <main>
-      <SidebarWithActions
+      <BentoSidebarWithActions
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
@@ -73,18 +73,21 @@ export const toolbar = () => {
 
   return (
     <main>
-      <SidebarWithActions
+      <BentoSidebarWithActions
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
       >
-        <SidebarToolbar toolbar={toolbarMedia} toolbarTarget="toolbar-target">
+        <BentoSidebarToolbar
+          toolbar={toolbarMedia}
+          toolbarTarget="toolbar-target"
+        >
           <ul>
             <li>Toolbar Item 1</li>
             <li>Toolbar Item 2</li>
           </ul>
-        </SidebarToolbar>
-      </SidebarWithActions>
+        </BentoSidebarToolbar>
+      </BentoSidebarWithActions>
       <div id="toolbar-target"></div>
     </main>
   );
@@ -97,11 +100,11 @@ export const scroll = () => {
   const backgroundColor = color('background');
   const backdropColor = color('backdrop color');
   const moreBackgroundContent = boolean('more background content', false);
-  const moreSidebarContent = boolean('more sidebar content', false);
+  const moreBentoSidebarContent = boolean('more sidebar content', false);
 
   return (
     <main>
-      <SidebarWithActions
+      <BentoSidebarWithActions
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
@@ -239,7 +242,7 @@ export const scroll = () => {
           )
         }
       >
-        {moreSidebarContent && (
+        {moreBentoSidebarContent && (
           <>
             <p>
               Dessert tootsie roll marzipan pastry. Powder powder jelly beans
@@ -368,7 +371,7 @@ export const scroll = () => {
             </p>
           </>
         )}
-      </SidebarWithActions>
+      </BentoSidebarWithActions>
     </main>
   );
 };

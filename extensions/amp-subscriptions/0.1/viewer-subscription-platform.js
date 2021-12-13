@@ -3,7 +3,7 @@ import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig as PageConfigInterface} from '#third_party/subscriptions-project/config';
 import {Services} from '#service';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';

@@ -1,16 +1,17 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {dict} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-selector-1.0.css';
-import {createCustomEvent} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';
@@ -51,7 +52,7 @@ class AmpSelector extends BaseElement {
   /** @override */
   triggerEvent(element, eventName, detail) {
     const event = createCustomEvent(
-      toWin(element.ownerDocument.defaultView),
+      getWin(element),
       `amp-selector.${eventName}`,
       detail
     );
@@ -59,7 +60,7 @@ class AmpSelector extends BaseElement {
       element,
       eventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(element, eventName, detail);

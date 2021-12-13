@@ -1,6 +1,6 @@
 import {loadScript, validateData} from '#3p/3p';
 import {parseJson} from '#core/types/object/json';
-import {user} from '../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'PROMOTEIQ';
 const mandatoryDataFields = ['src', 'params', 'sfcallback'];

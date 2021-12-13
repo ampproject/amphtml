@@ -8,7 +8,10 @@ import {
 } from '#service/history-impl';
 import {installTimerService} from '#service/timer-impl';
 
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
+
+import {FakePerformance} from '#testing/fake-dom';
+
 import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.fakeWin(
@@ -321,6 +324,7 @@ describes.sandboxed('Window - History', {}, (env) => {
           'https://cdn.ampproject.org/c/s/www.example.com/path'
         ),
         addEventListener: () => null,
+        performance: new FakePerformance(window),
       };
       ampdoc = new AmpDocSingle(win);
       installHistoryServiceForDoc(ampdoc);

@@ -1,10 +1,10 @@
 import '../amp-sidebar';
 import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {toggleExperiment} from '#experiments';
-import {waitFor, whenCalled} from '#testing/test-helper';
+import {waitFor, whenCalled} from '#testing/helpers/service';
 import {Services} from '#service/';
 
 describes.realWin(
@@ -43,7 +43,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,

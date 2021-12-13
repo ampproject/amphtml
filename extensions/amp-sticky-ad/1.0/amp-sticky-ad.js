@@ -1,6 +1,6 @@
 import {addExperimentIdToElement} from '#ads/google/a4a/traffic-experiments';
 
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {realChildElements} from '#core/dom/query';
@@ -15,8 +15,9 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
-import {dev, user, userAssert} from '../../../src/log';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -104,7 +105,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
-    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad-v2')) {
+    if (!isExperimentOn(this.win, 'amp-sticky-ad-to-amp-ad-v4')) {
       return null;
     }
 
@@ -119,7 +120,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     const adType = (ad.getAttribute('type') || '').toLowerCase();
     if (adType == 'doubleclick' || adType == 'adsense') {
-      addExperimentIdToElement(enableConversion ? '31062372' : '31062371', ad);
+      addExperimentIdToElement(enableConversion ? '31063204' : '31063203', ad);
     }
 
     if (!enableConversion) {
@@ -130,10 +131,13 @@ class AmpStickyAd extends AMP.BaseElement {
     }
 
     ad.setAttribute('sticky', 'bottom');
-    this.element.parentElement.replaceChild(ad, this.element);
+
+    // Rebuild the ad element since the attributes have changed
+    const newAd = ad.cloneNode();
+    this.element.parentElement.replaceChild(newAd, this.element);
     return Services.extensionsFor(this.win)
       .loadElementClass('amp-ad', '0.1')
-      .then((AmpAd) => new AmpAd(ad));
+      .then((AmpAd) => new AmpAd(newAd));
   }
 
   /** @override */
@@ -237,7 +241,7 @@ class AmpStickyAd extends AMP.BaseElement {
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
     const signals = ad.signals();
-    return signals.whenSignal(CommonSignals.RENDER_START).then(() => {
+    return signals.whenSignal(CommonSignals_Enum.RENDER_START).then(() => {
       let backgroundColor;
       return this.measureElement(() => {
         backgroundColor = computedStyle(this.win, this.element)[

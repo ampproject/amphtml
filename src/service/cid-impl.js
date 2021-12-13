@@ -18,12 +18,13 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {CacheCidApi} from './cache-cid-api';
-import {GoogleCidApi, TokenStatus} from './cid-api';
+import {GoogleCidApi, TokenStatus_Enum} from './cid-api';
 import {ViewerCidApi} from './viewer-cid-api';
 
 import {getCookie, setCookie} from '../cookies';
-import {dev, user, userAssert} from '../log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -236,7 +237,7 @@ class Cid {
       const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {
         return this.cidApi_.getScopedCid(apiKey, scope).then((scopedCid) => {
-          if (scopedCid == TokenStatus.OPT_OUT) {
+          if (scopedCid == TokenStatus_Enum.OPT_OUT) {
             return null;
           }
           if (scopedCid) {

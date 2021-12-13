@@ -6,10 +6,11 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {AccessClientAdapter} from './amp-access-client';
 
 import {fetchDocument} from '../../../src/document-fetcher';
-import {dev, devAssert} from '../../../src/log';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 
 /** @const {string} */

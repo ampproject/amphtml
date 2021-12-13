@@ -1,18 +1,18 @@
 import {playIgnoringError} from '#core/dom/video';
-import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
-import {ActionTrust} from '#core/constants/action-constants';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
+import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {
-  LayoutPriority,
+  LayoutPriority_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
-import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {user, userAssert} from '../../../src/log';
+import {createCustomEvent, getData, listen} from '#utils/event-helper';
+import {user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {getConsentDataToForward} from '../../../src/consent';
@@ -337,7 +337,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.isTrackingFrame_) {
       if (
         !this.getAmpDoc().registerSingleton(
-          AMPDOC_SINGLETON_NAME.TRACKING_IFRAME
+          AMPDOC_SINGLETON_NAME_ENUM.TRACKING_IFRAME
         )
       ) {
         console /*OK*/
@@ -424,9 +424,13 @@ export class AmpIframe extends AMP.BaseElement {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
-    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
-      this.sendConsentData_(source, origin);
-    });
+    listenFor(
+      iframe,
+      MessageType_Enum.SEND_CONSENT_DATA,
+      (data, source, origin) => {
+        this.sendConsentData_(source, origin);
+      }
+    );
 
     this.container_.appendChild(iframe);
 
@@ -493,7 +497,7 @@ export class AmpIframe extends AMP.BaseElement {
           Object.assign(
             dict({
               'sentinel': 'amp',
-              'type': MessageType.CONSENT_DATA,
+              'type': MessageType_Enum.CONSENT_DATA,
             }),
             consents
           )
@@ -544,10 +548,10 @@ export class AmpIframe extends AMP.BaseElement {
   /** @override  */
   getLayoutPriority() {
     if (this.isAdLike_) {
-      return LayoutPriority.ADS; // See AmpAd3PImpl.
+      return LayoutPriority_Enum.ADS; // See AmpAd3PImpl.
     }
     if (this.isTrackingFrame_) {
-      return LayoutPriority.METADATA;
+      return LayoutPriority_Enum.METADATA;
     }
     return super.getLayoutPriority();
   }
@@ -776,7 +780,12 @@ export class AmpIframe extends AMP.BaseElement {
         dict({'data': sanitized})
       );
       const actionService = Services.actionServiceForDoc(this.element);
-      actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
+      actionService.trigger(
+        this.element,
+        'message',
+        event,
+        ActionTrust_Enum.HIGH
+      );
     };
     // TODO(choumx): Consider using global listener in iframe-helper.
     this.win.addEventListener('message', listener);

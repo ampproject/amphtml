@@ -1,11 +1,11 @@
 import * as Preact from '#preact';
-import {Lightbox} from '../component';
+import {BentoLightbox} from '../component';
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 import {useRef} from '#preact';
 
 export default {
   title: 'Lightbox',
-  component: Lightbox,
+  component: BentoLightbox,
   decorators: [withKnobs],
 };
 
@@ -13,11 +13,11 @@ export default {
  * @param {!Object} props
  * @return {*}
  */
-function LightboxWithActions({children, ...rest}) {
+function BentoLightboxWithActions({children, ...rest}) {
   const ref = useRef();
   return (
     <section>
-      <Lightbox
+      <BentoLightbox
         closeButtonAs={(props) => (
           <button {...props} aria-label="My custom close button">
             close
@@ -27,7 +27,7 @@ function LightboxWithActions({children, ...rest}) {
         {...rest}
       >
         {children}
-      </Lightbox>
+      </BentoLightbox>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.open()}>open</button>
       </div>
@@ -160,7 +160,7 @@ export const _default = () => {
   const color = text('font color', '');
   return (
     <div>
-      <LightboxWithActions
+      <BentoLightboxWithActions
         id="lightbox"
         animation={animation}
         style={{backgroundColor, color}}
@@ -169,7 +169,7 @@ export const _default = () => {
           Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
           aeque inermis reprehendunt.
         </p>
-      </LightboxWithActions>
+      </BentoLightboxWithActions>
     </div>
   );
 };
@@ -186,7 +186,7 @@ export const scrollable = () => {
   const lotsOfText = boolean('lots of text?', true);
   return (
     <div>
-      <LightboxWithActions
+      <BentoLightboxWithActions
         id="lightbox"
         animation={animation}
         style={{backgroundColor, color}}
@@ -321,7 +321,7 @@ export const scrollable = () => {
             </p>
           </>
         )}
-      </LightboxWithActions>
+      </BentoLightboxWithActions>
     </div>
   );
 };

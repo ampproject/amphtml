@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
@@ -12,12 +12,13 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
+import {listen} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {ViewerInterface} from './viewer-interface';
 
 import {urls} from '../config';
 import {reportError} from '../error-reporting';
-import {listen} from '../event-helper';
-import {dev, devAssert} from '../log';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
   getSourceOrigin,
@@ -30,7 +31,7 @@ import {
 const TAG_ = 'Viewer';
 
 /** @enum {string} */
-export const Capability = {
+export const Capability_Enum = {
   VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
 };
 
@@ -518,17 +519,17 @@ export class ViewerImpl {
       return;
     }
 
-    devAssert(isEnumValue(VisibilityState, state));
+    devAssert(isEnumValue(VisibilityState_Enum, state));
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the
     // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
     // INACTIVE, though we know better.
-    if (state === VisibilityState.HIDDEN) {
+    if (state === VisibilityState_Enum.HIDDEN) {
       state =
         this.ampdoc.getLastVisibleTime() != null
-          ? VisibilityState.INACTIVE
-          : VisibilityState.PRERENDER;
+          ? VisibilityState_Enum.INACTIVE
+          : VisibilityState_Enum.PRERENDER;
     }
 
     this.ampdoc.overrideVisibilityState(state);
@@ -759,6 +760,11 @@ export class ViewerImpl {
   }
 
   /** @override */
+  maybeGetMessageDeliverer() {
+    return this.messageDeliverer_;
+  }
+
+  /** @override */
   sendMessage(eventType, data, cancelUnsent = false) {
     this.sendMessageInternal_(eventType, data, cancelUnsent, false);
   }
@@ -891,13 +897,13 @@ export class ViewerImpl {
    * made visible by the viewer.
    */
   visibleOnUserAction_() {
-    if (this.ampdoc.getVisibilityState() == VisibilityState.VISIBLE) {
+    if (this.ampdoc.getVisibilityState() == VisibilityState_Enum.VISIBLE) {
       return;
     }
     const unlisten = [];
     const doUnlisten = () => unlisten.forEach((fn) => fn());
     const makeVisible = () => {
-      this.setVisibilityState_(VisibilityState.VISIBLE);
+      this.setVisibilityState_(VisibilityState_Enum.VISIBLE);
       doUnlisten();
       dev().expectedError(TAG_, 'Received user action in non-visible doc');
     };

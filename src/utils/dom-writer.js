@@ -4,7 +4,7 @@ import {childElementsByTag} from '#core/dom/query';
 
 import {Services} from '#service';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs

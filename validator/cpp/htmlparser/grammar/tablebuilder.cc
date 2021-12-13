@@ -165,7 +165,7 @@ bool TableBuilder::OutputHeaderFile(
   fd << "// -*- C++ -*-\n";
 
   fd << "\n// AUTO GENERATED; DO NOT EDIT.\n";
-  fd << "// To regenerate this file, see comments in bin/jsongrammargen\n\n";
+  fd << "// To regenerate this file, see comments in bin/statetablegen\n\n";
   if (!header_options_.ifdef_guard.empty()) {
     fd << "#ifndef " << header_options_.ifdef_guard << "\n";
     fd << "#define " << header_options_.ifdef_guard << "\n\n";

@@ -1,6 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 
 /**

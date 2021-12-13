@@ -1,5 +1,5 @@
-import {CONSTANTS, MessageType} from '#core/3p-frame-messaging';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CONSTANTS, MessageType_Enum} from '#core/3p-frame-messaging';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
 import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '#service';
@@ -10,9 +10,9 @@ import {
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {applyFillContent} from '#core/dom/layout';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getHtml} from '#core/dom/get-html';
 import {isExperimentOn} from '#experiments';
 import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';
@@ -125,7 +125,7 @@ export class AmpAdXOriginIframeHandler {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
         this.iframe,
-        MessageType.SEND_POSITIONS,
+        MessageType_Enum.SEND_POSITIONS,
         true,
         () => {
           // TODO(@zhouyx): Make sendPosition_ only send to
@@ -141,7 +141,7 @@ export class AmpAdXOriginIframeHandler {
       this.element_.creativeId = info.data['id'];
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_HTML, (payload) => {
+    this.handleOneTimeRequest_(MessageType_Enum.GET_HTML, (payload) => {
       const selector = payload['selector'];
       const attributes = payload['attributes'];
       let content = '';
@@ -151,7 +151,7 @@ export class AmpAdXOriginIframeHandler {
       return Promise.resolve(content);
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
+    this.handleOneTimeRequest_(MessageType_Enum.GET_CONSENT_STATE, () => {
       return this.baseInstance_.getConsentState().then((consentState) => {
         return {consentState};
       });
@@ -195,21 +195,6 @@ export class AmpAdXOriginIframeHandler {
       )
     );
 
-    if (this.uiHandler_.isStickyAd()) {
-      setStyle(iframe, 'pointer-events', 'none');
-      this.unlisteners_.push(
-        listenFor(
-          this.iframe,
-          'signal-interactive',
-          () => {
-            setStyle(iframe, 'pointer-events', 'auto');
-          },
-          true,
-          true
-        )
-      );
-    }
-
     this.unlisteners_.push(
       this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
         this.sendEmbedInfo_(this.inViewport_);
@@ -219,7 +204,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       listenFor(
         this.iframe,
-        MessageType.USER_ERROR_IN_IFRAME,
+        MessageType_Enum.USER_ERROR_IN_IFRAME,
         (data) => {
           this.userErrorForAnalytics_(
             data['message'],
@@ -288,11 +273,13 @@ export class AmpAdXOriginIframeHandler {
     // Wait for initial load signal. Notice that this signal is not
     // used to resolve the final layout promise because iframe may still be
     // consuming significant network and CPU resources.
-    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
-      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
-      // received here as well.
-      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
-    });
+    listenForOncePromise(this.iframe, CommonSignals_Enum.INI_LOAD, true).then(
+      () => {
+        // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
+        // received here as well.
+        this.baseInstance_.signals().signal(CommonSignals_Enum.INI_LOAD);
+      }
+    );
 
     this.element_.appendChild(this.iframe);
     if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
@@ -472,7 +459,7 @@ export class AmpAdXOriginIframeHandler {
             } else {
               this.lastRejectedResizeTime_ = 0;
             }
-            this.uiHandler_.onResizeSuccess();
+            this.uiHandler_.adjustPadding();
             this.sendEmbedSizeResponse_(
               info.success,
               id,
@@ -570,7 +557,7 @@ export class AmpAdXOriginIframeHandler {
     this.sendPositionPending_ = true;
     this.getIframePositionPromise_().then((position) => {
       this.sendPositionPending_ = false;
-      this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
     });
   }
 
@@ -589,7 +576,7 @@ export class AmpAdXOriginIframeHandler {
           this.win_,
           () => {
             this.getIframePositionPromise_().then((position) => {
-              this.inaboxPositionApi_.send(MessageType.POSITION, position);
+              this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
             });
           },
           MIN_INABOX_POSITION_EVENT_INTERVAL
@@ -599,7 +586,7 @@ export class AmpAdXOriginIframeHandler {
     this.unlisteners_.push(
       this.viewport_.onResize(() => {
         this.getIframePositionPromise_().then((position) => {
-          this.inaboxPositionApi_.send(MessageType.POSITION, position);
+          this.inaboxPositionApi_.send(MessageType_Enum.POSITION, position);
         });
       })
     );

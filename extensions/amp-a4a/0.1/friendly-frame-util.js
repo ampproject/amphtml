@@ -41,6 +41,9 @@ export function renderCreativeIntoFriendlyFrame(
         'allowfullscreen': '',
         'allowtransparency': '',
         'scrolling': 'no',
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     )
   );

@@ -1,3 +1,4 @@
+import {propagateNonce} from '#core/dom';
 import * as mode from '#core/mode';
 
 import {urls} from '../config';
@@ -120,12 +121,7 @@ export function createExtensionScript(win, extensionId, version) {
   if (mode.isEsm()) {
     scriptElement.setAttribute('type', 'module');
   }
-
-  // Propagate nonce to all generated script tags.
-  const currentScript = win.document.head.querySelector('script[nonce]');
-  if (currentScript) {
-    scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
-  }
+  propagateNonce(win.document, scriptElement);
 
   // Allow error information to be collected
   // https://github.com/ampproject/amphtml/issues/7353
@@ -197,7 +193,7 @@ export function getExtensionScripts(
 /**
  * Get list of all the extension JS files.
  * @param {HTMLHeadElement|Element|ShadowRoot|Document} head
- * @return {!Array<{extensionId: string, extensionVersion: string}>}
+ * @return {!Array<{script: HTMLScriptElement, extensionId: string, extensionVersion: string}>}
  */
 export function extensionScriptsInNode(head) {
   // ampdoc.getHeadNode() can return null.
@@ -216,9 +212,12 @@ export function extensionScriptsInNode(head) {
       script.getAttribute('custom-element') ||
       script.getAttribute('custom-template');
     const urlParts = parseExtensionUrl(script.src);
-    // TODO: register error handler
     if (extensionId && urlParts) {
-      scripts.push({extensionId, extensionVersion: urlParts.extensionVersion});
+      scripts.push({
+        script,
+        extensionId,
+        extensionVersion: urlParts.extensionVersion,
+      });
     }
   }
   return scripts;

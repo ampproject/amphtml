@@ -1,7 +1,7 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 import {loadScript} from '#3p/3p';
@@ -549,7 +549,7 @@ function onImaLoadSuccess(global, data) {
     requestAds();
   } else {
     // Let amp-ima-video know that we are done set-up.
-    postMessage({event: VideoEvents.LOAD});
+    postMessage({event: VideoEvents_Enum.LOAD});
   }
 }
 
@@ -564,7 +564,7 @@ function onImaLoadFail() {
     showControlsThrottled
   );
   imaLoadAllowed = false;
-  postMessage({event: VideoEvents.LOAD});
+  postMessage({event: VideoEvents_Enum.LOAD});
 }
 
 /**
@@ -688,8 +688,8 @@ export function onContentEnded() {
     toggle(elements['overlayButton'], true);
   }
 
-  postMessage({event: VideoEvents.PAUSE});
-  postMessage({event: VideoEvents.ENDED});
+  postMessage({event: VideoEvents_Enum.PAUSE});
+  postMessage({event: VideoEvents_Enum.ENDED});
 }
 
 /**
@@ -737,7 +737,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  postMessage({event: VideoEvents.LOAD});
+  postMessage({event: VideoEvents_Enum.LOAD});
 }
 
 /**
@@ -750,7 +750,7 @@ export function onAdsLoaderError() {
   // Send this message to trigger auto-play for failed pre-roll requests -
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
-  postMessage({event: VideoEvents.LOAD});
+  postMessage({event: VideoEvents_Enum.LOAD});
   addHoverEventToElement(
     /** @type {!Element} */ (elements['video']),
     showControlsThrottled
@@ -766,7 +766,7 @@ export function onAdsLoaderError() {
  * @visibleForTesting
  */
 export function onAdError() {
-  postMessage({event: VideoEvents.AD_END});
+  postMessage({event: VideoEvents_Enum.AD_END});
   currentAd = null;
   if (adsManager) {
     adsManager.destroy();
@@ -824,7 +824,7 @@ export function onContentPauseRequested(global) {
   }
   adsActive = true;
   playerState = PlayerStates.PLAYING;
-  postMessage({event: VideoEvents.AD_START});
+  postMessage({event: VideoEvents_Enum.AD_START});
   toggle(elements['adContainer'], true);
   showAdControls();
 
@@ -849,7 +849,7 @@ export function onContentResumeRequested() {
     /** @type {!Element} */ (video),
     showControlsThrottled
   );
-  postMessage({event: VideoEvents.AD_END});
+  postMessage({event: VideoEvents_Enum.AD_END});
   resetControlsAfterAd();
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
@@ -1096,7 +1096,7 @@ export function playVideo() {
     video.play();
   }
   playerState = PlayerStates.PLAYING;
-  postMessage({event: VideoEvents.PLAYING});
+  postMessage({event: VideoEvents_Enum.PLAYING});
   toggleRootDataAttribute('playing', true);
 }
 
@@ -1121,7 +1121,7 @@ export function pauseVideo(event = null) {
     }
   }
   playerState = PlayerStates.PAUSED;
-  postMessage({event: VideoEvents.PAUSE});
+  postMessage({event: VideoEvents_Enum.PAUSE});
   toggleRootDataAttribute('playing', false);
 }
 
@@ -1168,7 +1168,9 @@ export function toggleMuted(video, muted) {
     muteAdsManagerOnLoaded = muted;
   }
   toggleRootDataAttribute('muted', muted);
-  postMessage({event: muted ? VideoEvents.MUTED : VideoEvents.UNMUTED});
+  postMessage({
+    event: muted ? VideoEvents_Enum.MUTED : VideoEvents_Enum.UNMUTED,
+  });
 }
 
 /**
@@ -1622,10 +1624,10 @@ export function setConsentStateForTesting(newConsentState) {
  *
  * Copied from src/video-interface.js.
  *
- * @const {!Object<string, string>}
+ * @enum {string}
  */
 // TODO(aghassemi, #9216): Use video-interface.js
-const VideoEvents = {
+const VideoEvents_Enum = {
   /**
    * load
    *

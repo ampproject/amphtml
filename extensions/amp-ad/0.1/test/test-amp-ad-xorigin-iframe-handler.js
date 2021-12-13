@@ -43,7 +43,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
     };
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
-    adImpl.uiHandler.onResizeSuccess = env.sandbox.spy();
+    adImpl.uiHandler.adjustPadding = env.sandbox.spy();
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
     testIndex++;
 
@@ -445,7 +445,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.adjustPadding).to.be.called;
         });
     });
 
@@ -471,7 +471,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.adjustPadding).to.be.called;
         });
     });
 

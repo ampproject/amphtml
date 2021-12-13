@@ -8,7 +8,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, red} = require('./colors');
+const {cyan, red} = require('kleur/colors');
 const {exec} = require('./exec');
 const {gitDiffColor, gitDiffNameOnly} = require('./git');
 const {log, logWithoutTimestamp} = require('./logging');
@@ -27,7 +27,7 @@ function runNpmChecks(dir = '.') {
   const packageLockFile = path.join(relativeDir, 'package-lock.json');
 
   // Check the lockfile version.
-  if (fs.readJsonSync(packageLockFile).lockfileVersion != 1) {
+  if (fs.readJsonSync(packageLockFile).lockfileVersion != 2) {
     log(
       red('ERROR:'),
       cyan(packageLockFile),

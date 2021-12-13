@@ -125,7 +125,7 @@
   width: 16px !important;
   top: 3px !important;
   right: -20px !important;
-  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="rgba(0, 0, 0, 0.87)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgba(0, 0, 0, 0.87)"><path d="M10 6 8.6 7.4l4.6 4.6-4.6 4.6L10 18l6-6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')
       center center no-repeat !important;
 }
 

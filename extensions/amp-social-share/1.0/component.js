@@ -1,29 +1,29 @@
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import * as Preact from '#preact';
 import {Wrapper} from '#preact/component';
-import {useResourcesNotify} from '#preact/utils';
+import {propName, useResourcesNotify} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 import {getSocialConfig} from './social-share-config';
-import {SocialShareIcon} from './social-share-svgs';
+import {BentoSocialShareIcon} from './social-share-svgs';
 
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {addParamsToUrl} from '../../../src/url';
 
-const NAME = 'SocialShare';
+const NAME = 'BentoSocialShare';
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
 const DEFAULT_TARGET = '_blank';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!SocialShareDef.Props} props
+ * @param {!BentoSocialShareDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare({
+export function BentoSocialShare({
   background,
   children,
   color,
@@ -31,10 +31,10 @@ export function SocialShare({
   height,
   params,
   style,
-  tabIndex = 0,
   target,
   type,
   width,
+  [propName('tabIndex')]: tabIndex = 0,
   ...rest
 }) {
   useResourcesNotify();
@@ -101,7 +101,7 @@ function processChildren(type, children, color, background) {
       'backgroundColor': background || typeConfig.defaultBackgroundColor,
     });
     return (
-      <SocialShareIcon
+      <BentoSocialShareIcon
         style={{
           ...iconStyle,
           width: '100%',
@@ -141,15 +141,36 @@ function checkProps(type, endpoint, target, width, height, params) {
     return null;
   }
 
+  // TODO: This logic might be duplicated in the AMP component
+  // https://github.com/ampproject/amphtml/issues/36777
+  const currentParams = Object.entries(typeConfig.defaultParams || {}).reduce(
+    (newParams, [key, value]) => {
+      if (newParams[key]) {
+        return newParams;
+      }
+      return {
+        ...newParams,
+        [key]: value
+          .replace('TITLE', document.title)
+          .replace(
+            'CANONICAL_URL',
+            document.querySelector("link[rel='canonical']")?.href ||
+              location.href
+          ),
+      };
+    },
+    params || {}
+  );
+
   // Special case when type is 'email'
   if (type === 'email' && !endpoint) {
-    baseEndpoint = `mailto:${(params && params['recipient']) || ''}`;
+    baseEndpoint = `mailto:${currentParams['recipient'] || ''}`;
   }
 
   // Add params to baseEndpoint
   const finalEndpoint = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),
-    /** @type {!JsonObject} */ (params)
+    /** @type {!JsonObject} */ (currentParams)
   );
 
   // Defaults
@@ -241,7 +262,7 @@ function isIos() {
  */
 function handleKeyPress(event, finalEndpoint, target) {
   const {key} = event;
-  if (key == Keys.SPACE || key == Keys.ENTER) {
+  if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
     event.preventDefault();
     handleActivation(finalEndpoint, target);
   }

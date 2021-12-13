@@ -1,3 +1,4 @@
+import {isAmp4Email} from '#core/document/format';
 import {dict} from '#core/types/object';
 
 import {
@@ -11,10 +12,10 @@ import {
   isValidAttr,
 } from '#purifier/sanitation';
 
+import {user} from '#utils/log';
+
 import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
 
-import {isAmp4Email} from './format';
-import {user} from './log';
 import {rewriteAttributeValue} from './url-rewrite';
 
 /** @private @const {string} */

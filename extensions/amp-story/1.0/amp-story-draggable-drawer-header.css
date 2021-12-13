@@ -17,14 +17,14 @@
   --i-amphtml-draggable-drawer-text-color: #202125 !important;
   --i-amphtml-draggable-drawer-handle-color: rgba(0, 0, 0, .2) !important;
   --i-amphtml-draggable-drawer-header-font-family: 'Roboto', sans-serif !important;
-  --i-amphtml-draggable-drawer-header-font-size: 14px !important;
+  --i-amphtml-draggable-drawer-header-font-size: 18px !important;
   --i-amphtml-draggable-drawer-header-title-height: 44px !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
 }
 
 .i-amphtml-story-draggable-drawer-header.i-amphtml-story-page-attachment-with-form {
   /* Additional space upon which the domain label can appear in an absolute position. */
-  padding-bottom: 50px !important;
+  padding-bottom: 40px !important;
 }
 
 /* Draggable handle UI */
@@ -54,7 +54,7 @@
   width: 14px !important;
   height: 14px !important;
   background-origin: content-box !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="rgba(0, 0, 0, .4)" viewBox="0 0 14 14"><path d="M13.295 2.115a.997.997 0 10-1.41-1.41L7 5.59 2.115.705a.997.997 0 10-1.41 1.41L5.59 7 .705 11.885a.997.997 0 101.41 1.41L7 8.41l4.885 4.885a.997.997 0 101.41-1.41L8.41 7l4.885-4.885z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="rgba(0, 0, 0, .4)" viewBox="0 0 14 14"><path d="M13.3 2.1A1 1 0 1 0 11.9.7L7 5.6 2.1.7A1 1 0 1 0 .7 2.1L5.6 7 .7 11.9a1 1 0 1 0 1.4 1.4L7 8.4l4.9 4.9a1 1 0 1 0 1.4-1.4L8.4 7l4.9-4.9z"/></svg>') !important;
   background-repeat: no-repeat !important;
   cursor: pointer !important;
   margin-inline-start: auto !important; /* RTL support */
@@ -65,7 +65,7 @@
 }
 
 [theme="dark"] .i-amphtml-story-page-attachment-close-button {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="rgba(255, 255, 255, .4)" viewBox="0 0 14 14"><path d="M13.295 2.115a.997.997 0 10-1.41-1.41L7 5.59 2.115.705a.997.997 0 10-1.41 1.41L5.59 7 .705 11.885a.997.997 0 101.41 1.41L7 8.41l4.885 4.885a.997.997 0 101.41-1.41L8.41 7l4.885-4.885z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="rgba(255, 255, 255, .4)" viewBox="0 0 14 14"><path d="M13.3 2.1A1 1 0 1 0 11.9.7L7 5.6 2.1.7A1 1 0 1 0 .7 2.1L5.6 7 .7 11.9a1 1 0 1 0 1.4 1.4L7 8.4l4.9 4.9a1 1 0 1 0 1.4-1.4L8.4 7l4.9-4.9z"/></svg>') !important;
 }
 
 .i-amphtml-story-page-attachment-domain-label {
@@ -73,13 +73,15 @@
   color: var(--i-amphtml-draggable-drawer-text-color) !important;
   display: block !important;
   font-family: var(--i-amphtml-draggable-drawer-header-font-family) !important;
-  font-size: var(--i-amphtml-draggable-drawer-header-font-size) !important;
+  font-size: calc(var(--i-amphtml-draggable-drawer-header-font-size) - 3px) !important;
+  font-weight: 300 !important;
   overflow: hidden !important;
   position: absolute !important;
   text-align: center !important;
   text-overflow: ellipsis !important;
-  top: var(--i-amphtml-draggable-drawer-header-title-height) !important;
+  top: 35px !important;
   white-space: nowrap !important;
+  width: calc(100% - 112px) !important;
 }
 
 .i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
@@ -112,6 +114,7 @@
   width: calc(100% - 80px) !important;
   color: var(--i-amphtml-draggable-drawer-text-color) !important;
   font-size: var(--i-amphtml-draggable-drawer-header-font-size) !important;
+  font-weight: 500 !important;
   line-height: 40px !important;
   overflow: hidden !important;
   text-align: center !important;

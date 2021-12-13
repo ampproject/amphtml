@@ -1,10 +1,10 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
@@ -195,7 +195,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
         this.element,
         'timeout',
         null,
-        ActionTrust.LOW
+        ActionTrust_Enum.LOW
       );
       this.win.clearInterval(this.countDownTimer_);
     }

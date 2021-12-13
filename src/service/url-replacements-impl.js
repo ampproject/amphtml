@@ -5,6 +5,8 @@ import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {Expander} from './url-expander/expander';
 import {
   AsyncResolverDef,
@@ -17,7 +19,6 @@ import {
 } from './variable-source';
 
 import {getTrackImpressionPromise} from '../impression';
-import {dev, devAssert, user, userAssert} from '../log';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
@@ -463,7 +464,11 @@ export class GlobalVariableSource extends VariableSource {
       (variable) =>
         win.navigator?.userAgentData
           ?.getHighEntropyValues([variable])
-          ?.then((values) => values[variable]) || Promise.resolve('')
+          ?.then((values) =>
+            typeof values[variable] !== 'object'
+              ? values[variable]
+              : JSON.stringify(values[variable])
+          ) || Promise.resolve('')
     );
 
     // Returns the time it took to load the whole page. (excludes amp-* elements

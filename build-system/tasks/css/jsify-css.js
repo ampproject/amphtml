@@ -1,7 +1,8 @@
 'use strict';
 
+const cssImports = require('css-imports');
 const cssnano = require('cssnano');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
@@ -11,7 +12,7 @@ const {
   md5,
 } = require('../../common/transform-cache');
 const {log} = require('../../common/logging');
-const {red} = require('../../common/colors');
+const {red} = require('kleur/colors');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const browsersList = {
@@ -40,7 +41,7 @@ const cssNanoDefaultOptions = {
   reduceInitial: false,
   zindex: false,
   svgo: {
-    encode: true,
+    encode: false,
   },
 };
 
@@ -99,11 +100,35 @@ async function transformCssString(contents, opt_filename) {
  */
 async function jsifyCssAsync(filename) {
   const {contents, hash: filehash} = await batchedRead(filename);
-  const hash = md5(filehash, await getEnvironmentHash());
+  const imports = await getCssImports(filename);
+  const importHashes = await Promise.all(
+    imports.map(async (importedFile) => (await batchedRead(importedFile)).hash)
+  );
+  const hash = md5(filehash, ...importHashes, await getEnvironmentHash());
   const result = await transformCss(contents, hash, filename);
 
   result.warnings.forEach((warn) => log(red(warn)));
   return result.css + '\n/*# sourceURL=/' + filename + '*/';
+}
+
+/**
+ * Computes the transitive closure of CSS files imported by the given file.
+ * @param {string} cssFile
+ * @return {Promise<!Array<string>>}
+ */
+async function getCssImports(cssFile) {
+  const contents = await fs.readFile(cssFile);
+  const topLevelImports = cssImports(contents)
+    .map((result) => result.path)
+    .filter((importedFile) => !importedFile.startsWith('http'))
+    .map((importedFile) => path.join(path.dirname(cssFile), importedFile));
+  if (topLevelImports.length == 0) {
+    return topLevelImports;
+  }
+  const nestedImports = await Promise.all(
+    topLevelImports.map(async (file) => await getCssImports(file))
+  );
+  return topLevelImports.concat(nestedImports).flat();
 }
 
 /**

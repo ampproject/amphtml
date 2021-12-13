@@ -1,11 +1,9 @@
 import * as Preact from '#preact';
-import {number, text, withKnobs} from '@storybook/addon-knobs';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
   title: 'amp-fit-text-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-fit-text', version: '1.0'}],
     experiments: ['bento'],
@@ -28,36 +26,32 @@ export const ScaleUpToCover = () => {
 
 ScaleUpToCover.storyName = 'Scale up to cover';
 
-export const ScaleUpOverflowEllipsis = () => {
-  const minFontSize = number('minFontSize', 42);
-  const content = text(
-    'content',
-    `
-        Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
-        aeque inermis reprehendunt.
-      `
-  );
+export const ScaleUpOverflowEllipsis = ({content, ...args}) => {
   return (
     <amp-fit-text
       width="300"
       height="200"
-      min-font-size={minFontSize}
-      style="border: 1px solid black;
-      display: block;"
+      style={{border: '1px solid black', display: 'block'}}
       dangerouslySetInnerHTML={{__html: content}}
+      {...args}
     />
   );
 };
 
-ScaleUpOverflowEllipsis.storyName = 'Scale up + overflow + ellipsis';
+ScaleUpOverflowEllipsis.args = {
+  'min-font-size': 42,
+  content: `
+    Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
+    aeque inermis reprehendunt.
+  `,
+};
 
 export const ScaleDown = () => {
   return (
     <amp-fit-text
       width="300"
       height="200"
-      style="border: 1px solid black;
-      display: block;"
+      style={{border: '1px solid black', display: 'block'}}
     >
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te
@@ -69,22 +63,17 @@ export const ScaleDown = () => {
   );
 };
 
-ScaleDown.storyName = 'Scale down';
-
 export const ScaleDownMore = () => {
   return (
     <amp-fit-text
       width="108"
       height="78"
-      style="border: 1px solid black;
-      display: block;"
+      style={{border: '1px solid black', display: 'block'}}
     >
       Superlongword text
     </amp-fit-text>
   );
 };
-
-ScaleDownMore.storyName = 'Scale down more';
 
 export const LayoutResponsive = () => {
   return (
@@ -95,7 +84,7 @@ export const LayoutResponsive = () => {
       <amp-fit-text
         width="100"
         height="100"
-        style="border: 1px solid black;"
+        style={{border: '1px solid black'}}
         layout="responsive"
         max-font-size="200"
       >
@@ -105,5 +94,3 @@ export const LayoutResponsive = () => {
     </div>
   );
 };
-
-LayoutResponsive.storyName = 'layout=responsive';

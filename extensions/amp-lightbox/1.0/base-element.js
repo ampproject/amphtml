@@ -1,5 +1,5 @@
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {Lightbox} from './component';
+import {BentoLightbox} from './component';
 import {PreactBaseElement} from '#preact/base-element';
 import {dict} from '#core/types/object';
 import {toggle} from '#core/dom/style';
@@ -59,7 +59,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = Lightbox;
+BaseElement['Component'] = BentoLightbox;
 
 /** @override */
 BaseElement['props'] = {

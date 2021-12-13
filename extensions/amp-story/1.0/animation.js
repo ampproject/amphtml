@@ -17,7 +17,7 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getChildJsonConfig} from '#core/dom';
 import {map, omit} from '#core/types/object';
@@ -27,8 +27,9 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {timeStrToMillis, unscaledClientRect} from './utils';
+import {isTransformed, timeStrToMillis, unscaledClientRect} from './utils';
 import {isExperimentOn} from '#experiments';
+import {isPreviewMode} from './embed-mode';
 
 const TAG = 'AMP-STORY';
 
@@ -400,7 +401,11 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      this.runner_.resume();
+      try {
+        this.runner_.resume();
+      } catch (e) {
+        // This fails when the story animations are not initialized and resume is called. Context on #35987.
+      }
     }
   }
 
@@ -541,10 +546,15 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    const firstPageAnimationDisabled =
+      isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
+      isPreviewMode(ampdoc.win) ||
+      isTransformed(ampdoc);
+
     /** @private @const {bool} */
     this.skipAnimations_ =
       prefersReducedMotion(ampdoc.win) ||
-      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+      (firstPageAnimationDisabled &&
         matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */

@@ -1,7 +1,7 @@
 import {isObject} from '#core/types';
 import {toArray} from '#core/types/array';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * Types of possibile mutations

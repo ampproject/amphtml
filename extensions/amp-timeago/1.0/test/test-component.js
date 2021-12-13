@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 import {BentoTimeago} from '../component';
 

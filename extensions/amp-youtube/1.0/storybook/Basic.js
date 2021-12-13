@@ -9,11 +9,11 @@ import {
   BentoAccordionHeader,
   BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
-import {Youtube} from '../component';
+import {BentoYoutube} from '../component';
 
 export default {
   title: 'YouTube',
-  component: Youtube,
+  component: BentoYoutube,
   decorators: [withKnobs],
 };
 
@@ -29,7 +29,7 @@ export const _default = () => {
   const params = object('params', {});
   const credentials = text('credentials', 'include');
   return (
-    <Youtube
+    <BentoYoutube
       autoplay={autoplay}
       loop={loop}
       videoid={videoid}
@@ -65,7 +65,7 @@ function WithStateTable({autoplay, credentials, loop, params, style, videoid}) {
 
   return (
     <>
-      <Youtube
+      <BentoYoutube
         ref={ref}
         autoplay={autoplay}
         loop={loop}
@@ -114,7 +114,7 @@ export const liveChannelId = () => {
   const params = object('params', {});
   const credentials = text('credentials', 'include');
   return (
-    <Youtube
+    <BentoYoutube
       autoplay={autoplay}
       loop={loop}
       liveChannelid={liveChannelid}
@@ -137,7 +137,7 @@ export const InsideAccordion = () => {
           <h2>Controls</h2>
         </BentoAccordionHeader>
         <BentoAccordionContent>
-          <Youtube
+          <BentoYoutube
             loop={true}
             videoid={videoid}
             params={params}
@@ -150,7 +150,7 @@ export const InsideAccordion = () => {
           <h2>Autoplay</h2>
         </BentoAccordionHeader>
         <BentoAccordionContent>
-          <Youtube
+          <BentoYoutube
             autoplay={true}
             loop={true}
             videoid={videoid}

@@ -1,4 +1,4 @@
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /**
  * When no matching index is found, whether to stop on the next or previous

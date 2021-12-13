@@ -1,5 +1,3 @@
-
-
 .i-amphtml-ad-overlay-container {
   align-items: center !important;
   display: flex !important;
@@ -18,7 +16,7 @@
   right: 0 !important;
 }
 
-.i-amphtml-ad-overlay-container[desktop-panels] {
+.i-amphtml-ad-overlay-container[desktop-fullbleed] {
   /* On desktop a story page has a with of 45vh. */
   left: calc(50vw - 22.5vh) !important;
   /* And a height of 75 vh. */
@@ -26,7 +24,7 @@
 }
 
 .i-amphtml-story-ad-badge-svg {
-  top: 50%  !important;
+  top: 50% !important;
   left: 50% !important;
   position: relative !important;
   transform: translate(-50%, -50%) !important;
@@ -44,11 +42,6 @@
   margin-right: 16px !important;
 }
 
-[ad-showing][desktop-panels] .i-amphtml-story-ad-badge {
-  /* Have to wait for page to slide in. */
-  transition: opacity 0.1s linear 0.3s;
-}
-
 [ad-showing] .i-amphtml-story-ad-badge {
   visibility: visible !important;
   opacity: 1 !important;
@@ -57,5 +50,7 @@
 .i-amphtml-ad-overlay-container[desktop-one-panel] {
   top: var(--i-amphtml-story-desktop-one-panel-responsive-margin) !important;
   /* Calculates position by factoring in page width. */
-  left: calc(50vw - var(--i-amphtml-story-desktop-one-panel-width) / 2) !important;
+  left: calc(
+    50vw - var(--i-amphtml-story-desktop-one-panel-width) / 2
+  ) !important;
 }

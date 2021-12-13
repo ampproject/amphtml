@@ -1,74 +1,66 @@
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
-  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
-import {dev, devAssert} from '../../../src/log';
-
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {devAssert} from '#utils/log';
+import {localize} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
-let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PaginationButtonStateDef;
 
-/** @const {!Object<string, !ButtonState_1_0_Def>} */
+/** @const {!Object<string, !PaginationButtonStateDef>} */
 const BackButtonStates = {
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
-    label: LocalizedStringId.AMP_STORY_PREVIOUS_PAGE,
+    label: LocalizedStringId_Enum.AMP_STORY_PREVIOUS_PAGE,
   },
 };
 
-/** @const {!Object<string, !ButtonState_1_0_Def>} */
+/** @const {!Object<string, !PaginationButtonStateDef>} */
 const ForwardButtonStates = {
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_PAGE,
+    label: LocalizedStringId_Enum.AMP_STORY_NEXT_PAGE,
   },
   NEXT_STORY: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
-    label: LocalizedStringId.AMP_STORY_NEXT_STORY,
+    label: LocalizedStringId_Enum.AMP_STORY_NEXT_STORY,
   },
   REPLAY: {
     className: 'i-amphtml-story-fwd-replay',
     triggers: EventType.REPLAY,
-    label: LocalizedStringId.AMP_STORY_REPLAY,
+    label: LocalizedStringId_Enum.AMP_STORY_REPLAY,
   },
 };
 
 /**
- * @param {!Element} element
+ * @param {!Node} context
+ * @param {PaginationButtonStateDef} initialState
+ * @param {function(Event)} onClick
  * @return {!Element}
  */
-const buildPaginationButton = (element) =>
-  htmlFor(element)`
-      <div class="i-amphtml-story-button-container">
-        <button class="i-amphtml-story-button-move"></button>
-      </div>`;
-
-/**
- * @param {!Element} hoverEl
- * @param {!Element} targetEl
- * @param {string} className
- * @return {?Array<function(!Event)>}
- */
-function setClassOnHover(hoverEl, targetEl, className) {
-  const enterListener = () => targetEl.classList.add(className);
-  const exitListener = () => targetEl.classList.remove(className);
-  hoverEl.addEventListener('mouseenter', enterListener);
-  hoverEl.addEventListener('mouseleave', exitListener);
-  return [enterListener, exitListener];
-}
+const renderPaginationButton = (context, initialState, onClick) => (
+  <div
+    onClick={onClick}
+    class={`i-amphtml-story-button-container ${initialState.className}`}
+  >
+    <button
+      class="i-amphtml-story-button-move"
+      aria-label={initialState.label && localize(context, initialState.label)}
+    ></button>
+  </div>
+);
 
 /**
  * Desktop navigation buttons.
@@ -76,32 +68,21 @@ function setClassOnHover(hoverEl, targetEl, className) {
 class PaginationButton {
   /**
    * @param {!Document} doc
-   * @param {!ButtonState_1_0_Def} initialState
+   * @param {!PaginationButtonStateDef} initialState
    * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
    * @param {!Window} win
    */
   constructor(doc, initialState, storeService, win) {
-    /** @private {!ButtonState_1_0_Def} */
+    /** @private {!PaginationButtonStateDef} */
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = buildPaginationButton(doc);
-
-    /** @private @const {!Element} */
-    this.buttonElement_ = dev().assertElement(
-      this.element.querySelector('button')
+    this.element = renderPaginationButton(doc, initialState, (e) =>
+      this.onClick_(e)
     );
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(doc);
-
-    this.element.classList.add(initialState.className);
-    initialState.label &&
-      this.buttonElement_.setAttribute(
-        'aria-label',
-        this.localizationService_.getLocalizedString(initialState.label)
-      );
-    this.element.addEventListener('click', (e) => this.onClick_(e));
+    /** @private @const {!Element} */
+    this.buttonElement_ = devAssert(this.element.firstElementChild);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
@@ -110,7 +91,7 @@ class PaginationButton {
     this.win_ = win;
   }
 
-  /** @param {!ButtonState_1_0_Def} state */
+  /** @param {!PaginationButtonStateDef} state */
   updateState(state) {
     if (state === this.state_) {
       return;
@@ -120,7 +101,7 @@ class PaginationButton {
     state.label
       ? this.buttonElement_.setAttribute(
           'aria-label',
-          this.localizationService_.getLocalizedString(state.label)
+          localize(this.win_.document, state.label)
         )
       : this.buttonElement_.removeAttribute('aria-label');
 
@@ -128,7 +109,7 @@ class PaginationButton {
   }
 
   /**
-   * @return {!ButtonState_1_0_Def}
+   * @return {!PaginationButtonStateDef}
    */
   getState() {
     return this.state_;
@@ -158,7 +139,6 @@ class PaginationButton {
     }
     if (this.state_.action) {
       this.storeService_.dispatch(this.state_.action, this.state_.data);
-      return;
     }
   }
 }
@@ -195,40 +175,16 @@ export class PaginationButtons {
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
 
-    /** @private {?ButtonState_1_0_Def} */
+    /** @private {?PaginationButtonStateDef} */
     this.backButtonStateToRestore_ = null;
 
-    /** @private {?ButtonState_1_0_Def} */
+    /** @private {?PaginationButtonStateDef} */
     this.forwardButtonStateToRestore_ = null;
-
-    /** @private {?Array<function(!Event)>} */
-    this.hoverListeners_ = null;
 
     this.initializeListeners_();
 
     this.ampStory_.element.appendChild(this.forwardButton_.element);
     this.ampStory_.element.appendChild(this.backButton_.element);
-  }
-
-  /** @private */
-  addHoverListeners_() {
-    if (this.hoverListeners_) {
-      return;
-    }
-
-    const forwardButtonListeners = setClassOnHover(
-      this.forwardButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-next-hover'
-    );
-
-    const backButtonListeners = setClassOnHover(
-      this.backButton_.element,
-      this.ampStory_.element,
-      'i-amphtml-story-prev-hover'
-    );
-
-    this.hoverListeners_ = forwardButtonListeners.concat(backButtonListeners);
   }
 
   /** @private */
@@ -256,14 +212,6 @@ export class PaginationButtons {
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
     );
   }
 
@@ -304,12 +252,12 @@ export class PaginationButtons {
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
       this.backButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
+        /** @type {!PaginationButtonStateDef} */ (
           devAssert(this.backButtonStateToRestore_)
         )
       );
       this.forwardButton_.updateState(
-        /** @type {!ButtonState_1_0_Def} */ (
+        /** @type {!PaginationButtonStateDef} */ (
           devAssert(this.forwardButtonStateToRestore_)
         )
       );
@@ -318,20 +266,6 @@ export class PaginationButtons {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
       this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
       this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
-    }
-  }
-
-  /**
-   * Reacts to UI state updates.
-   * @param {!UIType} uiState
-   * @private
-   */
-  onUIStateUpdate_(uiState) {
-    if (
-      uiState === UIType.DESKTOP_PANELS ||
-      uiState === UIType.DESKTOP_FULLBLEED
-    ) {
-      this.addHoverListeners_();
     }
   }
 }

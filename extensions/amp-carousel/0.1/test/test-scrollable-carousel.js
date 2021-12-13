@@ -1,10 +1,13 @@
 import '../amp-carousel';
 import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {AmpScrollableCarousel} from '../scrollable-carousel';
+import {buildDom} from '../build-dom';
+
 describes.realWin(
   'test-scrollable-carousel',
   {
@@ -33,7 +36,7 @@ describes.realWin(
       schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
     });
 
-    function getAmpScrollableCarousel() {
+    function getAmpScrollableCarousel(addToDom = true) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
@@ -52,6 +55,10 @@ describes.realWin(
         img.style.height = '100px';
         img.id = 'img-' + i;
         carouselElement.appendChild(img);
+      }
+
+      if (!addToDom) {
+        return Promise.resolve(carouselElement);
       }
 
       doc.body.appendChild(carouselElement);
@@ -102,16 +109,15 @@ describes.realWin(
         expect(carouselSlideEls[0]).to.have.display('inline-block');
 
         // show control buttons correctly
-        expect(impl.hasPrev()).to.be.false;
-        expect(impl.hasNext()).to.be.true;
-        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
-        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+        const {nextButton_: nextBtn, prevButton_: prevBtn} = impl.controls_;
+        expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
+        expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         // Controls are hidden from screen readers as they do not provide
         // any functionality for scrollable carousel.
         // ATs see this is a scrolling div and can scroll it as user navigates
         // items just fine (unlike type=slide which requires next/prev)
-        expect(impl.nextButton_.getAttribute('role')).equal('presentation');
-        expect(impl.prevButton_.getAttribute('role')).equal('presentation');
+        expect(prevBtn.getAttribute('role')).equal('presentation');
+        expect(nextBtn.getAttribute('role')).equal('presentation');
       }
     );
 
@@ -123,45 +129,46 @@ describes.realWin(
       )[0];
       const carouselSlideEls =
         container.getElementsByClassName('amp-carousel-slide');
+      const {nextButton_: nextBtn, prevButton_: prevBtn} = impl.controls_;
 
       // show control buttons correctly
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
       // Explicitly check if buttons don't have visibility hidden or display none
-      expect(impl.prevButton_.tabIndex).to.equal(-1);
-      expect(impl.nextButton_.tabIndex).to.equal(0);
-      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
-      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+      expect(prevBtn.tabIndex).to.equal(-1);
+      expect(nextBtn.tabIndex).to.equal(0);
+      expect(isScreenReaderHidden(prevBtn)).to.be.false;
+      expect(isScreenReaderHidden(nextBtn)).to.be.false;
 
-      impl.nextButton_.focus();
-      expect(doc.activeElement).to.equal(impl.nextButton_);
+      nextBtn.focus();
+      expect(doc.activeElement).to.equal(nextBtn);
 
       // Scroll to end
       for (let i = 0; i < carouselSlideEls.length - 1; i++) {
-        impl.goCallback(1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
       }
       // Explicitly check if buttons don't have visibility hidden or display none
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
-      expect(impl.prevButton_.tabIndex).to.equal(0);
-      expect(impl.nextButton_.tabIndex).to.equal(-1);
-      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
-      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
-      expect(doc.activeElement).to.equal(impl.nextButton_);
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
+      expect(prevBtn.tabIndex).to.equal(0);
+      expect(nextBtn.tabIndex).to.equal(-1);
+      expect(isScreenReaderHidden(prevBtn)).to.be.false;
+      expect(isScreenReaderHidden(nextBtn)).to.be.false;
+      expect(doc.activeElement).to.equal(nextBtn);
 
-      impl.prevButton_.focus();
+      prevBtn.focus();
 
       for (let i = 0; i < carouselSlideEls.length - 1; i++) {
-        impl.goCallback(-1, /*animate*/ false);
+        impl.go(-1, /*animate*/ false);
       }
       // Explicitly check if buttons don't have visibility hidden or display none
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
-      expect(impl.prevButton_.tabIndex).to.equal(-1);
-      expect(impl.nextButton_.tabIndex).to.equal(0);
-      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
-      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
-      expect(doc.activeElement).to.equal(impl.prevButton_);
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
+      expect(prevBtn.tabIndex).to.equal(-1);
+      expect(nextBtn.tabIndex).to.equal(0);
+      expect(isScreenReaderHidden(prevBtn)).to.be.false;
+      expect(isScreenReaderHidden(nextBtn)).to.be.false;
+      expect(doc.activeElement).to.equal(prevBtn);
     });
 
     // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
@@ -173,7 +180,7 @@ describes.realWin(
         const impl = await carousel.getImpl();
 
         // click on the next button
-        impl.goCallback(1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
 
         // scroll to the correct position
         expect(impl.container_./*OK*/ scrollLeft).to.equal(300);
@@ -225,6 +232,53 @@ describes.realWin(
       }
     );
 
+    describe('buildDom', () => {
+      it('buildDom and buildCallback should result in the same outerHTML', async () => {
+        env.sandbox
+          .stub(Services, 'inputFor')
+          .returns({onMouseDetected: () => {}});
+
+        const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
+        const el2 = el1.cloneNode(/* deep */ true);
+        const impl = new AmpScrollableCarousel(el1);
+        impl.setupBehavior_ = () => {};
+        await impl.buildCallback();
+        buildDom(el2);
+
+        expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      it('buildCallback should assign ivars even when server rendered', async () => {
+        const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
+        buildDom(el1);
+        el1.setAttribute('i-amphtml-ssr', '');
+        const impl = new AmpScrollableCarousel(el1);
+        impl.setupBehavior_ = () => {};
+        await impl.buildCallback();
+
+        expect(impl.cells_).length(7);
+        expect(impl.container_).ok;
+      });
+
+      it('buildDom should throw if invalid server rendered dom', async () => {
+        const carousel = await getAmpScrollableCarousel(/* addToDom */ false);
+        carousel.setAttribute('i-amphtml-ssr', '');
+        expect(() => buildDom(carousel)).throws(/Invalid server render/);
+      });
+
+      it('buildDom should not modify dom for server rendered element', async () => {
+        const carousel = await getAmpScrollableCarousel(/* addToDom */ false);
+        buildDom(carousel);
+        carousel.setAttribute('i-amphtml-ssr', '');
+
+        const before = carousel.outerHTML;
+        buildDom(carousel);
+        const after = carousel.outerHTML;
+
+        expect(before).equal(after);
+      });
+    });
+
     // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
     it.skip(
       'should behave correctly when clicking on next button and the ' +
@@ -234,10 +288,10 @@ describes.realWin(
         const impl = await carousel.getImpl();
 
         // click on the next button the first time
-        impl.goCallback(1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
 
         // click on the next button the second time
-        impl.goCallback(1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
 
         // scroll to the correct position
         // note the correct scrollLeft is not 600 (300 * 2) but 588 (888 - 300)
@@ -288,11 +342,11 @@ describes.realWin(
 
         // click on the next button twice to reach the right end
         // scrollLeft after second click is 588
-        impl.goCallback(1, /*animate*/ false);
-        impl.goCallback(1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
 
         // click on the previous button
-        impl.goCallback(-1, /*animate*/ false);
+        impl.go(-1, /*animate*/ false);
 
         // scroll to the correct position
         expect(impl.container_./*OK*/ scrollLeft).to.equal(288);
@@ -354,12 +408,12 @@ describes.realWin(
 
         // click on the next button twice to reach the right end and click on
         // the previous button once, scrollLeft after third click is 288
-        impl.goCallback(1, /*animate*/ false);
-        impl.goCallback(1, /*animate*/ false);
-        impl.goCallback(-1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
+        impl.go(1, /*animate*/ false);
+        impl.go(-1, /*animate*/ false);
 
         // click on the previous button
-        impl.goCallback(-1, /*animate*/ false);
+        impl.go(-1, /*animate*/ false);
 
         // scroll to the correct position
         expect(impl.container_./*OK*/ scrollLeft).to.equal(0);
@@ -425,7 +479,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
@@ -436,7 +490,7 @@ describes.realWin(
           method: 'goToSlide',
           node: element,
           source: 'source',
-          trust: ActionTrust.HIGH,
+          trust: ActionTrust_Enum.HIGH,
         })
       );
 
@@ -448,7 +502,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(

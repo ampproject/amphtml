@@ -2,7 +2,7 @@ import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
 import {deepEquals} from '#core/types/object/json';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {hasOwn} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
@@ -35,7 +35,6 @@ export const getStoreService = (win) => {
  */
 export const UIType = {
   MOBILE: 0,
-  DESKTOP_PANELS: 1, // Default desktop UI displaying previous and next pages.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
   DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
   VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
@@ -48,7 +47,6 @@ export const UIType = {
 export const EmbeddedComponentState = {
   HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
   FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
-  EXPANDED: 2, // Component is in expanded mode.
 };
 
 /**
@@ -72,6 +70,24 @@ export let InteractiveReactData;
 
 /**
  * @typedef {{
+ *   product-tag-id: string,
+ *   product-title: string,
+ *   product-price: string,
+ *   product-icon: string,
+ *   product-tag-text: ?string,
+ * }}
+ */
+export let ShoppingConfigDataDef;
+
+/**
+ * @typedef {{
+ *  items: !Map<string, !ShoppingConfigDataDef>,
+ * }}
+ */
+export let ShoppingDataDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -88,7 +104,6 @@ export let InteractiveReactData;
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
- *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    interactiveReactState: !Map<string, !InteractiveReactData>,
@@ -101,11 +116,9 @@ export let InteractiveReactData;
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
- *    sidebarState: boolean,
  *    storyHasAudioState: boolean,
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
- *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
  *    viewportWarningState: boolean,
@@ -138,10 +151,8 @@ export const StateProperty = {
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
-  DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
   GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
-  HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
@@ -156,8 +167,7 @@ export const StateProperty = {
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
-  SIDEBAR_STATE: 'sidebarState',
-  SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
+  SHOPPING_DATA: 'shoppingData',
   // Any page has audio, or amp-story has a `background-audio` attribute.
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
@@ -166,7 +176,6 @@ export const StateProperty = {
   STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
-  VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
   ACTIONS_ALLOWLIST: 'actionsAllowlist',
@@ -193,7 +202,6 @@ export const Action = {
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
-  TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_KEYBOARD_ACTIVE_STATE: 'toggleKeyboardActiveState',
@@ -204,15 +212,13 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-  TOGGLE_SIDEBAR: 'toggleSidebar',
-  TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
+  ADD_SHOPPING_DATA: 'addShoppingData',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
-  TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
@@ -241,12 +247,14 @@ const stateComparisonFunctions = {
     old.height !== curr.height,
   [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
     old === null || curr === null || !deepEquals(old, curr, 2),
+  [StateProperty.SHOPPING_DATA]: (old, curr) =>
+    old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
 
 /**
- * Returns the new sate.
+ * Returns the new state.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
  * @param  {*} data
@@ -275,6 +283,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PANNING_MEDIA_STATE]: updatedState,
+      });
+    case Action.ADD_SHOPPING_DATA:
+      const updatedShoppingData = {
+        ...state[StateProperty.SHOPPING_DATA],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SHOPPING_DATA]: updatedShoppingData,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -324,11 +341,8 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAUSED_STATE]:
-          data.state === EmbeddedComponentState.EXPANDED ||
           data.state === EmbeddedComponentState.FOCUSED,
-        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
-          data.state !== EmbeddedComponentState.EXPANDED ||
-          state.uiState === UIType.DESKTOP_PANELS,
+        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
         [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
       });
     // Shows or hides the info dialog.
@@ -386,26 +400,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
       });
-    case Action.TOGGLE_SIDEBAR:
-      // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
-      if (state[StateProperty.SIDEBAR_STATE] === data) {
-        return state;
-      }
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PAUSED_STATE]: !!data,
-        [StateProperty.SIDEBAR_STATE]: !!data,
-      });
-    case Action.TOGGLE_HAS_SIDEBAR:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.HAS_SIDEBAR_STATE]: !!data,
-      });
-    case Action.TOGGLE_SUPPORTED_BROWSER:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.SUPPORTED_BROWSER_STATE]: !!data,
-      });
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ ({
         ...state,
@@ -427,18 +421,12 @@ const actions = (state, action, data) => {
       }
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
       });
     case Action.SET_GYROSCOPE_PERMISSION:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.GYROSCOPE_PERMISSION_STATE]: data,
-      });
-    case Action.TOGGLE_VIEWPORT_WARNING:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.VIEWPORT_WARNING_STATE]: !!data,
       });
     case Action.SET_CONSENT_ID:
       return /** @type {!State} */ ({
@@ -582,10 +570,8 @@ export class AmpStoryStoreService {
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
-      [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
-      [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
@@ -600,14 +586,12 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
-      [StateProperty.SIDEBAR_STATE]: false,
-      [StateProperty.SUPPORTED_BROWSER_STATE]: true,
+      [StateProperty.SHOPPING_DATA]: {},
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
-      [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_ALLOWLIST]: [],

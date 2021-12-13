@@ -6,7 +6,7 @@ import {
 } from '#core/error';
 import {isUserErrorMessage} from '#core/error/message-helpers';
 
-import {setReportError, user} from '../../../src/log';
+import {setReportError, user} from '#utils/log';
 
 describes.sandboxed('errors', {}, (env) => {
   describe('rethrowAsync', () => {

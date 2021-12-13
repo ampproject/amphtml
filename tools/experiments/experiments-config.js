@@ -128,14 +128,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'adsense-ad-size-optimization',
-    name:
-      'Per publisher server side settings for changing the ad size ' +
-      'to responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/23568',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -156,11 +148,6 @@ export const EXPERIMENTS = [
     name: 'Backup AMP-generated CIDs to Storage.',
     spec: 'https://github.com/ampproject/amphtml/issues/29484',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
-  },
-  {
-    id: 'layout-aspect-ratio-css',
-    name: 'Responsive layouts implemented via aspect-ratio CSS',
-    spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
   {
     id: 'dfp-render-on-idle-cwv-exp',
@@ -186,5 +173,10 @@ export const EXPERIMENTS = [
     id: 'story-ad-auto-advance',
     name: 'Auto advancing story ads',
     spec: 'https://github.com/ampproject/amphtml/issues/33969',
+  },
+  {
+    id: 'story-ad-page-outlink',
+    name: 'Story ad CTA page outlink',
+    spec: 'https://github.com/ampproject/amphtml/pull/35867',
   },
 ];

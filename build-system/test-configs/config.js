@@ -411,6 +411,9 @@ const htmlFixtureGlobs = [
   '!test/fixtures/e2e/amphtml-ads/image.html',
   '!test/fixtures/e2e/amphtml-ads/lightbox-ad.a4a.html',
   '!test/fixtures/e2e/amphtml-ads/text.html',
+
+  // The following is a server-rendered file which is technically invalid.
+  '!examples/compiler-hydration.html',
 ];
 
 /**

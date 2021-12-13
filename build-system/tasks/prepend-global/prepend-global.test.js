@@ -3,16 +3,6 @@
 const m = require('.');
 const test = require('ava');
 
-test('sync - prepends global config', (t) => {
-  t.plan(1);
-  const res = m.prependConfig('{"hello":"world"}', 'var x = 1 + 1;');
-  t.is(
-    res,
-    'self.AMP_CONFIG||(self.AMP_CONFIG={"hello":"world"});' +
-      '/*AMP_CONFIG*/var x = 1 + 1;'
-  );
-});
-
 test('sync - valueOrDefault', (t) => {
   t.plan(2);
   let res = m.valueOrDefault(true, 'hello');

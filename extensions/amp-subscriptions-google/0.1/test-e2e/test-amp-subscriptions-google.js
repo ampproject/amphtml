@@ -44,9 +44,9 @@ describes.endtoend(
         'Basic access charged weekly..'
       );
 
-      const basicAccessPrice = await controller.findElement('.mojnzf');
+      const basicAccessPrice = await controller.findElement('.e02Wob', 130000);
       await expect(controller.getElementText(basicAccessPrice)).to.equal(
-        '$1.99/week*'
+        '$3.98\n$1.99/week*'
       );
     });
   }

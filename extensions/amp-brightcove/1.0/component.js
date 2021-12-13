@@ -26,7 +26,7 @@ const methods = {
  * @param {{current: ?VideoWrapperDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-export function BrightcoveWithRef(props, ref) {
+function BentoBrightcoveWithRef(props, ref) {
   const {
     account,
     autoplay,
@@ -122,9 +122,6 @@ export function BrightcoveWithRef(props, ref) {
     />
   );
 }
-const Brightcove = forwardRef(BrightcoveWithRef);
-Brightcove.displayName = 'Brightcove'; // Make findable for tests.
-export {Brightcove};
 
 /**
  * @param {string} method
@@ -164,3 +161,7 @@ function checkProps({account}) {
   }
   return true;
 }
+
+const BentoBrightcove = forwardRef(BentoBrightcoveWithRef);
+BentoBrightcove.displayName = 'BentoBrightcove'; // Make findable for tests.
+export {BentoBrightcove};

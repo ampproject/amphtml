@@ -6,21 +6,17 @@ const path = require('path');
 const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
-const {jsBundles} = require('./bundles.config');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
-
-let mainBundles;
 
 /**
  * Minify passed string.
  *
  * @param {string} code
- * @param {string} filename
  * @return {Promise<Object<string, terser.SourceMapOptions['content']>>}
  */
-async function terserMinify(code, filename) {
+async function terserMinify(code) {
   const options = {
     mangle: false,
     compress: {
@@ -30,24 +26,11 @@ async function terserMinify(code, filename) {
     output: {
       beautify: !!argv.pretty_print,
       comments: /\/*/,
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       keep_quoted_props: true,
     },
     sourceMap: true,
   };
-  const basename = path.basename(filename, argv.esm ? '.mjs' : '.js');
-  if (!mainBundles) {
-    mainBundles = Object.keys(jsBundles).map((key) => {
-      const bundle = jsBundles[key];
-      if (bundle.options && bundle.options.minifiedName) {
-        return path.basename(bundle.options.minifiedName, '.js');
-      }
-      return path.basename(key, '.js');
-    });
-  }
-  if (mainBundles.includes(basename)) {
-    options.output.preamble = ';';
-  }
   const minified = await terser.minify(code, options);
 
   return {
@@ -78,10 +61,10 @@ async function postClosureBabel(file) {
   }
 
   debug(CompilationLifecycles['closured-pre-terser'], file, code, babelMap);
-  const {compressed, terserMap} = await terserMinify(code, path.basename(file));
+  const {compressed, terserMap} = await terserMinify(code);
   await fs.outputFile(file, compressed);
 
-  const closureMap = await fs.readJson(`${file}.map`, 'utf-8');
+  const closureMap = await fs.readJson(`${file}.map`, 'utf8');
   const sourceMap = remapping(
     [terserMap, babelMap, closureMap],
     () => null,

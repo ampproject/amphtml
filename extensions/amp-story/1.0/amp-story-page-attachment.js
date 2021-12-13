@@ -1,18 +1,22 @@
+import * as Preact from '#core/dom/jsx';
 import {Action, StateProperty, UIType} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {buildOutlinkLinkIconElement} from './amp-story-open-page-attachment';
+import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
-import {dev, devAssert} from '../../../src/log';
+import {dev} from '#utils/log';
 import {getHistoryState} from '#core/window/history';
-import {getLocalizationService} from './amp-story-localization-service';
+import {localize} from './amp-story-localization-service';
 import {getSourceOrigin} from '../../../src/url';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {
+  allowlistFormActions,
+  setupResponseAttributeElements,
+} from './amp-story-form';
 import {removeElement} from '#core/dom';
-import {setImportantStyles, toggle} from '#core/dom/style';
+import {toggle} from '#core/dom/style';
 
 import {triggerClickFromLightDom} from './utils';
 
@@ -119,41 +123,52 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    if (this.doesContainFormElement_()) {
+    const titleText =
+      this.element.getAttribute('title') ||
+      this.element.getAttribute('data-title');
+
+    this.headerEl.appendChild(
+      <div class="i-amphtml-story-draggable-drawer-header-title-and-close">
+        <button
+          class="i-amphtml-story-page-attachment-close-button"
+          aria-label={localize(
+            this.element,
+            LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+          )}
+          role="button"
+        ></button>
+        {titleText && (
+          <span class="i-amphtml-story-page-attachment-title">{titleText}</span>
+        )}
+      </div>
+    );
+
+    const forms = this.element.querySelectorAll('form');
+    if (forms.length > 0) {
+      allowlistFormActions(this.win);
+      forms.forEach((form) => {
+        // Scroll each response attribute element into view, when displayed.
+        setupResponseAttributeElements(form).forEach((el) => {
+          // TODO(wg-stories): Share ResizeObserver for runtime performance.
+          new this.win.ResizeObserver((e) => {
+            if (
+              this.state === DrawerState.OPEN &&
+              e[0].contentRect.height > 0
+            ) {
+              el./*OK*/ scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+              });
+            }
+          }).observe(el);
+        });
+      });
+
       // Page attachments that contain forms must display the page's publisher
       // domain above the attachment's contents. This enables users to gauge
       // the trustworthiness of publishers before sending data to them.
       this.headerEl.append(this.createDomainLabelElement_());
       this.headerEl.classList.add('i-amphtml-story-page-attachment-with-form');
-    }
-
-    const closeButtonEl = htmlFor(this.element)`
-          <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
-              role="button">
-          </button>`;
-    const localizationService = getLocalizationService(devAssert(this.element));
-
-    if (localizationService) {
-      const localizedCloseString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      );
-      closeButtonEl.setAttribute('aria-label', localizedCloseString);
-    }
-
-    const titleAndCloseWrapperEl = this.headerEl.appendChild(
-      htmlFor(this.element)`
-            <div class="i-amphtml-story-draggable-drawer-header-title-and-close"></div>`
-    );
-    titleAndCloseWrapperEl.appendChild(closeButtonEl);
-
-    const titleText =
-      this.element.getAttribute('title') ||
-      this.element.getAttribute('data-title');
-    if (titleText) {
-      const titleEl = htmlFor(this.element)`
-        <span class="i-amphtml-story-page-attachment-title"></span>`;
-      titleEl.textContent = titleText;
-      titleAndCloseWrapperEl.appendChild(titleEl);
     }
 
     const templateEl = this.element.querySelector(
@@ -181,53 +196,75 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       'i-amphtml-story-draggable-drawer-header-attachment-remote'
     );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
-    // Use an anchor element to make this a real link in vertical rendering.
-    const link = htmlFor(this.element)`
-      <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
-        <span class="i-amphtml-story-page-attachment-remote-title"><span ref="openStringEl"></span><span ref="urlStringEl"></span></span>
-        <svg class="i-amphtml-story-page-attachment-remote-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"></path></svg>
-      </a>`;
+
+    const isPageOutlink = this.element.tagName === 'AMP-STORY-PAGE-OUTLINK';
 
     // For backwards compatibility if element is amp-story-page-outlink.
-    const hrefAttr =
-      this.element.tagName === 'AMP-STORY-PAGE-OUTLINK'
-        ? this.element.querySelector('a').getAttribute('href')
-        : this.element.getAttribute('href');
-
-    // URL will be validated and resolved based on the canonical URL if relative
-    // when navigating.
-    link.setAttribute('href', hrefAttr);
-    const {openStringEl, urlStringEl} = htmlRefs(link);
-
-    // Navigation is handled programmatically. Disable clicks on the placeholder
-    // anchor to prevent from users triggering double navigations, which has
-    // side effects in native contexts opening webviews/CCTs.
-    link.addEventListener('click', (event) => event.preventDefault());
+    const hrefAttr = isPageOutlink
+      ? this.element.querySelector('a').getAttribute('href')
+      : this.element.getAttribute('href');
 
     // Set image.
     const openImgAttr = this.element.getAttribute('cta-image');
-    if (openImgAttr && openImgAttr !== 'none') {
-      const ctaImgEl = this.win.document.createElement('div');
-      ctaImgEl.classList.add('i-amphtml-story-page-attachment-remote-img');
-      setImportantStyles(ctaImgEl, {
-        'background-image': 'url(' + openImgAttr + ')',
-      });
-      link.prepend(ctaImgEl);
-    } else if (!openImgAttr) {
-      // Attach link icon SVG by default.
-      const linkImage = buildOutlinkLinkIconElement(link);
-      link.prepend(linkImage);
+    const image =
+      openImgAttr && openImgAttr !== 'none' ? (
+        <div
+          class="i-amphtml-story-page-attachment-remote-img"
+          style={{backgroundImage: `url(${openImgAttr}) !important`}}
+        ></div>
+      ) : (
+        // Attach link icon SVG by default.
+        renderOutlinkLinkIconElement()
+      );
+
+    // Use an anchor element to make this a real link in vertical rendering.
+    const link = (
+      <a
+        class="i-amphtml-story-page-attachment-remote-content"
+        target="_blank"
+        // Navigation is handled programmatically. Disable clicks on the placeholder
+        // anchor to prevent from users triggering double navigations, which has
+        // side effects in native contexts opening webviews/CCTs.
+        onClick={(event) => event.preventDefault()}
+      >
+        {image}
+        <span class="i-amphtml-story-page-attachment-remote-title">
+          <span>
+            {localize(
+              this.element,
+              LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
+            )}
+          </span>
+          <span>{hrefAttr}</span>
+        </span>
+        <svg
+          class="i-amphtml-story-page-attachment-remote-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 48 48"
+        >
+          <path d="M38 38H10V10h14V6H10a4 4 0 0 0-4 4v28a4 4 0 0 0 4 4h28a4 4 0 0 0 4-4V24h-4v14zM28 6v4h7.2L15.5 29.7l2.8 2.8L38 12.8V20h4V6H28z" />
+        </svg>
+      </a>
+    );
+
+    if (isPageOutlink) {
+      // The target must be '_top' for page outlinks, which will result in the
+      // link opening in the current tab. Opening links in a new tab requires a
+      // trusted event, and Safari does not consider swiping up to be trusted.
+      this.element.querySelector('a').setAttribute('target', '_top');
     }
 
-    // Set url prevew text.
-    const localizationService = getLocalizationService(devAssert(this.element));
-    if (localizationService) {
-      const localizedOpenString = localizationService.getLocalizedString(
-        LocalizedStringId.AMP_STORY_OPEN_OUTLINK_TEXT
-      );
-      openStringEl.textContent = localizedOpenString;
-    }
-    urlStringEl.textContent = hrefAttr;
+    // URL will be validated and resolved based on the canonical URL if relative
+    // when navigating.
+    // TODO(wg-stories): It would be much nicer if this attribute was set inline
+    // on the JSX tag above. However, that makes the LGTM analysis fail on
+    // "Potentially unsafe external link".
+    // See https://lgtm.com/rules/1806963085/
+    // We set the href imperatively here to avoid triggering the warning
+    // (an lgtm-disable comment will not work due to formatting, unfortunately.)
+    // Consider whether we can use `noopener` and/or `noreferrer` so that we
+    // can inline the attribute, and avoid the warning.
+    link.setAttribute('href', hrefAttr);
 
     this.contentEl.appendChild(link);
   }
@@ -458,20 +495,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   createDomainLabelElement_() {
-    const domainLabelEl = this.win.document.createElement('div');
-    domainLabelEl.classList.add('i-amphtml-story-page-attachment-domain-label');
-    domainLabelEl.textContent = this.getPublisherOrigin_();
-    return domainLabelEl;
-  }
-
-  /**
-   * Returns whether a form element exists within this page attachment.
-   * @return {boolean} True, only if a form element exists as a descendant of
-   *     this page attachment.
-   * @private
-   */
-  doesContainFormElement_() {
-    return Boolean(this.element.querySelector('form'));
+    return (
+      <div class="i-amphtml-story-page-attachment-domain-label">
+        {this.getPublisherOrigin_()}
+      </div>
+    );
   }
 
   /**
@@ -481,6 +509,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   getPublisherOrigin_() {
     const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
-    return publisherOrigin.replace(/https?:\/\//, '');
+    return publisherOrigin.replace(/^http(s)?:\/\/(www.)?/, '');
   }
 }

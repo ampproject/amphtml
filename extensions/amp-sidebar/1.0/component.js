@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Side} from './sidebar-config';
 import {forwardRef} from '#preact/compat';
 import {isRTL} from '#core/dom';
@@ -18,11 +18,11 @@ import {useToolbarHook} from './sidebar-toolbar-hook';
 import objstr from 'obj-str';
 
 /**
- * @param {!SidebarDef.SidebarProps} props
- * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
+ * @param {!BentoSidebarDef.Props} props
+ * @param {{current: (!BentoSidebarDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function SidebarWithRef(
+function BentoSidebarWithRef(
   {
     as: Comp = 'div',
     backdropClassName,
@@ -67,7 +67,7 @@ function SidebarWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!SidebarDef.SidebarApi} */ ({
+      /** @type {!BentoSidebarDef.Api} */ ({
         open,
         close,
         toggle,
@@ -108,7 +108,7 @@ function SidebarWithRef(
       return;
     }
     const keydownCallback = (event) => {
-      if (event.key === Keys.ESCAPE) {
+      if (event.key === Keys_Enum.ESCAPE) {
         event.stopImmediatePropagation();
         event.preventDefault();
         close();
@@ -160,15 +160,15 @@ function SidebarWithRef(
   );
 }
 
-const Sidebar = forwardRef(SidebarWithRef);
-Sidebar.displayName = 'Sidebar'; // Make findable for tests.
-export {Sidebar};
+const BentoSidebar = forwardRef(BentoSidebarWithRef);
+BentoSidebar.displayName = 'BentoSidebar'; // Make findable for tests.
+export {BentoSidebar};
 
 /**
- * @param {!SidebarDef.SidebarToolbarProps} props
+ * @param {!BentoSidebarDef.BentoSidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
-export function SidebarToolbar({
+export function BentoSidebarToolbar({
   children,
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,

@@ -4,16 +4,13 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
 import {
-  Layout,
-  LayoutPriority,
+  LayoutPriority_Enum,
+  Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {setStyle} from '#core/dom/style';
 import {duplicateErrorIfNecessary} from '#core/error';
@@ -29,6 +26,11 @@ import {isExperimentOn} from '#experiments';
 import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {DomTransformStream} from '#utils/dom-tranform-stream';
+import {listenOnce} from '#utils/event-helper';
+import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {getExtensionsFromMetadata} from './amp-ad-utils';
@@ -47,14 +49,12 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {cancellation, isCancellation} from '../../../src/error-reporting';
-import {listenOnce} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
@@ -62,10 +62,8 @@ import {
   preloadFriendlyIframeEmbedExtensions,
 } from '../../../src/friendly-iframe-embed';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {dev, devAssert, logHashParam, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl} from '../../../src/url';
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -369,8 +367,8 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.transferDomBody_ = null;
 
-    /** @private {function(boolean)} */
-    this.boundViewportCallback_ = this.viewportCallbackTemp.bind(this);
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -381,7 +379,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -411,14 +409,18 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
 
-    const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() => {
-        this.getSigningServiceNames().forEach((signingServiceName) => {
-          verifier.loadKeyset(signingServiceName);
+    // Disable crypto key fetching if we are not going to use it in no-signing path.
+    // TODO(ccordry): clean up with no-signing launch.
+    if (!this.isInNoSigningExp()) {
+      const verifier = signatureVerifierFor(this.win);
+      this.keysetPromise_ = this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.getSigningServiceNames().forEach((signingServiceName) => {
+            verifier.loadKeyset(signingServiceName);
+          });
         });
-      });
+    }
 
     this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
     if (this.a4aAnalyticsConfig_) {
@@ -592,7 +594,7 @@ export class AmpA4A extends AMP.BaseElement {
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
     const fixedSizeZeroHeightOrWidth =
-      this.getLayout() != Layout.FLUID &&
+      this.getLayout() != Layout_Enum.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);
     if (
       fixedSizeZeroHeightOrWidth ||
@@ -991,7 +993,7 @@ export class AmpA4A extends AMP.BaseElement {
         if (!sanitizedHeadElement) {
           return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
         }
-        this.updateLayoutPriority(LayoutPriority.CONTENT);
+        this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
         this.isVerifiedAmpCreative_ = true;
         return sanitizedHeadElement;
       });
@@ -1009,7 +1011,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Experiment to give non-AMP creatives same benefits as AMP so
     // update priority.
     if (this.inNonAmpPreferenceExp()) {
-      this.updateLayoutPriority(LayoutPriority.CONTENT);
+      this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
     }
     return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
       checkStillCurrent();
@@ -1109,13 +1111,13 @@ export class AmpA4A extends AMP.BaseElement {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
               // update priority.
-              this.updateLayoutPriority(LayoutPriority.CONTENT);
+              this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
             }
             return null;
           }
 
           // Update priority.
-          this.updateLayoutPriority(LayoutPriority.CONTENT);
+          this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
 
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
@@ -1313,7 +1315,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.destroyFrame(true);
     }
     return this.attemptToRenderCreative().then(() => {
-      observeWithSharedInOb(this.element, this.boundViewportCallback_);
+      this.unobserveIntersections_ = observeIntersections(
+        this.element,
+        ({isIntersecting}) => this.viewportCallback(isIntersecting)
+      );
     });
   }
 
@@ -1414,7 +1419,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.tearDownSlot();
     return true;
   }
@@ -1495,12 +1501,11 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  // TODO: Rename to viewportCallback once BaseElement.viewportCallback has been removed.
   /**
    * @param {boolean}  inViewport
    * @protected
    */
-  viewportCallbackTemp(inViewport) {
+  viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -1883,6 +1888,9 @@ export class AmpA4A extends AMP.BaseElement {
           'allowtransparency': '',
           'scrolling': 'no',
           'title': this.getIframeTitle(),
+          'role': 'region',
+          'aria-label': 'Advertisement',
+          'tabindex': '0',
         })
       )
     );
@@ -2008,6 +2016,9 @@ export class AmpA4A extends AMP.BaseElement {
         'height': this.creativeSize_.height,
         'width': this.creativeSize_.width,
         'title': this.getIframeTitle(),
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     );
 
@@ -2315,13 +2326,6 @@ export class AmpA4A extends AMP.BaseElement {
       'https://tpc.googlesyndication.com/safeframe/' +
       `${this.safeframeVersion}/html/container.html`
     );
-  }
-
-  /**
-   * @return {boolean} whether this is a sticky ad unit
-   */
-  isStickyAd() {
-    return false;
   }
 
   /**

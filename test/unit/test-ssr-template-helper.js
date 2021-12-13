@@ -176,7 +176,7 @@ describes.fakeWin(
           allowConsoleError(() => {
             expect(() => {
               ssrTemplateHelper.applySsrOrCsrTemplate({}, {html: null});
-            }).to.throw(/Server side html response must be defined/);
+            }).to.throw(/Skipping template rendering due to failed fetch/);
           });
         });
 

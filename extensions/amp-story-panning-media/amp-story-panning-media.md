@@ -62,7 +62,7 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 ```html
 <amp-story-page>
   <amp-story-grid-layer>
-    <amp-story-panning-media layout="fill" x="-10%" y="-20%" zoom=".8">
+    <amp-story-panning-media layout="fill" data-x="-10%" data-y="-20%" data-zoom=".8">
       <amp-img layout="fill" src="assets/world-map.jpg" width="4000" height="3059" ></amp-img>
     </amp-story-panning-media>
   </amp-story-grid-layer>
@@ -70,7 +70,7 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 
 <amp-story-page>
   <amp-story-grid-layer>
-    <amp-story-panning-media layout="fill" x="20%" y="30%" zoom="2">
+    <amp-story-panning-media layout="fill" data-x="20%" data-y="30%" data-zoom="2">
       <amp-img layout="fill" src="assets/world-map.jpg" width="4000" height="3059" ></amp-img>
     </amp-story-panning-media>
   </amp-story-grid-layer>
@@ -79,7 +79,7 @@ The `amp-story-panning-media` component accepts 1 descendant. This descendant mu
 
 ### Web Story use example
 
-The [Northern Sky Constellations Web Story](https://philipbell-panning-media.web.app/examples/amp-story/northern-sky-constellations.html) uses a single star chart for the entire story. It highlights different constellations by panning and zooming. A parallax transition effect is also achieved by layering two png star images with transparency.
+The [Northern Sky Constellations Web Story](https://wsdemos.uc.r.appspot.com/constellations) uses a single star chart for the entire story. It highlights different constellations by panning and zooming. A parallax transition effect can be achieved by layering two png star images with transparency.
 
 <amp-img alt="image of Northern Sky Constellations Web Story example" layout="fixed" src="https://raw.githubusercontent.com/processprocess/amphtml/panning-media-docs/extensions/amp-story-panning-media/img/constellations-screenshot.jpg" width="690" height="1009"></amp-img>
 
@@ -91,21 +91,22 @@ The [Web Story creation tool integration example](https://philipbell-panning-med
 
 ## Attributes
 
-### x (optional)
+### data-x (optional)
 
 Specifies the horizontal position in percentage.  
 Centered on 0 (default) with positive values moving the image to the right (50% centering left edge of image) and negative to the left (-50% centering right edge of image).
 
-### y (optional)
+### data-y (optional)
 
 Specifies the vertical position in percentage.
 Centered on 0 (default) with positive values moving the image down (50% centering top edge of image) and negative upward (-50% centering bottom edge of image).
 
-### zoom (optional)
+### data-zoom (optional)
 
 Specifies the level of zoom.
-The default is 1. This corresponds to the image fitting the viewport with [`layout=fill`](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/?format=stories).
+The default is 1. This corresponds to the image covering it's container with the same behavior the CSS declaration `background: cover;`.
 A higher value scales the image up (zooms in). A lower value scales the image down (zooms out).
+If `lock-bounds` is specified the image will not scale smaller than the viewport.
 
 ### lock-bounds (optional)
 
@@ -113,4 +114,4 @@ Prevents the image from panning beyond the viewport. When using `lock-bounds` `w
 
 ## Validation
 
-This component is available in experimental. Validation details will be defined before launch.
+See validation rules in [amp-story-panning-media validator](https://github.com/processprocess/amphtml/blob/main/extensions/amp-story-panning-media/validator-amp-story-panning-media.protoascii).

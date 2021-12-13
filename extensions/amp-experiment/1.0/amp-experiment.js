@@ -1,4 +1,4 @@
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
@@ -10,10 +10,11 @@ import {
   originExperimentsForDoc,
 } from '#service/origin-experiments-impl';
 
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {applyExperimentToVariant} from './apply-experiment';
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 
-import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 
 const TAG = 'amp-experiment';
@@ -32,7 +33,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+    return layout == Layout_Enum.NODISPLAY || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
