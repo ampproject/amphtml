@@ -426,9 +426,7 @@ export class AmpStory extends AMP.BaseElement {
     }
     // [i-amphtml-version] marks that the style was inlined in the doc server-side.
     if (
-      this.getAmpDoc()
-        .getRootNode()
-        .documentElement.querySelector(
+      this.win.document.documentElement.querySelector(
           'style[amp-extension="amp-story"][i-amphtml-version]'
         )
     ) {
