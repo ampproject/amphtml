@@ -340,5 +340,5 @@ export const maybeMakeProxyUrl = (url, ampDoc) => {
  * @return {boolean}
  */
 export function isTransformed(ampdoc) {
-  return ampdoc.getRootNode().documentElement?.hasAttribute('transformed');
+  return ampdoc.getRootNode().documentElement.hasAttribute('transformed');
 }
