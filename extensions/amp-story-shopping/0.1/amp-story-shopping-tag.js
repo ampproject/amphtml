@@ -25,7 +25,13 @@ const FONTS_TO_LOAD = [
 ];
 
 const renderShoppingTagTemplate = (tagData) => (
-  <div class="amp-story-shopping-tag-inner">
+  <div
+    class={
+      tagData['rightEdgeOfScreentoTagDistance'] > 120
+        ? 'amp-story-shopping-tag-inner'
+        : 'amp-story-shopping-tag-inner-flipped'
+    }
+  >
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
       <span
@@ -81,9 +87,19 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
+
     if (!tagData) {
       return;
     }
+
+    const rightEdgeOfScreentoTagDistance =
+      document.getElementsByTagName('amp-story-shopping-attachment')[0]
+        .clientWidth - this.element.offsetLeft;
+
+    console.log(rightEdgeOfScreentoTagDistance);
+
+    tagData['rightEdgeOfScreentoTagDistance'] = rightEdgeOfScreentoTagDistance;
+
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,

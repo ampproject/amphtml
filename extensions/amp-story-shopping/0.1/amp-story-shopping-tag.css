@@ -18,6 +18,15 @@ amp-story-shopping-tag {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  flex-direction: row !important;
+}
+
+.amp-story-shopping-tag-inner-flipped {
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: row-reverse !important;
 }
 
 .amp-story-shopping-tag-dot {
