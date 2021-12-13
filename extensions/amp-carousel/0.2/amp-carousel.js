@@ -214,15 +214,17 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {*} onInteraction
    */
   setupButtonInteraction(button, onInteraction) {
-    button.onkeydown = (event) => {
-      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
-        if (!event.defaultPrevented) {
-          event.preventDefault();
-          onInteraction();
-        }
+    button.addEventListener('click', onInteraction);
+    button.addEventListener('keydown', (event) => {
+      if (event.defaultPrevented) {
+        return;
       }
-    };
-    button.onclick = onInteraction;
+
+      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
+        event.preventDefault();
+        onInteraction();
+      }
+    });
   }
 
   /** @override */
