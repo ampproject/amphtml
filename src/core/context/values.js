@@ -5,7 +5,10 @@ import {pushIfNotExist, removeItem} from '#core/types/array';
 import {deepScan, findParent} from './scan';
 import {throttleTail} from './scheduler';
 
+/** @type {Array<*>} */
 const EMPTY_ARRAY = [];
+
+/** @type {function():void} */
 const EMPTY_FUNC = () => {};
 
 /** @typedef {import('./node').ContextNode<?>} ContextNode */
@@ -316,6 +319,7 @@ export class Values {
    * @protected
    */
   scanAll(scheduled) {
+    /** @type {string[]?} */
     let newScheduled = null;
     const usedByKey = this.usedByKey_;
     if (usedByKey) {
@@ -372,6 +376,7 @@ export class Values {
         parentContextNode: null,
         // Schedule the value recalculation, optionally with the parent
         // refresh.
+        /** @type {function(boolean):void} */
         ping: (refreshParent) => {
           if (this.isConnected_()) {
             const pending = refreshParent
@@ -384,14 +389,18 @@ export class Values {
         // Schedule the value recalculation due to the dependency change.
         pingDep:
           deps.length > 0
-            ? deps.map((dep, index) => (value) => {
-                used.depValues[index] = value;
-                used.ping();
+            ? deps.map((dep, index) => {
+                /** @type {function(DEP):void} */
+                return (value) => {
+                  used.depValues[index] = value;
+                  used.ping();
+                };
               })
             : EMPTY_ARRAY,
         // Schedule the value recalculation due to the parent value change.
         pingParent: isRecursive(prop)
-          ? (parentValue) => {
+          ? /** @type {(function(T):void)} */
+            (parentValue) => {
               used.parentValue = parentValue;
               used.ping();
             }
@@ -457,6 +466,7 @@ export class Values {
 
     // Recompute all "pinged" values for this node. It checks if dependencies
     // are satisfied and recomputes values accordingly.
+    /** @type {number?} */
     let updated;
     do {
       updated = 0;
@@ -470,6 +480,7 @@ export class Values {
             used.pending = Pending_Enum.NOT_PENDING;
             return;
           }
+          devAssert(updated);
           updated++;
           this.tryUpdate_(used);
         }

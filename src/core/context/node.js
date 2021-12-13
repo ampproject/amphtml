@@ -26,7 +26,7 @@ const FRAGMENT_NODE = 11;
  * The structure for a group of nodes.
  *
  * @typedef {{
- *   cn: ContextNode,
+ *   cn: ContextNode<?>,
  *   match: function(Node, Node):boolean,
  *   weight: number,
  * }} GroupDef
@@ -83,7 +83,7 @@ export class ContextNode {
    * @param {Node} node The node from which to perform the search.
    * @param {boolean=} includeSelf Whether the specified node itself should
    * be included in the search. Defaults to `true`.
-   * @return {?ContextNode}
+   * @return {?ContextNode<?>}
    */
   static closest(node, includeSelf = true) {
     /** @type {?Node} */
@@ -93,7 +93,7 @@ export class ContextNode {
       if (n != node || includeSelf) {
         if (n[NODE_PROP]) {
           // Already a discovered node.
-          return /** @type {!ContextNode} */ (n[NODE_PROP]);
+          return /** @type {!ContextNode<?>} */ (n[NODE_PROP]);
         }
         const {nodeType} = n;
         if (
@@ -112,6 +112,7 @@ export class ContextNode {
       }
       // Navigate up the DOM tree. Notice that we do not automatically go over
       // a root node boundary.
+      /** @type {Node|Element|undefined|null} */
       const assignedSlot =
         /** @type {?Node|undefined} */ (n[ASSIGNED_SLOT_PROP]) ||
         /** @type {Element} */ (n).assignedSlot;
@@ -164,7 +165,9 @@ export class ContextNode {
    * @param {Node} node
    */
   static rediscoverChildren(node) {
-    const contextNode = /** @type {ContextNode|undefined} */ (node[NODE_PROP]);
+    const contextNode = /** @type {ContextNode<?>|undefined} */ (
+      node[NODE_PROP]
+    );
     contextNode?.children?.forEach(discoverContextNode);
   }
 
@@ -203,7 +206,7 @@ export class ContextNode {
      * root node after the discovery phase.
      *
      * @package
-     * @type {?ContextNode}
+     * @type {?ContextNode<?>}
      */
     this.root = this.isRoot ? this : null;
 
@@ -215,7 +218,7 @@ export class ContextNode {
      * unobfuscated to avoid cross-binary issues.
      *
      * @package
-     * @type {?ContextNode}
+     * @type {?ContextNode<?>}
      */
     this.parent = null;
 
@@ -223,7 +226,7 @@ export class ContextNode {
      * See `parent` description.
      *
      * @package
-     * @type {?ContextNode[]}
+     * @type {?ContextNode<?>[]}
      */
     this.children = null;
 
@@ -241,7 +244,7 @@ export class ContextNode {
 
     /**
      * @private
-     * @type {?Map<SID, import('./subscriber').Subscriber>}
+     * @type {?Map<SID, import('./subscriber').Subscriber<?>>}
      */
     this.subscribers_ = null;
 
@@ -301,12 +304,12 @@ export class ContextNode {
    * Sets (or unsets) the direct parent. If the parent is set, the node will no
    * longer try to discover itself.
    *
-   * @param {?(ContextNode|Node)} parent
+   * @param {?(ContextNode<?>|Node)} parent
    */
   setParent(parent) {
     const parentContext = /** @type {*} */ (parent)?.nodeType
       ? ContextNode.get(/** @type {!Node} */ (parent))
-      : /** @type {?ContextNode} */ (parent);
+      : /** @type {?ContextNode<?>} */ (parent);
     this.updateTree_(parentContext, /* parentOverridden */ parent != null);
   }
 
@@ -323,7 +326,7 @@ export class ContextNode {
   }
 
   /**
-   * @param {?ContextNode} root
+   * @param {?ContextNode<?>} root
    * @protected Used cross-binary.
    */
   updateRoot(root) {
@@ -348,7 +351,7 @@ export class ContextNode {
    * @param {string} name
    * @param {function(Node):boolean} match
    * @param {number} weight
-   * @return {ContextNode}
+   * @return {ContextNode<?>}
    */
   addGroup(name, match, weight) {
     const groups = this.groups || (this.groups = new Map());
@@ -362,7 +365,7 @@ export class ContextNode {
 
   /**
    * @param {string} name
-   * @return {?ContextNode}
+   * @return {?ContextNode<?>}
    */
   group(name) {
     return this.groups?.get(name)?.cn || null;
@@ -370,7 +373,7 @@ export class ContextNode {
 
   /**
    * @param {Node} node
-   * @return {?ContextNode}
+   * @return {?ContextNode<?>}
    * @protected
    */
   findGroup(node) {
@@ -447,7 +450,7 @@ export class ContextNode {
   }
 
   /**
-   * @param {?ContextNode} parent
+   * @param {?ContextNode<?>} parent
    * @param {boolean} parentOverridden
    * @private
    */
@@ -494,7 +497,7 @@ export class ContextNode {
  * `node`. Only iterates over known context nodes.
  *
  * @param {Node} node
- * @param {function(ContextNode):void} callback
+ * @param {function(ContextNode<?>):void} callback
  * @param {boolean=} includeSelf
  */
 function forEachContained(node, callback, includeSelf = true) {
@@ -521,7 +524,7 @@ function discoverContained(node) {
 }
 
 /**
- * @param {ContextNode} cn
+ * @param {ContextNode<?>} cn
  */
 function discoverContextNode(cn) {
   cn.discover();

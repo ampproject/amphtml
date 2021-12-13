@@ -1,3 +1,4 @@
+import {ContextNode} from './node'
 export interface IContextProp<T, DEP> {
   /**
    * A globally unique key. Extensions must use a fully qualified name such
@@ -77,4 +78,13 @@ export interface IContextPropUsed<T, DEP> {
   ping: (refreshParent: boolean) => void
   pingDep: ((dep: DEP) => void)[]
   pingParent: null | ((parentValue: T) => void)
+}
+declare global {
+  interface Node {
+    // Used to assign a ContextNode to a DOM Node.
+    __AMP_NODE?: ContextNode<any>;
+
+    // Used to map a Node to its assigned slot.
+    __AMP_ASSIGNED_SLOT?: Node;
+  }
 }
