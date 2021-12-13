@@ -55,9 +55,7 @@ export class WindowInterface {
    * @return {string}
    */
   static getUserLanguage(win) {
-    // The `navigator.userLanguage` is only supported by IE. The standard is
-    // the `navigator.language`.
-    return win.navigator['userLanguage'] || win.navigator.language;
+    return win.navigator.language;
   }
 
   /**
