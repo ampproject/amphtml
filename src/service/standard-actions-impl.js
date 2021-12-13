@@ -12,10 +12,10 @@ import {
 
 import {Services} from '#service';
 
-import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
-
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, user, userAssert} from '#utils/log';
+
+import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
 
 /**
  * @param {!Element} element
