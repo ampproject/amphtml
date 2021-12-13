@@ -29,44 +29,6 @@ export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 const TAG = 'amp-story-share-menu';
 
 /**
- * Quick share template, used as a fallback if native sharing is not supported.
- * @param {!Element} element
- * @param {function(Event)} close
- * @param {?Array<?Element|?string>|?Element|?string|undefined} children
- * @return {!Element}
- */
-const renderForFallbackSharing = (element, close, children) => {
-  return (
-    <div
-      class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
-      aria-hidden="true"
-      role="alert"
-      onClick={(event) => {
-        // Close if click occurred directly on this element.
-        if (event.target === event.currentTarget) {
-          close(event);
-        }
-      }}
-    >
-      <div class="i-amphtml-story-share-menu-container">
-        <button
-          class="i-amphtml-story-share-menu-close-button"
-          aria-label={localize(
-            element,
-            LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-          )}
-          role="button"
-          onClick={close}
-        >
-          &times;
-        </button>
-        {children}
-      </div>
-    </div>
-  );
-};
-
-/**
  * Share menu UI.
  */
 export class ShareMenu {
@@ -141,11 +103,7 @@ export class ShareMenu {
     const shareWidgetElement = this.shareWidget_.build(
       getAmpdoc(this.parentEl_)
     );
-    this.element_ = renderForFallbackSharing(
-      this.parentEl_,
-      () => this.close_(),
-      shareWidgetElement
-    );
+    this.element_ = this.renderForFallbackSharing_(shareWidgetElement);
     // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' when this file is lazy loaded.
     Services.extensionsFor(this.win_).installExtensionForDoc(
       getAmpdoc(this.parentEl_),
@@ -251,5 +209,41 @@ export class ShareMenu {
     navigator.share(shareData).catch((e) => {
       user().warn(TAG, e.message, shareData);
     });
+  }
+
+  /**
+   * Quick share template, used as a fallback if native sharing is not supported.
+   * @param {?Array<?Element|?string>|?Element|?string|undefined} children
+   * @return {!Element}
+   */
+  renderForFallbackSharing_(children) {
+    return (
+      <div
+        class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
+        aria-hidden="true"
+        role="alert"
+        onClick={(event) => {
+          // Close if click occurred directly on this element.
+          if (event.target === event.currentTarget) {
+            this.close_();
+          }
+        }}
+      >
+        <div class="i-amphtml-story-share-menu-container">
+          <button
+            class="i-amphtml-story-share-menu-close-button"
+            aria-label={localize(
+              this.parentEl_,
+              LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+            )}
+            role="button"
+            onClick={this.close_.bind(this)}
+          >
+            &times;
+          </button>
+          {children}
+        </div>
+      </div>
+    );
   }
 }
