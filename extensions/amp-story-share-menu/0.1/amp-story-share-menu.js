@@ -125,8 +125,7 @@ export class ShareMenu {
   }
 
   /**
-   * Builds a hidden amp-social-share button that triggers the native system
-   * sharing UI.
+   * Builds a element used for analytics, since the sharing menu is not rendered.
    * @private
    * @return {!Element}
    */
@@ -237,6 +236,7 @@ export class ShareMenu {
    * @private
    */
   close_() {
+    console.log('close');
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
   }
 
@@ -246,7 +246,7 @@ export class ShareMenu {
    */
   openSystemShare_() {
     const {navigator} = this.win_;
-    devAssert(navigator.share);
+    devAssert(navigator.share, 'share not supported');
     const shareData = {
       url: Services.documentInfoForDoc(this.parentEl_).canonicalUrl,
       text: this.win_.document.title,
