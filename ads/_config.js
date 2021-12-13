@@ -642,7 +642,6 @@ const adConfig = jsonConfiguration({
   'insurads': {
     prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
     preconnect: [
-      'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
       'https://adservice.google.com',
       'https://cdn.insurads.com',
