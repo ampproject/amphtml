@@ -17,7 +17,6 @@ import {isObject} from '#core/types';
  * @const {!Object<string, !LocalizedStringId_Enum>}
  */
 const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
-  'system': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
   'email': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
   'facebook': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
   'line': LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINE,
@@ -96,6 +95,10 @@ function buildProvider(doc, shareType) {
     SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
 
   if (!shareProviderLocalizedStringId) {
+    user().warn(
+      'AMP-STORY',
+      `'${shareType}'is not a valid share provider type.`
+    );
     return null;
   }
 
@@ -170,7 +173,6 @@ export class ShareWidget {
       <div class="i-amphtml-story-share-widget">
         <ul class="i-amphtml-story-share-list">
           {this.maybeRenderLinkShareButton_()}
-          <li></li>
         </ul>
       </div>
     );
@@ -270,16 +272,6 @@ export class ShareWidget {
       params = provider;
       provider = provider['provider'];
       delete params['provider'];
-    }
-
-    if (provider == 'system') {
-      user().warn(
-        'AMP-STORY',
-        '`system` is not a valid share provider type. Native sharing is ' +
-          'enabled by default and cannot be turned off.',
-        provider
-      );
-      return;
     }
 
     const element = buildProvider(

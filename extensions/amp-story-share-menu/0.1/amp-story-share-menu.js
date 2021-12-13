@@ -68,22 +68,6 @@ const renderForFallbackSharing = (element, close, children) => {
 };
 
 /**
- * System amp-social-share button template.
- * @return {!Element}
- */
-const renderAmpSocialShareSystemElement = () => {
-  return (
-    <amp-social-share
-      type="system"
-      // TODO(alanorozco): This style attr would be nicer as an object.
-      // We need to enable babel-plugin-jsx-style-object in the testing config
-      // so that we can verify results of style objects.
-      style="visibility:hidden;pointer-events:none;z-index:-1"
-    ></amp-social-share>
-  );
-};
-
-/**
  * Share menu UI.
  */
 export class ShareMenu {
@@ -147,8 +131,7 @@ export class ShareMenu {
    * @return {!Element}
    */
   buildForSystemSharing_() {
-    this.element_ = renderAmpSocialShareSystemElement();
-    return this.element_;
+    return (this.element_ = <div></div>);
   }
 
   /**
@@ -228,7 +211,8 @@ export class ShareMenu {
         this.element_.setAttribute('aria-hidden', !isOpen);
       });
     }
-    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
+
+    this.element_[ANALYTICS_TAG_NAME] = TAG;
     this.analyticsService_.triggerEvent(
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element_
