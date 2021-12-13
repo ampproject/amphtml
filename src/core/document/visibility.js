@@ -12,7 +12,7 @@ export function getDocumentVisibilityState(doc) {
     'visibilityState',
     true
   );
-  const visibilityStateValue = /** @type {any} */ (doc)[visibilityStateProp];
+  const visibilityStateValue = /** @type {*} */ (doc)[visibilityStateProp];
   if (visibilityStateValue) {
     return visibilityStateValue;
   }

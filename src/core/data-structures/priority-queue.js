@@ -70,7 +70,7 @@ export class PriorityQueue {
   }
 
   /**
-   * @param {function(T):any} callback
+   * @param {function(T):*} callback
    */
   forEach(callback) {
     let index = this.length;

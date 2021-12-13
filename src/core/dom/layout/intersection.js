@@ -91,7 +91,7 @@ export function intersectionEntryToJson(entry) {
 
 /**
  * @param {?} rect
- * @return {?import('#core/dom/layout/rect').LayoutRectDef}
+ * @return {?import('./rect').LayoutRectDef}
  */
 function safeLayoutRectFromDomRect(rect) {
   if (rect === null) {
