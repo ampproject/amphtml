@@ -37,7 +37,7 @@
 #include "cpp/htmlparser/atomutil.h"
 #include "cpp/htmlparser/css/amp4ads-parse-css.h"
 #include "cpp/htmlparser/css/parse-css.h"
-#include "css/parse-css.pb.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/elements.h"
 #include "cpp/htmlparser/json/parser.h"
