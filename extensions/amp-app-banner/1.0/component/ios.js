@@ -68,14 +68,12 @@ export function getIOSAppInfo() {
  * @return {{installAppUrl: string, openInAppUrl: string}}
  */
 export function parseIOSMetaContent(metaContent) {
-  const config = metaContent
-    .replace(/\s/, '')
-    .split(',')
-    .reduce((result, part) => {
-      const [key, value] = part.split('=');
-      result[key] = value;
-      return result;
-    }, {});
+  const config = Object.fromEntries(
+    metaContent
+      .replace(/\s/, '')
+      .split(',')
+      .map((part) => part.split('='))
+  );
 
   const appId = config['app-id'];
   const openUrl = config['app-argument'];
