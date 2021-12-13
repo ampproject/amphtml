@@ -1,14 +1,14 @@
-/** @typedef {function(function())} */
-let SchedulerDef;
+/** @typedef {function(function():*):void} SchedulerDef */
+
 /**
  * Creates a scheduling function that executes the callback based on the
  * scheduler, but only one task at a time.
  *
- * @param {function()} handler
- * @param {?SchedulerDef} defaultScheduler
- * @return {function(!SchedulerDef=)}
+ * @param {function():*} handler
+ * @param {SchedulerDef} defaultScheduler
+ * @return {function(SchedulerDef=):void}
  */
-export function throttleTail(handler, defaultScheduler = null) {
+export function throttleTail(handler, defaultScheduler) {
   let scheduled = false;
   const handleAndUnschedule = () => {
     scheduled = false;
