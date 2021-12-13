@@ -390,7 +390,7 @@ export class Values {
         pingDep:
           deps.length > 0
             ? deps.map((dep, index) => {
-                /** @type {function(DEP):void} */
+                /** @param {DEP} value*/
                 return (value) => {
                   used.depValues[index] = value;
                   used.ping();
@@ -399,7 +399,7 @@ export class Values {
             : EMPTY_ARRAY,
         // Schedule the value recalculation due to the parent value change.
         pingParent: isRecursive(prop)
-          ? /** @type {(function(T):void)} */
+          ? /** @param {T} parentValue */
             (parentValue) => {
               used.parentValue = parentValue;
               used.ping();

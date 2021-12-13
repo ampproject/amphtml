@@ -93,7 +93,7 @@ export class ContextNode {
       if (n != node || includeSelf) {
         if (n[NODE_PROP]) {
           // Already a discovered node.
-          return /** @type {!ContextNode<?>} */ (n[NODE_PROP]);
+          return /** @type {ContextNode<?>} */ (n[NODE_PROP]);
         }
         const {nodeType} = n;
         if (

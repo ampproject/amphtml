@@ -64,7 +64,7 @@ export function unobserveContentSize(element, callback) {
  */
 export function measureContentSize(element) {
   return new Promise((resolve) => {
-    /** @type {function(LayoutSizeDef):void} */
+    /** @param {LayoutSizeDef} size */
     const onSize = (size) => {
       resolve(size);
       unobserveContentSize(element, onSize);
@@ -98,7 +98,7 @@ export function unobserveBorderBoxSize(element, callback) {
  */
 export function measureBorderBoxSize(element) {
   return new Promise((resolve) => {
-    /** @type {function(ResizeObserverSize): void} */
+    /** @param {ResizeObserverSize} size */
     const onSize = (size) => {
       resolve(size);
       unobserveBorderBoxSize(element, onSize);

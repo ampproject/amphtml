@@ -75,7 +75,7 @@ function setAttribute(element, name, value) {
 }
 
 /**
- * @param {string | function(*): Element} tag
+ * @param {string | (function(*): Element)} tag
  * @param {Object<string, *>} props
  * @param {...*} children
  * @return {Element}

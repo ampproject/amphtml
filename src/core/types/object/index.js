@@ -59,7 +59,7 @@ export function hasOwn(obj, key) {
  * Returns obj[key] iff key is obj's own property (is not inherited).
  * Otherwise, returns undefined.
  *
- * @param {Object<string, any>} obj
+ * @param {Object<string, *>} obj
  * @param {string} key
  * @return {*}
  */
@@ -125,9 +125,9 @@ export function deepMerge(target, source, depth = 10) {
 }
 
 /**
- * @param {Object<string, any>} o An object to remove properties from
+ * @param {Object<string, *>} o An object to remove properties from
  * @param {Array<string>} props A list of properties to remove from the Object
- * @return {Object<string, any>} An object with the given properties removed
+ * @return {Object<string, *>} An object with the given properties removed
  */
 export function omit(o, props) {
   return Object.keys(o).reduce((acc, key) => {
