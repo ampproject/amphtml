@@ -87,19 +87,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
-
     if (!tagData) {
       return;
     }
-
-    const rightEdgeOfScreentoTagDistance =
+    tagData['rightEdgeOfScreentoTagDistance'] =
       document.getElementsByTagName('amp-story-shopping-attachment')[0]
         .clientWidth - this.element.offsetLeft;
-
-    console.log(rightEdgeOfScreentoTagDistance);
-
-    tagData['rightEdgeOfScreentoTagDistance'] = rightEdgeOfScreentoTagDistance;
-
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
