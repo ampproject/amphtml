@@ -424,16 +424,24 @@ export class AmpStory extends AMP.BaseElement {
         'story-disable-animations-first-page'
       );
     }
-    // [i-amphtml-version] marks that the style was inlined in the doc server-side.
-    if (
-      this.getAmpDoc()
-        .getRootNode()
-        .documentElement.querySelector(
-          'style[amp-extension="amp-story"][i-amphtml-version]'
-        )
-    ) {
+    const docElem = this.getAmpDoc().getRootNode().documentElement;
+    // [i-amphtml-version] marks that the style was inlined in the doc
+    // server-side.
+    const inlinedAmpStoryCssExists = docElem.querySelector(
+      'style[amp-extension="amp-story"][i-amphtml-version]'
+    );
+    // [amp-extension=amp-story] on a stylesheet link marks that the style
+    // was linked on the doc server-side.
+    const linkAmpStoryCssExists = docElem.querySelector(
+      'link[amp-extension="amp-story"][rel=stylesheet]'
+    );
+
+    if (inlinedAmpStoryCssExists) {
       performanceService.addEnabledExperiment('story-inline-css');
+    } else if (linkAmpStoryCssExists) {
+      performanceService.addEnabledExperiment('story-link-css');
     }
+
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
       performanceService.addEnabledExperiment(
         'story-load-inactive-outside-viewport'
