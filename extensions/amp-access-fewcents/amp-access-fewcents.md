@@ -6,17 +6,7 @@ teaser:
   text: Fill this in with teaser text to improve SEO. Use the component description.
 ---
 
-<!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
-  * Remove this comment!
--->
-
 # amp-access-fewcents
-
 -   The amp-access-fewcents component is based on, and requires amp-access.
 -   amp-access-fewcents is built for amp pages
 -   amp-access-fewcents component internally uses amp-access to provide a behavior similar to amp-access, but built in such a way that it can be used with Fewcents.
