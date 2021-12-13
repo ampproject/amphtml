@@ -55,7 +55,9 @@ export class WindowInterface {
    * @return {string}
    */
   static getUserLanguage(win) {
-    return win.navigator.language;
+    return (
+      /** @type {*} */ (win.navigator)['userLanguage'] || win.navigator.language
+    );
   }
 
   /**
