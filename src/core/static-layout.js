@@ -251,7 +251,10 @@ function getEffectiveLayoutInternal(element) {
     layoutAttr,
     element
   );
-  /** @type {string|null|undefined} */
+  /**
+   * @type {string|null|undefined}
+   * @const
+   */
   const inputWidth =
     widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
   userAssert(
@@ -260,7 +263,10 @@ function getEffectiveLayoutInternal(element) {
     widthAttr,
     element
   );
-  /** @type {string|null|undefined} */
+  /**
+   * @type {string|null|undefined}
+   * @const
+   */
   const inputHeight =
     heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
   userAssert(

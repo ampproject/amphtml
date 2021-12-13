@@ -44,7 +44,8 @@ const allowedAttributes = [
  */
 export function getHtml(win, selector, attrs) {
   const root = win.document.querySelector(selector);
-  const result = /** @type {string[]} */ ([]);
+  /** @type {string[]} */
+  const result = [];
 
   if (root) {
     appendToResult(root, attrs, result);

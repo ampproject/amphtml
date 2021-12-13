@@ -1,4 +1,4 @@
-/** @type {undefined|Promise<undefined>}| */
+/** @type {undefined|Promise<void>}| */
 let resolved;
 
 /**
@@ -6,7 +6,7 @@ let resolved;
  * Babel converts direct calls to Promise.resolve() (with no arguments) into
  * calls to this.
  *
- * @return {Promise<undefined>}
+ * @return {Promise<void>}
  */
 export function resolvedPromise() {
   if (resolved) {

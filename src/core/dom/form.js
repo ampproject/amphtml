@@ -8,7 +8,7 @@ const FORM_PROP_ = '__AMP_FORM';
 
 /**
  * @param {HTMLElement} element
- * @return {HTMLFormElement}
+ * @return {AmpForm}
  */
 export function formOrNullForElement(element) {
   return element[FORM_PROP_] || null;
@@ -16,7 +16,7 @@ export function formOrNullForElement(element) {
 
 /**
  * @param {HTMLElement} element
- * @param {HTMLFormElement} form
+ * @param {AmpForm} form
  */
 export function setFormForElement(element, form) {
   element[FORM_PROP_] = form;

@@ -246,8 +246,8 @@ export const Curves_Enum = {
 };
 
 /**
- * @const
  * @type {Object<string, CurveDef>}
+ * @const
  */
 const NAME_MAP = {
   'linear': Curves_Enum.LINEAR,

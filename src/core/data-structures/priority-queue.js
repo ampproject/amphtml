@@ -85,10 +85,11 @@ export class PriorityQueue {
    * @return {?T}
    */
   dequeue() {
-    if (!this.length) {
+    const lastItem = this.queue_.pop();
+    if (!lastItem) {
       return null;
     }
-    return /** @type {{item: T}} */ (this.queue_.pop()).item;
+    return lastItem.item;
   }
 
   /**

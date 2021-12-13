@@ -10,6 +10,7 @@ const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
 /**
  * Character mapping from base64 to base64url.
  * @type {Object<string, string>}
+ * @const
  */
 const base64UrlEncodeSubs = {'+': '-', '/': '_', '=': '.'};
 

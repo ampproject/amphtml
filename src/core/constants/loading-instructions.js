@@ -42,7 +42,10 @@ const ORDER = [
   Loading_Enum.UNLOAD,
 ];
 
-/** @type {Object<string, number>} */
+/**
+ * @type {Object<string, number>}
+ * @const
+ */
 const MAP = {
   [Loading_Enum.AUTO]: 0,
   [Loading_Enum.LAZY]: 1,

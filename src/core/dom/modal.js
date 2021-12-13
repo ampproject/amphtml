@@ -42,7 +42,8 @@ const SAVED_TAB_INDEX = '__AMP_MODAL_SAVED_TAB_INDEX';
  * @package Visible for testing
  */
 export function getElementsToAriaHide(element) {
-  const arr = /** @type {HTMLElement[]} */ ([]);
+  /** @type {HTMLElement[]} */
+  const arr = [];
   const ancestors = getAncestors(element);
 
   for (let i = 0; i < ancestors.length; i++) {
@@ -90,10 +91,11 @@ function getAncestors(element) {
  * Note that some of these Elements may not be focusable (e.g. is a button
  * that is `disabled` or has an ancestor that is `display: none`).
  * @param {HTMLElement} element
- * @return {Array<HTMLElement>}
+ * @return {HTMLElement[]}
  */
 function getPotentiallyFocusableElements(element) {
-  const arr = /** @type {HTMLElement[]}*/ ([]);
+  /** @type {HTMLElement[]} */
+  const arr = [];
   let cur = element;
 
   while (cur) {

@@ -13,6 +13,7 @@ import {devAssert} from '#core/assert';
  * TODO(rcebulko): Revert to @see once type is available
  *
  * @type {string}
+ * @const
  */
 export const RAW_OBJECT_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
@@ -20,6 +21,7 @@ export const RAW_OBJECT_ARGS_KEY = '__AMP_OBJECT_STRING__';
  * Identifier for an element's default action.
  *
  * @type {string}
+ * @const
  */
 export const DEFAULT_ACTION = 'activate';
 
