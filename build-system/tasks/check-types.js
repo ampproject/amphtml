@@ -54,7 +54,7 @@ async function checkTypes() {
   // Use the list of targets if provided, otherwise check all targets
   const targets = argv.targets
     ? argv.targets.split(/,/)
-    : Object.keys({...TSC_TYPECHECK_TARGETS});
+    : Object.keys(TSC_TYPECHECK_TARGETS);
 
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
