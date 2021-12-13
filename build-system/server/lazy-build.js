@@ -15,18 +15,20 @@ const {jsBundles} = require('../compile/bundles.config');
 const {VERSION} = require('../compile/internal-version');
 
 const extensionBundles = {};
-maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
+maybeInitializeExtensions(extensionBundles);
 
 const vendorBundles = generateBundles();
 
 /**
- * Gets the unminified name of the bundle if it can be lazily built.
+ * Normalizes bento extension names and gets the unminified name of the bundle
+ * if it can be lazily built.
  *
  * @param {!Object} bundles
  * @param {string} name
  * @return {string}
  */
 function maybeGetUnminifiedName(bundles, name) {
+  name = name.replace('bento-', 'amp-');
   if (argv.minified) {
     for (const key of Object.keys(bundles)) {
       if (
@@ -84,6 +86,7 @@ async function build(bundles, name, buildFunc) {
   bundle.pendingBuild = buildFunc(bundles, name, {
     watch: true,
     minify: argv.minified,
+    localDev: true,
     onWatchBuild: async (bundlePromise) => {
       bundle.pendingBuild = bundlePromise;
       await bundlePromise;
@@ -104,7 +107,9 @@ async function build(bundles, name, buildFunc) {
  */
 async function lazyBuildExtensions(req, _res, next) {
   const matcher = argv.minified
-    ? /\/dist\/v0\/([^\/]*)\.js/ // '/dist/v0/*.js'
+    ? argv.esm
+      ? /\/dist\/v0\/([^\/]*)\.mjs/ // '/dist/v0/*.mjs'
+      : /\/dist\/v0\/([^\/]*)\.js/ // '/dist/v0/*.js'
     : /\/dist\/v0\/([^\/]*)\.max\.js/; // '/dist/v0/*.max.js'
   await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
 }
@@ -118,7 +123,7 @@ async function lazyBuildExtensions(req, _res, next) {
  * @return {Promise<void>}
  */
 async function lazyBuildJs(req, _res, next) {
-  const matcher = /\/.*\/([^\/]*\.js)/;
+  const matcher = argv.esm ? /\/.*\/([^\/]*\.mjs)/ : /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
 }
 
@@ -132,7 +137,9 @@ async function lazyBuildJs(req, _res, next) {
  */
 async function lazyBuild3pVendor(req, _res, next) {
   const matcher = argv.minified
-    ? new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.js`) // '/dist.3p/21900000/vendor/*.js'
+    ? argv.esm
+      ? new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.mjs`) // '/dist.3p/21900000/vendor/*.mjs'
+      : new RegExp(`\\/dist\\.3p\\/${VERSION}\\/vendor\\/([^\/]*)\\.js`) // '/dist.3p/21900000/vendor/*.js'
     : /\/dist\.3p\/current\/vendor\/([^\/]*)\.max\.js/; // '/dist.3p/current/vendor/*.max.js'
   await lazyBuild(req.url, matcher, vendorBundles, doBuild3pVendor, next);
 }

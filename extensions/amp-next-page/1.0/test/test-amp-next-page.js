@@ -1,5 +1,5 @@
 import '../amp-next-page';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
@@ -312,7 +312,7 @@ describes.realWin(
         expect(service.pages_[0].url).to.include('about:srcdoc');
         expect(service.pages_[0].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[0].visibilityState_).to.equal(
-          VisibilityState.VISIBLE
+          VisibilityState_Enum.VISIBLE
         );
       });
 
@@ -320,7 +320,7 @@ describes.realWin(
         [1, 2].forEach((i) => {
           expect(service.pages_[i].state_).to.equal(PageState.QUEUED);
           expect(service.pages_[i].visibilityState_).to.equal(
-            VisibilityState.PRERENDER
+            VisibilityState_Enum.PRERENDER
           );
         });
       });
@@ -334,13 +334,13 @@ describes.realWin(
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.not.be.called;
         expect(service.pages_[2].state_).to.equal(PageState.QUEUED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -353,13 +353,13 @@ describes.realWin(
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[2].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -378,7 +378,7 @@ describes.realWin(
 
         expect(service.pages_[1].state_).to.equal(PageState.FAILED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -399,7 +399,7 @@ describes.realWin(
           `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`,
           '/document1'
         );
-        service.pages_[1].setVisibility(VisibilityState.VISIBLE);
+        service.pages_[1].setVisibility(VisibilityState_Enum.VISIBLE);
 
         await fetchDocuments(
           service,
@@ -444,7 +444,7 @@ describes.realWin(
             img: '/img.jpg',
           },
           PageState.INSERTED /** initState */,
-          VisibilityState.VISIBLE /** initVisibility */,
+          VisibilityState_Enum.VISIBLE /** initVisibility */,
           {} /* Document */
         );
 
@@ -520,7 +520,7 @@ describes.realWin(
         expect(container.querySelector('.i-amphtml-next-page-shadow-root')).to
           .be.ok;
 
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.pages_[2].visibilityState_ = VisibilityState_Enum.VISIBLE;
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
 
         await service.hidePreviousPages_(
@@ -532,7 +532,7 @@ describes.realWin(
         expect(secondPagePauseSpy).to.be.calledOnce;
         expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VisibilityState_Enum.HIDDEN
         );
 
         // Replaces the inserted shadow doc with a placeholder of equal height
@@ -557,7 +557,7 @@ describes.realWin(
 
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.pages_[2].visibilityState_ = VisibilityState_Enum.VISIBLE;
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
         await service.hidePreviousPages_(
           0 /** index */,
@@ -565,7 +565,7 @@ describes.realWin(
         );
         expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VisibilityState_Enum.HIDDEN
         );
 
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.DOWN;
@@ -616,6 +616,56 @@ describes.realWin(
             service.pages_[index].shadowDoc.ampdoc.getParam('cap')
           ).to.equal('cid');
         });
+      });
+
+      it('shadow-doc Viewer calls host-doc messageDeliverer', async () => {
+        const initialMessageDeliverer = env.sandbox.spy();
+        const initialViewer = Services.viewerForDoc(ampdoc);
+        initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const index of [1, 2]) {
+          const {ampdoc} = service.pages_[index].shadowDoc;
+          const viewer = Services.viewerForDoc(ampdoc);
+          expect(viewer).to.not.equal(initialViewer);
+
+          const messageDeliverer = viewer.maybeGetMessageDeliverer();
+          expect(messageDeliverer).to.not.be.null;
+
+          const args = [`event${index}`, `data${index}`, true];
+
+          messageDeliverer(...args);
+
+          expect(initialMessageDeliverer.withArgs(...args)).to.have.been
+            .calledOnce;
+        }
+      });
+
+      it('shadow-doc Viewer suppresses viewport message requests', async () => {
+        const initialMessageDeliverer = env.sandbox.spy();
+        const initialViewer = Services.viewerForDoc(ampdoc);
+        initialViewer.setMessageDeliverer(initialMessageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const eventType of ['documentHeight', 'scroll', 'viewport']) {
+          for (const index of [1, 2]) {
+            const {ampdoc} = service.pages_[index].shadowDoc;
+            const viewer = Services.viewerForDoc(ampdoc);
+            expect(viewer).to.not.equal(initialViewer);
+
+            const messageDeliverer = viewer.maybeGetMessageDeliverer();
+            expect(messageDeliverer).to.not.be.null;
+
+            const args = [eventType, `data${index}`, true];
+
+            messageDeliverer(...args);
+
+            expect(initialMessageDeliverer.withArgs(...args)).to.not.have.been
+              .called;
+          }
+        }
       });
     });
 

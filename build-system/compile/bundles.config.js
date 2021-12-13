@@ -1,7 +1,7 @@
 'use strict';
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -16,15 +16,19 @@ exports.jsBundles = {
     destDir: './build/',
     minifiedDestDir: './build/',
   },
-  'custom-elements-polyfill.js': {
-    srcDir: 'src/polyfills/',
-    srcFilename: 'custom-elements-entrypoint.js',
+  'bento.js': {
+    // This file is generated, so we find its source in the build/ dir
+    // See compileBentoRuntime() and generateBentoRuntimeEntrypoint()
+    srcDir: 'build/',
+    srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      toName: 'custom-elements-polyfill.max.js',
       includePolyfills: false,
-      minifiedName: 'custom-elements-polyfill.js',
+      toName: 'bento.max.js',
+      minifiedName: 'bento.js',
+      // For backwards-compat:
+      aliasName: 'custom-elements-polyfill.js',
     },
   },
   'alp.max.js': {
@@ -106,16 +110,6 @@ exports.jsBundles = {
       externs: [],
       include3pDirectories: true,
       includePolyfills: true,
-    },
-  },
-  'compiler.js': {
-    srcDir: './src/compiler/',
-    srcFilename: 'index.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      minifiedName: 'compiler.js',
-      extraGlobs: ['src/builtins/**/*.js', 'extensions/amp-fit-text/**/*.js'],
     },
   },
   'amp-viewer-host.max.js': {
@@ -263,25 +257,6 @@ exports.verifyExtensionBundles = function () {
       'is missing from',
       bundle.name,
       bundleString
-    );
-    verifyBundle_(
-      'latestVersion' in bundle,
-      'latestVersion',
-      'is missing from',
-      bundle.name,
-      bundleString
-    );
-    const duplicates = exports.extensionBundles.filter(
-      (duplicate) => duplicate.name === bundle.name
-    );
-    verifyBundle_(
-      duplicates.every(
-        (duplicate) => duplicate.latestVersion === bundle.latestVersion
-      ),
-      'latestVersion',
-      'is not the same for all versions of',
-      bundle.name,
-      JSON.stringify(duplicates, null, 2)
     );
   });
 };

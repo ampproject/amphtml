@@ -10,7 +10,7 @@ import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {hasOwn, map} from '#core/types/object';
 import {isFiniteNumber, isObject} from '#core/types';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';

@@ -56,7 +56,7 @@ const AmpVideoWithKnobs = ({i, ...rest}) => {
   return (
     <amp-video
       {...rest}
-      ariaLabel={ariaLabel}
+      aria-label={ariaLabel}
       autoplay={autoplay}
       controls={controls}
       mediasession={mediasession}

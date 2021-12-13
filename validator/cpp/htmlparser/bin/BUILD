@@ -54,15 +54,17 @@ cc_binary(
 )
 
 cc_binary(
-    name = "jsongrammargen",
+    name = "statetablegen",
     srcs = [
-        "jsongrammargen.cc",
+        "statetablegen.cc",
     ],
     data = [
         "@htmlparser//data:jsongrammar.txt",
         "@htmlparser//json:states.h",
     ],
     deps = [
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
         "@htmlparser//grammar:tablebuilder",
     ],
 )

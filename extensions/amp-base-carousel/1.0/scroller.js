@@ -6,12 +6,12 @@ import {
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
-import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
+import {WithBentoLightboxGallery} from '../../amp-lightbox-gallery/1.0/component';
 import {debounce} from '#core/types/function';
 import {forwardRef} from '#preact/compat';
 import {mod} from '#core/math';
 import {setStyle} from '#core/dom/style';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {
   useCallback,
   useImperativeHandle,
@@ -180,7 +180,7 @@ function ScrollerWithRef(
       return;
     }
     // Use local window.
-    const win = toWin(node.ownerDocument.defaultView);
+    const win = getWin(node);
     if (!win) {
       return undefined;
     }
@@ -192,9 +192,7 @@ function ScrollerWithRef(
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(() => {
     // Use local window if possible.
-    const win = containerRef.current
-      ? toWin(containerRef.current.ownerDocument.defaultView)
-      : window;
+    const win = containerRef.current ? getWin(containerRef.current) : window;
     return debounce(
       win,
       () => {
@@ -339,7 +337,7 @@ function renderSlides(
   classes
 ) {
   const {length} = children;
-  const Comp = lightboxGroup ? WithLightbox : 'div';
+  const Comp = lightboxGroup ? WithBentoLightboxGallery : 'div';
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (

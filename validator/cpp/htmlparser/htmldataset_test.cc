@@ -20,6 +20,8 @@
 #include "testconstants.h"
 #include "tokenizer.h"
 
+ABSL_FLAG(std::string, test_srcdir, "", "Testdata directory");
+
 using namespace htmlparser;
 
 // Represents a single test case.

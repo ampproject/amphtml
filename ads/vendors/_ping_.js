@@ -1,4 +1,4 @@
-import {dev, devAssert, userAssert} from '../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {validateData} from '#3p/3p';
 
 /**

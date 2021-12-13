@@ -1,13 +1,14 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
 
 import {ENDPOINTS} from './constants';
 import {Linkmate} from './linkmate';
 import {getConfigOptions} from './linkmate-options';
 
-import {getData} from '../../../src/event-helper';
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {LinkRewriterManager} from '../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 
@@ -140,7 +141,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   postPageImpression_() {
     // When using layout='nodisplay' manually trigger CustomEventReporterBuilder
-    this.signals().signal(CommonSignals.LOAD_START);
+    this.signals().signal(CommonSignals_Enum.LOAD_START);
     const payload = this.buildPageImpressionPayload_();
 
     const builder = new CustomEventReporterBuilder(this.element);

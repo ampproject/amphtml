@@ -160,6 +160,7 @@ describes.realWin(
           .returns(Promise.resolve('http://example.com/?foo=bar'));
 
         const impl = new AmpAdNetworkValueimpressionImpl(element);
+        impl.uiHandler = {isStickyAd: () => false};
         return impl
           .getAdUrl(
             {consentString: 'user_consent_string', gdprApplies: true},

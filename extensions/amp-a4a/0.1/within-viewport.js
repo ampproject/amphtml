@@ -1,7 +1,7 @@
 import {Deferred} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
 import {memo} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {getMode} from '../../../src/mode';
 
@@ -20,7 +20,7 @@ export function whenWithinViewport(element, viewportNum) {
     return Promise.reject('!WITHIN_VIEWPORT_INOB');
   }
 
-  const win = toWin(element.ownerDocument.defaultView);
+  const win = getWin(element);
   const observersMap = memo(win, OBSERVERS_MAP_PROP, createObserversMap);
 
   let observer = observersMap.get(viewportNum);

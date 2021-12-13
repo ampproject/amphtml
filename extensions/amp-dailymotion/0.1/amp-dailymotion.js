@@ -1,59 +1,31 @@
 import {Deferred} from '#core/data-structures/promise';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {addParamToUrl, addParamsToUrl} from '../../../src/url';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dispatchCustomEvent, getDataParamsFromAttributes} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getData, listen} from '../../../src/event-helper';
+import {
+  DailymotionEvents,
+  getDailymotionIframeSrc,
+  makeDailymotionMessage,
+} from '../dailymotion-api';
+import {getData, listen} from '#utils/event-helper';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {parseQueryString} from '#core/types/string/url';
-import {isAutoplaySupported} from '#core/dom/video';
 
 const TAG = 'amp-dailymotion';
-
-/**
- * Player events reverse-engineered from the Dailymotion API
- * NOTE: 'unstarted' isn't part of the API, just a placeholder
- * as an initial state
- *
- * @enum {string}
- * @private
- */
-const DailymotionEvents = {
-  UNSTARTED: 'unstarted',
-  API_READY: 'apiready',
-  // Events fired for both the original content or ads
-  START: 'start',
-  PLAY: 'play',
-  PAUSE: 'pause',
-  END: 'end',
-  // Events fired only for ads
-  AD_START: 'ad_start',
-  AD_PLAY: 'ad_play',
-  AD_PAUSE: 'ad_pause',
-  AD_END: 'ad_end',
-  // Events fired only for the original content
-  VIDEO_START: 'video_start',
-  VIDEO_END: 'video_end',
-  // Other events
-  VOLUMECHANGE: 'volumechange',
-  STARTED_BUFFERING: 'progress',
-  FULLSCREEN_CHANGE: 'fullscreenchange',
-};
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -190,10 +162,10 @@ class AmpDailymotion extends AMP.BaseElement {
     }
 
     redispatch(this.element, data['event'], {
-      [DailymotionEvents.API_READY]: VideoEvents.LOAD,
-      [DailymotionEvents.END]: [VideoEvents.ENDED, VideoEvents.PAUSE],
-      [DailymotionEvents.PAUSE]: VideoEvents.PAUSE,
-      [DailymotionEvents.PLAY]: VideoEvents.PLAYING,
+      [DailymotionEvents.API_READY]: VideoEvents_Enum.LOAD,
+      [DailymotionEvents.END]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
+      [DailymotionEvents.PAUSE]: VideoEvents_Enum.PAUSE,
+      [DailymotionEvents.PLAY]: VideoEvents_Enum.PLAYING,
     });
 
     switch (data['event']) {
@@ -242,60 +214,46 @@ class AmpDailymotion extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
-   * @param {Array<boolean>=} opt_args
+   * @param {boolean} opt_arg
    * @private
    */
-  sendCommand_(command, opt_args) {
+  sendCommand_(command, opt_arg) {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'command': command,
-            'parameters': opt_args || [],
-          })
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          makeDailymotionMessage(command, opt_arg),
+          endpoint
         );
-        this.iframe_.contentWindow./*OK*/ postMessage(message, endpoint);
       }
     });
   }
 
   /** @private */
   getIframeSrc_() {
-    let iframeSrc =
-      'https://www.dailymotion.com/embed/video/' +
-      encodeURIComponent(this.videoid_ || '') +
-      '?api=1&html=1&app=amp';
+    const {
+      'endscreenEnable': endscreenEnable,
+      'info': info,
+      'mute': mute,
+      'sharingEnable': sharingEnable,
+      'start': start,
+      'uiHighlight': uiHighlight,
+      'uiLogo': uiLogo,
+    } = this.element.dataset;
 
-    const explicitParamsAttributes = [
-      'mute',
-      'endscreen-enable',
-      'sharing-enable',
-      'start',
-      'ui-highlight',
-      'ui-logo',
-      'info',
-    ];
-
-    explicitParamsAttributes.forEach((explicitParam) => {
-      const val = this.element.getAttribute(`data-${explicitParam}`);
-      if (val) {
-        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
-      }
-    });
-
-    const implicitParams = getDataParamsFromAttributes(this.element);
-    iframeSrc = addParamsToUrl(iframeSrc, implicitParams);
-
-    // In order to support autoplay the video needs to be muted on load so we
-    // dont receive an unmute event which prevents the video from autoplay.
-    if (
-      this.element.hasAttribute('autoplay') &&
-      isAutoplaySupported(this.win)
-    ) {
-      iframeSrc = addParamsToUrl(iframeSrc, {'mute': 1});
-    }
-    return iframeSrc;
+    return getDailymotionIframeSrc(
+      this.win,
+      this.videoid_,
+      this.element.hasAttribute('autoplay'),
+      endscreenEnable !== 'false',
+      info !== 'false',
+      mute === 'true',
+      sharingEnable !== 'false',
+      start,
+      uiHighlight,
+      uiLogo !== 'false',
+      getDataParamsFromAttributes(this.element)
+    );
   }
 
   /** @override */
@@ -332,7 +290,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.MUTED);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.MUTED);
       this.muted_ = true;
     });
   }
@@ -345,7 +303,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.UNMUTED);
       this.muted_ = false;
     });
   }

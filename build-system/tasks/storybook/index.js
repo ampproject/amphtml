@@ -3,7 +3,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
-const {cyan} = require('../../common/colors');
+const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
@@ -11,6 +11,7 @@ const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {writeFileSync} = require('fs-extra');
+const {yellow} = require('kleur/colors');
 
 const ENV_PORTS = {
   amp: 9001,
@@ -29,6 +30,13 @@ const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
  * @param {string} env 'amp' or 'preact'
  */
 function launchEnv(env) {
+  if (env === 'amp') {
+    log(
+      yellow('AMP environment for storybook is temporarily disabled.\n') +
+        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
+    );
+    return;
+  }
   log(`Launching storybook for the ${cyan(env)} environment...`);
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
   execScriptAsync(
@@ -50,6 +58,14 @@ function launchEnv(env) {
  * @param {string} env 'amp' or 'preact'
  */
 function buildEnv(env) {
+  if (env === 'amp') {
+    log(
+      yellow('AMP environment for storybook is temporarily disabled.\n') +
+        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
+    );
+    return;
+  }
+
   const configDir = envConfigDir(env);
 
   if (env === 'amp' && isPullRequestBuild()) {

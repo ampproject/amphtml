@@ -1,8 +1,8 @@
 PASS
 |  <!--
 |    Test Description:
-|    This is the minimum valid AMP4EMAIL document; it includes all of the required
-|    fields from the spec, but nothing else.
+|    This is the minimum valid JavaScript AMP Email document; it includes all
+|    of the required fields from the spec, but nothing else.
 |  -->
 |  <!doctype html>
 |  <html ⚡4email data-css-strict>

@@ -1,58 +1,42 @@
 import * as Preact from '#preact';
 import {BentoFitText} from '../component';
-import {number, text, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'FitText',
   component: BentoFitText,
-  decorators: [withKnobs],
+  args: {
+    minFontSize: 35,
+    maxFontSize: 72,
+    width: 300,
+    height: 200,
+  },
 };
 
-export const _default = () => {
-  const minFontSize = number('minFontSize', 35);
-  const maxFontSize = number('maxFontSize', 72);
-  const width = number('width', 300);
-  const height = number('height', 200);
+export const _default = ({height, width, ...args}) => {
   return (
-    <BentoFitText
-      minFontSize={minFontSize}
-      maxFontSize={maxFontSize}
-      style={{border: '1px solid black', width, height}}
-    >
+    <BentoFitText style={{border: '1px solid black', width, height}} {...args}>
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
     </BentoFitText>
   );
 };
 
-export const scaleUpOverflowEllipsis = () => {
-  const minFontSize = number('minFontSize', 42);
-  const maxFontSize = number('maxFontSize', 72);
-  const width = number('width', 300);
-  const height = number('height', 200);
+export const ScaleUpOverflowEllipsis = ({height, width, ...args}) => {
   return (
-    <BentoFitText
-      minFontSize={minFontSize}
-      maxFontSize={maxFontSize}
-      style={{border: '1px solid black', width, height}}
-    >
+    <BentoFitText style={{border: '1px solid black', width, height}} {...args}>
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt.
     </BentoFitText>
   );
 };
 
-export const scaleDown = () => {
-  const minFontSize = number('minFontSize', 6);
-  const maxFontSize = number('maxFontSize', 72);
-  const width = number('width', 300);
-  const height = number('height', 200);
+ScaleUpOverflowEllipsis.args = {
+  minFontSize: 42,
+};
+
+export const ScaleDown = ({height, width, ...args}) => {
   return (
-    <BentoFitText
-      minFontSize={minFontSize}
-      maxFontSize={maxFontSize}
-      style={{border: '1px solid black', width, height}}
-    >
+    <BentoFitText style={{border: '1px solid black', width, height}} {...args}>
       Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
       aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te
       mea, ius noster platonem in. Mea an idque minim, sit sale deleniti
@@ -63,35 +47,32 @@ export const scaleDown = () => {
   );
 };
 
-export const scaleDownMore = () => {
-  const minFontSize = number('minFontSize', 6);
-  const maxFontSize = number('maxFontSize', 72);
-  const width = number('width', 108);
-  const height = number('height', 78);
+ScaleDown.args = {
+  minFontSize: 6,
+};
+
+export const ScaleDownMore = ({height, width, ...args}) => {
   return (
-    <BentoFitText
-      minFontSize={minFontSize}
-      maxFontSize={maxFontSize}
-      style={{border: '1px solid black', width, height}}
-    >
+    <BentoFitText style={{border: '1px solid black', width, height}} {...args}>
       Superlongword text
     </BentoFitText>
   );
 };
 
-export const configureContent = () => {
-  const content = text('Content', 'hello world');
-  const minFontSize = number('minFontSize', 6);
-  const maxFontSize = number('maxFontSize', 200);
-  const width = number('width', 400);
-  const height = number('height', 400);
+ScaleDownMore.args = {
+  minFontSize: 6,
+};
+
+export const ConfigureContent = ({content, height, width, ...args}) => {
   return (
-    <BentoFitText
-      minFontSize={minFontSize}
-      maxFontSize={maxFontSize}
-      style={{border: '1px solid black', width, height}}
-    >
+    <BentoFitText style={{border: '1px solid black', width, height}} {...args}>
       {content}
     </BentoFitText>
   );
+};
+
+ConfigureContent.args = {
+  minFontSize: 6,
+  maxFontSize: 200,
+  content: 'hello world',
 };

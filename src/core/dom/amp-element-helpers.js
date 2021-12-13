@@ -9,7 +9,7 @@ export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
  * Determines if this element is an AMP element
- * @param {!Element} element
+ * @param {Element} element
  * @return {boolean}
  */
 export function isAmpElement(element) {
@@ -26,12 +26,12 @@ export function isAmpElement(element) {
 /**
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
- * @param {!HTMLElement} element
- * @return {!Promise<!AmpElement>}
+ * @param {HTMLElement} element
+ * @return {Promise<AmpElement>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
-  if (element.createdCallback) {
+  if (/** @type {*} */ (element).createdCallback) {
     // Element already is CustomElement;
     return Promise.resolve(/**@type {!AmpElement} */ (element));
   }

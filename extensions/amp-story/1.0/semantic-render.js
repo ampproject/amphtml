@@ -1,7 +1,6 @@
+import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {dev} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {dev} from '#utils/log';
 import {includes} from '#core/types/string';
 
 /**
@@ -11,13 +10,8 @@ import {includes} from '#core/types/string';
  */
 export function renderPageDescription(page, videos) {
   const descriptionElId = `i-amphtml-story-${page.element.id}-description`;
-  const descriptionEl = createElementWithAttributes(
-    page.win.document,
-    'div',
-    dict({
-      'class': 'i-amphtml-story-page-description',
-      'id': descriptionElId,
-    })
+  const descriptionEl = (
+    <div class="i-amphtml-story-page-description" id={descriptionElId}></div>
   );
   const append = (el) => {
     page.mutateElement(() => {
@@ -152,7 +146,7 @@ function extractTextContentWebVtt(text) {
     .join(' ');
   // Super loose HTML parsing to get HTML entity parsing and removal
   // of WebVTT elements.
-  const div = document.createElement('div');
+  const div = <div />;
   div./* element is never added to DOM */ innerHTML = text;
   return div.textContent;
 }

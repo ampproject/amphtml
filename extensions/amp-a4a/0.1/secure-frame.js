@@ -26,6 +26,9 @@ const sandboxVals =
   'allow-scripts ' +
   'allow-top-navigation';
 
+const TOKEN_VALUE_1P =
+  'AlbC5LKqHkvdIY45O3/1Js/EyRmwSjb4wyp3XZy8KbMWhfMknydD4Wx9K9GyEIdG3ojUlZOdpdbX340wPHpYfQoAAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
+
 /**
  * Create the starting html for all FIE ads. If streaming is supported body will be
  * piped in later.
@@ -51,6 +54,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
       default-src 'none';
       style-src ${fontProviderAllowList} 'unsafe-inline';
     ">
+    <meta http-equiv="origin-trial" content=${TOKEN_VALUE_1P}>    
     ${sanitizedHeadElements}
   </head>
   <body>${body}</body>
@@ -81,6 +85,9 @@ export function createSecureFrame(win, title, height, width) {
         'allowtransparency': '',
         'scrolling': 'no',
         'sandbox': sandboxVals,
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     )
   );

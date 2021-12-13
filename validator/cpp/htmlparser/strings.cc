@@ -254,7 +254,7 @@ int8_t Strings::CodePointNumBytes(char32_t c) {
 }
 
 std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
-  if (s->empty()) {
+  if (!s || s->empty()) {
     return std::nullopt;
   }
 

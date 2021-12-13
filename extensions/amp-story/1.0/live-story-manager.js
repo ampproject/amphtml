@@ -1,10 +1,9 @@
+import * as Preact from '#core/dom/jsx';
 import {Action, getStoreService} from './amp-story-store-service';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 import {lastChildElement} from '#core/dom/query';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to
@@ -36,18 +35,17 @@ export class LiveStoryManager {
    * configuration and appends it to the DOM.
    */
   build() {
-    const liveListEl = createElementWithAttributes(
-      this.ampStory_.win.document,
-      'amp-live-list',
-      dict({
-        'id': 'i-amphtml-' + this.storyEl_.id + '-dynamic-list',
-        'data-poll-interval':
-          this.storyEl_.getAttribute('data-poll-interval') || 15000,
-        'sort': 'ascending',
-        'disable-scrolling': '',
-        'disable-pagination': '',
-        'auto-insert': '',
-      })
+    const liveListEl = (
+      <amp-live-list
+        id={'i-amphtml-' + this.storyEl_.id + '-dynamic-list'}
+        data-poll-interval={
+          this.storyEl_.getAttribute('data-poll-interval') || 15000
+        }
+        sort="ascending"
+        disable-scrolling
+        disable-pagination
+        auto-insert
+      />
     );
     liveListEl[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = userAssert(
       this.storyEl_.id,
@@ -56,7 +54,7 @@ export class LiveStoryManager {
 
     this.ampStory_.element
       .signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => {
         Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
           this.ampdoc_,

@@ -1,7 +1,7 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {dict} from '#core/types/object';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -34,7 +34,7 @@ export class AdSenseNetworkConfig {
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
-    const win = toWin(this.autoAmpAdsElement_.ownerDocument.defaultView);
+    const win = getWin(this.autoAmpAdsElement_);
     return buildUrl(
       '//pagead2.googlesyndication.com/getconfig/ama',
       {

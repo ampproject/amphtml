@@ -1,6 +1,6 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {bezierCurve} from '#core/data-structures/curve';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
@@ -26,9 +26,11 @@ import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {createCustomEvent, loadPromise} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
-import {Animation} from '../../../src/animation';
-import {createCustomEvent, loadPromise} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
@@ -37,7 +39,6 @@ import {
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
-import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -171,7 +172,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       ? Promise.resolve()
       : img.tagName === 'IMG'
       ? loadPromise(img)
-      : img.signals().whenSignal(CommonSignals.LOAD_END);
+      : img.signals().whenSignal(CommonSignals_Enum.LOAD_END);
 
     if (!haveImg) {
       Services.ownersForDoc(this.element).scheduleLayout(this.element, img);
@@ -216,7 +217,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FILL;
+    return layout == Layout_Enum.FILL;
   }
 
   /**

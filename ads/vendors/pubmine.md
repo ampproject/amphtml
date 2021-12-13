@@ -20,6 +20,7 @@
   data-pt="1"
   data-ht="1"
   data-siteid="37790885"
+  data-blogid="428"
 >
 </amp-ad>
 ```
@@ -40,6 +41,7 @@ Please note that the height parameter should be 15 greater than your ad size to 
 -   `data-pt`: Enum value for page type
 -   `data-ht`: Enum value for hosting type
 -   `data-npa-on-unknown-consent`: Flag for allowing/prohibiting non-personalized-ads on unknown consent.
+-   `data-blogid`: Pubmine publisher blog number.
 
 ## Consent Support
 

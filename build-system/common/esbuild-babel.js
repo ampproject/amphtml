@@ -66,18 +66,24 @@ function getEsbuildBabelPlugin(
 
       const babelOptions =
         babel.loadOptions({caller: {name: callerName}}) || {};
-      const optionsHash = md5(
-        JSON.stringify({babelOptions, argv: process.argv.slice(2)})
-      );
 
       build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const filename = file.path;
-        const {contents, hash} = await batchedRead(filename, optionsHash);
+        const {contents, hash} = await batchedRead(filename);
+        const rehash = md5(
+          JSON.stringify({
+            callerName,
+            filename,
+            hash,
+            babelOptions,
+            argv: process.argv.slice(2),
+          })
+        );
 
         const transformed = await transformContents(
           filename,
           contents,
-          hash,
+          rehash,
           getFileBabelOptions(babelOptions, filename)
         );
         return {contents: transformed};
@@ -111,10 +117,12 @@ function getFileBabelOptions(babelOptions, filename) {
     babelOptions = {...babelOptions, plugins};
   }
 
+  // The amp runner automatically sets cwd to the `amphtml` directory.
+  const root = process.cwd();
   return {
     ...babelOptions,
     filename,
-    filenameRelative: path.basename(filename),
+    filenameRelative: path.relative(root, filename),
   };
 }
 

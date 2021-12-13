@@ -6,7 +6,7 @@ setDOM.CHECKSUM = 'data-checksum'
 var parseHTML = require('./parse-html')
 var KEY_PREFIX = '_set-dom-'
 var NODE_MOUNTED = KEY_PREFIX + 'mounted'
-var ELEMENT_TYPE = 1
+var ELEMENT_TYPE_ENUM = 1
 var DOCUMENT_TYPE = 9
 var DOCUMENT_FRAGMENT_TYPE = 11
 
@@ -58,7 +58,7 @@ function setDOM (oldNode, newNode) {
 function setNode (oldNode, newNode) {
   if (oldNode.nodeType === newNode.nodeType) {
     // Handle regular element node updates.
-    if (oldNode.nodeType === ELEMENT_TYPE) {
+    if (oldNode.nodeType === ELEMENT_TYPE_ENUM) {
       // Checks if nodes are equal before diffing.
       if (isEqualNode(oldNode, newNode)) return
 
@@ -212,7 +212,7 @@ function setChildNodes (oldParent, newParent) {
  * @return {string|void}
  */
 function getKey (node) {
-  if (node.nodeType !== ELEMENT_TYPE) return
+  if (node.nodeType !== ELEMENT_TYPE_ENUM) return
   var key = node.getAttribute(setDOM.KEY) || node.id
   if (key) return KEY_PREFIX + key
 }

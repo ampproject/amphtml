@@ -1,12 +1,15 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpScriptService} from '../../../amp-script/0.1/amp-script';
-import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '#testing/helpers/service';
 import {Services} from '#service';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
 import {installDocService} from '#service/ampdoc-impl';
 import {installTimerService} from '#service/timer-impl';
-import {loadPromise} from '../../../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
 
 describes.realWin(
   'amp-analytics.transport',

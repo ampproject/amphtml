@@ -24,9 +24,10 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {listenFor} from '../../../src/iframe-helper';
-import {user, userAssert} from '../../../src/log';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */

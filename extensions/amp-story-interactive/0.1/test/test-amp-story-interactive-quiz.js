@@ -1,10 +1,10 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {
+  MOCK_URL,
   getMockIncompleteData,
   getMockInteractiveData,
   getMockOutOfBoundsData,
@@ -22,7 +22,8 @@ describes.realWin(
     let win;
     let ampStoryQuiz;
     let storyEl;
-    let requestService;
+    let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
@@ -36,9 +37,14 @@ describes.realWin(
       );
       ampStoryQuizEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = new AmpStoryRequestService(win);
-      registerServiceBuilder(win, 'story-request', function () {
-        return requestService;
+
+      const xhr = Services.xhrFor(win);
+      xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
       });
 
       const storeService = new AmpStoryStoreService(win);
@@ -130,11 +136,8 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
-
-      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+      ampStoryQuiz.element.setAttribute('endpoint', MOCK_URL);
+      xhrJson = getMockInteractiveData();
 
       populateQuiz(ampStoryQuiz);
       await ampStoryQuiz.buildCallback();
@@ -146,11 +149,9 @@ describes.realWin(
 
     it('should handle the percentage pipeline with scrambled data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockScrambledData());
+      xhrJson = getMockScrambledData();
 
-      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+      ampStoryQuiz.element.setAttribute('endpoint', MOCK_URL);
 
       populateQuiz(ampStoryQuiz, NUM_OPTIONS);
       await ampStoryQuiz.buildCallback();
@@ -167,9 +168,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with incomplete data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockIncompleteData());
+      xhrJson = getMockIncompleteData();
 
       ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -188,9 +187,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with out of bounds data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockOutOfBoundsData());
+      xhrJson = getMockOutOfBoundsData();
 
       ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
 

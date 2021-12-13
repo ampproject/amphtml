@@ -7,7 +7,7 @@ const path = require('path');
 const tempy = require('tempy');
 const {BABEL_SRC_GLOBS} = require('./sources');
 const {CompilationLifecycles, debug} = require('./debug-compilation-lifecycle');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {TransformCache, batchedRead, md5} = require('../common/transform-cache');
 
@@ -81,24 +81,28 @@ async function preClosureBabel(file, outputFilename, options) {
   }
   const transformedFile = path.join(outputDir, file);
   if (!filesToTransform.includes(file)) {
-    if (!(await fs.exists(transformedFile))) {
+    if (!(await fs.pathExists(transformedFile))) {
       await fs.copy(file, transformedFile);
     }
     return transformedFile;
   }
   try {
     debug(CompilationLifecycles['pre-babel'], file);
-    const babelOptions =
-      babel.loadOptions({caller: {name: 'pre-closure'}}) || {};
-    const optionsHash = md5(
-      JSON.stringify({babelOptions, argv: process.argv.slice(2)})
+    const callerName = 'pre-closure';
+    const babelOptions = babel.loadOptions({caller: {name: callerName}}) || {};
+    const {contents, hash} = await batchedRead(file);
+    const rehash = md5(
+      JSON.stringify({
+        callerName,
+        filename: file,
+        hash,
+        babelOptions,
+        argv: process.argv.slice(2),
+      })
     );
-    const {contents, hash} = await batchedRead(file, optionsHash);
-    const cachedPromise = transformCache.get(hash);
+    const cachedPromise = transformCache.get(rehash);
     if (cachedPromise) {
-      if (!(await fs.exists(transformedFile))) {
-        await fs.outputFile(transformedFile, await cachedPromise);
-      }
+      await cachedPromise;
     } else {
       const transformPromise = babel
         .transformAsync(contents, {
@@ -107,10 +111,23 @@ async function preClosureBabel(file, outputFilename, options) {
           filenameRelative: path.basename(file),
           sourceFileName: path.relative(process.cwd(), file),
         })
-        .then((result) => result?.code);
-      transformCache.set(hash, transformPromise);
-      await fs.outputFile(transformedFile, await transformPromise);
-      debug(CompilationLifecycles['pre-closure'], transformedFile);
+        .then((result) => {
+          const {code, map} = result || {};
+          debug(
+            CompilationLifecycles['pre-closure'],
+            transformedFile,
+            code,
+            map
+          );
+          return code + `\n// ${file}`;
+        })
+        .then(async (code) => {
+          await fs.outputFile(transformedFile, code);
+          return code;
+        });
+      transformCache.set(rehash, transformPromise);
+
+      await transformPromise;
     }
   } catch (err) {
     const reason = handlePreClosureError(err, outputFilename, options);

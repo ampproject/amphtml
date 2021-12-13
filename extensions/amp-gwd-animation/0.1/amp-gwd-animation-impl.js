@@ -4,8 +4,8 @@ import {scopedQuerySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {dict, hasOwn} from '#core/types/object';
 
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
 
 /**
  * CSS class used to deactivate animations.

@@ -3,7 +3,7 @@
 const fs = require('fs-extra');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMain} = require('../common/git');
 const {linkCheckGlobs} = require('../test-configs/config');
@@ -101,6 +101,10 @@ function checkLinksInFile(file) {
     // Relative links start at the markdown file's path.
     baseUrl: 'file://' + path.dirname(path.resolve(file)),
     ignorePatterns: [
+      // Please note: This list is for links that are present many times in the repository.
+      // If a single link is failing, you can remove it directly using a surrounding
+      // comment directive markdown-link-check-disable / markdown-link-check-enable.
+
       // Localhost links don't work unless a `amp` server is running.
       {pattern: /localhost/},
       // codepen returns a 503 for these link checks

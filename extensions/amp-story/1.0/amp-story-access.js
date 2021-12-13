@@ -1,17 +1,15 @@
+import * as Preact from '#core/dom/jsx';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {Layout} from '#core/dom/layout';
-import {closest} from '#core/dom/query';
+import {Layout_Enum} from '#core/dom/layout';
 import {copyChildren, removeChildren} from '#core/dom';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '#utils/log';
 import {getStoryAttributeSrc} from './utils';
-import {htmlFor} from '#core/dom/static-template';
 import {isArray, isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
-import {setImportantStyles} from '#core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-access';
@@ -19,44 +17,26 @@ const TAG = 'amp-story-access';
 /**
  * @enum {string}
  */
-export const Type = {
+export const Type_Enum = {
   BLOCKING: 'blocking',
   NOTIFICATION: 'notification',
 };
 
 /**
- * Story access blocking type template.
- * @param {!Element} element
+ * @param {function():void} onOverflowClick
+ * @param {?Element=} header
+ * @param {?Element=} children
  * @return {!Element}
  */
-const getBlockingTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-header">
-            <div class="i-amphtml-story-access-logo"></div>
-          </div>
-          <div class="i-amphtml-story-access-content"></div>
-        </div>
-      </div>`;
-};
-
-/**
- * Story access notification type template.
- * @param {!Element} element
- * @return {!Element}
- */
-const getNotificationTemplate = (element) => {
-  return htmlFor(element)`
-      <div class="i-amphtml-story-access-overflow">
-        <div class="i-amphtml-story-access-container">
-          <div class="i-amphtml-story-access-content">
-            <span class="i-amphtml-story-access-close-button" role="button">
-              &times;
-            </span>
-          </div>
-        </div>
-      </div>`;
+const renderDrawerElement = (onOverflowClick, header, children) => {
+  return (
+    <div class="i-amphtml-story-access-overflow" onClick={onOverflowClick}>
+      <div class="i-amphtml-story-access-container">
+        {header}
+        <div class="i-amphtml-story-access-content">{children}</div>
+      </div>
+    </div>
+  );
 };
 
 /**
@@ -67,9 +47,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
-    this.containerEl_ = null;
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
   }
@@ -78,15 +55,12 @@ export class AmpStoryAccess extends AMP.BaseElement {
   buildCallback() {
     // Defaults to blocking paywall.
     if (!this.element.hasAttribute('type')) {
-      this.element.setAttribute('type', Type.BLOCKING);
+      this.element.setAttribute('type', Type_Enum.BLOCKING);
     }
 
     const drawerEl = this.renderDrawerEl_();
 
-    this.containerEl_ = dev().assertElement(
-      drawerEl.querySelector('.i-amphtml-story-access-container')
-    );
-    const contentEl = dev().assertElement(
+    const contentEl = devAssert(
       drawerEl.querySelector('.i-amphtml-story-access-content')
     );
 
@@ -102,7 +76,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /**
@@ -120,8 +94,6 @@ export class AmpStoryAccess extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
-
-    this.element.addEventListener('click', (event) => this.onClick_(event));
   }
 
   /**
@@ -130,7 +102,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   onAccessStateChange_(isAccess) {
-    if (this.getType_() === Type.BLOCKING) {
+    if (this.getType_() === Type_Enum.BLOCKING) {
       this.toggle_(isAccess);
     }
   }
@@ -141,7 +113,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @param {number} currentPageIndex
    */
   onCurrentPageIndexChange_(currentPageIndex) {
-    if (this.getType_() === Type.NOTIFICATION) {
+    if (this.getType_() === Type_Enum.NOTIFICATION) {
       // Only show the notification if on the first page of the story.
       // Note: this can be overriden by an amp-access attribute that might
       // show/hide the notification based on the user's authorizations.
@@ -150,20 +122,12 @@ export class AmpStoryAccess extends AMP.BaseElement {
   }
 
   /**
-   * Handles click events and maybe closes the paywall.
    * @param {!Event} event
-   * @return {*} TODO(#23582): Specify return type
    * @private
    */
-  onClick_(event) {
-    const el = dev().assertElement(event.target);
-
-    if (el.classList.contains('i-amphtml-story-access-close-button')) {
-      return this.toggle_(false);
-    }
-
-    // Closes the menu if click happened outside of the main container.
-    if (!closest(el, (el) => el === this.containerEl_, this.element)) {
+  onOverflowClick_(event) {
+    // Closes the menu if click happened directly on overflow element.
+    if (event.target === event.currentTarget) {
       this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
     }
   }
@@ -196,28 +160,40 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   renderDrawerEl_() {
+    const onOverflowClick = (event) => this.onOverflowClick_(event);
     switch (this.getType_()) {
-      case Type.BLOCKING:
-        const drawerEl = getBlockingTemplate(this.element);
-
+      case Type_Enum.BLOCKING:
         const logoSrc = getStoryAttributeSrc(
           this.element,
           'publisher-logo-src',
           /* warn */ true
         );
-
-        if (logoSrc) {
-          const logoEl = dev().assertElement(
-            drawerEl.querySelector('.i-amphtml-story-access-logo')
-          );
-          setImportantStyles(logoEl, {'background-image': `url(${logoSrc})`});
-        }
-
-        return drawerEl;
-        break;
-      case Type.NOTIFICATION:
-        return getNotificationTemplate(this.element);
-        break;
+        const header = (
+          <div class="i-amphtml-story-access-header">
+            <div
+              class="i-amphtml-story-access-logo"
+              style={logoSrc && {backgroundImage: `url(${logoSrc}) !important`}}
+            ></div>
+          </div>
+        );
+        return renderDrawerElement(onOverflowClick, header);
+      case Type_Enum.NOTIFICATION:
+        const closeButton = (
+          <span
+            class="i-amphtml-story-access-close-button"
+            role="button"
+            onClick={() => {
+              this.toggle_(false);
+            }}
+          >
+            &times;
+          </span>
+        );
+        return renderDrawerElement(
+          onOverflowClick,
+          /* header */ null,
+          closeButton
+        );
       default:
         user().error(
           TAG,
@@ -241,7 +217,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   allowlistActions_() {
-    const accessEl = dev().assertElement(
+    const accessEl = devAssert(
       this.win.document.getElementById('amp-access'),
       'Cannot find the amp-access configuration'
     );

@@ -3,7 +3,7 @@ import {waitForChildPromise} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
 
-import {waitFor, whenCalled} from '#testing/test-helper';
+import {waitFor, whenCalled} from '#testing/helpers/service';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';

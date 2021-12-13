@@ -12,10 +12,10 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {dev, user} from '#utils/log';
+
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {measurePageLayoutBox} from './measure-page-layout-box';
-
-import {dev, user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

@@ -1,11 +1,11 @@
-import {VideoIframe} from './component';
+import {BentoVideoIframe} from './component';
 
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {}
 
 /** @override */
-BaseElement['Component'] = VideoIframe;
+BaseElement['Component'] = BentoVideoIframe;
 
 /** @override */
 BaseElement['props'] = {
@@ -15,6 +15,9 @@ BaseElement['props'] = {
   'poster': {attr: 'poster'},
   'src': {attr: 'src'},
   'controls': {attr: 'controls', type: 'boolean'},
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
+  'loading': {attr: 'data-loading'},
 
   // TODO(alanorozco): These props have no internal implementation yet.
   'dock': {attr: 'dock'},
@@ -23,3 +26,6 @@ BaseElement['props'] = {
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['loadable'] = true;

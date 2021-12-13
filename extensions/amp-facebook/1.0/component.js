@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {dashToUnderline} from '#core/types/string';
-import {MessageType, deserializeMessage} from '#core/3p-frame-messaging';
+import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
 import {forwardRef} from '#preact/compat';
 import {tryParseJson} from '#core/types/object/json';
 import {useCallback, useLayoutEffect, useMemo, useState} from '#preact';
@@ -14,11 +14,11 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
 const DEFAULT_TITLE = 'Facebook comments';
 
 /**
- * @param {!FacebookDef.Props} props
- * @param {{current: ?FacebookDef.Api}} ref
+ * @param {!BentoFacebookDef.Props} props
+ * @param {{current: ?BentoFacebookDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-function FacebookWithRef(
+function BentoFacebookWithRef(
   {
     action,
     colorscheme,
@@ -55,7 +55,7 @@ function FacebookWithRef(
       if (data['action'] == 'ready') {
         onLoadRef.current?.();
       }
-      if (data['type'] == MessageType.EMBED_SIZE) {
+      if (data['type'] == MessageType_Enum.EMBED_SIZE) {
         const height = data['height'];
         if (requestResize) {
           requestResize(height);
@@ -145,6 +145,6 @@ function FacebookWithRef(
   );
 }
 
-const Facebook = forwardRef(FacebookWithRef);
-Facebook.displayName = 'Facebook'; // Make findable for tests.
-export {Facebook};
+const BentoFacebook = forwardRef(BentoFacebookWithRef);
+BentoFacebook.displayName = 'BentoFacebook'; // Make findable for tests.
+export {BentoFacebook};

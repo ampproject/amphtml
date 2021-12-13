@@ -754,6 +754,8 @@ actions that apply to the whole document.
     <td>
       <p>Copy any content to the clipboard. <code>text</code> is optional, and if is set it will copy those content/value into the clipboard.</p>
     </td>
+    <td><code>toggleTheme()</code></td>
+    <td>Toggles the amp-dark-mode class on the body element when called and sets users preference to the localStorage. The amp-dark-mode class is added by default to body based on the <code>prefers-color-scheme</code> value. Use <code>data-prefers-dark-mode-class</code> attribute on body tag to override the class to be used for dark mode.</td>
   </tr>
 </table>
 

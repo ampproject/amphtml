@@ -9,8 +9,8 @@ import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
 import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
-import {Layout} from '#core/dom/layout';
-import {getDetail} from '../../../src/event-helper';
+import {Layout_Enum} from '#core/dom/layout';
+import {getDetail} from '#utils/event-helper';
 import {iterateCursor} from '#core/dom';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '#core/dom/query';
 import {toArray} from '#core/types/array';
@@ -78,7 +78,7 @@ class AmpInlineGallery extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.CONTAINER;
+    return layout === Layout_Enum.CONTAINER;
   }
 
   /**

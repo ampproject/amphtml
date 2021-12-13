@@ -51,7 +51,8 @@ describes.endtoend(
         'childElementCount'
       );
 
-      await expect(count).to.eql(0);
+      // 2 accounts for previous and next buttons in panel player.
+      await expect(count).to.eql(2);
     });
 
     it('when player is not visible in first viewport and on first user scroll, iframe loads first story in prerender', async () => {

@@ -1,14 +1,14 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
 import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
 import {poll} from '#testing/iframe';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {toggleExperiment} from '#experiments';
 import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-stream-gallery',
@@ -164,7 +164,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,

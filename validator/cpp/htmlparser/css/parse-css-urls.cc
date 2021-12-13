@@ -8,6 +8,7 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/variant.h"
+#include "glog/logging.h"
 #include "logging.h"
 #include "strings.h"
 

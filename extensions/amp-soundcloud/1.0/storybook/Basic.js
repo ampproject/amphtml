@@ -4,11 +4,11 @@ import * as Preact from '#preact';
 
 import {rgba2hex} from './converter';
 
-import {Soundcloud} from '../component';
+import {BentoSoundcloud} from '../component';
 
 export default {
   title: 'Soundcloud',
-  component: Soundcloud,
+  component: BentoSoundcloud,
   decorators: [withKnobs],
 };
 
@@ -23,7 +23,7 @@ export const track = () => {
 
   // Render Preact Component
   return (
-    <Soundcloud
+    <BentoSoundcloud
       color={hex}
       style={{height: '240px'}}
       trackId={trackid}
@@ -43,7 +43,7 @@ export const playlist = () => {
 
   // Render Preact Component
   return (
-    <Soundcloud
+    <BentoSoundcloud
       color={hex}
       style={{height: '240px'}}
       playlistId={playlistid}

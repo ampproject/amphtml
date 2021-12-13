@@ -15,7 +15,7 @@
 
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 /**
  * Store loading ads info within window to ensure it can be properly stored

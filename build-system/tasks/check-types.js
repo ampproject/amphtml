@@ -10,7 +10,8 @@ const {
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, red, yellow} = require('../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
+const {execOrThrow} = require('../common/exec');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {logClosureCompilerError} = require('../compile/closure-compile');
 const {log} = require('../common/logging');
@@ -38,6 +39,17 @@ const getExtensionSrcPaths = () =>
     .sort();
 
 /**
+ * Object of targets to check with TypeScript.
+ *
+ * @type {Object<string, string>}
+ */
+const TSC_TYPECHECK_TARGETS = {
+  'compiler': 'src/compiler',
+  'carousel': 'extensions/amp-carousel/0.1',
+  'core': 'src/core',
+};
+
+/**
  * The main configuration location to add/edit targets for type checking.
  * Properties besides `entryPoints` are passed on to `closureCompile` as
  * options. * Values may be objects or functions, as some require initialization
@@ -52,7 +64,7 @@ const getExtensionSrcPaths = () =>
  *
  * @type {Object<string, Array<string>|Object|function():Object>}
  */
-const TYPE_CHECK_TARGETS = {
+const CLOSURE_TYPE_CHECK_TARGETS = {
   // Below are targets containing individual directories which are fully passing
   // type-checking. Do not remove or disable anything on this list.
   // Goal: Remove 'QUIET' from all of them.
@@ -62,18 +74,10 @@ const TYPE_CHECK_TARGETS = {
     srcGlobs: ['src/amp-story-player/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-core': CORE_SRCS_GLOBS,
-  'src-experiments': ['src/experiments/**/*.js', ...CORE_SRCS_GLOBS],
   'src-inabox': {
     srcGlobs: ['src/inabox/**/*.js'],
     warningLevel: 'QUIET',
   },
-  'src-polyfills': [
-    'src/polyfills/**/*.js',
-    // Exclude fetch its dependencies are cleaned up/extracted to core.
-    '!src/polyfills/fetch.js',
-    ...CORE_SRCS_GLOBS,
-  ],
   'src-preact': {
     srcGlobs: ['src/preact/**/*.js', ...CORE_SRCS_GLOBS],
     warningLevel: 'QUIET',
@@ -85,9 +89,6 @@ const TYPE_CHECK_TARGETS = {
   'src-service': {
     srcGlobs: ['src/service/**/*.js'],
     warningLevel: 'QUIET',
-  },
-  'src-compiler': {
-    srcGlobs: ['src/compiler/**/*.js'],
   },
   'src-utils': {
     srcGlobs: ['src/utils/**/*.js'],
@@ -102,7 +103,7 @@ const TYPE_CHECK_TARGETS = {
   // errors.
   'low-bar': {
     entryPoints: ['src/amp.js'],
-    extraGlobs: ['{src,extensions}/**/*.js'],
+    extraGlobs: ['{src,extensions}/**/*.js', ...getLowBarExclusions()],
     onError(msg) {
       const lowBarErrors = [
         'JSC_BAD_JSDOC_ANNOTATION',
@@ -173,12 +174,47 @@ function externGlobsFromSrcGlobs(srcGlobs) {
 }
 
 /**
- * Performs closure type-checking on the target provided.
- * @param {string} targetName key in TYPE_CHECK_TARGETS
- * @return {!Promise<void>}
+ * Typecheck the given target using either tsc or closure.
+ *
+ * @param {string} targetName
+ * @return {Promise<void>}
  */
 async function typeCheck(targetName) {
-  let target = TYPE_CHECK_TARGETS[targetName];
+  return TSC_TYPECHECK_TARGETS[targetName]
+    ? tscTypeCheck(targetName)
+    : closureTypeCheck(targetName);
+}
+
+/**
+ * Performs tsc type-checking on the target provided.
+ * @param {string} targetName key in TSC_TYPECHECK_TARGETS
+ * @return {!Promise<void>}
+ */
+async function tscTypeCheck(targetName) {
+  execOrThrow(
+    `npx -p typescript tsc --project ${TSC_TYPECHECK_TARGETS[targetName]}/tsconfig.json`,
+    `Type checking ${targetName} failed`
+  );
+  log(green('SUCCESS:'), 'Type-checking passed for target', cyan(targetName));
+}
+
+/**
+ * Returns the exclusion glob for telling closure to ignore all paths
+ * being checked via TS.
+ *
+ * @return {string[]}
+ */
+function getLowBarExclusions() {
+  return Object.values(TSC_TYPECHECK_TARGETS).map((dir) => `!${dir}`);
+}
+
+/**
+ * Performs closure type-checking on the target provided.
+ * @param {string} targetName key in CLOSURE_TYPE_CHECK_TARGETS
+ * @return {!Promise<void>}
+ */
+async function closureTypeCheck(targetName) {
+  let target = CLOSURE_TYPE_CHECK_TARGETS[targetName];
   // Allow targets to be dynamically evaluated
   if (typeof target == 'function') {
     target = target();
@@ -268,7 +304,7 @@ async function checkTypes() {
   // Use the list of targets if provided, otherwise check all targets
   const targets = argv.targets
     ? argv.targets.split(/,/)
-    : Object.keys(TYPE_CHECK_TARGETS);
+    : Object.keys({...TSC_TYPECHECK_TARGETS, ...CLOSURE_TYPE_CHECK_TARGETS});
 
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
   displayLifecycleDebugging();
@@ -281,7 +317,7 @@ module.exports = {
   checkTypes,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: 'Set the number of concurrent invocations of closure',

@@ -1,12 +1,12 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '#service/cid-impl';
-import {ChunkPriority, chunk} from '../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {SameSite, setCookie} from '../../../src/cookies';
+import {SameSite_Enum, setCookie} from '../../../src/cookies';
 import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
 import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '#core/types';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/cookie-writer';
@@ -59,7 +59,7 @@ export class CookieWriter {
         this.writeDeferred_.resolve(this.init_());
       };
       // CookieWriter is not supported in inabox ad. Always chunk
-      chunk(this.element_, task, ChunkPriority.LOW);
+      chunk(this.element_, task, ChunkPriority_Enum.LOW);
     }
     return this.writeDeferred_.promise;
   }
@@ -203,7 +203,7 @@ export class CookieWriter {
    * @param {string} cookieName
    * @param {string} cookieValue
    * @param {number} cookieExpireDateMs
-   * @param {!SameSite=} sameSite
+   * @param {!SameSite_Enum=} sameSite
    * @return {!Promise}
    */
   expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs, sameSite) {
@@ -218,7 +218,7 @@ export class CookieWriter {
           const expireDate = Date.now() + cookieExpireDateMs;
           // SameSite=None must be secure as per
           // https://web.dev/samesite-cookies-explained/#samesitenone-must-be-secure
-          const secure = sameSite === SameSite.NONE;
+          const secure = sameSite === SameSite_Enum.NONE;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
             sameSite,
@@ -232,18 +232,18 @@ export class CookieWriter {
   }
 
   /**
-   * Converts SameSite string to SameSite type.
+   * Converts SameSite string to SameSite_Enum type.
    * @param {string=} sameSite
-   * @return {SameSite|undefined}
+   * @return {SameSite_Enum|undefined}
    */
   getSameSiteType_(sameSite) {
     switch (sameSite) {
       case 'Strict':
-        return SameSite.STRICT;
+        return SameSite_Enum.STRICT;
       case 'Lax':
-        return SameSite.LAX;
+        return SameSite_Enum.LAX;
       case 'None':
-        return SameSite.NONE;
+        return SameSite_Enum.NONE;
       default:
         return;
     }

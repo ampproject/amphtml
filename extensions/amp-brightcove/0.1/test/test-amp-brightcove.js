@@ -2,10 +2,10 @@ import '../amp-brightcove';
 import * as consent from '../../../../src/consent';
 import {BaseElement} from '../../../../src/base-element';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {CommonSignals} from '#core/constants/common-signals';
-import {VideoEvents} from '../../../../src/video-interface';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '#core/dom';
-import {listenOncePromise} from '../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 import {macroTask} from '#testing/helpers';
 import {parseUrlDeprecated} from '../../../../src/url';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -52,7 +52,7 @@ describes.realWin(
       const element = await getBrightcoveBuild(attributes);
       const impl = await element.getImpl(false);
 
-      await element.signals().whenSignal(CommonSignals.LOAD_START);
+      await element.signals().whenSignal(CommonSignals_Enum.LOAD_START);
 
       // Wait for the promise in layoutCallback() to resolve
       await macroTask();
@@ -64,7 +64,7 @@ describes.realWin(
         // fails) in which case awaiting the LOAD_END sigal below will throw.
       }
 
-      await element.signals().whenSignal(CommonSignals.LOAD_END);
+      await element.signals().whenSignal(CommonSignals_Enum.LOAD_END);
 
       return element;
     }
@@ -222,12 +222,12 @@ describes.realWin(
       const impl = await bc.getImpl();
       return Promise.resolve()
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.LOAD);
+          const p = listenOncePromise(bc, VideoEvents_Enum.LOAD);
           fakePostMessage(impl, {event: 'ready', muted: false, playing: false});
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.LOADEDMETADATA);
+          const p = listenOncePromise(bc, VideoEvents_Enum.LOADEDMETADATA);
           fakePostMessage(impl, {
             event: 'loadedmetadata',
             muted: false,
@@ -236,7 +236,7 @@ describes.realWin(
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.AD_START);
+          const p = listenOncePromise(bc, VideoEvents_Enum.AD_START);
           fakePostMessage(impl, {
             event: 'ads-ad-started',
             muted: false,
@@ -245,7 +245,7 @@ describes.realWin(
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.AD_END);
+          const p = listenOncePromise(bc, VideoEvents_Enum.AD_END);
           fakePostMessage(impl, {
             event: 'ads-ad-ended',
             muted: false,
@@ -254,7 +254,7 @@ describes.realWin(
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.PLAYING);
+          const p = listenOncePromise(bc, VideoEvents_Enum.PLAYING);
           fakePostMessage(impl, {
             event: 'playing',
             muted: false,
@@ -263,7 +263,7 @@ describes.realWin(
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.MUTED);
+          const p = listenOncePromise(bc, VideoEvents_Enum.MUTED);
           fakePostMessage(impl, {
             event: 'volumechange',
             muted: true,
@@ -272,7 +272,7 @@ describes.realWin(
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+          const p = listenOncePromise(bc, VideoEvents_Enum.UNMUTED);
           fakePostMessage(impl, {
             event: 'volumechange',
             muted: false,
@@ -281,12 +281,12 @@ describes.realWin(
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.PAUSE);
+          const p = listenOncePromise(bc, VideoEvents_Enum.PAUSE);
           fakePostMessage(impl, {event: 'pause', muted: false, playing: false});
           return p;
         })
         .then(() => {
-          const p = listenOncePromise(bc, VideoEvents.ENDED);
+          const p = listenOncePromise(bc, VideoEvents_Enum.ENDED);
           fakePostMessage(impl, {event: 'ended', muted: false, playing: false});
           return p;
         });

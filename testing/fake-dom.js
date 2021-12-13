@@ -210,6 +210,9 @@ export class FakeWindow {
     /** @const */
     this.Date = window.Date;
 
+    /** @const */
+    this.performance = new FakePerformance(this);
+
     /** polyfill setTimeout. */
     this.setTimeout = function () {
       return window.setTimeout.apply(window, arguments);
@@ -748,6 +751,21 @@ export class FakeMutationObserver {
       this.scheduled_ = null;
       this.callback_(this.takeRecords_());
     }));
+  }
+}
+
+export class FakePerformance {
+  constructor(win) {
+    /** @const */
+    this.win_ = win;
+  }
+
+  get timeOrigin() {
+    return 1;
+  }
+
+  now() {
+    return this.win_.Date.now();
   }
 }
 

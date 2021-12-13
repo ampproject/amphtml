@@ -12,15 +12,8 @@ bento: true
 
 ## Usage
 
-[tip type="warning"]
-
-This component is work in progress.
-
-[/tip]
-
 Displays an AMP valid iframe. `amp-iframe` has several important differences from vanilla iframes that are
-designed to make it more secure and avoid AMP files that are dominated by a
-single iframe:
+designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
 -   An `amp-iframe` may not appear close to the top of the document (except for
     iframes that use `placeholder` as described
@@ -41,7 +34,6 @@ single iframe:
   height="100"
   sandbox="allow-scripts allow-same-origin"
   layout="responsive"
-  frameborder="0"
   src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland"
 >
 </amp-iframe>
@@ -50,17 +42,19 @@ single iframe:
 <amp-iframe width="200" height="100"
     sandbox="allow-scripts allow-same-origin"
     layout="responsive"
-    frameborder="0"
     src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
 </amp-iframe>
+
+### Migrating from 0.1
+
+Unlike `0.1`, the experimental `1.0` version of `amp-iframe` has deprecated the `frameborder` attribute. Use the CSS `border` property to control `<amp-iframe>` borders.
 
 ### Use existing AMP components instead of `amp-iframe`
 
 The `amp-iframe` component should be considered a fallback if the required user
 experience is not possible by other means in AMP, that is, there's not already
-an existing AMP component
-for the use case. This is because there are many benefits to using an AMP
-component tailored for a specific use-case such as:
+an existing AMP component for the use case. This is because there are many
+benefits to using an AMP component tailored for a specific use-case such as:
 
 -   Better resource management and performance
 -   Custom components can provide built-in placeholder images in some cases.
@@ -91,6 +85,15 @@ The reasons for this policy are that:
     iframe.
 -   `amp-iframe` has no fully iframe controlled resize mechanism.
 -   Viewability information may not be available to `amp-iframe`.
+
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-iframe`, see [**`bento-iframe`**](./1.0/README.md).
 
 ### Iframe with placeholder <a name="iframe-with-placeholder"></a>
 
@@ -243,7 +246,8 @@ window.addEventListener('message', function (event) {
 
 The intersection message would be sent by the parent to the iframe in the format of IntersectionObserver entry wheneve there is intersectionRatio change across thresholds [0, 0.05, 0.1, ... 0.9, 0.95, 1].
 
-## Iframe & Consent Data
+<!-- TODO(#36211): uncomment when Bento amp-consent (v1.0) is ready -->
+<!-- ## Iframe & Consent Data
 
 Iframes can send a `send-consent-data` message to receive consent data if a CMP is present on their parents page.
 
@@ -288,6 +292,7 @@ window.addEventListener('message', function (event) {
   console.log(event.data.consentString);
 });
 ```
+-->
 
 ## Attributes
 
@@ -353,5 +358,4 @@ direct user purpose such as being invisible or small.
 
 ## Validation
 
-See [`amp-iframe` rules](validator-amp-iframe.protoascii)
-in the AMP validator specification.
+See [`amp-iframe` rules](validator-amp-iframe.protoascii) in the AMP validator specification.

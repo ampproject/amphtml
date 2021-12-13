@@ -2,7 +2,8 @@ import {rethrowAsync} from '#core/error';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
+
 import {
   parseUrlDeprecated,
   removeFragment,

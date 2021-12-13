@@ -1,9 +1,9 @@
 import '../amp-sidebar';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {ActionTrust} from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {assertScreenReaderElement} from '#testing/test-helper';
+import {assertScreenReaderElement} from '#testing/helpers/service';
 import {clearModalStack, getModalStackLength} from '#core/dom/modal';
 import {createElementWithAttributes} from '#core/dom';
 import {toggleExperiment} from '#experiments';
@@ -135,7 +135,7 @@ describes.realWin(
     }
 
     /** Helper for invoking open/close/toggle actions on amp-sidebar. */
-    function execute(impl, method, trust = ActionTrust.HIGH) {
+    function execute(impl, method, trust = ActionTrust_Enum.HIGH) {
       impl.executeAction({
         method,
         trust,
@@ -392,7 +392,7 @@ describes.realWin(
         if (eventObj.initEvent) {
           eventObj.initEvent('keydown', true, true);
         }
-        eventObj.key = Keys.ESCAPE;
+        eventObj.key = Keys_Enum.ESCAPE;
         eventObj.which = KEYBOARD_EVENT_WHICH_ESCAPE;
         const el = doc.documentElement;
         el.dispatchEvent

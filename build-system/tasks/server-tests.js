@@ -9,7 +9,7 @@ const {
   logWithoutTimestampLocalDev,
 } = require('../common/logging');
 const {buildNewServer} = require('../server/typescript-compile');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
 const inputPaths = [`${transformsDir}/**/input.html`];

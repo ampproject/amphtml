@@ -1,11 +1,12 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {SocialShare} from './component';
+import {BentoSocialShare} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = SocialShare;
+BaseElement['Component'] = BentoSocialShare;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
@@ -30,3 +31,6 @@ BaseElement['staticProps'] = {
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['shadowCss'] = COMPONENT_CSS;

@@ -1,6 +1,6 @@
 ---
 name: Release Tracker
-description: Track a new AMP release.
+description: Manually track a new AMP release. (This is automatically updated by the release-tagger GitHub Action).
 labels: 'Type: Release'
 title: "\U0001F684 Release VERSION"
 body:
@@ -17,12 +17,12 @@ body:
     id: promotions
     attributes:
       label: Promotions
-      description: Replace VERSION with AMP version and PROMOTE_TIME with CL submit time.
+      description: Replace `VERSION` with AMP version and `<!-- promote-time -->` with CL submit time.
       value: |
-        - [ ] VERSION promoted to Experimental and Beta (opt-in) channels (PROMOTE_TIME)
-        - [ ] VERSION promoted to Experimental and Beta (1% traffic) channels (PROMOTE_TIME)
-        - [ ] VERSION promoted to Stable channel (PROMOTE_TIME)
-        - [ ] (optional) VERSION promoted to LTS channel (PROMOTE_TIME)
+        - [ ] <!-- amp-version=VERSION channel=beta-opt-in -->VERSION promoted to Experimental and Beta (opt-in) channels <!-- promote-time -->
+        - [ ] <!-- amp-version=VERSION channel=beta-percent -->VERSION promoted to Experimental and Beta (1% traffic) channels <!-- promote-time -->
+        - [ ] <!-- amp-version=VERSION channel=stable -->VERSION promoted to Stable channel <!-- promote-time -->
+        - [ ] <!-- amp-version=VERSION channel=lts -->VERSION promoted to LTS channel <!-- promote-time -->
 
         /cc @ampproject/release-on-duty
     validations:

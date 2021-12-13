@@ -3,7 +3,8 @@ import {devAssert} from '#core/assert';
 import {Services} from '#service';
 import {calculateEntryPointScriptUrl} from '#service/extension-script';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
+
 import {ModeDef, getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service-helpers';
 

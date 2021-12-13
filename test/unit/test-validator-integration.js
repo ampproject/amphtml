@@ -2,7 +2,8 @@
  * @fileoverview Description of this file.
  */
 
-import * as eventHelper from '../../src/event-helper';
+import * as eventHelper from '#utils/event-helper';
+
 import * as mode from '../../src/mode';
 import {loadScript, maybeValidate} from '../../src/validator-integration';
 
@@ -62,8 +63,10 @@ describes.fakeWin('validator-integration', {}, (env) => {
   describe('loadScript', () => {
     it('should propagate pre-existing nonces', () => {
       const scriptEl = env.win.document.createElement('script');
-      scriptEl.setAttribute('nonce', '123');
+      scriptEl.setAttribute('nonce', '');
+      scriptEl.nonce = '123';
       win.document.head.append(scriptEl);
+
       loadScriptStub = env.sandbox
         .stub(eventHelper, 'loadPromise')
         .returns(Promise.resolve());
@@ -71,7 +74,7 @@ describes.fakeWin('validator-integration', {}, (env) => {
       loadScript(win.document, 'http://example.com');
 
       expect(loadScriptStub).calledWith(
-        env.sandbox.match((el) => el.getAttribute('nonce') === '123')
+        env.sandbox.match((el) => el.nonce === '123')
       );
     });
   });

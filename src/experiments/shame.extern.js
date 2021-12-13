@@ -18,9 +18,9 @@ Logger.prototype.error;
 /** @type {function(...?)} */
 Logger.prototype.assertString;
 /** @type {function():!Logger} */
-let user$$module$src$log;
+let user$$module$src$utils$log;
 /** @type {function():!Logger} */
-let dev$$module$src$log;
+let dev$$module$src$utils$log;
 
 /** @type {function():!{test:boolean}} */
 let getMode$$module$src$mode;

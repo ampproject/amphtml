@@ -24,6 +24,8 @@
       "#purifier/*": ["./src/purifier/*"],
       "#service": ["./src/service"],
       "#service/*": ["./src/service/*"],
+      "#utils": ["./src/utils"],
+      "#utils/*": ["./src/utils/*"],
 
       "#test/*": ["./test/*"],
       "#testing/*": ["./testing/*"],
@@ -32,5 +34,5 @@
     }
   },
   "include": ["src", "3p", "ads", "extensions", "test", "testing"],
-  "exclude": ["build", "dist", "dist.*", "node_modules"]
+  "exclude": ["**/build/**", "**/dist/**", "**/dist.*/**", "**/node_modules/**"]
 }

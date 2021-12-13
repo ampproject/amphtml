@@ -10,14 +10,14 @@ import {
 import {AdvancementMode} from './story-analytics';
 import {Services} from '#service';
 import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {closest, matches} from '#core/dom/query';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {listenOnce} from '#utils/event-helper';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
-import {listenOnce} from '../../../src/event-helper';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -58,10 +58,6 @@ const MINIMUM_TIME_BASED_AUTO_ADVANCE_MS = 500;
  * @private
  */
 const MAX_LINK_SCREEN_PERCENT = 0.8;
-
-const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
-  interactiveElementsSelectors()
-).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -396,12 +392,7 @@ export class ManualAdvancement extends AdvancementConfig {
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     this.timeoutId_ = null;
-    if (
-      !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-      /** @type {InteractiveComponentDef} */ (
-        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
-      ).state !== EmbeddedComponentState.EXPANDED
-    ) {
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -462,10 +453,9 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
-        if (
-          tagName === 'amp-story-page-attachment' ||
-          tagName === 'amp-story-page-outlink'
-        ) {
+        // Prevents navigation when clicking inside of draggable drawer elements,
+        // such as <amp-story-page-attachment> and <amp-story-page-outlink>.
+        if (el.classList.contains('amp-story-draggable-drawer-root')) {
           shouldHandleEvent = false;
           return true;
         }
@@ -640,15 +630,10 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const stored = /** @type {InteractiveComponentDef} */ (
-      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
-    );
-    const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
-      inExpandedMode ||
-      (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
-        this.canShowTooltip_(event, pageRect))
+      matches(target, interactiveElementsSelectors()) &&
+      this.canShowTooltip_(event, pageRect)
     );
   }
 
@@ -752,10 +737,7 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   getStoryPageRect_() {
     const uiState = this.storeService_.get(StateProperty.UI_STATE);
-    if (
-      uiState !== UIType.DESKTOP_PANELS &&
-      uiState !== UIType.DESKTOP_ONE_PANEL
-    ) {
+    if (uiState !== UIType.DESKTOP_ONE_PANEL) {
       return this.element_.getLayoutBox();
     } else {
       return this.element_
@@ -1098,9 +1080,14 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     this.element_.querySelector('video').removeAttribute('loop');
 
     this.unlistenFns_.push(
-      listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
-        capture: true,
-      })
+      listenOnce(
+        this.element_,
+        VideoEvents_Enum.ENDED,
+        () => this.onAdvance(),
+        {
+          capture: true,
+        }
+      )
     );
 
     this.onProgressUpdate();
@@ -1166,10 +1153,13 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       // amp-video, amp-audio, as well as amp-story-page with a background audio
       // are eligible for media based auto advance.
       let element = pageEl.querySelector(
-        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
-          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        `amp-video[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-video#${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}, amp-audio[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (
         matches(

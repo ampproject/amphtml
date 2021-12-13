@@ -3,7 +3,7 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 
 import {Services} from '#service';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 class AmpVine extends AMP.BaseElement {
   /** @param {!AmpElement} element */

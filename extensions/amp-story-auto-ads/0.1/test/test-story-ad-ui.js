@@ -1,4 +1,5 @@
-import {toggleExperiment} from '#experiments';
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
@@ -224,7 +225,11 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     beforeEach(() => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
-      toggleExperiment(env.win, 'amp-story-ads-page-outlink', true, true);
+      forceExperimentBranch(
+        win,
+        StoryAdSegmentExp.ID,
+        StoryAdSegmentExp.NO_ADVANCE_AD
+      );
     });
 
     it('createCta page outlink custom theme element', () => {
@@ -263,6 +268,8 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
           'https://www.cats.com/'
         );
         expect(containerElem.children[0].textContent).to.equal('SHOP');
+        expect(containerElem.children[0].target).to.equal('_top');
+        expect(containerElem.children[0].tagName).to.equal('A');
       });
     });
 

@@ -1,8 +1,9 @@
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
+
 import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-call-tracking';
@@ -51,7 +52,7 @@ export class AmpCallTracking extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout) || layout == Layout.CONTAINER;
+    return isLayoutSizeDefined(layout) || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */

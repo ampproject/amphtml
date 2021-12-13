@@ -11,7 +11,7 @@ import {
 import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {dev, user} from '../../../../src/log';
+import {dev, user} from '#utils/log';
 import {dict} from '#core/types/object';
 import {macroTask} from '#testing/helpers';
 import {

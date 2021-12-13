@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {Loading} from '#core/constants/loading-instructions';
+import {Loading_Enum} from '#core/constants/loading-instructions';
 import {rediscoverChildren, removeProp, setProp} from '#core/context';
 import {
   loadAll,
@@ -90,13 +90,13 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/constants/loading-instructions.Loading} */ (
+      /** @type {!./core/constants/loading-instructions.Loading_Enum} */ (
         context.loading
       )
     );
 
     if (!context.playable) {
-      execute(slot, pauseAll);
+      execute(slot, pauseAll, true);
     }
 
     return () => {
@@ -117,13 +117,13 @@ export function useSlotContext(ref, opt_props) {
 
     // Mount children, unless lazy loading requested. If so the element should
     // use `BaseElement.setAsContainer`.
-    if (loading != Loading.LAZY) {
+    if (loading != Loading_Enum.LAZY) {
       // TODO(#31915): switch to `mount`.
-      execute(slot, loadAll);
+      execute(slot, loadAll, true);
     }
 
     return () => {
-      execute(slot, unmountAll);
+      execute(slot, unmountAll, false);
     };
   }, [ref, loading]);
 }
@@ -131,12 +131,18 @@ export function useSlotContext(ref, opt_props) {
 /**
  * @param {!Element} slot
  * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
+ * @param {boolean} schedule
  */
-function execute(slot, action) {
+function execute(slot, action, schedule) {
   const assignedElements = slot.assignedElements
     ? slot.assignedElements()
     : slot;
   if (Array.isArray(assignedElements) && assignedElements.length == 0) {
+    return;
+  }
+
+  if (!schedule) {
+    action(assignedElements);
     return;
   }
 

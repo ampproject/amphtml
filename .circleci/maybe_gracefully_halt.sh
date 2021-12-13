@@ -15,7 +15,7 @@ if ls /tmp/restored-workspace/.CI_GRACEFULLY_HALT_* 1>/dev/null 2>&1; then
   exit 0
 fi
 
-if [[ $EXP ]]; then
+if [[ ${EXP} && ${EXP} != 'base' ]]; then
   # Extract the commit SHA. For PR jobs, this is written to .CIRCLECI_MERGE_COMMIT.
   if [[ -f /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT ]]; then
     COMMIT_SHA="$(cat /tmp/restored-workspace/.CIRCLECI_MERGE_COMMIT)"

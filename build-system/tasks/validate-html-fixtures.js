@@ -8,7 +8,7 @@ const {
   logWithoutTimestamp,
   logWithoutTimestampLocalDev,
 } = require('../common/logging');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {getFilesToCheck} = require('../common/utils');
 const {getOutput} = require('../common/process');
 const {htmlFixtureGlobs} = require('../test-configs/config');

@@ -1,5 +1,5 @@
 import {Deferred} from '#core/data-structures/promise';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -12,12 +12,13 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {
   cancellation,
   isBlockedByConsent,
   reportError,
 } from '../error-reporting';
-import {dev, devAssert} from '../log';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -28,7 +29,7 @@ const OWNER_PROP_ = '__AMP__OWNER';
  *
  * @enum {number}
  */
-export const ResourceState = {
+export const ResourceState_Enum = {
   /**
    * The resource has not been built yet. Measures, layouts, preloads or
    * viewport signals are not allowed.
@@ -150,15 +151,15 @@ export class Resource {
     /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
-    /** @private {!ResourceState} */
+    /** @private {!ResourceState_Enum} */
     this.state_ = element.isBuilt()
-      ? ResourceState.NOT_LAID_OUT
-      : ResourceState.NOT_BUILT;
+      ? ResourceState_Enum.NOT_LAID_OUT
+      : ResourceState_Enum.NOT_BUILT;
 
     // Race condition: if an element is reparented while building, it'll
     // receive a newly constructed Resource. Make sure this Resource's
     // internal state is also "building".
-    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+    if (this.state_ == ResourceState_Enum.NOT_BUILT && element.isBuilding()) {
       this.build();
     }
 
@@ -282,8 +283,8 @@ export class Resource {
   }
 
   /**
-   * Returns the resource's state. See {@link ResourceState} for details.
-   * @return {!ResourceState}
+   * Returns the resource's state. See {@link ResourceState_Enum} for details.
+   * @return {!ResourceState_Enum}
    */
   getState() {
     return this.state_;
@@ -327,7 +328,7 @@ export class Resource {
     return this.element.buildInternal().then(
       () => {
         this.isBuilding_ = false;
-        this.state_ = ResourceState.NOT_LAID_OUT;
+        this.state_ = ResourceState_Enum.NOT_LAID_OUT;
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
       },
@@ -441,7 +442,7 @@ export class Resource {
       // Most likely this is an element who's window has just been destroyed.
       // This is an issue with FIE embeds destruction. Such elements will be
       // considered "not displayable" until they are GC'ed.
-      this.state_ = ResourceState.NOT_LAID_OUT;
+      this.state_ = ResourceState_Enum.NOT_LAID_OUT;
       return;
     }
 
@@ -454,22 +455,22 @@ export class Resource {
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
     if (
-      this.state_ == ResourceState.NOT_LAID_OUT ||
+      this.state_ == ResourceState_Enum.NOT_LAID_OUT ||
       oldBox.top != newBox.top ||
       sizeChanges
     ) {
       if (this.element.isUpgraded()) {
-        if (this.state_ == ResourceState.NOT_LAID_OUT) {
+        if (this.state_ == ResourceState_Enum.NOT_LAID_OUT) {
           // If the element isn't laid out yet, then we're now ready for layout.
-          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
         } else if (
-          (this.state_ == ResourceState.LAYOUT_COMPLETE ||
-            this.state_ == ResourceState.LAYOUT_FAILED) &&
+          (this.state_ == ResourceState_Enum.LAYOUT_COMPLETE ||
+            this.state_ == ResourceState_Enum.LAYOUT_FAILED) &&
           this.element.isRelayoutNeeded()
         ) {
           // If the element was already laid out and we need to relayout, then
           // go back to ready for layout.
-          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
         }
       }
     }
@@ -635,7 +636,7 @@ export class Resource {
     if (!isConnected) {
       return false;
     }
-    const isFluid = this.element.getLayout() == Layout.FLUID;
+    const isFluid = this.element.getLayout() == Layout_Enum.FLUID;
     const box = this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return isFluid || hasNonZeroSize;
@@ -810,7 +811,7 @@ export class Resource {
    * @param {number} scheduleTime The time at which layout was scheduled.
    */
   layoutScheduled(scheduleTime) {
-    this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     this.element.layoutScheduleTime = scheduleTime;
   }
 
@@ -819,8 +820,8 @@ export class Resource {
    */
   layoutCanceled() {
     this.state_ = this.hasBeenMeasured()
-      ? ResourceState.READY_FOR_LAYOUT
-      : ResourceState.NOT_LAID_OUT;
+      ? ResourceState_Enum.READY_FOR_LAYOUT
+      : ResourceState_Enum.NOT_LAID_OUT;
   }
 
   /**
@@ -833,22 +834,22 @@ export class Resource {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
-    if (this.state_ == ResourceState.LAYOUT_COMPLETE) {
+    if (this.state_ == ResourceState_Enum.LAYOUT_COMPLETE) {
       return Promise.resolve();
     }
-    if (this.state_ == ResourceState.LAYOUT_FAILED) {
+    if (this.state_ == ResourceState_Enum.LAYOUT_FAILED) {
       return Promise.reject(this.lastLayoutError_);
     }
 
     devAssert(
-      this.state_ != ResourceState.NOT_BUILT,
+      this.state_ != ResourceState_Enum.NOT_BUILT,
       'Not ready to start layout: %s (%s)',
       this.debugid,
       this.state_
     );
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
-    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
+    if (this.state_ != ResourceState_Enum.LAYOUT_SCHEDULED) {
       const err = dev().createError(
         'startLayout called but not LAYOUT_SCHEDULED',
         'currently: ',
@@ -866,13 +867,13 @@ export class Resource {
         this.debugid,
         this.state_
       );
-      this.state_ = ResourceState.LAYOUT_COMPLETE;
+      this.state_ = ResourceState_Enum.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
     dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
-    this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
     this.abortController_ = new AbortController();
     const {signal} = this.abortController_;
 
@@ -918,8 +919,8 @@ export class Resource {
     }
     this.layoutPromise_ = null;
     this.state_ = success
-      ? ResourceState.LAYOUT_COMPLETE
-      : ResourceState.LAYOUT_FAILED;
+      ? ResourceState_Enum.LAYOUT_COMPLETE
+      : ResourceState_Enum.LAYOUT_FAILED;
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
@@ -935,8 +936,8 @@ export class Resource {
    */
   isLayoutPending() {
     return (
-      this.state_ != ResourceState.LAYOUT_COMPLETE &&
-      this.state_ != ResourceState.LAYOUT_FAILED
+      this.state_ != ResourceState_Enum.LAYOUT_COMPLETE &&
+      this.state_ != ResourceState_Enum.LAYOUT_FAILED
     );
   }
 
@@ -979,9 +980,9 @@ export class Resource {
    */
   unlayout() {
     if (
-      this.state_ == ResourceState.NOT_BUILT ||
-      this.state_ == ResourceState.NOT_LAID_OUT ||
-      this.state_ == ResourceState.READY_FOR_LAYOUT
+      this.state_ == ResourceState_Enum.NOT_BUILT ||
+      this.state_ == ResourceState_Enum.NOT_LAID_OUT ||
+      this.state_ == ResourceState_Enum.READY_FOR_LAYOUT
     ) {
       return;
     }
@@ -992,7 +993,7 @@ export class Resource {
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
-      this.state_ = ResourceState.NOT_LAID_OUT;
+      this.state_ = ResourceState_Enum.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
     }

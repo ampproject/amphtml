@@ -16,12 +16,13 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen} from '#utils/event-helper';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -262,7 +263,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /**
    * Sends a command to the player through postMessage. NOTE: All commands sent
-   * before imaVideo fires VideoEvents.LOAD will be queued until that event
+   * before imaVideo fires VideoEvents_Enum.LOAD will be queued until that event
    * fires.
    * @param {string} command
    * @param {Object=} opt_args
@@ -306,18 +307,18 @@ class AmpImaVideo extends AMP.BaseElement {
     }
 
     const videoEvent = eventData['event'];
-    if (isEnumValue(VideoEvents, videoEvent)) {
+    if (isEnumValue(VideoEvents_Enum, videoEvent)) {
       switch (videoEvent) {
-        case VideoEvents.LOAD:
+        case VideoEvents_Enum.LOAD:
           this.playerReadyResolver_(this.iframe_);
           break;
-        case VideoEvents.AD_START:
-        case VideoEvents.PLAY:
-        case VideoEvents.PLAYING:
+        case VideoEvents_Enum.AD_START:
+        case VideoEvents_Enum.PLAY:
+        case VideoEvents_Enum.PLAYING:
           this.pauseHelper_.updatePlaying(true);
           break;
-        case VideoEvents.PAUSE:
-        case VideoEvents.ENDED:
+        case VideoEvents_Enum.PAUSE:
+        case VideoEvents_Enum.ENDED:
           this.pauseHelper_.updatePlaying(false);
           break;
       }
@@ -326,7 +327,7 @@ class AmpImaVideo extends AMP.BaseElement {
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
-      dispatchCustomEvent(this.element, VideoEvents.LOADEDMETADATA);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {

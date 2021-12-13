@@ -1,7 +1,7 @@
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
@@ -82,7 +82,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(CommonSignals.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const liveListEl = ampStory.element.querySelector('amp-live-list');
       expect(liveListEl).to.exist;
     });
@@ -94,7 +94,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(CommonSignals.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const liveListEl = ampStory.element.querySelector('amp-live-list');
       expect(liveListEl.id).to.equal(
         'i-amphtml-' + ampStory.element.id + '-dynamic-list'
@@ -119,12 +119,14 @@ describes.realWin(
     it('should append new page from server to client in update', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
       ampStory.buildCallback();
-      expect(ampStory.element.children.length).to.equal(2);
+      expect(
+        ampStory.element.querySelectorAll('amp-story-page').length
+      ).to.equal(2);
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(CommonSignals.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const dispatchSpy = env.sandbox.spy(ampStory.storeService_, 'dispatch');
 
       const newPage = win.document.createElement('amp-story-page');

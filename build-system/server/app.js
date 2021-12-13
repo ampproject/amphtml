@@ -38,7 +38,7 @@ const {
 } = require('./recaptcha-router');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
-const {red} = require('../common/colors');
+const {red} = require('kleur/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
 
 /**
@@ -73,10 +73,7 @@ app.use(bodyParser.text());
 // Middleware is executed in order, so this must be at the top.
 // TODO(#24333): Migrate all server URL handlers to new-server/router and
 // deprecate app.js.
-// TODO(erwinmombay, #32865): Make visual diff tests use the new server
-if (!argv._.includes('visual-diff')) {
-  app.use(require('./new-server/router'));
-}
+app.use(require('./new-server/router'));
 
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
@@ -1336,7 +1333,7 @@ app.use('/subscription/register', (req, res) => {
   meteringStateStore[req.body.ampReaderId] = {
     id: meteringStateId,
     standardAttributes: {
-      // eslint-disable-next-line google-camelcase/google-camelcase
+      // eslint-disable-next-line local/camelcase
       registered_user: {
         timestamp: registrationTimestamp, // In seconds.
       },

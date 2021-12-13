@@ -1,6 +1,6 @@
-import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
+import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {Priority} from '#service/navigation';
+import {Priority_Enum} from '#service/navigation';
 import {Services} from '#service';
 import {WindowInterface} from '#core/window/interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
@@ -9,7 +9,7 @@ import {createLinker} from './linker';
 import {dict} from '#core/types/object';
 import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '#core/types';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
@@ -111,10 +111,10 @@ export class LinkerManager {
           return;
         }
         element.href = this.applyLinkers_(element.href);
-      }, Priority.ANALYTICS_LINKER);
+      }, Priority_Enum.ANALYTICS_LINKER);
       navigation.registerNavigateToMutator(
         (url) => this.applyLinkers_(url),
-        Priority.ANALYTICS_LINKER
+        Priority_Enum.ANALYTICS_LINKER
       );
     }
 
@@ -214,7 +214,7 @@ export class LinkerManager {
       return false;
     }
 
-    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME.LINKER);
+    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME_ENUM.LINKER);
   }
 
   /**

@@ -5,8 +5,9 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {devAssert} from '#utils/log';
+
 import {urls} from '../../../src/config';
-import {devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
