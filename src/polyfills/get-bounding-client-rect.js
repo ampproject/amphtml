@@ -6,7 +6,7 @@
  */
 
 import {isConnectedNode} from '#core/dom';
-import {LayoutRectDef, layoutRectLtwh} from '#core/dom/layout/rect';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import * as mode from '#core/mode';
 
 /**
@@ -18,7 +18,7 @@ let nativeClientRect;
 /**
  * Polyfill for Node.getBoundingClientRect API.
  * @this {!Element}
- * @return {!ClientRect|!LayoutRectDef}
+ * @return {!ClientRect|LayoutRectDef}
  */
 function getBoundingClientRect() {
   // eslint-disable-next-line local/no-invalid-this

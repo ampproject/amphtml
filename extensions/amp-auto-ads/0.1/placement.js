@@ -1,10 +1,6 @@
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {
-  LayoutMarginsChangeDef,
-  cloneLayoutMarginsChangeDef,
-} from '#core/dom/layout/rect';
-import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
@@ -16,6 +12,8 @@ import {dev, user} from '#utils/log';
 
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {measurePageLayoutBox} from './measure-page-layout-box';
+
+/** @typedef {import('#core/dom/layout/rect').LayoutMarginsChangeDef} LayoutMarginsChangeDef */
 
 /** @const */
 const TAG = 'amp-auto-ads';

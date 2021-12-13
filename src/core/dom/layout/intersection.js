@@ -3,7 +3,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
-import {LayoutRectDef, layoutRectFromDomRect} from './rect';
+import {layoutRectFromDomRect} from './rect';
 import {createViewportObserver} from './viewport-observer';
 
 /** @type {undefined|WeakMap<Element, Deferred<IntersectionObserverEntry>>|undefined} */
@@ -91,7 +91,7 @@ export function intersectionEntryToJson(entry) {
 
 /**
  * @param {?} rect
- * @return {?LayoutRectDef}
+ * @return {?import('#core/dom/layout/rect').LayoutRectDef}
  */
 function safeLayoutRectFromDomRect(rect) {
   if (rect === null) {

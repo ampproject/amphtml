@@ -1,5 +1,3 @@
-import {devAssert} from '#core/assert';
-
 /** @fileoverview Helpers to wrap functions. */
 
 /**
@@ -11,8 +9,8 @@ import {devAssert} from '#core/assert';
  * different.
  *
  * @template T
- * @param {(function(...any):T)} fn
- * @return {(function(...any):T)}
+ * @param {(function(...any):T?)} fn
+ * @return {(function(...any):T?)}
  */
 export function once(fn) {
   let evaluated = false;
@@ -26,7 +24,6 @@ export function once(fn) {
       evaluated = true;
       /** @type {?} */ (callback) = null; // GC
     }
-    devAssert(retValue);
     return retValue;
   };
 }
