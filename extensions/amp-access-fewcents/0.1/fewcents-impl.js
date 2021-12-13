@@ -60,7 +60,6 @@ export class AmpAccessFewcents {
     /** @private {!JsonObject} */
     this.i18n_ = Object.assign(dict(), DEFAULT_MESSAGES);
 
-    // Install styles.
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
   }
 
@@ -130,16 +129,6 @@ export class AmpAccessFewcents {
   }
 
   /**
-   * Creates new element for the paywall
-   * @param {string} name
-   * @return {!Element}
-   * @private
-   */
-  createElement_(name) {
-    return createElementWithAttributes(this.ampdoc.win.document, name, {});
-  }
-
-  /**
    * Return element on publisher's page where paywall will be displayed
    * @return {!Element}
    * @private
@@ -161,21 +150,36 @@ export class AmpAccessFewcents {
   renderPurchaseOverlay_() {
     // [TODO]: Create entire paywall element with button event listener for login flow
     this.dialogContainer_ = this.getPaywallContainer_();
-    this.innerContainer_ = this.createElement_('div');
-    this.innerContainer_.className = TAG_SHORTHAND + '-container';
+    this.innerContainer_ = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-container',
+      }
+    );
 
     // Creating header text of paywall
-    const headerText = this.createElement_('div');
-    headerText.className = TAG_SHORTHAND + '-headerText';
-    headerText.textContent = this.i18n_['fcTitleText'];
+    const headerText = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-headerText',
+      }
+    );
 
+    headerText.textContent = this.i18n_['fcTitleText'];
     this.innerContainer_.appendChild(headerText);
 
     // Creating unlock button on paywall
-    const unlockButton = this.createElement_('button');
-    unlockButton.className = TAG_SHORTHAND + '-purchase-button';
-    unlockButton.textContent = this.i18n_['fcButtonText'];
+    const unlockButton = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'button',
+      {
+        class: TAG_SHORTHAND + '-purchase-button',
+      }
+    );
 
+    unlockButton.textContent = this.i18n_['fcButtonText'];
     this.innerContainer_.appendChild(unlockButton);
 
     this.dialogContainer_.appendChild(this.innerContainer_);
