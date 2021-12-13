@@ -1,4 +1,4 @@
-import {devAssert} from '#core/assert';
+import {devAssert, devAssertNumber} from '#core/assert';
 import {rethrowAsync} from '#core/error';
 import {pushIfNotExist, removeItem} from '#core/types/array';
 
@@ -480,7 +480,7 @@ export class Values {
             used.pending = Pending_Enum.NOT_PENDING;
             return;
           }
-          devAssert(updated);
+          devAssertNumber(updated);
           updated++;
           this.tryUpdate_(used);
         }
