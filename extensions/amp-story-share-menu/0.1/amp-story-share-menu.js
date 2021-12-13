@@ -245,7 +245,6 @@ export class ShareMenu {
    */
   openSystemShare_() {
     const {navigator} = this.win_;
-    devAssert(navigator.share, 'share not supported');
     const shareData = {
       url: Services.documentInfoForDoc(this.parentEl_).canonicalUrl,
       text: this.win_.document.title,

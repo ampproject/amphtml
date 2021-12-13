@@ -10,10 +10,7 @@ import {
   VISIBLE_CLASS,
 } from '../../../amp-story-share-menu/0.1/amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
-import {
-  getAmpdoc,
-  registerServiceBuilder,
-} from '../../../../src/service-helpers';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let isSystemShareSupported;
