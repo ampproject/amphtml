@@ -1,3 +1,4 @@
+import {devAssertElement} from '#core/assert';
 import {ActionTrust} from '#core/constants/action-constants';
 import {tryFocus} from '#core/dom';
 import {Layout, getLayoutClass} from '#core/dom/layout';
@@ -14,8 +15,6 @@ import {Services} from '#service';
 import {createCustomEvent} from '../event-helper';
 import {dev, user, userAssert} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service-helpers';
-import {devAssertElement} from '#core/assert';
-import {dict} from '#core/types/object';
 
 /**
  * @param {!Element} element
@@ -232,19 +231,10 @@ export class StandardActions {
     const eventValue = /** @type {!JsonObject} */ ({
       data: /** @type {!JsonObject} */ {type: eventResult},
     });
-    let copyEvent = createCustomEvent(
-      win,
-      `${eventName}`,
-      eventValue
-    );
-    
+    const copyEvent = createCustomEvent(win, `${eventName}`, eventValue);
+
     const action_ = Services.actionServiceForDoc(invocation.caller);
-    action_.trigger(
-      invocation.caller,
-      eventName,
-      copyEvent,
-      ActionTrust.HIGH
-    );
+    action_.trigger(invocation.caller, eventName, copyEvent, ActionTrust.HIGH);
     return null;
   }
 
