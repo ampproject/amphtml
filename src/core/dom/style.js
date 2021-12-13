@@ -49,7 +49,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @param {any} style
+ * @param {*} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
@@ -119,7 +119,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   if (isVar(propertyName)) {
     element.style.setProperty(propertyName, styleValue);
   } else {
-    /** @type {any} */ (element.style)[propertyName] = styleValue;
+    /** @type {*} */ (element.style)[propertyName] = styleValue;
   }
 }
 
@@ -142,7 +142,7 @@ export function getStyle(element, property, opt_bypassCache) {
   if (isVar(propertyName)) {
     return element.style.getPropertyValue(propertyName);
   }
-  return /** @type {any} */ (element.style)[propertyName];
+  return /** @type {*} */ (element.style)[propertyName];
 }
 
 /**

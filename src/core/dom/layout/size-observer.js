@@ -6,7 +6,7 @@ import {getWin} from '#core/window';
 /** @typedef {import('./rect').LayoutSizeDef} LayoutSizeDef */
 /** @typedef {LayoutSizeDef|ResizeObserverSize} TargetSize */
 /**
- * @typedef {(s: Size) => void} SizeCallback
+ * @typedef {function(Size): void} SizeCallback
  * @template {TargetSize} Size
  */
 
@@ -64,7 +64,7 @@ export function unobserveContentSize(element, callback) {
  */
 export function measureContentSize(element) {
   return new Promise((resolve) => {
-    /** @type {(size: LayoutSizeDef) => void} */
+    /** @type {function(LayoutSizeDef):void} */
     const onSize = (size) => {
       resolve(size);
       unobserveContentSize(element, onSize);
@@ -98,7 +98,7 @@ export function unobserveBorderBoxSize(element, callback) {
  */
 export function measureBorderBoxSize(element) {
   return new Promise((resolve) => {
-    /** @type {(size: ResizeObserverSize) => void} */
+    /** @type {function(ResizeObserverSize): void} */
     const onSize = (size) => {
       resolve(size);
       unobserveBorderBoxSize(element, onSize);

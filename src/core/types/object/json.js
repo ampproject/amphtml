@@ -112,8 +112,8 @@ export function deepEquals(a, b, depth = 5) {
         }
         for (const k of keysA) {
           queue.push({
-            a: /** @type {any} */ (a)[k],
-            b: /** @type {any} */ (b)[k],
+            a: /** @type {*} */ (a)[k],
+            b: /** @type {*} */ (b)[k],
             depth: depth - 1,
           });
         }

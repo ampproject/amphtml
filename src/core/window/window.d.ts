@@ -23,9 +23,4 @@ declare global {
     // AMP Mode, used to force an override in tests.
     __AMP_MODE: {esm: boolean};
   }
-
-  interface Location {
-    // Set by a viewer when it removes the fragment.
-    originalHash?: string;
-  }
 }

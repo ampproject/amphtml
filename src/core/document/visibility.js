@@ -20,7 +20,7 @@ export function getDocumentVisibilityState(doc) {
   // Old API: `document.hidden` property.
   const hiddenProp = getVendorJsPropertyName(doc, 'hidden', true);
   if (hiddenProp in doc) {
-    const hiddenValue = /** @type {any} */ (doc)[hiddenProp];
+    const hiddenValue = /** @type {*} */ (doc)[hiddenProp];
     return hiddenValue
       ? VisibilityState_Enum.HIDDEN
       : VisibilityState_Enum.VISIBLE;

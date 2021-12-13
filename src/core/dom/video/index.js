@@ -26,8 +26,8 @@ export function detectIsAutoplaySupported(win) {
 
   detectionElement.muted = true;
   detectionElement.playsInline = true;
-  /** @type {any} */ (detectionElement)['playsinline'] = true;
-  /** @type {any} */ (detectionElement)['webkitPlaysinline'] = true;
+  /** @type {*} */ (detectionElement)['playsinline'] = true;
+  /** @type {*} */ (detectionElement)['webkitPlaysinline'] = true;
 
   setStyles(detectionElement, {
     position: 'fixed',

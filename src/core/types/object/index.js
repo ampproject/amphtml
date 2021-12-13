@@ -61,7 +61,7 @@ export function hasOwn(obj, key) {
  *
  * @param {Object<string, any>} obj
  * @param {string} key
- * @return {any}
+ * @return {*}
  */
 export function ownProperty(obj, key) {
   if (hasOwn(obj, key)) {
@@ -108,17 +108,17 @@ export function deepMerge(target, source, depth = 10) {
       continue;
     }
     for (const key of Object.keys(s)) {
-      const newValue = /** @type {any} */ (s)[key];
+      const newValue = /** @type {*} */ (s)[key];
       // Perform a deep merge IFF both target and source have the same key
       // whose corresponding values are objects.
       if (hasOwn(t, key)) {
-        const oldValue = /** @type {any} */ (t)[key];
+        const oldValue = /** @type {*} */ (t)[key];
         if (isObject(newValue) && isObject(oldValue)) {
           queue.push({t: oldValue, s: newValue, d: d + 1});
           continue;
         }
       }
-      /** @type {any} */ (t)[key] = newValue;
+      /** @type {*} */ (t)[key] = newValue;
     }
   }
   return target;
@@ -139,8 +139,8 @@ export function omit(o, props) {
 }
 
 /**
- * @param {any} o1
- * @param {any} o2
+ * @param {*} o1
+ * @param {*} o2
  * @return {boolean}
  */
 export function objectsEqualShallow(o1, o2) {
@@ -164,12 +164,12 @@ export function objectsEqualShallow(o1, o2) {
 }
 
 /**
- * @param {{[prop:string]: R|undefined}} obj
+ * @param {Object<string, R|undefined>} obj
  * @param {string} prop
- * @param {(obj:{[prop:string]:R|undefined}, str:string) => R} factory
+ * @param {function(Object<string, R|undefined>, string): R} factory
  * @return {R}
  *
- * @template {any} R
+ * @template R
  */
 export function memo(obj, prop, factory) {
   let result = obj[prop];

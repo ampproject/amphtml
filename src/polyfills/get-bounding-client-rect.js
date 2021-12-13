@@ -17,8 +17,8 @@ let nativeClientRect;
 
 /**
  * Polyfill for Node.getBoundingClientRect API.
- * @this {!Element}
- * @return {!ClientRect|LayoutRectDef}
+ * @this {Element}
+ * @return {ClientRect|LayoutRectDef}
  */
 function getBoundingClientRect() {
   // eslint-disable-next-line local/no-invalid-this

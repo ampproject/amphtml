@@ -24,7 +24,7 @@ declare global {
   }
 
   interface HTMLElement {
-    '__AMP_UPG_PRM'?: Promise<AmpElement>,
-    '__AMP_UPG_RES'?: (res:Function) => void,
+    __AMP_UPG_PRM?: Promise<AmpElement>;
+    __AMP_UPG_RES?: (res: Function) => void;
   }
 }

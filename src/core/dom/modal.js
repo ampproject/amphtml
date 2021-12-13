@@ -135,7 +135,7 @@ function getPotentiallyFocusableElements(element) {
  *
  * @param {HTMLElement} element The Element top operate on.
  * @param {string} attribute  The name of the attribute.
- * @param {?string|undefined} value The value of the attribute.
+ * @param {?string=} value The value of the attribute.
  */
 function restoreAttributeValue(element, attribute, value) {
   if (value === null || value == undefined) {

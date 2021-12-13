@@ -15,7 +15,7 @@ const readonlyGetterProp = (get) => ({
  * Returns a `LayoutRectDef`-like object whose values match the viewport's area
  * accoding to service.
  * @param {!../../../src/service/viewport/viewport-interface.ViewportInterface} viewport
- * @return {import('#core/dom/layout/rect').LayoutRectDef} with dynamic getters
+ * @return {import('./rect').LayoutRectDef} with dynamic getters
  */
 export function createViewportRect(viewport) {
   const width = readonlyGetterProp(() => viewport.getSize().width);

@@ -19,7 +19,7 @@ const srcsetRegex = /(\S+)(?:\s+(?:(-?\d+(?:\.\d+)?)([a-zA-Z]*)))?\s*(?:,|$)/g;
 /**
  * Extracts `srcset` and fallbacks to `src` if not available.
  * @param {Element} element
- * @return {Srcset<*>}
+ * @return {Srcset<SrcsetSourceDef>}
  */
 export function srcsetFromElement(element) {
   const srcsetAttr = element.getAttribute('srcset');
@@ -41,7 +41,7 @@ export function srcsetFromElement(element) {
 /**
  * Creates a Srcset from a `src` attribute value.
  * @param {string} src
- * @return {Srcset<*>}
+ * @return {Srcset<SrcsetSourceDef>}
  */
 export function srcsetFromSrc(src) {
   return new Srcset([{url: src, width: undefined, dpr: 1}]);
