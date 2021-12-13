@@ -14,7 +14,10 @@ import {throttleTail} from './scheduler';
  *          |(function(...DEP):(function():void))} SubscribeCallback
  */
 
+/** @type {Array<*>} */
 const EMPTY_ARRAY = [];
+
+/** @type {function():void} */
 const EMPTY_FUNC = () => {};
 
 /**

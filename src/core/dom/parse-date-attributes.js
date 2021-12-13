@@ -1,7 +1,8 @@
 import {devAssert, userAssert} from '#core/assert';
-import {TimestampDef, parseDate} from '#core/types/date';
+import {parseDate} from '#core/types/date';
 
-/** @typedef {function(string):TimestampDef} DateParserDef */
+/** @typedef {import('#core/types/date').TimestampDef} TimestampDef */
+/** @typedef {function(string): TimestampDef} DateParserDef */
 
 /**
  * Map from attribute names to their parsers.

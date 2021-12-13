@@ -2,6 +2,6 @@ export {};
 
 declare global {
   interface Element {
-    createShadowRoot;
+    createShadowRoot: () => ShadowRoot;
   }
 }

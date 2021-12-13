@@ -55,7 +55,9 @@ export class WindowInterface {
    * @return {string}
    */
   static getUserLanguage(win) {
-    return win.navigator.language;
+    return (
+      /** @type {*} */ (win.navigator)['userLanguage'] || win.navigator.language
+    );
   }
 
   /**
@@ -85,7 +87,7 @@ export class WindowInterface {
    * @return {typeof XMLHttpRequest}
    */
   static getXMLHttpRequest(win) {
-    return /** @type {any} */ (win).XMLHttpRequest;
+    return /** @type {*} */ (win).XMLHttpRequest;
   }
 
   /**
@@ -94,6 +96,6 @@ export class WindowInterface {
    * @return {typeof Image}
    */
   static getImage(win) {
-    return /** @type {any} */ (win).Image;
+    return /** @type {*} */ (win).Image;
   }
 }

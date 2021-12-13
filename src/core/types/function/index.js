@@ -9,13 +9,15 @@
  * different.
  *
  * @template T
- * @param {(function(...any):T)} fn
- * @return {(function(...any):T)}
+ * @param {(function(...any):T?)} fn
+ * @return {(function(...any):T?)}
  */
 export function once(fn) {
   let evaluated = false;
+  /** @type {T?} */
   let retValue = null;
   let callback = fn;
+
   return (...args) => {
     if (!evaluated) {
       retValue = callback.apply(self, args);
@@ -40,10 +42,12 @@ export function once(fn) {
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
+
+  /** @type {T[]?} */
   let nextCallArgs = null;
 
   /**
-   * @param {Object} args
+   * @param {T[]} args
    */
   function fire(args) {
     nextCallArgs = null;
@@ -88,10 +92,12 @@ export function throttle(win, callback, minInterval) {
 export function debounce(win, callback, minInterval) {
   let locker = 0;
   let timestamp = 0;
+
+  /** @type {T[]?} */
   let nextCallArgs = null;
 
   /**
-   * @param {?Array} args
+   * @param {T[]?} args
    */
   function fire(args) {
     nextCallArgs = null;

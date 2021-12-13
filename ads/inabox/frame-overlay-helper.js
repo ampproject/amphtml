@@ -1,8 +1,4 @@
-import {
-  LayoutRectDef,
-  layoutRectFromDomRect,
-  layoutRectLtwh,
-} from '#core/dom/layout/rect';
+import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
 import {
   centerFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,

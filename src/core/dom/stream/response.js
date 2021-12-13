@@ -41,7 +41,8 @@ export function streamResponseToWriter(win, response, writer) {
       }
 
       if (!done) {
-        return reader.read().then(handleChunk);
+        reader.read().then(handleChunk);
+        return;
       }
 
       writer.close();

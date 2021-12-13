@@ -3,16 +3,14 @@ import {isString} from '#core/types';
 /**
  * Number between 0 and 1 that designates normalized time, as in "from start to
  * end".
- * @typedef {number}
+ * @typedef {number} NormTimeDef
  */
-export let NormTimeDef;
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
  * normtime value.
- * @typedef {function(NormTimeDef): NormTimeDef}
+ * @typedef {function(NormTimeDef): NormTimeDef} CurveDef
  */
-export let CurveDef;
 
 /**
  * Returns a cubic bezier curve.
@@ -248,7 +246,8 @@ export const Curves_Enum = {
 };
 
 /**
- * @const {Object<string, CurveDef>}
+ * @type {Object<string, CurveDef>}
+ * @const
  */
 const NAME_MAP = {
   'linear': Curves_Enum.LINEAR,

@@ -43,5 +43,7 @@ export function whenUpgradedToCustomElement(element) {
     element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = deferred.resolve;
   }
 
-  return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+  const upgradedPromise = element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+  devAssert(upgradedPromise);
+  return upgradedPromise;
 }
