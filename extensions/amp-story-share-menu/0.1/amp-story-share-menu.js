@@ -236,7 +236,6 @@ export class ShareMenu {
    * @private
    */
   close_() {
-    console.log('close');
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
   }
 

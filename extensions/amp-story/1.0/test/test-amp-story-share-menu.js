@@ -10,7 +10,10 @@ import {
   VISIBLE_CLASS,
 } from '../../../amp-story-share-menu/0.1/amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {
+  getAmpdoc,
+  registerServiceBuilder,
+} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let isSystemShareSupported;
@@ -162,6 +165,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   it('should close back the share menu right away if system share', () => {
     isSystemShareSupported = true;
 
+    // Simulate native sharing.
     win.navigator.share = () => Promise.resolve();
 
     shareMenu.build();
@@ -169,5 +173,28 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+  });
+
+  it('should share natively if available with the canonical url and window title', () => {
+    isSystemShareSupported = true;
+
+    // Simulate native sharing.
+    win.navigator.share = () => Promise.resolve();
+    const shareSpy = env.sandbox.spy(win.navigator, 'share');
+
+    // Set canonicalUrl and window title for sharing.
+    env.sandbox
+      .stub(Services, 'documentInfoForDoc')
+      .returns({canonicalUrl: 'https://amp.dev'});
+    win.document.title = 'AMP';
+
+    shareMenu.build();
+
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+
+    expect(shareSpy).to.be.calledWith({
+      url: 'https://amp.dev',
+      text: 'AMP',
+    });
   });
 });
