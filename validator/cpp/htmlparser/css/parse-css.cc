@@ -1,4 +1,4 @@
-#include "css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
 
 #include <deque>
 #include <memory>
@@ -9,9 +9,9 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/variant.h"
-#include "css/parse-css.pb.h"
-#include "logging.h"
-#include "strings.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/strings.h"
 
 using absl::make_unique;
 using absl::StrCat;
