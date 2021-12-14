@@ -15,7 +15,6 @@ const OPEN_LINK_TIMEOUT = 1500;
  * @return {{openOrInstall: function(): void, promise: Promise<Response>}|null}
  */
 export function getAndroidAppInfo() {
-  const win = self.window;
   // We want to fallback to browser builtin mechanism when possible.
   const canShowBuiltinBanner =
     platformUtils.isAndroid() && platformUtils.isChrome();
@@ -28,7 +27,7 @@ export function getAndroidAppInfo() {
     return null;
   }
 
-  const manifestLink = win.document.head.querySelector(
+  const manifestLink = self.document.head.querySelector(
     'link[rel=manifest],link[rel=origin-manifest]'
   );
 
