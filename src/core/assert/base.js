@@ -1,3 +1,5 @@
+/// <reference path='./error.d.ts' />
+
 import {elementStringOrPassThru} from '#core/error/message-helpers';
 import {isArray, isElement, isString} from '#core/types';
 import {remove} from '#core/types/array';

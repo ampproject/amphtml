@@ -1,3 +1,5 @@
+/// <reference path='./build-constants.d.ts' />
+
 /**
  * Returns true when the build is meant for distribution.
  * This means `amp dist` was called _without_ the --fortesting flag.

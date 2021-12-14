@@ -16,11 +16,5 @@ declare global {
 
     // Counter for the DomBaseWeakRef polyfill.
     __AMP_WEAKREF_ID?: number;
-
-    // AMP Runtime settings, configuration, and environment/build constants.
-    AMP_CONFIG?: AmpConfigDef;
-
-    // AMP Mode, used to force an override in tests.
-    __AMP_MODE: {esm: boolean};
   }
 }

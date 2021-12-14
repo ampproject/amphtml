@@ -1,3 +1,5 @@
+/// <reference path='./fullscreen.d.ts' />
+
 /**
  * Replacement for `Element.requestFullscreen()` method.
  * https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen

@@ -1,3 +1,5 @@
+/// <reference path='./build-constants.d.ts' />
+
 /**
  * Returns true whenever closure compiler is used.
  * This is a magic constant that is replaced by babel.
