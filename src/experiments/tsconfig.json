@@ -14,14 +14,9 @@
       "#experiments": ["."],
       "#experiments/*": ["./*"],
 
-      "#core/*": ["../core/*"],
+      "#core/*": ["../core/*"]
     }
   },
-  "include": [
-    "**/*.js",
-    "**/*.d.ts",
-
-    "../core/**/*.d.ts"
-  ],
+  "include": ["**/*.js", "**/*.d.ts", "../core/**/*.d.ts"],
   "exclude": ["**/*.extern.js"]
 }
