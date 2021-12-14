@@ -1,8 +1,5 @@
 import {useCallback, useRef, useState} from '#preact';
 
-// eslint-disable-next-line local/no-forbidden-terms, local/no-global
-const storage = window.localStorage;
-
 /**
  * @param {string} key
  * @param {any} [defaultValue]
@@ -11,8 +8,14 @@ const storage = window.localStorage;
 export function useLocalStorage(key, defaultValue) {
   // Keep track of the state locally:
   const [value, setValue] = useState(() => {
-    const json = storage.getItem(key);
-    return json === undefined ? defaultValue : JSON.parse(json);
+    try {
+      // eslint-disable-next-line local/no-forbidden-terms
+      const json = self.localStorage?.getItem(key);
+      return json === undefined ? defaultValue : JSON.parse(json);
+    } catch (err) {
+      // warning: could not read from local storage
+      return defaultValue;
+    }
   });
 
   // Use a keyRef to ensure that `storeValue` maintains referential integrity
@@ -20,8 +23,13 @@ export function useLocalStorage(key, defaultValue) {
   keyRef.current = key;
 
   const storeValue = useCallback((newValue) => {
-    const json = JSON.stringify(newValue);
-    storage.setItem(keyRef.current, json);
+    try {
+      const json = JSON.stringify(newValue);
+      // eslint-disable-next-line local/no-forbidden-terms
+      self.localStorage?.setItem(keyRef.current, json);
+    } catch (err) {
+      // warning: could not write to local storage
+    }
     setValue(newValue);
   }, []);
 
