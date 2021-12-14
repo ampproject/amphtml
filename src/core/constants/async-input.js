@@ -1,5 +1,3 @@
-/// <reference path='./async-input.d.ts' />
-
 /**
  * Attributes
  *

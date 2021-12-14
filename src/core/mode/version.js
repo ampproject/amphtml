@@ -1,5 +1,3 @@
-/// <reference path='./build-constants.d.ts' />
-
 /**
  * Returns the internal AMP runtime version. Note that this is not the RTV,
  * which is a prefix and the runtime version.

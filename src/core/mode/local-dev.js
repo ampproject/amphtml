@@ -1,4 +1,3 @@
-/// <reference path='./build-constants.d.ts' />
 import {isProd} from './prod';
 import {isTest} from './test';
 

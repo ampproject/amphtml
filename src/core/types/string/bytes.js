@@ -1,5 +1,3 @@
-/// <reference path='./crypto-globals.d.ts' />
-
 import {devAssert} from '#core/assert';
 import * as mode from '#core/mode';
 

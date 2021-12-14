@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./build-constants.d.ts' />
 import {isProd} from './prod';
 
 /**

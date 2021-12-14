@@ -1,5 +1,3 @@
-/// <reference path='./json-object.d.ts' />
-
 import {isArray} from '#core/types/array';
 
 /**
