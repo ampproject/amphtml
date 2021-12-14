@@ -104,5 +104,18 @@
        srcset="https://www.example.com/blah2.jpg 470w,
                https://www.example.com/blah3.jpg 800w,
                https://www.example.com/blah4.jpg 1200w">
+
+  <!-- Invalid inside amp-story -->
+  <amp-story standalone
+           title=""
+           publisher=""
+           publisher-logo-src="logo"
+           poster-portrait-src="portrait">
+    <amp-story-page id=page1>
+      <amp-story-grid-layer template="vertical">
+        <img src="http://www.example.com/blah.jpg#fragment" width=92 height=10>"
+      </amp-story-grid-layer>
+    </amp-story-page>
+  </amp-story>
 </body>
 </html>

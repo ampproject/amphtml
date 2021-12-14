@@ -1,4 +1,10 @@
-import {devAssert, devAssertString, userAssert} from '#core/assert';
+import {
+  devAssert,
+  devAssertElement,
+  devAssertNumber,
+  devAssertString,
+  userAssert,
+} from '#core/assert';
 import {
   Layout_Enum,
   getLayoutClass,
@@ -18,8 +24,8 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
  * `hasNaturalDimensions` checks for membership in this set.
  * `getNaturalDimensions` determines the dimensions for an element in the
  *    set and caches it.
- * @type {!Object<string, ?./dom/layout/index.DimensionsDef>}
- * @private  Visible for testing only!
+ * @type {Object<string, ?import('./dom/layout').DimensionsDef>}
+ * @private  Visible for testing only
  */
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '0px', height: '0px'},
@@ -45,8 +51,8 @@ export function hasNaturalDimensions(tagName) {
  * different browser implementations, like <audio> for instance.
  * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
- * @param {!Element} element
- * @return {./dom/layout/index.DimensionsDef}
+ * @param {Element} element
+ * @return {import('./dom/layout').DimensionsDef}
  */
 export function getNaturalDimensions(element) {
   const tagName = element.tagName.toUpperCase();
@@ -54,9 +60,7 @@ export function getNaturalDimensions(element) {
   if (!naturalDimensions_[tagName]) {
     const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
-    const temp = /** @type {!HTMLElement} */ (
-      doc.createElement(naturalTagName)
-    );
+    const temp = /** @type {HTMLElement} */ (doc.createElement(naturalTagName));
 
     // For audio, should no-op elsewhere.
     /** @type {HTMLAudioElement} */ (temp).controls = true;
@@ -72,7 +76,7 @@ export function getNaturalDimensions(element) {
     };
     doc.body.removeChild(temp);
   }
-  return /** @type {./dom/layout/index.DimensionsDef} */ (
+  return /** @type {import('./dom/layout').DimensionsDef} */ (
     naturalDimensions_[tagName]
   );
 }
@@ -90,8 +94,8 @@ export function getNaturalDimensions(element) {
  * any changes made to it must be made in coordination with caches that
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
- * @param {!AmpElement} element
- * @return {!Layout_Enum}
+ * @param {AmpElement} element
+ * @return {Layout_Enum}
  */
 export function applyStaticLayout(element) {
   // Check if the layout has already been done by server-side rendering or
@@ -100,16 +104,18 @@ export function applyStaticLayout(element) {
   // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
-    const layout = /** @type {!Layout_Enum} */ (
-      devAssert(parseLayout(completedLayoutAttr))
-    );
+    const layout = parseLayout(completedLayoutAttr);
+    devAssert(layout);
+
     if (
       (layout == Layout_Enum.RESPONSIVE || layout == Layout_Enum.INTRINSIC) &&
       element.firstElementChild
     ) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
-        element.querySelector('i-amphtml-sizer') || undefined;
+        /** @type {?HTMLElement} */ (
+          element.querySelector('i-amphtml-sizer')
+        ) || undefined;
       element.sizerElement?.setAttribute('slot', 'i-amphtml-svc');
     } else if (layout == Layout_Enum.NODISPLAY) {
       toggle(element, false);
@@ -141,9 +147,12 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout_Enum.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
     sizer.setAttribute('slot', 'i-amphtml-svc');
+    const heightNumeral = getLengthNumeral(height);
+    const widthNumeral = getLengthNumeral(width);
+    devAssertNumber(heightNumeral);
+    devAssertNumber(widthNumeral);
     setStyles(sizer, {
-      paddingTop:
-        (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
+      paddingTop: (heightNumeral / widthNumeral) * 100 + '%',
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
@@ -157,6 +166,7 @@ export function applyStaticLayout(element) {
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
     const intrinsicSizer = sizer.firstElementChild;
+    devAssertElement(intrinsicSizer);
     intrinsicSizer.setAttribute(
       'src',
       `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
@@ -194,12 +204,12 @@ export function applyStaticLayout(element) {
 /**
  * Gets the effective layout for an element.
  *
- * @param {!Element} element
- * @return {!Layout_Enum}
+ * @param {Element} element
+ * @return {Layout_Enum}
  */
 export function getEffectiveLayout(element) {
   // Return the pre-existing value if layout has already been applied.
-  const completedLayout = parseLayout(element.getAttribute('layout'));
+  const completedLayout = parseLayout(element.getAttribute('layout') ?? '');
   if (completedLayout) {
     return completedLayout;
   }
@@ -210,8 +220,8 @@ export function getEffectiveLayout(element) {
 /**
  * @typedef {{
  *  layout: !Layout_Enum,
- *  height: (string|number|null),
- *  width: (string|number|null)
+ *  height: (string|number|null|undefined),
+ *  width: (string|number|null|undefined)
  * }}
  */
 let InternalEffectiveLayoutDef;
@@ -222,7 +232,7 @@ let InternalEffectiveLayoutDef;
  * If class 'i-amphtml-layout' is present, then directly use its value.
  * Else calculate layout based on element attributes and return the width/height.
  *
- * @param {!Element} element
+ * @param {Element} element
  * @return {InternalEffectiveLayoutDef}
  */
 function getEffectiveLayoutInternal(element) {
@@ -241,7 +251,10 @@ function getEffectiveLayoutInternal(element) {
     layoutAttr,
     element
   );
-  /** @const {string|null|undefined} */
+  /**
+   * @type {string|null|undefined}
+   * @const
+   */
   const inputWidth =
     widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
   userAssert(
@@ -250,7 +263,10 @@ function getEffectiveLayoutInternal(element) {
     widthAttr,
     element
   );
-  /** @const {string|null|undefined} */
+  /**
+   * @type {string|null|undefined}
+   * @const
+   */
   const inputHeight =
     heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
   userAssert(

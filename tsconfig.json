@@ -34,5 +34,5 @@
     }
   },
   "include": ["src", "3p", "ads", "extensions", "test", "testing"],
-  "exclude": ["build", "dist", "dist.*", "node_modules"]
+  "exclude": ["**/build/**", "**/dist/**", "**/dist.*/**", "**/node_modules/**"]
 }
