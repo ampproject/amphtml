@@ -11,11 +11,12 @@
     "paths": {
       "#core": ["."],
       "#core/*": ["./*"],
-      "#experiments": ["."],
+      // "#experiments": ["."],
       "#experiments/*": ["./*"]
     }
   },
   "include": [
+    "story-ad-*.js",
      "**/*.d.ts"
    ],
   "exclude": ["**/*.extern.js"]
