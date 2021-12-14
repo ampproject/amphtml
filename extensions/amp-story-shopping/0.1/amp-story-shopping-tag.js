@@ -81,7 +81,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * and sets the styling properties dynamically based on the number of lines.
    * @private
    */
-  countLines_() {
+  countLinesAndResize_() {
     if (this.element.shadowRoot) {
       const pillEl = this.element.shadowRoot.querySelector(
         '.amp-story-shopping-tag-pill'
@@ -121,8 +121,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
 
-    this.countLines_(tagData);
-
     if (!tagData) {
       return;
     }
@@ -132,7 +130,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         renderShoppingTagTemplate(tagData),
         shoppingTagCSS
       );
-      this.countLines_();
+      this.countLinesAndResize_();
     });
   }
 
