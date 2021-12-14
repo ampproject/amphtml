@@ -5,7 +5,6 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html
  */
 
-import {devAssertArray, devAssertString} from '#core/assert';
 import {isArray} from '#core/types';
 import {hasOwn, map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
@@ -142,7 +141,6 @@ export function experimentToggles(win) {
     if (meta) {
       const optedInExperiments = meta.getAttribute('content')?.split(',') || [];
       for (const experiment of optedInExperiments) {
-        devAssertArray(allowedDocOptIn);
         if (allowedDocOptIn.includes(experiment)) {
           toggles[experiment] = true;
         }
@@ -281,9 +279,7 @@ export const RANDOM_NUMBER_GENERATORS = {
  */
 function selectRandomItem(arr) {
   const rn = RANDOM_NUMBER_GENERATORS.accuratePrng();
-  const result = arr[Math.floor(rn * arr.length)];
-  devAssertString(result);
-  return result || null;
+  return arr[Math.floor(rn * arr.length)] || null;
 }
 
 /**
