@@ -1,5 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
@@ -76,11 +77,52 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * This function counts the number of lines in the shopping tag
+   * and sets the styling properties dynamically based on the number of lines.
+   * @private
+   */
+  countLines_() {
+    if (this.element.shadowRoot) {
+      const pillEl = this.element.shadowRoot.querySelector(
+        '.amp-story-shopping-tag-pill'
+      );
+
+      const textEl = this.element.shadowRoot.querySelector(
+        '.amp-story-shopping-tag-pill-text'
+      );
+
+      const tagTextStyle = computedStyle(window, textEl).getPropertyValue(
+        'font-size'
+      );
+
+      const fontSize = parseFloat(tagTextStyle);
+      const lineHeight = Math.floor(fontSize * 1.5);
+      const height = textEl.clientHeight;
+      const numLines = Math.ceil(height / lineHeight);
+
+      if (numLines == 1) {
+        if (pillEl.classList.contains('amp-story-shopping-tag-pill-overflow')) {
+          pillEl.classList.remove('amp-story-shopping-tag-pill-overflow');
+        }
+      } else {
+        if (
+          !pillEl.classList.contains('amp-story-shopping-tag-pill-overflow')
+        ) {
+          pillEl.classList.add('amp-story-shopping-tag-pill-overflow');
+        }
+      }
+    }
+  }
+
+  /**
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
+
+    this.countLines_(tagData);
+
     if (!tagData) {
       return;
     }
@@ -90,6 +132,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         renderShoppingTagTemplate(tagData),
         shoppingTagCSS
       );
+      this.countLines_();
     });
   }
 

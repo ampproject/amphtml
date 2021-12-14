@@ -47,11 +47,15 @@ amp-story-shopping-tag {
 .amp-story-shopping-tag-pill {
   display: flex !important;
   align-items: center !important;
-  border-radius: 18px !important;
+  border-radius: 100px !important;
   height: 100% !important;
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
   padding: 4px 12px 4px 4px !important;
+}
+
+.amp-story-shopping-tag-pill-overflow {
+  border-radius: 10px !important;
 }
 
 .amp-story-shopping-tag-pill-image {
