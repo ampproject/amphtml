@@ -4,7 +4,7 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {ExperimentInfoDef} from '#experiments/experiments.type';
+// import {ExperimentInfoDef} from '#experiments/experiments.type';
 
 /**
  * Attempts to select into experiment and forces branch if selected.
