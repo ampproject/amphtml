@@ -24,20 +24,36 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('initial dates', () => {
-    let onChangeStub;
-
-    beforeEach(() => {
-      onChangeStub = env.sandbox.stub();
-    });
-
     it('should use the value of a single input at load-time', () => {
       const wrapper = mount(
-        <DatePicker onChange={onChangeStub} inputSelector="#date">
+        <DatePicker inputSelector="#date">
           <input type="text" id="date" value="2021-01-01" />
         </DatePicker>
       );
 
-      expect(wrapper.find('[data-date="2021-01-01"]')).not.to.be.undefined;
+      expect(wrapper.find('[data-date="2021-01-01"]')).length.to.be.greaterThan(
+        0
+      );
+    });
+
+    it('should use the value of a range input at load-time', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          startInputSelector="#startdate"
+          endInputSelector="#enddate"
+        >
+          <input type="text" id="startdate" value="2021-01-01" />
+          <input type="text" id="enddate" value="2021-01-02" />
+        </DatePicker>
+      );
+
+      expect(
+        wrapper.find('[data-startdate="2021-01-01"]')
+      ).length.to.be.greaterThan(0);
+      expect(
+        wrapper.find('[data-enddate="2021-01-02"]')
+      ).length.to.be.greaterThan(0);
     });
   });
 });
