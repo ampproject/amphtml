@@ -23,13 +23,21 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     expect(component).to.have.lengthOf(1);
   });
 
-  // describe('initial dates', () => {
-  //   it('should use the value of a single input at load-time', () => {
-  //     const wrapper = mount(
-  //       <DatePicker inputSelector="#date">
-  //         <input type="text" id="#date" value="2021-01-01" />
-  //       </DatePicker>
-  //     );
-  //   });
-  // });
+  describe('initial dates', () => {
+    let onChangeStub;
+
+    beforeEach(() => {
+      onChangeStub = env.sandbox.stub();
+    });
+
+    it('should use the value of a single input at load-time', () => {
+      const wrapper = mount(
+        <DatePicker onChange={onChangeStub} inputSelector="#date">
+          <input type="text" id="date" value="2021-01-01" />
+        </DatePicker>
+      );
+
+      expect(wrapper.find('[data-date="2021-01-01"]')).not.to.be.undefined;
+    });
+  });
 });
