@@ -36,7 +36,7 @@
       "#utils/*": ["./src/utils/*"],
 
       "#test/*": ["./test/*"],
-      "#testing/*": ["./testing/*"],
+      "#testing/*": ["./testing/*"]
     }
   },
 
