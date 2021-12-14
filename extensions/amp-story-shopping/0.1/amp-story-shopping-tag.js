@@ -24,10 +24,10 @@ const FONTS_TO_LOAD = [
   },
 ];
 
-const renderShoppingTagTemplate = (tagData) => (
+const renderShoppingTagTemplate = (tagData, rightEdgeOfScreentoTagDistance) => (
   <div
     class={
-      tagData['rightEdgeOfScreentoTagDistance'] > 120
+      rightEdgeOfScreentoTagDistance > 120
         ? 'amp-story-shopping-tag-inner'
         : 'amp-story-shopping-tag-inner-flipped'
     }
@@ -90,13 +90,21 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!tagData) {
       return;
     }
-    tagData['rightEdgeOfScreentoTagDistance'] =
-      document.getElementsByTagName('amp-story-shopping-attachment')[0]
-        .clientWidth - this.element.offsetLeft;
+
+    let rightEdgeOfScreentoTagDistance = 0.0;
+
+    this.measureElement(() => {
+      rightEdgeOfScreentoTagDistance =
+        document.getElementsByTagName('amp-story-shopping-attachment')[0]
+          ./*OK*/ clientWidth -
+        (this.element./*OK*/ offsetLeft +
+          this.element./*OK*/ clientWidth / 2.0);
+    });
+
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        renderShoppingTagTemplate(tagData),
+        renderShoppingTagTemplate(tagData, rightEdgeOfScreentoTagDistance),
         shoppingTagCSS
       );
     });
