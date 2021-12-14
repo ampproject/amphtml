@@ -81,7 +81,7 @@ export class AmpStoryShareMenu {
     this.win_ = getWin(hostEl);
 
     /** @private {?Element} */
-    this.rootEl_ = null;
+    this.element_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
@@ -102,12 +102,12 @@ export class AmpStoryShareMenu {
    * UI.
    */
   build() {
-    if (this.rootEl_) {
+    if (this.element_) {
       return;
     }
 
-    const shareWidgetElement = this.buildFallback_();
-    this.rootEl_ = this.renderForFallbackSharing_(shareWidgetElement);
+    const shareWidgetElement = this.buildProvidersList_();
+    this.element_ = this.buildDialog_(shareWidgetElement);
     // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' when this file is lazy loaded.
     Services.extensionsFor(this.win_).installExtensionForDoc(
       getAmpdoc(this.hostEl_),
@@ -115,7 +115,7 @@ export class AmpStoryShareMenu {
     );
 
     this.vsync_.mutate(() => {
-      createShadowRootWithStyle(this.hostEl_, this.rootEl_, CSS);
+      createShadowRootWithStyle(this.hostEl_, this.element_, CSS);
       this.initializeListeners_();
     });
   }
@@ -156,8 +156,8 @@ export class AmpStoryShareMenu {
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
       uiState !== UIType.MOBILE
-        ? this.rootEl_.setAttribute('desktop', '')
-        : this.rootEl_.removeAttribute('desktop');
+        ? this.element_.setAttribute('desktop', '')
+        : this.element_.removeAttribute('desktop');
     });
   }
 
@@ -168,8 +168,8 @@ export class AmpStoryShareMenu {
    */
   onShareMenuStateUpdate_(isOpen) {
     this.vsync_.mutate(() => {
-      this.rootEl_.classList.toggle(VISIBLE_CLASS, isOpen);
-      this.rootEl_.setAttribute('aria-hidden', !isOpen);
+      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
+      this.element_.setAttribute('aria-hidden', !isOpen);
     });
   }
 
@@ -183,17 +183,17 @@ export class AmpStoryShareMenu {
 
   /**
    * Quick share template, used as a fallback if native sharing is not supported.
-   * @param {?Array<?Element|?string>|?Element|?string|undefined} children
+   * @param {!Element} child
    * @return {!Element}
    */
-  renderForFallbackSharing_(children) {
+  buildDialog_(child) {
     return (
       <div
         class="i-amphtml-story-share-menu i-amphtml-story-system-reset"
         aria-hidden="true"
         role="alert"
         onClick={(event) => {
-          // Close if click occurred directly on this element.
+          // Only close if clicked on background.
           if (event.target === event.currentTarget) {
             this.close_();
           }
@@ -211,7 +211,7 @@ export class AmpStoryShareMenu {
           >
             &times;
           </button>
-          {children}
+          {child}
         </div>
       </div>
     );
@@ -221,13 +221,11 @@ export class AmpStoryShareMenu {
    * Create widget, and load the providers in the config.
    * @return {!Element}
    */
-  buildFallback_() {
-    const widget = (
-      <div class="i-amphtml-story-share-widget">
-        <ul class="i-amphtml-story-share-list">
-          {this.maybeRenderLinkShareButton_()}
-        </ul>
-      </div>
+  buildProvidersList_() {
+    const list = (
+      <ul class="i-amphtml-story-share-list">
+        {this.maybeRenderLinkShareButton_()}
+      </ul>
     );
 
     const shareEl = this.storyEl_.querySelector(
@@ -242,7 +240,6 @@ export class AmpStoryShareMenu {
         return;
       }
 
-      const list = widget.lastElementChild;
       for (const provider of providers) {
         const el = this.buildShareProvider_(provider);
         if (el) {
@@ -251,7 +248,7 @@ export class AmpStoryShareMenu {
       }
     });
 
-    return widget;
+    return list;
   }
 
   /**

@@ -2,32 +2,22 @@
 
 @import '../../amp-social-share/0.1/amp-social-share.css';
 
-.i-amphtml-story-share-widget {
-  display: block !important;
-  margin: 16px 8px !important;
-}
-
-.i-amphtml-story-no-sharing .i-amphtml-story-share-widget {
+.i-amphtml-story-no-sharing .i-amphtml-story-share-list {
   display: none !important;
 }
 
-.i-amphtml-story-share-widget-scrollable {
-  padding: 16px 0 !important;
-  overflow: auto !important;
-}
-
-.i-amphtml-story-share-widget::-webkit-scrollbar {
+.i-amphtml-story-share-list::-webkit-scrollbar {
   width: 0px !important;
   background: transparent !important;
 }
 
 .i-amphtml-story-share-list {
   list-style: none !important;
-  padding: 0 8px !important;
-  margin: 0 !important;
+  margin: 16px 16px !important;
+  padding: 0 !important;
   display: flex !important;
   flex-wrap: wrap !important;
-  width: 100% !important;
+  width: calc(100% - 32px) !important;
 }
 
 .i-amphtml-story-share-item {
@@ -63,17 +53,6 @@
     padding: 0 !important;
     width: 16.66% !important;
   }
-}
-
-.i-amphtml-story-share-widget-scrollable .i-amphtml-story-share-list {
-  flex-wrap: nowrap !important;
-}
-
-.i-amphtml-story-share-widget-scrollable > * > .i-amphtml-story-share-item {
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 16px !important;
-  min-width: auto !important;
 }
 
 .i-amphtml-story-share-item:empty {
