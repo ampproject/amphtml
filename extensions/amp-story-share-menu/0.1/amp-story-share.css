@@ -13,8 +13,8 @@
 
 .i-amphtml-story-share-list {
   list-style: none !important;
-  margin: 16px 16px !important;
-  padding: 0 !important;
+  padding: 16px !important;
+  margin: 0 !important;
   display: flex !important;
   flex-wrap: wrap !important;
   width: calc(100% - 32px) !important;

@@ -1,3 +1,4 @@
+import {devAssert, userAssert} from '#core/assert';
 import {Keys_Enum} from '#core/constants/key-codes';
 import * as Preact from '#core/dom/jsx';
 import {closestAncestorElementBySelector} from '#core/dom/query';
@@ -87,7 +88,9 @@ export class AmpStoryShareMenu {
     this.storeService_ = getStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.storyEl_ = closestAncestorElementBySelector(hostEl, 'amp-story');
+    this.storyEl_ = userAssert(
+      closestAncestorElementBySelector(hostEl, 'amp-story')
+    );
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -106,11 +109,11 @@ export class AmpStoryShareMenu {
       return;
     }
 
-    const shareWidgetElement = this.buildProvidersList_();
-    this.element_ = this.buildDialog_(shareWidgetElement);
+    const providersList = this.buildProvidersList_();
+    this.element_ = this.buildDialog_(providersList);
     // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' when this file is lazy loaded.
     Services.extensionsFor(this.win_).installExtensionForDoc(
-      getAmpdoc(this.hostEl_),
+      getAmpdoc(this.storyEl_),
       'amp-social-share'
     );
 
@@ -149,6 +152,18 @@ export class AmpStoryShareMenu {
   }
 
   /**
+   * Reacts to menu state updates shows or hides the menu.
+   * @param {boolean} isOpen
+   * @private
+   */
+  onShareMenuStateUpdate_(isOpen) {
+    this.vsync_.mutate(() => {
+      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
+      this.element_.setAttribute('aria-hidden', !isOpen);
+    });
+  }
+
+  /**
    * Reacts to UI state updates and triggers the right UI.
    * @param {!UIType} uiState
    * @private
@@ -158,18 +173,6 @@ export class AmpStoryShareMenu {
       uiState !== UIType.MOBILE
         ? this.element_.setAttribute('desktop', '')
         : this.element_.removeAttribute('desktop');
-    });
-  }
-
-  /**
-   * Reacts to menu state updates shows or hides the menu.
-   * @param {boolean} isOpen
-   * @private
-   */
-  onShareMenuStateUpdate_(isOpen) {
-    this.vsync_.mutate(() => {
-      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
-      this.element_.setAttribute('aria-hidden', !isOpen);
     });
   }
 

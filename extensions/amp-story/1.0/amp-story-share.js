@@ -37,7 +37,7 @@ export class AmpStoryShare {
     storyEl.appendChild(this.shareMenuEl_);
 
     /** @private {boolean} */
-    this.builtFallback_ = false;
+    this.initializedFallback_ = false;
 
     this.initializeListeners_();
   }
@@ -97,12 +97,11 @@ export class AmpStoryShare {
 
   /** @private */
   buildFallbackMenu_() {
-    if (this.builtFallback_) {
+    if (this.initializedFallback_) {
       return;
     }
-    this.builtFallback_ = true;
+    this.initializedFallback_ = true;
     const shareMenu = new AmpStoryShareMenu(this.shareMenuEl_);
     shareMenu.build();
-    this.storyEl_.appendChild(this.shareMenuEl_);
   }
 }
