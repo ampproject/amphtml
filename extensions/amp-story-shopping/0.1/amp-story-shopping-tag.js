@@ -97,7 +97,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
       const fontSize = parseFloat(tagTextStyle);
       const lineHeight = Math.floor(fontSize * 1.5);
-      const height = textEl.clientHeight;
+      const height = textEl./*OK*/ clientHeight;
       const numLines = Math.ceil(height / lineHeight);
 
       if (numLines == 1) {
@@ -124,14 +124,18 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!tagData) {
       return;
     }
-    this.mutateElement(() => {
-      createShadowRootWithStyle(
-        this.element,
-        renderShoppingTagTemplate(tagData),
-        shoppingTagCSS
-      );
-      this.countLinesAndResize_();
-    });
+    this.measureMutateElement(
+      () => {
+        createShadowRootWithStyle(
+          this.element,
+          renderShoppingTagTemplate(tagData),
+          shoppingTagCSS
+        );
+      },
+      () => {
+        this.countLinesAndResize_();
+      }
+    );
   }
 
   /** @private */

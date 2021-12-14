@@ -62,7 +62,7 @@ describes.realWin(
     it('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
-      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
+      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.equal(
           'Spectacular Spectacles'
         );
