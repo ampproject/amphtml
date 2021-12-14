@@ -74,43 +74,6 @@ const renderShareItemElement = (child) => (
 );
 
 /**
- * @private
- * @param {!Element} el
- * @param {function(e)} onClick
- * @return {!Element}
- */
-function renderLinkShareItemElement(el, onClick) {
-  return renderShareItemElement(
-    <div
-      class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
-      tabIndex={0}
-      role="button"
-      aria-label={localize(
-        el,
-        LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
-      )}
-      onClick={onClick}
-      onKeyUp={(e) => {
-        // Check if pressed Space or Enter to trigger button.
-        // TODO(wg-stories): Try switching this element to a <button> and
-        // removing this keyup handler, since it gives you this behavior for free.
-        const code = e.charCode || e.keyCode;
-        if (code === 32 || code === 13) {
-          onClick();
-        }
-      }}
-    >
-      <span class="i-amphtml-story-share-label">
-        {localize(
-          el,
-          LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
-        )}
-      </span>
-    </div>
-  );
-}
-
-/**
  * Returns the share button for the provider if available.
  * @param {!Document} doc
  * @param {string} shareType
@@ -143,25 +106,6 @@ function buildProvider(doc, shareType) {
 }
 
 /**
- * @param {!Document} doc
- * @param {string} url
- * @return {!Element}
- */
-function buildCopySuccessfulToast(doc, url) {
-  return (
-    <div class="i-amphtml-story-copy-successful">
-      <div>
-        {localize(
-          doc,
-          LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
-        )}
-      </div>
-      <div class="i-amphtml-story-copy-url">{url}</div>
-    </div>
-  );
-}
-
-/**
  * Share menu UI.
  */
 export class ShareMenu {
@@ -170,6 +114,9 @@ export class ShareMenu {
    * @param {!Element} storyEl Element where to append the component
    */
   constructor(win, storyEl) {
+    /** @private {!AmpDoc} */
+    this.ampdoc_ = getAmpdoc(storyEl);
+
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -233,11 +180,11 @@ export class ShareMenu {
    * @return {!Element}
    */
   buildForFallbackSharing_() {
-    const shareWidgetElement = this.buildFallback_(getAmpdoc(this.parentEl_));
+    const shareWidgetElement = this.buildFallback_(this.ampdoc_);
     this.element_ = this.renderForFallbackSharing_(shareWidgetElement);
     // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' when this file is lazy loaded.
     Services.extensionsFor(this.win_).installExtensionForDoc(
-      getAmpdoc(this.parentEl_),
+      this.ampdoc_,
       'amp-social-share'
     );
 
@@ -281,7 +228,6 @@ export class ShareMenu {
    * @private
    */
   onShareMenuStateUpdate_(isOpen) {
-    console.log('share menu state update', isOpen);
     if (this.isSystemShareSupported_ && isOpen) {
       // Dispatches a click event on the amp-social-share button to trigger the
       // native system sharing UI. This has to be done upon user interaction.
@@ -461,30 +407,66 @@ export class ShareMenu {
     if (!isCopyingToClipboardSupported(this.win_.document)) {
       return;
     }
-    return renderLinkShareItemElement(this.parentEl_, (e) => {
-      e.preventDefault();
-      this.copyUrlToClipboard_();
-    });
+    return this.renderLinkShareItemElement_(this.parentEl_);
+  }
+
+  /**
+   * @private
+   * @param {!Element} el
+   * @return {!Element}
+   */
+  renderLinkShareItemElement_(el) {
+    const label = localize(
+      el,
+      LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+    );
+    return renderShareItemElement(
+      <button
+        class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
+        aria-label={label}
+        onClick={(e) => {
+          e.preventDefault();
+          this.copyUrlToClipboard_();
+        }}
+      >
+        <span class="i-amphtml-story-share-label">{label}</span>
+      </button>
+    );
   }
 
   /**
    * @private
    */
   copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
+    const url = Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
 
     if (!copyTextToClipboard(this.win_, url)) {
       const failureString = localize(
         this.parentEl_,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
-      Toast.show(this.storyEl_, devAssert(failureString));
+      Toast.show(this.parentEl_, devAssert(failureString));
       return;
     }
 
-    Toast.show(
-      this.storyEl_,
-      buildCopySuccessfulToast(this.win_.document, url)
+    Toast.show(this.parentEl_, this.buildCopySuccessfulToast_(url));
+  }
+
+  /**
+   * @param {string} url
+   * @return {!Element}
+   */
+  buildCopySuccessfulToast_(url) {
+    return (
+      <div class="i-amphtml-story-copy-successful">
+        <div>
+          {localize(
+            this.parentEl_,
+            LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+          )}
+        </div>
+        <div class="i-amphtml-story-copy-url">{url}</div>
+      </div>
     );
   }
 }
