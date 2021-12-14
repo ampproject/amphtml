@@ -296,12 +296,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
    * @private
    */
   parseIosMetaContent_(metaContent) {
-    const config = Object.fromEntries(
-      metaContent
-        .replace(/\s/, '')
-        .split(',')
-        .map((part) => part.split('='))
-    );
+    const config = this.parseKeyValues(metaContent);
 
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
@@ -328,6 +323,22 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       openInAppUrl,
       installAppUrl
     );
+  }
+
+  /**
+   * Parses a string like "key1=value1,key2=value2" into { key1: "value1", key2: "value2" }
+   * @param {string} metaContent
+   * @return {*}
+   */
+  parseKeyValues(metaContent) {
+    return metaContent
+      .replace(/\s/, '')
+      .split(',')
+      .reduce((result, keyValue) => {
+        const [key, value] = keyValue.split('=');
+        result[key] = value;
+        return result;
+      }, {});
   }
 }
 
