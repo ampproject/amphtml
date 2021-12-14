@@ -9,12 +9,18 @@
     "noImplicitAny": true,
     "lib": ["dom", "esnext", "es6"],
     "paths": {
-      "#core": ["../core"],
-      "#core/*": ["../core/*"],
       // "#experiments": ["."],
-      "#experiments/*": ["./*"]
+      "#experiments/*": ["./*"],
+
+      "#core": ["../core"],
+      "#core/*": ["../core/*"]
     }
   },
-  "include": ["story-ad-*/**.js", "**/*.d.ts"],
+  "include": [
+    "story-ad-*/**.js",
+    "**/*.d.ts",
+
+    "../core/**/*.d.ts"
+  ],
   "exclude": ["**/*.extern.js"]
 }
