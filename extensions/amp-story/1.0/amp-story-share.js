@@ -12,7 +12,7 @@ import {
 const TAG = 'amp-story-share';
 
 /**
- * Social share widget for the system button.
+ * Support for amp-story to launch native sharing menu or fallback sharing icons.
  */
 export class AmpStoryShare {
   /**
