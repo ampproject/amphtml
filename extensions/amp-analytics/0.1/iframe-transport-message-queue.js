@@ -1,7 +1,4 @@
-import {
-  IframeTransportEventDef,
-  MessageType_Enum,
-} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {dev, devAssert} from '#utils/log';
 
@@ -10,6 +7,8 @@ const TAG_ = 'amp-analytics/iframe-transport-message-queue';
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;
+
+/** @typedef {import('#core/3p-frame-messaging').IframeTransportEventDef} IframeTransportDef */
 
 /**
  * @visibleForTesting

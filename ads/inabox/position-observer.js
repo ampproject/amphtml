@@ -1,5 +1,4 @@
 import {
-  LayoutRectDef,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
@@ -14,6 +13,8 @@ import {throttle} from '#core/types/function';
  * }}
  */
 let PositionEntryDef;
+
+/** @typedef {import('#core/dom/layout/rect').LayoutRectDef} LayoutRectDef */
 
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;

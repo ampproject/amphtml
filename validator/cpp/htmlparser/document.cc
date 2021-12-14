@@ -1,5 +1,5 @@
 #include "absl/flags/flag.h"
-#include "document.h"
+#include "cpp/htmlparser/document.h"
 
 ABSL_FLAG(std::size_t, htmlparser_nodes_allocator_block_size,
           256 << 10 /* 256k */,

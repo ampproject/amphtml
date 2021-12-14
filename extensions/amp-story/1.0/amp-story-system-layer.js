@@ -66,9 +66,6 @@ const PAUSE_CLASS = 'i-amphtml-story-pause-control';
 const PLAY_CLASS = 'i-amphtml-story-play-control';
 
 /** @private @const {string} */
-const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
-
-/** @private @const {string} */
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
@@ -121,26 +118,6 @@ const renderSystemLayerElement = (element, children) => (
         )}
       />
       <div class="i-amphtml-story-sound-display">
-        <div role="alert" class="i-amphtml-message-container">
-          <div class="i-amphtml-story-mute-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
-            )}
-          </div>
-          <div class="i-amphtml-story-unmute-sound-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
-            )}
-          </div>
-          <div class="i-amphtml-story-unmute-no-sound-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
-            )}
-          </div>
-        </div>
         <button
           class={UNMUTE_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
@@ -360,7 +337,6 @@ export class SystemLayer {
 
     this.maybeBuildAttribution_();
 
-    this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.root_;
   }
@@ -827,10 +803,6 @@ export class SystemLayer {
    */
   onAudioIconClick_(mute) {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
-    });
   }
 
   /**

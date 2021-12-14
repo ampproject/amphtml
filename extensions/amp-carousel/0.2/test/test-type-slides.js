@@ -214,6 +214,24 @@ describes.realWin(
         expect(slideWrappers[2].getAttribute('aria-hidden')).to.equal('true');
       });
 
+      it('should go to the correct slide when navigating with keyboard', async () => {
+        const carousel = await getCarousel({loop: true});
+        const slideWrappers = getSlideWrappers(carousel);
+        const kbEnterEvent = new KeyboardEvent('keydown', {'key': 'Enter'});
+
+        getNextButton(carousel).dispatchEvent(kbEnterEvent);
+        await afterIndexUpdate(carousel);
+        expect(slideWrappers[0].getAttribute('aria-hidden')).to.equal('true');
+        expect(slideWrappers[1].getAttribute('aria-hidden')).to.equal('false');
+        expect(slideWrappers[2].getAttribute('aria-hidden')).to.equal('true');
+
+        getPrevButton(carousel).dispatchEvent(kbEnterEvent);
+        await afterIndexUpdate(carousel);
+        expect(slideWrappers[0].getAttribute('aria-hidden')).to.equal('false');
+        expect(slideWrappers[1].getAttribute('aria-hidden')).to.equal('true');
+        expect(slideWrappers[2].getAttribute('aria-hidden')).to.equal('true');
+      });
+
       it('should go to the correct slide clicking prev', async () => {
         const carousel = await getCarousel({loop: true});
         const slideWrappers = getSlideWrappers(carousel);

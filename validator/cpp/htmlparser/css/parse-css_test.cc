@@ -1,4 +1,4 @@
-#include "css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
 
 #include <memory>
 #include <vector>
@@ -7,9 +7,9 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "css/parse-css.pb.h"
-#include "logging.h"
-#include "strings.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/strings.h"
 
 using std::unique_ptr;
 using std::vector;

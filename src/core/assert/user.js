@@ -21,10 +21,9 @@ import * as assertions from './base';
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {T}
+ * @return {asserts shouldBeTruthy}
  * @template T
  * @throws {UserError} when shouldBeTruthy is not truthy.
- * @closurePrimitive {asserts.truthy}
  */
 export function userAssert(
   shouldBeTruthy,
@@ -61,14 +60,13 @@ export function userAssert(
  * For more details see `assert`.
  *
  * @param {*} shouldBeElement
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {!Element} The value of shouldBeTrueish.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeElement is Element}
  * @throws {Error} when shouldBeElement is not an Element
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function userAssertElement(shouldBeElement, opt_message) {
   return assertions.assertElement(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (userAssert),
     shouldBeElement,
     opt_message
   );
@@ -81,14 +79,13 @@ export function userAssertElement(shouldBeElement, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeString
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {string} The string value. Can be an empty string.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeString is string}
  * @throws {Error} when shouldBeString is not an String
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function userAssertString(shouldBeString, opt_message) {
   return assertions.assertString(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (userAssert),
     shouldBeString,
     opt_message
   );
@@ -101,15 +98,13 @@ export function userAssertString(shouldBeString, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeNumber
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {number} The number value. The allowed values include `0`
- *   and `NaN`.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeNumber is number}
  * @throws {Error} when shouldBeNumber is not an Number
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function userAssertNumber(shouldBeNumber, opt_message) {
   return assertions.assertNumber(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (userAssert),
     shouldBeNumber,
     opt_message
   );
@@ -122,14 +117,13 @@ export function userAssertNumber(shouldBeNumber, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeArray
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {!Array} The array value
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeArray is Array} The array value
  * @throws {Error} when shouldBeArray is not an Array
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function userAssertArray(shouldBeArray, opt_message) {
   return assertions.assertArray(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (userAssert),
     shouldBeArray,
     opt_message
   );
@@ -141,14 +135,13 @@ export function userAssertArray(shouldBeArray, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeBoolean
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {boolean} The boolean value.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeBoolean is boolean} The boolean value.
  * @throws {Error} when shouldBeBoolean is not an Boolean
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function userAssertBoolean(shouldBeBoolean, opt_message) {
   return assertions.assertBoolean(
-    /** @type {!assertions.AssertionFunctionDef} */ (userAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (userAssert),
     shouldBeBoolean,
     opt_message
   );
