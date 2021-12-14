@@ -5,13 +5,13 @@ import {useCallback, useRef, useState} from '#preact';
  * @param {any} [defaultValue]
  * @return {{ "0": any, "1": function(any): void }}
  */
-export function useLocalStorage(key, defaultValue) {
+export function useLocalStorage(key, defaultValue = null) {
   // Keep track of the state locally:
   const [value, setValue] = useState(() => {
     try {
       // eslint-disable-next-line local/no-forbidden-terms
       const json = self.localStorage?.getItem(key);
-      return json === undefined ? defaultValue : JSON.parse(json);
+      return !json ? defaultValue : JSON.parse(json);
     } catch (err) {
       // warning: could not read from local storage
       return defaultValue;
