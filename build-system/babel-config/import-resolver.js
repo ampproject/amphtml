@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.base.json');
+const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
 let tsConfigPaths = null;
 
 /**
