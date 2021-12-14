@@ -1,9 +1,14 @@
 {
+  "extends": "../tsconfig.json",
+
   "compilerOptions": {
-    "allowJs": true,
-    "baseUrl": ".",
-    "outDir": "dist",
-    "noEmit": true,
+    "checkJs": true,
+    "downlevelIteration": true,
+    "target": "esnext",
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "lib": ["dom", "esnext", "es6"],
 
     "paths": {
       "#3p/*": ["./3p/*"],
@@ -30,18 +35,8 @@
 
       "#test/*": ["./test/*"],
       "#testing/*": ["./testing/*"],
-
-      "#third_party/*": ["./third_party/*"]
     }
   },
 
-  "include": ["src", "3p", "ads", "extensions", "test", "testing"],
-  "exclude": [
-    "**/build/**",
-    "**/dist/**",
-    "**/dist.*/**",
-    "**/node_modules/**",
-    "**/third_party/**",
-    "**/*.extern.js"
-  ]
+  "include": [],
 }
