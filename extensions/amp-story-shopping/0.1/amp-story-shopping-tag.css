@@ -15,7 +15,13 @@ amp-story-shopping-tag {
 
 .amp-story-shopping-product-tag-text {
   font-family: 'Poppins', sans-serif !important;
-  font-weight: 200 !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  line-height: 15.4px !important;
+  font-style: normal;  
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.01em;
 }
 
 .amp-story-shopping-tag-inner {
