@@ -18,9 +18,8 @@ amp-story-shopping-tag {
   font-weight: 600 !important;
   font-size: 11px !important;
   line-height: 15.4px !important;
-  display: flex;
-  align-items: center;
-  letter-spacing: 0.01em;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .amp-story-shopping-tag-inner {
