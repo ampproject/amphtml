@@ -1,8 +1,10 @@
 import {devAssert} from '#core/assert';
 import {Keys_Enum} from '#core/constants/key-codes';
 import * as Preact from '#core/dom/jsx';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {isObject} from '#core/types';
 import {map} from '#core/types/object';
+import {getWin} from '#core/window';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
@@ -19,24 +21,16 @@ import {Toast} from 'extensions/amp-story/1.0/toast';
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {localize} from '../../amp-story/1.0/amp-story-localization-service';
-import {ShareWidget} from '../../amp-story/1.0/amp-story-share';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from '../../amp-story/1.0/story-analytics';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
-
-const TAG = 'amp-story-share-menu';
 
 /**
  * Maps share provider type to localization asset.
@@ -74,72 +68,39 @@ const renderShareItemElement = (child) => (
 );
 
 /**
- * Returns the share button for the provider if available.
- * @param {!Document} doc
- * @param {string} shareType
- * @return {?Element}
- */
-function buildProvider(doc, shareType) {
-  const shareProviderLocalizedStringId =
-    SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
-
-  if (!shareProviderLocalizedStringId) {
-    user().warn(
-      'AMP-STORY',
-      `'${shareType}'is not a valid share provider type.`
-    );
-    return null;
-  }
-
-  return (
-    <amp-social-share
-      width={48}
-      height={48}
-      class="i-amphtml-story-share-icon"
-      type={shareType}
-    >
-      <span class="i-amphtml-story-share-label">
-        {localize(doc, shareProviderLocalizedStringId)}
-      </span>
-    </amp-social-share>
-  );
-}
-
-/**
  * Share menu UI.
  */
-export class ShareMenu {
+export class AmpStoryShareMenu {
   /**
-   * @param {!Window} win
-   * @param {!Element} storyEl Element where to append the component
+   * @param hostEl Element where to append the component
    */
-  constructor(win, storyEl) {
+  constructor(hostEl) {
     /** @private {!AmpDoc} */
-    this.ampdoc_ = getAmpdoc(storyEl);
+    this.ampdoc_ = getAmpdoc(hostEl);
+
+    /** @private {string} */
+    this.canonicalUrl_ = Services.documentInfoForDoc(hostEl).canonicalUrl;
 
     /** @private @const {!Window} */
-    this.win_ = win;
+    this.win_ = getWin(hostEl);
 
     /** @private {?Element} */
     this.element_ = null;
 
-    /** @private {boolean} */
-    this.isSystemShareSupported_ = false;
-
-    /** @private @const {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(this.win_, storyEl);
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
-
     /** @private @const {!Element} */
-    this.parentEl_ = storyEl;
+    this.storyEl_ = closestAncestorElementBySelector(hostEl, 'amp-story');
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @private {?Element} */
+    this.root_ = null;
+
+    /** @private {!Element} */
+    this.hostEl_ = hostEl;
   }
 
   /**
@@ -148,38 +109,10 @@ export class ShareMenu {
    * UI.
    */
   build() {
-    if (this.element_) {
+    if (this.root_) {
       return;
     }
 
-    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported();
-
-    const child = this.isSystemShareSupported_
-      ? this.buildForSystemSharing_()
-      : this.buildForFallbackSharing_();
-
-    this.initializeListeners_();
-
-    this.vsync_.mutate(() => {
-      this.parentEl_.appendChild(child);
-    });
-  }
-
-  /**
-   * Builds a element used for analytics, since the sharing menu is not rendered.
-   * @private
-   * @return {!Element}
-   */
-  buildForSystemSharing_() {
-    return (this.element_ = <div></div>);
-  }
-
-  /**
-   * Builds and appends the fallback UI.
-   * @private
-   * @return {!Element}
-   */
-  buildForFallbackSharing_() {
     const shareWidgetElement = this.buildFallback_(this.ampdoc_);
     this.element_ = this.renderForFallbackSharing_(shareWidgetElement);
     // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' when this file is lazy loaded.
@@ -188,20 +121,10 @@ export class ShareMenu {
       'amp-social-share'
     );
 
-    // Only listen for closing when system share is unsupported, since the
-    // native layer would handle all the UI interactions.
-    this.win_.addEventListener('keyup', (event) => {
-      if (event.key == Keys_Enum.ESCAPE) {
-        event.preventDefault();
-        this.close_();
-      }
+    this.vsync_.mutate(() => {
+      createShadowRootWithStyle(this.hostEl_, this.element_, CSS);
+      this.initializeListeners_();
     });
-
-    return createShadowRootWithStyle(
-      <div class="i-amphtml-story-share-menu-host"></div>,
-      this.element_,
-      CSS
-    );
   }
 
   /**
@@ -216,8 +139,19 @@ export class ShareMenu {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
-      this.onShareMenuStateUpdate_(isOpen);
+    this.storeService_.subscribe(
+      StateProperty.SHARE_MENU_STATE,
+      (isOpen) => {
+        this.onShareMenuStateUpdate_(isOpen);
+      },
+      true
+    );
+
+    this.win_.addEventListener('keyup', (event) => {
+      if (event.key == Keys_Enum.ESCAPE) {
+        event.preventDefault();
+        this.close_();
+      }
     });
   }
 
@@ -228,50 +162,9 @@ export class ShareMenu {
    * @private
    */
   onShareMenuStateUpdate_(isOpen) {
-    if (this.isSystemShareSupported_ && isOpen) {
-      // Dispatches a click event on the amp-social-share button to trigger the
-      // native system sharing UI. This has to be done upon user interaction.
-      this.openSystemShare_();
-
-      // There is no way to know when the user dismisses the native system share
-      // menu, so we pretend it is closed on the story end, and let the native
-      // end handle the UI interactions.
-      this.close_();
-    }
-
-    if (!this.isSystemShareSupported_) {
-      this.vsync_.mutate(() => {
-        this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
-        this.element_.setAttribute('aria-hidden', !isOpen);
-      });
-    }
-
-    this.element_[ANALYTICS_TAG_NAME] = TAG;
-    this.analyticsService_.triggerEvent(
-      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-      this.element_
-    );
-  }
-
-  /**
-   * Loads and applies the share providers configured by the publisher.
-   * @protected
-   */
-  loadProviders() {
-    const shareEl = this.parentEl_.querySelector(
-      'amp-story-social-share, amp-story-bookend'
-    );
-
-    getElementConfig(shareEl).then((config) => {
-      const providers =
-        config &&
-        (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
-      if (!providers) {
-        return;
-      }
-      for (const provider of providers) {
-        this.setProviders_(provider);
-      }
+    this.vsync_.mutate(() => {
+      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
+      this.element_.setAttribute('aria-hidden', !isOpen);
     });
   }
 
@@ -289,7 +182,7 @@ export class ShareMenu {
       delete params['provider'];
     }
 
-    const element = buildProvider(
+    const element = this.buildProvider_(
       this.win_.document,
       /** @type {string} */ (provider)
     );
@@ -300,7 +193,7 @@ export class ShareMenu {
       }
     }
 
-    const list = devAssert(this.root).lastElementChild;
+    const list = devAssert(this.root_).lastElementChild;
     const item = renderShareItemElement(element);
 
     // `lastElementChild` is the system share button container, which should
@@ -330,21 +223,6 @@ export class ShareMenu {
   }
 
   /**
-   * Opens the sharing dialog of native browsers.
-   * @private
-   */
-  openSystemShare_() {
-    const {navigator} = this.win_;
-    const shareData = {
-      url: Services.documentInfoForDoc(this.parentEl_).canonicalUrl,
-      text: this.win_.document.title,
-    };
-    navigator.share(shareData).catch((e) => {
-      user().warn(TAG, e.message, shareData);
-    });
-  }
-
-  /**
    * Quick share template, used as a fallback if native sharing is not supported.
    * @param {?Array<?Element|?string>|?Element|?string|undefined} children
    * @return {!Element}
@@ -366,7 +244,7 @@ export class ShareMenu {
           <button
             class="i-amphtml-story-share-menu-close-button"
             aria-label={localize(
-              this.parentEl_,
+              this.storyEl_,
               LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
             )}
             role="button"
@@ -384,9 +262,7 @@ export class ShareMenu {
    * @return {!Element}
    */
   buildFallback_() {
-    devAssert(!this.root, 'Already built.');
-
-    this.root = (
+    this.root_ = (
       <div class="i-amphtml-story-share-widget">
         <ul class="i-amphtml-story-share-list">
           {this.maybeRenderLinkShareButton_()}
@@ -394,9 +270,23 @@ export class ShareMenu {
       </div>
     );
 
-    this.loadProviders();
+    const shareEl = this.storyEl_.querySelector(
+      'amp-story-social-share, amp-story-bookend'
+    );
 
-    return this.root;
+    getElementConfig(shareEl).then((config) => {
+      const providers =
+        config &&
+        (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
+      if (!providers) {
+        return;
+      }
+      for (const provider of providers) {
+        this.setProviders_(provider);
+      }
+    });
+
+    return this.root_;
   }
 
   /**
@@ -407,7 +297,7 @@ export class ShareMenu {
     if (!isCopyingToClipboardSupported(this.win_.document)) {
       return;
     }
-    return this.renderLinkShareItemElement_(this.parentEl_);
+    return this.renderLinkShareItemElement_(this.storyEl_);
   }
 
   /**
@@ -438,18 +328,19 @@ export class ShareMenu {
    * @private
    */
   copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
-
-    if (!copyTextToClipboard(this.win_, url)) {
+    if (!copyTextToClipboard(this.win_, this.canonicalUrl_)) {
       const failureString = localize(
-        this.parentEl_,
+        this.storyEl_,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
-      Toast.show(this.parentEl_, devAssert(failureString));
+      Toast.show(this.storyEl_, failureString);
       return;
     }
 
-    Toast.show(this.parentEl_, this.buildCopySuccessfulToast_(url));
+    Toast.show(
+      this.storyEl_,
+      this.buildCopySuccessfulToast_(this.canonicalUrl_)
+    );
   }
 
   /**
@@ -459,14 +350,44 @@ export class ShareMenu {
   buildCopySuccessfulToast_(url) {
     return (
       <div class="i-amphtml-story-copy-successful">
-        <div>
-          {localize(
-            this.parentEl_,
-            LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
-          )}
-        </div>
+        {localize(
+          this.storyEl_,
+          LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+        )}
         <div class="i-amphtml-story-copy-url">{url}</div>
       </div>
+    );
+  }
+
+  /**
+   * Returns the share button for the provider if available.
+   * @param {!Document} doc
+   * @param {string} shareType
+   * @return {?Element}
+   */
+  buildProvider_(doc, shareType) {
+    const shareProviderLocalizedStringId =
+      SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType];
+
+    if (!shareProviderLocalizedStringId) {
+      user().warn(
+        'AMP-STORY',
+        `'${shareType}'is not a valid share provider type.`
+      );
+      return null;
+    }
+
+    return (
+      <amp-social-share
+        width={48}
+        height={48}
+        class="i-amphtml-story-share-icon"
+        type={shareType}
+      >
+        <span class="i-amphtml-story-share-label">
+          {localize(doc, shareProviderLocalizedStringId)}
+        </span>
+      </amp-social-share>
     );
   }
 }
