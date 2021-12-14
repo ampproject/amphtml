@@ -26,12 +26,12 @@ if (platform.isIos()) {
 Using Bento services:
 
 ```js
-import { platformService } from "#preact/services/platform";
+import { platformUtils } from "#preact/services/platform";
 ///...
 
-if (platformService.isIos()) {
+if (platformUtils.isIos()) {
   // do Apple stuff
-} else if (platformService.isAndroid()) {
+} else if (platformUtils.isAndroid()) {
   // do Android stuff
 }
 ```

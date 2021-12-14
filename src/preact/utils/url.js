@@ -6,7 +6,7 @@ import {
   // eslint-disable-next-line import/no-restricted-paths
 } from '../../url';
 
-export const urlService = {
+export const urlUtils = {
   /**
    * @return {HTMLAnchorElement}
    * @private

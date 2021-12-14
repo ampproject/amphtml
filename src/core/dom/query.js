@@ -398,8 +398,7 @@ function isInternalElement(nodeOrTagName) {
  * @return {HTMLElement|null}
  */
 export function querySelectorInSlot(slot, selector) {
-  /** @type {HTMLElement[]} */
-  const nodes = slot.assignedElements();
+  const nodes = /** @type {HTMLElement[]} */ (slot.assignedElements());
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (matches(node, selector)) {

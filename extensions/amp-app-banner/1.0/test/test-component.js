@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
-import {platformService} from '#preact/services/platform';
+import {platformUtils} from '#preact/utils/platform';
 
 import {AppBanner, BentoAppBanner} from '../component/component';
 
@@ -60,8 +60,8 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
     describe('on Android', () => {
       // Set up the Android environment:
       beforeEach(() => {
-        env.sandbox.stub(platformService, 'isAndroid').returns(true);
-        env.sandbox.stub(platformService, 'isChrome').returns(false);
+        env.sandbox.stub(platformUtils, 'isAndroid').returns(true);
+        env.sandbox.stub(platformUtils, 'isChrome').returns(false);
       });
       // Mock the <link> manifest:
       beforeEach(() => {
@@ -76,7 +76,7 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
       });
 
       it('should not render if using Chrome', async () => {
-        platformService.isChrome.returns(true);
+        platformUtils.isChrome.returns(true);
         const wrapper = renderWrapper();
 
         expect(wrapper.isEmptyRender()).to.be.true;
@@ -120,8 +120,8 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
     describe('on iOS', () => {
       // Set up the iOS environment:
       beforeEach(() => {
-        env.sandbox.stub(platformService, 'isIos').returns(true);
-        env.sandbox.stub(platformService, 'isSafari').returns(false);
+        env.sandbox.stub(platformUtils, 'isIos').returns(true);
+        env.sandbox.stub(platformUtils, 'isSafari').returns(false);
       });
       // Mock the <meta> tag:
       beforeEach(() => {
@@ -140,7 +140,7 @@ describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
       });
 
       it('should not render if using Safari', () => {
-        platformService.isSafari.returns(true);
+        platformUtils.isSafari.returns(true);
         const wrapper = renderWrapper();
         expect(wrapper.isEmptyRender()).to.be.true;
       });

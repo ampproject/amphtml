@@ -4,7 +4,7 @@ import * as Preact from '#preact';
 import {useEffect, useMemo, useRef} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useLocalStorage} from '#preact/hooks/useLocalStorage';
-import {platformService} from '#preact/services/platform';
+import {platformUtils} from '#preact/utils/platform';
 
 import {user, userAssert} from '#utils/log';
 
@@ -108,9 +108,9 @@ export function BentoAppBanner(props) {
     return null;
   }
 
-  const AppBannerForCurrentPlatform = platformService.isIos()
+  const AppBannerForCurrentPlatform = platformUtils.isIos()
     ? AppBannerIOS
-    : platformService.isAndroid()
+    : platformUtils.isAndroid()
     ? AppBannerAndroid
     : null;
 

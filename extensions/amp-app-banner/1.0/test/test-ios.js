@@ -1,4 +1,4 @@
-import {platformService} from '#preact/services/platform';
+import {platformUtils} from '#preact/utils/platform';
 
 import {getIOSAppInfo} from '../component/ios';
 
@@ -43,7 +43,7 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       });
 
       it('should not show the banner if the built-in banner can be shown', () => {
-        env.sandbox.stub(platformService, 'isSafari').returns(true);
+        env.sandbox.stub(platformUtils, 'isSafari').returns(true);
         expect(getIOSAppInfo()).to.be.null;
       });
 

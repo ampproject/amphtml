@@ -1,6 +1,6 @@
-import {getMetaByName} from '#preact/services/document';
-import {platformService} from '#preact/services/platform';
-import {urlService} from '#preact/services/url';
+import {docInfo} from '#preact/utils/document';
+import {platformUtils} from '#preact/utils/platform';
+import {urlUtils} from '#preact/utils/url';
 
 import {user, userAssert} from '#utils/log';
 
@@ -16,7 +16,7 @@ const OPEN_LINK_TIMEOUT = 1500;
  * }|null}
  */
 export function getIOSAppInfo() {
-  const canShowBuiltinBanner = platformService.isSafari();
+  const canShowBuiltinBanner = platformUtils.isSafari();
   if (canShowBuiltinBanner) {
     user().info(
       'BENTO-APP-BANNER',
@@ -25,7 +25,7 @@ export function getIOSAppInfo() {
     return null;
   }
 
-  const metaContent = getMetaByName('apple-itunes-app');
+  const metaContent = docInfo.getMetaByName('apple-itunes-app');
   if (!metaContent) {
     return null;
   }
@@ -60,7 +60,7 @@ export function parseIOSMetaContent(metaContent) {
 
   if (openUrl) {
     userAssert(
-      urlService.isProtocolValid(openUrl),
+      urlUtils.isProtocolValid(openUrl),
       'The url in app-argument has invalid protocol: %s',
       openUrl
     );

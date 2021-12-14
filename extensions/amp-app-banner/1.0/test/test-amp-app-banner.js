@@ -2,7 +2,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
-import {platformService} from '#preact/services/platform';
+import {platformUtils} from '#preact/utils/platform';
 
 import {waitFor} from '#testing/helpers/service';
 import '../amp-app-banner';
@@ -24,8 +24,8 @@ describes.realWin(
       toggleExperiment(env.win, 'bento-app-banner', true, true);
 
       // Mock the platform:
-      env.sandbox.stub(platformService, 'isIos').returns(true);
-      env.sandbox.stub(platformService, 'isSafari').returns(false);
+      env.sandbox.stub(platformUtils, 'isIos').returns(true);
+      env.sandbox.stub(platformUtils, 'isSafari').returns(false);
 
       // Inject a tag like: <meta name="apple-itunes-app" content="..." />
       const meta = document.createElement('meta');

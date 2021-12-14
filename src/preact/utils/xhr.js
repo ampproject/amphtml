@@ -1,4 +1,4 @@
-export const xhrService = {
+export const xhrUtils = {
   /**
    * Simply calls `fetch(url).then(r => r.json())`
    * @param {RequestInfo} url

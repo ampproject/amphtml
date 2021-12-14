@@ -1,15 +1,15 @@
 import {WindowInterface} from '#core/window/interface';
 
-import {docInfo} from '#preact/services/document';
-import {platformService} from '#preact/services/platform';
-import {xhrService} from '#preact/services/xhr';
+import {docInfo} from '#preact/utils/document';
+import {platformUtils} from '#preact/utils/platform';
+import {xhrUtils} from '#preact/utils/xhr';
 
 import {getAndroidAppInfo} from '../component/android';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   let xhrServiceStub;
   beforeEach(() => {
-    xhrServiceStub = env.sandbox.stub(xhrService);
+    xhrServiceStub = env.sandbox.stub(xhrUtils);
     env.sandbox
       .stub(docInfo, 'canonicalUrl')
       .get(() => 'https://test.com/canonicalUrl');
@@ -46,8 +46,8 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       });
 
       it('should not show a banner if a built-in banner can be shown', async () => {
-        env.sandbox.stub(platformService, 'isChrome').returns(true);
-        env.sandbox.stub(platformService, 'isAndroid').returns(true);
+        env.sandbox.stub(platformUtils, 'isChrome').returns(true);
+        env.sandbox.stub(platformUtils, 'isAndroid').returns(true);
         const appInfo = getAndroidAppInfo();
         expect(appInfo).to.be.null;
       });

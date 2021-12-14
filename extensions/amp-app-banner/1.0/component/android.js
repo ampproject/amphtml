@@ -1,9 +1,9 @@
 import {WindowInterface} from '#core/window/interface';
 
-import {docInfo} from '#preact/services/document';
-import {platformService} from '#preact/services/platform';
-import {urlService} from '#preact/services/url';
-import {xhrService} from '#preact/services/xhr';
+import {docInfo} from '#preact/utils/document';
+import {platformUtils} from '#preact/utils/platform';
+import {urlUtils} from '#preact/utils/url';
+import {xhrUtils} from '#preact/utils/xhr';
 
 import {user} from '#utils/log';
 
@@ -18,7 +18,7 @@ export function getAndroidAppInfo() {
   const win = self.window;
   // We want to fallback to browser builtin mechanism when possible.
   const canShowBuiltinBanner =
-    platformService.isAndroid() && platformService.isChrome();
+    platformUtils.isAndroid() && platformUtils.isChrome();
 
   if (canShowBuiltinBanner) {
     user().info(
@@ -39,9 +39,9 @@ export function getAndroidAppInfo() {
 
   const manifestHref = manifestLink.getAttribute('href');
 
-  urlService.assertHttpsUrl(manifestHref, undefined, 'manifest href');
+  urlUtils.assertHttpsUrl(manifestHref, undefined, 'manifest href');
 
-  const promise = xhrService.fetchJson(manifestHref).then(parseManifest);
+  const promise = xhrUtils.fetchJson(manifestHref).then(parseManifest);
   return {
     promise,
     openOrInstall: () => {
@@ -92,7 +92,7 @@ function parseManifest(manifestJson) {
  * @return {string}
  */
 function getAndroidIntentForUrl(appId) {
-  const parsedUrl = urlService.parse(docInfo.canonicalUrl);
+  const parsedUrl = urlUtils.parse(docInfo.canonicalUrl);
   const cleanProtocol = parsedUrl.protocol.replace(':', '');
   const {host, pathname} = parsedUrl;
 

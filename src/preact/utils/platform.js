@@ -1,4 +1,4 @@
-export const platformService = {
+export const platformUtils = {
   /**
    * Whether the current platform an Android device.
    * @return {boolean}
