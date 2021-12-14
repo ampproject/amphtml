@@ -390,3 +390,25 @@ function isInternalElement(nodeOrTagName) {
 
   return !!tagName && tagName.toLowerCase().startsWith('i-');
 }
+
+/**
+ * Finds a matching node inside an HTML template slot's children
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {HTMLElement|null}
+ */
+export function querySelectorInSlot(slot, selector) {
+  /** @type {HTMLElement[]} */
+  const nodes = slot.assignedElements();
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      return node;
+    }
+    const child = scopedQuerySelector(node, selector);
+    if (child) {
+      return child;
+    }
+  }
+  return null;
+}

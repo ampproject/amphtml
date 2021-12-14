@@ -1,4 +1,4 @@
-import {matches, scopedQuerySelector} from '#core/dom/query';
+import {querySelectorInSlot} from '#core/dom/query';
 
 import * as Preact from '#preact';
 import {useEffect, useMemo, useRef} from '#preact';
@@ -133,24 +133,4 @@ export function BentoAppBanner(props) {
 function getStorageKey(id) {
   userAssert(id, 'bento-app-banner should have an id.');
   return 'bento-app-banner:' + id;
-}
-
-/**
- * @param {HTMLSlotElement} slot
- * @param {string} selector
- * @return {Element|null}
- */
-function querySelectorInSlot(slot, selector) {
-  const nodes = slot.assignedElements();
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    if (matches(node, selector)) {
-      return node;
-    }
-    const child = scopedQuerySelector(node, selector);
-    if (child) {
-      return child;
-    }
-  }
-  return null;
 }
