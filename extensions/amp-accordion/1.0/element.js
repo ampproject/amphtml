@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {CustomEventOptionsDef, toggleAttribute} from '#core/dom';
+import {toggleAttribute} from '#core/dom';
 import {childElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {dict, memo} from '#core/types/object';
