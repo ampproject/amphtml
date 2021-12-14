@@ -1,10 +1,10 @@
-export interface Logger {
-  warn: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  assertString: (...args: any[]) => void;
-}
-
 declare module '#utils/log' {
-  user: () => Logger;
-  dev: () => Logger;
+  export interface Logger {
+    warn: (...args: any[]) => void;
+    error: (...args: any[]) => void;
+    assertString: (...args: any[]) => void;
+  }
+
+  export const user: () => Logger;
+  export const dev: () => Logger;
 }

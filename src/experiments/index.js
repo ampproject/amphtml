@@ -2,9 +2,10 @@
  * @fileoverview Experiments system allows a developer to opt-in to test
  * features that are not yet fully tested.
  *
- * Experiments page: https://cdn.ampproject.org/experiments.html *
+ * Experiments page: https://cdn.ampproject.org/experiments.html
  */
 
+import {devAssertArray, devAssertString} from '#core/assert';
 import {isArray} from '#core/types';
 import {hasOwn, map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
@@ -12,10 +13,11 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {dev, user} from '#utils/log';
 
-// import {ExperimentInfoDef} from './experiments.type';
-
 import {getMode} from '../mode';
 import {getTopWindow} from '../service-helpers';
+
+/** @typedef {import('./types.d').ExperimentBranchMap} ExperimentBranchMap */
+/** @typedef {{[key: string]: boolean}} ExperimentToggleMap */
 
 /**
  * @const
@@ -111,13 +113,13 @@ export function toggleExperiment(
  * Calculate whether the experiment is on or off based off of its default value,
  * stored overriden value, or the global config frequency given.
  * @param {Window} win
- * @return {Object<string, boolean>}
+ * @return {ExperimentToggleMap}
  */
 export function experimentToggles(win) {
-  if (win[TOGGLES_WINDOW_PROPERTY]) {
+  if (/** @type {ExperimentToggleMap} */ (win[TOGGLES_WINDOW_PROPERTY])) {
     return win[TOGGLES_WINDOW_PROPERTY];
   }
-  win[TOGGLES_WINDOW_PROPERTY] = map();
+  win[TOGGLES_WINDOW_PROPERTY] = /** @type {ExperimentToggleMap} */ (map());
   const toggles = win[TOGGLES_WINDOW_PROPERTY];
 
   // Read default and injected configs of this build.
@@ -138,9 +140,10 @@ export function experimentToggles(win) {
       'meta[name="amp-experiments-opt-in"]'
     );
     if (meta) {
-      const optedInExperiments = meta.getAttribute('content').split(',');
+      const optedInExperiments = meta.getAttribute('content')?.split(',') || [];
       for (const experiment of optedInExperiments) {
-        if (dev().assertArray(allowedDocOptIn).includes(experiment)) {
+        devAssertArray(allowedDocOptIn);
+        if (allowedDocOptIn.includes(experiment)) {
           toggles[experiment] = true;
         }
       }
@@ -185,7 +188,7 @@ function getExperimentToggles(win) {
   let experimentsString = '';
   try {
     if ('localStorage' in win) {
-      experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY);
+      experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '';
     }
   } catch {
     dev().warn(TAG, 'Failed to retrieve experiments from localStorage.');
@@ -278,7 +281,9 @@ export const RANDOM_NUMBER_GENERATORS = {
  */
 function selectRandomItem(arr) {
   const rn = RANDOM_NUMBER_GENERATORS.accuratePrng();
-  return dev().assertString(arr[Math.floor(rn * arr.length)]) || null;
+  const result = arr[Math.floor(rn * arr.length)];
+  devAssertString(result);
+  return result || null;
 }
 
 /**
@@ -292,13 +297,14 @@ function selectRandomItem(arr) {
  *
  * @param {Window} win Window context on which to save experiment
  *     selection state.
- * @param {ExperimentInfo[]} experiments  Set of experiments to
- *     configure for this page load.
- * @return {Object<string, string>} Map of experiment names to selected
+ * @param {import('./types.d').ExperimentInfo[]} experiments Set of experiments
+ *     to configure for this page load.
+ * @return {ExperimentBranchMap} Map of experiment names to selected
  *     branches.
  */
 export function randomlySelectUnsetExperiments(win, experiments) {
   win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
+  /** @type {ExperimentBranchMap} */
   const selectedExperiments = {};
   for (const experiment of experiments) {
     const experimentName = experiment.experimentId;

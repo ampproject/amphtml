@@ -8,16 +8,17 @@
     "strictNullChecks": true,
     "noImplicitAny": true,
     "lib": ["dom", "esnext", "es6"],
+
+    "suppressImplicitAnyIndexErrors": true,
     "paths": {
-      // "#experiments": ["."],
+      "#experiments": ["."],
       "#experiments/*": ["./*"],
 
-      "#core": ["../core"],
-      "#core/*": ["../core/*"]
+      "#core/*": ["../core/*"],
     }
   },
   "include": [
-    "story-ad-*/**.js",
+    "**/*.js",
     "**/*.d.ts",
 
     "../core/**/*.d.ts"
