@@ -1,4 +1,4 @@
-import {docInfo} from '#preact/utils/document';
+import {docInfo} from '#preact/utils/docInfo';
 import {platformUtils} from '#preact/utils/platform';
 import {urlUtils} from '#preact/utils/url';
 
