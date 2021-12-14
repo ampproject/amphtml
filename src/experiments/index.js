@@ -12,23 +12,32 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {dev, user} from '#utils/log';
 
-import {ExperimentInfoDef} from './experiments.type';
+// import {ExperimentInfoDef} from './experiments.type';
 
 import {getMode} from '../mode';
 import {getTopWindow} from '../service-helpers';
 
-/** @const {string} */
+/**
+ * @const
+ * @type {string}
+ */
 const TAG = 'EXPERIMENTS';
 
-/** @const {string} */
+/**
+ * @const
+ * @type {string}
+ */
 const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
 
-/** @const {string} */
+/**
+ * @const
+ * @type {string}
+ */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 /**
  * Whether we are in canary.
- * @param {!Window} win
+ * @param {Window} win
  * @return {boolean}
  */
 export function isCanary(win) {
@@ -37,7 +46,7 @@ export function isCanary(win) {
 
 /**
  * Returns binary type, e.g., canary, production, control, or rc.
- * @param {!Window} win
+ * @param {Window} win
  * @return {string}
  */
 export function getBinaryType(win) {
@@ -46,7 +55,7 @@ export function getBinaryType(win) {
 
 /**
  * Whether the specified experiment is on or off.
- * @param {!Window} win
+ * @param {Window} win
  * @param {string} experimentId
  * @return {boolean}
  */
@@ -58,7 +67,7 @@ export function isExperimentOn(win, experimentId) {
 /**
  * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
- * @param {!Window} win
+ * @param {Window} win
  * @param {string} experimentId
  * @param {boolean=} opt_on
  * @param {boolean=} opt_transientExperiment  Whether to toggle the
@@ -101,8 +110,8 @@ export function toggleExperiment(
 /**
  * Calculate whether the experiment is on or off based off of its default value,
  * stored overriden value, or the global config frequency given.
- * @param {!Window} win
- * @return {!Object<string, boolean>}
+ * @param {Window} win
+ * @return {Object<string, boolean>}
  */
 export function experimentToggles(win) {
   if (win[TOGGLES_WINDOW_PROPERTY]) {
@@ -160,7 +169,7 @@ export function experimentToggles(win) {
 /**
  * Returns the cached experiments toggles, or null if they have not been
  * computed yet.
- * @param {!Window} win
+ * @param {Window} win
  * @return {?Object<string, boolean>}
  */
 export function experimentTogglesOrNull(win) {
@@ -169,8 +178,8 @@ export function experimentTogglesOrNull(win) {
 
 /**
  * Returns a set of experiment IDs currently on.
- * @param {!Window} win
- * @return {!Object<string, boolean>}
+ * @param {Window} win
+ * @return {Object<string, boolean>}
  */
 function getExperimentToggles(win) {
   let experimentsString = '';
@@ -199,8 +208,8 @@ function getExperimentToggles(win) {
 
 /**
  * Saves a set of experiment IDs currently on.
- * @param {!Window} win
- * @param {!Object<string, boolean>} toggles
+ * @param {Window} win
+ * @param {Object<string, boolean>} toggles
  */
 function saveExperimentToggles(win, toggles) {
   const experimentIds = [];
@@ -216,8 +225,8 @@ function saveExperimentToggles(win, toggles) {
 
 /**
  * See getExperimentToggles().
- * @param {!Window} win
- * @return {!Object<string, boolean>}
+ * @param {Window} win
+ * @return {Object<string, boolean>}
  * @visibleForTesting
  */
 export function getExperimentTogglesForTesting(win) {
@@ -226,7 +235,7 @@ export function getExperimentTogglesForTesting(win) {
 
 /**
  * Resets the experimentsToggle cache for testing purposes.
- * @param {!Window} win
+ * @param {Window} win
  * @visibleForTesting
  */
 export function resetExperimentTogglesForTesting(win) {
@@ -255,7 +264,8 @@ function slowButAccuratePrng() {
  * out easily in tests.
  *
  * @visibleForTesting
- * @const {!{accuratePrng: function():number}}
+ * @const
+ * @type {{accuratePrng: function():number}}
  */
 export const RANDOM_NUMBER_GENERATORS = {
   accuratePrng: slowButAccuratePrng,
@@ -263,7 +273,7 @@ export const RANDOM_NUMBER_GENERATORS = {
 
 /**
  * Selects, uniformly at random, a single item from the array.
- * @param {!Array<string>} arr Object to select from.
+ * @param {string[]} arr Object to select from.
  * @return {?string} Single item from arr or null if arr was empty.
  */
 function selectRandomItem(arr) {
@@ -280,11 +290,11 @@ function selectRandomItem(arr) {
  * experimentName) and, if it is on, look for which branch is selected in
  * win.__AMP_EXPERIMENT_BRANCHES[experimentName].
  *
- * @param {!Window} win Window context on which to save experiment
+ * @param {Window} win Window context on which to save experiment
  *     selection state.
- * @param {!Array<!ExperimentInfoDef>} experiments  Set of experiments to
+ * @param {ExperimentInfo[]} experiments  Set of experiments to
  *     configure for this page load.
- * @return {!Object<string, string>} Map of experiment names to selected
+ * @return {Object<string, string>} Map of experiment names to selected
  *     branches.
  */
 export function randomlySelectUnsetExperiments(win, experiments) {
@@ -324,7 +334,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  * Returns the experiment branch enabled for the given experiment ID.
  * For example, 'control' or 'experiment'.
  *
- * @param {!Window} win Window context to check for experiment state.
+ * @param {Window} win Window context to check for experiment state.
  * @param {string} experimentName Name of the experiment to check.
  * @return {?string} Active experiment branch ID for experimentName (possibly
  *     null if experimentName has been tested but no branch was enabled).
@@ -339,8 +349,8 @@ export function getExperimentBranch(win, experimentName) {
  * Returns an object containing all active experiment branches on the
  * top Window.
  *
- * @param {!Window} win Window context to check for experiment state.
- * @return {!Object} contains all experiment branches and their ids.
+ * @param {Window} win Window context to check for experiment state.
+ * @return {Object} contains all experiment branches and their ids.
  */
 export function getActiveExperimentBranches(win) {
   const topWin = getTopWindow(win);
@@ -354,7 +364,7 @@ export function getActiveExperimentBranches(win) {
  * Force enable (or disable) a specific branch of a given experiment name.
  * Disables the experiment name altogether if branchId is falseish.
  *
- * @param {!Window} win Window context to check for experiment state.
+ * @param {Window} win Window context to check for experiment state.
  * @param {string} experimentName Name of the experiment to check.
  * @param {?string} branchId ID of branch to force or null to disable
  *     altogether.
