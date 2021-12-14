@@ -1,42 +1,37 @@
 import {urlService} from './url';
 
-class DocumentService {
-  /**
-   * @param {string} metaName
-   * @return {string|null}
-   */
-  getMetaByName(metaName) {
-    const metas = self.window.document.head.querySelectorAll('meta[name]');
-    for (let i = 0; i < metas.length; i++) {
-      const meta = metas[i];
-      const name = meta.getAttribute('name');
-      if (name === metaName) {
-        const content = meta.getAttribute('content');
-        if (content !== undefined) {
-          return content;
-        }
+/**
+ * @param {string} metaName
+ * @return {string|null}
+ */
+export function getMetaByName(metaName) {
+  const metas = self.document.head.querySelectorAll('meta[name]');
+  for (let i = 0; i < metas.length; i++) {
+    const meta = metas[i];
+    const name = meta.getAttribute('name');
+    if (name === metaName) {
+      const content = meta.getAttribute('content');
+      if (content !== undefined) {
+        return content;
       }
     }
-    return null;
   }
+  return null;
 }
 
-// eslint-disable-next-line local/no-export-side-effect
-export const docService = new DocumentService();
-
-class DocumentInfoService {
+export const docInfo = {
   /**
    * @return {string}
    */
   get sourceUrl() {
-    return self.window.location.href;
-  }
+    return self.location.href;
+  },
 
   /**
    * @return {string}
    */
   get canonicalUrl() {
-    const rootNode = self.window.document;
+    const rootNode = self.document;
 
     let canonicalUrl = rootNode?.AMP?.canonicalUrl;
     if (!canonicalUrl) {
@@ -47,8 +42,5 @@ class DocumentInfoService {
     }
 
     return canonicalUrl;
-  }
-}
-
-// eslint-disable-next-line local/no-export-side-effect
-export const docInfoService = new DocumentInfoService();
+  },
+};

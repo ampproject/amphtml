@@ -1,8 +1,6 @@
-import {docService} from '#preact/services/document';
+import {getMetaByName} from '#preact/services/document';
 import {platformService} from '#preact/services/platform';
-import {timerService} from '#preact/services/timer';
 import {urlService} from '#preact/services/url';
-import {viewerService} from '#preact/services/viewer';
 
 import {user, userAssert} from '#utils/log';
 
@@ -18,8 +16,7 @@ const OPEN_LINK_TIMEOUT = 1500;
  * }|null}
  */
 export function getIOSAppInfo() {
-  const canShowBuiltinBanner =
-    !viewerService.isEmbedded() && platformService.isSafari();
+  const canShowBuiltinBanner = platformService.isSafari();
   if (canShowBuiltinBanner) {
     user().info(
       'BENTO-APP-BANNER',
@@ -28,13 +25,7 @@ export function getIOSAppInfo() {
     return null;
   }
 
-  const canNavigateTo =
-    !viewerService.isEmbedded() || viewerService.hasCapability('navigateTo');
-  if (!canNavigateTo) {
-    return null;
-  }
-
-  const metaContent = docService.getMetaByName('apple-itunes-app');
+  const metaContent = getMetaByName('apple-itunes-app');
   if (!metaContent) {
     return null;
   }
@@ -44,21 +35,10 @@ export function getIOSAppInfo() {
     installAppUrl,
     openInAppUrl,
     openOrInstall: () => {
-      if (viewerService.isEmbedded()) {
-        user().warn(
-          'BENTO-APP-BANNER',
-          'Bento components should never be running in an embedded viewer'
-        );
-        // timerService.delay(() => {
-        //   viewerService.sendMessage('navigateTo', dict({'url': installAppUrl}));
-        // }, OPEN_LINK_TIMEOUT);
-        // viewerService.sendMessage('navigateTo', dict({'url': openInAppUrl}));
-      } else {
-        timerService.delay(() => {
-          openWindowDialog(window, installAppUrl, '_top');
-        }, OPEN_LINK_TIMEOUT);
-        openWindowDialog(window, openInAppUrl, '_top');
-      }
+      setTimeout(() => {
+        openWindowDialog(window, installAppUrl, '_top');
+      }, OPEN_LINK_TIMEOUT);
+      openWindowDialog(window, openInAppUrl, '_top');
     },
   };
 }

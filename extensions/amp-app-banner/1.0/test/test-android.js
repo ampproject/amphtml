@@ -1,6 +1,6 @@
 import {WindowInterface} from '#core/window/interface';
 
-import {docInfoService} from '#preact/services/document';
+import {docInfo} from '#preact/services/document';
 import {platformService} from '#preact/services/platform';
 import {xhrService} from '#preact/services/xhr';
 
@@ -11,7 +11,7 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   beforeEach(() => {
     xhrServiceStub = env.sandbox.stub(xhrService);
     env.sandbox
-      .stub(docInfoService, 'canonicalUrl')
+      .stub(docInfo, 'canonicalUrl')
       .get(() => 'https://test.com/canonicalUrl');
   });
 

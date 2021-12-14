@@ -1,13 +1,10 @@
-class XhrService {
+export const xhrService = {
   /**
-   * Simply calls `fetch`
+   * Simply calls `fetch(url).then(r => r.json())`
    * @param {RequestInfo} url
    * @return {Promise<Response>}
    */
   fetchJson(url) {
-    return fetch(url);
-  }
-}
-
-// eslint-disable-next-line local/no-export-side-effect
-export const xhrService = new XhrService();
+    return fetch(url).then((r) => r.json());
+  },
+};

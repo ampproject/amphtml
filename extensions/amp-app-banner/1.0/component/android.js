@@ -1,10 +1,8 @@
 import {WindowInterface} from '#core/window/interface';
 
-import {docInfoService} from '#preact/services/document';
+import {docInfo} from '#preact/services/document';
 import {platformService} from '#preact/services/platform';
-import {timerService} from '#preact/services/timer';
 import {urlService} from '#preact/services/url';
-import {viewerService} from '#preact/services/viewer';
 import {xhrService} from '#preact/services/xhr';
 
 import {user} from '#utils/log';
@@ -19,11 +17,8 @@ const OPEN_LINK_TIMEOUT = 1500;
 export function getAndroidAppInfo() {
   const win = self.window;
   // We want to fallback to browser builtin mechanism when possible.
-  const isChromeAndroid =
-    platformService.isAndroid() && platformService.isChrome();
-  const isProxyOrigin = urlService.isProxyOrigin(win.location);
   const canShowBuiltinBanner =
-    !isProxyOrigin && !viewerService.isEmbedded() && isChromeAndroid;
+    platformService.isAndroid() && platformService.isChrome();
 
   if (canShowBuiltinBanner) {
     user().info(
@@ -55,7 +50,7 @@ export function getAndroidAppInfo() {
           return;
         }
         const {installAppUrl, openInAppUrl} = manifest;
-        timerService.delay(() => {
+        setTimeout(() => {
           WindowInterface.getTop(window).location.assign(installAppUrl);
         }, OPEN_LINK_TIMEOUT);
         openWindowDialog(window, openInAppUrl, '_top');
@@ -97,8 +92,7 @@ function parseManifest(manifestJson) {
  * @return {string}
  */
 function getAndroidIntentForUrl(appId) {
-  const {canonicalUrl} = docInfoService;
-  const parsedUrl = urlService.parse(canonicalUrl);
+  const parsedUrl = urlService.parse(docInfo.canonicalUrl);
   const cleanProtocol = parsedUrl.protocol.replace(':', '');
   const {host, pathname} = parsedUrl;
 

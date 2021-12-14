@@ -1,26 +1,19 @@
-class PlatformService {
-  /**
-   * @constructor
-   */
-  constructor() {
-    this.navigator_ = self.navigator;
-  }
-
+export const platformService = {
   /**
    * Whether the current platform an Android device.
    * @return {boolean}
    */
   isAndroid() {
-    return /Android/i.test(this.navigator_.userAgent);
-  }
+    return /Android/i.test(self.navigator.userAgent);
+  },
 
   /**
    * Whether the current platform an iOS device.
    * @return {boolean}
    */
   isIos() {
-    return /iPhone|iPad|iPod/i.test(this.navigator_.userAgent);
-  }
+    return /iPhone|iPad|iPod/i.test(self.navigator.userAgent);
+  },
 
   /**
    * Whether the current browser is Safari.
@@ -28,13 +21,13 @@ class PlatformService {
    */
   isSafari() {
     return (
-      /Safari/i.test(this.navigator_.userAgent) &&
+      /Safari/i.test(self.navigator.userAgent) &&
       !this.isChrome() &&
       !this.isEdge() &&
       !this.isFirefox() &&
       !this.isOpera()
     );
-  }
+  },
 
   /**
    * Whether the current browser is a Chrome browser.
@@ -43,19 +36,19 @@ class PlatformService {
   isChrome() {
     // Also true for MS Edge :)
     return (
-      /Chrome|CriOS/i.test(this.navigator_.userAgent) &&
+      /Chrome|CriOS/i.test(self.navigator.userAgent) &&
       !this.isEdge() &&
       !this.isOpera()
     );
-  }
+  },
 
   /**
    * Whether the current browser is a Firefox browser.
    * @return {boolean}
    */
   isFirefox() {
-    return /Firefox|FxiOS/i.test(this.navigator_.userAgent) && !this.isEdge();
-  }
+    return /Firefox|FxiOS/i.test(self.navigator.userAgent) && !this.isEdge();
+  },
 
   /**
    * Whether the current browser is an Opera browser.
@@ -65,32 +58,32 @@ class PlatformService {
     // Chrome UA on Android may include OPR<v> (build code referring to Oreo),
     // however real Opera puts put a / after OPR and that's the only tell, so
     // we check for OPR/ instead of OPR
-    return /OPR\/|Opera|OPiOS/i.test(this.navigator_.userAgent);
-  }
+    return /OPR\/|Opera|OPiOS/i.test(self.navigator.userAgent);
+  },
 
   /**
    * Whether the current browser is an Edge browser.
    * @return {boolean}
    */
   isEdge() {
-    return /Edge/i.test(this.navigator_.userAgent);
-  }
+    return /Edge/i.test(self.navigator.userAgent);
+  },
 
   /**
    * Whether the current browser is based on the WebKit engine.
    * @return {boolean}
    */
   isWebKit() {
-    return /WebKit/i.test(this.navigator_.userAgent) && !this.isEdge();
-  }
+    return /WebKit/i.test(self.navigator.userAgent) && !this.isEdge();
+  },
 
   /**
    * Whether the current browser is running on Windows.
    * @return {boolean}
    */
   isWindows() {
-    return /Windows/i.test(this.navigator_.userAgent);
-  }
+    return /Windows/i.test(self.navigator.userAgent);
+  },
 
   /**
    * Whether the current browser is isStandalone.
@@ -98,19 +91,18 @@ class PlatformService {
    */
   isStandalone() {
     return (
-      (this.isIos() && this.navigator_.standalone) ||
-      (this.isChrome() &&
-        this.win_.matchMedia('(display-mode: standalone)').matches)
+      (this.isIos() && self.navigator.standalone) ||
+      (this.isChrome() && self.matchMedia('(display-mode: standalone)').matches)
     );
-  }
+  },
 
   /**
    * Whether the current platform matches a bot user agent.
    * @return {boolean}
    */
   isBot() {
-    return /bot/i.test(this.navigator_.userAgent);
-  }
+    return /bot/i.test(self.navigator.userAgent);
+  },
 
   /**
    * Returns the major version of the browser.
@@ -135,7 +127,7 @@ class PlatformService {
       return this.evalMajorVersion_(/Edge\/(\d+)/, 1);
     }
     return 0;
-  }
+  },
 
   /**
    * @param {!RegExp} expr
@@ -144,15 +136,15 @@ class PlatformService {
    * @return {number}
    */
   evalMajorVersion_(expr, index) {
-    if (!this.navigator_.userAgent) {
+    if (!self.navigator.userAgent) {
       return 0;
     }
-    const res = this.navigator_.userAgent.match(expr);
+    const res = self.navigator.userAgent.match(expr);
     if (!res || index >= res.length) {
       return 0;
     }
     return parseInt(res[index], 10);
-  }
+  },
 
   /**
    * Returns the minor ios version in string.
@@ -161,13 +153,13 @@ class PlatformService {
    * @return {string}
    */
   getIosVersionString() {
-    if (!this.navigator_.userAgent) {
+    if (!self.navigator.userAgent) {
       return '';
     }
     if (!this.isIos()) {
       return '';
     }
-    let version = this.navigator_.userAgent.match(
+    let version = self.navigator.userAgent.match(
       /OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/
     );
     if (!version) {
@@ -175,7 +167,7 @@ class PlatformService {
     }
     version = version[1].replace(/_/g, '.');
     return version;
-  }
+  },
 
   /**
    * Returns the major ios version in number.
@@ -183,12 +175,9 @@ class PlatformService {
    */
   getIosMajorVersion() {
     const currentIosVersion = this.getIosVersionString();
-    if (currentIosVersion == '') {
+    if (currentIosVersion === '') {
       return null;
     }
     return Number(currentIosVersion.split('.')[0]);
-  }
-}
-
-// eslint-disable-next-line local/no-export-side-effect
-export const platformService = new PlatformService();
+  },
+};
