@@ -82,7 +82,7 @@ describes.realWin(
           '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
       };
 
-      await shoppingTag.onClick_(tagData);
+      await shoppingTag.element.click();
 
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
         expect(

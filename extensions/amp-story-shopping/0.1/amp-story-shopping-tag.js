@@ -28,7 +28,7 @@ const FONTS_TO_LOAD = [
 
 /**
  * @param {!ShoppingConfigDataDef} tagData
- * @param {function(Event)} onClick
+ * @param {function(!ShoppingConfigDataDef): undefined} onClick
  * @return {!Element}
  */
 const renderShoppingTagTemplate = (tagData, onClick) => (
@@ -62,8 +62,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @param {?Element} element */
-    this.renderedEl_ = null;
+    /** @param {boolean} element */
+    this.hasAppendedInnerShoppingTagEl_ = false;
   }
 
   /** @override */
@@ -105,15 +105,16 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
-    if (this.renderedEl_ || !tagData) {
+    if (this.hasAppendedInnerShoppingTagEl_ || !tagData) {
       return;
     }
     this.mutateElement(() => {
-      this.renderedEl_ = createShadowRootWithStyle(
+      createShadowRootWithStyle(
         this.element,
         renderShoppingTagTemplate(tagData, (tagData) => this.onClick_(tagData)),
         shoppingTagCSS
       );
+      this.hasAppendedInnerShoppingTagEl_ = true;
     });
   }
 
