@@ -3,8 +3,17 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "paths": {}
+    "downlevelIteration": true,
+    "target": "esnext",
+    "moduleResolution": "node",
+    "paths": {
+      "#compiler": ["../../../src/compiler"],
+      "#compiler/*": ["../../../src/compiler/*"],
+      "#core": ["../../../src/core"],
+      "#core/*": ["../../../src/core/*"],
+      "#third_party/*": ["../../../third_party/*"]
+    }
   },
-  "include": ["*.js", "**/*.d.ts", "../../../src/*.d.ts"],
-  "exclude": []
+  "include": ["*.js", "**/*.d.ts", "../../../src/**/*.d.ts"],
+  "exclude": ["../../../src/purifier/index.d.ts"]
 }

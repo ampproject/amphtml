@@ -150,7 +150,7 @@ function buildScrollableCarousel(element) {
   }
 
   const doc = element.ownerDocument;
-  const cells = realChildElements(element);
+  const cells = /** @type {HTMLDivElement[]}*/ (realChildElements(element));
   const container = doc.createElement('div');
 
   container.classList.add(ClassNames.SCROLLABLE_CONTAINER);
@@ -202,7 +202,7 @@ function buildSlideScrollCarousel(element) {
     return querySlideScrollCarousel(element);
   }
   const doc = element.ownerDocument;
-  const slides = realChildElements(element);
+  const slides = /** @type {HTMLDivElement[]} */ (realChildElements(element));
   element.classList.add(ClassNames.SLIDESCROLL_CAROUSEL);
 
   const slidesContainer = doc.createElement('div');
