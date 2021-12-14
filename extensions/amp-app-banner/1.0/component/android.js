@@ -1,3 +1,5 @@
+import {WindowInterface} from '#core/window/interface';
+
 import {docInfoService} from '#preact/services/document';
 import {platformService} from '#preact/services/platform';
 import {timerService} from '#preact/services/timer';
@@ -54,7 +56,7 @@ export function getAndroidAppInfo() {
         }
         const {installAppUrl, openInAppUrl} = manifest;
         timerService.delay(() => {
-          window.top.location.assign(installAppUrl);
+          WindowInterface.getTop(window).location.assign(installAppUrl);
         }, OPEN_LINK_TIMEOUT);
         openWindowDialog(window, openInAppUrl, '_top');
       });

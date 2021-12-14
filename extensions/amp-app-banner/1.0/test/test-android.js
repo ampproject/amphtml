@@ -1,16 +1,18 @@
+import {WindowInterface} from '#core/window/interface';
+
 import {docInfoService} from '#preact/services/document';
 import {platformService} from '#preact/services/platform';
-import {timerService} from '#preact/services/timer';
 import {xhrService} from '#preact/services/xhr';
 
 import {getAndroidAppInfo} from '../component/android';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   let xhrServiceStub;
-  let canonicalUrlStub;
   beforeEach(() => {
     xhrServiceStub = env.sandbox.stub(xhrService);
-    canonicalUrlStub = env.sandbox.stub(docInfoService, 'canonicalUrl');
+    env.sandbox
+      .stub(docInfoService, 'canonicalUrl')
+      .get(() => 'https://test.com/canonicalUrl');
   });
 
   describe('getAndroidAppInfo', () => {
@@ -22,8 +24,17 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
     });
 
     describe('when manifest link is present', () => {
-      // Mock the <link> manifest:
+      let clock;
       beforeEach(() => {
+        clock = env.sandbox.useFakeTimers();
+
+        // Mock data fetching:
+        const mockManifest = {
+          'related_applications': [{platform: 'play', id: '11111111'}],
+        };
+        xhrServiceStub.fetchJson.resolves(mockManifest);
+
+        // Mock the <link> manifest:
         const link = document.createElement('link');
         link.setAttribute('id', 'TEST_LINK');
         link.setAttribute('rel', 'manifest');
@@ -32,16 +43,6 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       });
       afterEach(() => {
         document.getElementById('TEST_LINK').remove();
-      });
-
-      // Mock data fetching:
-      beforeEach(() => {
-        const mockManifest = {
-          'related_applications': [{platform: 'play', id: '11111111'}],
-        };
-        xhrServiceStub.fetchJson.resolves(mockManifest);
-
-        canonicalUrlStub.get(() => 'https://test.com/canonicalUrl');
       });
 
       it('should not show a banner if a built-in banner can be shown', async () => {
@@ -66,9 +67,9 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       });
 
       it('clicking "Open" should open the app URL', async () => {
+        const location = {assign: env.sandbox.stub()};
         env.sandbox.stub(window, 'open');
-        // We cannot stub the `window.top.location.assign` method, so we can only stub this:
-        env.sandbox.stub(timerService, 'delay');
+        env.sandbox.stub(WindowInterface, 'getTop').returns({location});
 
         const appInfo = getAndroidAppInfo();
         const manifest = await appInfo.promise;
@@ -77,7 +78,11 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
           .to.have.callCount(1)
           .calledWith(manifest.openInAppUrl, '_top');
 
-        expect(timerService.delay).to.have.callCount(1);
+        clock.tick(5_000);
+
+        expect(location.assign)
+          .to.have.callCount(1)
+          .calledWith(manifest.installAppUrl);
       });
 
       it('should not show a banner if the manifest is missing data', async () => {

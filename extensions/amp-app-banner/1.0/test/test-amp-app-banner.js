@@ -15,24 +15,18 @@ describes.realWin(
     },
   },
   (env) => {
-    let win;
     let doc;
     let html;
 
     beforeEach(async () => {
-      win = env.win;
-      doc = win.document;
+      doc = env.win.document;
       html = htmlFor(doc);
-      toggleExperiment(win, 'bento-app-banner', true, true);
-    });
+      toggleExperiment(env.win, 'bento-app-banner', true, true);
 
-    // Mock the platform:
-    beforeEach(() => {
+      // Mock the platform:
       env.sandbox.stub(platformService, 'isIos').returns(true);
       env.sandbox.stub(platformService, 'isSafari').returns(false);
-    });
-    // Add necessary meta tag:
-    beforeEach(() => {
+
       // Inject a tag like: <meta name="apple-itunes-app" content="..." />
       const meta = document.createElement('meta');
       meta.setAttribute('id', 'TEST_META');
@@ -44,6 +38,7 @@ describes.realWin(
       document.head.appendChild(meta);
     });
     afterEach(() => {
+      // Remove the injected <meta> tag:
       document.getElementById('TEST_META').remove();
     });
 
