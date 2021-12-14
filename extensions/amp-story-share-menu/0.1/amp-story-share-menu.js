@@ -75,9 +75,6 @@ export class AmpStoryShareMenu {
    * @param {!Element} hostEl
    */
   constructor(hostEl) {
-    /** @private {string} */
-    this.canonicalUrl_ = Services.documentInfoForDoc(hostEl).canonicalUrl;
-
     /** @private @const {!Window} */
     this.win_ = getWin(hostEl);
 
@@ -332,7 +329,8 @@ export class AmpStoryShareMenu {
    * @private
    */
   copyUrlToClipboard_() {
-    if (!copyTextToClipboard(this.win_, this.canonicalUrl_)) {
+    const url = Services.documentInfoForDoc(hostEl).canonicalUrl;
+    if (!copyTextToClipboard(this.win_, url)) {
       const failureString = localize(
         this.storyEl_,
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
@@ -341,10 +339,7 @@ export class AmpStoryShareMenu {
       return;
     }
 
-    Toast.show(
-      this.storyEl_,
-      this.buildCopySuccessfulToast_(this.canonicalUrl_)
-    );
+    Toast.show(this.storyEl_, this.buildCopySuccessfulToast_(url));
   }
 
   /**
