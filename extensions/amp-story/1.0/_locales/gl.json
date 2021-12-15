@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Obter ligazón"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Continuar de todas formas"
   },
-  "31": {
-    "string": "Son desactivado"
-  },
-  "32": {
-    "string": "Son activado"
-  },
-  "33": {
-    "string": "Esta páxina non ten son"
-  },
   "34": {
     "string": "Reproducir vídeo"
   },
   "35": {
     "string": "Deslizar cara enriba"
-  },
-  "36": {
-    "string": "Mostrar todo"
   },
   "62": {
     "string": "Compartir a partir desta páxina"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Abrindo"
+  },
+  "98": {
+    "string": "Formulario non enviado, reinténtao"
+  },
+  "99": {
+    "string": "Formulario enviado correctamente"
   }
 }

@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Hae linkki"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Jatka silti"
   },
-  "31": {
-    "string": "Äänet pois käytöstä"
-  },
-  "32": {
-    "string": "Äänet käytössä"
-  },
-  "33": {
-    "string": "Tällä sivulla ei ole ääntä"
-  },
   "34": {
     "string": "Toista video"
   },
   "35": {
     "string": "Pyyhkäise ylös"
-  },
-  "36": {
-    "string": "Laajenna tviitti"
   },
   "62": {
     "string": "Jaa tältä sivulta alkaen"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Avataan"
+  },
+  "98": {
+    "string": "Lomaketta ei lähetetty, yritä uudelleen"
+  },
+  "99": {
+    "string": "Lomake lähetettiin"
   }
 }

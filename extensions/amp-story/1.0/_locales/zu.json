@@ -17,9 +17,6 @@
   "7": {
     "string": "U-Facebook"
   },
-  "8": {
-    "string": "U-Google"
-  },
   "9": {
     "string": "Thola Isixhumanisi"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Qhubeka Noma Kunjalo"
   },
-  "31": {
-    "string": "Umsindo uvaliwe"
-  },
-  "32": {
-    "string": "Umsindo uvuliwe"
-  },
-  "33": {
-    "string": "Leli khasi alinawo umsindo"
-  },
   "34": {
     "string": "Dlala ividiyo"
   },
   "35": {
     "string": "Swayiphela phezulu"
-  },
-  "36": {
-    "string": "Khulisa i-Tweet"
   },
   "62": {
     "string": "Ukwabelana kuqala kuleli khasi"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Iyavula"
+  },
+  "98": {
+    "string": "Ifomu alithunyelwanga, zama futhi"
+  },
+  "99": {
+    "string": "Ifomu lithunyelwe ngempumelelo"
   }
 }

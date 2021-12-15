@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Link abrufen"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Trotzdem fortfahren"
   },
-  "31": {
-    "string": "Ton aus"
-  },
-  "32": {
-    "string": "Ton an"
-  },
-  "33": {
-    "string": "Diese Seite hat keinen Ton"
-  },
   "34": {
     "string": "Video abspielen"
   },
   "35": {
     "string": "Nach oben wischen"
-  },
-  "36": {
-    "string": "Tweet maximieren"
   },
   "62": {
     "string": "Ab dieser Seite teilen"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Wird geöffnet"
+  },
+  "98": {
+    "string": "Formular nicht abgeschickt, versuche es erneut"
+  },
+  "99": {
+    "string": "Formular erfolgreich abgeschickt"
   }
 }

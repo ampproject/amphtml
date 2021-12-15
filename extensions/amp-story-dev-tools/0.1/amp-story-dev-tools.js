@@ -225,20 +225,14 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     });
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   loadFonts_() {
     if (this.win.document.fonts && FontFace) {
-      fontsToLoad.forEach((fontProperties) => {
-        const font = new FontFace(fontProperties.family, fontProperties.src, {
-          weight: fontProperties.weight,
-          style: 'normal',
-        });
-        font.load().then(() => {
-          this.win.document.fonts.add(font);
-        });
-      });
+      fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
+        new FontFace(family, src, {weight, style})
+          .load()
+          .then((font) => this.win.document.fonts.add(font))
+      );
     }
   }
 

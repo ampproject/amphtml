@@ -23,10 +23,6 @@
     "string": "Facebook",
     "description": "Button label for the share target that shares a link via Facebook."
   },
-  "8": {
-    "string": "Google+",
-    "description": "Button label for the share target that shares a link via Google+."
-  },
   "9": {
     "string": "Get Link",
     "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
@@ -87,18 +83,6 @@
     "string": "Continue Anyway",
     "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
-  "31": {
-    "string": "Sound off",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Sound on",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "This page has no sound",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
   "34": {
     "string": "Play video",
     "description": "Label for a button to play the video visible on the page."
@@ -106,10 +90,6 @@
   "35": {
     "string": "Swipe up",
     "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "36": {
-    "string": "Expand Tweet",
-    "description": "Label in the tooltip text for when a Twitter embed is expandable."
   },
   "62": {
     "string": "Share starting from this page",
@@ -254,5 +234,13 @@
   "99": {
     "string": "Form successfully submitted",
     "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+  },
+  "100": {
+    "string": "Read more",
+    "description": "Label for a button to open a drawer containing additional content."
+  },
+  "101": {
+    "string": "Shop Now",
+    "description": "Label for the shopping CTA button."
   }
 }

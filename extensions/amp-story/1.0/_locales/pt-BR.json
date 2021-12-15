@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Copiar link"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Continuar mesmo assim"
   },
-  "31": {
-    "string": "Som desativado"
-  },
-  "32": {
-    "string": "Som ativado"
-  },
-  "33": {
-    "string": "Esta página não tem som"
-  },
   "34": {
     "string": "Reproduzir vídeo"
   },
   "35": {
     "string": "Deslizar para cima"
-  },
-  "36": {
-    "string": "Expandir tweet"
   },
   "62": {
     "string": "Compartilhar a partir desta página"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Abrindo"
+  },
+  "98": {
+    "string": "Formulário não enviado, tente novamente"
+  },
+  "99": {
+    "string": "Formulário enviado com sucesso"
   }
 }

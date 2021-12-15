@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Merr lidhjen"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Vazhdo gjithsesi"
   },
-  "31": {
-    "string": "Pa zë"
-  },
-  "32": {
-    "string": "Me zë"
-  },
-  "33": {
-    "string": "Kjo faqe nuk ka zë"
-  },
   "34": {
     "string": "Luaj videon"
   },
   "35": {
     "string": "Rrëshqit lart"
-  },
-  "36": {
-    "string": "Zgjero tweet-in"
   },
   "62": {
     "string": "Ndaj duke filluar nga kjo faqe"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Duke hapur"
+  },
+  "98": {
+    "string": "Formulari nuk u dorëzua, provo përsëri"
+  },
+  "99": {
+    "string": "Formulari u dorëzua me sukses"
   }
 }

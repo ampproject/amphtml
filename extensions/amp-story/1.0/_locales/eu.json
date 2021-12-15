@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Lortu esteka"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Jarraitu halere"
   },
-  "31": {
-    "string": "Desaktibatu da audioa"
-  },
-  "32": {
-    "string": "Aktibatu da audioa"
-  },
-  "33": {
-    "string": "Orriak ez du audiorik"
-  },
   "34": {
     "string": "Erreproduzitu bideoa"
   },
   "35": {
     "string": "Pasatu hatza gora"
-  },
-  "36": {
-    "string": "Zabaldu txioa"
   },
   "62": {
     "string": "Partekatu orri honetatik aurrera"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Irekitzen"
+  },
+  "98": {
+    "string": "Inprimakia ez da bidali. Saiatu berriro."
+  },
+  "99": {
+    "string": "Bidali da inprimakia"
   }
 }

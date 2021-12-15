@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Dapatkan Pautan"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Teruskan Juga"
   },
-  "31": {
-    "string": "Bunyi dimatikan"
-  },
-  "32": {
-    "string": "Bunyi dihidupkan"
-  },
-  "33": {
-    "string": "Halaman ini tiada bunyi"
-  },
   "34": {
     "string": "Mainkan video"
   },
   "35": {
     "string": "Leret ke atas"
-  },
-  "36": {
-    "string": "Kembangkan Twit"
   },
   "62": {
     "string": "Berkongsi bermula dari halaman ini"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Membuka"
+  },
+  "98": {
+    "string": "Borang tidak diserah, cuba lagi"
+  },
+  "99": {
+    "string": "Borang berjaya diserah"
   }
 }

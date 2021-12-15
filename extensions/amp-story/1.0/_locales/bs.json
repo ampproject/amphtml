@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Preuzmi vezu"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Svejedno nastavi"
   },
-  "31": {
-    "string": "Zvuk je isključen"
-  },
-  "32": {
-    "string": "Zvuk je uključen"
-  },
-  "33": {
-    "string": "Ova stranica nema zvuk"
-  },
   "34": {
     "string": "Reproduciraj videozapis"
   },
   "35": {
     "string": "Pređite prstom nagore"
-  },
-  "36": {
-    "string": "Proširi tweet"
   },
   "62": {
     "string": "Podijeli počevši od ove stranice"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Otvaranje"
+  },
+  "98": {
+    "string": "Formular nije poslan, pokušajte ponovo"
+  },
+  "99": {
+    "string": "Formular uspješno poslan"
   }
 }

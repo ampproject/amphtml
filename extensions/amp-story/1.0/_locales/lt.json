@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Gauti nuorodą"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Vis tiek tęsti"
   },
-  "31": {
-    "string": "Garsas išjungtas"
-  },
-  "32": {
-    "string": "Garsas įjungtas"
-  },
-  "33": {
-    "string": "Nėra šio puslapio garso"
-  },
   "34": {
     "string": "Leisti vaizdo įrašą"
   },
   "35": {
     "string": "Perbraukti aukštyn"
-  },
-  "36": {
-    "string": "Išskleisti „Twitter“ įrašą"
   },
   "62": {
     "string": "Bendrinti pradedant šiuo puslapiu"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Atidaromas"
+  },
+  "98": {
+    "string": "Forma nepateikta, bandykite dar kartą"
+  },
+  "99": {
+    "string": "Forma sėkmingai pateikta"
   }
 }

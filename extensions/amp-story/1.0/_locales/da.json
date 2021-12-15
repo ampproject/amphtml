@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Hent link"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Fortsæt alligevel"
   },
-  "31": {
-    "string": "Lyd fra"
-  },
-  "32": {
-    "string": "Lyd til"
-  },
-  "33": {
-    "string": "Denne side har ingen lyd"
-  },
   "34": {
     "string": "Afspil video"
   },
   "35": {
     "string": "Stryg op"
-  },
-  "36": {
-    "string": "Udvid tweet"
   },
   "62": {
     "string": "Begynd at dele startende fra denne side"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Åbner"
+  },
+  "98": {
+    "string": "Formularen blev ikke indsendt. Prøv igen"
+  },
+  "99": {
+    "string": "Formularen blev indsendt"
   }
 }

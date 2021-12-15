@@ -47,7 +47,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {
   assertDoesNotContainDisplay,
@@ -68,7 +68,6 @@ import {
   randomlySelectUnsetExperiments,
 } from '#experiments';
 import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
-import {StoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -418,7 +417,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
+    this.isFluidPrimaryRequest_ = layout == Layout_Enum.FLUID;
     this.isFluidRequest_ = this.isFluidRequest_ || this.isFluidPrimaryRequest_;
     return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }
@@ -497,14 +496,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
-    }
-
-    const storyAdPageOutlinkExpId = getExperimentBranch(
-      this.win,
-      StoryAdPageOutlink.ID
-    );
-    if (storyAdPageOutlinkExpId) {
-      addExperimentIdToElement(storyAdPageOutlinkExpId, this.element);
     }
 
     const autoAdvanceExpBranch = getExperimentBranch(

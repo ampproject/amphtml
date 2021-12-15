@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Pata Kiungo"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Endelea Hata Hivyo"
   },
-  "31": {
-    "string": "Sauti imezimwa"
-  },
-  "32": {
-    "string": "Sauti imewashwa"
-  },
-  "33": {
-    "string": "Ukurasa huu hauna sauti"
-  },
   "34": {
     "string": "Cheza video"
   },
   "35": {
     "string": "Telezesha juu"
-  },
-  "36": {
-    "string": "Panua Tweet"
   },
   "62": {
     "string": "Tuma kuanzia ukurasa huu"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Inafungua"
+  },
+  "98": {
+    "string": "Fomu haijatumwa, jaribu tena"
+  },
+  "99": {
+    "string": "Fomu imefaulu kutumwa"
   }
 }

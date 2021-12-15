@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Bağlantıyı Al"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Yine De Devam Et"
   },
-  "31": {
-    "string": "Ses kapalı"
-  },
-  "32": {
-    "string": "Ses açık"
-  },
-  "33": {
-    "string": "Bu sayfada ses yok"
-  },
   "34": {
     "string": "Video oynat"
   },
   "35": {
     "string": "Yukarı kaydır"
-  },
-  "36": {
-    "string": "Tweet'i genişlet"
   },
   "62": {
     "string": "Bu sayfadan başlayarak paylaşın"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Açılıyor"
+  },
+  "98": {
+    "string": "Form gönderilmedi, tekrar deneyin"
+  },
+  "99": {
+    "string": "Form başarıyla gönderildi"
   }
 }

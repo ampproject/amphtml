@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Link mutatása"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Folytatás mindenképp"
   },
-  "31": {
-    "string": "Hang kikapcsolva"
-  },
-  "32": {
-    "string": "Hang bekapcsolva"
-  },
-  "33": {
-    "string": "Ezen az oldalon nincs hang"
-  },
   "34": {
     "string": "Videó lejátszása"
   },
   "35": {
     "string": "Csúsztatás felfelé"
-  },
-  "36": {
-    "string": "Tweet kibontása"
   },
   "62": {
     "string": "Megosztás ettől az oldaltól kezdve"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Megnyitás"
+  },
+  "98": {
+    "string": "Az űrlap nincs elküldve, próbálja újra"
+  },
+  "99": {
+    "string": "Az űrlap sikeresen elküldve"
   }
 }

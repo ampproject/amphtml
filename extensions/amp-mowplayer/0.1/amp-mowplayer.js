@@ -23,7 +23,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-mowplayer';
 
@@ -132,7 +132,7 @@ class AmpMowplayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
       this.listenToFrame_();
-      dispatchCustomEvent(this.element, VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
     });
     this.playerReadyResolver_(loaded);
 
@@ -233,10 +233,10 @@ class AmpMowplayer extends AMP.BaseElement {
     const playerState = info['playerState'];
     if (eventType == 'infoDelivery' && playerState != null) {
       redispatch(element, playerState.toString(), {
-        [PlayerStates.PLAYING]: VideoEvents.PLAYING,
-        [PlayerStates.PAUSED]: VideoEvents.PAUSE,
+        [PlayerStates.PLAYING]: VideoEvents_Enum.PLAYING,
+        [PlayerStates.PAUSED]: VideoEvents_Enum.PAUSE,
         // mowplayer does not fire pause and ended together.
-        [PlayerStates.ENDED]: [VideoEvents.ENDED, VideoEvents.PAUSE],
+        [PlayerStates.ENDED]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
       });
       return;
     }

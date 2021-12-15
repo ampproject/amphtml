@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Link ophalen"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Toch doorgaan"
   },
-  "31": {
-    "string": "Geluid uit"
-  },
-  "32": {
-    "string": "Geluid aan"
-  },
-  "33": {
-    "string": "Deze pagina heeft geen geluid"
-  },
   "34": {
     "string": "Video afspelen"
   },
   "35": {
     "string": "Omhoog vegen"
-  },
-  "36": {
-    "string": "Tweet uitvouwen"
   },
   "62": {
     "string": "Delen vanaf deze pagina"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Wordt geopend"
+  },
+  "98": {
+    "string": "Formulier niet verzonden, probeer het opnieuw"
+  },
+  "99": {
+    "string": "Formulier verzonden"
   }
 }

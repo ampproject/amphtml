@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Hent lenke"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Fortsett likevel"
   },
-  "31": {
-    "string": "Lyd av"
-  },
-  "32": {
-    "string": "Lyd på"
-  },
-  "33": {
-    "string": "Denne siden har ingen lyd"
-  },
   "34": {
     "string": "Spill av video"
   },
   "35": {
     "string": "Sveip opp"
-  },
-  "36": {
-    "string": "Utvid Tweet"
   },
   "62": {
     "string": "Del med start fra denne siden"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Åpner"
+  },
+  "98": {
+    "string": "Skjema ikke sendt inn. Prøv igjen"
+  },
+  "99": {
+    "string": "Skjema sendt inn"
   }
 }

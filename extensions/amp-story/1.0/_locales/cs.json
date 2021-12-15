@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Získat odkaz"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Přesto pokračovat"
   },
-  "31": {
-    "string": "Zvuk je vypnutý"
-  },
-  "32": {
-    "string": "Zvuk je zapnutý"
-  },
-  "33": {
-    "string": "Tato stránka je bez zvuku"
-  },
   "34": {
     "string": "Přehrát video"
   },
   "35": {
     "string": "Potáhněte nahoru"
-  },
-  "36": {
-    "string": "Rozbalit tweet"
   },
   "62": {
     "string": "Sdílet od této stránky"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Otevírání"
+  },
+  "98": {
+    "string": "Formulář nebyl odeslán, zkuste to znovu"
+  },
+  "99": {
+    "string": "Formulář byl odeslán"
   }
 }

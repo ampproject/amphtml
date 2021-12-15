@@ -406,6 +406,11 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  'colombiafeed': {
+    prefetch:
+      'https://static.clmbtech.com/c1e/static/themes/js/colombiafeed-amp.js',
+  },
+
   'conative': {
     renderStartImplemented: true,
   },
@@ -634,6 +639,19 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'insurads': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://tpc.googlesyndication.com',
+      'https://adservice.google.com',
+      'https://cdn.insurads.com',
+      'https://services.insurads.com',
+      'https://messaging.insurads.com',
+    ],
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,
@@ -661,7 +679,7 @@ const adConfig = jsonConfiguration({
   },
 
   'jixie': {
-    prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
+    prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',
     clientIdCookieName: '_jx',
     renderStartImplemented: true,
@@ -1370,6 +1388,7 @@ const adConfig = jsonConfiguration({
   'wunderkind': {
     preconnect: ['https://tag.wknd.ai', 'https://api.bounceexchange.com'],
     renderStartImplemented: true,
+    fullWidthHeightRatio: 4 / 3,
   },
 
   'xlift': {

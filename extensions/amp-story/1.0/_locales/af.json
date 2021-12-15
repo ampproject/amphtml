@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Kry skakel"
   },
@@ -65,23 +62,11 @@
   "27": {
     "string": "Gaan in elk geval voort"
   },
-  "31": {
-    "string": "Klank af"
-  },
-  "32": {
-    "string": "Klank aan"
-  },
-  "33": {
-    "string": "Hierdie bladsy het geen klank nie"
-  },
   "34": {
     "string": "Speel video"
   },
   "35": {
     "string": "Vee opwaarts"
-  },
-  "36": {
-    "string": "Vou twiet uit"
   },
   "62": {
     "string": "Deel vanaf hierdie bladsy"
@@ -184,5 +169,11 @@
   },
   "97": {
     "string": "Wird geöffnet"
+  },
+  "98": {
+    "string": "Vorm nie ingedien nie, probeer weer"
+  },
+  "99": {
+    "string": "Vorm suksesvol ingedien"
   }
 }

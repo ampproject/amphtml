@@ -3,11 +3,17 @@ import {mount} from 'enzyme';
 import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
+import {Wrapper} from '#preact/component';
 
 import {BentoSocialShare} from '../component';
 
-describes.sandboxed('BentoSocialShare 1.0 preact component', {}, () => {
+describes.sandboxed('BentoSocialShare 1.0 preact component', {}, (env) => {
   const originalWarn = console.warn;
+  let openSpy;
+
+  beforeEach(() => {
+    openSpy = env.sandbox.stub(window, 'open');
+  });
 
   afterEach(() => (console.warn = originalWarn));
 
@@ -38,5 +44,17 @@ describes.sandboxed('BentoSocialShare 1.0 preact component', {}, () => {
 
     const button = wrapper.getDOMNode();
     expect(button.className.includes('button')).to.be.true;
+  });
+
+  it('should call window.open when clicked', () => {
+    const wrapper = mount(<BentoSocialShare type="twitter" />);
+
+    const button = wrapper.find(Wrapper);
+
+    expect(button.length).to.equal(1);
+
+    button.getDOMNode().dispatchEvent(new Event('click'));
+
+    expect(openSpy).called;
   });
 });

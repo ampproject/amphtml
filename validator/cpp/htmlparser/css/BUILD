@@ -34,9 +34,9 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:variant",
-        "@htmlparser//:strings",
-        "@htmlparser//json:types",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:strings",
+        "//cpp/htmlparser/json:types",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -49,7 +49,7 @@ cc_test(
         ":parse_css_cc_proto",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
 
@@ -74,8 +74,8 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:variant",
-        "@htmlparser//:strings",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:strings",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -110,6 +110,6 @@ cc_test(
         ":parse-css",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
