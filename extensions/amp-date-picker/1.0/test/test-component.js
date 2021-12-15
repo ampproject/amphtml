@@ -84,15 +84,59 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('should error if another #date input exists and the picker has no ID', () => {
-      const wrapper = mount(
+      const onErrorSpy = env.sandbox.spy();
+      mount(
         <form>
-          <DatePicker>
+          <DatePicker onError={onErrorSpy}>
             <input type="hidden" name="date"></input>
           </DatePicker>
         </form>
       );
 
-      // TODO: Figure out how to log and stub errors
+      expect(onErrorSpy).to.have.been.calledWith(
+        'Multiple date-pickers with implicit BentoDatePicker fields need to have IDs'
+      );
     });
   });
+
+  describe('hidden inputs in range date picker in forms', () => {
+    it('should not create hidden inputs outside of forms', () => {
+      const wrapper = mount(<DatePicker type="range"></DatePicker>);
+
+      expect(wrapper.exists('input[type="hidden"]')).to.be.false;
+    });
+
+    it('should create a hidden input when inside a form', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker type="range"></DatePicker>
+        </form>
+      );
+
+      const inputs = wrapper.find('input[type="hidden"]');
+
+      expect(inputs.length).to.equal(2);
+      expect(inputs.first().prop('name')).to.equal('start-date');
+      expect(inputs.last().prop('name')).to.equal('end-date');
+    });
+  });
+
+  it(
+    'should name an input `${id}-(start|end)-date` when another ' +
+      '#(start|end)-date input exists',
+    () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker type="range" id="delivery">
+            <input type="hidden" name="start-date"></input>
+          </DatePicker>
+        </form>
+      );
+
+      // TODO: Should the initial start date field be replaced?
+      // expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
+      expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
+      expect(wrapper.exists('input[name="end-date"]')).to.be.true;
+    }
+  );
 });

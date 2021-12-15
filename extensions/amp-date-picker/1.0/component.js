@@ -15,6 +15,8 @@ const DEFAULT_END_INPUT_SELECTOR = '#enddate';
 const ISO_8601 = 'YYYY-MM-DD';
 const DEFAULT_LOCALE = 'en';
 const FORM_INPUT_SELECTOR = 'form';
+// TODO: Check on this tag name
+const TAG = 'BentoDatePicker';
 
 /** @enum {string} */
 const DatePickerMode = {
@@ -55,13 +57,18 @@ export function BentoDatePicker({
   format = ISO_8601,
   locale = DEFAULT_LOCALE,
   id,
+  onError,
   ...rest
 }) {
   const wrapperRef = useRef();
+  const onErrorRef = useRef(onError);
+
   const [dateElement, setDateElement] = useState();
   const [startDateElement, setStartDateElement] = useState();
   const [endDateElement, setEndDateElement] = useState();
   const [hiddenDateElement, setHiddenDateElement] = useState();
+  const [hiddenStartDateElement, setHiddenStartDateElement] = useState();
+  const [hiddenEndDateElement, setHiddenEndDateElement] = useState();
 
   /**
    * Forgivingly parse an ISO8601 input string into a moment object,
@@ -122,11 +129,10 @@ export function BentoDatePicker({
         return alternativeName;
       }
 
-      // user().error(
-      //   TAG,
-      //   'Multiple date-pickers with implicit %s fields need to have IDs',
-      //   name
-      // );
+      onErrorRef.current(
+        `Multiple date-pickers with implicit ${TAG} fields need to have IDs`
+      );
+
       return '';
     },
     [id]
@@ -153,12 +159,14 @@ export function BentoDatePicker({
     return parseDate(endDateElement?.value);
   }, [endDateElement, parseDate]);
 
-  useEffect(() => {
-    const form = closestAncestorElementBySelector(
-      wrapperRef.current,
-      FORM_INPUT_SELECTOR
-    );
-    if (type === DatePickerType.SINGLE) {
+  /**
+   * Sets up hidden input fields for a single input.
+   * @param {!Element} form
+   * @return {void}
+   * @private
+   */
+  const setupSingleInput = useCallback(
+    (form) => {
       const inputElement = scopedQuerySelector(
         wrapperRef.current,
         inputSelector
@@ -173,7 +181,18 @@ export function BentoDatePicker({
           ></input>
         ));
       }
-    } else if (type === DatePickerType.RANGE) {
+    },
+    [inputSelector, getHiddenInputId, mode]
+  );
+
+  /**
+   * Sets up hidden input fields for a range input.
+   * @param {!Element} form
+   * @return {void}
+   * @private
+   */
+  const setupRangeInput = useCallback(
+    (form) => {
       const startDateInputElement = scopedQuerySelector(
         wrapperRef.current,
         startInputSelector
@@ -182,22 +201,41 @@ export function BentoDatePicker({
         wrapperRef.current,
         endInputSelector
       );
-      setStartDateElement(startDateInputElement);
-      setEndDateElement(endDateInputElement);
+      if (startDateInputElement) {
+        setStartDateElement(startDateInputElement);
+      } else if (mode === DatePickerMode.STATIC && !!form) {
+        setHiddenStartDateElement(() => (
+          <input
+            type="hidden"
+            name={getHiddenInputId(form, DateFieldType.START_DATE)}
+          />
+        ));
+      }
+      if (endDateInputElement) {
+        setEndDateElement(endDateInputElement);
+      } else if (mode === DatePickerMode.STATIC && !!form) {
+        setHiddenEndDateElement(() => (
+          <input
+            type="hidden"
+            name={getHiddenInputId(form, DateFieldType.END_DATE)}
+          />
+        ));
+      }
+    },
+    [startInputSelector, endInputSelector, getHiddenInputId, mode]
+  );
+
+  useEffect(() => {
+    const form = closestAncestorElementBySelector(
+      wrapperRef.current,
+      FORM_INPUT_SELECTOR
+    );
+    if (type === DatePickerType.SINGLE) {
+      setupSingleInput(form);
+    } else if (type === DatePickerType.RANGE) {
+      setupRangeInput(form);
     }
-  }, [
-    wrapperRef,
-    inputSelector,
-    startInputSelector,
-    endInputSelector,
-    type,
-    parseDate,
-    setDateElement,
-    setStartDateElement,
-    setEndDateElement,
-    mode,
-    getHiddenInputId,
-  ]);
+  }, [wrapperRef, type, setupSingleInput, setupRangeInput]);
 
   return (
     <ContainWrapper
@@ -209,6 +247,8 @@ export function BentoDatePicker({
     >
       {children}
       {hiddenDateElement}
+      {hiddenStartDateElement}
+      {hiddenEndDateElement}
     </ContainWrapper>
   );
 }
