@@ -4,6 +4,7 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {waitFor} from '#testing/helpers/service';
 
+/** todo(kvchari): split out amp-agnostic date-countdown tests into test-bento-date-countdown.js when template implementation is designed/completed */
 describes.realWin(
   'amp-date-countdown 1.0',
   {

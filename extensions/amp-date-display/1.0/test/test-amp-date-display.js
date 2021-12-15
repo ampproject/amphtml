@@ -8,6 +8,7 @@ import {user} from '#utils/log';
 
 import {waitFor} from '#testing/helpers/service';
 
+/** todo(kvchari): split out amp-agnostic date-display tests into test-bento-date-display.js when template implementation is designed/completed */
 describes.realWin(
   'amp-date-display 1.0',
   {
