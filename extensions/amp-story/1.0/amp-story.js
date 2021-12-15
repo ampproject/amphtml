@@ -97,10 +97,6 @@ import {
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {
-  upgradeBackgroundAudio,
-  waitForElementsWithUnresolvedAudio,
-} from './audio';
 import {isEsm} from '#core/mode';
 import {upgradeBackgroundAudio} from './audio';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';

@@ -61,7 +61,6 @@ import {
   upgradeBackgroundAudio,
   waitForElementsWithUnresolvedAudio,
 } from './audio';
-import {upgradeBackgroundAudio} from './audio';
 import {embeddedElementsSelectors} from './amp-story-embedded-component';
 
 /**
