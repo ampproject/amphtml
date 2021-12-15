@@ -77,11 +77,26 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * @param {string} textContent
+   * @return {boolean}
+   * @private
+   */
+  isRTLLanguage_(textContent) {
+    const ltrChars =
+        'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF' +
+        '\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF',
+      rtlChars = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC',
+      rtlDirCheck = new RegExp('^[^' + ltrChars + ']*[' + rtlChars + ']');
+
+    return rtlDirCheck.test(textContent);
+  }
+
+  /**
    * This function counts the number of lines in the shopping tag
    * and sets the styling properties dynamically based on the number of lines.
    * @private
    */
-  countLinesAndResize_() {
+  countLinesResizeLanguageRightToLeft_() {
     if (this.element.shadowRoot) {
       const pillEl = this.element.shadowRoot.querySelector(
         '.amp-story-shopping-tag-pill'
@@ -111,6 +126,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
           pillEl.classList.add('amp-story-shopping-tag-pill-overflow');
         }
       }
+
+      if (
+        this.isRTLLanguage_(textEl.textContent) &&
+        !textEl.classList.contains('amp-story-shopping-tag-pill-text-rtl')
+      ) {
+        textEl.classList.add('amp-story-shopping-tag-pill-text-rtl');
+      }
     }
   }
 
@@ -133,7 +155,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         );
       },
       () => {
-        this.countLinesAndResize_();
+        this.countLinesResizeLanguageRightToLeft_();
       }
     );
   }

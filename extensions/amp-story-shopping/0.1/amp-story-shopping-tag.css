@@ -82,4 +82,9 @@ amp-story-shopping-tag {
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   max-height: 36px !important;
+  direction: ltr !important;
+}
+
+.amp-story-shopping-tag-pill-text-rtl {
+  direction: rtl !important;
 }
