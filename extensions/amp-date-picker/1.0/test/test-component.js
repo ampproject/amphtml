@@ -138,4 +138,23 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(wrapper.exists('input[name="end-date"]')).to.be.true;
     }
   );
+
+  it(
+    'should name both inputs `${id}-(start|end)-date` when other ' +
+      '#start-date and #end-date inputs exists',
+    () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker type="range" id="delivery">
+            <input type="hidden" name="start-date"></input>
+            <input type="hidden" name="end-date"></input>
+          </DatePicker>
+        </form>
+      );
+
+      expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
+      expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
+      expect(wrapper.exists('input[name="delivery-end-date"]')).to.be.true;
+    }
+  );
 });

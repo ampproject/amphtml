@@ -24,3 +24,12 @@ export const withSingleInput = (args) => {
     </BentoDatePicker>
   );
 };
+
+export const withRangeInput = (args) => {
+  return (
+    <BentoDatePicker {...args} type="range">
+      <input id="startdate" value="2021-01-01" />
+      <input id="enddate" value="2021-01-02" />
+    </BentoDatePicker>
+  );
+};
