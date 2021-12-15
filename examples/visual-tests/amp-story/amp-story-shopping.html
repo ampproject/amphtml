@@ -104,6 +104,45 @@
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
+      <amp-story-page id="inline-no-product">
+          <!--
+            Example of:
+            CTA Button not rendering due to no product tags.
+          -->
+        <amp-story-shopping-config layout="nodisplay">
+          <script type="application/json">
+            {
+                "items" : []
+            }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="remote-with-product">
+        <!--
+          Example of:
+          CTA Button rendering due to remote product tag existing, but no inline.
+        -->
+        <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
+          <script type="application/json">
+            {
+                "items" : []
+              }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
+      </amp-story-page>
     </amp-story>
   </body>
 </html>

@@ -75,11 +75,10 @@ function setAttribute(element, name, value) {
 }
 
 /**
- * @param {string|function(T):Element} tag
- * @param {T} props
+ * @param {string | (function(*): Element)} tag
+ * @param {Object<string, *>} props
  * @param {...*} children
  * @return {Element}
- * @template T
  */
 export function createElement(tag, props, ...children) {
   if (typeof tag !== 'string') {

@@ -11,6 +11,9 @@ declare global {
     // Global property set by test some harnesses to signal a testing environment.
     __AMP_TEST?: boolean;
 
+    // Global property set by test some harnesses to signal karma testing environment.
+    __karma__?: boolean;
+
     // Counter for the DomBaseWeakRef polyfill.
     __AMP_WEAKREF_ID?: number;
 

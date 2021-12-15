@@ -200,6 +200,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
             }
           });
         }
+      })
+      .catch((e) => {
+        dev().expectedError(
+          TAG,
+          'Player does not support `playerExperiments` message',
+          e
+        );
       });
   }
 

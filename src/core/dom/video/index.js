@@ -26,8 +26,8 @@ export function detectIsAutoplaySupported(win) {
 
   detectionElement.muted = true;
   detectionElement.playsInline = true;
-  detectionElement['playsinline'] = true;
-  detectionElement['webkitPlaysinline'] = true;
+  /** @type {*} */ (detectionElement)['playsinline'] = true;
+  /** @type {*} */ (detectionElement)['webkitPlaysinline'] = true;
 
   setStyles(detectionElement, {
     position: 'fixed',
@@ -59,7 +59,7 @@ export function isAutoplaySupported(win) {
   if (win[AUTOPLAY_SUPPORTED_WIN_PROP] == null) {
     win[AUTOPLAY_SUPPORTED_WIN_PROP] = detectIsAutoplaySupported(win);
   }
-  return win[AUTOPLAY_SUPPORTED_WIN_PROP];
+  return /** @type {Promise<boolean>} */ (win[AUTOPLAY_SUPPORTED_WIN_PROP]);
 }
 
 /**
