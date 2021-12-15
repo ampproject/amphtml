@@ -2,7 +2,12 @@ import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {user} from '#utils/log';
 import {AmpStoryShareMenu} from 'extensions/amp-story-share-menu/0.1/amp-story-share-menu';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getAmpdoc} from 'src/service-helpers';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -87,7 +92,7 @@ export class AmpStoryShare {
   openSystemShare_() {
     const {navigator} = this.win_;
     const shareData = {
-      url: this.canonicalUrl_,
+      url: Services.documentInfoForDoc(getAmpdoc(this.storyEl_)).canonicalUrl,
       text: this.win_.document.title,
     };
     navigator.share(shareData).catch((e) => {
@@ -103,5 +108,13 @@ export class AmpStoryShare {
     this.initializedFallback_ = true;
     const shareMenu = new AmpStoryShareMenu(this.shareMenuEl_);
     shareMenu.build();
+  }
+
+  /**
+   * Closes the share menu.
+   * @private
+   */
+  close_() {
+    this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
   }
 }
