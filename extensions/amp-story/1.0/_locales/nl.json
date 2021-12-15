@@ -5,45 +5,6 @@
   "3": {
     "string": "Tik op Terug"
   },
-  "4": {
-    "string": "Kan link niet kopiëren naar klembord :("
-  },
-  "5": {
-    "string": "Link gekopieerd"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Link ophalen"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "Sms"
-  },
-  "13": {
-    "string": "Meer"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Je moet het amp-story-experiment inschakelen om deze content te bekijken."
-  },
   "21": {
     "string": "Je browser ondersteunt deze ervaring niet"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Omhoog vegen"
   },
-  "62": {
-    "string": "Delen vanaf deze pagina"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Bijgewerkt"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Verhaal delen"
   },
-  "70": {
-    "string": "Verhaalmenu schakelen"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1 van 2"
-  },
-  "76": {
-    "string": "Tik om naar het volgende scherm te gaan"
-  },
-  "77": {
-    "string": "Volgende"
-  },
-  "78": {
-    "string": "Tip 2 van 2"
-  },
-  "79": {
-    "string": "Veeg om naar het volgende verhaal te gaan"
-  },
-  "80": {
-    "string": "Begrepen"
-  },
-  "81": {
-    "string": "Tip"
-  },
   "82": {
     "string": "Vorige pagina"
-  },
-  "83": {
-    "string": "Activeren"
-  },
-  "84": {
-    "string": "SCORE:"
   },
   "85": {
     "string": "Verhaal pauzeren"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Overslaan naar volgende"
   },
-  "89": {
-    "string": "Je antwoord wordt verzonden naar"
-  },
   "90": {
     "string": "Volgende verhaal"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Vorige pagina"
-  },
-  "96": {
-    "string": "Beweeg het apparaat om te verkennen"
   },
   "97": {
     "string": "Wordt geopend"

@@ -5,45 +5,6 @@
   "3": {
     "string": "Klepněte na Zpět"
   },
-  "4": {
-    "string": "Odkaz nelze zkopírovat do schránky :("
-  },
-  "5": {
-    "string": "Odkaz byl zkopírován!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Získat odkaz"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Více"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Pokud chcete zobrazit tento obsah, musíte povolit experiment s příběhem amp-story."
-  },
   "21": {
     "string": "Je nám líto, zdá se, že váš prohlížeč toto tento prvek nepodporuje"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Potáhněte nahoru"
   },
-  "62": {
-    "string": "Sdílet od této stránky"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Aktualizováno"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Sdílet příběh"
   },
-  "70": {
-    "string": "Přepnout nabídku příběhu"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1/2"
-  },
-  "76": {
-    "string": "Klepnutím přejdete na další obrazovku"
-  },
-  "77": {
-    "string": "Další"
-  },
-  "78": {
-    "string": "Tip 2/2"
-  },
-  "79": {
-    "string": "Potáhnutím přejdete na další příběh"
-  },
-  "80": {
-    "string": "Rozumím"
-  },
-  "81": {
-    "string": "Tip"
-  },
   "82": {
     "string": "Předchozí stránka"
-  },
-  "83": {
-    "string": "Aktivovat"
-  },
-  "84": {
-    "string": "SKÓRE:"
   },
   "85": {
     "string": "Pozastavit příběh"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Přeskočit na další"
   },
-  "89": {
-    "string": "Vaši odpověď obdrží"
-  },
   "90": {
     "string": "Další příběh"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Předchozí stránka"
-  },
-  "96": {
-    "string": "Pohněte zařízením a objevujte"
   },
   "97": {
     "string": "Otevírání"

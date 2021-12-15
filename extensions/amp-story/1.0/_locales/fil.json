@@ -5,45 +5,6 @@
   "3": {
     "string": "I-tap ang Bumalik"
   },
-  "4": {
-    "string": "Hindi makopya ang link sa clipboard :("
-  },
-  "5": {
-    "string": "Nakopya na ang link!"
-  },
-  "6": {
-    "string": "Email"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Kunin ang Link"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Higit pa"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Kailangan mong i-enable ang amp-story experiment para makita ang content na ito."
-  },
   "21": {
     "string": "Paumanhin, mukhang hindi sinusuportahan ng browser mo ang karanasang ito"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Mag-swipe pataas"
   },
-  "62": {
-    "string": "Ibahagi simula sa page na ito"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Na-update na"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Ibahagi ang kwento"
   },
-  "70": {
-    "string": "I-toggle ang menu ng kwento"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1 ng 2"
-  },
-  "76": {
-    "string": "I-tap para pumunta sa susunod na screen"
-  },
-  "77": {
-    "string": "Susunod"
-  },
-  "78": {
-    "string": "Tip 2 ng 2"
-  },
-  "79": {
-    "string": "Mag-swipe upang pumunta sa susunod na kwento"
-  },
-  "80": {
-    "string": "Kuha ko na"
-  },
-  "81": {
-    "string": "Tip"
-  },
   "82": {
     "string": "Nakaraang page"
-  },
-  "83": {
-    "string": "I-activate"
-  },
-  "84": {
-    "string": "ISKOR:"
   },
   "85": {
     "string": "I-pause ang kwento"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Laktawan ang susunod"
   },
-  "89": {
-    "string": "Ipapadala ang sagot mo sa"
-  },
   "90": {
     "string": "Susunod na kwento"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Nakaraang page"
-  },
-  "96": {
-    "string": "Igalaw ang device para tumuklas"
   },
   "97": {
     "string": "Binubuksan"

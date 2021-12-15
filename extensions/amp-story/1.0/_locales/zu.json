@@ -5,45 +5,6 @@
   "3": {
     "string": "Thepha Emuva"
   },
-  "4": {
-    "string": "Asikopishekanga isixhumanisi ebhodini lokunamathisela :("
-  },
-  "5": {
-    "string": "Isixhumanisi sikopishiwe!"
-  },
-  "6": {
-    "string": "I-Imeyili"
-  },
-  "7": {
-    "string": "U-Facebook"
-  },
-  "9": {
-    "string": "Thola Isixhumanisi"
-  },
-  "10": {
-    "string": "U-LinkedIn"
-  },
-  "11": {
-    "string": "U-Pinterest"
-  },
-  "12": {
-    "string": "I-SMS"
-  },
-  "13": {
-    "string": "Okunye"
-  },
-  "14": {
-    "string": "U-Tumblr"
-  },
-  "15": {
-    "string": "U-Twitter"
-  },
-  "16": {
-    "string": "U-WhatsApp"
-  },
-  "19": {
-    "string": "Kumele uvule ukuhlolwa kwe-amp-story ukuze ubone lokhu okuqukethwe."
-  },
   "21": {
     "string": "Siyaxolisa, kubonakala sengathi isiphequluli sakho asikusekeli lokhu"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Swayiphela phezulu"
   },
-  "62": {
-    "string": "Ukwabelana kuqala kuleli khasi"
-  },
-  "63": {
-    "string": "Ulayini"
-  },
   "64": {
     "string": "Kuthuthukisiwe"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Yabelana ngendaba"
   },
-  "70": {
-    "string": "Vula noma uvale imenu yendaba"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Ithiphu 1 kwama-2"
-  },
-  "76": {
-    "string": "Thepha ukuze uye esikrinini esilandelayo"
-  },
-  "77": {
-    "string": "Okulandelayo"
-  },
-  "78": {
-    "string": "Ithiphu 2 kwama-2"
-  },
-  "79": {
-    "string": "Swayipha ukuze uye endabeni elandelayo"
-  },
-  "80": {
-    "string": "Ngiyathola"
-  },
-  "81": {
-    "string": "Ithiphu"
-  },
   "82": {
     "string": "Ikhasi eledlule"
-  },
-  "83": {
-    "string": "Yenza kusebenze"
-  },
-  "84": {
-    "string": "IPHUZU:"
   },
   "85": {
     "string": "Misa indaba"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Dlulela kokulandelayo"
   },
-  "89": {
-    "string": "Impendulo yakho izothunyelwa ku"
-  },
   "90": {
     "string": "Indaba elandelayo"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Ikhasi eledlule"
-  },
-  "96": {
-    "string": "Hambisa idivayisi ukuze uhlole"
   },
   "97": {
     "string": "Iyavula"

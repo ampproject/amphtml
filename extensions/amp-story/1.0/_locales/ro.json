@@ -5,45 +5,6 @@
   "3": {
     "string": "Atingeți Înapoi"
   },
-  "4": {
-    "string": "Nu s-a putut copia linkul în clipboard :("
-  },
-  "5": {
-    "string": "Link copiat!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Obțineți linkul"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Mai mult"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Trebuie să activați experimentul amp-story pentru a vizualiza acest conținut."
-  },
   "21": {
     "string": "Ne pare rău, se pare că browserul dvs. nu acceptă această experiență"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Glisați în sus"
   },
-  "62": {
-    "string": "Distribuiți începând cu această pagină"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Actualizat"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Distribuiți relatarea"
   },
-  "70": {
-    "string": "Alternați meniul relatării"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Sugestia 1 din 2"
-  },
-  "76": {
-    "string": "Atingeți pentru a accesa ecranul următor"
-  },
-  "77": {
-    "string": "Înainte"
-  },
-  "78": {
-    "string": "Sugestia 2 din 2"
-  },
-  "79": {
-    "string": "Glisați pentru a accesa relatarea următoare"
-  },
-  "80": {
-    "string": "Am înțeles"
-  },
-  "81": {
-    "string": "Sugestie"
-  },
   "82": {
     "string": "Pagina precedentă"
-  },
-  "83": {
-    "string": "Activați"
-  },
-  "84": {
-    "string": "PUNCTAJ:"
   },
   "85": {
     "string": "Întrerupeți relatarea"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Salt la următorul"
   },
-  "89": {
-    "string": "Răspunsul dvs. va fi trimis la"
-  },
   "90": {
     "string": "Următoarea relatare"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Pagina precedentă"
-  },
-  "96": {
-    "string": "Mutați dispozitivul pentru a explora"
   },
   "97": {
     "string": "Se deschide"

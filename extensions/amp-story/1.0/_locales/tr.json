@@ -5,45 +5,6 @@
   "3": {
     "string": "Geri'ye dokunun"
   },
-  "4": {
-    "string": "Bağlantı panoya kopyalanamadı :("
-  },
-  "5": {
-    "string": "Bağlantı kopyalandı!"
-  },
-  "6": {
-    "string": "E-posta"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Bağlantıyı Al"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Diğer"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Bu içeriği görüntülemek için amp-story deneyini etkinleştirmelisiniz."
-  },
   "21": {
     "string": "Üzgünüz, görünüşe göre tarayıcınız bu deneyimi desteklemiyor"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Yukarı kaydır"
   },
-  "62": {
-    "string": "Bu sayfadan başlayarak paylaşın"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Güncellendi"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Hikayeyi paylaş"
   },
-  "70": {
-    "string": "Hikaye menüsünü aç/kapat"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "İpucu 1/2"
-  },
-  "76": {
-    "string": "Sonraki ekrana gitmek için dokunun"
-  },
-  "77": {
-    "string": "Sonraki"
-  },
-  "78": {
-    "string": "İpucu 2/2"
-  },
-  "79": {
-    "string": "Sonraki hikayeye gitmek için kaydırın"
-  },
-  "80": {
-    "string": "Anladım"
-  },
-  "81": {
-    "string": "İpucu"
-  },
   "82": {
     "string": "Önceki sayfa"
-  },
-  "83": {
-    "string": "Etkinleştir"
-  },
-  "84": {
-    "string": "SKOR:"
   },
   "85": {
     "string": "Hikayeyi duraklat"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Sonrakine atla"
   },
-  "89": {
-    "string": "Yanıtınız şuraya gönderilecek:"
-  },
   "90": {
     "string": "Sonraki hikaye"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Önceki sayfa"
-  },
-  "96": {
-    "string": "Keşfetmek için cihazı hareket ettirin"
   },
   "97": {
     "string": "Açılıyor"

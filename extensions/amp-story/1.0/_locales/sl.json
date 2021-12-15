@@ -5,45 +5,6 @@
   "3": {
     "string": "Dotaknite se »Nazaj«"
   },
-  "4": {
-    "string": "Povezave ni bilo mogoče kopirati v odložišče :("
-  },
-  "5": {
-    "string": "Povezava kopirana!"
-  },
-  "6": {
-    "string": "E-pošta"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Pridobi povezavo"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Več"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Če si želite ogledati to vsebino, morate omogočiti preizkus zgodb amp-story."
-  },
   "21": {
     "string": "Vaš brskalnik na žalost ne podpira te izkušnje"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Povleci navzgor"
   },
-  "62": {
-    "string": "Začni deliti s to stranjo"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Posodobljeno"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Deli zgodbo"
   },
-  "70": {
-    "string": "Prikaži/skrij meni za zgodbo"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Namig 1 od 2"
-  },
-  "76": {
-    "string": "Dotaknite se za pomik na naslednji zaslon"
-  },
-  "77": {
-    "string": "Naprej"
-  },
-  "78": {
-    "string": "Namig 2 od 2"
-  },
-  "79": {
-    "string": "Povlecite za pomik na naslednjo zgodbo"
-  },
-  "80": {
-    "string": "Razumem"
-  },
-  "81": {
-    "string": "Namig"
-  },
   "82": {
     "string": "Prejšnja stran"
-  },
-  "83": {
-    "string": "Aktiviraj"
-  },
-  "84": {
-    "string": "REZULTAT:"
   },
   "85": {
     "string": "Začasno ustavi zgodbo"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Preskoči na naslednji element"
   },
-  "89": {
-    "string": "Vaš odgovor bo poslan na"
-  },
   "90": {
     "string": "Naslednja zgodba"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Prejšnja stran"
-  },
-  "96": {
-    "string": "Premaknite napravo za raziskovanje"
   },
   "97": {
     "string": "Odpiranje"

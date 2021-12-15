@@ -5,45 +5,6 @@
   "3": {
     "string": "Tryk på Tilbage"
   },
-  "4": {
-    "string": "Kunne ikke kopiere linket til udklipsholderen :("
-  },
-  "5": {
-    "string": "Link kopieret!"
-  },
-  "6": {
-    "string": "E-mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Hent link"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Mere"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Du skal aktivere amp-story-eksperimentet for at se dette indhold."
-  },
   "21": {
     "string": "Vi beklager, men det ser ud til, at din browser ikke understøtter denne oplevelse"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Stryg op"
   },
-  "62": {
-    "string": "Begynd at dele startende fra denne side"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Opdateret"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Del historie"
   },
-  "70": {
-    "string": "Slå historiemenu til"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tip 1 af 2"
-  },
-  "76": {
-    "string": "Tryk for at gå til næste skærmbillede"
-  },
-  "77": {
-    "string": "Næste"
-  },
-  "78": {
-    "string": "Tip 2 af 2"
-  },
-  "79": {
-    "string": "Stryg for at gå til den næste historie"
-  },
-  "80": {
-    "string": "Forstået"
-  },
-  "81": {
-    "string": "Tip"
-  },
   "82": {
     "string": "Forrige side"
-  },
-  "83": {
-    "string": "Aktiver"
-  },
-  "84": {
-    "string": "SCORE:"
   },
   "85": {
     "string": "Sæt historie på pause"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Spring til næste"
   },
-  "89": {
-    "string": "Dit svar vil blive sendt til"
-  },
   "90": {
     "string": "Næste historie"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Forrige side"
-  },
-  "96": {
-    "string": "Flyt enhed for at udforske"
   },
   "97": {
     "string": "Åbner"

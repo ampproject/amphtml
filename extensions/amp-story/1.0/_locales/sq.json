@@ -5,45 +5,6 @@
   "3": {
     "string": "Trokit \"Pas\""
   },
-  "4": {
-    "string": "Lidhja nuk mund të kopjohej te kujtesa e fragmenteve :("
-  },
-  "5": {
-    "string": "Lidhja u kopjua!"
-  },
-  "6": {
-    "string": "Email"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Merr lidhjen"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Të tjera"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Duhet të aktivizosh eksperimentin e amp-story për ta parë këtë përmbajtje."
-  },
   "21": {
     "string": "Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë përvojë"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Rrëshqit lart"
   },
-  "62": {
-    "string": "Ndaj duke filluar nga kjo faqe"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "E përditësuar"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Ndaj historinë"
   },
-  "70": {
-    "string": "Ndërro gjendjen e menysë së historisë"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Këshilla 1 nga 2"
-  },
-  "76": {
-    "string": "Trokit për të shkuar tek ekrani tjetër"
-  },
-  "77": {
-    "string": "Tjetër"
-  },
-  "78": {
-    "string": "Këshilla 2 nga 2"
-  },
-  "79": {
-    "string": "Rrëshqit për të shkuar te historia tjetër"
-  },
-  "80": {
-    "string": "E kuptova"
-  },
-  "81": {
-    "string": "Këshillë"
-  },
   "82": {
     "string": "Faqja e mëparshme"
-  },
-  "83": {
-    "string": "Aktivizo"
-  },
-  "84": {
-    "string": "REZULTATI:"
   },
   "85": {
     "string": "Vendos në pauzë historinë"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Kalo te tjetra"
   },
-  "89": {
-    "string": "Përgjigja jote do t'i dërgohet"
-  },
   "90": {
     "string": "Historia tjetër"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Faqja e mëparshme"
-  },
-  "96": {
-    "string": "Lëviz pajisjen për të eksploruar"
   },
   "97": {
     "string": "Duke hapur"

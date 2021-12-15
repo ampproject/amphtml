@@ -5,45 +5,6 @@
   "3": {
     "string": "Preme Atrás"
   },
-  "4": {
-    "string": "Non se puido copiar a ligazón no portapapeis :("
-  },
-  "5": {
-    "string": "Ligazón copiada!"
-  },
-  "6": {
-    "string": "Correo electrónico"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Obter ligazón"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Máis"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Para ver este contido, debes activar o experimento amp-story."
-  },
   "21": {
     "string": "Sentímolo, pero semella que o teu navegador non é compatible con esta experiencia"
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Deslizar cara enriba"
   },
-  "62": {
-    "string": "Compartir a partir desta páxina"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Actualizado"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Compartir historia"
   },
-  "70": {
-    "string": "Mostrar o menú da historia"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Consello 1 de 2"
-  },
-  "76": {
-    "string": "Preme para ir á seguinte pantalla"
-  },
-  "77": {
-    "string": "Seguinte"
-  },
-  "78": {
-    "string": "Consello 2 de 2"
-  },
-  "79": {
-    "string": "Desliza para ir á seguinte historia"
-  },
-  "80": {
-    "string": "Entendido"
-  },
-  "81": {
-    "string": "Consello"
-  },
   "82": {
     "string": "Páxina anterior"
-  },
-  "83": {
-    "string": "Activar"
-  },
-  "84": {
-    "string": "PUNTUACIÓN:"
   },
   "85": {
     "string": "Parar historia"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Saltar ó seguinte"
   },
-  "89": {
-    "string": "A túa resposta enviarase a"
-  },
   "90": {
     "string": "Seguinte historia"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Páxina anterior"
-  },
-  "96": {
-    "string": "Move o dispositivo para explorar"
   },
   "97": {
     "string": "Abrindo"

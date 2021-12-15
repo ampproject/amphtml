@@ -5,45 +5,6 @@
   "3": {
     "string": "Tippe auf \\\"Zurück\\\""
   },
-  "4": {
-    "string": "Der Link konnte nicht in die Zwischenablage kopiert werden :("
-  },
-  "5": {
-    "string": "Link kopiert!"
-  },
-  "6": {
-    "string": "E-Mail"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "9": {
-    "string": "Link abrufen"
-  },
-  "10": {
-    "string": "LinkedIn"
-  },
-  "11": {
-    "string": "Pinterest"
-  },
-  "12": {
-    "string": "SMS"
-  },
-  "13": {
-    "string": "Mehr"
-  },
-  "14": {
-    "string": "Tumblr"
-  },
-  "15": {
-    "string": "Twitter"
-  },
-  "16": {
-    "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Um diesen Inhalt anzuzeigen, musst du das Experiment für amp-story aktivieren."
-  },
   "21": {
     "string": "Leider unterstützt dein Browser diese Art der Präsentation nicht."
   },
@@ -68,12 +29,6 @@
   "35": {
     "string": "Nach oben wischen"
   },
-  "62": {
-    "string": "Ab dieser Seite teilen"
-  },
-  "63": {
-    "string": "Line"
-  },
   "64": {
     "string": "Aktualisiert"
   },
@@ -92,50 +47,8 @@
   "69": {
     "string": "Story teilen"
   },
-  "70": {
-    "string": "Story Menü ein/aus"
-  },
-  "71": {
-    "string": "A"
-  },
-  "72": {
-    "string": "B"
-  },
-  "73": {
-    "string": "C"
-  },
-  "74": {
-    "string": "D"
-  },
-  "75": {
-    "string": "Tipp 1 von 2"
-  },
-  "76": {
-    "string": "Hier tippen, um zum nächsten Bildschirm zu gelangen"
-  },
-  "77": {
-    "string": "Weiter"
-  },
-  "78": {
-    "string": "Tipp 2 von 2"
-  },
-  "79": {
-    "string": "Wischen, um zur nächsten Story zu gelangen"
-  },
-  "80": {
-    "string": "Verstanden"
-  },
-  "81": {
-    "string": "Tipp"
-  },
   "82": {
     "string": "Vorherige Seite"
-  },
-  "83": {
-    "string": "Aktivieren"
-  },
-  "84": {
-    "string": "SCORE:"
   },
   "85": {
     "string": "Story anhalten"
@@ -149,9 +62,6 @@
   "88": {
     "string": "Nächstes Element"
   },
-  "89": {
-    "string": "Deine Antwort wird gesendet an"
-  },
   "90": {
     "string": "Nächste Story"
   },
@@ -163,9 +73,6 @@
   },
   "93": {
     "string": "Vorherige Seite"
-  },
-  "96": {
-    "string": "Bewege dein Gerät, um dich umzusehen"
   },
   "97": {
     "string": "Wird geöffnet"
