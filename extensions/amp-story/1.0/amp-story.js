@@ -590,7 +590,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_(initialPageId) {
-    this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
@@ -2230,28 +2229,6 @@ export class AmpStory extends AMP.BaseElement {
     }
     this.mediaPool_.unmute(this.backgroundAudioEl_);
     this.mediaPool_.play(this.backgroundAudioEl_);
-  }
-
-  /**
-   * Shows the audio icon if the story has any media elements containing audio,
-   * or background audio at the story or page level.
-   * @private
-   */
-  updateAudioIcon_() {
-    const containsMediaElementWithAudio = !!this.element.querySelector(
-      'amp-audio, amp-video:not([noaudio]), [background-audio]'
-    );
-    const storyHasBackgroundAudio =
-      this.element.hasAttribute('background-audio');
-
-    this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_AUDIO,
-      containsMediaElementWithAudio || storyHasBackgroundAudio
-    );
-    this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
-      storyHasBackgroundAudio
-    );
   }
 
   /**

@@ -440,14 +440,6 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.STORY_HAS_AUDIO_STATE,
-      (hasAudio) => {
-        this.onStoryHasAudioStateUpdate_(hasAudio);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
       StateProperty.STORY_HAS_PLAYBACK_UI_STATE,
       (hasPlaybackUi) => {
         this.onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi);
@@ -584,21 +576,6 @@ export class SystemLayer {
       this.getShadowRoot().classList.toggle(
         'i-amphtml-story-no-sharing',
         !canShowSharingUis
-      );
-    });
-  }
-
-  /**
-   * Reacts to has audio state updates, determining if the story has a global
-   * audio track playing, or if any page has audio.
-   * @param {boolean} hasAudio
-   * @private
-   */
-  onStoryHasAudioStateUpdate_(hasAudio) {
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle(
-        'i-amphtml-story-has-audio',
-        hasAudio
       );
     });
   }
