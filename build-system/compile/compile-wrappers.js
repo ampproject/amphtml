@@ -1,5 +1,13 @@
-const latestVersions = require('./bundles.legacy-latest-versions');
+const fs = require('fs-extra');
+const json5 = require('json5');
 const {VERSION} = require('./internal-version');
+
+const latestVersions = json5.parse(
+  fs.readFileSync(
+    require.resolve('./bundles.legacy-latest-versions.jsonc'),
+    'utf8'
+  )
+);
 
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.

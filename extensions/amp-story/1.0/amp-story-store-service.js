@@ -117,7 +117,6 @@ export let ShoppingDataDef;
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
- *    storyHasAudioState: boolean,
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    systemUiIsVisibleState: boolean,
@@ -170,8 +169,6 @@ export const StateProperty = {
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SHOPPING_DATA: 'shoppingData',
-  // Any page has audio, or amp-story has a `background-audio` attribute.
-  STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   // Any page has elements with playback.
@@ -216,8 +213,6 @@ export const Action = {
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   ADD_SHOPPING_DATA: 'addShoppingData',
-  TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
-  TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
@@ -369,17 +364,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.INFO_DIALOG_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
-      });
-    // Shows or hides the audio controls.
-    case Action.TOGGLE_STORY_HAS_AUDIO:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.STORY_HAS_AUDIO_STATE]: !!data,
-      });
-    case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
     // Shows or hides the play/pause controls.
     case Action.TOGGLE_STORY_HAS_PLAYBACK_UI:
@@ -606,7 +590,6 @@ export class AmpStoryStoreService {
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SHOPPING_DATA]: {},
-      [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,

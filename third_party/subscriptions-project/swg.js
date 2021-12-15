@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.196 */
+/** Version: 0.1.22.197 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -65,6 +65,8 @@ const AnalyticsEvent = {
   IMPRESSION_TWG_DYNAMIC_BUTTON: 31,
   IMPRESSION_TWG_STICKER_SELECTION_SCREEN: 32,
   IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
+  IMPRESSION_REGWALL_OPT_IN: 34,
+  IMPRESSION_NEWSLETTER_OPT_IN: 35,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -119,7 +121,13 @@ const AnalyticsEvent = {
   ACTION_TWG_PAID_TRANSACTION_START_NEXT_BUTTON_CLICK: 1051,
   ACTION_TWG_STICKER_SELECTION_SCREEN_CLOSE_CLICK: 1052,
   ACTION_TWG_ARTICLE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1053,
+  ACTION_REGWALL_OPT_IN_BUTTON_CLICK: 1054,
+  ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
+  ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
+  ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   EVENT_PAYMENT_FAILED: 2000,
+  EVENT_REGWALL_OPT_IN_FAILED: 2001,
+  EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -143,6 +151,8 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PRIVATE: 3020,
   EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PUBLIC: 3021,
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
+  EVENT_REGWALL_OPTED_IN: 3023,
+  EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -788,6 +798,59 @@ class AnalyticsRequest {
    */
   label() {
     return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class AudienceActivityClientLogsRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+      this.event_,  // field 1 - event
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AudienceActivityClientLogsRequest';
   }
 }
 
@@ -1942,6 +2005,7 @@ const PROTO_MAP = {
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'AudienceActivityClientLogsRequest': AudienceActivityClientLogsRequest,
   'EntitlementJwt': EntitlementJwt,
   'EntitlementsRequest': EntitlementsRequest,
   'EntitlementsResponse': EntitlementsResponse,
@@ -4819,7 +4883,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.196',
+    '_client': 'SwG 0.1.22.197',
   });
 }
 
@@ -6132,7 +6196,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.196',
+        '_client': 'SwG 0.1.22.197',
         'supportsEventManager': true,
       },
       args || {}
@@ -7011,7 +7075,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.196');
+    context.setClientVersion('SwG 0.1.22.197');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7299,6 +7363,8 @@ const SWG_I18N_STRINGS = {
     'th': 'สมัครฟาน Google',
     'tr': 'Google ile Abone Ol',
     'uk': 'Підписатися через Google',
+    'zh-cn': '通过 Google 订阅',
+    'zh-hk': '透過 Google 訂閱',
     'zh-tw': '透過 Google 訂閱',
   },
   'CONTRIBUTION_TITLE_LANG_MAP': {
@@ -7331,6 +7397,8 @@ const SWG_I18N_STRINGS = {
     'th': 'มีส่วนร่วมผ่าน Google',
     'tr': 'Google ile Katkıda Bulun',
     'uk': 'Зробити внесок через Google',
+    'zh-cn': '通过 Google 捐赠',
+    'zh-hk': '透過 Google 提供內容',
     'zh-tw': '透過 Google 捐款',
   },
 };
@@ -9663,16 +9731,13 @@ class Dialog {
   close(animated = true) {
     let animating;
     if (animated) {
+      const transitionStyles = this.shouldPositionCenter_()
+        ? {'opacity': 0}
+        : {'transform': 'translateY(100%)'};
+
       animating = this.animate_(() => {
         this.graypane_.hide(/* animate */ true);
-        return transition$1(
-          this.getElement(),
-          {
-            'transform': 'translateY(100%)',
-          },
-          300,
-          'ease-out'
-        );
+        return transition$1(this.getElement(), transitionStyles, 300, 'ease-out');
       });
     } else {
       animating = Promise.resolve();

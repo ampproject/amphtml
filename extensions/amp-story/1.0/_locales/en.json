@@ -83,18 +83,6 @@
     "string": "Continue Anyway",
     "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
-  "31": {
-    "string": "Sound off",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Sound on",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "This page has no sound",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
   "34": {
     "string": "Play video",
     "description": "Label for a button to play the video visible on the page."

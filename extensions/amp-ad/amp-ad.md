@@ -359,6 +359,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Imedia](../../ads/vendors/imedia.md)
 -   [Improve Digital](../../ads/vendors/improvedigital.md)
 -   [Insticator](../../ads/vendors/insticator.md)
+-   [InsurAds](../../ads/vendors/insurads.md)
 -   [Index Exchange](../../ads/vendors/ix.md)
 -   [Industrybrains](../../ads/vendors/industrybrains.md)
 -   [InMobi](../../ads/vendors/inmobi.md)

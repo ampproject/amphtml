@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {Deferred} from '#core/data-structures/promise';
 
 /**
@@ -5,17 +6,21 @@ import {Deferred} from '#core/data-structures/promise';
  * Returns a promise that resolves when first bytes are received from the
  * response, or we learn that the response is empty.
  * This function should be replaced with transform stream when well supported.
- * @param {!Window} win
- * @param {!Response} response
- * @param {!./detached.DetachedDomStream} writer
- * @return {!Promise<boolean>} true if response has content, false if
+ * @param {Window} win
+ * @param {Response} response
+ * @param {import('./detached').DetachedDomStream} writer
+ * @return {Promise<boolean>} true if response has content, false if
  * the response is empty.
  */
 export function streamResponseToWriter(win, response, writer) {
   const hasContentDeferred = new Deferred();
   // Try native streaming first.
-  if (win.TextDecoder && win.ReadableStream) {
+  if (
+    /** @type {?} */ (win).TextDecoder &&
+    /** @type {?} */ (win).ReadableStream
+  ) {
     let firstRead = true;
+    devAssert(response.body);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
@@ -36,7 +41,8 @@ export function streamResponseToWriter(win, response, writer) {
       }
 
       if (!done) {
-        return reader.read().then(handleChunk);
+        reader.read().then(handleChunk);
+        return;
       }
 
       writer.close();

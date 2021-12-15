@@ -1,12 +1,12 @@
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 #include <algorithm>
 #include <functional>
 #include <sstream>
 
-#include "atomutil.h"
-#include "elements.h"
-#include "logging.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/elements.h"
+#include "cpp/htmlparser/logging.h"
 
 namespace htmlparser {
 

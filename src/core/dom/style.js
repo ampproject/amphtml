@@ -6,16 +6,18 @@ import {map} from '#core/types/object';
 /** @type {Object<string, string>} */
 let propertyNameCache;
 
-/** @const {!Array<string>} */
+/** @const {Array<string>} */
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
 const DISPLAY_STYLE_MESSAGE =
   '`display` style detected. You must use toggle instead.';
 
-const EMPTY_CSS_DECLARATION = /** @type {!CSSStyleDeclaration} */ ({
-  'getPropertyPriority': () => '',
-  'getPropertyValue': () => '',
-});
+const EMPTY_CSS_DECLARATION = /** @type {CSSStyleDeclaration} */ (
+  /** @type {?} */ ({
+    'getPropertyPriority': () => '',
+    'getPropertyValue': () => '',
+  })
+);
 
 /**
  * @param {string} camelCase camel cased string
@@ -29,7 +31,7 @@ export function camelCaseToTitleCase(camelCase) {
   Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {!Object} style
+ * @param {Object<string, *>} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
@@ -47,7 +49,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @param {!Object} style
+ * @param {*} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
@@ -82,8 +84,8 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 /**
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
- * @param {!Element} element
- * @param {!Object<string, *>} styles
+ * @param {HTMLElement} element
+ * @param {Object<string, *>} styles
  */
 export function setImportantStyles(element, styles) {
   const {style} = element;
@@ -98,7 +100,7 @@ export function setImportantStyles(element, styles) {
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {?Element} element
+ * @param {HTMLElement} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
@@ -113,19 +115,17 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   if (!propertyName) {
     return;
   }
-  const styleValue = /** @type {string} */ (
-    opt_units ? value + opt_units : value
-  );
+  const styleValue = opt_units ? value + opt_units : value;
   if (isVar(propertyName)) {
     element.style.setProperty(propertyName, styleValue);
   } else {
-    element.style[propertyName] = styleValue;
+    /** @type {*} */ (element.style)[propertyName] = styleValue;
   }
 }
 
 /**
  * Returns the value of the CSS style of the specified element.
- * @param {!Element} element
+ * @param {HTMLElement} element
  * @param {string} property
  * @param {boolean=} opt_bypassCache
  * @return {*}
@@ -142,14 +142,14 @@ export function getStyle(element, property, opt_bypassCache) {
   if (isVar(propertyName)) {
     return element.style.getPropertyValue(propertyName);
   }
-  return element.style[propertyName];
+  return /** @type {*} */ (element.style)[propertyName];
 }
 
 /**
  * Sets the CSS styles of the specified element. The styles
  * a specified as a map from CSS property names to their values.
- * @param {!Element} element
- * @param {!Object<string, *>} styles
+ * @param {HTMLElement} element
+ * @param {Object<string, *>} styles
  */
 export function setStyles(element, styles) {
   for (const k in styles) {
@@ -162,7 +162,7 @@ export function setStyles(element, styles) {
  * can set the initial display using CSS, YOU MUST.
  * DO NOT USE THIS TO ARBITRARILY SET THE DISPLAY STYLE AFTER INITIAL SETUP.
  *
- * @param {!Element} el
+ * @param {HTMLElement} el
  * @param {string} value
  */
 export function setInitialDisplay(el, value) {
@@ -182,7 +182,7 @@ export function setInitialDisplay(el, value) {
 
 /**
  * Shows or hides the specified element.
- * @param {!Element} element
+ * @param {HTMLElement} element
  * @param {boolean=} opt_display
  */
 export function toggle(element, opt_display) {
@@ -281,19 +281,19 @@ export function removeAlphaFromColor(rgbaColor) {
  * Gets the computed style of the element. The helper is necessary to enforce
  * the possible `null` value returned by a buggy Firefox.
  *
- * @param {!Window} win
- * @param {!Element} el
- * @return {!CSSStyleDeclaration}
+ * @param {Window} win
+ * @param {HTMLElement} el
+ * @return {CSSStyleDeclaration}
  */
 export function computedStyle(win, el) {
-  const style = /** @type {?CSSStyleDeclaration} */ (win.getComputedStyle(el));
+  const style = win.getComputedStyle(el);
   return style || EMPTY_CSS_DECLARATION;
 }
 
 /**
  * Resets styles that were set dynamically (i.e. inline)
- * @param {!Element} element
- * @param {!Array<string>} properties
+ * @param {HTMLElement} element
+ * @param {Array<string>} properties
  */
 export function resetStyles(element, properties) {
   for (let i = 0; i < properties.length; i++) {
@@ -303,8 +303,8 @@ export function resetStyles(element, properties) {
 
 /**
  * Propagates the object-fit/position element attributes as styles.
- * @param {!Element} fromEl ie: amp-img
- * @param {!Element} toEl ie: the img within amp-img
+ * @param {HTMLElement} fromEl ie: amp-img
+ * @param {HTMLElement} toEl ie: the img within amp-img
  */
 export function propagateObjectFitStyles(fromEl, toEl) {
   if (fromEl.hasAttribute('object-fit')) {
@@ -352,8 +352,8 @@ export function assertNotDisplay(style) {
  * If you wish to set `display`, use the `toggle` helper instead. This is so
  * changes to display can trigger necessary updates. See #17475.
  *
- * @param {!Object<string, *>} styles
- * @return {!Object<string, *>}
+ * @param {Object<string, *>} styles
+ * @return {Object<string, *>}
  */
 export function assertDoesNotContainDisplay(styles) {
   if ('display' in styles) {

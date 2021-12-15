@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "glog/logging.h"
-#include "validator_pb.h"
+#include "cpp/engine/validator_pb.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
@@ -13,9 +13,9 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
 #include "absl/strings/str_split.h"
-#include "testing-utils.h"
-#include "validator.h"
-#include "css/parse-css.pb.h"
+#include "cpp/engine/testing-utils.h"
+#include "cpp/engine/validator.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
 #include "validator.pb.h"
 
 using absl::StartsWith;

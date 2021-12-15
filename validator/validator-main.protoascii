@@ -1826,6 +1826,7 @@ tags: {
   spec_name: "Standard Img"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "decoding"
     value_casei: "async"
@@ -1839,6 +1840,7 @@ tags: {
   spec_name: "Hero Img"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "data-hero"
     mandatory: true
@@ -1857,6 +1859,7 @@ tags: {
   spec_name: "Img using srcset"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "decoding"
     value_casei: "async"
@@ -1873,6 +1876,7 @@ tags: {
   spec_name: "Standard Image"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "decoding"
     value_casei: "async"
@@ -1886,6 +1890,7 @@ tags: {
   spec_name: "Hero Image"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "data-hero"
     mandatory: true
@@ -1903,6 +1908,7 @@ tags: {
   tag_name: "IMAGE"
   spec_name: "Image using srcset"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   descriptive_name: "img"
   attrs: {
     name: "decoding"

@@ -493,29 +493,6 @@ export const Services = {
   },
 
   /**
-   * Get promise with story request service
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>}
-   */
-  storyRequestServiceForOrNull: (win) => {
-    return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
-      (getElementServiceIfAvailable(win, 'story-request', 'amp-story', '1.0'))
-    );
-  },
-
-  /**
-   * @param {!Window} win
-   * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
-   */
-  storyRequestService: (win) => {
-    return (
-      /** @type {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
-      (getExistingServiceOrNull(win, 'story-request'))
-    );
-  },
-
-  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
    */
