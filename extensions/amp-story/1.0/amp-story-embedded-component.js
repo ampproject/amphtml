@@ -14,7 +14,6 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {tryFocus} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
