@@ -23,7 +23,7 @@ const TAG = 'amp-access-fewcents';
 const TAG_SHORTHAND = 'aaf';
 
 describes.realWin(
-  'amp-access-fewpaywallResponsecents-v0.1',
+  'amp-access-fewcents-v0.1',
   {
     amp: {
       runtimeOn: true,
