@@ -133,8 +133,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </form>
       );
 
-      // TODO: Should the initial start date field be replaced?
-      // expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
+      expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
       expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
       expect(wrapper.exists('input[name="end-date"]')).to.be.true;
     }

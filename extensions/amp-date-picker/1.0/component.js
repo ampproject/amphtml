@@ -63,12 +63,22 @@ export function BentoDatePicker({
   const wrapperRef = useRef();
   const onErrorRef = useRef(onError);
 
+  const dateInputRef = useRef();
+  const startDateInputRef = useRef();
+  const endDateInputRef = useRef();
+
   const [dateElement, setDateElement] = useState();
   const [startDateElement, setStartDateElement] = useState();
   const [endDateElement, setEndDateElement] = useState();
-  const [hiddenDateElement, setHiddenDateElement] = useState();
-  const [hiddenStartDateElement, setHiddenStartDateElement] = useState();
-  const [hiddenEndDateElement, setHiddenEndDateElement] = useState();
+
+  const [date, setDate] = useState();
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+
+  // This might not be the best way to handle this, but we need a way to get the initial
+  // child nodes and their values, but then replace them with the controlled inputs from
+  // state
+  const [showChildren, setShowChildren] = useState(true);
 
   /**
    * Forgivingly parse an ISO8601 input string into a moment object,
@@ -139,27 +149,6 @@ export function BentoDatePicker({
   );
 
   /**
-   * @return {?moment} date
-   */
-  const date = useMemo(() => {
-    return parseDate(dateElement?.value);
-  }, [dateElement, parseDate]);
-
-  /**
-   * @return {?moment} date
-   */
-  const startDate = useMemo(() => {
-    return parseDate(startDateElement?.value);
-  }, [startDateElement, parseDate]);
-
-  /**
-   * @return {?moment} date
-   */
-  const endDate = useMemo(() => {
-    return parseDate(endDateElement?.value);
-  }, [endDateElement, parseDate]);
-
-  /**
    * Sets up hidden input fields for a single input.
    * @param {!Element} form
    * @return {void}
@@ -172,17 +161,21 @@ export function BentoDatePicker({
         inputSelector
       );
       if (inputElement) {
-        setDateElement(inputElement);
+        setDate(parseDate(inputElement.value));
+        setDateElement(() => (
+          <input ref={dateInputRef} value={inputElement.value} />
+        ));
       } else if (mode === DatePickerMode.STATIC && !!form) {
-        setHiddenDateElement(() => (
+        setDateElement(() => (
           <input
+            ref={dateInputRef}
             type="hidden"
             name={getHiddenInputId(form, DateFieldType.DATE)}
           ></input>
         ));
       }
     },
-    [inputSelector, getHiddenInputId, mode]
+    [inputSelector, getHiddenInputId, mode, parseDate]
   );
 
   /**
@@ -202,9 +195,12 @@ export function BentoDatePicker({
         endInputSelector
       );
       if (startDateInputElement) {
-        setStartDateElement(startDateInputElement);
+        setStartDate(parseDate(startDateInputElement.value));
+        setStartDateElement(() => (
+          <input ref={startDateInputRef} value={startDateInputElement.value} />
+        ));
       } else if (mode === DatePickerMode.STATIC && !!form) {
-        setHiddenStartDateElement(() => (
+        setStartDateElement(() => (
           <input
             type="hidden"
             name={getHiddenInputId(form, DateFieldType.START_DATE)}
@@ -212,9 +208,12 @@ export function BentoDatePicker({
         ));
       }
       if (endDateInputElement) {
-        setEndDateElement(endDateInputElement);
+        setEndDate(parseDate(endDateInputElement.value));
+        setEndDateElement(() => (
+          <input ref={endDateInputRef} value={endDateInputElement.value} />
+        ));
       } else if (mode === DatePickerMode.STATIC && !!form) {
-        setHiddenEndDateElement(() => (
+        setEndDateElement(() => (
           <input
             type="hidden"
             name={getHiddenInputId(form, DateFieldType.END_DATE)}
@@ -222,7 +221,7 @@ export function BentoDatePicker({
         ));
       }
     },
-    [startInputSelector, endInputSelector, getHiddenInputId, mode]
+    [startInputSelector, endInputSelector, getHiddenInputId, mode, parseDate]
   );
 
   useEffect(() => {
@@ -235,6 +234,7 @@ export function BentoDatePicker({
     } else if (type === DatePickerType.RANGE) {
       setupRangeInput(form);
     }
+    setShowChildren(false);
   }, [wrapperRef, type, setupSingleInput, setupRangeInput]);
 
   return (
@@ -245,10 +245,10 @@ export function BentoDatePicker({
       data-enddate={getFormattedDate(endDate)}
       {...rest}
     >
-      {children}
-      {hiddenDateElement}
-      {hiddenStartDateElement}
-      {hiddenEndDateElement}
+      {showChildren && children}
+      {dateElement}
+      {startDateElement}
+      {endDateElement}
     </ContainWrapper>
   );
 }
