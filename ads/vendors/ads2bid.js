@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {validateData, loadScript} from '#3p/3p';
+import {loadScript, validateData} from '#3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function ads2bid(global, data) {
-  validateData(data, ['src', 'blockId', 'siteId']);
-  const {src, siteId, blockId} = data;
+  validateData(data, ['blockId', 'siteId', 'src']);
+  const {blockId, siteId, src} = data;
   const url = src + `/html/amp?site_id=${siteId}&blocks=${blockId}`;
   createContainer(global);
   loadScript(global, url);
