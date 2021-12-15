@@ -78,12 +78,12 @@ describes.realWin(
         `);
       });
 
-      it('the light dom is visible', async () => {
+      it('the light dom is visible', () => {
         expect(element.querySelector('h2')).to.be.not.null;
         expect(element.querySelector('button[open-button]')).to.be.not.null;
       });
 
-      it('the shadow dom is mounted', async () => {
+      it('the shadow dom is mounted', () => {
         expect(element.shadowRoot.querySelector('div')).to.be.not.null;
         expect(element.shadowRoot.querySelector('button[aria-label="Dismiss"]'))
           .to.be.not.null;
