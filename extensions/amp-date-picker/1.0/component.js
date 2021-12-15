@@ -1,4 +1,5 @@
 import moment from 'moment';
+import {DateRangePicker, SingleDatePicker} from 'react-dates';
 
 import {
   closestAncestorElementBySelector,
@@ -74,6 +75,8 @@ export function BentoDatePicker({
   const [date, setDate] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
+
+  const [isOpen, setIsOpen] = useState(false);
 
   // This might not be the best way to handle this, but we need a way to get the initial
   // child nodes and their values, but then replace them with the controlled inputs from
@@ -151,7 +154,6 @@ export function BentoDatePicker({
   /**
    * Sets up hidden input fields for a single input.
    * @param {!Element} form
-   * @return {void}
    * @private
    */
   const setupSingleInput = useCallback(
@@ -181,7 +183,6 @@ export function BentoDatePicker({
   /**
    * Sets up hidden input fields for a range input.
    * @param {!Element} form
-   * @return {void}
    * @private
    */
   const setupRangeInput = useCallback(
@@ -224,6 +225,27 @@ export function BentoDatePicker({
     [startInputSelector, endInputSelector, getHiddenInputId, mode, parseDate]
   );
 
+  const onDateChange = useCallback((date) => {
+    // TODO: set date in state
+    console.log(date);
+  }, []);
+
+  const onFocusChange = useCallback(({focused}) => {}, []);
+
+  const pickerComponent = useMemo(() => {
+    if (type === DatePickerType.RANGE) {
+      return <DateRangePicker />;
+    }
+    return (
+      <SingleDatePicker
+        date={date}
+        onDateChange={onDateChange}
+        onFocusChange={onFocusChange}
+        id="single-date-picker"
+      />
+    );
+  }, [type, date, onDateChange, onFocusChange]);
+
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       wrapperRef.current,
@@ -245,6 +267,7 @@ export function BentoDatePicker({
       data-enddate={getFormattedDate(endDate)}
       {...rest}
     >
+      {isOpen && pickerComponent}
       {showChildren && children}
       {dateElement}
       {startDateElement}
