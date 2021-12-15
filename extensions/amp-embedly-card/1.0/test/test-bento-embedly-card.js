@@ -7,13 +7,8 @@ import {toggleExperiment} from '#experiments';
 import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 
-/**
- * todo(kvchari):
- * remove existing tests (bc they're duped in test-bento)
- * add test for requestResize->attemptChangeSize callback.
- */
 describes.realWin(
-  'amp-embedly-card-v1.0',
+  'bento-embedly-card-v1.0',
   {
     amp: {
       extensions: ['amp-embedly-card:1.0'],
