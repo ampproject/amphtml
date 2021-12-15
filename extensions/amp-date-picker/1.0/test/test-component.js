@@ -31,9 +31,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </DatePicker>
       );
 
-      expect(wrapper.find('[data-date="2021-01-01"]')).length.to.be.greaterThan(
-        0
-      );
+      expect(wrapper.exists('[data-date="2021-01-01"]')).to.be.true;
     });
 
     it('should use the value of a range input at load-time', () => {
@@ -48,12 +46,53 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </DatePicker>
       );
 
-      expect(
-        wrapper.find('[data-startdate="2021-01-01"]')
-      ).length.to.be.greaterThan(0);
-      expect(
-        wrapper.find('[data-enddate="2021-01-02"]')
-      ).length.to.be.greaterThan(0);
+      expect(wrapper.exists('[data-startdate="2021-01-01"]')).to.be.true;
+      expect(wrapper.exists('[data-enddate="2021-01-02"]')).to.be.true;
+    });
+  });
+
+  describe('hidden inputs in single date picker', () => {
+    it('should not create hidden inputs outside of forms', () => {
+      const wrapper = mount(<DatePicker></DatePicker>);
+
+      expect(wrapper.exists('input[type="hidden"]')).to.be.false;
+    });
+
+    it('should create a hidden input when inside a form', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker></DatePicker>
+        </form>
+      );
+
+      expect(wrapper.exists('input[type="hidden"]')).to.be.true;
+      expect(wrapper.find('input[type="hidden"]').prop('name')).to.equal(
+        'date'
+      );
+    });
+
+    it('should name the input `${id}-date` when another #date input exists', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker id="delivery">
+            <input type="hidden" name="date"></input>
+          </DatePicker>
+        </form>
+      );
+
+      expect(wrapper.exists('input[name="delivery-date"]')).to.be.true;
+    });
+
+    it('should error if another #date input exists and the picker has no ID', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker>
+            <input type="hidden" name="date"></input>
+          </DatePicker>
+        </form>
+      );
+
+      // TODO: Figure out how to log and stub errors
     });
   });
 });
