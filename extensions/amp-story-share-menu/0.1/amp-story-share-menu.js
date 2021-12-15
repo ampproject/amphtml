@@ -1,4 +1,4 @@
-import {devAssert, userAssert} from '#core/assert';
+import {userAssert} from '#core/assert';
 import {Keys_Enum} from '#core/constants/key-codes';
 import * as Preact from '#core/dom/jsx';
 import {closestAncestorElementBySelector} from '#core/dom/query';
@@ -329,7 +329,9 @@ export class AmpStoryShareMenu {
    * @private
    */
   copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(hostEl).canonicalUrl;
+    const url = Services.documentInfoForDoc(
+      getAmpdoc(this.storyEl_)
+    ).canonicalUrl;
     if (!copyTextToClipboard(this.win_, url)) {
       const failureString = localize(
         this.storyEl_,
