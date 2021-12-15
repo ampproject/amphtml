@@ -4,6 +4,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "dist",
+    "checkJs": false,
 
     "paths": {
       "#3p/*": ["./3p/*"],
