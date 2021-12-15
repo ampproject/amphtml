@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Máis"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Para ver este contido, debes activar o experimento amp-story."
   },
   "21": {
     "string": "Sentímolo, pero semella que o teu navegador non é compatible con esta experiencia"
@@ -68,9 +62,6 @@
   "35": {
     "string": "Deslizar cara enriba"
   },
-  "62": {
-    "string": "Compartir a partir desta páxina"
-  },
   "63": {
     "string": "Line"
   },
@@ -91,9 +82,6 @@
   },
   "69": {
     "string": "Compartir historia"
-  },
-  "70": {
-    "string": "Mostrar o menú da historia"
   },
   "71": {
     "string": "A"
@@ -127,9 +115,6 @@
   },
   "81": {
     "string": "Consello"
-  },
-  "82": {
-    "string": "Páxina anterior"
   },
   "83": {
     "string": "Activar"

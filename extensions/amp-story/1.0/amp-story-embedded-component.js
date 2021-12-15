@@ -52,7 +52,6 @@ const EMBEDDED_COMPONENTS_SELECTORS = {
   'amp-twitter': {
     customIconClassName: 'amp-social-share-twitter-no-background',
     actionIcon: LAUNCH_ICON_CLASS,
-    localizedStringId: LocalizedStringId_Enum.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter[interactive]',
   },
 };
