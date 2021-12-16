@@ -59,7 +59,7 @@ export const MessageType_Enum = {
  * @param {string} eventType
  * @param {function(Event):void} listener
  * @param {Object=} opt_evtListenerOpts
- * @return {UnlistenCallback}
+ * @return {import('#core/types/function/types').UnlistenCallback}
  */
 export function listen(element, eventType, listener, opt_evtListenerOpts) {
   return internalListenImplementation(
