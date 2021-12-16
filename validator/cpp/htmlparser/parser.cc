@@ -217,7 +217,7 @@ int Parser::IndexOfElementInScope(Scope scope,
           }
           break;
         default:
-          CHECK(false, "HTML Parser reached unreachable scope");
+          CHECK(false) << "HTML Parser reached unreachable scope";
       }
     }
 
@@ -274,7 +274,7 @@ void Parser::ClearStackToContext(Scope scope) {
         }
         break;
       default:
-        CHECK(false, "HTML Parser reached unreachable scope");
+        CHECK(false) << "HTML Parser reached unreachable scope";
     }
   }
 }  // Parser::ClearStackToContext.
@@ -548,8 +548,8 @@ void Parser::AcknowledgeSelfClosingTag() {
 
 // Section 12.2.4.1, "using the rules for".
 void Parser::SetOriginalIM() {
-  CHECK(!original_insertion_mode_,
-        "html: bad parser state: original_insertion_mode was set twice");
+  CHECK(!original_insertion_mode_)
+      << "html: bad parser state: original_insertion_mode was set twice";
   original_insertion_mode_ = insertion_mode_;
 }  // Parser::SetOriginalIM.
 
@@ -1016,8 +1016,8 @@ bool Parser::InHeadNoscriptIM() {
       break;
   }
   open_elements_stack_.Pop();
-  CHECK(top()->atom_ == Atom::HEAD,
-        "html: the new current node will be a head element.");
+  CHECK(top()->atom_ == Atom::HEAD)
+      << "html: the new current node will be a head element.";
 
   insertion_mode_ = std::bind(&Parser::InHeadIM, this);
   if (token_.atom == Atom::NOSCRIPT) {
@@ -2868,9 +2868,9 @@ bool Parser::AfterBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       // The comment is attached to the <html> element.
       CHECK(open_elements_stack_.size() > 0 &&
-                open_elements_stack_.at(0)->atom_ == Atom::HTML,
-            "html: bad parser state: <html> element not found, in the "
-            "after-body insertion mode");
+            open_elements_stack_.at(0)->atom_ == Atom::HTML)
+          << "html: bad parser state: <html> element not found, in the "
+             "after-body insertion mode";
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       if (record_node_offsets_) {
@@ -3136,7 +3136,7 @@ bool Parser::ParseForeignContent() {
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
-        CHECK(false, "html: bad parser state: unexpected namespace");
+        CHECK(false) << "html: bad parser state: unexpected namespace";
       }
 
       AdjustForeignAttributes(&token_.attributes);
