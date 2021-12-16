@@ -5,6 +5,6 @@ export const xhrUtils = {
    * @return {Promise<Response>}
    */
   fetchJson(url) {
-    return fetch(url).then((r) => r.json());
+    return self.fetch(url).then((r) => r.json());
   },
 };
