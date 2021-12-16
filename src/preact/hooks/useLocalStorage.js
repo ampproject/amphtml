@@ -1,4 +1,4 @@
-import {useCallback, useRef, useState} from '#preact';
+import {useCallback, useState} from '#preact';
 
 /**
  * @param {string} key
@@ -18,20 +18,19 @@ export function useLocalStorage(key, defaultValue = null) {
     }
   });
 
-  // Use a keyRef to ensure that `storeValue` maintains referential integrity
-  const keyRef = useRef(key);
-  keyRef.current = key;
-
-  const storeValue = useCallback((newValue) => {
-    try {
-      const json = JSON.stringify(newValue);
-      // eslint-disable-next-line local/no-forbidden-terms
-      self.localStorage?.setItem(keyRef.current, json);
-    } catch (err) {
-      // warning: could not write to local storage
-    }
-    setValue(newValue);
-  }, []);
+  const storeValue = useCallback(
+    (newValue) => {
+      try {
+        const json = JSON.stringify(newValue);
+        // eslint-disable-next-line local/no-forbidden-terms
+        self.localStorage?.setItem(key, json);
+      } catch (err) {
+        // warning: could not write to local storage
+      }
+      setValue(newValue);
+    },
+    [key]
+  );
 
   return [value, storeValue];
 }
