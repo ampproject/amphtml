@@ -356,8 +356,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map));
-      map = await massageSourcemaps(map, options);
+      ({code, map: minifiedMap} = await minify(code));
+      map = await massageSourcemaps(map, minifiedMap, options);
     }
 
     await Promise.all([
@@ -450,10 +450,9 @@ const mangleIdentifier = {
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
- * @param {string} map
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map) {
+async function minify(code) {
   /* eslint-disable local/camelcase */
   const terserOptions = {
     mangle: {
@@ -471,7 +470,7 @@ async function minify(code, map) {
       beautify: !!argv.pretty_print,
       keep_quoted_props: true,
     },
-    sourceMap: {content: map},
+    sourceMap: true,
     toplevel: true,
     module: !!argv.esm,
     nameCache: argv.nomanglecache ? undefined : nameCache,
@@ -687,11 +686,12 @@ async function getDependencies(entryPoint, options) {
 }
 
 /**
- * @param {*} sourcemapsFile
+ * @param {string} sourcemapsFile
+ * @param {*} minifiedMap
  * @param {*} options
- * @return {*}
+ * @return {string}
  */
-function massageSourcemaps(sourcemapsFile, options) {
+function massageSourcemaps(sourcemapsFile, minifiedMap, options) {
   const sourcemaps = JSON.parse(sourcemapsFile);
   sourcemaps.sources = sourcemaps.sources.map((source) => {
     if (source.startsWith('../')) {
@@ -707,7 +707,11 @@ function massageSourcemaps(sourcemapsFile, options) {
     delete sourcemaps.sourcesContent;
   }
 
-  return JSON.stringify(sourcemaps);
+  return remapping(
+    [minifiedMap, sourcemaps],
+    () => null,
+    !argv.full_sourcemaps
+  ).toString();
 }
 
 module.exports = {
