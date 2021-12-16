@@ -16,7 +16,7 @@ import * as preactDOM from 'preact/dom';
 /** @type {typeof import('preact').hydrate} */
 export const hydrate = preactDOM.hydrate;
 
-/** @type {typeof import('preact').hydrate} */
+/** @type {typeof import('preact').render} */
 export const render = preactDOM.render;
 
 /* eslint-enable */
