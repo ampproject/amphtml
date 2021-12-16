@@ -560,6 +560,14 @@
     }
   },
   {
+    "name": "amp-list",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-live-list",
     "version": "0.1",
     "options": {
