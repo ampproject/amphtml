@@ -46,10 +46,8 @@ const renderShoppingTagTemplate = (tagData) => (
           new Intl.NumberFormat('en-EN', {
             style: 'currency',
             currency: 'USD',
-          }).formatToParts(0.0)[0].value +
-            Number(
-              new Intl.NumberFormat('en-EN').format(tagData['product-price'])
-            )}
+            maximumFractionDigits: 0,
+          }).format(tagData['product-price'])}
       </span>
     </span>
   </div>
