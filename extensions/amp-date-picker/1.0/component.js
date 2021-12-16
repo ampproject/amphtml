@@ -1,5 +1,8 @@
 import moment from 'moment';
-import {DateRangePicker, SingleDatePicker} from 'react-dates';
+import {
+  DayPickerRangeController,
+  DayPickerSingleDateController,
+} from 'react-dates';
 
 import {
   closestAncestorElementBySelector,
@@ -9,6 +12,10 @@ import {
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
+import './amp-date-picker.css';
+
+import './amp-date-picker.css';
+import 'react-dates/initialize';
 
 const DEFAULT_INPUT_SELECTOR = '#date';
 const DEFAULT_START_INPUT_SELECTOR = '#startdate';
@@ -76,7 +83,7 @@ export function BentoDatePicker({
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
 
   // This might not be the best way to handle this, but we need a way to get the initial
   // child nodes and their values, but then replace them with the controlled inputs from
@@ -230,18 +237,21 @@ export function BentoDatePicker({
     console.log(date);
   }, []);
 
+  const onDatesChange = useCallback(({endDate, startDate}) => {
+    // TODO: set date in state
+  }, []);
+
   const onFocusChange = useCallback(({focused}) => {}, []);
 
   const pickerComponent = useMemo(() => {
     if (type === DatePickerType.RANGE) {
-      return <DateRangePicker />;
+      return <DayPickerRangeController />;
     }
     return (
-      <SingleDatePicker
+      <DayPickerSingleDateController
         date={date}
         onDateChange={onDateChange}
         onFocusChange={onFocusChange}
-        id="single-date-picker"
       />
     );
   }, [type, date, onDateChange, onFocusChange]);
@@ -253,11 +263,34 @@ export function BentoDatePicker({
     );
     if (type === DatePickerType.SINGLE) {
       setupSingleInput(form);
+      // if (mode === DatePickerMode.OVERLAY && !dateElement) {
+      //   onError(`Overlay single pickers must specify "inputSelector"`);
+      // }
     } else if (type === DatePickerType.RANGE) {
       setupRangeInput(form);
+      // if (
+      //   mode === DatePickerMode.OVERLAY &&
+      //   (!startDateElement || !endDateElement)
+      // ) {
+      //   onError(
+      //     `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
+      //   );
+      // } else {
+      //   onError(`Invalid picker type`);
+      // }
     }
     setShowChildren(false);
-  }, [wrapperRef, type, setupSingleInput, setupRangeInput]);
+  }, [
+    wrapperRef,
+    type,
+    setupSingleInput,
+    setupRangeInput,
+    dateElement,
+    mode,
+    onError,
+    startDateElement,
+    endDateElement,
+  ]);
 
   return (
     <ContainWrapper
@@ -267,11 +300,11 @@ export function BentoDatePicker({
       data-enddate={getFormattedDate(endDate)}
       {...rest}
     >
-      {isOpen && pickerComponent}
       {showChildren && children}
       {dateElement}
       {startDateElement}
       {endDateElement}
+      {isOpen && pickerComponent}
     </ContainWrapper>
   );
 }

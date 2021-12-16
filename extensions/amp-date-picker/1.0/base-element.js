@@ -1,6 +1,7 @@
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {BentoDatePicker} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoDatePicker} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 

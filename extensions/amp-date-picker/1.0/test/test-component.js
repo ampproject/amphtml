@@ -119,42 +119,59 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(inputs.first().prop('name')).to.equal('start-date');
       expect(inputs.last().prop('name')).to.equal('end-date');
     });
+
+    it(
+      'should name an input `${id}-(start|end)-date` when another ' +
+        '#(start|end)-date input exists',
+      () => {
+        const wrapper = mount(
+          <form>
+            <DatePicker type="range" id="delivery">
+              <input type="hidden" name="start-date"></input>
+            </DatePicker>
+          </form>
+        );
+
+        expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
+        expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
+        expect(wrapper.exists('input[name="end-date"]')).to.be.true;
+      }
+    );
+
+    it(
+      'should name both inputs `${id}-(start|end)-date` when other ' +
+        '#start-date and #end-date inputs exists',
+      () => {
+        const wrapper = mount(
+          <form>
+            <DatePicker type="range" id="delivery">
+              <input type="hidden" name="start-date"></input>
+              <input type="hidden" name="end-date"></input>
+            </DatePicker>
+          </form>
+        );
+
+        expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
+        expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
+        expect(wrapper.exists('input[name="delivery-end-date"]')).to.be.true;
+      }
+    );
   });
 
-  it(
-    'should name an input `${id}-(start|end)-date` when another ' +
-      '#(start|end)-date input exists',
-    () => {
+  describe('showing the date picker in static mode for a single date', () => {
+    it.only('shows the calendar view by default', () => {
       const wrapper = mount(
-        <form>
-          <DatePicker type="range" id="delivery">
-            <input type="hidden" name="start-date"></input>
-          </DatePicker>
-        </form>
+        <DatePicker
+          type="single"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+        />
       );
 
-      expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
-      expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
-      expect(wrapper.exists('input[name="end-date"]')).to.be.true;
-    }
-  );
+      console.log(wrapper.debug());
 
-  it(
-    'should name both inputs `${id}-(start|end)-date` when other ' +
-      '#start-date and #end-date inputs exists',
-    () => {
-      const wrapper = mount(
-        <form>
-          <DatePicker type="range" id="delivery">
-            <input type="hidden" name="start-date"></input>
-            <input type="hidden" name="end-date"></input>
-          </DatePicker>
-        </form>
-      );
-
-      expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
-      expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
-      expect(wrapper.exists('input[name="delivery-end-date"]')).to.be.true;
-    }
-  );
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
+  });
 });
