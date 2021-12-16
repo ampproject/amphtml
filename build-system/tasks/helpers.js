@@ -335,6 +335,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
+        sourcesContent: !argv.full_sourcemaps,
         outfile: destFile,
         define: experimentDefines,
         plugins,
