@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "downlevelIteration": true,
+    "target": "esnext",
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "lib": ["dom", "esnext", "es6"],
+
+    "paths": {
+      "#compiler": ["./src/compiler"],
+      "#compiler/*": ["./src/compiler/*"],
+      "#core/*": ["./src/core/*"]
+    }
+  },
+
+  "exclude": [
+    "**/build/**",
+    "**/dist/**",
+    "**/dist.*/**",
+    "**/node_modules/**",
+    "**/third_party/**",
+    "**/*.extern.js"
+  ]
+}

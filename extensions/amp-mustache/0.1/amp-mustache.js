@@ -25,7 +25,9 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer(sanitizeTagsForTripleMustache);
+    mustache.setUnescapedSanitizer((html) =>
+      sanitizeTagsForTripleMustache(html, this.win.document)
+    );
 
     user().warn(
       TAG,

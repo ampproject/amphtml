@@ -462,6 +462,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments/index.js',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',
       'testing/init-tests.js',
       'testing/fake-dom.js',
@@ -587,8 +588,6 @@ const forbiddenTermsGlobal = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/core/assert/base.js', // Has actual implementation of assertElement.
-      'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
       'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
@@ -632,7 +631,6 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'src/config.js',
-      'src/core/window/window.extern.js',
       'src/experiments/index.js',
       'src/experiments/shame.extern.js',
       'src/mode.js',
