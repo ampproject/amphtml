@@ -1,8 +1,10 @@
-import '../amp-accordion';
-// import {subscribe, unsubscribe} from '#core/context';
 import {htmlFor} from '#core/dom/static-template';
 
-import {toggleExperiment} from '#experiments';
+import {BaseElement as BentoAccordion} from '../base-element';
+// import '../amp-accordion';
+// import {subscribe, unsubscribe} from '#core/context';
+
+// import {toggleExperiment} from '#experiments';
 
 // import {CanRender} from '#preact/contextprops';
 
@@ -11,9 +13,7 @@ import {toggleExperiment} from '#experiments';
 describes.realWin(
   'amp-accordion:1.0',
   {
-    amp: {
-      extensions: ['amp-accordion:1.0'],
-    },
+    amp: false,
   },
   (env) => {
     let win;
@@ -40,9 +40,9 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'bento-accordion', true, true);
+      // toggleExperiment(win, 'bento-accordion', true, true);
       element = html`
-        <amp-accordion layout="fixed" width="300" height="200">
+        <bento-accordion>
           <section expanded id="section1">
             <h1>header1</h1>
             <div>content1</div>
@@ -55,10 +55,14 @@ describes.realWin(
             <h1>header3</h1>
             <div>content3</div>
           </section>
-        </amp-accordion>
+        </bento-accordion>
       `;
+      win.customElements.define(
+        'bento-accordion',
+        BentoAccordion.CustomElement(BentoAccordion)
+      );
       win.document.body.appendChild(element);
-      await element.buildInternal();
+      await element.getApi();
     });
 
     it('should render expanded and collapsed sections', () => {

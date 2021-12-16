@@ -30,7 +30,7 @@ function maybeWrapNativeSuper(klass) {
 /** @type {typeof AMP.BaseElement} */
 let BaseElement;
 
-if (typeof AMP !== 'undefined' && AMP.BaseElement) {
+if (false && typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
   let ExtendableHTMLElement;
