@@ -51,5 +51,9 @@
       pattern: 'tsconfig{,.base}.json',
       owners: [{name: 'ampproject/wg-performance', required: true}],
     },
+    {
+      pattern: '**/build-dom.js',
+      owners: [{name: 'samouri'}],
+    },
   ],
 }
