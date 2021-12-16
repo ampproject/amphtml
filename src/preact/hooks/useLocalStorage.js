@@ -11,7 +11,7 @@ export function useLocalStorage(key, defaultValue = null) {
     try {
       // eslint-disable-next-line local/no-forbidden-terms
       const json = self.localStorage?.getItem(key);
-      return !json ? defaultValue : JSON.parse(json);
+      return json ? JSON.parse(json) : defaultValue;
     } catch (err) {
       // warning: could not read from local storage
       return defaultValue;
