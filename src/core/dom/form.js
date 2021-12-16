@@ -3,9 +3,6 @@ import {ancestorElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {dict} from '#core/types/object';
 
-/**
- * @const
- * @type {'__AMP_FORM'} */
 const FORM_PROP_ = '__AMP_FORM';
 
 /**
