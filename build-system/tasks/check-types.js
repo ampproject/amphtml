@@ -25,7 +25,7 @@ const TSC_TYPECHECK_TARGETS = {
   'core': 'src/core',
   'experiments': 'src/experiments',
   'preact': 'src/preact',
-}
+};
 
 /**
  * Performs tsc type-checking on the target provided.
