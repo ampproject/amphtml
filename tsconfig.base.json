@@ -13,6 +13,8 @@
     "paths": {
       "#compiler": ["./src/compiler"],
       "#compiler/*": ["./src/compiler/*"],
+      "#experiments": ["./src/experiments"],
+      "#experiments/*": ["./src/experiments/*"],
       "#core/*": ["./src/core/*"]
     }
   },

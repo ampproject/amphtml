@@ -2,6 +2,6 @@ export {};
 
 declare global {
   interface Error {
-    messageArray?: Array<any>;
+    messageArray?: any[];
   }
 }
