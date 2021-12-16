@@ -357,7 +357,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map: minifiedMap} = await minify(code));
+      const {code: minified, map: minifiedMap} = await minify(code);
+      code = minified;
       map = await massageSourcemaps(map, minifiedMap, options);
     }
 
