@@ -1,14 +1,7 @@
-export {};
+export * from './amp-globals.d';
 
 declare global {
   interface HTMLElement {
-    // Used by modal.js to keep track of the saved tab on an element.
-    __AMP_MODAL_SAVED_TAB_INDEX?: string | null;
-
-    // Used by extensions/amp-form/0.1 and src/core/form.js.
-    // TODO(wg-performance): move to extensions/amp-form, as it is the only consumer.
-    __AMP_FORM: AmpForm;
-
     nonce?: string;
 
     mozMatchesSelector?: (s: string) => boolean;
@@ -26,10 +19,7 @@ declare global {
     data?: Object | string | null;
   }
 
-  interface AmpForm {}
-
   // Fullscreen proprties
-
   interface Element {
     requestFullScreen: any;
     exitFullscreen: any;
