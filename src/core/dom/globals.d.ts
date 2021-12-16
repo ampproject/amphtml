@@ -1,4 +1,4 @@
-export * from './amp-globals.d';
+import './amp-globals.d';
 
 declare global {
   interface HTMLElement {

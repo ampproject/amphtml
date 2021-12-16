@@ -1,1 +1,1 @@
-export * from './amp-globals.d';
+import './amp-globals.d';
