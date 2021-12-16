@@ -30,10 +30,6 @@ const TAG = 'EXPERIMENTS';
  */
 const LOCAL_STORAGE_KEY = 'amp-experiment-toggles';
 
-/**
- * @const
- * @type {string}
- */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 /**

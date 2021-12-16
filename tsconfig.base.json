@@ -8,7 +8,6 @@
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true,
     "lib": ["dom", "esnext", "es6"],
 
     "paths": {
