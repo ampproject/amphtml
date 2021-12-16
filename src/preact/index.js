@@ -7,8 +7,16 @@
  * @fileoverview
  */
 
+// Importing directly from preact/dom is a hack to allow us to mimic the structure of react.
 // @ts-ignore
-export {hydrate, render} from 'preact/dom';
+import * as preactDOM from 'preact/dom'
+
+/** @type {typeof import('preact').hydrate} */
+export const hydrate = preactDOM.hydrate;
+
+/** @type {typeof import('preact').hydrate} */
+export const render = preactDOM.render;
+
 export {createElement, cloneElement, createRef, createContext} from 'preact';
 export {
   useState,
