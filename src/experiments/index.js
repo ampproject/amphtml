@@ -5,6 +5,7 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html
  */
 
+import {devAssert} from '#core/assert';
 import {isArray} from '#core/types';
 import {hasOwn, map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
@@ -16,7 +17,7 @@ import {getMode} from '../mode';
 import {getTopWindow} from '../service-helpers';
 
 /** @typedef {import('./types.d').ExperimentBranchMap} ExperimentBranchMap */
-/** @typedef {{[key: string]: boolean}} ExperimentToggleMap */
+/** @typedef {{[key: string]: boolean}} ExperimentTogglesMap */
 
 /**
  * @const
@@ -108,14 +109,15 @@ export function toggleExperiment(
  * Calculate whether the experiment is on or off based off of its default value,
  * stored overriden value, or the global config frequency given.
  * @param {Window} win
- * @return {ExperimentToggleMap}
+ * @return {ExperimentTogglesMap}
  */
 export function experimentToggles(win) {
-  if (/** @type {ExperimentToggleMap} */ (win[TOGGLES_WINDOW_PROPERTY])) {
-    return win[TOGGLES_WINDOW_PROPERTY];
+  if (win[TOGGLES_WINDOW_PROPERTY]) {
+    return /** @type {ExperimentTogglesMap} */ (win[TOGGLES_WINDOW_PROPERTY]);
   }
-  win[TOGGLES_WINDOW_PROPERTY] = /** @type {ExperimentToggleMap} */ (map());
+  win[TOGGLES_WINDOW_PROPERTY] = /** @type {ExperimentTogglesMap} */ (map());
   const toggles = win[TOGGLES_WINDOW_PROPERTY];
+  devAssert(toggles);
 
   // Read default and injected configs of this build.
   const buildExperimentConfigs = {
@@ -167,7 +169,7 @@ export function experimentToggles(win) {
  * Returns the cached experiments toggles, or null if they have not been
  * computed yet.
  * @param {Window} win
- * @return {?Object<string, boolean>}
+ * @return {?ExperimentTogglesMap}
  */
 export function experimentTogglesOrNull(win) {
   return win[TOGGLES_WINDOW_PROPERTY] || null;
@@ -176,7 +178,7 @@ export function experimentTogglesOrNull(win) {
 /**
  * Returns a set of experiment IDs currently on.
  * @param {Window} win
- * @return {Object<string, boolean>}
+ * @return {ExperimentTogglesMap}
  */
 function getExperimentToggles(win) {
   let experimentsString = '';
@@ -206,7 +208,7 @@ function getExperimentToggles(win) {
 /**
  * Saves a set of experiment IDs currently on.
  * @param {Window} win
- * @param {Object<string, boolean>} toggles
+ * @param {ExperimentTogglesMap} toggles
  */
 function saveExperimentToggles(win, toggles) {
   const experimentIds = [];
@@ -223,7 +225,7 @@ function saveExperimentToggles(win, toggles) {
 /**
  * See getExperimentToggles().
  * @param {Window} win
- * @return {Object<string, boolean>}
+ * @return {ExperimentTogglesMap}
  * @visibleForTesting
  */
 export function getExperimentTogglesForTesting(win) {
@@ -237,7 +239,7 @@ export function getExperimentTogglesForTesting(win) {
  */
 export function resetExperimentTogglesForTesting(win) {
   saveExperimentToggles(win, {});
-  win[TOGGLES_WINDOW_PROPERTY] = null;
+  win[TOGGLES_WINDOW_PROPERTY] = undefined;
 }
 
 /**
