@@ -20,11 +20,12 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  * @type {Object<string, string>}
  */
 const TSC_TYPECHECK_TARGETS = {
-  'compiler': 'src/compiler',
   'carousel': 'extensions/amp-carousel/0.1',
+  'compiler': 'src/compiler',
   'core': 'src/core',
   'experiments': 'src/experiments',
-};
+  'preact': 'src/preact',
+}
 
 /**
  * Performs tsc type-checking on the target provided.
