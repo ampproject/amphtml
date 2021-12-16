@@ -1,5 +1,6 @@
 import {userAssert} from '#core/assert';
 import {Keys_Enum} from '#core/constants/key-codes';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {isObject} from '#core/types';
@@ -15,6 +16,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {user} from '#utils/log';
 
+import {SHARE_MENU_HOST_CLASS} from 'extensions/amp-story/1.0/amp-story-share';
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 import {Toast} from 'extensions/amp-story/1.0/toast';
 
@@ -28,6 +30,8 @@ import {
   getStoreService,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+
+import '../../amp-social-share/0.1/amp-social-share';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
@@ -52,13 +56,13 @@ const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
  * Key for share providers in config.
  * @const {string}
  */
-export const SHARE_PROVIDERS_KEY = 'shareProviders';
+const SHARE_PROVIDERS_KEY = 'shareProviders';
 
 /**
  * Deprecated key for share providers in config.
  * @const {string}
  */
-export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
+const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
 /**
  * @param {!Node} child
@@ -108,11 +112,6 @@ export class AmpStoryShareMenu {
 
     const providersList = this.buildProvidersList_();
     this.element_ = this.buildDialog_(providersList);
-    // TODO(mszylkowski): import '../../amp-social-share/0.1/amp-social-share' when this file is lazy loaded.
-    Services.extensionsFor(this.win_).installExtensionForDoc(
-      getAmpdoc(this.storyEl_),
-      'amp-social-share'
-    );
 
     this.vsync_.mutate(() => {
       createShadowRootWithStyle(this.hostEl_, this.element_, CSS);
@@ -360,3 +359,17 @@ export class AmpStoryShareMenu {
     );
   }
 }
+
+/**
+ * This extension installs the share widget.
+ */
+
+AMP.extension('amp-story-share-menu', '0.1', (AMP) => {
+  AMP.ampdoc.whenReady().then(() => {
+    const element = AMP.ampdoc
+      .getRootNode()
+      .querySelector(`.${escapeCssSelectorIdent(SHARE_MENU_HOST_CLASS)}`);
+    const shareMenu = new AmpStoryShareMenu(element, AMP.ampdoc.win);
+    shareMenu.build();
+  });
+});
