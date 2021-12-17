@@ -6,15 +6,36 @@ export default {
   title: 'List',
   component: BentoList,
   args: {
-    'exampleProperty': 'example string property argument',
+    wrapper: (list) => <ol>{list}</ol>,
+    template: (item) => <li>{item.toUpperCase()}</li>,
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const _default = (args) => {
+export const SimpleList = (args) => {
   return (
-    <BentoList style={{width: 300, height: 200}} {...args}>
-      This text is inside.
-    </BentoList>
+    <BentoList
+      {...args}
+      fetchJson={async () => ({items: ['one', 'two', 'three']})}
+    />
+  );
+};
+export const LoadingState = (args) => {
+  return (
+    <BentoList
+      {...args}
+      fetchJson={async () => {
+        await new Promise(() => {});
+      }}
+    />
+  );
+};
+export const ErrorState = (args) => {
+  return (
+    <BentoList
+      {...args}
+      fetchJson={async () => {
+        throw new Error('Failed to fetch');
+      }}
+    />
   );
 };
