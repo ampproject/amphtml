@@ -159,7 +159,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in static mode for a single date', () => {
-    it('shows the calendar view by default', () => {
+    xit('shows the calendar view by default', () => {
       const wrapper = mount(
         <DatePicker
           type="single"
@@ -170,6 +170,28 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       );
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
+  });
+
+  describe('showing the date picker in overlay mode for a single date', () => {
+    it('throws an error if there is no inputSelector specified', () => {
+      const onErrorSpy = env.sandbox.spy();
+      mount(<DatePicker type="single" mode="overlay" onError={onErrorSpy} />);
+
+      expect(onErrorSpy).to.have.been.calledWith(
+        'Overlay single pickers must specify "inputSelector"'
+      );
+    });
+  });
+
+  describe('showing the date picker in overlay mode for a date range', () => {
+    it('throws an error if there is no inputSelector specified', () => {
+      const onErrorSpy = env.sandbox.spy();
+      mount(<DatePicker type="range" mode="overlay" onError={onErrorSpy} />);
+
+      expect(onErrorSpy).to.have.been.calledWith(
+        `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
+      );
     });
   });
 });

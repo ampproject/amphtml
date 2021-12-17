@@ -1,4 +1,5 @@
 import {format as dateFnsFormat, isValid, parse} from 'date-fns';
+import {DayPicker} from 'react-day-picker';
 
 import {
   closestAncestorElementBySelector,
@@ -6,7 +7,7 @@ import {
 } from '#core/dom/query';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {useCallback, useEffect, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 import './amp-date-picker.css';
@@ -19,6 +20,7 @@ const DEFAULT_LOCALE = 'en';
 const FORM_INPUT_SELECTOR = 'form';
 // TODO: Check on this tag name
 const TAG = 'BentoDatePicker';
+const DEFAULT_DATE = new Date();
 
 /** @enum {string} */
 const DatePickerMode = {
@@ -78,6 +80,8 @@ export function BentoDatePicker({
   const [endDate, setEndDate] = useState();
 
   const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
+
+  // const {dayPickerProps, inputProps} = useInput();
 
   // This might not be the best way to handle this, but we need a way to get the initial
   // child nodes and their values, but then replace them with the controlled inputs from
@@ -233,24 +237,34 @@ export function BentoDatePicker({
     );
     if (type === DatePickerType.SINGLE) {
       setupSingleInput(form);
-      // if (mode === DatePickerMode.OVERLAY && !dateElement) {
-      //   onError(`Overlay single pickers must specify "inputSelector"`);
-      // }
+      if (mode === DatePickerMode.OVERLAY && !dateElement) {
+        onError(`Overlay single pickers must specify "inputSelector"`);
+      }
     } else if (type === DatePickerType.RANGE) {
       setupRangeInput(form);
-      // if (
-      //   mode === DatePickerMode.OVERLAY &&
-      //   (!startDateElement || !endDateElement)
-      // ) {
-      //   onError(
-      //     `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
-      //   );
-      // } else {
-      //   onError(`Invalid picker type`);
-      // }
+      if (
+        mode === DatePickerMode.OVERLAY &&
+        (!startDateElement || !endDateElement)
+      ) {
+        onError(
+          `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
+        );
+      }
+    } else {
+      onError(`Invalid picker type`);
     }
     setShowChildren(false);
-  }, [setupRangeInput, setupSingleInput, type]);
+  }, [
+    setupRangeInput,
+    setupSingleInput,
+    type,
+    // TODO: Uncommenting these dependencies causes the unit tests not to complete
+    // dateElement,
+    // startDateElement,
+    // endDateElement,
+    mode,
+    onError,
+  ]);
 
   return (
     <ContainWrapper
@@ -264,6 +278,7 @@ export function BentoDatePicker({
       {dateElement}
       {startDateElement}
       {endDateElement}
+      {/* <DayPicker aria-label="Calendar" /> */}
     </ContainWrapper>
   );
 }
