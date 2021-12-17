@@ -1,46 +1,52 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import * as Preact from '#preact';
+import {useCallback, useEffect, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
 
 import {useStyles} from './component.jss';
 
+const listItemTemplate = (item) => <li>{item}</li>;
+const listWrapperTemplate = (list) => <ul>{list}</ul>;
+
 /**
  * @param {!BentoList.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BentoList({fetchJson, src, template, wrapper, ...rest}) {
+export function BentoList({
+  src = null,
+  fetchJson = xhrUtils.fetchJson,
+  itemsKey = 'items',
+  template: itemTemplate = listItemTemplate,
+  wrapper: wrapperTemplate = listWrapperTemplate,
+  loading: loadingTemplate = (src) => 'Loading...',
+  error: errorTemplate = (err) => 'Error: ' + err.message,
+  ...rest
+}) {
   const {playable, renderable} = useAmpContext();
 
   const styles = useStyles();
 
-  const {
-    error,
-    loading,
-    results: items,
-  } = useAsync(async () => {
+  const {error, loading, results} = useAsync(async () => {
     if (!renderable) {
       return null;
     }
-    const results = await (fetchJson || xhrUtils.fetchJson)(src);
-    const items = results['items'];
-    return items;
-  }, [src]);
+    const results = await fetchJson(src);
+    return results;
+  }, [fetchJson, src]);
 
-  const children = useMemo(() => {
-    let templates = items?.map((item) => template(item));
-    if (wrapper) {
-      templates = wrapper(templates);
-    }
-    return templates;
-  }, [items, template]);
+  const items = results?.[itemsKey];
+
+  let children = items?.map((item) => itemTemplate(item));
+  if (wrapperTemplate) {
+    children = wrapperTemplate(children);
+  }
 
   return (
     <ContainWrapper {...rest}>
       {children}
-      {loading && 'loading...'}
-      {error && 'Error: ' + error.message}
+      {loading && loadingTemplate && loadingTemplate(src)}
+      {error && errorTemplate && errorTemplate(error)}
     </ContainWrapper>
   );
 }
