@@ -20,7 +20,6 @@ const DEFAULT_LOCALE = 'en';
 const FORM_INPUT_SELECTOR = 'form';
 // TODO: Check on this tag name
 const TAG = 'BentoDatePicker';
-const DEFAULT_DATE = new Date();
 
 /** @enum {string} */
 const DatePickerMode = {
@@ -278,7 +277,7 @@ export function BentoDatePicker({
       {dateElement}
       {startDateElement}
       {endDateElement}
-      {/* <DayPicker aria-label="Calendar" /> */}
+      <DayPicker aria-label="Calendar" />
     </ContainWrapper>
   );
 }
