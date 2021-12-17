@@ -159,7 +159,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in static mode for a single date', () => {
-    it.only('shows the calendar view by default', () => {
+    it('shows the calendar view by default', () => {
       const wrapper = mount(
         <DatePicker
           type="single"
@@ -168,8 +168,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           height={360}
         />
       );
-
-      console.log(wrapper.debug());
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });

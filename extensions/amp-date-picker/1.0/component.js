@@ -1,8 +1,4 @@
-import moment from 'moment';
-import {
-  DayPickerRangeController,
-  DayPickerSingleDateController,
-} from 'react-dates';
+import {format as dateFnsFormat, isValid, parse} from 'date-fns';
 
 import {
   closestAncestorElementBySelector,
@@ -12,15 +8,13 @@ import {
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
-import './amp-date-picker.css';
 
 import './amp-date-picker.css';
-import 'react-dates/initialize';
 
 const DEFAULT_INPUT_SELECTOR = '#date';
 const DEFAULT_START_INPUT_SELECTOR = '#startdate';
 const DEFAULT_END_INPUT_SELECTOR = '#enddate';
-const ISO_8601 = 'YYYY-MM-DD';
+const ISO_8601 = 'yyyy-MM-dd';
 const DEFAULT_LOCALE = 'en';
 const FORM_INPUT_SELECTOR = 'form';
 // TODO: Check on this tag name
@@ -98,11 +92,11 @@ export function BentoDatePicker({
    */
   const parseDate = useCallback(
     (value) => {
-      const dateAsMoment = moment(value, format);
-      if (dateAsMoment.isValid()) {
-        return dateAsMoment;
+      const date = parse(value, format, new Date());
+      if (isValid(date)) {
+        return date;
       }
-      return moment(value);
+      return parse(value);
     },
     [format]
   );
@@ -114,15 +108,15 @@ export function BentoDatePicker({
    * @private
    */
   const getFormattedDate = useCallback(
-    (dateAsMoment) => {
-      if (!dateAsMoment) {
+    (date) => {
+      if (!date) {
         return '';
       }
-      const isUnixTimestamp = format.match(/[Xx]/);
-      const _locale = isUnixTimestamp ? DEFAULT_LOCALE : locale;
-      return dateAsMoment.clone().locale(_locale).format(format);
+      // const isUnixTimestamp = format.match(/[Xx]/);
+      // const _locale = isUnixTimestamp ? DEFAULT_LOCALE : locale;
+      return dateFnsFormat(date, format);
     },
-    [format, locale]
+    [format]
   );
 
   /**
@@ -232,30 +226,6 @@ export function BentoDatePicker({
     [startInputSelector, endInputSelector, getHiddenInputId, mode, parseDate]
   );
 
-  const onDateChange = useCallback((date) => {
-    // TODO: set date in state
-    console.log(date);
-  }, []);
-
-  const onDatesChange = useCallback(({endDate, startDate}) => {
-    // TODO: set date in state
-  }, []);
-
-  const onFocusChange = useCallback(({focused}) => {}, []);
-
-  const pickerComponent = useMemo(() => {
-    if (type === DatePickerType.RANGE) {
-      return <DayPickerRangeController />;
-    }
-    return (
-      <DayPickerSingleDateController
-        date={date}
-        onDateChange={onDateChange}
-        onFocusChange={onFocusChange}
-      />
-    );
-  }, [type, date, onDateChange, onFocusChange]);
-
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       wrapperRef.current,
@@ -280,17 +250,7 @@ export function BentoDatePicker({
       // }
     }
     setShowChildren(false);
-  }, [
-    wrapperRef,
-    type,
-    setupSingleInput,
-    setupRangeInput,
-    dateElement,
-    mode,
-    onError,
-    startDateElement,
-    endDateElement,
-  ]);
+  }, [setupRangeInput, setupSingleInput, type]);
 
   return (
     <ContainWrapper
@@ -304,7 +264,6 @@ export function BentoDatePicker({
       {dateElement}
       {startDateElement}
       {endDateElement}
-      {isOpen && pickerComponent}
     </ContainWrapper>
   );
 }
