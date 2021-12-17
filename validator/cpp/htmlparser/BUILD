@@ -254,6 +254,16 @@ cc_test(
 )
 
 cc_library(
+    name = "iterators",
+    hdrs = [
+        "iterators.h",
+    ],
+    deps = [
+        ":node",
+    ],
+)
+
+cc_library(
     name = "htmlentities",
     hdrs = [
         "entity.h",
@@ -286,9 +296,11 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         ":allocator",
+        ":iterators",
         ":node",
         ":token",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -339,6 +351,7 @@ cc_library(
         ":tokenizer",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
     ],
 )
 

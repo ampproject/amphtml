@@ -6,6 +6,7 @@
 #endif               // DUMP_NODES
 
 #include "absl/flags/flag.h"
+#include "absl/status/status.h"
 #include "cpp/htmlparser/atomutil.h"
 #include "cpp/htmlparser/comparators.h"
 #include "cpp/htmlparser/defer.h"
@@ -15,12 +16,7 @@
 #include "cpp/htmlparser/parser.h"
 #include "cpp/htmlparser/strings.h"
 
-ABSL_FLAG(uint32_t, htmlparser_max_nodes_depth_count, 245,
-          "Maximum depth of open nodes. "
-          "For: <a><b><c><d></d></c></b/></a>, the stack size is 4 as <a> is "
-          "kept open until three elements <b>,<c> and <d> are closed. "
-          "For: <a>a</a><b>b</b><c>c</c><d>d</d> the depth is 1 as they are "
-          "closed immediately after one child element.");
+ABSL_RETIRED_FLAG(uint32_t, htmlparser_max_nodes_depth_count, 245, "retired");
 
 namespace htmlparser {
 
@@ -85,16 +81,14 @@ std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
 
   auto doc = parser->Parse();
 
-  // doc could be nullptr when, for example, the stack depth >
-  // htmlparser_max_nodes_depth_count).
-  if (doc == nullptr) return nullptr;
-
-  Node* parent = fragment_parent ? root : doc->root_node_;
-  for (Node* c = parent->FirstChild(); c;) {
-    Node* next = c->NextSibling();
-    doc->fragment_nodes_.push_back(std::move(c));
-    parent->RemoveChild(c);
-    c = next;
+  if (doc->status().ok()) {
+    Node* parent = fragment_parent ? root : doc->root_node_;
+    for (Node* c = parent->FirstChild(); c;) {
+      Node* next = c->NextSibling();
+      doc->fragment_nodes_.push_back(std::move(c));
+      parent->RemoveChild(c);
+      c = next;
+    }
   }
 
   return doc;
@@ -134,13 +128,6 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
 std::unique_ptr<Document> Parser::Parse() {
   bool eof = tokenizer_->IsEOF();
   while (!eof) {
-    if (open_elements_stack_.size() >
-        ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)) {
-      // Skipping parsing. Document too complex.
-      delete document_.release();
-      return nullptr;
-    }
-
     Node* node = open_elements_stack_.Top();
     tokenizer_->SetAllowCDATA(node && !node->name_space_.empty());
     // Read and parse the next token.
@@ -150,7 +137,9 @@ std::unique_ptr<Document> Parser::Parse() {
     if (token_type == TokenType::ERROR_TOKEN) {
       eof = tokenizer_->IsEOF();
       if (!eof && tokenizer_->Error()) {
-        return nullptr;
+        document_->status_ = absl::InvalidArgumentError(
+            "htmlparser::Parser tokenizer error.");
+        return std::move(document_);
       }
     }
     token_ = tokenizer_->token();
@@ -1119,7 +1108,7 @@ bool Parser::AfterHeadIM() {
 }  // Parser::AfterHeadIM.
 
 // Section 12.2.6.4.7.
-bool Parser::InBodyIM() {
+bool Parser::InBodyIM() {  // NOLINT
   switch (token_.token_type) {
     case TokenType::TEXT_TOKEN: {
       std::string d = token_.data;
@@ -1751,7 +1740,8 @@ bool Parser::InBodyIM() {
   }
 
   return true;
-}  // Parser::InBodyIM.
+}  // NOLINT(readability/fn_size)
+// Parser::InBodyIM end.
 
 void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
   // This is the "adoption agency" algorithm, described at
