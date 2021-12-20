@@ -83,6 +83,9 @@ class PaginationButton {
 
     /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(doc);
   }
 
   /** @param {!PaginationButtonStateDef} state */
@@ -90,12 +93,14 @@ class PaginationButton {
     if (state === this.state_) {
       return;
     }
-    this.element.classList.remove(this.state_.className);
-    this.element.classList.add(state.className);
-    this.buttonElement_.setAttribute(
-      'aria-label',
-      localize(this.win_.document, state.label)
-    );
+    this.mutator_.mutateElement(this.element, () => {
+      this.element.classList.remove(this.state_.className);
+      this.element.classList.add(state.className);
+      this.buttonElement_.setAttribute(
+        'aria-label',
+        localize(this.win_.document, state.label)
+      );
+    });
 
     this.state_ = state;
   }
@@ -105,6 +110,19 @@ class PaginationButton {
    */
   getState() {
     return this.state_;
+  }
+
+  /** @param {boolean} isEnabled */
+  setEnabled(isEnabled) {
+    this.mutator_.mutateElement(this.element, () => {
+      this.element.classList.toggle(
+        'i-amphtml-story-button-hidden',
+        !isEnabled
+      );
+      this.element
+        .querySelector('button')
+        ?.toggleAttribute('disabled', !isEnabled);
+    });
   }
 
   /**
@@ -195,9 +213,7 @@ export class PaginationButtons {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      (isVisible) => {
-        this.onSystemUiIsVisibleStateUpdate_(isVisible);
-      }
+      (isVisible) => this.onSystemUiIsVisibleStateUpdate_(isVisible)
     );
   }
 
@@ -209,7 +225,7 @@ export class PaginationButtons {
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
 
     // Hide back button if no previous page.
-    this.setEnabled_(this.backButton_, pageIndex > 0);
+    this.backButton_.setEnabled(pageIndex > 0);
 
     if (pageIndex < totalPages - 1) {
       this.forwardButton_.updateState(ButtonStates.NEXT_PAGE);
@@ -224,24 +240,12 @@ export class PaginationButtons {
   }
 
   /**
-   * Updates element based on visibility state.
-   * @param {!PaginationButton} paginationButton
-   * @param {boolean} isVisible
-   * @private
-   */
-  setEnabled_(paginationButton, isVisible) {
-    const {element} = paginationButton;
-    element.classList.toggle('i-amphtml-story-button-hidden', !isVisible);
-    element.querySelector('button')?.toggleAttribute('disabled', !isVisible);
-  }
-
-  /**
    * Reacts to system UI visibility state updates.
    * @param {boolean} isVisible
    * @private
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
-    this.setEnabled_(this.backButton_, isVisible);
-    this.setEnabled_(this.forwardButton_, isVisible);
+    this.backButton_.setEnabled(isVisible);
+    this.forwardButton_.setEnabled(isVisible);
   }
 }
