@@ -425,6 +425,7 @@ export class SubscriptionService {
    */
   getEntitlements_(platform) {
     return platform.getEntitlements().then((entitlements) => {
+      // debugger;
       if (
         entitlements &&
         entitlements.granted &&

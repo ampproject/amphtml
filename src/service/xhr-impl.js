@@ -91,6 +91,7 @@ export class Xhr {
   fetchAmpCors_(input, init = {}) {
     input = setupInput(this.win, input, init);
     init = setupAMPCors(this.win, input, init);
+    console.log('fetch amp cors: ' + JSON.stringify(init));
     return this.fetch_(input, init).then(
       (response) => response,
       (reason) => {
@@ -167,6 +168,7 @@ export class Xhr {
    */
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
+    console.log('fetch init: ' + JSON.stringify(init));
     return this.fetchAmpCors_(input, init).then((response) =>
       assertSuccess(response)
     );

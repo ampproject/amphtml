@@ -1,0 +1,364 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
+
+    <!-- <script async custom-element="amp-story"
+        src="http://localhost:8000/dist/v0/amp-story-0.1.max.js"></script> -->
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <!-- <script
+        async
+        custom-element="amp-subscriptions-google"
+        src="http://localhost:8000/dist/v0/amp-subscriptions-google-0.1.max.js">
+    </script> -->
+    <script
+      async
+      custom-element="amp-subscriptions-google"
+      src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"
+    ></script>
+    <!-- <script async custom-element="amp-story-subscription" src="http://localhost:8000/dist/v0/amp-story-subscription-0.1.max.js"></script> -->
+    <script async custom-element="amp-story-subscription" src="https://cdn.ampproject.org/v0/amp-story-subscription-0.1.js"></script>
+
+    
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
+    <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700" rel="stylesheet">
+
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "isAccessibleForFree": "False",
+        "isPartOf": {
+          "@type": ["CreativeWork", "Product"],
+          "name" : "Product A",
+          "productID": "scenic-2017.appspot.com:news"
+        }
+      }
+    </script>
+
+    <!-- <script type="application/json" id="amp-subscriptions">
+      {
+        "services": [
+          {
+            "authorizationUrl": "https://amp-paywall-demo.web.app/subscriptions/amp-story/entitlements?pubid=scenic-2017.appspot.com&rid=READER_ID",
+            "pingbackUrl": "https://scenic-2017.appspot.com/amp-pingback?pubid=scenic-2017.appspot.com",
+            "actions":{
+              "login": "https://amp-paywall-demo.web.app/subscriptions/amp-story/signin?rid=READER_ID",
+              "subscribe": "https://amp-paywall-demo.web.app/subscriptions/amp-story/signin?rid=READER_ID"
+            }
+          },
+          {
+            "serviceId": "subscribe.google.com"
+          }
+        ]
+      }
+    </script> -->
+    
+    <!-- <script type="application/json" id="amp-subscriptions">
+      {
+        "services": [
+          {
+            "authorizationUrl": "https://scenic-2017.appspot.com/amp-entitlements?pubid=scenic-2017.appspot.com&meter=1&rid=READER_ID",
+            "pingbackUrl": "https://scenic-2017.appspot.com/amp-pingback?pubid=scenic-2017.appspot.com",
+            "actions":{
+              "login": "https://scenic-2017.appspot.com/signin?rid=READER_ID",
+              "subscribe": "https://scenic-2017.appspot.com/subscribe"
+            }
+          },
+          {
+            "serviceId": "subscribe.google.com"
+          }
+        ]
+      }
+    </script> -->
+
+    <script type="application/json" id="amp-subscriptions">
+      {
+        "services": [
+          {
+            "authorizationUrl": "//localhost:8001/amp-entitlements?pubid=scenic-2017.appspot.com&meter=1&rid=READER_ID",
+            "pingbackUrl": "https://scenic-2017.appspot.com/amp-pingback?pubid=scenic-2017.appspot.com",
+            "actions":{
+              "login": "//localhost:8001/signin?rid=READER_ID",
+              "subscribe": "https://scenic-2017.appspot.com/subscribe"
+            }
+          },
+          {
+            "serviceId": "subscribe.google.com"
+          }
+        ]
+      }
+    </script>
+
+    <!-- "authorizationUrl": "//localhost:8000/subscription/0/entitlements", -->
+    <!-- "login": "https://scenic-2017.appspot.com/signin?rid=READER_ID", -->
+
+    <!-- <script type="application/json" cryptokeys="">
+      {
+        "google.com": "ALElAs5wWqRUfDtCFP0xv9vByzTZ/cgP7aLPO+ROmoQxbTUh9rnDLeCU8qqVAPYpIakur71hwxRTNlyqn9AC+ECgJTlFw/ZN6edqd952rrJ13WlEmGUa3+MmaXplGN+to29dlD0SSMmJsOexPJNig8E62zyo/YV0tngr41Rq1EHMuuZvGfGm+HfvggeuO5Lfv8sCSbYZeZDh4JT0qgBJIWcM3D2jcymiHJr1N4L8E6fXM6A+eccj5Y8=",
+        "local": "ABmKBJWqE5RpZAoerpchoobpRpSDJFfCAeZZomD+7gn+LqE4HWbx5XieQtLDu7pv0rGXC/U6/cxCX9SJtn/egg9NHzQgKlR1gLb88GDWpsWpwHnx8798rjpYXwRiCvNs7qUC5nV/FV0bGhg7suqX0ajNw70wcWEtDyWe+pFN2+fOXKXnO3VkuzI5k71bIx1OD2yamOvgIdSn7N7OE87Z3gBZCqFm0X11uWwISH8Qw2gIxO7g/XXWFAU="
+      }
+    </script> -->
+
+    <!-- <script cryptokeys type="application/json">
+      {
+        "google.com": "ENCRYPT({\"accessRequirements\": [\"norcal.com:premium\"], \"key\":\"aBcDef781-2-4/sjfdi\"})",
+        "local": "ENCRYPT({\"accessRequirements\": [\"whateveryouwant:12\"], \"key\":\"0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ=\"})"
+      }
+    </script> -->
+
+    <title>My Story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="helloworld.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: white;
+      }
+      h1 {
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+        color: #FFFFFF;
+      }
+      p {
+        font-family: Poppins;
+        color: #FFFFFF;
+      }
+      .top {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        background: green;
+      }
+      .cover-title {
+        position: absolute;
+        width: 80%;
+        height: 117px;
+        left: 10%;
+        right: 10%;
+        top: 450px;
+
+        /* display: flex; */
+        align-items: center;
+        text-align: center;
+        letter-spacing: 0.5px;
+
+        color: #FFFFFF;
+      }
+      .cover-title p {
+        display: block;
+        font-family: Playfair Display;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 50px;
+        line-height: 54px;
+      }
+      .cover-subtitle {
+        position: absolute;
+        width: 80%;
+        left: 10%;
+        right: 10%;
+        height: 44px;
+        top: 565px;
+      }
+      .cover-subtitle p {
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 20px;
+        /* or 143% */
+
+        display: flex;
+        align-items: center;
+        text-align: center;
+        letter-spacing: 1px;
+
+        color: #FFFFFF;
+      }
+      #page-1 .text-section {
+        background: linear-gradient(0deg, #483614, #483614);
+        height: 384px;
+      }
+      #page-2 .text-section {
+        background: #8B2B30;
+        height: 292px;
+      }
+      #page-3 .text-section {
+        background: #324B3C;
+        height: 332px;
+      }
+      .text-section {
+        position: absolute;
+        width: 90%;
+        /* height: 30%; */
+        left: 5%;
+        right: 5%;
+        bottom: 5%;
+        margin: auto;
+      } 
+      .text-section h3 {
+        margin-top: 28px;
+        margin-left: 28px;
+        margin-right: 28px;
+        
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 12px;
+        line-height: 16px;
+
+        align-items: center;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+
+        color: #FFFFFF;
+      }
+      .text-section p {
+        margin-top: 14px;
+        margin-left: 14px;
+        margin-right: 14px;
+
+        font-family: Poppins;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 12px;
+        line-height: 20px;
+        /* or 167% */
+
+        letter-spacing: 0.5px;
+
+        color: #FFFFFF;
+      }
+      .text {
+        font-size: 1em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone>
+
+      <amp-story-page id="cover" auto-advance-after="5s">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="img/story-cover.jpeg"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <!-- <amp-story-grid-layer template="vertical">
+          <h1>Cover</h1>
+          <p>This is the cover page of this story.</p>   
+        </amp-story-grid-layer> -->
+        <amp-story-grid-layer class="box" aspect-ratio="9:16">
+          <!-- <div class="top"></div> -->
+          <div class="cover-title"><p>Amazing</p><p>Kyoto</p></div>
+          <div class="cover-subtitle"><p>Modern culture meets ancient traditions and beauty</p></div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-1" auto-advance-after="5s" subscriptions-section="content">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="img/story-page1.jpeg"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <!-- <amp-story-grid-layer template="vertical">
+          <h1>First Page</h1>
+          <p>This is the first page of this story.</p>
+          <amp-img src="https://picsum.photos/1600/900?image=110"
+              width="400"
+              height="225"></amp-img>
+        </amp-story-grid-layer> -->
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>Amazing Kyoto</h3>
+            <p>Kyoto is a true embodiment of Old Japan awash with beautiful vestiges of its past glory. Beyond the futuristic Kyoto Station, modern shopping complexes, and sleek luxury hotels, lies a city with celebrated centuries-old wonders, breathtaking temples, serene Zen gardens, narrow cobbled alleyways, bustling markets and a vibrant nightlife.</p>
+            <p>By effortlessly blending the past and present, Kyoto is poised to be an alluring destination for history buffs and art lovers, gourmands, and outdoor enthusiasts. —Nano Betts</p>  
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2" auto-advance-after="5s" subscriptions-section="content">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="img/story-page2.jpeg"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <!-- <amp-story-grid-layer template="vertical">
+          <h1>[Locked]</h1>
+          <h1>Second Page</h1>
+          <p>This is a locked content. You have to subscribe to see this.</p>
+        </amp-story-grid-layer> -->
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>arashiyama</h3>
+            <p>The rolling foothills of Arashiyama are home to the iconic Sagano Bamboo Forest. The verdant grove is accessed via the 14th-century Buddhist temple Tenryu-ji. A unique serenity is experienced from the wind rustling through the soaring trees making a zawa zawa sound and the filtered sunlight filling the space with a tranquil green glow.</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3" subscriptions-section="content">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="img/story-page3.jpeg"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <!-- <amp-story-grid-layer template="vertical">
+          <h1>[Locked]</h1>
+          <h1>Thrid Page</h1>
+          <p>This is a locked content. You have to subscribe to see this</p>
+        </amp-story-grid-layer> -->
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>Cultral Experiences</h3>
+            <p>As a birthplace of Sado, or Japanese tea ceremony, the historic neighborhoods of Gion and Higashiyama are perfect places to visit machiyas and learn about the ancient art of tea-making. During the ritual performed on a tatami floor by a professional tea master, you'll have a chance to learn about the philosophy and etiquette of drinking tea, as well as master the basics of making matcha.</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+
+    <amp-story-subscription>
+        <div subscriptions-dialog subscriptions-display="NOT granted">
+          <div class="i-amphtml-story-subscription-header"><div class="i-amphtml-story-subscription-header-title"><span style="text-decoration-line: line-through; margin-right: 10px;">$2</span>$0.50/week</div></div>
+          <div class="i-amphtml-story-subscription-desc-title">Culture at your fingertips</div>
+          <div class="i-amphtml-story-subscription-desc-content">Subscribe for unlimited access.<br>Cancel anytime.</div>
+          <div class="i-ampthml-story-subscription-button-container"> 
+            <div class="i-ampthml-story-subscription-button-google" subscriptions-action="subscribe"
+              subscriptions-display="NOT granted"
+              subscriptions-service="subscribe.google.com"
+              subscriptions-decorate>
+                Subscribe
+            </div>
+            <div class="i-amphtml-story-subscription-button-publisher" subscriptions-action="subscribe" subscriptions-display="NOT granted" class="i-amphtml-subs-display">
+                 <div class="publisher-button-text">Subscribe</div>
+                <img src="img/story-3p-icon.png" style="width: 27px; height: 27px;">
+            </div>
+          </div>
+          <div class="i-amphtml-story-subscription-signin">Already a subscriber? <a subscriptions-action="login" subscriptions-display="NOT granted">Sign in.</a></div>
+        </div>
+    </amp-story-subscription>
+  </body>
+</html>

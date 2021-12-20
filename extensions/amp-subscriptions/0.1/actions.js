@@ -55,6 +55,7 @@ export class Actions {
         this.urlBuilder_
           .buildUrl(this.actionsConfig_[k], /* useAuthData */ true)
           .then((url) => {
+            console.log('action built url: ' + url);
             this.builtActionUrlMap_[k] = url;
           })
       );
@@ -81,6 +82,7 @@ export class Actions {
       action
     );
     console.log('before executing action: ' + action);
+    console.log('action url: ' + url);
     return this.execute_(url, action);
   }
 

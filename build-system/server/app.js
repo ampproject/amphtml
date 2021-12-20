@@ -38,6 +38,7 @@ const {
 } = require('./recaptcha-router');
 const {logWithoutTimestamp} = require('../common/logging');
 const {log} = require('../common/logging');
+const {none} = require('../compile/compile-wrappers');
 const {red} = require('kleur/colors');
 const {renderShadowViewer} = require('./shadow-viewer');
 
@@ -1262,6 +1263,121 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   res.json(response);
 });
 
+const DECRYPTED_DOCUMENT_KEY = 'd4ZoJQJLWrV6DiF9oI40fw==';
+const AUTH_COOKIE = 'AMP_STORY_PAYWALL_AUTH';
+// needed for parsing the cookie
+app.use(require('cookie-parser')());
+
+/**
+ * Maps AMP reader IDs to emails from Google Sign-In.
+ * @type {{ [ampReaderId: string]: string }}
+ */
+const ampReaderIdToEmailMap = {};
+
+/**
+ * @param {!HttpRequest} req
+ * @param {string} name
+ * @return {?string}
+ */
+function getParam(req, name) {
+  return req.query[name] || (req.body && req.body[name]) || null;
+}
+
+/**
+ * Returns subscriber.
+ * @param {!HttpRequest} req
+ * @return {?string}
+ * @private
+ */
+function getUserInfoFromCookies(req) {
+  console.log('getting user info. cookie: ' + JSON.stringify(req.cookies));
+  const cookie = req.cookies && req.cookies[AUTH_COOKIE];
+  console.log('getting user info. auth: ' + cookie);
+  if (!cookie) {
+    return null;
+  }
+  return cookie;
+}
+
+/**
+ * Sets user email in the cookie.
+ * @param {!HttpResponse} res
+ * @param {string} email
+ * @private
+ */
+function setUserInfoInCookies(res, email) {
+  res.clearCookie(AUTH_COOKIE);
+  if (email) {
+    res.cookie(AUTH_COOKIE, email, {
+      maxAge: /* 60 minutes */ 1000 * 60 * 60,
+      sameSite: 'none',
+      secure: true,
+    });
+    console.log(
+      'after setting cookie: ' + JSON.stringify(res.cookie(AUTH_COOKIE))
+    );
+  }
+}
+
+/**
+ * AMP entitlements request.
+ */
+app.get('/subscriptions/amp-story/entitlements', (req, res) => {
+  console.log('getting entitlement. cookie: ' + req.headers.cookies);
+  // Add headers.
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader(
+    'Access-Control-Expose-Headers',
+    'AMP-Access-Control-Allow-Source-Origin'
+  );
+  res.setHeader('Content-Type', 'application/json');
+  if (req.query.__amp_source_origin) {
+    res.setHeader(
+      'AMP-Access-Control-Allow-Source-Origin',
+      req.query.__amp_source_origin
+    );
+  }
+
+  // Support AMP reader IDs.
+  // This works on the AMP cache.
+  // TODO(ychsieh): verify it works on AMP cache.
+  const ampReaderId = req.query.rid;
+  const emailFromAmpReaderId = ampReaderIdToEmailMap[ampReaderId];
+  if (emailFromAmpReaderId) {
+    console.log(
+      `Granting access to ${emailFromAmpReaderId} based on their AMP reader ID.`
+    );
+    res.json({
+      'granted': true,
+      'decryptedDocumentKey': DECRYPTED_DOCUMENT_KEY,
+      'reason': 'AMP reader ID gives entitlements',
+    });
+    return;
+  }
+
+  // Support entitlements from 1p cookies.
+  // This doesn't work on the AMP cache.
+  const cookieHasEntitlements = getUserInfoFromCookies(req);
+  if (cookieHasEntitlements) {
+    console.log('found 1P cookie is set so granting the access!');
+    res.json({
+      'granted': true,
+      'decryptedDocumentKey': DECRYPTED_DOCUMENT_KEY,
+      'reason': '1p cookie gives entitlements',
+    });
+    return;
+  } else {
+    console.log('no 1P cookie found!');
+  }
+
+  // Default to an empty response.
+  res.json({
+    'granted': false,
+    'reason': 'default response',
+  });
+});
+
 /**
  * @param {string} returnUrl
  * @return {string}
@@ -1283,21 +1399,66 @@ function cleanupReturnUrl(returnUrl) {
   return returnUrl;
 }
 
-const googleSignInClientId =
-  process.env.GSI_CLIENT_ID ||
-  '520465458218-e9vp957krfk2r0i4ejeh6aklqm7c25p4.apps.googleusercontent.com';
+// needed to parse the post body.
+app.use(bodyParser.urlencoded({extended: true}));
+
+// needed to have the simple html as the template engine
+app.set('view engine', 'html');
+app.engine('html', require('hogan-express'));
+app.locals.delimiters = '<% %>';
+app.set('views', path.join(__dirname, 'views'));
 
 /**
  * Signin page. Format:
  * /signin?return=RETURN_URL
  */
-app.use('/subscriptions/login', (req, res) => {
+app.get('/subscriptions/amp-story/signin', (req, res) => {
+  console.log('signin request return param: ' + req.query['return']);
   const returnUrl = cleanupReturnUrl(req.query['return'] || null);
-  res.render('../paywall-login', {
-    'type_signin': true,
+  res.render('amp-story-paywall-signin', {
     'returnUrl': returnUrl,
-    googleSignInClientId,
   });
+});
+
+/**
+ * Logs-in user on the publication's domain and redirects to the referrer.
+ * Also sets the authorized user's email in the cookie.
+ */
+app.post('/subscriptions/amp-story/signin', (req, res) => {
+  debugger;
+  // console.log('request: ' + JSON.stringify(req));
+  console.log('request query: ' + JSON.stringify(req.query));
+  console.log('request body: ' + JSON.stringify(req.body));
+  console.log('signin post request returnUrl: ' + req.query['returnUrl']);
+  const returnUrl = cleanupReturnUrl(getParam(req, 'returnUrl'));
+  const email = req.body['email'];
+  const password = req.body['password'];
+  const idToken = req.body['id_token'];
+  if ((!email || !password) && !idToken) {
+    throw new Error('Missing email and/or password');
+  }
+  // if (idToken) {
+  //   // TODO(dvoytenko): verify token as well.
+  //   const jwt = jsonwebtoken.decode(idToken);
+  //   email = jwt['email'];
+  // }
+
+  const ampReaderId = req.body.rid;
+  if (ampReaderId) {
+    // Remember this AMP reader ID has entitlements to content.
+    // This supports articles on the AMP cache. Entitlements requests from AMP
+    // will include the AMP reader ID as a URL param (`rid`).
+    console.log(`Registering ${email} based on their AMP reader ID.`);
+    ampReaderIdToEmailMap[ampReaderId] = email;
+  } else {
+    // Save a 1p cookie that entitles the user to content.
+    // This doesn't support articles on the AMP cache, since
+    // it would then be a 3rd party cookie, which browsers won't send.
+    setUserInfoInCookies(res, email);
+  }
+
+  console.log('redirect to return url: ' + returnUrl);
+  res.redirect(302, returnUrl);
 });
 
 // Simulate a publisher's SKU map API.

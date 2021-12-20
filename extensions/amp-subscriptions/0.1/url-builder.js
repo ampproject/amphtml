@@ -32,6 +32,7 @@ export class UrlBuilder {
    * @return {!Promise<string>}
    */
   buildUrl(url, useAuthData) {
+    console.log('building url for action with url: ' + url);
     return this.prepareUrlVars_(useAuthData).then((vars) => {
       return this.urlReplacements_.expandUrlAsync(url, vars);
     });

@@ -113,6 +113,7 @@ export class WebLoginDialog {
    * @param {string|!Promise<string>} urlOrPromise
    */
   constructor(win, viewer, urlOrPromise) {
+    console.log('urlOrPromise in login-dialog: ' + urlOrPromise);
     /** @const {!Window} */
     this.win = win;
 
@@ -260,6 +261,7 @@ export class WebLoginDialog {
    * @private
    */
   setupDialog_(returnUrl) {
+    console.log('setting up dialog in amp-access. return url: ' + returnUrl);
     const returnOrigin = parseUrlDeprecated(returnUrl).origin;
 
     this.heartbeatInterval_ = this.win.setInterval(() => {

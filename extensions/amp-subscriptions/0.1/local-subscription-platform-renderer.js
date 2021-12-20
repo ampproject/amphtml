@@ -79,7 +79,7 @@ export class LocalSubscriptionPlatformRenderer {
           const candidate = candidates[i];
           const expr = candidate.getAttribute('subscriptions-display');
           console.log('subscription dialog display: ' + expr);
-          debugger;
+          // debugger;
           if (expr && evaluateExpr(expr, authResponse)) {
             console.log('found matched dialog candidate!');
             return candidate;

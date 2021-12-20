@@ -5,6 +5,7 @@ import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {isArray} from '#core/types';
+// import {debug} from 'console';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -69,6 +70,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
           //TODO(chenshay): if crypt, switch to 'post'
           fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
         }
+        console.log('fetching entitlement from url: ' + fetchUrl);
         return this.xhr_
           .fetchJson(fetchUrl, {credentials: 'include'})
           .then((res) => res.json())
@@ -82,9 +84,14 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
               );
             }
 
-            return Promise.all(promises).then(() =>
-              Entitlement.parseFromJson(resJson)
-            );
+            return Promise.all(promises).then(() => {
+              const res = Entitlement.parseFromJson(resJson);
+              // debugger;
+              console.log(
+                'parsed JSON to entitlement. granted: ' + res.granted
+              );
+              return res;
+            });
           });
       }
     );

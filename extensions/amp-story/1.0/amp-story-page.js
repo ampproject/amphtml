@@ -427,6 +427,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {!PageState} state
    */
   setState(state) {
+    console.log('setting state: ' + JSON.stringify(state));
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
@@ -454,6 +455,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.state_ = state;
         break;
       case PageState.PAUSED:
+        console.log('setState when the page state is paused');
         this.advancement_.stop(true /** canResume */);
         this.pauseAllMedia_(false /** rewindToBeginning */);
         this.animationManager_?.pauseAll();
@@ -469,6 +471,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   pause_() {
+    console.log('trying to pause so stop the advancement');
     this.advancement_.stop(false /** canResume */);
 
     this.stopMeasuringAllVideoPerformance_();

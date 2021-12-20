@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>The Scenic</title>
+    <link rel="canonical" href="index.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Playfair+Display"
+      type="text/css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Muli"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="/styles.css" type="text/css" />
+    <link rel="icon" type="image/png" href="/icons/icon-2x.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-2x.png" />
+    <meta name="msapplication-TileImage" content="/icons/icon-2x.png" />
+    <meta name="msapplication-TileColor" content="#37dc8c" />
+
+    <style>
+      .container {
+        font-size: 16px;
+        line-height: 1.4em;
+      }
+      h2 {
+        margin-bottom: 16px;
+      }
+      input {
+        border: 1px solid #ddd;
+        border-radius: 3px;
+      }
+      .input-container {
+        display: flex;
+        flex-direction: row;
+        padding: 5px;
+        height: 35px;
+        max-width: 300px;
+      }
+      .input-container span {
+        flex: 1;
+      }
+      .input-container input,
+      .input-container .input {
+        flex: 2;
+      }
+      section {
+        margin: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-body">
+      <header>
+        <a class="brand-header" href="/">
+          <div class="brand-logo"></div>
+          <div class="brand-name">The Scenic</div>
+        </a>
+      </header>
+      <main role="main">
+        <div class="container">
+          <h2>Sign-in to Scenic</h2>
+
+          <section>
+            Use your username/password:
+            <form id="loginForm" action="./signin" method="post">
+              <input type="hidden" name="returnUrl" value="<% returnUrl %>" />
+              <input type="hidden" id="id_token" name="id_token" value="" />
+              <input type="hidden" id="rid" name="rid" value="" />
+              <div class="input-container">
+                <span>Email:</span>
+                <input name="email" type="email" required />
+              </div>
+              <div class="input-container">
+                <span>Password:</span>
+                <input name="password" type="password" required />
+              </div>
+              <div class="input-container">
+                <span></span>
+                <input type="submit" value="Submit" />
+              </div>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
