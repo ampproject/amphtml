@@ -177,7 +177,6 @@ module.exports = {
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
     'local/no-duplicate-import': 2,
-    'local/no-duplicate-name-typedef': 2,
     'local/no-dynamic-import': 2,
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,

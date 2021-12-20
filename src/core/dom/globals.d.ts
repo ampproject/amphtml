@@ -1,11 +1,25 @@
-/**
- * @fileoverview Externs for possible fullscreen properties browsers may attach
- * to Elements.
- * @externs
- */
-export {};
+import './amp-globals.d';
 
 declare global {
+  interface HTMLElement {
+    nonce?: string;
+
+    mozMatchesSelector?: (s: string) => boolean;
+    msMatchesSelector?: (s: string) => boolean;
+    oMatchesSelector?: (s: string) => boolean;
+  }
+
+  interface Element {
+    createShadowRoot: () => ShadowRoot;
+  }
+
+  interface Event {
+    // We assign an `Object` at times, though Typescript's dom lib supports
+    // string or null, so here we allow all three (plus unedfined).
+    data?: Object | string | null;
+  }
+
+  // Fullscreen proprties
   interface Element {
     requestFullScreen: any;
     exitFullscreen: any;

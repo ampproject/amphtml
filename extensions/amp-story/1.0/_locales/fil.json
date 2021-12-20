@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Higit pa"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Kailangan mong i-enable ang amp-story experiment para makita ang content na ito."
   },
   "21": {
     "string": "Paumanhin, mukhang hindi sinusuportahan ng browser mo ang karanasang ito"
@@ -68,9 +62,6 @@
   "35": {
     "string": "Mag-swipe pataas"
   },
-  "62": {
-    "string": "Ibahagi simula sa page na ito"
-  },
   "63": {
     "string": "Line"
   },
@@ -91,9 +82,6 @@
   },
   "69": {
     "string": "Ibahagi ang kwento"
-  },
-  "70": {
-    "string": "I-toggle ang menu ng kwento"
   },
   "71": {
     "string": "A"
@@ -127,9 +115,6 @@
   },
   "81": {
     "string": "Tip"
-  },
-  "82": {
-    "string": "Nakaraang page"
   },
   "83": {
     "string": "I-activate"

@@ -23,8 +23,17 @@ declare global {
     ensureLoaded: () => Promise<void>;
   }
 
+  interface AmpForm {}
+
   interface HTMLElement {
     __AMP_UPG_PRM?: Promise<AmpElement>;
     __AMP_UPG_RES?: (res: Function) => void;
+
+    // Used by modal.js to keep track of the saved tab on an element.
+    __AMP_MODAL_SAVED_TAB_INDEX?: string | null;
+
+    // Used by extensions/amp-form/0.1 and src/core/form.js.
+    // TODO(wg-performance): move to extensions/amp-form, as it is the only consumer.
+    __AMP_FORM: AmpForm;
   }
 }
