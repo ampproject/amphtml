@@ -5,6 +5,12 @@ import * as Preact from '#preact';
 
 import {BentoDatePicker} from '../component';
 
+// TODO(becca-bailey): fix this
+// This is necessary in order to stub React for external libraries
+// (like react-day-picker) that depend on React
+// eslint-disable-next-line no-undef
+const React = require('react');
+
 const DEFAULT_PROPS = {
   layout: 'fixed-height',
   height: 360,
@@ -16,6 +22,11 @@ function DatePicker(props = {}) {
 }
 
 describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
+  // See require('react') comment above
+  beforeEach(() => {
+    env.sandbox.stub(React);
+  });
+
   it('should render', () => {
     const wrapper = mount(<DatePicker />);
 
@@ -159,7 +170,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in static mode for a single date', () => {
-    xit('shows the calendar view by default', () => {
+    it('shows the calendar view by default', () => {
       const wrapper = mount(
         <DatePicker
           type="single"
