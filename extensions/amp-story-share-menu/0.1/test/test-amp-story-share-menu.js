@@ -95,12 +95,4 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     expect(clickCallbackSpy).to.have.been.calledOnce;
   });
-
-  it('should load the amp-social-share extension', () => {
-    shareMenu.build();
-
-    expect(
-      installExtensionForDoc.withArgs(env.sandbox.match.any, 'amp-social-share')
-    ).to.have.been.called;
-  });
 });
