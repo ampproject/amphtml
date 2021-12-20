@@ -99,13 +99,14 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * Builds and appends the component in the story. Could build either the
    * amp-social-share button to display the native system sharing, or a fallback
    * UI.
+   * @return {!Promise}
    */
   buildCallback() {
     if (this.rootEl_) {
       return;
     }
 
-    Promise.all([
+    return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then(
         (service) => (this.storeService_ = service)
       ),
