@@ -318,7 +318,7 @@ describes.sandboxed('Viewer', {}, (env) => {
     return promise;
   });
 
-  // TODO(#): Fix failing test
+  // TODO(#37245): Fix failing test
   it.skip('should initialize firstVisibleTime when doc becomes visible', () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
