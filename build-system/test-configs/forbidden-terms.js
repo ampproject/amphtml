@@ -462,6 +462,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments/index.js',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',
       'testing/init-tests.js',
       'testing/fake-dom.js',
@@ -587,8 +588,6 @@ const forbiddenTermsGlobal = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/core/assert/base.js', // Has actual implementation of assertElement.
-      'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
       'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
@@ -608,10 +607,7 @@ const forbiddenTermsGlobal = {
   '\\b(__)?AMP_EXP\\b': {
     message:
       'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: [
-      'src/experiments/index.js',
-      'src/experiments/experiments.extern.js',
-    ],
+    allowlist: ['src/experiments/index.js'],
   },
   'AMP_CONFIG': {
     message:
@@ -632,9 +628,7 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'src/config.js',
-      'src/core/window/window.extern.js',
       'src/experiments/index.js',
-      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/core/mode/test.js',
       'src/core/mode/local-dev.js',
@@ -853,6 +847,7 @@ const forbiddenTermsSrcInclusive = {
       'use tryDecodeUriComponent from src/url.js',
     allowlist: [
       '3p/integration-lib.js',
+      'build-system/release-tagger/index.js',
       'examples/pwa/pwa.js',
       'validator/js/engine/parse-url.js',
       'validator/js/engine/validator.js',
@@ -1045,7 +1040,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
       'extensions/amp-script/0.1/amp-script.js',
-      'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
   'onLayoutMeasure': {
@@ -1063,7 +1057,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'extensions/amp-script/0.1/amp-script.js',
-      'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
   '\\.getIntersectionElementLayoutBox': {

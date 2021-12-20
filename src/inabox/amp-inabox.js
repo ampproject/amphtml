@@ -3,7 +3,7 @@
  */
 
 import '#polyfills';
-import {TickLabel} from '#core/constants/enums';
+import {TickLabel_Enum} from '#core/constants/enums';
 import * as mode from '#core/mode';
 
 import {Services} from '#service';
@@ -66,7 +66,7 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  perf.tick(TickLabel.INSTALL_STYLES);
+  perf.tick(TickLabel_Enum.INSTALL_STYLES);
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
   installStylesForDoc(
@@ -107,7 +107,7 @@ startupChunk(self.document, function initial() {
         /* makes the body visible */ true
       );
       startupChunk(self.document, function finalTick() {
-        perf.tick(TickLabel.END_INSTALL_STYLES);
+        perf.tick(TickLabel_Enum.END_INSTALL_STYLES);
         Services.resourcesForDoc(ampdoc).ampInitComplete();
         // TODO(erwinm): move invocation of the `flush` method when we have the
         // new ticks in place to batch the ticks properly.

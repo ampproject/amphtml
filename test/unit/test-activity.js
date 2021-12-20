@@ -9,6 +9,8 @@ import {installViewerServiceForDoc} from '#service/viewer-impl';
 import {installViewportServiceForDoc} from '#service/viewport/viewport-impl';
 import {installVsyncService} from '#service/vsync-impl';
 
+import {FakePerformance} from '#testing/fake-dom';
+
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 
 describes.sandboxed('Activity getTotalEngagedTime', {}, (env) => {
@@ -76,6 +78,7 @@ describes.sandboxed('Activity getTotalEngagedTime', {}, (env) => {
       addEventListener: () => {},
       removeEventListener: () => {},
       Promise: window.Promise,
+      performance: new FakePerformance(window),
     };
     fakeDoc.defaultView = fakeWin;
     fakeDoc.head.defaultView = fakeWin;
@@ -301,6 +304,7 @@ describes.sandboxed('Activity getIncrementalEngagedTime', {}, (env) => {
       addEventListener: () => {},
       removeEventListener: () => {},
       Promise: window.Promise,
+      performance: new FakePerformance(window),
     };
     fakeDoc.defaultView = fakeWin;
     fakeDoc.head.defaultView = fakeWin;

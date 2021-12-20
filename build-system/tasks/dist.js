@@ -5,6 +5,7 @@ const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
+  compileBentoRuntime,
   compileCoreRuntime,
   compileJs,
   endBuildStep,
@@ -119,6 +120,8 @@ async function dist() {
   // These steps use closure compiler. Small ones before large (parallel) ones.
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
+  } else if (argv.bento_runtime_only) {
+    await compileBentoRuntime(options);
   } else {
     await Promise.all([
       writeVersionFiles(),
@@ -136,6 +139,7 @@ async function dist() {
   // This step is to be run only during a full `amp dist`.
   if (
     !argv.core_runtime_only &&
+    !argv.bento_runtime_only &&
     !argv.extensions &&
     !argv.extensions_from &&
     !argv.noextensions
@@ -387,7 +391,7 @@ module.exports = {
   runPreDistSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 dist.description =
   'Compile AMP production binaries and apply AMP_CONFIG to runtime files';
@@ -398,12 +402,15 @@ dist.flags = {
     'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
+  nomanglecache:
+    'Do not share the mangle cache between binaries, useful only in estimating size impacts of code changes.',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   coverage: 'Instrument code for collecting coverage information',
   extensions: 'Build only the listed extensions',
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
+  bento_runtime_only: 'Build only the standalone Bento runtime',
   full_sourcemaps: 'Include source code content in sourcemaps',
   sourcemap_url: 'Set a custom sourcemap URL with placeholder {version}',
   type: 'Point sourcemap to fetch files from the correct GitHub tag',

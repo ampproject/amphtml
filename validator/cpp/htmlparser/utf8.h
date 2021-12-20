@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__UTF8_H_
-#define HTMLPARSER__UTF8_H_
+#ifndef CPP_HTMLPARSER_UTF8_H_
+#define CPP_HTMLPARSER_UTF8_H_
 
 #include <array>
 
@@ -131,4 +131,4 @@ static constexpr std::array<uint8_t, 16> k4ByteTrailByteValidity {
 }  // namespace htmlparser
 
 
-#endif  // HTMLPARSER__UTF8_H_
+#endif  // CPP_HTMLPARSER_UTF8_H_

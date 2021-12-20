@@ -110,7 +110,7 @@ async function fetchCoverage_(outDir) {
   // it can be accessed separately.
 
   // Clear out previous coverage data.
-  fs.rmdirSync(outDir, {recursive: true});
+  fs.rmSync(outDir, {recursive: true});
   fs.mkdirSync(outDir);
 
   const zipFilename = path.join(outDir, 'coverage.zip');

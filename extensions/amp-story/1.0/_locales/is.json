@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Fá tengil"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Meira"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Þú verður að virkja amp-story tilraunina til að skoða þetta efni."
   },
   "21": {
     "string": "Því miður virðist vafrinn þinn ekki styðja þetta efni"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Halda samt áfram"
   },
-  "31": {
-    "string": "Slökkt á hljóði"
-  },
-  "32": {
-    "string": "Kveikt á hljóði"
-  },
-  "33": {
-    "string": "Þessi síða hefur ekkert hljóð"
-  },
   "34": {
     "string": "Spila myndskeið"
   },
   "35": {
     "string": "Strjúktu upp"
-  },
-  "36": {
-    "string": "Stækka tíst"
-  },
-  "62": {
-    "string": "Deila frá og með þessari síðu"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Deila sögu"
-  },
-  "70": {
-    "string": "Sýna/fela söguvalmynd"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Ráð"
-  },
-  "82": {
-    "string": "Fyrri síða"
   },
   "83": {
     "string": "Virkja"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Opnast"
+  },
+  "98": {
+    "string": "Eyðublað ekki sent inn, reyndu aftur"
+  },
+  "99": {
+    "string": "Eyðublað sent inn"
   }
 }

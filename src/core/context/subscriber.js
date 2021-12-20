@@ -2,10 +2,22 @@ import {tryCallback} from '#core/error';
 import {arrayOrSingleItemToArray} from '#core/types/array';
 
 import {ContextNode} from './node';
-import {ContextPropDef} from './prop.type';
 import {throttleTail} from './scheduler';
 
+/**
+ * @template T, DEP
+ * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp
+ */
+/**
+ * @template DEP
+ * @typedef {(function(...DEP):void)
+ *          |(function(...DEP):(function():void))} SubscribeCallback
+ */
+
+/** @type {Array<*>} */
 const EMPTY_ARRAY = [];
+
+/** @type {function():void} */
 const EMPTY_FUNC = () => {};
 
 /**
@@ -16,9 +28,9 @@ const EMPTY_FUNC = () => {};
  * - The subscriber is called whenever any of its dependencies change.
  * - A subscriber can optionally return a cleanup function.
  *
- * @param {!Node} node
- * @param {!ContextPropDef<DEP>|!Array<!ContextPropDef<DEP>>} deps
- * @param {function(...DEP)} callback
+ * @param {Node} node
+ * @param {IContextProp<DEP, ?>|IContextProp<DEP, ?>[]} deps
+ * @param {SubscribeCallback<DEP>} callback
  * @template DEP
  */
 export function subscribe(node, deps, callback) {
@@ -31,8 +43,8 @@ export function subscribe(node, deps, callback) {
 /**
  * Removes the subscriber prevoiously registered with `subscribe` API.
  *
- * @param {!Node} node
- * @param {function(...DEP)} callback
+ * @param {Node} node
+ * @param {SubscribeCallback<DEP>} callback
  * @template DEP
  */
 export function unsubscribe(node, callback) {
@@ -50,29 +62,47 @@ export function unsubscribe(node, callback) {
  */
 export class Subscriber {
   /**
-   * @param {!ContextNode} contextNode
-   * @param {function(...DEP)} func
-   * @param {!Array<!ContextPropDef<DEP>>} deps
+   * @param {ContextNode<SubscribeCallback<DEP>>} contextNode
+   * @param {SubscribeCallback<DEP>} func
+   * @param {IContextProp<DEP, ?>[]} deps
    */
   constructor(contextNode, func, deps) {
-    /** @package @const {!ContextNode} */
+    /**
+     * @package
+     * @const
+     * @type {ContextNode<SubscribeCallback<DEP>>}
+     */
     this.contextNode = contextNode;
 
-    /** @private @const {function(DEP)} */
+    /**
+     * @private
+     * @const
+     * @type {function(DEP):void}
+     */
     this.func_ = func;
 
-    /** @private @const {!Array<!ContextPropDef<DEP>>} */
+    /**
+     * @private
+     * @const
+     * @type {IContextProp<DEP, ?>[]}
+     */
     this.deps_ = deps;
 
     /**
-     * @private @const {!Array<DEP|undefined>}
+     * @private
+     * @const
+     * @type {(DEP|undefined)[]}
      *
      * Start with a pre-allocated array filled with `undefined`. The filling
      * is important to ensure the correct `Array.every` execution.
      */
     this.depValues_ = deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY;
 
-    /** @private @const {!Array<function(DEP)>} */
+    /**
+     * @private
+     * @const
+     * @type {(function(DEP):void)[]}
+     */
     this.depSubscribers_ =
       deps.length > 0
         ? deps.map((unusedDep, index) => (value) => {
@@ -81,14 +111,24 @@ export class Subscriber {
           })
         : EMPTY_ARRAY;
 
-    /** @private {boolean} */
+    /**
+     * @private
+     * @type {boolean}
+     */
     this.running_ = false;
 
-    /** @private {?function()} */
+    /**
+     * @private
+     * @type {null|void|function():void}
+     */
     this.runCleanup_ = null;
 
     // Schedulers.
-    /** @private @const {function()} */
+    /**
+     * @private
+     * @const
+     * @type {function():void}
+     */
     this.update_ = throttleTail(this.update_.bind(this), setTimeout);
 
     // Subscribe to all dependencies.
@@ -159,12 +199,7 @@ export class Subscriber {
 
   /** @private */
   run_() {
-    // Cleanup the previous run.
-    if (this.runCleanup_) {
-      tryCallback(this.runCleanup_);
-      this.runCleanup_ = null;
-    }
-
+    this.cleanup_();
     // Run the subscriber.
     const func = this.func_;
     this.runCleanup_ = callHandler(func, this.depValues_);
@@ -196,9 +231,9 @@ function isDefined(v) {
 /**
  * Creates a subscriber.
  *
- * @param {function(...DEP)} callback
- * @param {!Array<DEP>} deps
- * @return {?function()}
+ * @param {SubscribeCallback<DEP>} callback
+ * @param {DEP[]} deps
+ * @return {ReturnType<SubscribeCallback<DEP>>}
  * @template DEP
  */
 function callHandler(callback, deps) {

@@ -1,6 +1,6 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {isJsonScriptTag, removeElement} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   childElementsByAttr,
   childElementsByTag,
@@ -19,7 +19,7 @@ import {NextPageService} from './next-page-service';
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -35,7 +35,7 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -259,7 +259,7 @@ export class AmpNextPage extends AMP.BaseElement {
    */
   fetchConfig_() {
     const ampdoc = this.getAmpDoc();
-    const policy = UrlReplacementPolicy.ALL;
+    const policy = UrlReplacementPolicy_Enum.ALL;
     return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
   }
 

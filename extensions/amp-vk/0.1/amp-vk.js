@@ -1,5 +1,5 @@
 import {removeElement} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 import {isEnumValue} from '#core/types';
 import {dict} from '#core/types/object';
 
@@ -247,9 +247,9 @@ export class AmpVk extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return (
-      layout === Layout.RESPONSIVE ||
-      layout === Layout.FLEX_ITEM ||
-      layout === Layout.FIXED
+      layout === Layout_Enum.RESPONSIVE ||
+      layout === Layout_Enum.FLEX_ITEM ||
+      layout === Layout_Enum.FIXED
     );
   }
 

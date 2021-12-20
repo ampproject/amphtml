@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert/dev';
 import {
   createElementWithAttributes,
   toggleAttribute,
@@ -10,8 +11,7 @@ import {dict} from '#core/types/object';
 import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
-
-import {devAssert} from '#utils/log';
+import {propName} from '#preact/utils';
 
 import {BentoSelector, BentoSelectorOption} from './component';
 
@@ -131,7 +131,7 @@ export function OptionShim({
   role = 'option',
   selected,
   shimDomElement,
-  tabIndex,
+  [propName('tabIndex')]: tabIndex,
 }) {
   const syncEvent = useCallback(
     (type, handler) => {
@@ -186,8 +186,8 @@ function SelectorShim({
   onKeyDown,
   role = 'listbox',
   shimDomElement,
-  tabIndex,
   value,
+  [propName('tabIndex')]: tabIndex,
 }) {
   const input = useRef(null);
   if (!input.current) {

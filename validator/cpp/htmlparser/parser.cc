@@ -6,14 +6,14 @@
 #endif               // DUMP_NODES
 
 #include "absl/flags/flag.h"
-#include "atomutil.h"
-#include "comparators.h"
-#include "defer.h"
-#include "doctype.h"
-#include "foreign.h"
-#include "logging.h"
-#include "parser.h"
-#include "strings.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/comparators.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/doctype.h"
+#include "cpp/htmlparser/foreign.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/parser.h"
+#include "cpp/htmlparser/strings.h"
 
 ABSL_FLAG(uint32_t, htmlparser_max_nodes_depth_count, 245,
           "Maximum depth of open nodes. "

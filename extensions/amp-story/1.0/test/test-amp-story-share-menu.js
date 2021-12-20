@@ -3,11 +3,13 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Services} from '#service';
-import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
+import {
+  ShareMenu,
+  VISIBLE_CLASS,
+} from '../../../amp-story-share-menu/0.1/amp-story-share-menu';
 import {ShareWidget} from '../amp-story-share';
-import {getStyle} from '#core/dom/style';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
@@ -17,6 +19,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   let shareWidgetMock;
   let storeService;
   let win;
+  let installExtensionForDoc;
 
   beforeEach(() => {
     win = env.win;
@@ -30,7 +33,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     const shareWidget = {
       build: () => win.document.createElement('div'),
       isSystemShareSupported: () => isSystemShareSupported,
-      loadRequiredExtensions: () => {},
     };
     shareWidgetMock = env.sandbox.mock(shareWidget);
     env.sandbox.stub(ShareWidget, 'create').returns(shareWidget);
@@ -44,6 +46,12 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
       },
     });
 
+    installExtensionForDoc = env.sandbox.spy();
+
+    env.sandbox.stub(Services, 'extensionsFor').returns({
+      installExtensionForDoc,
+    });
+
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);
     shareMenu = new ShareMenu(win, parentEl);
@@ -51,8 +59,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
   it('should build the sharing menu', () => {
     shareMenu.build();
-
-    expect(shareMenu.isBuilt()).to.be.true;
     expect(shareMenu.element_).to.exist;
   });
 
@@ -69,9 +75,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
       .returns(win.document.createElement('div'));
 
     shareMenu.build();
-
-    expect(shareMenu.isBuilt()).to.be.true;
-
     shareWidgetMock.verify();
   });
 
@@ -109,7 +112,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
-    shareMenu.innerContainerEl_.dispatchEvent(new Event('click'));
+    parentEl
+      .querySelector('.i-amphtml-story-share-menu-container')
+      .dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
   });
@@ -123,60 +128,70 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     // Create escape keyup event.
     const keyupEvent = new Event('keyup');
-    keyupEvent.keyCode = Keys.ESCAPE;
+    keyupEvent.keyCode = Keys_Enum.ESCAPE;
     win.dispatchEvent(keyupEvent);
 
     expect(clickCallbackSpy).to.have.been.calledOnce;
   });
 
-  it('should render the amp-social-share button if system share', () => {
+  it('should not load the amp-social-share extension if system share', () => {
     isSystemShareSupported = true;
 
     shareMenu.build();
 
-    expect(shareMenu.element_.tagName).to.equal('AMP-SOCIAL-SHARE');
-  });
-
-  it('should hide the amp-social-share button if system share', () => {
-    isSystemShareSupported = true;
-
-    shareMenu.build();
-
-    expect(getStyle(shareMenu.element_, 'visibility')).to.equal('hidden');
-  });
-
-  it('should load the amp-social-share extension if system share', () => {
-    isSystemShareSupported = true;
-    shareWidgetMock.expects('loadRequiredExtensions').once();
-
-    shareMenu.build();
+    expect(
+      installExtensionForDoc.withArgs(env.sandbox.match.any, 'amp-social-share')
+    ).to.not.have.been.called;
 
     shareWidgetMock.verify();
   });
 
-  it('should dispatch an event on system share button if system share', () => {
-    isSystemShareSupported = true;
+  it('should load the amp-social-share extension if fallback share', () => {
+    isSystemShareSupported = false;
 
     shareMenu.build();
 
-    const clickCallbackSpy = env.sandbox.spy();
-    shareMenu.element_.addEventListener('click', clickCallbackSpy);
+    expect(
+      installExtensionForDoc.withArgs(env.sandbox.match.any, 'amp-social-share')
+    ).to.have.been.called;
 
-    // Toggling the share menu dispatches a click event on the amp-social-share
-    // button, which triggers the native sharing menu.
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
-
-    expect(clickCallbackSpy).to.have.been.calledOnce;
+    shareWidgetMock.verify();
   });
 
   // See ShareMenu.onShareMenuStateUpdate_ for details.
   it('should close back the share menu right away if system share', () => {
     isSystemShareSupported = true;
 
+    // Simulate native sharing.
+    win.navigator.share = () => Promise.resolve();
+
     shareMenu.build();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+  });
+
+  it('should share natively if available with the canonical url and window title', () => {
+    isSystemShareSupported = true;
+
+    // Simulate native sharing.
+    win.navigator.share = () => Promise.resolve();
+    const shareSpy = env.sandbox.spy(win.navigator, 'share');
+
+    // Set canonicalUrl and window title for sharing.
+    env.sandbox
+      .stub(Services, 'documentInfoForDoc')
+      .returns({canonicalUrl: 'https://amp.dev'});
+    win.document.title = 'AMP';
+
+    shareMenu.build();
+
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+
+    expect(shareSpy).to.be.calledWith({
+      url: 'https://amp.dev',
+      text: 'AMP',
+    });
   });
 });

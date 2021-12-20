@@ -99,7 +99,8 @@
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
       "rebaseWhen": "never",
-      "automerge": false
+      "automerge": false,
+      "schedule": null
     },
     {
       "groupName": "core dependencies",

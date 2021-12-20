@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Získať odkaz"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Viac"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Ak chcete zobraziť tento obsah, je potrebné povoliť experiment Príbeh AMP."
   },
   "21": {
     "string": "Ľutujeme, zdá sa, že váš prehliadač toto prostredie nepodporuje"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Pokračovať napriek tomu"
   },
-  "31": {
-    "string": "Zvuk vypnutý"
-  },
-  "32": {
-    "string": "Zvuk zapnutý"
-  },
-  "33": {
-    "string": "Táto stránka nemá zvuk"
-  },
   "34": {
     "string": "Prehrať video"
   },
   "35": {
     "string": "Potiahnite nahor"
-  },
-  "36": {
-    "string": "Rozbaliť tweet"
-  },
-  "62": {
-    "string": "Zdieľanie začína z tejto stránky"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Zdieľať príbeh"
-  },
-  "70": {
-    "string": "Prepnúť ponuku príbehu"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Tip"
-  },
-  "82": {
-    "string": "Predchádzajúca strana"
   },
   "83": {
     "string": "Aktivovať"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Otvára sa"
+  },
+  "98": {
+    "string": "Formulár nebol odoslaný, skúste to znova"
+  },
+  "99": {
+    "string": "Formulár bol úspešne odoslaný"
   }
 }

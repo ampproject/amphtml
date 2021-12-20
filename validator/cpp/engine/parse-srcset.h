@@ -1,5 +1,5 @@
-#ifndef AMPVALIDATOR__PARSE_SRCSET_H_
-#define AMPVALIDATOR__PARSE_SRCSET_H_
+#ifndef CPP_ENGINE_PARSE_SRCSET_H_
+#define CPP_ENGINE_PARSE_SRCSET_H_
 
 #include <string>
 #include <vector>
@@ -47,4 +47,4 @@ SrcsetParsingResult ParseSourceSet(
 
 }  // namespace amp::validator::parse_srcset
 
-#endif  // AMPVALIDATOR__PARSE_SRCSET_H_
+#endif  // CPP_ENGINE_PARSE_SRCSET_H_

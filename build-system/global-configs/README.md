@@ -112,3 +112,9 @@ Example:
 ```
 
 Once merged onto the `main` branch, this file is automatically picked up by the AMP CDN (usually within 1-2 hours from PR merge) and its content is injected into `v0.[m]js`. AMP caches can also inject the contents of this file verbatim into pages inside a `<script language=text/json id=__AMP_EXP>{...}</script>` element.
+
+# versioning.json
+
+Defines the routing between channels and RTVs (see [Versioning section in amp-framework-hosting.md](../../docs/spec/amp-framework-hosting.md#versioning) for an explanation of AMP versions and RTV numbers).
+
+Currently in testing in preparation for [#36152](https://github.com/ampproject/amphtml/issues/36152).

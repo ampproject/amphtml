@@ -3,27 +3,19 @@ import {ancestorElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 import {dict} from '#core/types/object';
 
-/**
- * Stub type until an AmpForm interface is available in typechecked-land.
- * Should be satisfied by `#extensions/amp-form/0.1/amp-form.AmpForm`
- * @typedef {?}
- */
-let AmpFormDef;
-
-/** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
 
 /**
- * @param {!Element} element
- * @return {AmpFormDef}
+ * @param {HTMLElement} element
+ * @return {AmpForm}
  */
 export function formOrNullForElement(element) {
   return element[FORM_PROP_] || null;
 }
 
 /**
- * @param {!Element} element
- * @param {!AmpFormDef} form
+ * @param {HTMLElement} element
+ * @param {AmpForm} form
  */
 export function setFormForElement(element, form) {
   element[FORM_PROP_] = form;
@@ -32,8 +24,8 @@ export function setFormForElement(element, form) {
 /**
  * Returns form data in the passed-in form as an object.
  * Includes focused submit buttons.
- * @param {!HTMLFormElement} form
- * @return {!JsonObject}
+ * @param {HTMLFormElement} form
+ * @return {JsonObject}
  */
 export function getFormAsObject(form) {
   const {elements} = form;
@@ -108,14 +100,14 @@ export function getFormAsObject(form) {
  * 1. The first submit button element OR
  * 2. a focused submit button, indicating it was specifically used to submit.
  * 3. null, if neither of the above is found.
- * @param {!HTMLFormElement} form
+ * @param {HTMLFormElement} form
  * @return {?HTMLButtonElement}
  */
 export function getSubmitButtonUsed(form) {
   const {elements} = form;
   const {activeElement} = form.ownerDocument;
 
-  const submitBtns = /** @type {!Array<!HTMLButtonElement>} */ (
+  const submitBtns = /** @type {Array<HTMLButtonElement>} */ (
     toArray(elements).filter(isSubmitButton)
   );
   return submitBtns.includes(/** @type {?} */ (activeElement))
@@ -125,52 +117,56 @@ export function getSubmitButtonUsed(form) {
 
 /**
  * True if the given button can submit a form.
- * @param {!Element} element
+ * @param {Element} element
  * @return {boolean}
  */
 function isSubmitButton(element) {
-  const {tagName, type} = /** @type {!HTMLButtonElement} */ (element);
+  const {tagName, type} = /** @type {HTMLButtonElement} */ (element);
   return tagName == 'BUTTON' || type == 'submit';
 }
 
 /**
  * Checks if a field is disabled.
- * @param {!HTMLInputElement} element
+ * @param {HTMLInputElement} element
  * @return {boolean}
  */
 export function isDisabled(element) {
   return (
     element.disabled ||
     ancestorElementsByTag(element, 'fieldset').some(
-      (el) => /** @type {!HTMLFieldSetElement} */ (el).disabled
+      (el) => /** @type {HTMLFieldSetElement} */ (el).disabled
     )
   );
 }
 
 /**
  * Checks if a form field is in its default state.
- * @param {!HTMLInputElement|!HTMLSelectElement} field
+ * @param {HTMLInputElement|HTMLSelectElement} field
  * @return {boolean}
  */
 export function isFieldDefault(field) {
+  const fieldAsSelect = /** @type {HTMLSelectElement} */ (field);
+  const fieldAsInput = /** @type {HTMLInputElement} */ (field);
   switch (field.type) {
     case 'select-multiple':
     case 'select-one':
-      return toArray(/** @type {!HTMLSelectElement} */ (field).options).every(
+      return toArray(fieldAsSelect.options).every(
         ({defaultSelected, selected}) => selected === defaultSelected
       );
     case 'checkbox':
     case 'radio':
-      return field.checked === field.defaultChecked;
+      const {checked, defaultChecked} = fieldAsInput;
+      return checked === defaultChecked;
     default:
-      return field.value === field.defaultValue;
+      const {defaultValue, value} = fieldAsInput;
+      return value === defaultValue;
   }
 }
 
 /**
  * Checks if a form field is empty. It expects a form field element,
  * i.e. `<input>`, `<textarea>`, or `<select>`.
- * @param {!HTMLInputElement} field
+ * @param {HTMLInputElement} field
  * @throws {Error}
  * @return {boolean}
  */

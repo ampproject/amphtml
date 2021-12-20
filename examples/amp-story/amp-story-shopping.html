@@ -1,0 +1,148 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Shopping</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
+    <style amp-custom>
+      [data-tag-id="hat"] {
+        top: 33%;
+        left: 7%;
+      }
+      [data-tag-id="sunglasses"] {
+        top: 28%;
+        left: 43%;
+      }
+      [data-tag-id="backpack"] {
+        top: 33%;
+        left: 80%;
+      }
+      [data-tag-id=city-pop] {
+        top: 33%;
+        left: 7%;
+      }
+    </style>
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="Story Shopping Component"
+        publisher="AMP Story Shopping"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+      <amp-story-page id="inline-light-theme">
+        <!--
+          Example of
+          Inline config.
+          Multiple product tags with icon defined.
+        -->
+        <amp-story-shopping-config layout="nodisplay">
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "product-tag-id": "hat",
+                    "product-title": "Hootenanny Hat",
+                    "product-price": "799",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                   },
+                   {
+                    "product-tag-id": "sunglasses",
+                    "product-title": "Spectacular Spectacles",
+                    "product-price": "400",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
+                   },
+                   {
+                    "product-tag-id": "backpack",
+                    "product-title": "Beastly Backpack",
+                    "product-price": "1000",
+                    "product-tag-text": "Beastly Backpack",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-tag-id="hat" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="sunglasses" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="backpack" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="remote-dark-theme">
+        <!--
+          Example of:
+          Remote JSON with inline fallback.
+          Single product tag without icon.
+        -->
+        <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
+          <script type="application/json">
+            {
+                "items" : [
+                   {
+                    "product-tag-id": "city-pop",
+                    "product-title": "Plastic Love",
+                    "product-price": "19"
+                   }
+                ]
+              }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-no-product">
+          <!--
+            Example of:
+            CTA Button not rendering due to no product tags.
+          -->
+        <amp-story-shopping-config layout="nodisplay">
+          <script type="application/json">
+            {
+                "items" : []
+            }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="remote-with-product">
+        <!--
+          Example of:
+          CTA Button rendering due to remote product tag existing, but no inline.
+        -->
+        <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
+          <script type="application/json">
+            {
+                "items" : []
+              }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

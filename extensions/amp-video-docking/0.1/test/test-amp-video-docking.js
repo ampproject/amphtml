@@ -5,7 +5,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {PlayingStates} from '../../../../src/video-interface';
+import {PlayingStates_Enum} from '../../../../src/video-interface';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -53,7 +53,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
     // VideoDocking.querySlot_() expects this guy:
     querySelectorStub.withArgs('[dock]').returns(video.element);
 
-    // VideoDocking.querySlot_() expects the VideoEvents.REGISTERED signal.
+    // VideoDocking.querySlot_() expects the VideoEvents_Enum.REGISTERED signal.
     // This is normally set by virtue of the Video service, which is not
     // tested here.
     video.signals = () => ({
@@ -154,7 +154,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     manager = {
       getPlayingState() {
-        return PlayingStates.PLAYING_MANUAL;
+        return PlayingStates_Enum.PLAYING_MANUAL;
       },
       isMuted() {
         return false;
