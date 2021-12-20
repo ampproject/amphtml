@@ -6,7 +6,7 @@
 #include "cpp/engine/error-formatter.h"
 #include "cpp/engine/testing-utils.h"
 #include "cpp/engine/validator.h"
-#include "../../validator.proto.h"
+#include "validator.pb.h"
 
 namespace amp::validator {
 

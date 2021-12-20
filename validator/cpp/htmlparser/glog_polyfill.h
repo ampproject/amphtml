@@ -20,9 +20,18 @@ class Checker {
   bool condition_;
 };
 
+// Using the same value as `absl::LogSeverity`
+const int INFO = 0;
+const int WARNING = 1;
+const int ERROR = 2;
+const int FATAL = 3;
+
 #define CHECK(condition) Checker(condition)
-#define CHECK_GE(val1, val2) Checker(val1 >= val2)
-#define CHECK_LT(val1, val2) Checker(val1 < val2)
+#define CHECK_EQ(val1, val2) Checker((val1) == (val2))
+#define CHECK_GE(val1, val2) Checker((val1) >= (val2))
+#define CHECK_LT(val1, val2) Checker((val1) < (val2))
+#define CHECK_NE(val1, val2) Checker((val1) != (val2))
+#define LOG(level) Checker((level) < FATAL)
 
 #define DCHECK(condition) Checker(true)
 #define DCHECK_EQ(val1, val2) Checker(true)
