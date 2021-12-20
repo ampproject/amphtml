@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "validator.pb.h"
+#include "../../validator.proto.h"
 
 namespace amp::validator {
 

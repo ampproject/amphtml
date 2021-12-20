@@ -1,21 +1,15 @@
-goog.require('goog.asserts');
-goog.require('goog.crypt.base64');
-goog.require('goog.uri.utils');
-goog.require('proto.amp.validator.ValidationError');
-goog.require('proto.amp.validator.ValidationResult');
-const {
-  ValidationError,
-  ValidationResult,
-} = proto.amp.validator;
-const {
-  asserts,
-  crypt: {
-    base64,
-  },
-  uri: {
-    utils: uriUtils,
-  },
-} = goog;
+goog.module('amp.validator');
+
+// from //third_party/javascript/amp_validator:validator_jspb_proto
+const ValidationError = goog.require('proto.amp.validator.ValidationError');
+// from //third_party/javascript/amp_validator:validator_jspb_proto
+const ValidationResult = goog.require('proto.amp.validator.ValidationResult');
+// from //third_party/javascript/closure/asserts
+const asserts = goog.require('goog.asserts');
+// from //third_party/javascript/closure/crypt:base64
+const base64 = goog.require('goog.crypt.base64');
+// from //third_party/javascript/closure/uri:utils
+const uriUtils = goog.require('goog.uri.utils');
 
 let wasmModule;
 
