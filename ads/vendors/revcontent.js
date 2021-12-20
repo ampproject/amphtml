@@ -12,7 +12,7 @@ export function revcontent(global, data) {
     if (typeof data.env === 'undefined') {
       endpoint = 'https://assets.revcontent.com/master/delivery.js';
     } else if (data.env == 'dev') {
-      endpoint = 'https://performante.revcontent.dev/delivery.js';
+      endpoint = 'https://preact.revcontent.dev/delivery.js';
     } else {
       endpoint = 'https://assets.revcontent.com/' + data.env + '/delivery.js';
     }
