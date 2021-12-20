@@ -679,7 +679,6 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.DISPATCH_ACTION, (e) => {
-      console.log('dispatchAction', getDetail(e));
       if (!getMode().test) {
         return;
       }
