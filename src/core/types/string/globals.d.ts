@@ -1,4 +1,4 @@
-export {};
+import './amp-globals.d';
 
 declare global {
   interface Window {
