@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Daugiau"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Turite suaktyvinti „amp-story“ eksperimentą, kad galėtumėte peržiūrėti šį turinį."
   },
   "21": {
     "string": "Apgailestaujame, bet atrodo, kad jūsų naršyklė šios istorijos nepalaiko"
@@ -62,23 +56,11 @@
   "27": {
     "string": "Vis tiek tęsti"
   },
-  "31": {
-    "string": "Garsas išjungtas"
-  },
-  "32": {
-    "string": "Garsas įjungtas"
-  },
-  "33": {
-    "string": "Nėra šio puslapio garso"
-  },
   "34": {
     "string": "Leisti vaizdo įrašą"
   },
   "35": {
     "string": "Perbraukti aukštyn"
-  },
-  "62": {
-    "string": "Bendrinti pradedant šiuo puslapiu"
   },
   "63": {
     "string": "Line"
@@ -100,9 +82,6 @@
   },
   "69": {
     "string": "Bendrinti istoriją"
-  },
-  "70": {
-    "string": "Perjungti istorijos meniu"
   },
   "71": {
     "string": "A"
@@ -136,9 +115,6 @@
   },
   "81": {
     "string": "Patarimas"
-  },
-  "82": {
-    "string": "Ankstesnis puslapis"
   },
   "83": {
     "string": "Aktyvinti"

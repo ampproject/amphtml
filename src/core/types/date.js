@@ -4,9 +4,8 @@ import {isString} from './string';
 
 /**
  * Absolute time in milliseconds.
- * @typedef {number}
+ * @typedef {number} TimestampDef
  */
-export let TimestampDef;
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -29,7 +28,7 @@ export function parseDate(s) {
 
 /**
  * Converts various date formats into a timestamp in ms.
- * @param {!Date|number|string} value
+ * @param {Date|number|string} value
  * @return {?TimestampDef}
  */
 export function getDate(value) {
@@ -42,6 +41,6 @@ export function getDate(value) {
   if (isString(value)) {
     return parseDate(/** @type {string} */ (value));
   }
-  value = /** @type {!Date} */ (value);
+  value = /** @type {Date} */ (value);
   return value.getTime();
 }

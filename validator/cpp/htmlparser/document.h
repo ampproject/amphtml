@@ -1,12 +1,12 @@
-#ifndef HTMLPARSER__DOCUMENT_H_
-#define HTMLPARSER__DOCUMENT_H_
+#ifndef CPP_HTMLPARSER_DOCUMENT_H_
+#define CPP_HTMLPARSER_DOCUMENT_H_
 
 #include <memory>
 #include <vector>
 
-#include "allocator.h"
-#include "node.h"
-#include "token.h"
+#include "cpp/htmlparser/allocator.h"
+#include "cpp/htmlparser/node.h"
+#include "cpp/htmlparser/token.h"
 
 namespace htmlparser {
 
@@ -117,4 +117,4 @@ class Document {
 }  // namespace htmlparser
 
 
-#endif  // HTMLPARSER__DOCUMENT_H_
+#endif  // CPP_HTMLPARSER_DOCUMENT_H_

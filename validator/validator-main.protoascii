@@ -13,6 +13,8 @@ script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/valid
 # in the extensions/*/validator-*.protoascii files. This makes it
 # easy to organize the rules for extensions next to their Javascript
 # implementation.
+# Please read how the rules in this file works:
+# https://github.com/ampproject/amphtml/blob/fc447110e86db57e4391bf5c50de8dd2bf75e18f/docs/component-validator-rules.md
 
 # Rules for AMP HTML
 # https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml
@@ -1771,6 +1773,153 @@ tags: {
 # the exception of tags inside of a <noscript> or <amp-story-player> ancestor
 # and transformed amp-img.
 # 4.7.1 The img element
+attr_lists: {
+  name: "img-attrs"
+  attrs: {
+    name: "align"
+    value_casei: "top"
+    value_casei: "middle"
+    value_casei: "bottom"
+    value_casei: "left"
+    value_casei: "right"
+  }
+  attrs: { name: "alt" }
+  attrs: { name: "border" }
+  attrs: {
+    name: "crossorigin"
+    value_casei: "anonymous"
+    value_casei: "use-credentials"
+  }
+  attrs: { name: "height" }
+  attrs: { name: "hspace" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
+  attrs: { name: "ismap" }
+  attrs: {
+    name: "loading"
+    value_casei: "lazy"
+  }  # Not yet part of the html spec
+  attrs: { name: "name" }
+  attrs: {
+    name: "referrerpolicy"
+    value_casei: "no-referrer"
+    value_casei: "no-referrer-when-downgrade"
+    value_casei: "origin"
+    value_casei: "origin-when-cross-origin"
+    value_casei: "same-origin"
+    value_casei: "strict-origin"
+    value_casei: "strict-origin-when-cross-origin"
+    value_casei: "unsafe-url"
+  }
+  attrs: { name: "usemap" }
+  attrs: { name: "vspace" }
+  attrs: { name: "width" }
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  spec_name: "Standard Img"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  spec_name: "Hero Img"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "data-hero"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  spec_name: "Img using srcset"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMAGE"
+  spec_name: "Standard Image"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMAGE"
+  spec_name: "Hero Image"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "data-hero"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMAGE"
+  spec_name: "Image using srcset"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  descriptive_name: "img"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+  attrs: {
+    name: "sizes"
+  }
+}
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "IMG"
@@ -1778,30 +1927,16 @@ tags: {
   descriptive_name: "img"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
-  attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: {
     name: "decoding"
-    value: "async"
-    value: "auto"
-    value: "sync"
+    value_casei: "async"
+    value_casei: "auto"
+    value_casei: "sync"
   }
-  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
-  attrs: { name: "importance" }  # Not yet part of the html spec
-  attrs: { name: "ismap" }
   attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
-  attrs: { name: "loading" }  # Not yet part of the html spec
-  attrs: {
-    name: "longdesc"
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
   attrs: { name: "sizes" }
-  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
+  attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://amp.dev/documentation/components/amp-img/"
 }

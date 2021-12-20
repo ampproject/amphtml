@@ -29,9 +29,6 @@
   "12": {
     "string": "I-SMS"
   },
-  "13": {
-    "string": "Okunye"
-  },
   "14": {
     "string": "U-Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "U-WhatsApp"
-  },
-  "19": {
-    "string": "Kumele uvule ukuhlolwa kwe-amp-story ukuze ubone lokhu okuqukethwe."
   },
   "21": {
     "string": "Siyaxolisa, kubonakala sengathi isiphequluli sakho asikusekeli lokhu"
@@ -62,23 +56,11 @@
   "27": {
     "string": "Qhubeka Noma Kunjalo"
   },
-  "31": {
-    "string": "Umsindo uvaliwe"
-  },
-  "32": {
-    "string": "Umsindo uvuliwe"
-  },
-  "33": {
-    "string": "Leli khasi alinawo umsindo"
-  },
   "34": {
     "string": "Dlala ividiyo"
   },
   "35": {
     "string": "Swayiphela phezulu"
-  },
-  "62": {
-    "string": "Ukwabelana kuqala kuleli khasi"
   },
   "63": {
     "string": "Ulayini"
@@ -100,9 +82,6 @@
   },
   "69": {
     "string": "Yabelana ngendaba"
-  },
-  "70": {
-    "string": "Vula noma uvale imenu yendaba"
   },
   "71": {
     "string": "A"
@@ -136,9 +115,6 @@
   },
   "81": {
     "string": "Ithiphu"
-  },
-  "82": {
-    "string": "Ikhasi eledlule"
   },
   "83": {
     "string": "Yenza kusebenze"

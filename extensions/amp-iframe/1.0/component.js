@@ -2,7 +2,8 @@ import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
 import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {getWin} from '#core/window';
-import {ContainWrapper, useIntersectionObserver} from '#preact/component';
+import {ContainWrapper} from '#preact/component';
+import {useIntersectionObserver} from '#preact/component/intersection-observer';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
 import {

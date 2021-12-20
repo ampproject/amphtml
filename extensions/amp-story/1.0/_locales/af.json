@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Meer"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Jy moet die amp-story-eksperiment aktiveer om hierdie inhoud te bekyk."
   },
   "21": {
     "string": "Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring steun nie"
@@ -62,23 +56,11 @@
   "27": {
     "string": "Gaan in elk geval voort"
   },
-  "31": {
-    "string": "Klank af"
-  },
-  "32": {
-    "string": "Klank aan"
-  },
-  "33": {
-    "string": "Hierdie bladsy het geen klank nie"
-  },
   "34": {
     "string": "Speel video"
   },
   "35": {
     "string": "Vee opwaarts"
-  },
-  "62": {
-    "string": "Deel vanaf hierdie bladsy"
   },
   "63": {
     "string": "LINE"
@@ -100,9 +82,6 @@
   },
   "69": {
     "string": "Deel storie"
-  },
-  "70": {
-    "string": "Wissel storiekieslys"
   },
   "71": {
     "string": "A"
@@ -136,9 +115,6 @@
   },
   "81": {
     "string": "Wenk"
-  },
-  "82": {
-    "string": "Vorige bladsy"
   },
   "83": {
     "string": "Aktiveer"

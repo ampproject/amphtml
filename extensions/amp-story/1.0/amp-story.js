@@ -53,7 +53,7 @@ import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '#service';
-import {ShareMenu} from './amp-story-share-menu';
+import {ShareMenu} from '../../amp-story-share-menu/0.1/amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -92,6 +92,7 @@ import {isPreviewMode} from './embed-mode';
 import {isRTL, removeElement} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
 import {
+  isTransformed,
   removeAttributeInMutate,
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
@@ -409,22 +410,40 @@ export class AmpStory extends AMP.BaseElement {
         this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
     }
+    const performanceService = Services.performanceFor(this.win);
     if (isExperimentOn(this.win, 'story-load-first-page-only')) {
-      Services.performanceFor(this.win).addEnabledExperiment(
-        'story-load-first-page-only'
-      );
+      performanceService.addEnabledExperiment('story-load-first-page-only');
     }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
       isPreviewMode(this.win) ||
-      prefersReducedMotion(this.win)
+      prefersReducedMotion(this.win) ||
+      isTransformed(this.getAmpDoc())
     ) {
-      Services.performanceFor(this.win).addEnabledExperiment(
+      performanceService.addEnabledExperiment(
         'story-disable-animations-first-page'
       );
     }
+    const docElem = this.getAmpDoc().getRootNode().documentElement;
+    // [i-amphtml-version] marks that the style was inlined in the doc
+    // server-side.
+    const inlinedAmpStoryCssExists = docElem.querySelector(
+      'style[amp-extension="amp-story"][i-amphtml-version]'
+    );
+    // [amp-extension=amp-story] on a stylesheet link marks that the style
+    // was linked on the doc server-side.
+    const linkAmpStoryCssExists = docElem.querySelector(
+      'link[amp-extension="amp-story"][rel=stylesheet]'
+    );
+
+    if (inlinedAmpStoryCssExists) {
+      performanceService.addEnabledExperiment('story-inline-css');
+    } else if (linkAmpStoryCssExists) {
+      performanceService.addEnabledExperiment('story-link-css');
+    }
+
     if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
-      Services.performanceFor(this.win).addEnabledExperiment(
+      performanceService.addEnabledExperiment(
         'story-load-inactive-outside-viewport'
       );
       this.element.classList.add(
@@ -571,7 +590,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_(initialPageId) {
-    this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
@@ -2211,28 +2229,6 @@ export class AmpStory extends AMP.BaseElement {
     }
     this.mediaPool_.unmute(this.backgroundAudioEl_);
     this.mediaPool_.play(this.backgroundAudioEl_);
-  }
-
-  /**
-   * Shows the audio icon if the story has any media elements containing audio,
-   * or background audio at the story or page level.
-   * @private
-   */
-  updateAudioIcon_() {
-    const containsMediaElementWithAudio = !!this.element.querySelector(
-      'amp-audio, amp-video:not([noaudio]), [background-audio]'
-    );
-    const storyHasBackgroundAudio =
-      this.element.hasAttribute('background-audio');
-
-    this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_AUDIO,
-      containsMediaElementWithAudio || storyHasBackgroundAudio
-    );
-    this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
-      storyHasBackgroundAudio
-    );
   }
 
   /**

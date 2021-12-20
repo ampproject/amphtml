@@ -21,7 +21,7 @@ const versionedBuilderMap = {
  */
 function wrap(buildDom) {
   return function wrapper(element) {
-    applyStaticLayout(element);
+    applyStaticLayout(/** @type {AmpElement} */ (element));
     buildDom(element);
     element.setAttribute('i-amphtml-ssr', '');
   };
