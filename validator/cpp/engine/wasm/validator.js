@@ -1,21 +1,15 @@
-goog.require('goog.asserts');
-goog.require('goog.crypt.base64');
-goog.require('goog.uri.utils');
-goog.require('proto.amp.validator.ValidationError');
-goog.require('proto.amp.validator.ValidationResult');
-const {
-  ValidationError,
-  ValidationResult,
-} = proto.amp.validator;
-const {
-  asserts,
-  crypt: {
-    base64,
-  },
-  uri: {
-    utils: uriUtils,
-  },
-} = goog;
+goog.module('amp.validator');
+
+// from //third_party/javascript/amp_validator:validator_jspb_proto
+const ValidationError = goog.require('proto.amp.validator.ValidationError');
+// from //third_party/javascript/amp_validator:validator_jspb_proto
+const ValidationResult = goog.require('proto.amp.validator.ValidationResult');
+// from //third_party/javascript/closure/asserts
+const asserts = goog.require('goog.asserts');
+// from //third_party/javascript/closure/crypt:base64
+const base64 = goog.require('goog.crypt.base64');
+// from //third_party/javascript/closure/uri:utils
+const uriUtils = goog.require('goog.uri.utils');
 
 let wasmModule;
 
@@ -43,8 +37,7 @@ class ProtobufEnum {
   constructor(jspbObject) {
     const entries = Object.entries(jspbObject);
     this.numberByName = new Map(entries);
-    this.nameByNumber =
-        new Map(entries.map(([name, number]) => [number, name]));
+    this.nameByNumber = new Map(entries.map(([name, number]) => [number, name]));
   }
 }
 
@@ -86,7 +79,7 @@ function digitizeValidationErrorFields(error) {
  * Hence when a plain object neeeds to be transformed back to protobuf,
  * the attached base64 could be directly used.
  */
-const PB_BASE64 = '_PB_BASE64';
+const PB_BASE64 = Symbol('PB_BASE64');
 
 /**
  * Validates a document input as a string.
@@ -111,7 +104,8 @@ function validateString(input, opt_htmlFormat) {
         base64.encodeByteArray(errorJspb.serializeBinary());
     return errorObject;
   });
-  resultObject.status = STATUS.nameByNumber.get(resultObject.status);
+  resultObject.status =
+      STATUS.nameByNumber.get(resultObject.status);
   resultObject[PB_BASE64] = resultBase64;
   return resultObject;
 }
@@ -178,7 +172,7 @@ function logValidationResult(validationResult, url) {
     status,
     errors,
   } = validationResult;
-  if (status === STATUS.nameByNumber.get(ValidationResult.Status.PASS)) {
+  if (status === ValidationResult.Status.PASS) {
     console.info('AMP validation successful.');
     console.info(
         `Review our 'publishing checklist' to ensure successful AMP document` +
@@ -186,19 +180,18 @@ function logValidationResult(validationResult, url) {
     if (errors.length === 0) {
       return;
     }
-  } else if (status !== STATUS.nameByNumber.get(ValidationResult.Status.FAIL)) {
+  } else if (status !== ValidationResult.Status.FAIL) {
     console.error(
         'AMP validation had unknown results. This indicates a validator ' +
         'bug. Please report at https://github.com/ampproject/amphtml/issues .');
   }
-  if (status === STATUS.nameByNumber.get(ValidationResult.Status.FAIL)) {
+  if (status === ValidationResult.Status.FAIL) {
     console.error('AMP validation had errors:');
   } else {
     console.error('AMP validation had warnings:');
   }
   for (const error of errors) {
-    if (error.severity ===
-        SEVERITY.nameByNumber.get(ValidationError.Severity.ERROR)) {
+    if (error.severity === ValidationError.Severity.ERROR) {
       console.error(errorLine(url, error));
     } else {
       console.warn(errorLine(url, error));
