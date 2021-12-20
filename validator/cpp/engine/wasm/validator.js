@@ -74,6 +74,14 @@ function digitizeValidationErrorFields(error) {
 }
 
 /**
+ * When transforming validation errors and validation results from jspb to plain
+ * objects, the protobuf base64 string is also attached to the output.
+ * Hence when a plain object neeeds to be transformed back to protobuf,
+ * the attached base64 could be directly used.
+ */
+const PB_BASE64 = Symbol('PB_BASE64');
+
+/**
  * Validates a document input as a string.
  *
  * @param {string} input
@@ -88,13 +96,18 @@ function validateString(input, opt_htmlFormat) {
   asserts.assertExists(wasmModule, `WebAssembly is uninitialized`);
   const resultBase64 =
       wasmModule.validateString(input, htmlFormat, /*maxErrors=*/ -1);
-  const validationResult =
-      ValidationResult.deserializeBinary(resultBase64).toObject();
-  validationResult.errors =
-      validationResult.errorsList.map(stringifyValidationErrorFields);
-  validationResult.status =
-      STATUS.nameByNumber.get(validationResult.status);
-  return validationResult;
+  const resultJspb = ValidationResult.deserializeBinary(resultBase64);
+  const resultObject = resultJspb.toObject();
+  resultObject.errors = resultJspb.getErrorsList().map((errorJspb) => {
+    const errorObject = stringifyValidationErrorFields(errorJspb.toObject());
+    errorObject[PB_BASE64] =
+        base64.encodeByteArray(errorJspb.serializeBinary());
+    return errorObject;
+  });
+  resultObject.status =
+      STATUS.nameByNumber.get(resultObject.status);
+  resultObject[PB_BASE64] = resultBase64;
+  return resultObject;
 }
 
 /**
@@ -105,11 +118,7 @@ function validateString(input, opt_htmlFormat) {
  */
 function renderErrorMessage(error) {
   asserts.assertExists(wasmModule, `WebAssembly is uninitialized`);
-  const validationError =
-      ValidationError.fromObject(digitizeValidationErrorFields(error));
-  const errorMessage = wasmModule.renderErrorMessage(
-      base64.encodeByteArray(validationError.serializeBinary()));
-  return errorMessage;
+  return wasmModule.renderErrorMessage(error[PB_BASE64]);
 }
 
 /**
@@ -120,17 +129,11 @@ function renderErrorMessage(error) {
  */
 function renderInlineResult(validationResult, filename, inputContents) {
   asserts.assertExists(wasmModule, `WebAssembly is uninitialized`);
-  const validationResultProto = ValidationResult.fromObject({
-    ...validationResult,
-    status: STATUS.nameByNumber.get(validationResult.status),
-    errorList: validationResult.errors.map(digitizeValidationErrorFields),
-  });
-  const inlineResult = wasmModule.renderInlineResult(
-      base64.encodeByteArray(validationResultProto.serializeBinary()),
+  return wasmModule.renderInlineResult(
+      validationResult[PB_BASE64],
       filename,
       inputContents,
   );
-  return inlineResult;
 }
 
 /**
