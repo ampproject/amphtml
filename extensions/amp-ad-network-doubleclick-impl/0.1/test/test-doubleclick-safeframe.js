@@ -7,6 +7,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
+import {AdFormatType} from 'extensions/amp-ad/0.1/ad-format';
+
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {
   MESSAGE_FIELDS,
@@ -61,6 +63,9 @@ describes.realWin(
       });
       doc.body.appendChild(ampAd);
       doubleclickImpl = new AmpAdNetworkDoubleclickImpl(ampAd, doc, env.win);
+      doubleclickImpl.uiHandler = {
+        getAdFormat: () => AdFormatType.REGULAR,
+      };
       const creativeSize = {
         width: creativeWidth,
         height: creativeHeight,

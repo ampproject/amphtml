@@ -1,3 +1,7 @@
+.i-amphtml-has-start-control.i-amphtml-ad-overlay-container {
+  top: 50px !important;
+}
+
 .i-amphtml-ad-overlay-container {
   align-items: center !important;
   display: flex !important;

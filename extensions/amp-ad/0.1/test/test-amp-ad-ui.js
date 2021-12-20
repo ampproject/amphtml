@@ -308,43 +308,5 @@ describes.realWin(
         });
       });
     });
-
-    describe('sticky ads', () => {
-      it('should reject invalid sticky type', () => {
-        expectAsyncConsoleError(/Invalid sticky ad type: invalid/, 1);
-        adElement.setAttribute('sticky', 'invalid');
-        const uiHandler = new AmpAdUIHandler(adImpl);
-        expect(uiHandler.stickyAdPosition_).to.be.null;
-      });
-
-      it('should render close buttons', () => {
-        expect(uiHandler.unlisteners_).to.be.empty;
-        uiHandler.stickyAdPosition_ = 'bottom';
-        uiHandler.maybeInitStickyAd();
-        expect(uiHandler.unlisteners_.length).to.equal(1);
-        expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
-          .not.null;
-      });
-
-      it('top sticky ads shall cause scroll trigger', () => {
-        uiHandler.stickyAdPosition_ = 'top';
-        uiHandler.maybeInitStickyAd();
-        expect(uiHandler.topStickyAdScrollListener_).to.not.be.undefined;
-      });
-
-      it('should refuse to load the second sticky ads', () => {
-        for (let i = 0; i < 2; i++) {
-          const adElement = env.win.document.createElement('amp-ad');
-          adElement.setAttribute('sticky', 'top');
-          adElement.setAttribute('class', 'i-amphtml-built');
-          env.win.document.body.insertBefore(adElement, null);
-        }
-        allowConsoleError(() => {
-          expect(() => {
-            uiHandler.validateAd();
-          }).to.throw();
-        });
-      });
-    });
   }
 );

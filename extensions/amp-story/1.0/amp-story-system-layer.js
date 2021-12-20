@@ -901,6 +901,7 @@ export class SystemLayer {
       }
 
       if (control.position === 'start') {
+        this.win_.__AMP_STORY_BUTTON_AT_START = true;
         const startButtonContainer = this.systemLayerEl_.querySelector(
           '.i-amphtml-story-system-layer-buttons-start-position'
         );

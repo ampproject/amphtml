@@ -1,4 +1,3 @@
-import {AdFormatInterface} from './ad-format-interface';
 import {Services} from '#service';
 import {user, userAssert} from '#utils/log';
 import {setStyle} from '#core/dom/style';

@@ -385,6 +385,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_ = this.doc_.createElement('aside');
     this.adBadgeContainer_.className = 'i-amphtml-ad-overlay-container';
 
+    if (this.win.__AMP_STORY_BUTTON_AT_START) {
+      this.adBadgeContainer_.className += ' i-amphtml-has-start-control';
+    }
+
     const badge = this.doc_.createElement('div');
     badge.className = 'i-amphtml-story-ad-badge';
 
