@@ -1,11 +1,10 @@
 import {userAssert} from '#core/assert';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
+import {Layout_Enum} from '#core/dom/layout';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {isObject} from '#core/types';
 import {map} from '#core/types/object';
-import {getWin} from '#core/window';
 import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
@@ -16,18 +15,15 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {user} from '#utils/log';
 
-import {SHARE_MENU_HOST_CLASS} from 'extensions/amp-story/1.0/amp-story-share';
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 import {Toast} from 'extensions/amp-story/1.0/toast';
 
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,
   StateProperty,
   UIType,
-  getStoreService,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -74,30 +70,29 @@ const renderShareItemElement = (child) => (
 /**
  * Share menu UI.
  */
-export class AmpStoryShareMenu {
+export class AmpStoryShareMenu extends AMP.BaseElement {
   /**
-   * @param {!Element} hostEl
+   * @param {!Element} element
    */
-  constructor(hostEl) {
-    /** @private @const {!Window} */
-    this.win_ = getWin(hostEl);
+  constructor(element) {
+    super(element);
 
     /** @private {?Element} */
-    this.element_ = null;
-
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win_);
+    this.rootEl_ = null;
 
     /** @private @const {!Element} */
     this.storyEl_ = userAssert(
-      closestAncestorElementBySelector(hostEl, 'amp-story')
+      closestAncestorElementBySelector(element, 'amp-story')
     );
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
+    this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {!Element} */
-    this.hostEl_ = hostEl;
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
+
+    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
   }
 
   /**
@@ -105,16 +100,22 @@ export class AmpStoryShareMenu {
    * amp-social-share button to display the native system sharing, or a fallback
    * UI.
    */
-  build() {
-    if (this.element_) {
+  buildCallback() {
+    if (this.rootEl_) {
       return;
     }
 
-    const providersList = this.buildProvidersList_();
-    this.element_ = this.buildDialog_(providersList);
-
-    this.vsync_.mutate(() => {
-      createShadowRootWithStyle(this.hostEl_, this.element_, CSS);
+    Promise.all([
+      Services.storyStoreServiceForOrNull(this.win).then(
+        (service) => (this.storeService_ = service)
+      ),
+      Services.localizationServiceForOrNull(this.element).then(
+        (service) => (this.localizationService_ = service)
+      ),
+    ]).then(() => {
+      const providersList = this.buildProvidersList_();
+      this.rootEl_ = this.buildDialog_(providersList);
+      createShadowRootWithStyle(this.element, this.rootEl_, CSS);
       this.initializeListeners_();
     });
   }
@@ -139,7 +140,7 @@ export class AmpStoryShareMenu {
       true /** callToInitialize */
     );
 
-    this.win_.addEventListener('keyup', (event) => {
+    this.win.addEventListener('keyup', (event) => {
       if (event.key == Keys_Enum.ESCAPE) {
         event.preventDefault();
         this.close_();
@@ -154,8 +155,8 @@ export class AmpStoryShareMenu {
    */
   onShareMenuStateUpdate_(isOpen) {
     this.vsync_.mutate(() => {
-      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
-      this.element_.setAttribute('aria-hidden', !isOpen);
+      this.rootEl_.classList.toggle(VISIBLE_CLASS, isOpen);
+      this.rootEl_.setAttribute('aria-hidden', !isOpen);
     });
   }
 
@@ -167,8 +168,8 @@ export class AmpStoryShareMenu {
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
       uiState !== UIType.MOBILE
-        ? this.element_.setAttribute('desktop', '')
-        : this.element_.removeAttribute('desktop');
+        ? this.rootEl_.setAttribute('desktop', '')
+        : this.rootEl_.removeAttribute('desktop');
     });
   }
 
@@ -201,8 +202,7 @@ export class AmpStoryShareMenu {
         <div class="i-amphtml-story-share-menu-container">
           <button
             class="i-amphtml-story-share-menu-close-button"
-            aria-label={localize(
-              this.storyEl_,
+            aria-label={this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
             )}
             role="button"
@@ -284,7 +284,9 @@ export class AmpStoryShareMenu {
         type={provider}
       >
         <span class="i-amphtml-story-share-label">
-          {localize(this.win_.document, shareProviderLocalizedStringId)}
+          {this.localizationService_.getLocalizedString(
+            shareProviderLocalizedStringId
+          )}
         </span>
       </amp-social-share>
     );
@@ -303,11 +305,10 @@ export class AmpStoryShareMenu {
    * @private
    */
   maybeRenderLinkShareButton_() {
-    if (!isCopyingToClipboardSupported(this.win_.document)) {
+    if (!isCopyingToClipboardSupported(this.win.document)) {
       return;
     }
-    const label = localize(
-      this.storyEl_,
+    const label = this.localizationService_.getLocalizedString(
       LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
     );
     return renderShareItemElement(
@@ -331,9 +332,8 @@ export class AmpStoryShareMenu {
     const url = Services.documentInfoForDoc(
       getAmpdoc(this.storyEl_)
     ).canonicalUrl;
-    if (!copyTextToClipboard(this.win_, url)) {
-      const failureString = localize(
-        this.storyEl_,
+    if (!copyTextToClipboard(this.win, url)) {
+      const failureString = this.localizationService_.getLocalizedString(
         LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
       );
       Toast.show(this.storyEl_, failureString);
@@ -350,13 +350,17 @@ export class AmpStoryShareMenu {
   buildCopySuccessfulToast_(url) {
     return (
       <div class="i-amphtml-story-copy-successful">
-        {localize(
-          this.storyEl_,
+        {this.localizationService_.getLocalizedString(
           LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
         )}
         <div class="i-amphtml-story-copy-url">{url}</div>
       </div>
     );
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout_Enum.CONTAINER;
   }
 }
 
@@ -365,11 +369,5 @@ export class AmpStoryShareMenu {
  */
 
 AMP.extension('amp-story-share-menu', '0.1', (AMP) => {
-  AMP.ampdoc.whenReady().then(() => {
-    const element = AMP.ampdoc
-      .getRootNode()
-      .querySelector(`.${escapeCssSelectorIdent(SHARE_MENU_HOST_CLASS)}`);
-    const shareMenu = new AmpStoryShareMenu(element, AMP.ampdoc.win);
-    shareMenu.build();
-  });
+  AMP.registerElement('amp-story-share-menu', AmpStoryShareMenu);
 });

@@ -15,9 +15,6 @@ import {
 
 const TAG = 'amp-story-share';
 
-/** @const {string} */
-export const SHARE_MENU_HOST_CLASS = 'i-amphtml-story-share-menu-host';
-
 /**
  * Support for amp-story to launch native sharing menu or fallback sharing icons.
  */
@@ -40,7 +37,7 @@ export class AmpStoryShare {
     this.storeService_ = getStoreService(win);
 
     /** @private {!Element} used to host the fallback menu or for analytics. */
-    this.shareMenuEl_ = <div class={String(SHARE_MENU_HOST_CLASS)}></div>;
+    this.shareMenuEl_ = <amp-story-share-menu></amp-story-share-menu>;
     storyEl.appendChild(this.shareMenuEl_);
 
     /** @private {boolean} */
