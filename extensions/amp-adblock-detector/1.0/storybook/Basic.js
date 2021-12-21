@@ -25,12 +25,12 @@ export const _default = (args) => {
           </div>
         </amp-ad>
       )}
-      fallbackDiv={(props) => {
-        <div status="blocked">
+      fallbackDiv={(props) => (
+        <div status="blocked" {...props}>
           <h2>Ad Blocker Detected</h2>
           <p>Please allow ads to run on this page.</p>
-        </div>;
-      }}
+        </div>
+      )}
     ></BentoAdblockDetector>
   );
 };
