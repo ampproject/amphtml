@@ -1,24 +1,34 @@
+import {removeElement} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
-import {Action, StateProperty, UIType} from './amp-story-store-service';
-import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
-import {HistoryState, setHistoryState} from './history';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
-import {dev} from '#utils/log';
+import {toggle} from '#core/dom/style';
 import {getHistoryState} from '#core/window/history';
-import {localize} from './amp-story-localization-service';
-import {getSourceOrigin} from '../../../src/url';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
+
+import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {
   allowlistFormActions,
   setupResponseAttributeElements,
 } from './amp-story-form';
-import {removeElement} from '#core/dom';
-import {toggle} from '#core/dom/style';
 
-import {triggerClickFromLightDom} from './utils';
+import {getSourceOrigin} from '../../../src/url';
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
+import {renderOutlinkLinkIconElement} from '../../amp-story/1.0/amp-story-open-page-attachment';
+import {
+  Action,
+  StateProperty,
+  UIType,
+} from '../../amp-story/1.0/amp-story-store-service';
+import {HistoryState, setHistoryState} from '../../amp-story/1.0/history';
+import {
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from '../../amp-story/1.0/story-analytics';
+import {triggerClickFromLightDom} from '../../amp-story/1.0/utils';
 
 /**
  * Distance to swipe before opening attachment.

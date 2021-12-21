@@ -1,9 +1,17 @@
-import * as Preact from '#core/dom/jsx';
-import {Action, getStoreService} from './amp-story-store-service';
-import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {localize} from './amp-story-localization-service';
+import * as Preact from '#core/dom/jsx';
+
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
+import {
+  Action,
+  getStoreService,
+} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  renderLoadingSpinner,
+  toggleLoadingSpinner,
+} from '../../amp-story/1.0/loading-spinner';
 
 /**
  * Adds AMP form actions to the action allow list.

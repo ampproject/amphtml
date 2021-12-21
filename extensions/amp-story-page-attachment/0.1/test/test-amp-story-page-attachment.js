@@ -1,4 +1,5 @@
 import {AmpDocSingle} from '#service/ampdoc-impl';
+
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
