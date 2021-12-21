@@ -22,6 +22,7 @@ import {
 import {ContainWrapper} from '#preact/component';
 
 import './amp-date-picker.css';
+import 'react-dates/initialize';
 
 const DEFAULT_INPUT_SELECTOR = '#date';
 const DEFAULT_START_INPUT_SELECTOR = '#startdate';
@@ -71,7 +72,7 @@ function asMoment(date) {
 /**
  * Formats a moment object as a Date
  * TODO: Remove this once we are no longer using moment
- * @param moment
+ * @param {moment} moment
  * @return {Date}
  * @private
  */
@@ -91,7 +92,7 @@ export function BentoDatePicker({
   startInputSelector = DEFAULT_START_INPUT_SELECTOR,
   endInputSelector = DEFAULT_END_INPUT_SELECTOR,
   format = ISO_8601,
-  locale = DEFAULT_LOCALE,
+  // locale = DEFAULT_LOCALE,
   id,
   onError,
   ...rest
@@ -112,8 +113,6 @@ export function BentoDatePicker({
   const [endDate, setEndDate] = useState();
 
   const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
-
-  // const {dayPickerProps, inputProps} = useInput();
 
   // This might not be the best way to handle this, but we need a way to get the initial
   // child nodes and their values, but then replace them with the controlled inputs from
@@ -324,12 +323,12 @@ export function BentoDatePicker({
       onError(`Invalid picker type`);
     }
     setShowChildren(false);
+    // TODO: Uncommenting these dependencies causes the unit tests not to complete
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     setupRangeInput,
     setupSingleInput,
     type,
-    // TODO: Uncommenting these dependencies causes the unit tests not to complete
     // dateElement,
     // startDateElement,
     // endDateElement,

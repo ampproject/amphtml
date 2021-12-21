@@ -13,7 +13,7 @@ import {BentoDatePicker} from '../component';
 const React = require('react');
 
 function selectDate(wrapper, date) {
-  const calendar = wrapper.find('[aria-label="Calendar"]');
+  const calendar = wrapper.find('[aria-label="Calendar"]').first();
 
   calendar.props().onDateChange(moment(date));
 
@@ -21,7 +21,7 @@ function selectDate(wrapper, date) {
 }
 
 function selectDates(wrapper, startDate, endDate) {
-  const calendar = wrapper.find('[aria-label="Calendar"]');
+  const calendar = wrapper.find('[aria-label="Calendar"]').first();
 
   calendar
     .props()
