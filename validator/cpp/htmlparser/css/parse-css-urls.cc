@@ -1,4 +1,4 @@
-#include "css/parse-css-urls.h"
+#include "cpp/htmlparser/css/parse-css-urls.h"
 
 #include <memory>
 
@@ -8,8 +8,9 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/variant.h"
-#include "logging.h"
-#include "strings.h"
+#include "glog/logging.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/strings.h"
 
 using absl::AsciiStrToLower;
 using absl::c_find;

@@ -741,6 +741,10 @@ actions that apply to the whole document.
       <p>Requires <a href="https://amp.dev/documentation/components/amp-bind.html#modifying-history-with-amppushstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
   </tr>
+  <tr>
+    <td><code>toggleTheme()</code></td>
+    <td>Toggles the amp-dark-mode class on the body element when called and sets users preference to the localStorage. The amp-dark-mode class is added by default to body based on the <code>prefers-color-scheme</code> value. Use <code>data-prefers-dark-mode-class</code> attribute on body tag to override the class to be used for dark mode.</td>
+  </tr>
 </table>
 
 <sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> or <code>pushState()</code> to complete before invocation. Only a single <code>setState()</code> or <code>pushState()</code> is allowed per event.

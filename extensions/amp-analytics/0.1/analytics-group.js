@@ -1,9 +1,9 @@
-import {ChunkPriority, chunk} from '../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {dev, userAssert} from '../../../src/log';
+import {dev, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 /**
  * @const {number}
@@ -39,7 +39,7 @@ export class AnalyticsGroup {
     this.triggerCount_ = 0;
 
     /** @private @const {!Window} */
-    this.win_ = toWin(analyticsElement.ownerDocument.defaultView);
+    this.win_ = getWin(analyticsElement);
   }
 
   /** @override */
@@ -95,8 +95,8 @@ export class AnalyticsGroup {
     } else {
       const priority =
         this.triggerCount_ < HIGH_PRIORITY_TRIGGER_THRES
-          ? ChunkPriority.HIGH
-          : ChunkPriority.LOW;
+          ? ChunkPriority_Enum.HIGH
+          : ChunkPriority_Enum.LOW;
       chunk(this.analyticsElement_, task, priority);
     }
     this.triggerCount_++;

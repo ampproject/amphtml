@@ -10,14 +10,14 @@ import {computedStyle, getStyle, setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
 import {hasOwn} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {randomlySelectUnsetExperiments} from '#experiments';
 
 import {Services} from '#service';
 
-import {getData} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 const TAG = 'amp-ad-network-adsense-impl';
 
@@ -65,7 +65,7 @@ export class ResponsiveState {
     this.isContainerWidth_ = !!isContainerWidth;
 
     /** @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
+    this.win_ = getWin(element);
   }
 
   /**
@@ -153,7 +153,7 @@ export class ResponsiveState {
    * @return {!Promise<?ResponsiveState>} a promise that return container width responsive state.
    */
   static convertToContainerWidth(element) {
-    const vsync = Services.vsyncFor(toWin(element.ownerDocument.defaultView));
+    const vsync = Services.vsyncFor(getWin(element));
 
     return vsync
       .runPromise(
@@ -201,7 +201,7 @@ export class ResponsiveState {
     const savePromise = new Promise((resolve) => {
       promiseResolver = resolve;
     });
-    const win = toWin(element.ownerDocument.defaultView);
+    const win = getWin(element);
 
     const listener = (event) => {
       const data = getData(event);

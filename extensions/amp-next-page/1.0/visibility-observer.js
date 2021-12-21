@@ -1,4 +1,4 @@
-import {RelativePositions} from '#core/dom/layout/rect';
+import {RelativePositions_Enum} from '#core/dom/layout/rect';
 import {throttle} from '#core/types/function';
 
 import {Services} from '#service';
@@ -8,10 +8,10 @@ import {
 } from '#service/position-observer/position-observer-impl';
 import {
   PositionInViewportEntryDef,
-  PositionObserverFidelity,
+  PositionObserverFidelity_Enum,
 } from '#service/position-observer/position-observer-worker';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /** @enum {number} */
 export const ViewportRelativePos = {
@@ -38,23 +38,23 @@ export class VisibilityObserverEntry {
   constructor(observer, callback) {
     /** @private {!VisibilityObserver} */
     this.observer_ = observer;
-    /** @private {?RelativePositions} */
+    /** @private {?RelativePositions_Enum} */
     this.topSentinelPosition_ = null;
-    /** @private {?RelativePositions} */
+    /** @private {?RelativePositions_Enum} */
     this.bottomSentinelPosition_ = null;
     /** @const {function(!ViewportRelativePos)} */
     this.callback = callback;
   }
 
   /**
-   * @return {?RelativePositions}
+   * @return {?RelativePositions_Enum}
    */
   get top() {
     return this.topSentinelPosition_;
   }
 
   /**
-   * @return {?RelativePositions}
+   * @return {?RelativePositions_Enum}
    */
   get bottom() {
     return this.bottomSentinelPosition_;
@@ -75,12 +75,12 @@ export class VisibilityObserverEntry {
 
     this.observer_
       .getPositionObserver()
-      .observe(top, PositionObserverFidelity.LOW, (position) =>
+      .observe(top, PositionObserverFidelity_Enum.LOW, (position) =>
         this.topSentinelPositionChanged_(position)
       );
     this.observer_
       .getPositionObserver()
-      .observe(bottom, PositionObserverFidelity.LOW, (position) =>
+      .observe(bottom, PositionObserverFidelity_Enum.LOW, (position) =>
         this.bottomSentinelPositionChanged_(position)
       );
   }
@@ -328,7 +328,7 @@ export default class VisibilityObserver {
    */
   getRelativePosFromSentinel(entry) {
     const {bottom, top} = entry;
-    const {BOTTOM, INSIDE, TOP} = RelativePositions;
+    const {BOTTOM, INSIDE, TOP} = RelativePositions_Enum;
     if (!top && !bottom) {
       // Early exit if this an intersection change happening before a
       // sentinel position change

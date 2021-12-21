@@ -2,14 +2,14 @@
  * Possible versions of Shadow DOM spec
  * @enum {string}
  */
-export const ShadowDomVersion = {
+export const ShadowDomVersion_Enum = {
   NONE: 'none',
   V0: 'v0',
   V1: 'v1',
 };
 
 /**
- * @type {!ShadowDomVersion|undefined}
+ * @type {ShadowDomVersion_Enum|undefined}
  * @visibleForTesting
  */
 let shadowDomSupportedVersion;
@@ -21,7 +21,7 @@ let shadowDomSupportedVersion;
 let shadowCssSupported;
 
 /**
- * @param {!ShadowDomVersion|undefined} val
+ * @param {ShadowDomVersion_Enum|undefined} val
  * @visibleForTesting
  */
 export function setShadowDomSupportedVersionForTesting(val) {
@@ -41,7 +41,7 @@ export function setShadowCssSupportedForTesting(val) {
  * @return {boolean}
  */
 export function isShadowDomSupported() {
-  return getShadowDomSupportedVersion() != ShadowDomVersion.NONE;
+  return getShadowDomSupportedVersion() != ShadowDomVersion_Enum.NONE;
 }
 
 /**
@@ -72,7 +72,7 @@ function isNative(func) {
 /**
  * Returns the supported version of Shadow DOM spec.
  * @param {typeof Element=} opt_elementClass optional for testing
- * @return {!ShadowDomVersion}
+ * @return {ShadowDomVersion_Enum}
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
@@ -86,14 +86,14 @@ export function getShadowDomSupportedVersion(opt_elementClass) {
 /**
  * Returns shadow dom version.
  *
- * @param {!typeof Element} element
- * @return {!ShadowDomVersion}
+ * @param {typeof Element} element
+ * @return {ShadowDomVersion_Enum}
  */
 function getShadowDomVersion(element) {
   if (!!element.prototype.attachShadow) {
-    return ShadowDomVersion.V1;
+    return ShadowDomVersion_Enum.V1;
   } else if (!!element.prototype.createShadowRoot) {
-    return ShadowDomVersion.V0;
+    return ShadowDomVersion_Enum.V0;
   }
-  return ShadowDomVersion.NONE;
+  return ShadowDomVersion_Enum.NONE;
 }

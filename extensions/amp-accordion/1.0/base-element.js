@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {toggleAttribute} from '#core/dom';
 import {childElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
@@ -16,8 +17,6 @@ import {
   BentoAccordionHeader,
   BentoAccordionSection,
 } from './component';
-
-import {devAssert} from '../../../src/log';
 
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';

@@ -14,10 +14,11 @@
  * the License.
  */
 
+import {getData} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {TAG} from './vars';
 
-import {getData} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
 import {parseUrlDeprecated} from '../../../src/url';
 
 /** @typedef {{

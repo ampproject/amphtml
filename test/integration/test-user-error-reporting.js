@@ -1,4 +1,4 @@
-import {BrowserController, RequestBank} from '#testing/test-helper';
+import {BrowserController, RequestBank} from '#testing/helpers/service';
 
 // TODO(zhouyx, #11459): Unskip the test on Safari and Firefox.
 const t = describes.sandboxed.configure().skipSafari().skipFirefox().skipEdge();

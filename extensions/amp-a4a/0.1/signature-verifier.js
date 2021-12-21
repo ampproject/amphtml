@@ -3,7 +3,7 @@ import {base64DecodeToBytes} from '#core/types/string/base64';
 
 import {Services} from '#service';
 
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 
 /** @visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';

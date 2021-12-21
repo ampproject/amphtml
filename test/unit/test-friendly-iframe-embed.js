@@ -8,12 +8,13 @@ import {AmpDocFie} from '#service/ampdoc-impl';
 import {resetScheduledElementForTesting} from '#service/custom-element-registry';
 import {installExtensionsService} from '#service/extensions-impl';
 
+import {loadPromise} from '#utils/event-helper';
+
 import {FakeWindow} from '#testing/fake-dom';
-import {isAnimationNone} from '#testing/test-helper';
+import {isAnimationNone} from '#testing/helpers/service';
 
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
-import {loadPromise} from '../../src/event-helper';
 import {
   FriendlyIframeEmbed,
   Installers,

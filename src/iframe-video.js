@@ -7,11 +7,12 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {dev} from './log';
-import {VideoEvents} from './video-interface';
+import {dev} from '#utils/log';
+
+import {VideoEvents_Enum} from './video-interface';
 
 /** @enum {string} */
-export const SandboxOptions = {
+export const SandboxOptions_Enum = {
   ALLOW_SCRIPTS: 'allow-scripts',
   ALLOW_SAME_ORIGIN: 'allow-same-origin',
   ALLOW_POPUPS: 'allow-popups',
@@ -60,7 +61,7 @@ export function redispatch(element, event, events) {
  * @param {!./base-element.BaseElement} video
  * @param {string} src
  * @param {string=} opt_name
- * @param {!Array<!SandboxOptions>=} opt_sandbox
+ * @param {!Array<!SandboxOptions_Enum>=} opt_sandbox
  * @return {!Element}
  */
 export function createFrameFor(video, src, opt_name, opt_sandbox) {
@@ -116,7 +117,7 @@ export function objOrParseJson(objOrStr) {
  * @return {string}
  */
 export function mutedOrUnmutedEvent(isMuted) {
-  return isMuted ? VideoEvents.MUTED : VideoEvents.UNMUTED;
+  return isMuted ? VideoEvents_Enum.MUTED : VideoEvents_Enum.UNMUTED;
 }
 
 /**

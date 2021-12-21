@@ -15,7 +15,7 @@ import {
 import {Deferred} from '#core/data-structures/promise';
 import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 import {hasOwn} from '#core/types/object';
 import {once} from '#core/types/function';
@@ -231,11 +231,15 @@ export class ConsentStateManager {
   }
 
   /**
-   * Sets the dirty bit so current consent info won't be used for
-   * decision making on next visit
+   * Set dirtyBit to current consent info. Refresh stored consent value with
+   * dirtyBit
+   * @param {boolean=} dirty
+   * @return {Promise<void>}
+   * TODO(alanorozco): Remove `dirty` argument and always set to true once
+   * we remove clearDirtyBitOnResponse_dontUseThisItMightBeRemoved.
    */
-  setDirtyBit() {
-    this.instance_.setDirtyBit();
+  setDirtyBit(dirty = true) {
+    return this.instance_.setDirtyBit(dirty);
   }
 
   /**
@@ -320,14 +324,17 @@ export class ConsentInstance {
   /**
    * Set dirtyBit to current consent info. Refresh stored consent value with
    * dirtyBit
-   * @return {*} TODO(#23582): Specify return type
+   * @param {boolean=} dirty
+   * @return {Promise<void>}
+   * TODO(alanorozco): Remove `dirty` argument and always set to true once
+   * we remove clearDirtyBitOnResponse_dontUseThisItMightBeRemoved.
    */
-  setDirtyBit() {
-    // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptNext'
+  setDirtyBit(dirty = true) {
+    // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptOnNext'
     // is set to true and we need to set dirtyBit for next visit.
-    this.hasDirtyBitNext_ = true;
+    this.hasDirtyBitNext_ = dirty;
     return this.get().then((info) => {
-      if (hasDirtyBit(info)) {
+      if (hasDirtyBit(info) === dirty) {
         // Current stored value has dirtyBit and is no longer valid.
         // No need to update with dirtyBit
         return;
@@ -337,7 +344,7 @@ export class ConsentInstance {
         info['consentString'],
         info['purposeConsents'],
         info['consentMetadata'],
-        true
+        dirty
       );
     });
   }

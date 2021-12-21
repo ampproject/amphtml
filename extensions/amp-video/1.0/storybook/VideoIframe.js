@@ -21,7 +21,7 @@ import {
   BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
-import {createCustomEvent} from '../../../../src/event-helper';
+import {createCustomEvent} from '#utils/event-helper';
 import {useCallback} from '#preact';
 
 export default {

@@ -1,11 +1,11 @@
-import {whenDocumentComplete} from '#core/document-ready';
+import {isAmp4Email} from '#core/document/format';
+import {whenDocumentComplete} from '#core/document/ready';
 import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
-import {loadPromise} from '../event-helper';
-import {isAmp4Email} from '../format';
-import {devAssert} from '../log';
+import {loadPromise} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
 
 /** @typedef {string|number|boolean|undefined|null} */
 export let ResolverReturnDef;
@@ -24,7 +24,7 @@ let ReplacementDef;
  * Sort event in order
  * @enum {number}
  */
-const WAITFOR_EVENTS = {
+const WAITFOR_EVENTS_ENUM = {
   VIEWER_FIRST_VISIBLE: 1,
   DOCUMENT_COMPLETE: 2,
   LOAD: 3,
@@ -33,31 +33,31 @@ const WAITFOR_EVENTS = {
 
 /**
  * A list of events on which event they should wait
- * @const {!Object<string, WAITFOR_EVENTS>}
+ * @const {!Object<string, WAITFOR_EVENTS_ENUM>}
  */
 const NAV_TIMING_WAITFOR_EVENTS = {
   // ready on viewer first visible
-  'navigationStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'redirectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'redirectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'fetchStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'domainLookupStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'domainLookupEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'connectStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'secureConnectionStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'connectEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'requestStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'responseStart': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
-  'responseEnd': WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE,
+  'navigationStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'redirectStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'redirectEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'fetchStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'domainLookupStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'domainLookupEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'connectStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'secureConnectionStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'connectEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'requestStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'responseStart': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
+  'responseEnd': WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE,
   // ready on document complte
-  'domLoading': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
-  'domInteractive': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
-  'domContentLoaded': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
-  'domComplete': WAITFOR_EVENTS.DOCUMENT_COMPLETE,
+  'domLoading': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
+  'domInteractive': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
+  'domContentLoaded': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
+  'domComplete': WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE,
   // ready on load
-  'loadEventStart': WAITFOR_EVENTS.LOAD,
+  'loadEventStart': WAITFOR_EVENTS_ENUM.LOAD,
   // ready on load complete
-  'loadEventEnd': WAITFOR_EVENTS.LOAD_END,
+  'loadEventEnd': WAITFOR_EVENTS_ENUM.LOAD_END,
 };
 
 /**
@@ -74,22 +74,22 @@ const NAV_TIMING_WAITFOR_EVENTS = {
 export function getTimingDataAsync(win, startEvent, endEvent) {
   // Fallback to load event if we don't know what to wait for
   const startWaitForEvent =
-    NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS.LOAD;
+    NAV_TIMING_WAITFOR_EVENTS[startEvent] || WAITFOR_EVENTS_ENUM.LOAD;
   const endWaitForEvent = endEvent
-    ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS.LOAD
+    ? NAV_TIMING_WAITFOR_EVENTS[endEvent] || WAITFOR_EVENTS_ENUM.LOAD
     : startWaitForEvent;
 
   const waitForEvent = Math.max(startWaitForEvent, endWaitForEvent);
 
   // set wait for onload to be default
   let readyPromise;
-  if (waitForEvent === WAITFOR_EVENTS.VIEWER_FIRST_VISIBLE) {
+  if (waitForEvent === WAITFOR_EVENTS_ENUM.VIEWER_FIRST_VISIBLE) {
     readyPromise = Promise.resolve();
-  } else if (waitForEvent === WAITFOR_EVENTS.DOCUMENT_COMPLETE) {
+  } else if (waitForEvent === WAITFOR_EVENTS_ENUM.DOCUMENT_COMPLETE) {
     readyPromise = whenDocumentComplete(win.document);
-  } else if (waitForEvent === WAITFOR_EVENTS.LOAD) {
+  } else if (waitForEvent === WAITFOR_EVENTS_ENUM.LOAD) {
     readyPromise = loadPromise(win);
-  } else if (waitForEvent === WAITFOR_EVENTS.LOAD_END) {
+  } else if (waitForEvent === WAITFOR_EVENTS_ENUM.LOAD_END) {
     // performance.timing.loadEventEnd returns 0 before the load event handler
     // has terminated, that's when the load event is completed.
     // To wait for the event handler to terminate, wait 1ms and defer to the

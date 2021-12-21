@@ -1,4 +1,4 @@
-import * as utilsStory from '../../../../src/utils/story';
+import * as utilsStory from '#utils/story';
 import {Entitlement, GrantReason} from '../entitlement';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
 import {LocalSubscriptionRemotePlatform} from '../local-subscription-platform-remote';

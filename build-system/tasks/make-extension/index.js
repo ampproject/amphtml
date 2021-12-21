@@ -39,7 +39,6 @@ let ArgsDef;
  * @typedef {{
  *   name: string,
  *   version: string,
- *   latestVersion?: (string|undefined)
  *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
  * }}
  */
@@ -145,18 +144,11 @@ async function insertExtensionBundlesConfig(
   destination = extensionBundlesJson
 ) {
   const extensionBundles = fs.readJsonSync(destination, {throws: false}) ?? [];
-  const existingOrNull = extensionBundles.find(
-    ({name}) => name === bundle.name
-  );
 
-  const {latestVersion, name, version, ...rest} = bundle;
+  const {name, version, ...rest} = bundle;
   extensionBundles.push({
     name,
     version,
-    latestVersion:
-      (existingOrNull && existingOrNull.latestVersion) ||
-      latestVersion ||
-      version,
     ...rest,
   });
 
@@ -279,7 +271,7 @@ async function makeExtensionFromTemplates(
     bundleConfig.options = {...bundleConfig.options, hasCss: true};
   }
   if (options.bento) {
-    bundleConfig.options = {...bundleConfig.options, wrapper: 'bento'};
+    bundleConfig.options = {...bundleConfig.options, bento: true};
   }
 
   await insertExtensionBundlesConfig(

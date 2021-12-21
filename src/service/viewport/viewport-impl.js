@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {tryResolve} from '#core/data-structures/promise';
 import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
@@ -17,14 +17,15 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {dev, devAssert} from '#utils/log';
+
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
 
-import {Animation} from '../../animation';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {dev, devAssert} from '../../log';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
@@ -327,8 +328,8 @@ export class ViewportImpl {
       // Only report when the visibility is "visible" or "prerender".
       const visibilityState = this.ampdoc.getVisibilityState();
       if (
-        visibilityState == VisibilityState.PRERENDER ||
-        visibilityState == VisibilityState.VISIBLE
+        visibilityState == VisibilityState_Enum.PRERENDER ||
+        visibilityState == VisibilityState_Enum.VISIBLE
       ) {
         if (Math.random() < 0.01) {
           dev().error(TAG_, 'viewport has zero dimensions');
@@ -1207,7 +1208,7 @@ function createViewport(ampdoc) {
   let binding;
   if (
     ampdoc.isSingleDoc() &&
-    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED &&
+    getViewportType(win, viewer) == ViewportType_Enum.NATURAL_IOS_EMBED &&
     !IS_SXG
   ) {
     binding = new ViewportBindingIosEmbedWrapper_(win);
@@ -1221,7 +1222,7 @@ function createViewport(ampdoc) {
  * The type of the viewport.
  * @enum {string}
  */
-const ViewportType = {
+const ViewportType_Enum = {
   /**
    * Viewer leaves sizing and scrolling up to the AMP document's window.
    */
@@ -1247,7 +1248,7 @@ function getViewportType(win, viewer) {
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
   if (getMode(win).test && isIframedIos) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return ViewportType_Enum.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
@@ -1256,9 +1257,9 @@ function getViewportType(win, viewer) {
     viewer.isEmbedded() &&
     !viewer.hasCapability('iframeScroll')
   ) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return ViewportType_Enum.NATURAL_IOS_EMBED;
   }
-  return ViewportType.NATURAL;
+  return ViewportType_Enum.NATURAL;
 }
 
 /**

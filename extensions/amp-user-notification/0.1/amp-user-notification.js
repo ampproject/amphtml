@@ -9,8 +9,9 @@ import {
   NotificationUiManager,
 } from '#service/notification-ui-manager';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
-import {dev, user, userAssert} from '../../../src/log';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,

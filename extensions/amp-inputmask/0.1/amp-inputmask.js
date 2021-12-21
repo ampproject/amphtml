@@ -1,9 +1,9 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 
-import {TextMask} from './text-mask';
+import {listen} from '#utils/event-helper';
 
-import {listen} from '../../../src/event-helper';
+import {TextMask} from './text-mask';
 
 const SERVICE = 'inputmask';
 const TAG = `amp-${SERVICE}`;
@@ -21,7 +21,7 @@ export class AmpInputmaskService {
     /** @const */
     this.domUpdateUnlistener_ = listen(
       this.ampdoc.getRootNode(),
-      AmpEvents.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       () => this.install()
     );
   }

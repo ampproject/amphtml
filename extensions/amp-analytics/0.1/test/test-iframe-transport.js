@@ -5,7 +5,7 @@ import {
 import {addParamsToUrl} from '../../../../src/url';
 import {expectPostMessage} from '#testing/iframe';
 import {urls} from '../../../../src/config';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 
 describes.realWin('amp-analytics.iframe-transport', {amp: true}, (env) => {
   let iframeTransport;

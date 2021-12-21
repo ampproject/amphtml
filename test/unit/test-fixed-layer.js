@@ -9,10 +9,14 @@ import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
 
-import {FakeMutationObserver, FakeWindow} from '#testing/fake-dom';
+import {Animation} from '#utils/animation';
+import {user} from '#utils/log';
 
-import {Animation} from '../../src/animation';
-import {user} from '../../src/log';
+import {
+  FakeMutationObserver,
+  FakePerformance,
+  FakeWindow,
+} from '#testing/fake-dom';
 
 describes.sandboxed('FixedLayer', {}, (env) => {
   let parentApi;
@@ -150,6 +154,7 @@ describes.sandboxed('FixedLayer', {}, (env) => {
         navigator: window.navigator,
         location: window.location,
         cookie: '',
+        performance: new FakePerformance(window),
       },
       createElement: (name) => {
         return createElement(name);

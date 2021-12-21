@@ -29,9 +29,9 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 import {dict, hasOwn} from '#core/types/object';
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {isArray, isEnumValue, isObject} from '#core/types';
 import {realChildElements} from '#core/dom/query';
@@ -453,6 +453,30 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {!ConsentMetadataDef=} opt_consentMetadata
    */
   handleAction_(action, consentString, opt_consentMetadata) {
+    const setDirtyBitPromise =
+      isEnumValue(ACTION_TYPE, action) &&
+      this.consentConfig_['clearDirtyBitOnResponse_dontUseThisItMightBeRemoved']
+        ? this.consentStateManager_.setDirtyBit(false)
+        : Promise.resolve();
+    setDirtyBitPromise.then(() => {
+      this.handleActionAfterClearingDirtyBit_(
+        action,
+        consentString,
+        opt_consentMetadata
+      );
+    });
+  }
+
+  /**
+   * @param {string} action
+   * @param {string=} consentString
+   * @param {!ConsentMetadataDef=} opt_consentMetadata
+   */
+  handleActionAfterClearingDirtyBit_(
+    action,
+    consentString,
+    opt_consentMetadata
+  ) {
     this.consentStateChangedViaPromptUI_ = true;
 
     if (action == ACTION_TYPE.ACCEPT) {
@@ -521,10 +545,13 @@ export class AmpConsent extends AMP.BaseElement {
    */
   handleReprompt_(invocation) {
     const {args} = invocation;
-    if (args && args['expireCache'] === true) {
-      this.consentStateManager_.setDirtyBit();
-    }
-    this.scheduleDisplay_(true);
+    const setDirtyBitPromise =
+      args?.['expireCache'] === true
+        ? this.consentStateManager_.setDirtyBit()
+        : Promise.resolve();
+    setDirtyBitPromise.then(() => {
+      this.scheduleDisplay_(true);
+    });
   }
 
   /**

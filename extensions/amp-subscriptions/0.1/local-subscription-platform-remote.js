@@ -2,7 +2,7 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Services} from '#service';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {devAssert, userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {isArray} from '#core/types';
 

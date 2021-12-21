@@ -1,7 +1,7 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {bezierCurve} from '#core/data-structures/curve';
 import {dispatchCustomEvent} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
 import {
   observeContentSize,
@@ -16,9 +16,11 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-pan-zoom-0.1.css';
-import {Animation} from '../../../src/animation';
-import {createCustomEvent, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
@@ -26,7 +28,6 @@ import {
   SwipeXYRecognizer,
   TapRecognizer,
 } from '../../../src/gesture-recognizers';
-import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -240,10 +241,10 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return (
-      layout == Layout.FIXED ||
-      layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.FILL ||
-      layout == Layout.RESPONSIVE
+      layout == Layout_Enum.FIXED ||
+      layout == Layout_Enum.FIXED_HEIGHT ||
+      layout == Layout_Enum.FILL ||
+      layout == Layout_Enum.RESPONSIVE
     );
   }
 
@@ -761,7 +762,12 @@ export class AmpPanZoom extends AMP.BaseElement {
         'y': y,
       })
     );
-    this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
+    this.action_.trigger(
+      this.element,
+      'transformEnd',
+      event,
+      ActionTrust_Enum.HIGH
+    );
     dispatchCustomEvent(this.element, 'transformEnd');
   }
 

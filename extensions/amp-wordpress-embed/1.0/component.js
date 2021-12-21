@@ -5,7 +5,8 @@ import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
 
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
+
 import {addParamToUrl} from '../../../src/url';
 
 const {useCallback, useEffect, useMemo, useRef, useState} = Preact;

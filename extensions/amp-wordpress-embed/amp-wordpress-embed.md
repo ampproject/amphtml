@@ -16,20 +16,12 @@ This extension creates an iframe and displays the [excerpt](https://make.wordpre
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/). To find the standalone version of `amp-my-element`, see [`bento-wordpress-embed`](./1.0/README.md).
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
-#### Example: Embedding a WordPress post
-
-```html
-<amp-wordpress-embed
-  data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
-  layout="fixed"
-  height="400"
-  width="600"
->
-  <button overflow>Load more</button>
-</amp-wordpress-embed>
-```
+To find the standalone version of `amp-wordpress-embed`, see [**`bento-wordpress-embed`**](./1.0/README.md).
 
 ## Attributes
 

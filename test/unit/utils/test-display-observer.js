@@ -7,7 +7,7 @@ import {
   registerContainer,
   unobserveDisplay,
   unregisterContainer,
-} from '../../../src/utils/display-observer';
+} from '#utils/display-observer';
 
 describes.realWin('display-observer', {amp: true}, (env) => {
   let win, doc, ampdoc;

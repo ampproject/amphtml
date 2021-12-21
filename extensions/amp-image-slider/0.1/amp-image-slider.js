@@ -1,5 +1,5 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {CommonSignals} from '#core/constants/common-signals';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {realChildElements} from '#core/dom/query';
@@ -9,11 +9,12 @@ import {clamp} from '#core/math';
 
 import {Services} from '#service';
 
+import {listen, loadPromise} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-image-slider-0.1.css';
-import {listen, loadPromise} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {dev, user, userAssert} from '../../../src/log';
 
 const VALID_IMAGE_TAGNAMES = new Set(['AMP-IMG', 'IMG']);
 
@@ -169,7 +170,7 @@ export class AmpImageSlider extends AMP.BaseElement {
           }
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
 
     const initialPositionString = this.element.getAttribute(
@@ -292,7 +293,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     const rightAmpImage = dev().assertElement(this.rightImage_);
     leftAmpImage
       .signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => {
         if (leftAmpImage.childElementCount > 0) {
           const img = leftAmpImage.querySelector('img');
@@ -318,7 +319,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       });
     rightAmpImage
       .signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => {
         if (rightAmpImage.childElementCount > 0) {
           const img = rightAmpImage.querySelector('img');
@@ -730,11 +731,11 @@ export class AmpImageSlider extends AMP.BaseElement {
         dev()
           .assertElement(this.leftImage_)
           .signals()
-          .whenSignal(CommonSignals.LOAD_END),
+          .whenSignal(CommonSignals_Enum.LOAD_END),
         dev()
           .assertElement(this.rightImage_)
           .signals()
-          .whenSignal(CommonSignals.LOAD_END),
+          .whenSignal(CommonSignals_Enum.LOAD_END),
       ]).then(appendHints, appendHints);
     }
 
@@ -747,7 +748,7 @@ export class AmpImageSlider extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.unregisterEvents_();
     return true;
   }

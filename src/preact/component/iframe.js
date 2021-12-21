@@ -1,5 +1,5 @@
-import {Loading} from '#core/constants/loading-instructions';
-import {ReadyState} from '#core/constants/ready-state';
+import {Loading_Enum} from '#core/constants/loading-instructions';
+import {ReadyState_Enum} from '#core/constants/ready-state';
 
 import * as Preact from '#preact';
 import {
@@ -50,7 +50,7 @@ export function IframeEmbedWithRef(
 ) {
   const {playable} = useAmpContext();
   const loading = useLoading(loadingProp);
-  const mount = loading !== Loading.UNLOAD;
+  const mount = loading !== Loading_Enum.UNLOAD;
 
   const loadedRef = useRef(false);
   // The `onReadyStateRef` is passed via a ref to avoid the changed values
@@ -61,7 +61,9 @@ export function IframeEmbedWithRef(
       if (value !== loadedRef.current) {
         loadedRef.current = value;
         const onReadyState = onReadyStateRef.current;
-        onReadyState?.(value ? ReadyState.COMPLETE : ReadyState.LOADING);
+        onReadyState?.(
+          value ? ReadyState_Enum.COMPLETE : ReadyState_Enum.LOADING
+        );
       }
     },
     [onReadyStateRef]
@@ -75,7 +77,9 @@ export function IframeEmbedWithRef(
     () => ({
       // Standard Bento
       get readyState() {
-        return loadedRef.current ? ReadyState.COMPLETE : ReadyState.LOADING;
+        return loadedRef.current
+          ? ReadyState_Enum.COMPLETE
+          : ReadyState_Enum.LOADING;
       },
       get node() {
         return iframeRef.current;

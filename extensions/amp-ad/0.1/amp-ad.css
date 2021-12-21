@@ -118,18 +118,6 @@ amp-ad[sticky='left'] .amp-ad-close-button {
   left: 0;
 }
 
-amp-ad-sticky-padding {
-  display: block;
-  width: 100% !important;
-  background: #fff;
-  height: 4px;
-  max-height: 5px !important;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  /** Must be above the dismiss button to cover bottom shadow */
-  z-index: 12;
-}
-
 amp-ad[sticky] {
   z-index: 11;
   position: fixed;
@@ -153,7 +141,7 @@ amp-ad[sticky='bottom'] {
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #fff;
   bottom: 0;
-  padding-top: 5px;
+  padding-top: 4px;
 }
 
 amp-ad[sticky='bottom-right'] {

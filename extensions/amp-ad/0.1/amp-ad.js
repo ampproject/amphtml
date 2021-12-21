@@ -20,7 +20,7 @@ import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {getA4ARegistry} from '#ads/_a4a-config';
 import {hasOwn} from '#core/types/object';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * Construct ad network type-specific tag and script name.  Note that this

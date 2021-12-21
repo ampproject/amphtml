@@ -1,7 +1,8 @@
 import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
 
-import {userAssert} from './log';
+import {userAssert} from '#utils/log';
+
 import {toStructuredCloneable} from './utils/xhr-utils';
 
 /**

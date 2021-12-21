@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {
   USER_ERROR_SENTINEL,
@@ -14,10 +14,11 @@ import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
 
 import {Services} from '#service';
 
-import {triggerAnalyticsEvent} from './analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {isLoadErrorMessage} from '#utils/event-helper';
+import {dev, setReportError} from '#utils/log';
+
 import {urls} from './config';
-import {isLoadErrorMessage} from './event-helper';
-import {dev, setReportError} from './log';
 import {getMode} from './mode';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';
@@ -207,7 +208,10 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
+      element.dispatchCustomEventForTesting(
+        AmpEvents_Enum.ERROR,
+        error.message
+      );
     }
 
     // 'call' to make linter happy. And .call to make compiler happy

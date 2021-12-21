@@ -2,7 +2,8 @@ import {once} from '#core/types/function';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {dev} from '../src/log';
+import {dev} from '#utils/log';
+
 import {getMode} from '../src/mode';
 import {parseUrlDeprecated} from '../src/url';
 

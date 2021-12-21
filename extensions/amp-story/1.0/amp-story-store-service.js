@@ -2,7 +2,7 @@ import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '#core/data-structures/observable';
 import {Services} from '#service';
 import {deepEquals} from '#core/types/object/json';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {hasOwn} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
@@ -47,7 +47,6 @@ export const UIType = {
 export const EmbeddedComponentState = {
   HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
   FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
-  EXPANDED: 2, // Component is in expanded mode.
 };
 
 /**
@@ -68,6 +67,24 @@ export let InteractiveComponentDef;
  * }}
  */
 export let InteractiveReactData;
+
+/**
+ * @typedef {{
+ *   product-tag-id: string,
+ *   product-title: string,
+ *   product-price: string,
+ *   product-icon: string,
+ *   product-tag-text: ?string,
+ * }}
+ */
+export let ShoppingConfigDataDef;
+
+/**
+ * @typedef {{
+ *  items: !Map<string, !ShoppingConfigDataDef>,
+ * }}
+ */
+export let ShoppingDataDef;
 
 /**
  * @typedef {{
@@ -99,10 +116,8 @@ export let InteractiveReactData;
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
- *    storyHasAudioState: boolean,
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
- *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
  *    viewportWarningState: boolean,
@@ -151,9 +166,7 @@ export const StateProperty = {
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
-  SUPPORTED_BROWSER_STATE: 'supportedBrowserState',
-  // Any page has audio, or amp-story has a `background-audio` attribute.
-  STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
+  SHOPPING_DATA: 'shoppingData',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   // Any page has elements with playback.
@@ -196,9 +209,7 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-  TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
-  TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
-  TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
+  ADD_SHOPPING_DATA: 'addShoppingData',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
@@ -231,12 +242,14 @@ const stateComparisonFunctions = {
     old.height !== curr.height,
   [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
     old === null || curr === null || !deepEquals(old, curr, 2),
+  [StateProperty.SHOPPING_DATA]: (old, curr) =>
+    old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
 
 /**
- * Returns the new sate.
+ * Returns the new state.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
  * @param  {*} data
@@ -265,6 +278,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PANNING_MEDIA_STATE]: updatedState,
+      });
+    case Action.ADD_SHOPPING_DATA:
+      const updatedShoppingData = {
+        ...state[StateProperty.SHOPPING_DATA],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SHOPPING_DATA]: updatedShoppingData,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -314,10 +336,8 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAUSED_STATE]:
-          data.state === EmbeddedComponentState.EXPANDED ||
           data.state === EmbeddedComponentState.FOCUSED,
-        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]:
-          data.state !== EmbeddedComponentState.EXPANDED,
+        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
         [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
       });
     // Shows or hides the info dialog.
@@ -326,17 +346,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.INFO_DIALOG_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
-      });
-    // Shows or hides the audio controls.
-    case Action.TOGGLE_STORY_HAS_AUDIO:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.STORY_HAS_AUDIO_STATE]: !!data,
-      });
-    case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
     // Shows or hides the play/pause controls.
     case Action.TOGGLE_STORY_HAS_PLAYBACK_UI:
@@ -374,11 +383,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
-      });
-    case Action.TOGGLE_SUPPORTED_BROWSER:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.SUPPORTED_BROWSER_STATE]: !!data,
       });
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ ({
@@ -566,8 +570,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
-      [StateProperty.SUPPORTED_BROWSER_STATE]: true,
-      [StateProperty.STORY_HAS_AUDIO_STATE]: false,
+      [StateProperty.SHOPPING_DATA]: {},
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,

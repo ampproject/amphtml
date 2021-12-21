@@ -1,10 +1,6 @@
 import {dict} from '#core/types/object';
 
-import {isExperimentOn} from '#experiments';
-
 import {BaseElement} from './base-element';
-
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-wordpress-embed';
@@ -12,11 +8,6 @@ const TAG = 'amp-wordpress-embed';
 class AmpWordPressEmbed extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-wordpress-embed'),
-      'expected global "bento" or specific "bento-wordpress-embed" experiment to be enabled'
-    );
     return super.isLayoutSupported(layout);
   }
 

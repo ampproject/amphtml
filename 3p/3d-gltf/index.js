@@ -6,9 +6,9 @@ import {listenParent, nonSensitiveDataPostMessage} from '#3p/messaging';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import GltfViewer from './viewer';
+import {user} from '#utils/log';
 
-import {user} from '../../src/log';
+import GltfViewer from './viewer';
 
 const seq = (taskA, taskB) => (cb) => taskA(() => taskB(cb));
 const parallel = (taskA, taskB) => (cb) => {

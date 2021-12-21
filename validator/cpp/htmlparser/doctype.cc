@@ -1,8 +1,8 @@
-#include "doctype.h"
+#include "cpp/htmlparser/doctype.h"
 
 #include <sstream>
 
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 namespace htmlparser {
 

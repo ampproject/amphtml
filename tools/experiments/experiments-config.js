@@ -150,11 +150,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
   },
   {
-    id: 'layout-aspect-ratio-css',
-    name: 'Responsive layouts implemented via aspect-ratio CSS',
-    spec: 'https://github.com/ampproject/amphtml/issues/30291',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',

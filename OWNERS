@@ -48,8 +48,19 @@
     },
     {
       // Locked down to minimize new import aliases being added
-      pattern: 'tsconfig.json',
+      pattern: 'tsconfig{,.base}.json',
       owners: [{name: 'ampproject/wg-performance', required: true}],
+    },
+    {
+      pattern: '**/*.d.js',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: '**/build-dom.js',
+      owners: [{name: 'samouri'}],
     },
   ],
 }

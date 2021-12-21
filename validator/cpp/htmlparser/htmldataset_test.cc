@@ -10,15 +10,17 @@
 
 #include "gtest/gtest.h"
 #include "absl/flags/flag.h"
-#include "atomutil.h"
-#include "defer.h"
-#include "fileutil.h"
-#include "node.h"
-#include "parser.h"
-#include "renderer.h"
-#include "strings.h"
-#include "testconstants.h"
-#include "tokenizer.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/node.h"
+#include "cpp/htmlparser/parser.h"
+#include "cpp/htmlparser/renderer.h"
+#include "cpp/htmlparser/strings.h"
+#include "cpp/htmlparser/testconstants.h"
+#include "cpp/htmlparser/tokenizer.h"
+
+ABSL_FLAG(std::string, test_srcdir, "", "Testdata directory");
 
 using namespace htmlparser;
 

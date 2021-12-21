@@ -1,12 +1,12 @@
 import {select, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
-import {useState} from '#preact';
+import {useRef, useState} from '#preact';
 
-import {Option, Selector} from '../component';
+import {BentoSelector, BentoSelectorOption} from '../component';
 export default {
   title: 'Selector',
-  component: Selector,
+  component: BentoSelector,
   decorators: [withKnobs],
 };
 
@@ -32,16 +32,16 @@ function SelectorWithActions(props) {
       <button onClick={() => setShow(!show)}>
         toggle option 2.5 visibility
       </button>
-      <Selector ref={ref} {...props}>
+      <BentoSelector ref={ref} {...props}>
         {props.children.slice(0, 2)}
         {show && (
-          <Option as="div" option="2.5" index={2}>
+          <BentoSelectorOption as="div" option="2.5" index={2}>
             Option 2.5
-          </Option>
+          </BentoSelectorOption>
         )}
         <br />
         {props.children.slice(2)}
-      </Selector>
+      </BentoSelector>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current./*OK*/ toggle('2')}>
           toggle(option "2")
@@ -81,7 +81,7 @@ export const actionsAndOrder = () => {
         name="poll"
         aria-label="Image menu"
       >
-        <Option
+        <BentoSelectorOption
           as="img"
           alt="Sea landscape"
           style={imgStyle}
@@ -89,68 +89,73 @@ export const actionsAndOrder = () => {
           option="1"
           index={0}
           disabled
-        ></Option>
-        <Option
+        ></BentoSelectorOption>
+        <BentoSelectorOption
           as="img"
           alt="Desert landscape"
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
           option="2"
           index={1}
-        ></Option>
+        ></BentoSelectorOption>
         <br />
-        <Option
+        <BentoSelectorOption
           as="img"
           alt="Ship landscape"
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
           option="3"
           index={3}
-        ></Option>
-        <Option
+        ></BentoSelectorOption>
+        <BentoSelectorOption
           as="img"
           alt="Village landscape"
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
           option="4"
           index={4}
-        ></Option>
+        ></BentoSelectorOption>
       </SelectorWithActions>
     </form>
   );
 };
 
-export const optionItems = () => {
+export const OptionItems = () => {
+  const ref = useRef(null);
   return (
-    <Selector aria-label="Option menu">
-      <Option option="1">Option 1</Option>
-      <Option option="2">Option 2</Option>
-      <Option option="3">Option 3</Option>
-      <Option option="4">Option 4</Option>
-    </Selector>
+    <>
+      <button onClick={() => ref.current.toggle('1')}>toggle1</button>
+      <button onClick={() => ref.current.toggle('2')}>toggle2</button>
+      <BentoSelector ref={ref} aria-label="Option menu">
+        <BentoSelectorOption option="1">Option 1</BentoSelectorOption>
+        <BentoSelectorOption option="2">Option 2</BentoSelectorOption>
+        <BentoSelectorOption option="3">Option 3</BentoSelectorOption>
+        <BentoSelectorOption option="4">Option 4</BentoSelectorOption>
+      </BentoSelector>
+    </>
   );
 };
 
 export const multiselect = () => {
   return (
-    <Selector
+    <BentoSelector
       as="ul"
       multiple
       aria-label="Multiselect menu"
       defaultValue={['2']}
     >
-      <Option as="li" option="1">
+      <BentoSelectorOption as="li" option="1">
         Option 1
-      </Option>
-      <Option as="li" disabled option="2">
+      </BentoSelectorOption>
+      <BentoSelectorOption as="li" disabled option="2">
         Option 2 (disabled)
-      </Option>
-      <Option as="li" option="3">
+      </BentoSelectorOption>
+      <BentoSelectorOption as="li" option="3">
         Option 3
-      </Option>
-      <Option as="li" option="4">
+      </BentoSelectorOption>
+      <BentoSelectorOption as="li" option="4">
         Option 4
-      </Option>
-    </Selector>
+      </BentoSelectorOption>
+    </BentoSelector>
   );
 };

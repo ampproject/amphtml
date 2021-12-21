@@ -1,6 +1,7 @@
 import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoMathml} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -21,4 +22,4 @@ BaseElement['layoutSizeDefined'] = true;
 BaseElement['usesShadowDom'] = true;
 
 /** @override */
-BaseElement['shadowCss'] = true;
+BaseElement['shadowCss'] = COMPONENT_CSS;

@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -11,9 +11,10 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {dev, devAssert} from '../../../src/log';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 const TAG = 'amp-3d-gltf';
@@ -79,7 +80,7 @@ export class Amp3dGltf extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -138,7 +139,7 @@ export class Amp3dGltf extends AMP.BaseElement {
           (e) => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 

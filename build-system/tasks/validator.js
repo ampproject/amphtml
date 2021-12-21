@@ -34,10 +34,10 @@ async function validatorCpp() {
     '--noshow_loading_progress',
     '--test_summary=detailed',
     '--verbose_failures',
-    'validator_test',
+    'cpp/engine:validator_test',
   ].join(' ');
   execOrDie(bazelCmd, {
-    cwd: 'validator/cpp/engine',
+    cwd: 'validator',
     stdio: 'inherit',
   });
 }

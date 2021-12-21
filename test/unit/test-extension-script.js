@@ -7,7 +7,7 @@ import {
   parseExtensionUrl,
 } from '#service/extension-script';
 
-import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
+import {initLogConstructor, resetLogConstructorForTesting} from '#utils/log';
 
 describes.sandboxed('Extension Location', {}, () => {
   describe('get correct script source', () => {

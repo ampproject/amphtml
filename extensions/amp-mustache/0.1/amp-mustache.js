@@ -5,7 +5,7 @@ import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 import mustache from '#third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
@@ -25,7 +25,9 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer(sanitizeTagsForTripleMustache);
+    mustache.setUnescapedSanitizer((html) =>
+      sanitizeTagsForTripleMustache(html, this.win.document)
+    );
 
     user().warn(
       TAG,

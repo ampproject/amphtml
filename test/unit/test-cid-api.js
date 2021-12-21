@@ -1,6 +1,6 @@
 import {GoogleCidApi} from '#service/cid-api';
 
-import {mockWindowInterface, stubService} from '#testing/test-helper';
+import {mockWindowInterface, stubService} from '#testing/helpers/service';
 
 import {getCookie, setCookie} from '../../src/cookies';
 

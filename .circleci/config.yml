@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.2.2
+  browser-tools: circleci/browser-tools@1.2.3
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -96,6 +96,10 @@ commands:
           install-npm: false
       - node/install-packages
   setup_vm:
+    parameters:
+      save-git-cache:
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: /tmp
@@ -107,7 +111,8 @@ commands:
       - run:
           name: 'Maybe Gracefully Halt'
           command: /tmp/restored-workspace/maybe_gracefully_halt.sh
-      - checkout_repo
+      - checkout_repo:
+          save-git-cache: << parameters.save-git-cache >>
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -123,7 +128,11 @@ commands:
             - workspace
   install_chrome:
     steps:
+      - run:
+          name: 'Get Pinned Chrome Version'
+          command: ./.circleci/get_pinned_chrome_version.sh
       - browser-tools/install-chrome:
+          chrome-version: ${CHROME_VERSION}
           replace-existing: true
       - browser-tools/install-chromedriver
   install_firefox:
@@ -148,6 +157,10 @@ commands:
           path: result-reports
       - store_test_results:
           path: result-reports
+  store_filelist:
+    steps:
+      - store_artifacts:
+          path: /tmp/filelist.txt
   skip_on_push_builds:
     steps:
       - when:
@@ -214,7 +227,7 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
-  nomodule_build_prod:
+  nomodule_build_bundle_size:
     executor:
       name: node-docker-xlarge
     steps:
@@ -223,7 +236,7 @@ jobs:
           name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/bundle-size-nomodule-build.js
       - teardown_vm
-  module_build_prod:
+  module_build_bundle_size:
     executor:
       name: node-docker-xlarge
     steps:
@@ -270,7 +283,6 @@ jobs:
       name: node-docker-large
     steps:
       - setup_vm
-      - install_chrome
       - run:
           name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js
@@ -299,6 +311,7 @@ jobs:
           name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   unminified_tests:
     executor:
@@ -354,12 +367,14 @@ jobs:
           name: '⭐ End-to-End Tests ⭐'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   browser_tests_safari:
     executor:
       name: macos-medium
     steps:
-      - setup_vm
+      - setup_vm:
+          save-git-cache: true
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
@@ -433,6 +448,7 @@ jobs:
           name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
+      - store_filelist
       - teardown_vm
   amp_release:
     executor:
@@ -456,14 +472,14 @@ jobs:
           name: '⭐ amp release ⭐'
           command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
       - teardown_vm
-  archive_release:
+  upload_release:
     executor:
       name: node-docker-medium
     steps:
       - setup_vm
       - run:
-          name: '⭐ Archive Release Artifacts ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/archive-release.js
+          name: '⭐ Upload Release Artifacts ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
           path: /tmp/release.tar.gz
       - teardown_vm
@@ -496,13 +512,13 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - nomodule_build_prod:
-          name: 'Nomodule Build (Prod)'
+      - nomodule_build_bundle_size:
+          name: 'Nomodule Build (Bundle Size)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - module_build_prod:
-          name: 'Module Build (Prod)'
+      - module_build_bundle_size:
+          name: 'Module Build (Bundle Size)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
@@ -515,8 +531,8 @@ workflows:
           name: 'Bundle Size'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Prod)'
-            - 'Module Build (Prod)'
+            - 'Nomodule Build (Bundle Size)'
+            - 'Module Build (Bundle Size)'
       - validator_tests:
           name: 'Validator Tests'
           <<: *push_and_pr_builds
@@ -526,6 +542,7 @@ workflows:
           name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
           requires:
+            - 'Module Build (Test)'
             - 'Nomodule Build (Test)'
       - local_unit_tests:
           name: 'Local Unit Tests'
@@ -623,8 +640,10 @@ workflows:
           <<: *release_builds_only
           requires:
             - 'Initialize Repository'
-      - archive_release:
-          name: 'Archive Release'
+      - upload_release:
+          name: 'Upload Release'
           <<: *release_builds_only
           requires:
             - amp_release
+          context:
+            - release-build-uploader

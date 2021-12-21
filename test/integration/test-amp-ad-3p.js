@@ -3,9 +3,9 @@ import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {Services} from '#service';
 import {installPlatformService} from '#service/platform-impl';
 
-import {createFixtureIframe, poll} from '#testing/iframe';
+import {createCustomEvent} from '#utils/event-helper';
 
-import {createCustomEvent} from '../../src/event-helper';
+import {createFixtureIframe, poll} from '#testing/iframe';
 
 const IFRAME_HEIGHT = 3000;
 function createFixture() {

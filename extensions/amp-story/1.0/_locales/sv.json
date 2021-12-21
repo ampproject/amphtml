@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Få länk"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Fler"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Du måste aktivera amp-story-experimentet för att visa det här innehållet."
   },
   "21": {
     "string": "Det verkar dessvärre som om din webbläsare inte stöder den här upplevelsen"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Fortsätt ändå"
   },
-  "31": {
-    "string": "Ljud av"
-  },
-  "32": {
-    "string": "Ljud på"
-  },
-  "33": {
-    "string": "Den här sidan saknar ljud"
-  },
   "34": {
     "string": "Spela video"
   },
   "35": {
     "string": "Svep upp"
-  },
-  "36": {
-    "string": "Expandera tweet"
-  },
-  "62": {
-    "string": "Dela med start från den här sidan"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Dela story"
-  },
-  "70": {
-    "string": "Öppna/stäng storymeny"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Tips"
-  },
-  "82": {
-    "string": "Föregående sida"
   },
   "83": {
     "string": "Aktivera"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Öppnar"
+  },
+  "98": {
+    "string": "Formuläret har inte skickats, försök igen"
+  },
+  "99": {
+    "string": "Formuläret har skickats in"
   }
 }

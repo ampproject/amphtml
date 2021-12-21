@@ -30,7 +30,7 @@ const MODULE_CONTAINER_DIRECTORY = 'module';
 
 const ARTIFACT_DIRECTORY = '/tmp/artifacts/';
 const ARTIFACT_FILE_NAME = `${ARTIFACT_DIRECTORY}/amp_nomodule_build.tar.gz`;
-const TEST_FILES_LIST_FILE_NAME = '/tmp/testfiles.txt';
+const FILELIST_PATH = '/tmp/filelist.txt';
 
 const BUILD_OUTPUT_DIRS = ['build', 'dist', 'dist.3p', 'dist.tools'];
 const APP_SERVING_DIRS = [
@@ -327,17 +327,17 @@ function generateCircleCiShardTestFileList(globs) {
   )
     .trim()
     .replace(/\s+/g, ',');
-  fs.writeFileSync(TEST_FILES_LIST_FILE_NAME, fileList, 'utf8');
+  fs.writeFileSync(FILELIST_PATH, fileList, 'utf8');
   logWithoutTimestamp(
     'Stored list of',
     cyan(fileList.split(',').length),
     'test files in',
-    cyan(TEST_FILES_LIST_FILE_NAME)
+    cyan(FILELIST_PATH)
   );
 }
 
 module.exports = {
-  TEST_FILES_LIST_FILE_NAME,
+  FILELIST_PATH,
   abortTimedJob,
   printChangeSummary,
   skipDependentJobs,

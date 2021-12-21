@@ -3,7 +3,7 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';
@@ -43,12 +43,22 @@ export class AnchorAdStrategy {
       return Promise.resolve(false);
     }
 
-    Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
-      this.ampdoc,
-      STICKY_AD_TAG,
-      '1.0'
-    );
-    this.placeStickyAd_();
+    if (this.baseAttributes_.sticky === 'top') {
+      Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
+        this.ampdoc,
+        'amp-ad',
+        '0.1'
+      );
+      this.placeAmpAdStickyAd_();
+    } else {
+      // TODO(powerivq@) once <amp-ad sticky=bottom> is stabilized, move this to use amp-ad sticky.
+      Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
+        this.ampdoc,
+        STICKY_AD_TAG,
+        '1.0'
+      );
+      this.placeStickyAd_();
+    }
     return Promise.resolve(true);
   }
 
@@ -57,7 +67,9 @@ export class AnchorAdStrategy {
    * @private
    */
   hasExistingStickyAd_() {
-    return !!this.ampdoc.getRootNode().querySelector('AMP-STICKY-AD');
+    return !!this.ampdoc
+      .getRootNode()
+      .querySelector('amp-sticky-ad, amp-ad[sticky]');
   }
 
   /**
@@ -68,6 +80,27 @@ export class AnchorAdStrategy {
     return user()
       .assertArray(this.configObj_['optInStatus'] || [])
       .includes(OPT_IN_STATUS_ANCHOR_ADS);
+  }
+
+  /**
+   * @private
+   */
+  placeAmpAdStickyAd_() {
+    const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
+    const attributes = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict(),
+        this.baseAttributes_,
+        dict({
+          'width': String(viewportWidth),
+          'height': this.baseAttributes_.height || '100',
+        })
+      )
+    );
+    const doc = this.ampdoc.win.document;
+    const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
+    const body = this.ampdoc.getBody();
+    body.insertBefore(ampAd, body.firstChild);
   }
 
   /**
@@ -86,6 +119,7 @@ export class AnchorAdStrategy {
         })
       )
     );
+    delete attributes.sticky; // To ensure that no sticky attribute will be wrapped inside an amp-sticky-ad element.
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
     const stickyAd = createElementWithAttributes(

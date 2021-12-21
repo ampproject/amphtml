@@ -1,13 +1,17 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {dispatchCustomEvent} from '#core/dom';
-import {Layout, LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
 import {isArray} from '#core/types';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
-import {getData, listen, loadPromise} from './event-helper';
-import {devAssert, user, userAssert} from './log';
+import {getData, listen, loadPromise} from '#utils/event-helper';
+import {devAssert, user, userAssert} from '#utils/log';
+
 import {getMode} from './mode';
 
 /**
@@ -174,14 +178,14 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LayoutPriority.CONTENT.
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
    *
    * @param {!AmpElement} unusedElement
    * @return {number}
    * @nocollapse
    */
   static getBuildPriority(unusedElement) {
-    return LayoutPriority.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /**
@@ -217,7 +221,7 @@ export class BaseElement {
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = toWin(element.ownerDocument.defaultView);
+    this.win = getWin(element);
 
     /*
     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  ____|
@@ -237,7 +241,7 @@ export class BaseElement {
      * trust required to invoke the handler.
      * @private {?Object<string, {
      *   handler: function(!./service/action-impl.ActionInvocation),
-     *   minTrust: ActionTrust,
+     *   minTrust: ActionTrust_Enum,
      * }>} */
     this['actionMap_'] = null;
 
@@ -268,12 +272,12 @@ export class BaseElement {
    *
    * The lower the number, the higher the priority.
    *
-   * The default priority for base elements is LayoutPriority.CONTENT.
+   * The default priority for base elements is LayoutPriority_Enum.CONTENT.
    * @return {number}
    * TODO(#31915): remove once R1 migration is complete.
    */
   getLayoutPriority() {
-    return LayoutPriority.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /**
@@ -293,7 +297,7 @@ export class BaseElement {
       .updateLayoutPriority(this.element, newLayoutPriority);
   }
 
-  /** @return {!Layout} */
+  /** @return {!Layout_Enum} */
   getLayout() {
     return this.element.getLayout();
   }
@@ -316,15 +320,6 @@ export class BaseElement {
    */
   getLayoutSize() {
     return this.element.getLayoutSize();
-  }
-
-  /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @public
-   * @return {!Window}
-   */
-  getWin() {
-    return this.win;
   }
 
   /**
@@ -362,14 +357,14 @@ export class BaseElement {
 
   /**
    * Intended to be implemented by subclasses. Tests whether the element
-   * supports the specified layout. By default only Layout.NODISPLAY is
+   * supports the specified layout. By default only Layout_Enum.NODISPLAY is
    * supported.
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @return {boolean}
    * @public
    */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /**
@@ -528,7 +523,7 @@ export class BaseElement {
    *
    * Only used for R1 elements.
    *
-   * @param {!./ready-state.ReadyState} state
+   * @param {!./ready-state.ReadyState_Enum} state
    * @param {*=} opt_failure
    * @final
    */
@@ -672,10 +667,10 @@ export class BaseElement {
    *
    * @param {string} alias
    * @param {function(!./service/action-impl.ActionInvocation)} handler
-   * @param {ActionTrust} minTrust
+   * @param {ActionTrust_Enum} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
+  registerAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     initActionMap(this);
     this['actionMap_'][alias] = {handler, minTrust};
   }
@@ -684,13 +679,13 @@ export class BaseElement {
    * Registers the default action for this component.
    * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @param {string=} alias
-   * @param {ActionTrust=} minTrust
+   * @param {ActionTrust_Enum=} minTrust
    * @public
    */
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.DEFAULT
+    minTrust = ActionTrust_Enum.DEFAULT
   ) {
     devAssert(
       !this['defaultActionAlias_'],

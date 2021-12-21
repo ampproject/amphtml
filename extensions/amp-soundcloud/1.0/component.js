@@ -6,7 +6,7 @@ import {useCallback, useEffect, useRef} from '#preact';
 import {useValueRef} from '#preact/component';
 import {IframeEmbed} from '#preact/component/iframe';
 
-import {getData} from '../../../src/event-helper';
+import {getData} from '#utils/event-helper';
 
 const MATCHES_MESSAGING_ORIGIN = (origin) => {
   return origin === 'https://w.soundcloud.com';

@@ -20,10 +20,10 @@
 //
 //   - See scripts/basic_validator_example.cc for a working example.
 
-#ifndef AMPVALIDATOR__VALIDATOR_H_
-#define AMPVALIDATOR__VALIDATOR_H_
+#ifndef CPP_ENGINE_VALIDATOR_H_
+#define CPP_ENGINE_VALIDATOR_H_
 
-#include "document.h"
+#include "cpp/htmlparser/document.h"
 #include "validator.pb.h"
 
 namespace amp::validator {
@@ -41,4 +41,4 @@ int ValidatorVersion();
 
 }  // namespace amp::validator
 
-#endif  // AMPVALIDATOR__VALIDATOR_H_
+#endif  // CPP_ENGINE_VALIDATOR_H_

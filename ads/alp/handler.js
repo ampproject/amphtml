@@ -5,7 +5,7 @@ import {
   parseUrlDeprecated,
 } from '../../src/url';
 import {closest} from '#core/dom/query';
-import {dev} from '../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {openWindowDialog} from '../../src/open-window-dialog';
 import {parseQueryString} from '#core/types/string/url';

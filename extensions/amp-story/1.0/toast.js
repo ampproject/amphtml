@@ -1,9 +1,7 @@
+import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
-import {createElementWithAttributes, removeElement} from '#core/dom';
-import {toWin} from '#core/window';
-
-/** @private @const {string} */
-const TOAST_CLASSNAME = 'i-amphtml-story-toast';
+import {removeElement} from '#core/dom';
+import {getWin} from '#core/window';
 
 /**
  * The 'alert' role assertively announces toast content to screen readers.
@@ -27,22 +25,13 @@ export class Toast {
    * @param {!Node|string} childNodeOrText
    */
   static show(storyEl, childNodeOrText) {
-    const win = toWin(storyEl.ownerDocument.defaultView);
+    const win = getWin(storyEl);
 
-    const toast = createElementWithAttributes(
-      win.document,
-      'div',
-      /** @type {!JsonObject} */ ({
-        'class': TOAST_CLASSNAME,
-        'role': TOAST_ROLE,
-      })
+    const toast = (
+      <div class="i-amphtml-story-toast" role={TOAST_ROLE}>
+        {childNodeOrText}
+      </div>
     );
-
-    if (typeof childNodeOrText == 'string') {
-      toast.textContent = childNodeOrText;
-    } else {
-      toast.appendChild(childNodeOrText);
-    }
 
     storyEl.appendChild(toast);
 

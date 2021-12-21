@@ -1,4 +1,25 @@
 {
+  "2": {
+    "string": "Dotaknite se »Naprej«"
+  },
+  "3": {
+    "string": "Dotaknite se »Nazaj«"
+  },
+  "4": {
+    "string": "Povezave ni bilo mogoče kopirati v odložišče :("
+  },
+  "5": {
+    "string": "Povezava kopirana!"
+  },
+  "6": {
+    "string": "E-pošta"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Pridobi povezavo"
+  },
   "10": {
     "string": "LinkedIn"
   },
@@ -8,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Več"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -19,12 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Če si želite ogledati to vsebino, morate omogočiti preizkus zgodb amp-story."
-  },
-  "2": {
-    "string": "Dotaknite se »Naprej«"
   },
   "21": {
     "string": "Vaš brskalnik na žalost ne podpira te izkušnje"
@@ -44,38 +56,11 @@
   "27": {
     "string": "Vseeno nadaljuj"
   },
-  "3": {
-    "string": "Dotaknite se »Nazaj«"
-  },
-  "31": {
-    "string": "Zvok je izklopljen"
-  },
-  "32": {
-    "string": "Zvok je vklopljen"
-  },
-  "33": {
-    "string": "Na tej strani ni zvoka"
-  },
   "34": {
     "string": "Predvajaj video"
   },
   "35": {
     "string": "Povleci navzgor"
-  },
-  "36": {
-    "string": "Razširi objavo"
-  },
-  "4": {
-    "string": "Povezave ni bilo mogoče kopirati v odložišče :("
-  },
-  "5": {
-    "string": "Povezava kopirana!"
-  },
-  "6": {
-    "string": "E-pošta"
-  },
-  "62": {
-    "string": "Začni deliti s to stranjo"
   },
   "63": {
     "string": "Line"
@@ -97,12 +82,6 @@
   },
   "69": {
     "string": "Deli zgodbo"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "70": {
-    "string": "Prikaži/skrij meni za zgodbo"
   },
   "71": {
     "string": "A"
@@ -131,17 +110,11 @@
   "79": {
     "string": "Povlecite za pomik na naslednjo zgodbo"
   },
-  "8": {
-    "string": "Google+"
-  },
   "80": {
     "string": "Razumem"
   },
   "81": {
     "string": "Namig"
-  },
-  "82": {
-    "string": "Prejšnja stran"
   },
   "83": {
     "string": "Aktiviraj"
@@ -164,9 +137,6 @@
   "89": {
     "string": "Vaš odgovor bo poslan na"
   },
-  "9": {
-    "string": "Pridobi povezavo"
-  },
   "90": {
     "string": "Naslednja zgodba"
   },
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Odpiranje"
+  },
+  "98": {
+    "string": "Obrazec ni poslan, poskusite znova"
+  },
+  "99": {
+    "string": "Obrazec je bil uspešno oddan"
   }
 }

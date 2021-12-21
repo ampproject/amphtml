@@ -3,7 +3,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {AmpStoryAccess, Type} from '../amp-story-access';
+import {AmpStoryAccess, Type_Enum} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {afterRenderPromise} from '#testing/helpers';
 
@@ -74,7 +74,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
   });
 
   it('should show the access notification on state update', async () => {
-    storyAccess.element.setAttribute('type', Type.NOTIFICATION);
+    storyAccess.element.setAttribute('type', Type_Enum.NOTIFICATION);
     storyAccess.buildCallback();
 
     storeService.dispatch(Action.CHANGE_PAGE, {

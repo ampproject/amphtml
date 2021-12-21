@@ -2,7 +2,7 @@ import {BaseElement} from './base-element';
 __css_import__;
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';

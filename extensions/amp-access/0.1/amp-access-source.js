@@ -7,6 +7,9 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, user, userAssert} from '#utils/log';
+
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessIframeAdapter} from './amp-access-iframe';
 import {AccessOtherAdapter} from './amp-access-other';
@@ -15,8 +18,6 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {dev, user, userAssert} from '../../../src/log';
 import {assertHttpsUrl} from '../../../src/url';
 
 /** @const */

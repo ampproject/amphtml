@@ -20,6 +20,7 @@ tags: {  # amp-carousel for AMP4EMAIL
     name: "amp-carousel"
     # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
+    version: "0.2"
   }
   attr_lists: "common-extension-attrs"
 }

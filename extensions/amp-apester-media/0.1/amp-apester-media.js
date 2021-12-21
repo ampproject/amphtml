@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
 import {Services} from '#service';
 import {addParamsToUrl} from '../../../src/url';
 import {
@@ -22,7 +22,7 @@ import {
   getLengthNumeral,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {
   extractTags,
@@ -407,7 +407,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.unobserveIntersections_?.();
-    this.unobserveIntersections = null;
+    this.unobserveIntersections_ = null;
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;

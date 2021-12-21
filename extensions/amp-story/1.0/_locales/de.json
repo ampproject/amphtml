@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Link abrufen"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Mehr"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Um diesen Inhalt anzuzeigen, musst du das Experiment für amp-story aktivieren."
   },
   "21": {
     "string": "Leider unterstützt dein Browser diese Art der Präsentation nicht."
@@ -65,26 +56,11 @@
   "27": {
     "string": "Trotzdem fortfahren"
   },
-  "31": {
-    "string": "Ton aus"
-  },
-  "32": {
-    "string": "Ton an"
-  },
-  "33": {
-    "string": "Diese Seite hat keinen Ton"
-  },
   "34": {
     "string": "Video abspielen"
   },
   "35": {
     "string": "Nach oben wischen"
-  },
-  "36": {
-    "string": "Tweet maximieren"
-  },
-  "62": {
-    "string": "Ab dieser Seite teilen"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Story teilen"
-  },
-  "70": {
-    "string": "Story Menü ein/aus"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Tipp"
-  },
-  "82": {
-    "string": "Vorherige Seite"
   },
   "83": {
     "string": "Aktivieren"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Wird geöffnet"
+  },
+  "98": {
+    "string": "Formular nicht abgeschickt, versuche es erneut"
+  },
+  "99": {
+    "string": "Formular erfolgreich abgeschickt"
   }
 }

@@ -1,18 +1,18 @@
-import * as Listen from '../../../../src/event-helper';
+import * as Listen from '#utils/event-helper';
 import {
   SESSION_MAX_AGE_MILLIS,
   SESSION_VALUES,
   SessionManager,
   installSessionServiceForTesting,
 } from '../session-manager';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {expect} from 'chai';
 import {installVariableServiceForTesting} from '../variables';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 
 describes.realWin('Session Manager', {amp: true}, (env) => {
   let win;
@@ -453,12 +453,12 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(sessionManager.isVisible_).to.be.false;
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: false,
         });
-        env.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.VISIBLE);
         expect(sessionManager.isVisible_).to.be.true;
 
         expect(updateEngagedSpy.callCount).to.equal(6);
@@ -538,7 +538,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         session[SESSION_VALUES.ENGAGED] = false;
 
         expect(storageSetSpy).to.be.calledOnce;
@@ -550,7 +550,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: false,
         });
-        env.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.VISIBLE);
         session[SESSION_VALUES.ENGAGED] = true;
 
         expect(storageSetSpy).to.be.calledOnce;
@@ -595,7 +595,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(sessionManager.isVisible_).to.be.false;
 
         // Uses the `true` engaged value
@@ -632,7 +632,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(sessionManager.isVisible_).to.be.false;
 
         const persistedSession = await sessionManager.get(vendorType);
@@ -666,7 +666,7 @@ describes.realWin('Session Manager', {amp: true}, (env) => {
         env.sandbox.defineProperty(win.document, 'hidden', {
           value: true,
         });
-        env.ampdoc.overrideVisibilityState(VisibilityState.HIDDEN);
+        env.ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
 
         const engaged = await sessionManager.getSessionValue(
           vendorType,

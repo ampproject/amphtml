@@ -44,3 +44,16 @@ export function useMergeRefs(refs) {
     refs
   );
 }
+
+/**
+ * Required to use `props` whose name would be usually be mapped in
+ * Preact-to-React style.
+ * This passes through the value during development, because we render on Preact.
+ * It's an annotation so that we can convert these values when we transform the
+ * React build.
+ * @param {string} name
+ * @return {string}
+ */
+export function propName(name) {
+  return name;
+}

@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Lortu esteka"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Gehiago"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Eduki hau ikusteko, amp-story esperimentua gaitu behar duzu."
   },
   "21": {
     "string": "Zure arakatzaileak ez du onartzen eduki hau"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Jarraitu halere"
   },
-  "31": {
-    "string": "Desaktibatu da audioa"
-  },
-  "32": {
-    "string": "Aktibatu da audioa"
-  },
-  "33": {
-    "string": "Orriak ez du audiorik"
-  },
   "34": {
     "string": "Erreproduzitu bideoa"
   },
   "35": {
     "string": "Pasatu hatza gora"
-  },
-  "36": {
-    "string": "Zabaldu txioa"
-  },
-  "62": {
-    "string": "Partekatu orri honetatik aurrera"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Partekatu istorioa"
-  },
-  "70": {
-    "string": "Aktibatu/Desaktibatu istorioaren menua"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Aholkua"
-  },
-  "82": {
-    "string": "Aurreko orria"
   },
   "83": {
     "string": "Aktibatu"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Irekitzen"
+  },
+  "98": {
+    "string": "Inprimakia ez da bidali. Saiatu berriro."
+  },
+  "99": {
+    "string": "Bidali da inprimakia"
   }
 }

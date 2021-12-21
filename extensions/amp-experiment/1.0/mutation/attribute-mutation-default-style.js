@@ -2,9 +2,9 @@ import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
 import {dict, hasOwn} from '#core/types/object';
 
-import {assertAttributeMutationFormat} from './mutation';
+import {dev, user} from '#utils/log';
 
-import {dev, user} from '../../../../src/log';
+import {assertAttributeMutationFormat} from './mutation';
 
 /** @const {RegExp} */
 const NON_SPACE_REGEX = /\S/;

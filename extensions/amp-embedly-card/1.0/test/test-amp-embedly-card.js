@@ -4,8 +4,8 @@ import {computedStyle} from '#core/dom/style';
 
 import {toggleExperiment} from '#experiments';
 
+import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
-import {waitFor} from '#testing/test-helper';
 
 describes.realWin(
   'amp-embedly-card-v1.0',

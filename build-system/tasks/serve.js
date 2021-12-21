@@ -234,7 +234,7 @@ module.exports = {
   PORT,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 serve.description = 'Start a webserver at the project root directory';
 serve.flags = {

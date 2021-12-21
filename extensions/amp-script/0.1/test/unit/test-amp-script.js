@@ -1,10 +1,9 @@
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
-
 import {Services} from '#service';
+
+import {user} from '#utils/log';
 
 import {FakeWindow} from '#testing/fake-dom';
 
-import {user} from '../../../../../src/log';
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
@@ -14,6 +13,7 @@ import {
   AmpScriptService,
   SanitizerImpl,
   StorageLocation,
+  setUpgradeForTest,
 } from '../../amp-script';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
@@ -23,6 +23,11 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let xhr;
 
   beforeEach(() => {
+    registerServiceBuilderForDoc(
+      env.win.document,
+      'amp-script',
+      AmpScriptService
+    );
     element = document.createElement('amp-script');
     env.ampdoc.getBody().appendChild(element);
 
@@ -39,14 +44,16 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       fetchText: env.sandbox.stub(),
     };
     xhr.fetchText
-      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .withArgs(env.sandbox.match(/amp-script-worker/))
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
     // Make @ampproject/worker-dom dependency essentially a noop for these tests.
-    env.sandbox
-      .stub(WorkerDOM, 'upgrade')
-      .callsFake((unused, scriptsPromise) => scriptsPromise);
+    setUpgradeForTest((unused, scriptsPromise) => scriptsPromise);
+  });
+
+  afterEach(() => {
+    resetServiceForTesting(env.win, 'amp-script');
   });
 
   function stubFetch(url, headers, text, responseUrl) {
@@ -89,15 +96,9 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     xhr.fetchText
       .withArgs(env.sandbox.match(/amp-script-worker-nodom-0.1.js/))
       .resolves({text: () => Promise.resolve('/* noop */')});
-    registerServiceBuilderForDoc(
-      env.win.document,
-      'amp-script',
-      AmpScriptService
-    );
 
     await script.buildCallback();
     await script.layoutCallback();
-    resetServiceForTesting(env.win, 'amp-script');
   });
 
   it('should work with "text/javascript" content-type for same-origin src', () => {
@@ -127,6 +128,22 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     service.checkSha384.withArgs('alert(1)').resolves();
     await script.layoutCallback();
     expect(service.checkSha384).to.be.called;
+  });
+
+  it('should skip the check for sha384(author_js) for cross-origin src in sandboxed mode', async () => {
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://bar.example/bar.js');
+    element.setAttribute('sandboxed', '');
+
+    stubFetch(
+      'https://bar.example/bar.js',
+      {'Content-Type': 'application/javascript; charset=UTF-8'},
+      'alert(1)'
+    );
+
+    await script.buildCallback();
+    await script.layoutCallback();
+    expect(service.checkSha384).not.to.be.called;
   });
 
   it('callFunction waits for initialization to complete before returning', async () => {
@@ -230,17 +247,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   });
 
   describe('development mode', () => {
-    beforeEach(() => {
-      registerServiceBuilderForDoc(
-        env.win.document,
-        'amp-script',
-        AmpScriptService
-      );
-    });
-    afterEach(() => {
-      resetServiceForTesting(env.win, 'amp-script');
-    });
-
     it('should not be in dev mode by default', () => {
       script.buildCallback();
       expect(script.development_).false;
