@@ -23,7 +23,7 @@ const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles);
 
 const bentoBundles = {};
-maybeInitializeBentoComponents(bentoBundles, /* includeLatest */ true);
+maybeInitializeBentoComponents(bentoBundles);
 
 const vendorBundles = generateBundles();
 

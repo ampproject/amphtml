@@ -25,26 +25,14 @@ const COMPONENTS = {};
  * Initializes all components from build-system/compile/bundles.config.bento.json
  * if not already done and populates the given components object.
  * @param {Object} componentsObject
- * @param {boolean=} includeLatest
  */
-function maybeInitializeBentoComponents(
-  componentsObject,
-  includeLatest = false
-) {
+function maybeInitializeBentoComponents(componentsObject) {
   if (Object.keys(componentsObject).length > 0) {
     return;
   }
   verifyBentoBundles();
   bentoBundles.forEach((c) => {
-    declareExtension(
-      c.name,
-      c.version,
-      // TODO(rileyajones): Remove this once the bento build process fully seperated.
-      '0.1',
-      c.options,
-      componentsObject,
-      includeLatest
-    );
+    declareExtension(c.name, c.version, c.options, componentsObject);
   });
 }
 
