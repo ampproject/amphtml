@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "glog/logging.h"
 #include "google/protobuf/repeated_field.h"
 #include "absl/algorithm/container.h"
 #include "absl/base/thread_annotations.h"
@@ -41,6 +40,7 @@
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/elements.h"
 #include "cpp/htmlparser/json/parser.h"
+#include "cpp/htmlparser/logging.h"
 #include "cpp/htmlparser/node.h"
 #include "cpp/htmlparser/parser.h"
 #include "cpp/htmlparser/strings.h"
@@ -128,6 +128,8 @@ static const LazyRE2 kExtensionPathRe = {
     R"re((?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?)re"};
 
 namespace {
+
+#define CHECK_NOTNULL(x) (x)
 
 // Sorts and eliminates duplicates in |v|.
 template <typename T>
