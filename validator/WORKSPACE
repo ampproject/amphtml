@@ -10,13 +10,6 @@ http_archive(
 )
 
 http_archive(
-    name = "com_github_glog",
-    sha256 = "9411249a033ff79b100d55111347cba886eebf4f0bb6394554b9c11a98eb837f",
-    strip_prefix = "glog-f4dd77ae6b8e5f8e1323c929e81dbc40ff58fc7b",
-    urls = ["https://github.com/google/glog/archive/f4dd77ae6b8e5f8e1323c929e81dbc40ff58fc7b.zip"],
-)
-
-http_archive(
     name = "com_google_googletest",
     sha256 = "002d540f947e5981f54ddaab476d87b113d2a14822f21a34dca30f24c9492a24",
     strip_prefix = "googletest-16f637fbf4ffc3f7a01fa4eceb7906634565242f",
