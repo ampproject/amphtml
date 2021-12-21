@@ -15,12 +15,13 @@ import {forwardRef} from '#preact/compat';
 
 import {installTimerService} from '#service/timer-impl';
 
+import {listen} from '#utils/event-helper';
+import {initLogConstructor} from '#utils/log';
+
 import {useStyles} from './component.jss';
 
-import {listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {initLogConstructor} from '../../../src/log';
 
 /**
  * Using Gestures class throws console error for failed to call initLogConstructor
