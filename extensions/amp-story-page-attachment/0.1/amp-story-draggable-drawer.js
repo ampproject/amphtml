@@ -10,7 +10,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
-import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
+import {CSS} from '../../../build/amp-story-draggable-drawer-header-0.1.css';
 import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,
