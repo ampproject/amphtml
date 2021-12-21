@@ -15,9 +15,13 @@ import {
   setupResponseAttributeElements,
 } from './amp-story-form';
 
+import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
 import {getSourceOrigin} from '../../../src/url';
 import {localize} from '../../amp-story/1.0/amp-story-localization-service';
-import {renderOutlinkLinkIconElement} from '../../amp-story/1.0/amp-story-open-page-attachment';
+import {
+  AttachmentTheme,
+  renderOutlinkLinkIconElement,
+} from '../../amp-story/1.0/amp-story-open-page-attachment';
 import {
   Action,
   StateProperty,
@@ -48,15 +52,6 @@ const DRAG_CAP_PX = 56;
  * @const {number}
  */
 const POST_TAP_ANIMATION_DURATION = 500;
-
-/**
- * @enum {string}
- */
-export const AttachmentTheme = {
-  LIGHT: 'light', // default
-  DARK: 'dark',
-  CUSTOM: 'custom',
-};
 
 /**
  * @enum
@@ -522,3 +517,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     return publisherOrigin.replace(/^http(s)?:\/\/(www.)?/, '');
   }
 }
+
+AMP.extension('amp-story-page-attachment', '1.0', () => {
+  AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment, CSS);
+  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment);
+});

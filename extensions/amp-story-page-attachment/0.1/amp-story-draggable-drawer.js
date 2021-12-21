@@ -1,21 +1,24 @@
+import {isAmpElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
+import {Layout_Enum} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
+import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
-} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
-import {Layout_Enum} from '#core/dom/layout';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {closest} from '#core/dom/query';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '#utils/log';
-import {localize} from './amp-story-localization-service';
-import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {listen} from '#utils/event-helper';
-import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+} from '../../amp-story/1.0/amp-story-store-service';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;

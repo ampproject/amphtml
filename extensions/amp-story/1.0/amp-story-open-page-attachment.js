@@ -2,7 +2,6 @@ import * as Preact from '#core/dom/jsx';
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
-import {AttachmentTheme} from '../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {dev} from '#utils/log';
@@ -21,6 +20,15 @@ import {scopedQuerySelector} from '#core/dom/query';
 const CtaAccentElement = {
   TEXT: 'text',
   BACKGROUND: 'background',
+};
+
+/**
+ * @enum {string}
+ */
+export const AttachmentTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+  CUSTOM: 'custom',
 };
 
 const renderOutlinkAttachmentArrow = () => (
