@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {mount} from 'enzyme';
+import moment from 'moment';
 
 import * as Preact from '#preact';
 
@@ -10,6 +11,24 @@ import {BentoDatePicker} from '../component';
 // (like react-day-picker) that depend on React
 // eslint-disable-next-line no-undef
 const React = require('react');
+
+function selectDate(wrapper, date) {
+  const calendar = wrapper.find('[aria-label="Calendar"]');
+
+  calendar.props().onDateChange(moment(date));
+
+  wrapper.update();
+}
+
+function selectDates(wrapper, startDate, endDate) {
+  const calendar = wrapper.find('[aria-label="Calendar"]');
+
+  calendar
+    .props()
+    .onDatesChange({startDate: moment(startDate), endDate: moment(endDate)});
+
+  wrapper.update();
+}
 
 const DEFAULT_PROPS = {
   layout: 'fixed-height',
@@ -181,6 +200,92 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       );
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
+
+    it('can select a date', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+        />
+      );
+
+      selectDate(wrapper, '2021-01-01');
+
+      expect(wrapper.exists('[data-date="2021-01-01"]')).to.be.true;
+    });
+
+    it('sets the selected date as the input value', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker
+            type="single"
+            mode="static"
+            layout="fixed-height"
+            height={360}
+          />
+        </form>
+      );
+
+      selectDate(wrapper, '2021-01-01');
+
+      const input = wrapper.find('input[type="hidden"]');
+
+      expect(input.prop('value')).to.equal('2021-01-01');
+    });
+  });
+
+  describe('showing the date picker in static mode for a date range', () => {
+    it('shows the calendar view by default', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+        />
+      );
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
+
+    it('can select a date range', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+        />
+      );
+
+      selectDates(wrapper, '2021-01-01', '2021-01-02');
+
+      expect(wrapper.exists('[data-startdate="2021-01-01"]')).to.be.true;
+      expect(wrapper.exists('[data-enddate="2021-01-02"]')).to.be.true;
+    });
+
+    it('sets the selected date as the input value', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker
+            type="range"
+            mode="static"
+            layout="fixed-height"
+            height={360}
+          />
+        </form>
+      );
+
+      selectDates(wrapper, '2021-01-01', '2021-01-02');
+
+      const startDateInput = wrapper.find('input[name="start-date"]');
+      const endDateInput = wrapper.find('input[name="end-date"]');
+
+      expect(startDateInput.prop('value')).to.equal('2021-01-01');
+      expect(endDateInput.prop('value')).to.equal('2021-01-02');
     });
   });
 

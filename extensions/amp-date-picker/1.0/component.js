@@ -1,5 +1,9 @@
 import {format as dateFnsFormat, isValid, parse} from 'date-fns';
-import {DayPicker} from 'react-day-picker';
+import * as moment from 'moment';
+import {
+  DayPickerRangeController,
+  DayPickerSingleDateController,
+} from 'react-dates';
 
 import {
   closestAncestorElementBySelector,
@@ -7,7 +11,14 @@ import {
 } from '#core/dom/query';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useRef, useState} from '#preact';
+import {
+  cloneElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 import './amp-date-picker.css';
@@ -45,6 +56,28 @@ const DateFieldNameByType = {
   [DateFieldType.START_DATE]: 'start-date',
   [DateFieldType.END_DATE]: 'end-date',
 };
+
+/**
+ * Formats a date as a moment object
+ * TODO: Remove this once we are no longer using moment
+ * @param {?Date} date
+ * @return {moment}
+ * @private
+ */
+function asMoment(date) {
+  return moment(date);
+}
+
+/**
+ * Formats a moment object as a Date
+ * TODO: Remove this once we are no longer using moment
+ * @param moment
+ * @return {Date}
+ * @private
+ */
+function asDate(moment) {
+  return moment.toDate();
+}
 
 /**
  * @param {!BentoDatePicker.Props} props
@@ -88,10 +121,10 @@ export function BentoDatePicker({
   const [showChildren, setShowChildren] = useState(true);
 
   /**
-   * Forgivingly parse an ISO8601 input string into a moment object,
+   * Forgivingly parse an ISO8601 input string into a date object,
    * preferring the date picker's configured format.
    * @param {string} value
-   * @return {?moment} date
+   * @return {?Date} date
    */
   const parseDate = useCallback(
     (value) => {
@@ -106,7 +139,7 @@ export function BentoDatePicker({
 
   /**
    * Formats a date in the page's locale and the element's configured format.
-   * @param {?moment} date
+   * @param {?Date} date
    * @return {string}
    * @private
    */
@@ -229,6 +262,44 @@ export function BentoDatePicker({
     [startInputSelector, endInputSelector, getHiddenInputId, mode, parseDate]
   );
 
+  const onDateChange = useCallback(
+    (dateAsMoment) => {
+      const _date = asDate(dateAsMoment);
+      setDate(_date);
+    },
+    [setDate]
+  );
+
+  const onDatesChange = useCallback(
+    ({endDate, startDate}) => {
+      const _startDate = asDate(startDate);
+      const _endDate = asDate(endDate);
+      setStartDate(_startDate);
+      setEndDate(_endDate);
+    },
+    [setStartDate, setEndDate]
+  );
+
+  const calendarComponent = useMemo(() => {
+    const defaultProps = {
+      'aria-label': 'Calendar',
+    };
+    if (type === DatePickerType.RANGE) {
+      return (
+        <DayPickerRangeController
+          {...defaultProps}
+          onDatesChange={onDatesChange}
+        />
+      );
+    }
+    return (
+      <DayPickerSingleDateController
+        {...defaultProps}
+        onDateChange={onDateChange}
+      />
+    );
+  }, [onDateChange, onDatesChange, type]);
+
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       wrapperRef.current,
@@ -253,6 +324,7 @@ export function BentoDatePicker({
       onError(`Invalid picker type`);
     }
     setShowChildren(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     setupRangeInput,
     setupSingleInput,
@@ -274,10 +346,13 @@ export function BentoDatePicker({
       {...rest}
     >
       {showChildren && children}
-      {dateElement}
-      {startDateElement}
-      {endDateElement}
-      <DayPicker aria-label="Calendar" />
+      {dateElement &&
+        cloneElement(dateElement, {value: getFormattedDate(date)})}
+      {startDateElement &&
+        cloneElement(startDateElement, {value: getFormattedDate(startDate)})}
+      {endDateElement &&
+        cloneElement(endDateElement, {value: getFormattedDate(endDate)})}
+      {calendarComponent}
     </ContainWrapper>
   );
 }
