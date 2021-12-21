@@ -2,6 +2,14 @@
   // See https://go.microsoft.com/fwlink/?LinkId=733558
   // for the documentation about the tasks.json format
   "version": "2.0.0",
+  "presentation": {
+    "echo": true,
+    "reveal": "always",
+    "focus": false,
+    "panel": "shared",
+    "showReuseMessage": true,
+    "clear": true
+  },
   "tasks": [
     {
       "label": "amp: Run unit test in this file",
@@ -10,14 +18,6 @@
       "command": "amp",
       "args": ["unit", "--files=${file}", "--headless", "--verbose"],
       "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      }
     },
     {
       "label": "amp: Watch unit test in this file",
@@ -26,14 +26,6 @@
       "command": "amp",
       "args": ["unit", "--files=${file}", "--headless", "--verbose", "--watch"],
       "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
       "isBackground": true
     },
     {
@@ -43,14 +35,6 @@
       "command": "amp",
       "args": ["unit", "--local_changes", "--headless", "--verbose"],
       "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      }
     },
     {
       "label": "amp: Check PR",
@@ -59,14 +43,6 @@
       "command": "amp",
       "args": ["pr-check", "--nobuild"],
       "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      }
     },
   ]
 }
