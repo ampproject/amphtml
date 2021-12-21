@@ -7,6 +7,7 @@ teaser:
 ---
 
 # amp-access-fewcents
+
 -   The amp-access-fewcents component is based on, and requires amp-access.
 -   amp-access-fewcents is built for amp pages
 -   amp-access-fewcents component internally uses amp-access to provide a behavior similar to amp-access, but built in such a way that it can be used with Fewcents.
