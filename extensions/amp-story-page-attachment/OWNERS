@@ -11,11 +11,11 @@
         },
         {
           name: 'newmuis',
-          notify: true
+          notify: true,
         },
         {
-          name: 'mszylkowski', 
-          notify: true
+          name: 'mszylkowski',
+          notify: true,
         },
       ],
     },
