@@ -73,6 +73,7 @@ export let InteractiveReactData;
  *   product-tag-id: string,
  *   product-title: string,
  *   product-price: string,
+ *   product-price-currency: string,
  *   product-icon: string,
  *   product-tag-text: ?string,
  * }}

@@ -2,8 +2,10 @@ import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   ShoppingDataDef,
   StateProperty,
@@ -24,7 +26,7 @@ const FONTS_TO_LOAD = [
   },
 ];
 
-const renderShoppingTagTemplate = (tagData) => (
+const renderShoppingTagTemplate = (tagData, element) => (
   <div class="amp-story-shopping-tag-inner">
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
@@ -38,7 +40,22 @@ const renderShoppingTagTemplate = (tagData) => (
         }
       ></span>
       <span class="amp-story-shopping-tag-pill-text">
-        {tagData['product-tag-text'] || '$' + tagData['product-price']}
+        {(tagData['product-tag-text'] && (
+          <span class="amp-story-shopping-product-tag-text">
+            {tagData['product-tag-text']}
+          </span>
+        )) ||
+          new Intl.NumberFormat(
+            localize(
+              element,
+              LocalizedStringId_Enum.AMP_STORY_SHOPPING_LANGUAGE_ISO_LABEL
+            ),
+            {
+              style: 'currency',
+              currency: tagData['product-price-currency'],
+              maximumFractionDigits: 0 /* This is need to NOT display the Trailing zeroes (for now), otherwise by default $100 will display as $100.00*/,
+            }
+          ).format(tagData['product-price'])}
       </span>
     </span>
   </div>
@@ -84,10 +101,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!tagData) {
       return;
     }
+
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        renderShoppingTagTemplate(tagData),
+        renderShoppingTagTemplate(tagData, this.element),
         shoppingTagCSS
       );
     });
