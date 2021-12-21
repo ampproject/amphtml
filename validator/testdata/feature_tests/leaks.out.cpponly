@@ -105,24 +105,18 @@ feature_tests/leaks.html:65:8 The attribute 'background' may not appear in tag '
 |  %Images
 |  -->
 |  <img src="https://leaking.via/img-src">
->> ^~~~~~~~~
-feature_tests/leaks.html:72:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |  <img dynsrc="https://leaking.via/img-dynsrc">
 >> ^~~~~~~~~
-feature_tests/leaks.html:73:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:73:0 The attribute 'dynsrc' may not appear in tag 'img'.
 |  <img lowsrc="https://leaking.via/img-lowsrc">
 >> ^~~~~~~~~
-feature_tests/leaks.html:74:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:74:0 The attribute 'lowsrc' may not appear in tag 'img'.
 |  <img src="data:image/svg+xml,<svg%20xmlns='%68ttp:%2f/www.w3.org/2000/svg'%20xmlns:xlink='%68ttp:%2f/www.w3.org/1999/xlink'><image%20xlink:hr%65f='%68ttp:%2f/leaking.via/svg-via-data'></image></svg>">
->> ^~~~~~~~~
-feature_tests/leaks.html:75:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |
 |  <image src="https://leaking.via/image-src"></image>
->> ^~~~~~~~~
-feature_tests/leaks.html:77:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |  <image href="https://leaking.via/image-href"></image>
 >> ^~~~~~~~~
-feature_tests/leaks.html:78:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:78:0 The attribute 'href' may not appear in tag 'img'.
 |
 |  <picture>
 >> ^~~~~~~~~
@@ -133,15 +127,16 @@ feature_tests/leaks.html:80:0 The parent tag of tag 'picture' is 'body', but it 
 >> ^~~~~~~~~
 feature_tests/leaks.html:83:0 The parent tag of tag 'picture' is 'body', but it can only be 'noscript'. (see https://amp.dev/documentation/components/amp-img/)
 |      <img srcset="https://leaking.via/picture-img-srcset">
->>     ^~~~~~~~~
-feature_tests/leaks.html:84:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |  </picture>
+|
+|  <!-- Warning: There are different results between JS and CPP validators for this -->
 |  <img srcset=",,,,,https://leaking.via/img-srcset">
 >> ^~~~~~~~~
-feature_tests/leaks.html:86:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:88:0 The attribute 'srcset' in tag 'img' is set to the invalid value ',,,,,https://leaking.via/img-srcset'.
+|
 |  <img src="#" longdesc="https://leaking.via/img-longdesc">
 >> ^~~~~~~~~
-feature_tests/leaks.html:87:0 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+feature_tests/leaks.html:90:0 The attribute 'longdesc' may not appear in tag 'img'.
 |  <!-- longdesc works on Firefox but requires right-click, "View Description" -->
 |
 |  <!--
@@ -149,92 +144,92 @@ feature_tests/leaks.html:87:0 The tag 'img' may only appear as a descendant of t
 |  -->
 |  <input type="image" src="https://leaking.via/input-src" name="test" value="test">
 >> ^~~~~~~~~
-feature_tests/leaks.html:93:0 The attribute 'src' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
+feature_tests/leaks.html:96:0 The attribute 'src' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
 |  <isindex src="https://leaking.via/isindex-src" type="image">
 >> ^~~~~~~~~
-feature_tests/leaks.html:94:0 The tag 'isindex' is disallowed.
+feature_tests/leaks.html:97:0 The tag 'isindex' is disallowed.
 |  <isindex action="https://leaking.via/isindex-action"></isindex>
 >> ^~~~~~~~~
-feature_tests/leaks.html:95:0 The tag 'isindex' is disallowed.
+feature_tests/leaks.html:98:0 The tag 'isindex' is disallowed.
 |  <form id="test2"></form><isindex type="submit" formaction="https://leaking.via/isindex-formaction" form="test2"></isindex>
 >> ^~~~~~~~~
-feature_tests/leaks.html:96:0 The mandatory attribute 'action' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/leaks.html:99:0 The mandatory attribute 'action' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 >> ^~~~~~~~~
-feature_tests/leaks.html:96:0 The mandatory attribute 'target' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/leaks.html:99:0 The mandatory attribute 'target' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 >> ^~~~~~~~~
-feature_tests/leaks.html:96:0 The tag 'form' requires including the 'amp-form' extension JavaScript. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/leaks.html:99:0 The tag 'form' requires including the 'amp-form' extension JavaScript. (see https://amp.dev/documentation/components/amp-form)
 >>                         ^~~~~~~~~
-feature_tests/leaks.html:96:24 The tag 'isindex' is disallowed.
+feature_tests/leaks.html:99:24 The tag 'isindex' is disallowed.
 |
 |  <!--
 |  %Media
 |  -->
 |  <bgsound src="https://leaking.via/bgsound-src"></bgsound>
 >> ^~~~~~~~~
-feature_tests/leaks.html:101:0 The tag 'bgsound' is disallowed.
+feature_tests/leaks.html:104:0 The tag 'bgsound' is disallowed.
 |  <video src="https://leaking.via/video-src">
 >> ^~~~~~~~~
-feature_tests/leaks.html:102:0 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://amp.dev/documentation/components/amp-video/)
+feature_tests/leaks.html:105:0 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://amp.dev/documentation/components/amp-video/)
 |    <track kind="subtitles" label="English subtitles" src="https://leaking.via/track-src" srclang="en" default></track>
 |  </video>
 |  <video controls>
 >> ^~~~~~~~~
-feature_tests/leaks.html:105:0 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://amp.dev/documentation/components/amp-video/)
+feature_tests/leaks.html:108:0 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://amp.dev/documentation/components/amp-video/)
 |    <source src="https://leaking.via/video-source-src" type="video/mp4">
 |  </video>
 |  <audio src="https://leaking.via/audio-src"></audio>
 >> ^~~~~~~~~
-feature_tests/leaks.html:108:0 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://amp.dev/documentation/components/amp-audio/)
+feature_tests/leaks.html:111:0 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://amp.dev/documentation/components/amp-audio/)
 |  <audio controls>
 >> ^~~~~~~~~
-feature_tests/leaks.html:109:0 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://amp.dev/documentation/components/amp-audio/)
+feature_tests/leaks.html:112:0 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://amp.dev/documentation/components/amp-audio/)
 |    <source src="https://leaking.via/audio-source-src" type="video/mp4">
 |  </audio>
 |  <video poster="https://leaking.via/video-poster" src="https://leaking.via/video-poster-2"></video>
 >> ^~~~~~~~~
-feature_tests/leaks.html:112:0 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://amp.dev/documentation/components/amp-video/)
+feature_tests/leaks.html:115:0 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://amp.dev/documentation/components/amp-video/)
 |
 |  <!--
 |  %Object & Embed
 |  -->
 |  <object data="https://leaking.via/object-data"></object>
 >> ^~~~~~~~~
-feature_tests/leaks.html:117:0 The tag 'object' is disallowed.
+feature_tests/leaks.html:120:0 The tag 'object' is disallowed.
 |  <object type="text/x-scriptlet" data="https://leaking.via/object-data-x-scriptlet"></object>
 >> ^~~~~~~~~
-feature_tests/leaks.html:118:0 The tag 'object' is disallowed.
+feature_tests/leaks.html:121:0 The tag 'object' is disallowed.
 |  <object movie="https://leaking.via/object-movie" type="application/x-shockwave-flash"></object>
 >> ^~~~~~~~~
-feature_tests/leaks.html:119:0 The tag 'object' is disallowed.
+feature_tests/leaks.html:122:0 The tag 'object' is disallowed.
 |  <object movie="https://leaking.via/object-movie">
 >> ^~~~~~~~~
-feature_tests/leaks.html:120:0 The tag 'object' is disallowed.
+feature_tests/leaks.html:123:0 The tag 'object' is disallowed.
 |      <param name="type" value="application/x-shockwave-flash"></param>
 >>     ^~~~~~~~~
-feature_tests/leaks.html:121:4 The tag 'param' is disallowed.
+feature_tests/leaks.html:124:4 The tag 'param' is disallowed.
 |  </object>
 |  <object codebase="https://leaking.via/object-codebase"></object>
 >> ^~~~~~~~~
-feature_tests/leaks.html:123:0 The tag 'object' is disallowed.
+feature_tests/leaks.html:126:0 The tag 'object' is disallowed.
 |  <embed src="https://leaking.via/embed-src"></embed>
 >> ^~~~~~~~~
-feature_tests/leaks.html:124:0 The tag 'embed' is disallowed.
+feature_tests/leaks.html:127:0 The tag 'embed' is disallowed.
 |  <embed code="https://leaking.via/embed-code"></embed>
 >> ^~~~~~~~~
-feature_tests/leaks.html:125:0 The tag 'embed' is disallowed.
+feature_tests/leaks.html:128:0 The tag 'embed' is disallowed.
 |  <object classid="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83">
 >> ^~~~~~~~~
-feature_tests/leaks.html:126:0 The tag 'object' is disallowed.
+feature_tests/leaks.html:129:0 The tag 'object' is disallowed.
 |      <param name="DataURL" value="https://leaking.via/object-param-dataurl">
 >>     ^~~~~~~~~
-feature_tests/leaks.html:127:4 The tag 'param' is disallowed.
+feature_tests/leaks.html:130:4 The tag 'param' is disallowed.
 |  </object>
 |  <object classid="clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6">
 >> ^~~~~~~~~
-feature_tests/leaks.html:129:0 The tag 'object' is disallowed.
+feature_tests/leaks.html:132:0 The tag 'object' is disallowed.
 |      <param name="URL" value="https://leaking.via/object-param-url">
 >>     ^~~~~~~~~
-feature_tests/leaks.html:130:4 The tag 'param' is disallowed.
+feature_tests/leaks.html:133:4 The tag 'param' is disallowed.
 |  </object>
 |
 |
@@ -243,16 +238,16 @@ feature_tests/leaks.html:130:4 The tag 'param' is disallowed.
 |  -->
 |  <script src="https://leaking.via/script-src"></script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:137:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:140:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  <svg><script href="https://leaking.via/svg-script-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:138:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:141:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  <svg><script xlink:href="https://leaking.via/svg-script-xlink-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:139:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:142:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  <script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:140:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:143:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  //# sourceMappingURL=https://leaking.via/javascript-source-map
 |  </script>
 |
@@ -261,38 +256,38 @@ feature_tests/leaks.html:140:0 Custom JavaScript is not allowed. (see https://am
 |  -->
 |  <iframe src="https://leaking.via/iframe-src"></iframe>
 >> ^~~~~~~~~
-feature_tests/leaks.html:147:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
+feature_tests/leaks.html:150:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
 |  <iframe src="data:image/svg+xml,<svg%20xmlns='%68ttp:%2f/www.w3.org/2000/svg'%20xmlns:xlink='%68ttp:%2f/www.w3.org/1999/xlink'><image%20xlink:hr%65f='%68ttps:%2f/leaking.via/svg-via-data'></image></svg>"></iframe>
 >> ^~~~~~~~~
-feature_tests/leaks.html:148:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
+feature_tests/leaks.html:151:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
 |  <iframe srcdoc="<img src=https://leaking.via/iframe-srcdoc-img-src>"></iframe>
 >> ^~~~~~~~~
-feature_tests/leaks.html:149:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
+feature_tests/leaks.html:152:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
 |  <iframe src="view-source:https://leaking.via/iframe-src-viewsource"></iframe>
 >> ^~~~~~~~~
-feature_tests/leaks.html:150:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
+feature_tests/leaks.html:153:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
 |  <iframe src="javascript:'&lt;img src=https://leaking.via/iframe-javascript-src&gt;'"></iframe>
 >> ^~~~~~~~~
-feature_tests/leaks.html:151:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
+feature_tests/leaks.html:154:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
 |  <iframe src="javascript:'&lt;iframe src=&quot;javascript:\&apos;&lt;img src=https://leaking.via/iframe-javascript-src-2&gt;\&apos;&quot;&gt;&lt;/iframe&gt;'"></iframe>
 >> ^~~~~~~~~
-feature_tests/leaks.html:152:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
+feature_tests/leaks.html:155:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
 |  <iframe src="javascript:atob('PGltZyBzcmM9Imh0dHBzOi8vbGVha2luZy52aWEvaWZyYW1lLWphdmFzY3JpcHQtc3JjLTMiPg==')"></iframe>
 >> ^~~~~~~~~
-feature_tests/leaks.html:153:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
+feature_tests/leaks.html:156:0 The tag 'iframe' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-iframe'? (see https://amp.dev/documentation/components/amp-iframe/)
 |
 |  <!--
 |  %Menu
 |  -->
 |  <p contextmenu="a">Right Click</p>
 >> ^~~~~~~~~
-feature_tests/leaks.html:158:0 The attribute 'contextmenu' may not appear in tag 'p'.
+feature_tests/leaks.html:161:0 The attribute 'contextmenu' may not appear in tag 'p'.
 |  <menu type="context" id="a">
 >> ^~~~~~~~~
-feature_tests/leaks.html:159:0 The tag 'menu' is disallowed.
+feature_tests/leaks.html:162:0 The tag 'menu' is disallowed.
 |      <menuitem label="a" icon="https://leaking.via/menuitem-icon"></menuitem>
 >>     ^~~~~~~~~
-feature_tests/leaks.html:160:4 The tag 'menuitem' is disallowed.
+feature_tests/leaks.html:163:4 The tag 'menuitem' is disallowed.
 |  </menu>
 |
 |
@@ -301,26 +296,26 @@ feature_tests/leaks.html:160:4 The tag 'menuitem' is disallowed.
 |  -->
 |  <applet code="Test" codebase="https://leaking.via/applet-codebase"></applet>
 >> ^~~~~~~~~
-feature_tests/leaks.html:167:0 The tag 'applet' is disallowed.
+feature_tests/leaks.html:170:0 The tag 'applet' is disallowed.
 |  <applet code="Test" archive="https://leaking.via/applet-archive"></applet>
 >> ^~~~~~~~~
-feature_tests/leaks.html:168:0 The tag 'applet' is disallowed.
+feature_tests/leaks.html:171:0 The tag 'applet' is disallowed.
 |  <applet code="Test" object="https://leaking.via/applet-object"></applet>
 >> ^~~~~~~~~
-feature_tests/leaks.html:169:0 The tag 'applet' is disallowed.
+feature_tests/leaks.html:172:0 The tag 'applet' is disallowed.
 |
 |  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 |      <image xmlns:xlink="http://www.w3.org/1999/xlink">
 |          <animate attributeName="xlink:href" begin="0s" from="#" to="https://leaking.via/svg-image-animate" />
 >>         ^~~~~~~~~
-feature_tests/leaks.html:173:8 The tag 'animate' is disallowed.
+feature_tests/leaks.html:176:8 The tag 'animate' is disallowed.
 |      </image>
 |  </svg>
 |
 |  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 |      <feImage xlink:href="https://leaking.via/svg-feimage" />
 >>     ^~~~~~~~~
-feature_tests/leaks.html:178:4 The tag 'feimage' is disallowed.
+feature_tests/leaks.html:181:4 The tag 'feimage' is disallowed.
 |  </svg>
 |
 |  <!--
@@ -329,40 +324,40 @@ feature_tests/leaks.html:178:4 The tag 'feimage' is disallowed.
 |  <?xml-stylesheet type="text/xsl" href="https://leaking.via/xslt-stylesheet" ?>
 |
 >>   ^~~~~~~~~
-feature_tests/leaks.html:185:2 The tag '<?' is disallowed.
+feature_tests/leaks.html:188:2 The tag '<?' is disallowed.
 |  <!--
 |  %Data Islands
 |  -->
 |  <xml src="https://leaking.via/xml-src" id="xml"></xml>
 >> ^~~~~~~~~
-feature_tests/leaks.html:189:0 The tag 'xml' is disallowed.
+feature_tests/leaks.html:192:0 The tag 'xml' is disallowed.
 |  <div datasrc="#xml" datafld="$text" dataformatas="html"></div>
 >> ^~~~~~~~~
-feature_tests/leaks.html:190:0 The attribute 'datafld' may not appear in tag 'div'.
+feature_tests/leaks.html:193:0 The attribute 'datafld' may not appear in tag 'div'.
 >> ^~~~~~~~~
-feature_tests/leaks.html:190:0 The attribute 'dataformatas' may not appear in tag 'div'.
+feature_tests/leaks.html:193:0 The attribute 'dataformatas' may not appear in tag 'div'.
 >> ^~~~~~~~~
-feature_tests/leaks.html:190:0 The attribute 'datasrc' may not appear in tag 'div'.
+feature_tests/leaks.html:193:0 The attribute 'datasrc' may not appear in tag 'div'.
 |
 |  <!--
 |  %VML
 |  -->
 |  <line xmlns="urn:schemas-microsoft-com:vml">
 >> ^~~~~~~~~
-feature_tests/leaks.html:195:0 The tag 'line' may only appear as a descendant of tag 'svg'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg)
+feature_tests/leaks.html:198:0 The tag 'line' may only appear as a descendant of tag 'svg'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg)
 |      <fill style="behavior:url(#default#vml)" src="https://leaking.via/vml-line-fill-src" />
 >>     ^~~~~~~~~
-feature_tests/leaks.html:196:4 The tag 'fill' is disallowed.
+feature_tests/leaks.html:199:4 The tag 'fill' is disallowed.
 |      <stroke style="behavior:url(#default#vml)" src="https://leaking.via/vml-line-stroke-src" />
 >>     ^~~~~~~~~
-feature_tests/leaks.html:197:4 The tag 'stroke' is disallowed.
+feature_tests/leaks.html:200:4 The tag 'stroke' is disallowed.
 |      <imageData style="behavior:url(#default#vml)" src="https://leaking.via/vml-line-imgdata-src" />
 >>     ^~~~~~~~~
-feature_tests/leaks.html:198:4 The tag 'imagedata' is disallowed.
+feature_tests/leaks.html:201:4 The tag 'imagedata' is disallowed.
 |  </line>
 |  <vmlframe
 >> ^~~~~~~~~
-feature_tests/leaks.html:200:0 The tag 'vmlframe' is disallowed.
+feature_tests/leaks.html:203:0 The tag 'vmlframe' is disallowed.
 |      xmlns="urn:schemas-microsoft-com:vml"
 |      style="behavior:url(#default#vml);position:absolute;width:100%;height:100%"
 |      src="https://leaking.via/vmlframe-src#xss">

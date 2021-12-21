@@ -1,10 +1,10 @@
-#include "tokenizer.h"
+#include "cpp/htmlparser/tokenizer.h"
 
 #include "absl/flags/flag.h"
-#include "atom.h"
-#include "atomutil.h"
-#include "defer.h"
-#include "strings.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/strings.h"
 
 ABSL_FLAG(std::size_t, htmlparser_max_attributes_per_node,
           1000,

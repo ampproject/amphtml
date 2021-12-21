@@ -23,7 +23,7 @@ function devAssertDceCheck() {
 /**
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
  * src/log.js.
- * @param {T} shouldBeTruthy
+ * @param {*} shouldBeTruthy
  * @param {string=} opt_message
  * @param {*=} opt_1 Optional argument (var arg as individual params for better
  * @param {*=} opt_2 Optional argument inlining)
@@ -34,10 +34,8 @@ function devAssertDceCheck() {
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {T}
- * @template T
+ * @return {asserts shouldBeTruthy}
  * @throws {Error} when shouldBeTruthy is not truthy.
- * @closurePrimitive {asserts.truthy}
  */
 export function devAssert(
   shouldBeTruthy,
@@ -53,7 +51,7 @@ export function devAssert(
   opt_9
 ) {
   if (mode.isMinified()) {
-    return shouldBeTruthy;
+    return /** @type {void} */ (shouldBeTruthy);
   }
   devAssertDceCheck();
 
@@ -79,19 +77,18 @@ export function devAssert(
  * For more details see `assert`.
  *
  * @param {*} shouldBeElement
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {!Element} The value of shouldBeTrueish.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeElement is Element}
  * @throws {Error} when shouldBeElement is not an Element
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertElement(shouldBeElement, opt_message) {
   if (mode.isMinified()) {
-    return /** @type {!Element} */ (shouldBeElement);
+    return /** @type {void} */ (shouldBeElement);
   }
   devAssertDceCheck();
 
   return assertions.assertElement(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (devAssert),
     shouldBeElement,
     opt_message
   );
@@ -104,19 +101,18 @@ export function devAssertElement(shouldBeElement, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeString
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {string} The string value. Can be an empty string.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeString is string}
  * @throws {Error} when shouldBeString is not an String
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertString(shouldBeString, opt_message) {
   if (mode.isMinified()) {
-    return /** @type {string} */ (shouldBeString);
+    return /** @type {void} */ (shouldBeString);
   }
   devAssertDceCheck();
 
   return assertions.assertString(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (devAssert),
     shouldBeString,
     opt_message
   );
@@ -129,20 +125,18 @@ export function devAssertString(shouldBeString, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeNumber
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {number} The number value. The allowed values include `0`
- *   and `NaN`.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeNumber is number}
  * @throws {Error} when shouldBeNumber is not an Number
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertNumber(shouldBeNumber, opt_message) {
   if (mode.isMinified()) {
-    return /** @type {number} */ (shouldBeNumber);
+    return /** @type {void} */ (shouldBeNumber);
   }
   devAssertDceCheck();
 
   return assertions.assertNumber(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (devAssert),
     shouldBeNumber,
     opt_message
   );
@@ -155,19 +149,18 @@ export function devAssertNumber(shouldBeNumber, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeArray
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {!Array} The array value
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeArray is Array}
  * @throws {Error} when shouldBeArray is not an Array
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertArray(shouldBeArray, opt_message) {
   if (mode.isMinified()) {
-    return /** @type {!Array} */ (shouldBeArray);
+    return /** @type {void} */ (shouldBeArray);
   }
   devAssertDceCheck();
 
   return assertions.assertArray(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (devAssert),
     shouldBeArray,
     opt_message
   );
@@ -179,19 +172,18 @@ export function devAssertArray(shouldBeArray, opt_message) {
  * For more details see `assert`.
  *
  * @param {*} shouldBeBoolean
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {boolean} The boolean value.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeBoolean is boolean}
  * @throws {Error} when shouldBeBoolean is not an Boolean
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function devAssertBoolean(shouldBeBoolean, opt_message) {
   if (mode.isMinified()) {
-    return /** @type {boolean} */ (shouldBeBoolean);
+    return /** @type {void} */ (shouldBeBoolean);
   }
   devAssertDceCheck();
 
   return assertions.assertBoolean(
-    /** @type {!assertions.AssertionFunctionDef} */ (devAssert),
+    /** @type {import('./base').AssertionFunctionDef} */ (devAssert),
     shouldBeBoolean,
     opt_message
   );

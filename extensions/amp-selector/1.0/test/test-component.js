@@ -1,6 +1,6 @@
 import {mount} from 'enzyme';
 
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 
 import * as Preact from '#preact';
 
@@ -538,70 +538,70 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.LEFT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.LEFT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.RIGHT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.RIGHT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.DOWN_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.UP_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.UP_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Enter to select', () => {
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Enter will deselect.
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select multiple options.
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        options.at(1).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Space to select', () => {
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Space will deselect.
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select multiple options.
-        options.at(0).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
@@ -641,60 +641,60 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.LEFT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.LEFT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.RIGHT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.RIGHT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.DOWN_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.UP_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.UP_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Enter to select', () => {
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Enter does nothing.
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select new option deselects the first.
-        options.at(1).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Space to select', () => {
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Space does nothing.
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select new option deselects the first.
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');

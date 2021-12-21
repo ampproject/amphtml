@@ -5,8 +5,8 @@
 #include "glog/logging.h"
 #include "google/protobuf/text_format.h"
 
-#include "defer.h"
-#include "fileutil.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
 
 #include "validator.pb.h"
 

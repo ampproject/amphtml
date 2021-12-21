@@ -1,42 +1,53 @@
-import {createElementWithAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {expect} from 'chai';
+
+import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story-shopping:0.1'],
+      extensions: ['amp-story:1.0', 'amp-story-shopping:0.1'],
     },
   },
   (env) => {
     let win;
-    let element;
-    let shoppingAttachment;
+    let shoppingEl;
+    let shoppingImpl;
 
     beforeEach(async () => {
       win = env.win;
-      await createAmpStoryShoppingAttachment();
-    });
+      registerServiceBuilder(win, 'performance', function () {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
+      env.sandbox.stub(win.history, 'replaceState');
 
-    async function createAmpStoryShoppingAttachment() {
+      const story = win.document.createElement('amp-story');
+      win.document.body.appendChild(story);
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-      element = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-attachment',
-        {'layout': 'nodisplay'}
-      );
-      pageEl.appendChild(element);
-      win.document.body.appendChild(pageEl);
-
-      shoppingAttachment = await element.getImpl();
-    }
+      shoppingEl = win.document.createElement('amp-story-shopping-attachment');
+      pageEl.appendChild(shoppingEl);
+      story.appendChild(pageEl);
+      shoppingImpl = await shoppingEl.getImpl();
+    });
 
     it('should build shopping attachment component', () => {
-      expect(() => shoppingAttachment.layoutCallback()).to.not.throw();
-      expect(shoppingAttachment.isLayoutSupported(Layout.NODISPLAY)).to.be.true;
+      expect(() => shoppingImpl.layoutCallback()).to.not.throw();
+    });
+
+    it('should open attachment', async () => {
+      const attachmentChildEl = shoppingEl.querySelector(
+        'amp-story-page-attachment'
+      );
+      const attachmentChildImpl = await attachmentChildEl.getImpl();
+      env.sandbox.stub(attachmentChildImpl, 'open');
+      await shoppingImpl.open(true);
+      expect(attachmentChildImpl.open).to.be.calledOnce;
     });
   }
 );

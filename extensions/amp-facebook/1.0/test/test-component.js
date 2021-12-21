@@ -176,4 +176,37 @@ describes.sandboxed('BentoFacebook preact component', {}, (env) => {
     const iframe = wrapper.find('iframe');
     expect(iframe.prop('name')).to.contain('"locale":"fr_FR"');
   });
+
+  it('should pass the loading attribute to the underlying iframe', () => {
+    const wrapper = mount(
+      <BentoFacebook
+        href={href}
+        locale="fr_FR"
+        style={{
+          'width': '500px',
+          'height': '600px',
+        }}
+        loading="lazy"
+      />
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    expect(iframe.getAttribute('loading')).to.equal('lazy');
+  });
+
+  it('should set data-loading="auto" if no value is specified', () => {
+    const wrapper = mount(
+      <BentoFacebook
+        href={href}
+        locale="fr_FR"
+        style={{
+          'width': '500px',
+          'height': '600px',
+        }}
+      />
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    expect(iframe.getAttribute('loading')).to.equal('auto');
+  });
 });

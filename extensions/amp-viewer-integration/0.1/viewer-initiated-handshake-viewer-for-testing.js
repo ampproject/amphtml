@@ -1,7 +1,8 @@
 import {parseUrlDeprecated, serializeQueryString} from '../../../src/url';
 
 const APP = '__AMPHTML__';
-const MessageType = {
+/** @enum {string} */
+const MessageType_Enum = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
@@ -132,7 +133,7 @@ export class WebviewViewerForTesting {
     const message = {
       app: APP,
       requestid: requestId,
-      type: MessageType.RESPONSE,
+      type: MessageType_Enum.RESPONSE,
     };
 
     this.log('############## viewer posting1 Message', message);
@@ -159,7 +160,7 @@ export class WebviewViewerForTesting {
       rsvp: true,
       name: eventType,
       data: payload,
-      type: MessageType.REQUEST,
+      type: MessageType_Enum.REQUEST,
     };
     this.iframe.contentWindow./*OK*/ postMessage(message, this.frameOrigin_);
   }

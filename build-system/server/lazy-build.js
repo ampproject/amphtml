@@ -15,7 +15,7 @@ const {jsBundles} = require('../compile/bundles.config');
 const {VERSION} = require('../compile/internal-version');
 
 const extensionBundles = {};
-maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
+maybeInitializeExtensions(extensionBundles);
 
 const vendorBundles = generateBundles();
 

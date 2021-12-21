@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
+        background: #ecf1f3;
+      }
+      .my-accordion > section {
+        border-radius: 0.5rem;
+        margin: 1rem;
+        background: white;
+        background-repeat: no-repeat;
+        background-position: right 1rem top 1rem;
+      }
+      .my-accordion h2 {
+        background: white;
+        padding: 2rem;
+        border: none;
+        background: none;
+      }
+      .my-accordion div {
+        padding: 2rem;
+        padding-top: 0;
+      }
+      .my-accordion section[expanded] {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='48px' viewBox='0 0 24 24' width='48px' fill='%23000000'%3E%3Cpath d='M0 0h24v24H0V0z' fill='none'/%3E%3Cpath d='M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14l-6-6z'/%3E%3C/svg%3E%0A");
+      }
+
+      .my-accordion section:not([expanded]) {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='48px' viewBox='0 0 24 24' width='48px' fill='%23000000'%3E%3Cpath d='M24 24H0V0h24v24z' fill='none' opacity='.87'/%3E%3Cpath d='M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z'/%3E%3C/svg%3E%0A");
+      }
+    </style>
+  </head>
+  <body>
+    <bento-accordion id="my-accordion" class="my-accordion">
+      <section>
+        <h2>Section 1</h2>
+        <div>Content in section 1.</div>
+      </section>
+      <section>
+        <h2>Section 2</h2>
+        <div>Content in section 2.</div>
+      </section>
+      <section expanded>
+        <h2>Section 3</h2>
+        <div>Content in section 3.</div>
+      </section>
+    </bento-accordion>
+  </body>
+</html>

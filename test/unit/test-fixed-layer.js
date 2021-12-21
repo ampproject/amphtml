@@ -12,7 +12,11 @@ import {installViewerServiceForDoc} from '#service/viewer-impl';
 import {Animation} from '#utils/animation';
 import {user} from '#utils/log';
 
-import {FakeMutationObserver, FakeWindow} from '#testing/fake-dom';
+import {
+  FakeMutationObserver,
+  FakePerformance,
+  FakeWindow,
+} from '#testing/fake-dom';
 
 describes.sandboxed('FixedLayer', {}, (env) => {
   let parentApi;
@@ -150,6 +154,7 @@ describes.sandboxed('FixedLayer', {}, (env) => {
         navigator: window.navigator,
         location: window.location,
         cookie: '',
+        performance: new FakePerformance(window),
       },
       createElement: (name) => {
         return createElement(name);

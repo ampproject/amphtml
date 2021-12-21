@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
@@ -60,7 +60,7 @@ class AmpSelector extends BaseElement {
       element,
       eventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(element, eventName, detail);

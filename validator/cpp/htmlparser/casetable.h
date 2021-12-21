@@ -1,13 +1,13 @@
 // AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file, see comments in bin/casetable.cc
 
-#ifndef HTMLPARSER__CASETABLE_H_
-#define HTMLPARSER__CASETABLE_H_
+#ifndef CPP_HTMLPARSER_CASETABLE_H_
+#define CPP_HTMLPARSER_CASETABLE_H_
 
 #include <algorithm>
 #include <utility>
 
-#include "comparators.h"
+#include "cpp/htmlparser/comparators.h"
 
 namespace htmlparser {
 
@@ -2967,4 +2967,4 @@ inline char32_t ToUpperChar(char32_t c) {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__CASETABLE_H_
+#endif  // CPP_HTMLPARSER_CASETABLE_H_

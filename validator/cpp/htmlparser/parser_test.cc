@@ -1,13 +1,13 @@
-#include "parser.h"
+#include "cpp/htmlparser/parser.h"
 
 #include "gtest/gtest.h"
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
-#include "atom.h"
-#include "atomutil.h"
-#include "node.h"
-#include "renderer.h"
-#include "token.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/node.h"
+#include "cpp/htmlparser/renderer.h"
+#include "cpp/htmlparser/token.h"
 
 ABSL_DECLARE_FLAG(uint32_t, htmlparser_max_nodes_depth_count);
 
