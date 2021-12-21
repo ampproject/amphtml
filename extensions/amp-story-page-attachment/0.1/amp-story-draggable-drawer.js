@@ -16,7 +16,6 @@ import {
   Action,
   StateProperty,
   UIType,
-  getStoreService,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -90,8 +89,8 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @protected {!DrawerState} */
     this.state = DrawerState.CLOSED;
 
-    /** @protected @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService = getStoreService(this.win);
+    /** @protected @const {!Promise<!./amp-story-store-service.AmpStoryStoreService>} */
+    this.storeServicePromise_ = Services.storyStoreServiceForOrNull(this.win);
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -180,12 +179,14 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   initializeListeners_() {
-    this.storeService.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
+    this.storeServicePromise_.then((storeService) =>
+      storeService.subscribe(
+        StateProperty.UI_STATE,
+        (uiState) => {
+          this.onUIStateUpdate_(uiState);
+        },
+        true /** callToInitialize */
+      )
     );
 
     const spacerEl = dev().assertElement(
@@ -547,7 +548,9 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state = DrawerState.OPEN;
 
-    this.storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    this.storeServicePromise_.then((storeService) =>
+      storeService.dispatch(Action.TOGGLE_PAUSED, true)
+    );
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', false);
