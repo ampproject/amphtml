@@ -36,7 +36,9 @@
  *
  * @return {!Object}
  */
-module.exports = function (context) {
+// eslint-disable-next-line
+module.exports = function create(context) {
+  const renames = [];
   /**
    * @param {!Node} node
    * @return {boolean}
@@ -112,6 +114,18 @@ module.exports = function (context) {
       if (parent.object === node && parent.computed === false) {
         return;
       }
+
+      // NS.Enum.key get
+      if (parent.property === node && parent.computed === false) {
+        const grand = parent.parent;
+        if (
+          grand.type === 'MemberExpression' &&
+          grand.object === parent &&
+          grand.computed === false
+        ) {
+          return;
+        }
+      }
     }
 
     if (parent.type === 'CallExpression') {
@@ -120,7 +134,7 @@ module.exports = function (context) {
         // isEnumValue(Enum, value)
         if (callee.type === 'Identifier') {
           const {name} = callee;
-          if (name === 'isEnumValue') {
+          if (name === 'isEnumValue' || name === 'enumValues') {
             return;
           }
         }
@@ -133,7 +147,38 @@ module.exports = function (context) {
         `Improper use of enum, you may only do:`,
         `- \`${node.name}.key\` get access.`,
         `- \`isEnumValue(${node.name}, someValue)\` value checks.`,
+        `- \`enumValues(${node.name}) values gathering (discouraged)\``,
       ].join('\n\t'),
+    });
+  }
+
+  /**
+   * @param {!Node} id
+   * @param {!Node} root
+   * @param {!Node} old
+   */
+  function rename(id, root, old) {
+    if (!renames.includes(id.name)) {
+      return;
+    }
+
+    const rename = id.name + '_Enum';
+
+    context.report({
+      node: root || id,
+      message: 'rename',
+
+      fix(fixer) {
+        const fixes = [];
+        if (root) {
+          fixes.push(fixer.replaceText(root, rename));
+        }
+        const variable = context.getScope().set.get(old.name);
+        for (const ref of variable.references) {
+          fixes.push(fixer.replaceText(ref.identifier, rename));
+        }
+        return fixes;
+      },
     });
   }
 
@@ -154,6 +199,9 @@ module.exports = function (context) {
       if (id.type !== 'Identifier') {
         return;
       }
+
+      rename(id, null, id);
+
       if (!/_E(NUM|num)$/.test(id.name)) {
         return;
       }
@@ -181,6 +229,16 @@ module.exports = function (context) {
             `eg, \`${node.kind} ${id.name} = { … }\``,
           ].join('\n\t'),
         });
+      }
+    },
+
+    ImportDeclaration(node) {
+      for (const imp of node.specifiers) {
+        if (imp.type !== 'ImportSpecifier') {
+          continue;
+        }
+
+        rename(imp.imported, imp, imp.local);
       }
     },
   };

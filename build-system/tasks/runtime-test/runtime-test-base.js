@@ -236,6 +236,7 @@ class RuntimeTestConfig {
         'process.env.NODE_ENV': '"test"',
       },
       plugins: [importPathPlugin, babelPlugin],
+      mainFields: ['module', 'browser', 'main'],
       sourcemap: 'inline',
     };
   }

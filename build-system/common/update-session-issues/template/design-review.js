@@ -8,10 +8,16 @@ const sessionDurationHours = 1;
 const timeRotationUtc = [
   [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
   [/* wed */ 3, '21:00', 'Americas'],
+  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
+  [/* wed */ 3, '21:00', 'Americas'],
+  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
+  [/* wed */ 3, '21:00', 'Americas'],
+  [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
+  [/* wed */ 3, '21:00', 'Americas'],
   [/* thu */ 4, '01:00', 'Asia/Oceania'],
 ];
 
-const timeRotationStart = new Date('2021-04-14');
+const timeRotationStart = new Date('2021-12-01');
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
@@ -36,7 +42,7 @@ If you are interested in bringing your design to design review, read the [design
 
 When attending a design review please read through the designs _before_ the design review starts. This allows us to spend more time on discussion of the design.
 
-We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let mrjoro@ know on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and we will find a time that works for you.
+We rotate our design review between times that work better for different parts of the world as described in our [design review documentation](https://github.com/ampproject/amphtml/blob/main/docs/design-reviews.md), but you are welcome to attend any design review. If you cannot make any of the design reviews but have a design to discuss please let us know in the \`#contributing\` channel on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels) and we will find a time that works for you.
 `;
 
 module.exports = /** @type {import('../types').TemplateDef} */ ({

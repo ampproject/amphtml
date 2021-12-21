@@ -48,5 +48,37 @@ describes.realWin(
         'https://www.youtube.com/embed/IAvf-rkzNck?enablejsapi=1&amp=1&playsinline=1'
       );
     });
+
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
+      element = createElementWithAttributes(win.document, 'amp-youtube', {
+        'data-videoid': 'IAvf-rkzNck',
+        'data-loading': 'lazy',
+        'amp': true,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('lazy');
+    });
+
+    it('should set loading="auto" if no value is specified', async () => {
+      element = createElementWithAttributes(win.document, 'amp-youtube', {
+        'data-videoid': 'IAvf-rkzNck',
+        'amp': true,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      expect(
+        element.shadowRoot.querySelector('iframe').getAttribute('loading')
+      ).to.equal('auto');
+    });
   }
 );
