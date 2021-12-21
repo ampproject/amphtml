@@ -1,4 +1,5 @@
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_proto_library")
+load("@io_bazel_rules_closure//closure:defs.bzl", "closure_proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -6,13 +7,18 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 proto_library(
-    name = "validator-proto",
+    name = "validator_proto",
     srcs = ["validator.proto"],
 )
 
 cc_proto_library(
     name = "validator_cc_proto",
-    deps = [":validator-proto"],
+    deps = [":validator_proto"],
+)
+
+closure_proto_library(
+    name = "validator_closure_proto",
+    deps = [":validator_proto"],
 )
 
 # <validator rules protoascii>
