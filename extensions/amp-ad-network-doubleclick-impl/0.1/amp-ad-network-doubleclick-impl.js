@@ -721,6 +721,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
       'ppid': (this.jsonTargeting && this.jsonTargeting['ppid']) || null,
+      'macr': (this.jsonTargeting && this.jsonTargeting['macr']) || null,
       ...googleBlockParameters(this),
     };
   }

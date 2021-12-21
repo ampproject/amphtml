@@ -142,6 +142,7 @@ Supported via `json` attribute:
     -   `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 -   `ppid`: Sets a custom provided user ID for targeting. Do not set when
     serving responses to crawlers since this value is expected to be dynamic.
+-   `macr`: Specify maximum content rating for ad in compliance with UK's Age-Appropriate Design Code (AADC).
 
 Example with json attribute:
 
