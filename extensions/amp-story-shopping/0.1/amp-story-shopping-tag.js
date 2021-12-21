@@ -85,10 +85,18 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       return;
     }
     this.mutateElement(() => {
+      let shopTagCSS = shoppingTagCSS;
+      if (document['dir'] === 'rtl') {
+        shopTagCSS = shoppingTagCSS.replace(
+          '.amp-story-shopping-tag-inner{',
+          '.amp-story-shopping-tag-inner{flex-flow:row-reverse !important;'
+        );
+      }
+
       createShadowRootWithStyle(
         this.element,
         renderShoppingTagTemplate(tagData),
-        shoppingTagCSS
+        shopTagCSS
       );
     });
   }
