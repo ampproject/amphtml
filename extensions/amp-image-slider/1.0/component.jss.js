@@ -83,10 +83,13 @@ const imageSliderLabelWrapper = {
   bottom: '0 !important',
   left: '0 !important',
   'z-index': '1 !important',
-  '& > [first]': {
+  '& > [slot="first-label"]': {
     position: 'absolute !important',
   },
-  '& > [second]': {
+  '& > [slot="second-label"]': {
+    position: 'absolute !important',
+  },
+  '& > .label': {
     position: 'absolute !important',
   },
 };
@@ -128,8 +131,8 @@ const imageSliderHintLeft = {
   'background-size': '56px 16px',
   width: '56px',
   height: '16px',
-  'background-image':
-    'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M4 5h12V3H4V0L0 4l4 4z" fill="#fff"/></g></svg>\')',
+  backgroundImage:
+    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 8'%3E%3Cg%3E%3Cpath d='M4 5h12V3H4V0L0 4l4 4z' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E\")",
   filter: 'drop-shadow(3px 3px 4px black)',
 };
 
@@ -137,8 +140,8 @@ const imageSliderHintRight = {
   'background-size': '56px 16px',
   width: '56px',
   height: '16px',
-  'background-image':
-    'url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 8"><g><path d="M24 5h-12V3H24V0L28 4l-4 4z" fill="#fff"/></g></svg>\')',
+  backgroundImage:
+    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 8'%3E%3Cpath d='M24 5H12V3h12V0l4 4-4 4z' fill='%23fff'/%3E%3C/svg%3E\")",
   filter: 'drop-shadow(3px 3px 4px black)',
 };
 
