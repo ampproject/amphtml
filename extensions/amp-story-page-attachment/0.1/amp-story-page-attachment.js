@@ -67,7 +67,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super(element);
 
     /** @private @const {!Promise<!../../amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-    this.analyticsServicePromise_ = Services.analyticsServiceForOrNull(
+    this.analyticsServicePromise_ = Services.storyAnalyticsServiceForOrNull(
       this.win
     );
 

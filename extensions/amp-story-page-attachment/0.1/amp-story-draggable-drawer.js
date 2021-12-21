@@ -593,7 +593,9 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state = DrawerState.CLOSED;
 
-    this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    this.storeServicePromise_.then((storeService) => {
+      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    });
     this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {
