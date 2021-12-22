@@ -53,7 +53,6 @@ const renderShoppingTagTemplate = (tagData, element) => (
             {
               style: 'currency',
               currency: tagData['product-price-currency'],
-              maximumFractionDigits: 0 /* This is needed to NOT display the Trailing zeroes (for now), otherwise by default $100 will display as $100.00*/,
             }
           ).format(tagData['product-price'])}
       </span>
