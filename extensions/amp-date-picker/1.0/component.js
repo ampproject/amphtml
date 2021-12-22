@@ -1,9 +1,10 @@
 import {format as dateFnsFormat, isValid, parse} from 'date-fns';
-import * as moment from 'moment';
+import moment from 'moment';
 import {
   DayPickerRangeController,
   DayPickerSingleDateController,
 } from 'react-dates';
+import {END_DATE, START_DATE} from 'react-dates/constants';
 
 import {
   closestAncestorElementBySelector,
@@ -66,7 +67,7 @@ const DateFieldNameByType = {
  * @private
  */
 function asMoment(date) {
-  return moment(date);
+  return moment.utc(date);
 }
 
 /**
@@ -95,6 +96,7 @@ export function BentoDatePicker({
   // locale = DEFAULT_LOCALE,
   id,
   onError,
+  initialVisibleMonth,
   ...rest
 }) {
   const wrapperRef = useRef();
@@ -280,13 +282,20 @@ export function BentoDatePicker({
   );
 
   const calendarComponent = useMemo(() => {
+    const _initialVisibleMonth = initialVisibleMonth
+      ? () => asMoment(initialVisibleMonth)
+      : null;
     const defaultProps = {
       'aria-label': 'Calendar',
+      initialVisibleMonth: _initialVisibleMonth,
     };
     if (type === DatePickerType.RANGE) {
       return (
         <DayPickerRangeController
           {...defaultProps}
+          focusedInput={START_DATE}
+          startDate={asMoment(startDate)}
+          endDate={asMoment(endDate)}
           onDatesChange={onDatesChange}
         />
       );
@@ -294,10 +303,21 @@ export function BentoDatePicker({
     return (
       <DayPickerSingleDateController
         {...defaultProps}
+        // This is necessary for the initialVisibleMonth prop to work
+        focused={true}
+        date={asMoment(date)}
         onDateChange={onDateChange}
       />
     );
-  }, [onDateChange, onDatesChange, type]);
+  }, [
+    onDateChange,
+    onDatesChange,
+    type,
+    initialVisibleMonth,
+    startDate,
+    endDate,
+    date,
+  ]);
 
   useEffect(() => {
     const form = closestAncestorElementBySelector(

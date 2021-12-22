@@ -19,7 +19,10 @@ export const _default = (args) => {
 
 export const withSingleInput = (args) => {
   return (
-    <BentoDatePicker {...args}>
+    <BentoDatePicker
+      initialVisibleMonth={new Date(Date.UTC(2021, 0, 1))}
+      {...args}
+    >
       <input id="date" value="2021-01-01" />
     </BentoDatePicker>
   );

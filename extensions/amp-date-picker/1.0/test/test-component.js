@@ -43,7 +43,7 @@ function DatePicker(props = {}) {
 describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   // See require('react') comment above
   beforeEach(() => {
-    env.sandbox.stub(React);
+    // env.sandbox.stub(React);
   });
 
   it('should render', () => {
@@ -235,6 +235,41 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(input.prop('value')).to.equal('2021-01-01');
     });
+
+    it('sets the selected date in the calendar state', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date('2021-01-01')}
+        />
+      );
+
+      selectDate(wrapper, '2021-01-01');
+
+      expect(wrapper.exists('[aria-label="Selected. Friday, January 1, 2021"]'))
+        .to.be.true;
+    });
+
+    it('can set the initial visible month', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker
+            type="single"
+            mode="static"
+            layout="fixed-height"
+            height={360}
+            initialVisibleMonth={new Date('2021-01-01')}
+          />
+        </form>
+      );
+
+      const visibleMonth = wrapper.find('[data-visible=true]');
+
+      expect(visibleMonth.getDOMNode().innerHTML).to.contain('January 2021');
+    });
   });
 
   describe('showing the date picker in static mode for a date range', () => {
@@ -286,6 +321,44 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(startDateInput.prop('value')).to.equal('2021-01-01');
       expect(endDateInput.prop('value')).to.equal('2021-01-02');
+    });
+
+    xit('sets the selected date in the calendar state', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date('2021-01-01')}
+        />
+      );
+
+      selectDates(wrapper, '2021-01-01', '2021-01-02');
+
+      expect(wrapper.exists('[aria-label="Selected. Friday, January 1, 2021"]'))
+        .to.be.true;
+      expect(
+        wrapper.exists('[aria-label="Selected. Saturday, January 2, 2021"]')
+      ).to.be.true;
+    });
+
+    it('can set the initial visible month', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker
+            type="range"
+            mode="static"
+            layout="fixed-height"
+            height={360}
+            initialVisibleMonth={new Date('2021-01-01')}
+          />
+        </form>
+      );
+
+      const visibleMonth = wrapper.find('[data-visible=true]');
+
+      expect(visibleMonth.getDOMNode().innerHTML).to.contain('January 2021');
     });
   });
 
