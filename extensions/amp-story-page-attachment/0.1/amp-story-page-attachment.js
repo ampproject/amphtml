@@ -17,7 +17,6 @@ import {
 
 import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
 import {getSourceOrigin} from '../../../src/url';
-import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   AttachmentTheme,
   renderOutlinkLinkIconElement,
@@ -82,33 +81,37 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   buildCallback() {
-    super.buildCallback();
+    super.buildCallback().then(() => {
+      this.maybeSetDarkThemeForElement_(this.headerEl);
+      this.maybeSetDarkThemeForElement_(this.element);
 
-    this.maybeSetDarkThemeForElement_(this.headerEl);
-    this.maybeSetDarkThemeForElement_(this.element);
+      // Outlinks can be an amp-story-page-outlink or the legacy version,
+      // an amp-story-page-attachment with an href.
+      const isOutlink =
+        this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
+        this.element.hasAttribute('href');
+      this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
-    // Outlinks can be an amp-story-page-outlink or the legacy version,
-    // an amp-story-page-attachment with an href.
-    const isOutlink =
-      this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
-      this.element.hasAttribute('href');
-    this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
-
-    if (this.type_ === AttachmentType.INLINE) {
-      this.buildInline_();
-    }
-
-    this.win.addEventListener('pageshow', (event) => {
-      // On browser back, Safari does not reload the page but resumes its cached
-      // version. This event's parameter lets us know when this happens so we
-      // can cleanup the remote opening animation.
-      if (event.persisted) {
-        this.closeInternal_(false /** shouldAnimate */);
+      if (this.type_ === AttachmentType.INLINE) {
+        Services.localizationServiceForOrNull(this.element).then(
+          (localizationService) => {
+            this.buildInline_(localizationService);
+          }
+        );
       }
-    });
 
-    toggle(this.element, true);
-    this.element.setAttribute('aria-live', 'assertive');
+      this.win.addEventListener('pageshow', (event) => {
+        // On browser back, Safari does not reload the page but resumes its cached
+        // version. This event's parameter lets us know when this happens so we
+        // can cleanup the remote opening animation.
+        if (event.persisted) {
+          this.closeInternal_(false /** shouldAnimate */);
+        }
+      });
+
+      toggle(this.element, true);
+      this.element.setAttribute('aria-live', 'assertive');
+    });
   }
 
   /**
@@ -124,9 +127,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
   /**
    * Builds inline page attachment's drawer UI.
+   * @param {../../../src/services/localization/LocalizationService} localizationService
    * @private
    */
-  buildInline_() {
+  buildInline_(localizationService) {
     const titleText =
       this.element.getAttribute('title') ||
       this.element.getAttribute('data-title');
@@ -135,8 +139,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       <div class="i-amphtml-story-draggable-drawer-header-title-and-close">
         <button
           class="i-amphtml-story-page-attachment-close-button"
-          aria-label={localize(
-            this.element,
+          aria-label={localizationService.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
           )}
           role="button"
@@ -150,22 +153,25 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
       allowlistFormActions(this.win);
+
       forms.forEach((form) => {
         // Scroll each response attribute element into view, when displayed.
-        setupResponseAttributeElements(form).forEach((el) => {
-          // TODO(wg-stories): Share ResizeObserver for runtime performance.
-          new this.win.ResizeObserver((e) => {
-            if (
-              this.state === DrawerState.OPEN &&
-              e[0].contentRect.height > 0
-            ) {
-              el./*OK*/ scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-              });
-            }
-          }).observe(el);
-        });
+        setupResponseAttributeElements(form, localizationService).forEach(
+          (el) => {
+            // TODO(wg-stories): Share ResizeObserver for runtime performance.
+            new this.win.ResizeObserver((e) => {
+              if (
+                this.state === DrawerState.OPEN &&
+                e[0].contentRect.height > 0
+              ) {
+                el./*OK*/ scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'nearest',
+                });
+              }
+            }).observe(el);
+          }
+        );
       });
 
       // Page attachments that contain forms must display the page's publisher

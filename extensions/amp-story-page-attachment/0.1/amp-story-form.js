@@ -3,7 +3,6 @@ import * as Preact from '#core/dom/jsx';
 
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,
   getStoreService,
@@ -36,14 +35,18 @@ let FormElementChildrenDef;
 const createStatusChildrenByAttribute = {
   'submitting': () => toggleLoadingSpinner(renderLoadingSpinner(), true),
 
-  'submit-success': (formEl) =>
+  'submit-success': (localizationService) =>
     createFormResultChildren(
-      localize(formEl, LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_SUCCESS)
+      localizationService.getLocalizedString(
+        LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_SUCCESS
+      )
     ),
 
-  'submit-error': (formEl) =>
+  'submit-error': (localizationService) =>
     createFormResultChildren(
-      localize(formEl, LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_ERROR)
+      localizationService.getLocalizedString(
+        LocalizedStringId_Enum.AMP_STORY_FORM_SUBMIT_ERROR
+      )
     ),
 };
 
@@ -51,11 +54,12 @@ const createStatusChildrenByAttribute = {
  * Add a default form attribute element for each absent response attribute.
  * @param {!Element} formEl The form to which the attribute elements will be
  *     selected or added.
+ * @param {!../../../src/service/localization.LocalizationService} localizationService
  * @return {Array<!Element>} The list of response attribute elements that
  *     belong to the given form.
  * @private
  */
-export function setupResponseAttributeElements(formEl) {
+export function setupResponseAttributeElements(formEl, localizationService) {
   return Object.keys(createStatusChildrenByAttribute).map((attr) => {
     const selected = formEl.querySelector(`[${escapeCssSelectorIdent(attr)}]`);
     if (selected) {
@@ -64,7 +68,7 @@ export function setupResponseAttributeElements(formEl) {
     const created = (
       <div>
         <div class="i-amphtml-story-page-attachment-form-submission-status">
-          {createStatusChildrenByAttribute[attr](formEl)}
+          {createStatusChildrenByAttribute[attr](localizationService)}
         </div>
       </div>
     );

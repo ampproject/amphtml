@@ -11,7 +11,6 @@ import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-0.1.css';
-import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -121,38 +120,43 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('amp-story-draggable-drawer-root');
+    return Services.localizationServiceForOrNull(this.element).then(
+      (localizationService) => {
+        this.element.classList.add('amp-story-draggable-drawer-root');
 
-    const templateEl = renderDrawerElement();
-    this.headerEl = renderHeaderElement();
+        const templateEl = renderDrawerElement();
+        this.headerEl = renderHeaderElement();
 
-    this.containerEl = dev().assertElement(
-      templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
+        this.containerEl = dev().assertElement(
+          templateEl.querySelector(
+            '.i-amphtml-story-draggable-drawer-container'
+          )
+        );
+        this.contentEl = dev().assertElement(
+          this.containerEl.querySelector(
+            '.i-amphtml-story-draggable-drawer-content'
+          )
+        );
+
+        const spacerEl = (
+          <button
+            role="button"
+            class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
+            aria-label={localizationService.getLocalizedString(
+              LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+            )}
+          ></button>
+        );
+
+        this.containerEl.insertBefore(spacerEl, this.contentEl);
+        this.contentEl.appendChild(
+          createShadowRootWithStyle(<div />, this.headerEl, CSS)
+        );
+
+        this.element.appendChild(templateEl);
+        this.element.setAttribute('aria-hidden', true);
+      }
     );
-    this.contentEl = dev().assertElement(
-      this.containerEl.querySelector(
-        '.i-amphtml-story-draggable-drawer-content'
-      )
-    );
-
-    const spacerEl = (
-      <button
-        role="button"
-        class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
-        aria-label={localize(
-          this.element,
-          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-        )}
-      ></button>
-    );
-
-    this.containerEl.insertBefore(spacerEl, this.contentEl);
-    this.contentEl.appendChild(
-      createShadowRootWithStyle(<div />, this.headerEl, CSS)
-    );
-
-    this.element.appendChild(templateEl);
-    this.element.setAttribute('aria-hidden', true);
   }
 
   /** @override */
