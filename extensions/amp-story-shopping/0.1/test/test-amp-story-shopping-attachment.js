@@ -2,6 +2,9 @@ import {expect} from 'chai';
 
 import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
+
+import {AmpStoryPageAttachment} from 'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
@@ -44,7 +47,8 @@ describes.realWin(
       const attachmentChildEl = shoppingEl.querySelector(
         'amp-story-page-attachment'
       );
-      const attachmentChildImpl = await attachmentChildEl.getImpl();
+      const attachmentChildImpl = new AmpStoryPageAttachment(attachmentChildEl);
+      attachmentChildEl.getImpl = () => Promise.resolve(attachmentChildImpl);
       env.sandbox.stub(attachmentChildImpl, 'open');
       await shoppingImpl.open(true);
       expect(attachmentChildImpl.open).to.be.calledOnce;
