@@ -1,4 +1,6 @@
+import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
 
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
@@ -15,6 +17,11 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     const storyEl = win.document.createElement('amp-story');
     storyEl.getAmpDoc = () => new AmpDocSingle(win);
     win.document.body.appendChild(storyEl);
+
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationServiceForOrNull')
+      .returns(Promise.resolve(localizationService));
 
     // Set up the attachment element for inline attachment testing.
     attachmentEl = win.document.createElement('amp-story-page-attachment');
@@ -36,12 +43,12 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   });
 
   it('should build an attachment', async () => {
-    attachment.buildCallback();
+    await attachment.buildCallback();
     return attachment.layoutCallback();
   });
 
   it('should build an outlink', async () => {
-    outlink.buildCallback();
+    await outlink.buildCallback();
     return outlink.layoutCallback();
   });
 
@@ -49,7 +56,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     const anchorEl = outlinkEl.querySelector('amp-story-page-outlink a');
     anchorEl.setAttribute('target', '_blank');
 
-    outlink.buildCallback();
+    await outlink.buildCallback();
     await outlink.layoutCallback();
 
     expect(anchorEl.getAttribute('target')).to.eql('_top');

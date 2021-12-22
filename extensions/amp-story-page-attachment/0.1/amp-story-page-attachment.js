@@ -81,7 +81,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   buildCallback() {
-    super.buildCallback().then(() => {
+    return super.buildCallback().then(() => {
       this.maybeSetDarkThemeForElement_(this.headerEl);
       this.maybeSetDarkThemeForElement_(this.element);
 
