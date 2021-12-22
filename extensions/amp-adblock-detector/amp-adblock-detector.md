@@ -144,8 +144,12 @@ Syntax and argument details for use in fully valid AMP pages.
 Syntax and argument details for use in Bento mode.
 
 ```
-Bento example
+<WIP>
 ```
+
+## Limitation
+
+`amp-adblock-detector` is only designed to work as wrapper around `amp-ad` and cannot work with `amp-sticky-ad`.
 
 ## Validation
 
