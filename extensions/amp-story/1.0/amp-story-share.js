@@ -1,7 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {user} from '#utils/log';
-import {AmpStoryShareMenu} from 'extensions/amp-story-share-menu/0.1/amp-story-share-menu';
 import {getAmpdoc} from 'src/service-helpers';
 import {
   Action,
@@ -38,7 +37,7 @@ export class AmpStoryShare {
     this.storeService_ = getStoreService(win);
 
     /** @private {!Element} used to host the fallback menu or for analytics. */
-    this.shareMenuEl_ = <div class="i-amphtml-story-share-menu-host"></div>;
+    this.shareMenuEl_ = <amp-story-share-menu></amp-story-share-menu>;
     storyEl.appendChild(this.shareMenuEl_);
 
     /** @private {boolean} */
@@ -106,8 +105,11 @@ export class AmpStoryShare {
       return;
     }
     this.initializedFallback_ = true;
-    const shareMenu = new AmpStoryShareMenu(this.shareMenuEl_);
-    shareMenu.build();
+    Services.extensionsFor(this.win_).installExtensionForDoc(
+      getAmpdoc(this.storyEl_),
+      'amp-story-share-menu',
+      '0.1'
+    );
   }
 
   /**
