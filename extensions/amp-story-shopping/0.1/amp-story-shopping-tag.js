@@ -2,10 +2,8 @@ import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
-import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   ShoppingDataDef,
   StateProperty,
@@ -26,7 +24,7 @@ const FONTS_TO_LOAD = [
   },
 ];
 
-const renderShoppingTagTemplate = (tagData, element) => (
+const renderShoppingTagTemplate = (tagData, element, localizationService) => (
   <div class="amp-story-shopping-tag-inner">
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
@@ -46,10 +44,7 @@ const renderShoppingTagTemplate = (tagData, element) => (
           </span>
         )) ||
           new Intl.NumberFormat(
-            localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_SHOPPING_LANGUAGE_ISO_LABEL
-            ),
+            localizationService.getLanguageCodesForElement(element)[0],
             {
               style: 'currency',
               currency: tagData['product-price-currency'],
@@ -66,15 +61,23 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     super(element);
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.loadFonts_();
     this.element.setAttribute('role', 'button');
-    return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => (this.storeService_ = storeService)
-    );
+
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win),
+      Services.localizationServiceForOrNull(this.element),
+    ]).then(([storeService, localizationService]) => {
+      this.storeService_ = storeService;
+      this.localizationService_ = localizationService;
+    });
   }
 
   /** @override */
@@ -100,10 +103,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!tagData) {
       return;
     }
+
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        renderShoppingTagTemplate(tagData, this.element),
+        renderShoppingTagTemplate(
+          tagData,
+          this.element,
+          this.localizationService_
+        ),
         shoppingTagCSS
       );
     });

@@ -218,9 +218,5 @@
   "101": {
     "string": "Shop Now",
     "description": "Label for the shopping CTA button."
-  },
-  "102": {
-    "string": "en-EN",
-    "description": "ISO 639-1 language code for English."
   }
 }
