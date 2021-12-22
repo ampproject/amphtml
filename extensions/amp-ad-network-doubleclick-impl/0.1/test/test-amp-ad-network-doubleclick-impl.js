@@ -1227,6 +1227,31 @@ for (const {config, name} of [
             /(\?|&)ppid=testId(&|$)/
           );
         });
+
+        it('should set macr parameter if set in json', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          element.setAttribute('json', '{"macr": "pg"}');
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)macr=pg(&|$)/
+          );
+        });
+
+        it('should be blank if macr is invalid', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          element.setAttribute('json', '{"macr": "invalid"}');
+          return expect(impl.getAdUrl()).to.eventually.not.match(
+            /(\?|&)macr=/
+          );
+        });
+
+        it('should be blank if macr not set in json', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          element.setAttribute('json', '{}');
+          return expect(impl.getAdUrl()).to.eventually.not.match(
+            /(\?|&)macr=/
+          );
+        });
+
       });
 
       describe('#getPageParameters', () => {

@@ -4,6 +4,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {validateAdContentRating} from "#ads/google/a4a/shared/shared-util";
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
@@ -406,6 +407,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'pwprc': this.element.getAttribute('data-package'),
       'spsa': this.isSinglePageStoryAd
         ? `${this.size_.width}x${this.size_.height}`
+        : null,
+      'macr': validateAdContentRating(this.element.getAttribute('data-max-ad-content-rating'))
+        ? this.element.getAttribute('data-max-ad-content-rating')
         : null,
     };
 

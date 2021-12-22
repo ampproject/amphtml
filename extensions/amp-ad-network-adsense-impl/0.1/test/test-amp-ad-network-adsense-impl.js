@@ -957,6 +957,27 @@ describes.realWin(
         });
       });
 
+
+      it('should include macr when present', () => {
+        element.setAttribute('data-max-ad-content-rating', 'pg');
+        return expect(impl.getAdUrl()).to.eventually.match(
+          /macr=pg(&|$)/
+        );
+      });
+
+      it('should not include macr, if content rating is missing', () => {
+        return expect(impl.getAdUrl()).to.eventually.not.match(
+          /(\?|&)macr=/
+        );
+      });
+
+      it('should not include macr, if content rating is invalid', () => {
+        element.setAttribute('data-max-ad-content-rating','test');
+        return expect(impl.getAdUrl()).to.eventually.not.match(
+          /(\?|&)macr=/
+        );
+      });
+
       describe('SSR experiments', () => {
         it('should include SSR experiments', () => {
           env.sandbox
