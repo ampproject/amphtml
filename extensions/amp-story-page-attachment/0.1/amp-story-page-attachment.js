@@ -336,26 +336,24 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     super.open(shouldAnimate);
 
-    this.storeServicePromise_.then((storeService) => {
-      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
-      storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
-      // Don't create a new history entry for remote attachment as user is
-      // navigating away.
-      if (this.type_ !== AttachmentType.OUTLINK) {
-        const currentHistoryState = /** @type {!Object} */ (
-          getHistoryState(this.win.history)
-        );
-        const historyState = {
-          ...currentHistoryState,
-          [HistoryState.ATTACHMENT_PAGE_ID]: storeService.get(
-            StateProperty.CURRENT_PAGE_ID
-          ),
-        };
+    // Don't create a new history entry for remote attachment as user is
+    // navigating away.
+    if (this.type_ !== AttachmentType.OUTLINK) {
+      const currentHistoryState = /** @type {!Object} */ (
+        getHistoryState(this.win.history)
+      );
+      const historyState = {
+        ...currentHistoryState,
+        [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService.get(
+          StateProperty.CURRENT_PAGE_ID
+        ),
+      };
 
-        this.historyService_.push(() => this.closeInternal_(), historyState);
-      }
-    });
+      this.historyService_.push(() => this.closeInternal_(), historyState);
+    }
 
     this.toggleBackgroundOverlay_(true);
 

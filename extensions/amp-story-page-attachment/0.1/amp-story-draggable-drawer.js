@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
@@ -67,9 +68,6 @@ export class DraggableDrawer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @protected {?../../../src/services/localization.LocalizationService} */
-    this.localizationService = null;
-
     /** @private {!Array<!Element>} AMP components within the drawer. */
     this.ampComponents_ = [];
 
@@ -91,8 +89,13 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @protected {!DrawerState} */
     this.state = DrawerState.CLOSED;
 
-    /** @protected @const {!Promise<!./amp-story-store-service.AmpStoryStoreService>} */
-    this.storeServicePromise_ = Services.storyStoreServiceForOrNull(this.win);
+    /** @protected @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService = devAssert(Services.storyStoreService(this.win));
+
+    /** @protected @const {!../../../src/services/localization.LocalizationService} */
+    this.localizationService = devAssert(
+      Services.localizationForDoc(this.element)
+    );
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -123,44 +126,37 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return Services.localizationServiceForOrNull(this.element).then(
-      (localizationService) => {
-        this.localizationService = localizationService;
-        this.element.classList.add('amp-story-draggable-drawer-root');
+    this.element.classList.add('amp-story-draggable-drawer-root');
 
-        const templateEl = renderDrawerElement();
-        this.headerEl = renderHeaderElement();
+    const templateEl = renderDrawerElement();
+    this.headerEl = renderHeaderElement();
 
-        this.containerEl = dev().assertElement(
-          templateEl.querySelector(
-            '.i-amphtml-story-draggable-drawer-container'
-          )
-        );
-        this.contentEl = dev().assertElement(
-          this.containerEl.querySelector(
-            '.i-amphtml-story-draggable-drawer-content'
-          )
-        );
-
-        const spacerEl = (
-          <button
-            role="button"
-            class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
-            aria-label={localizationService.getLocalizedString(
-              LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-            )}
-          ></button>
-        );
-
-        this.containerEl.insertBefore(spacerEl, this.contentEl);
-        this.contentEl.appendChild(
-          createShadowRootWithStyle(<div />, this.headerEl, CSS)
-        );
-
-        this.element.appendChild(templateEl);
-        this.element.setAttribute('aria-hidden', true);
-      }
+    this.containerEl = dev().assertElement(
+      templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
     );
+    this.contentEl = dev().assertElement(
+      this.containerEl.querySelector(
+        '.i-amphtml-story-draggable-drawer-content'
+      )
+    );
+
+    const spacerEl = (
+      <button
+        role="button"
+        class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
+        aria-label={this.localizationService.getLocalizedString(
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+      ></button>
+    );
+
+    this.containerEl.insertBefore(spacerEl, this.contentEl);
+    this.contentEl.appendChild(
+      createShadowRootWithStyle(<div />, this.headerEl, CSS)
+    );
+
+    this.element.appendChild(templateEl);
+    this.element.setAttribute('aria-hidden', true);
   }
 
   /** @override */
@@ -187,14 +183,12 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @protected
    */
   initializeListeners_() {
-    this.storeServicePromise_.then((storeService) =>
-      storeService.subscribe(
-        StateProperty.UI_STATE,
-        (uiState) => {
-          this.onUIStateUpdate_(uiState);
-        },
-        true /** callToInitialize */
-      )
+    this.storeService.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
     );
 
     const spacerEl = dev().assertElement(
@@ -556,9 +550,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state = DrawerState.OPEN;
 
-    this.storeServicePromise_.then((storeService) =>
-      storeService.dispatch(Action.TOGGLE_PAUSED, true)
-    );
+    this.storeService.dispatch(Action.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', false);
@@ -601,9 +593,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state = DrawerState.CLOSED;
 
-    this.storeServicePromise_.then((storeService) => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, false);
-    });
+    this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
     this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {
