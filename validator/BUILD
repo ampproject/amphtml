@@ -7,6 +7,11 @@ package(default_visibility = ["//visibility:public"])
 licenses(["notice"])
 
 proto_library(
+    name = "validator-proto",
+    srcs = ["validator.proto"],
+)
+
+proto_library(
     name = "validator_proto",
     srcs = ["validator.proto"],
 )
