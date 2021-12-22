@@ -2,10 +2,11 @@ import {isFiniteNumber} from '#core/types';
 
 import {isExperimentOn} from '#experiments';
 
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-image-slider-1.0.css';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-image-slider';
