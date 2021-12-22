@@ -1,63 +1,49 @@
 ---
-$category@: presentation
+$category@: ads-analytics
 formats:
   - websites
 teaser:
-  text: Fill this in with teaser text to improve SEO. Use the component description.
+  text: Detects Ad-Blocker and display fallback.
 ---
-
-<!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
-  * Remove this comment!
--->
 
 # amp-adblock-detector
 
-<!--
-  If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple content blocks and code samples.
--->
-
 ## Usage
 
-One to three paragraphs explaining the component usage. List important functionality. Explain why developers care about it.
+`amp-adblock-detector` detects Ad-Blocker and displays fallback. It works as a wrapper component around the `amp-ad`.
 
-[filter formats=“websites”]
-
-Below is an example for websites.
+**Example**
 
 [example preview="inline" playground="true" imports="amp-adblock-detector"]
 
 ```html
-<amp-adblock-detector required-attribute>
-  I am a hello world inline executable code sample for websites!
+<amp-adblock-detector layout="fixed" width="120" height="600">
+  <amp-ad
+    width="120"
+    height="600"
+    type="doubleclick"
+    data-slot="/21730346048/test-skyscraper"
+  >
+    <div fallback>
+      <p>Error while loading Ad</p>
+    </div>
+  </amp-ad>
+  <div
+    status="blocked"
+    style="border: 2px solid red; border-radius: 10px; margin: 5px; padding: 5px;"
+  >
+    <h2>Ad Blocker Detected</h2>
+    <p>Please allow ads to run on this page.</p>
+  </div>
 </amp-adblock-detector>
 ```
 
-[/example][/filter]
+[/example]
 
 <!--
   * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
   * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
  -->
-
-[filter formats=“ads”]
-
-Below is an example for ads.
-
-[example preview=“inline” playground=“true” imports="amp-adblock-detector"]
-
-```html
-<amp-adblock-detector required-attribute>
-  I am a hello world inline executable code sample for ads!
-</amp-adblock-detector>
-```
-
-[/example][/filter]
 
 ### Standalone use outside valid AMP documents (optional)
 
@@ -71,7 +57,7 @@ The example below demonstrates `amp-adblock-detector` component in standalone us
 
 [example preview="top-frame" playground="false"]
 
-```
+```html
 <head>
 ...
 <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -80,14 +66,14 @@ The example below demonstrates `amp-adblock-detector` component in standalone us
 ...
 </head>
 <amp-adblock-detector>
-  ...
+  <amp-ad
+    ...
+  >
+  </amp-ad>
+  <div status="blocked">
+    <!-- fallback markup goes here -->
+  </div>
 </amp-adblock-detector>
-<button id="element-id">
-  Event Trigger
-</button>
-<script>
-  example of one API usage
-</script>
 ```
 
 [/example]
@@ -105,26 +91,8 @@ const api = await AdblockDetector.getApi();
 
 The `amp-adblock-detector` API allows you to register and respond to the following events:
 
-**event 1**
-Explanation of event, proper syntax/arguments.
-
-```
-example
-```
-
-**event 2**
-Explanation of event, proper syntax/arguments.
-
-```
-example
-```
-
-**action 1**
-Explanation of action, proper syntax/arguments.
-
-```
-example
-```
+**onBlock**
+Fires when Ad-Blocker is detected.
 
 #### Layout and style
 
@@ -136,60 +104,11 @@ Each Bento component has a small CSS library you must include to guarantee prope
 
 Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
 
-**Container type**
+## Events
 
-The `amp-adblock-detector` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
+### `onblock`
 
-```css
-example
-```
-
-**style/layout guidelines 2 (optional)**
-
-Information on how to layout and style `amp-adblock-detector`.
-
-```
-example
-```
-
-### Behavior users should be aware of (optional)
-
-What to do if they want behavior. How to work around it.
-
-```html
-<amp-adblock-detector required-attribute>
-  Code sample of behavior or behavior workaround.
-</amp-adblock-detector>
-```
-
-### Behavior restrictions
-
-What is allowed, what isn't.
-
-## Attributes
-
-### `attribute-name`
-
-Description of attribute. Use cases for this attribute.
-
--   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-adblock-detector`.
--   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-adblock-detector`.
-
-### `optional-attribute-name` (optional)
-
-Here, I write what `optional-attribute-name` will do to `amp-adblock-detector`.
-
-## Actions (optional)
-
-### `action-name`
-
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-adblock-detector` needs to be identified with an `id` to work.
-
-## Events (optional)
-
-### `event-name`
-
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-adblock-detector` needs to be identified with an `id` to work.
+`onblock` will be fired when an Ad-Blocker is detected.
 
 #### Valid AMP
 
@@ -206,15 +125,15 @@ Syntax and argument details for use in fully valid AMP pages.
   ></script>
 </head>
 <body>
-  <amp-adblock-detector
-    required-attribute
-    on="event-name: my-button.show"
-  >
-    Hello World!
+  <amp-adblock-detector>
+    <amp-ad
+      ...
+    >
+    </amp-ad>
+    <div status="blocked">
+      <!-- fallback markup goes here -->
+    </div>
   </amp-adblock-detector>
-  <button id="my-button" hidden>
-    Here I am!
-  </button>
 </body>
 ```
 
@@ -227,26 +146,6 @@ Syntax and argument details for use in Bento mode.
 ```
 Bento example
 ```
-
-## Styling (optional)
-
-Explain how to style the element.
-
-## Analytics (optional)
-
-Explain analytics.
-
-```html
-"configuration": {}
-```
-
-## Accessibility (optional)
-
-Accessibility information related to `amp-adblock-detector`.
-
-## Version notes (optional)
-
-Information on version differences and migration notes.
 
 ## Validation
 
