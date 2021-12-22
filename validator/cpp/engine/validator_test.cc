@@ -2,7 +2,6 @@
 #include <fstream>
 #include <memory>
 
-#include "glog/logging.h"
 #include "cpp/engine/validator_pb.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
@@ -16,6 +15,7 @@
 #include "cpp/engine/testing-utils.h"
 #include "cpp/engine/validator.h"
 #include "cpp/htmlparser/css/parse-css.pb.h"
+#include "cpp/htmlparser/logging.h"
 #include "validator.pb.h"
 
 using absl::StartsWith;

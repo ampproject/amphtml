@@ -103,8 +103,8 @@ bool Node::InsertBefore(Node* new_child, Node* old_child) {
 
 bool Node::AppendChild(Node* new_child) {
   CHECK(!(new_child->Parent() || new_child->PrevSibling() ||
-          new_child->NextSibling()),
-        "html: AppendChild called for an attached child Node.");
+          new_child->NextSibling()))
+      << "html: AppendChild called for an attached child Node.";
 
   Node* last = LastChild();
   if (last) {
@@ -121,7 +121,7 @@ bool Node::AppendChild(Node* new_child) {
 
 Node* Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
+  CHECK(c->parent_ == this) << "html: RemoveChild called for a non-child Node";
 
   if (first_child_ == c) {
     first_child_ = c->next_sibling_;
