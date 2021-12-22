@@ -93,11 +93,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
       if (this.type_ === AttachmentType.INLINE) {
-        Services.localizationServiceForOrNull(this.element).then(
-          (localizationService) => {
-            this.buildInline_(localizationService);
-          }
-        );
+        this.buildInline_(this.localizationService);
       }
 
       this.win.addEventListener('pageshow', (event) => {
@@ -127,10 +123,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
   /**
    * Builds inline page attachment's drawer UI.
-   * @param {../../../src/services/localization/LocalizationService} localizationService
    * @private
    */
-  buildInline_(localizationService) {
+  buildInline_() {
     const titleText =
       this.element.getAttribute('title') ||
       this.element.getAttribute('data-title');
@@ -139,7 +134,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       <div class="i-amphtml-story-draggable-drawer-header-title-and-close">
         <button
           class="i-amphtml-story-page-attachment-close-button"
-          aria-label={localizationService.getLocalizedString(
+          aria-label={this.localizationService.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
           )}
           role="button"
@@ -156,7 +151,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
       forms.forEach((form) => {
         // Scroll each response attribute element into view, when displayed.
-        setupResponseAttributeElements(form, localizationService).forEach(
+        setupResponseAttributeElements(form, this.localizationService).forEach(
           (el) => {
             // TODO(wg-stories): Share ResizeObserver for runtime performance.
             new this.win.ResizeObserver((e) => {
@@ -240,8 +235,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         {image}
         <span class="i-amphtml-story-page-attachment-remote-title">
           <span>
-            {localize(
-              this.element,
+            {this.localizationService.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
             )}
           </span>

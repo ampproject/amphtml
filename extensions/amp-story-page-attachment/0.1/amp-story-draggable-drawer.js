@@ -67,6 +67,9 @@ export class DraggableDrawer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @protected {?../../../src/services/localization.LocalizationService} */
+    this.localizationService = null;
+
     /** @private {!Array<!Element>} AMP components within the drawer. */
     this.ampComponents_ = [];
 
@@ -122,6 +125,7 @@ export class DraggableDrawer extends AMP.BaseElement {
   buildCallback() {
     return Services.localizationServiceForOrNull(this.element).then(
       (localizationService) => {
+        this.localizationService = localizationService;
         this.element.classList.add('amp-story-draggable-drawer-root');
 
         const templateEl = renderDrawerElement();
