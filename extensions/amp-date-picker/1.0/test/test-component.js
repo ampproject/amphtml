@@ -363,6 +363,28 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         'Overlay single pickers must specify "inputSelector"'
       );
     });
+
+    it('hides the calendar view by default', () => {
+      const wrapper = mount(
+        <DatePicker type="single" mode="overlay" inputSelector="[name=date]">
+          <input type="text" name="date" />
+        </DatePicker>
+      );
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+    });
+
+    it('shows the calendar view on click', () => {
+      const wrapper = mount(
+        <DatePicker type="single" mode="overlay" inputSelector="[name=date]">
+          <input type="text" name="date" />
+        </DatePicker>
+      );
+
+      wrapper.find('input[name="date"]').simulate('click');
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
   });
 
   describe('showing the date picker in overlay mode for a date range', () => {
@@ -373,6 +395,22 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(onErrorSpy).to.have.been.calledWith(
         `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
       );
+    });
+
+    it('hides the calendar view by default', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="overlay"
+          startInputSelector="[name=start-date]"
+          endInputSelector="[name=end-date]"
+        >
+          <input type="text" name="start-date" />
+          <input type="text" name="end-date" />
+        </DatePicker>
+      );
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
     });
   });
 });

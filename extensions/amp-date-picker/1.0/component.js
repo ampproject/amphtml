@@ -87,7 +87,7 @@ export function BentoDatePicker({
   const [startInputAttributes, setStartInputAttributes] = useState();
   const [endInputAttributes, setEndInputAttributes] = useState();
 
-  // const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
+  const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
 
   // This might not be the best way to handle this, but we need a way to get the initial
   // child nodes and their values, but then replace them with the controlled inputs from
@@ -117,6 +117,9 @@ export function BentoDatePicker({
    */
   const parseDate = useCallback(
     (value) => {
+      if (!value) {
+        return null;
+      }
       const date = parse(value, format, new Date());
       if (isValid(date)) {
         return date;
@@ -190,6 +193,10 @@ export function BentoDatePicker({
       );
       if (inputElement) {
         setDate(parseDate(inputElement.value));
+        setDateInputAttributes({
+          name: inputElement.name,
+          onClick: () => setIsOpen(true),
+        });
       } else if (mode === DatePickerMode.STATIC && !!form) {
         setDateInputAttributes({
           type: 'hidden',
@@ -219,6 +226,9 @@ export function BentoDatePicker({
       );
       if (startDateInputElement) {
         setStartDate(parseDate(startDateInputElement.value));
+        setStartInputAttributes({
+          name: startDateInputElement.name,
+        });
       } else if (mode === DatePickerMode.STATIC && !!form) {
         setStartInputAttributes({
           type: 'hidden',
@@ -227,6 +237,9 @@ export function BentoDatePicker({
       }
       if (endDateInputElement) {
         setEndDate(parseDate(endDateInputElement.value));
+        setEndInputAttributes({
+          name: endDateInputElement.name,
+        });
       } else if (mode === DatePickerMode.STATIC && !!form) {
         setEndInputAttributes({
           type: 'hidden',
@@ -249,6 +262,9 @@ export function BentoDatePicker({
   );
 
   const calendarComponent = useMemo(() => {
+    if (!isOpen) {
+      return null;
+    }
     const defaultProps = {
       'aria-label': 'Calendar',
       defaultMonth: initialVisibleMonth,
@@ -271,7 +287,7 @@ export function BentoDatePicker({
         onSelect={setDate}
       />
     );
-  }, [type, initialVisibleMonth, date, dateRange, setDateRange]);
+  }, [type, initialVisibleMonth, date, dateRange, setDateRange, isOpen]);
 
   const getInputProps = useCallback(
     (type) => {
@@ -316,8 +332,6 @@ export function BentoDatePicker({
       onError(`Invalid picker type`);
     }
     setShowChildren(false);
-    // TODO: Uncommenting these dependencies causes the unit tests not to complete
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setupRangeInput, setupSingleInput, type, mode, onError, inputSelector]);
 
   return (
