@@ -5,6 +5,7 @@ import {createContext, useContext, useMemo} from 'src/preact';
 // eslint-disable-next-line local/no-export-side-effect
 export const AttributesContext = createContext();
 
+// Example: Wednesday, December 1, 2021
 const DATE_FORMAT = 'cccc, LLLL d, yyyy';
 
 /**

@@ -1,7 +1,25 @@
-import {isSameDay, isValid} from 'date-fns';
+import {addDays, isSameDay, isValid} from 'date-fns';
 import * as rrule from 'rrule';
 
 const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // closure imports into .default, esbuild flattens a layer.
+
+/**
+ * RRULE returns dates as local time formatted at UTC, so the
+ * Date.prototype.getUTC* methods must be used to create a new date object.
+ * {@link https://github.com/jakubroztocil/rrule#important-use-utc-dates}
+ * @param {!Date} rruleDate
+ * @return {!Date}
+ */
+function normalizeRruleReturn(rruleDate) {
+  const year = rruleDate.getUTCFullYear();
+  const month = rruleDate.getUTCMonth();
+  const day = rruleDate.getUTCDate();
+  const hours = rruleDate.getUTCHours();
+  const minutes = rruleDate.getUTCMinutes();
+  const seconds = rruleDate.getUTCSeconds();
+  const ms = rruleDate.getUTCMilliseconds();
+  return new Date(year, month, day, hours, minutes, seconds, ms);
+}
 
 /**
  * Tries to parse a string into an RRULE object.
@@ -27,9 +45,21 @@ const DateType = {
  */
 export class DatesList {
   /**
-   * @param {!Array<string|Date>} dates
+   * @param {string|Array<string|Date>} args
    */
-  constructor(dates) {
+  constructor(args) {
+    let dates;
+    if (typeof args === 'string') {
+      dates = [args];
+    } else {
+      dates = args || [];
+    }
+
+    /** @private @const */
+    this.rrulestrs_ = dates
+      .filter((d) => this.getDateType_(d) === DateType.RRULE)
+      .map((d) => tryParseRrulestr(d));
+
     /** @private @const */
     this.dates_ = dates
       .filter((d) => this.getDateType_(d) === DateType.DATE)
@@ -43,7 +73,7 @@ export class DatesList {
    * @return {boolean}
    */
   contains(date) {
-    return this.matchesDate_(date);
+    return this.matchesDate_(date) || this.matchesRrule_(date);
   }
 
   /**
@@ -60,16 +90,12 @@ export class DatesList {
       }
     }
 
-    // const rruleDates = this.rrulestrs_
-    //   .map((rrule) => /** @type {RRule} */ (rrule).after(date))
-    //   .filter(Boolean)
-    //   .map(normalizeRruleReturn);
-    const rruleDates = [];
+    const rruleDates = this.rrulestrs_
+      .map((rrule) => /** @type {RRule} */ (rrule).after(date))
+      .filter(Boolean)
+      .map(normalizeRruleReturn);
 
     return firstDatesAfter.concat(rruleDates).sort((a, b) => {
-      // toDate method does not exist for RRule dates.
-      a = a.toDate ? a.toDate() : a;
-      b = b.toDate ? b.toDate() : b;
       return a - b;
     })[0];
   }
@@ -95,11 +121,29 @@ export class DatesList {
 
   /**
    * Determines if any internal moment object matches the given date.
-   * @param {!moment} date
+   * @param {!Date} date
    * @return {boolean}
    * @private
    */
   matchesDate_(date) {
     return this.dates_.some((d) => isSameDay(d, date));
+  }
+
+  /**
+   * Determines if any internal RRULE object matches the given date.
+   * @param {!Date} date
+   * @return {boolean}
+   * @private
+   */
+  matchesRrule_(date) {
+    const nextDate = addDays(date, 1);
+    return this.rrulestrs_.some((rrule) => {
+      const rruleUTCDate = /** @type {RRule} */ (rrule).before(nextDate);
+      if (!rruleUTCDate) {
+        return false;
+      }
+      const rruleLocalDate = normalizeRruleReturn(rruleUTCDate);
+      return isSameDay(rruleLocalDate, date);
+    });
   }
 }

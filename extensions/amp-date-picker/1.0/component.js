@@ -74,7 +74,7 @@ export function BentoDatePicker({
   id,
   onError = DEFAULT_ON_ERROR,
   initialVisibleMonth,
-  blocked = [],
+  blocked,
   allowBlockedRanges,
   allowBlockedEndDate,
   ...rest

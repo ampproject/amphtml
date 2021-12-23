@@ -15,10 +15,10 @@ const ISO_8601 = 'yyyy-MM-dd';
 function getDateButton(
   wrapper,
   date,
-  formatDate = (date) => format(date, DATE_FORMAT)
+  getAriaLabel = (date) => format(date, DATE_FORMAT)
 ) {
-  const formattedDate = formatDate(date);
-  return wrapper.find(`button[aria-label="${formattedDate}"]`);
+  const label = getAriaLabel(date);
+  return wrapper.find(`button[aria-label="${label}"]`);
 }
 
 function isSelectedDate(wrapper, date) {
@@ -450,7 +450,9 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       );
 
       expect(
-        wrapper.exists(`button[aria-label="Not available. ${formattedDate}"]`)
+        wrapper
+          .find(`button[aria-label="Not available. ${formattedDate}"]`)
+          .prop('aria-disabled')
       ).to.be.true;
     });
 
@@ -471,6 +473,32 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       );
 
       expect(wrapper.exists('[data-date="2021-01-05"]')).to.be.false;
+    });
+
+    it('disables dates using RFC 5545 RRULEs', () => {
+      const expectedBlockedDates = [
+        new Date(2022, 0, 1),
+        new Date(2022, 0, 8),
+        new Date(2022, 0, 15),
+        new Date(2022, 0, 22),
+        new Date(2022, 0, 29),
+      ];
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          blocked="FREQ=WEEKLY;WKST=SU;BYDAY=SA"
+        ></DatePicker>
+      );
+
+      expectedBlockedDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
     });
   });
 
