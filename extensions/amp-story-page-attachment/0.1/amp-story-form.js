@@ -1,12 +1,10 @@
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
 
+import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {
-  Action,
-  getStoreService,
-} from '../../amp-story/1.0/amp-story-store-service';
+import {Action} from '../../amp-story/1.0/amp-story-store-service';
 import {
   renderLoadingSpinner,
   toggleLoadingSpinner,
@@ -17,7 +15,7 @@ import {
  * @param {!Window} win
  */
 export function allowlistFormActions(win) {
-  const storeService = getStoreService(win);
+  const storeService = Services.storyStoreService(win);
   storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
     {tagOrTarget: 'FORM', method: 'clear'},
     {tagOrTarget: 'FORM', method: 'submit'},
