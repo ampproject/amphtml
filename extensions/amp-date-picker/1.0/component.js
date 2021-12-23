@@ -26,6 +26,9 @@ const ISO_8601 = 'yyyy-MM-dd';
 const FORM_INPUT_SELECTOR = 'form';
 // TODO: Check on this tag name
 const TAG = 'BentoDatePicker';
+const DEFAULT_ON_ERROR = (message) => {
+  throw new Error(message);
+};
 
 /** @enum {string} */
 const DatePickerMode = {
@@ -65,7 +68,7 @@ export function BentoDatePicker({
   endInputSelector = DEFAULT_END_INPUT_SELECTOR,
   format = ISO_8601,
   id,
-  onError,
+  onError = DEFAULT_ON_ERROR,
   initialVisibleMonth,
   ...rest
 }) {
@@ -76,13 +79,14 @@ export function BentoDatePicker({
   const startDateInputRef = useRef();
   const endDateInputRef = useRef();
 
-  const [dateElement, setDateElement] = useState();
   const [startDateElement, setStartDateElement] = useState();
   const [endDateElement, setEndDateElement] = useState();
 
   const [date, setDate] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
+
+  const [dateInputAttributes, setDateInputAttributes] = useState();
 
   // const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
 
@@ -187,20 +191,16 @@ export function BentoDatePicker({
       );
       if (inputElement) {
         setDate(parseDate(inputElement.value));
-        setDateElement(() => (
-          <input ref={dateInputRef} value={inputElement.value} />
-        ));
       } else if (mode === DatePickerMode.STATIC && !!form) {
-        setDateElement(() => (
-          <input
-            ref={dateInputRef}
-            type="hidden"
-            name={getHiddenInputId(form, DateFieldType.DATE)}
-          ></input>
-        ));
+        setDateInputAttributes({
+          type: 'hidden',
+          name: getHiddenInputId(form, DateFieldType.DATE),
+        });
+      } else if (mode === DatePickerMode.OVERLAY) {
+        onError(`Overlay single pickers must specify "inputSelector"`);
       }
     },
-    [inputSelector, getHiddenInputId, mode, parseDate]
+    [inputSelector, getHiddenInputId, mode, parseDate, onError]
   );
 
   /**
@@ -273,6 +273,26 @@ export function BentoDatePicker({
     );
   }, [type, initialVisibleMonth, date, dateRange, setDateRange]);
 
+  const getInputProps = useCallback(
+    (type) => {
+      if (type === DateFieldType.DATE) {
+        return {
+          value: getFormattedDate(date),
+          ...dateInputAttributes,
+        };
+      } else if (type === DateFieldType.START_DATE) {
+        return {
+          value: getFormattedDate(startDate),
+        };
+      } else if (type === DateFieldType.END_DATE) {
+        return {
+          value: getFormattedDate(endDate),
+        };
+      }
+    },
+    [date, startDate, endDate, getFormattedDate, dateInputAttributes]
+  );
+
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       wrapperRef.current,
@@ -280,9 +300,6 @@ export function BentoDatePicker({
     );
     if (type === DatePickerType.SINGLE) {
       setupSingleInput(form);
-      if (mode === DatePickerMode.OVERLAY && !dateElement) {
-        onError(`Overlay single pickers must specify "inputSelector"`);
-      }
     } else if (type === DatePickerType.RANGE) {
       setupRangeInput(form);
       if (
@@ -308,6 +325,7 @@ export function BentoDatePicker({
     // endDateElement,
     mode,
     onError,
+    inputSelector,
   ]);
 
   return (
@@ -319,8 +337,9 @@ export function BentoDatePicker({
       {...rest}
     >
       {showChildren && children}
-      {dateElement &&
-        cloneElement(dateElement, {value: getFormattedDate(date)})}
+      {type === DatePickerType.SINGLE && (
+        <input {...getInputProps(DateFieldType.DATE)} />
+      )}
       {startDateElement &&
         cloneElement(startDateElement, {value: getFormattedDate(startDate)})}
       {endDateElement &&
