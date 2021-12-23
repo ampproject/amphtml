@@ -9,12 +9,6 @@ import {BentoDatePicker} from '../component';
 // Example: 1st December (Wednesday)
 const DATE_FORMAT = 'do LLLL (cccc)';
 
-// TODO(becca-bailey): fix this
-// This is necessary in order to stub React for external libraries
-// (like react-day-picker) that depend on React
-// eslint-disable-next-line no-undef
-const React = require('react');
-
 function selectDate(wrapper, date) {
   const formattedDate = format(date, DATE_FORMAT);
   const button = wrapper.findWhere(
@@ -25,30 +19,6 @@ function selectDate(wrapper, date) {
 
   wrapper.update();
 }
-
-// function selectDates(wrapper, startDate, endDate) {
-//   const formattedStartDate = format(startDate, DATE_FORMAT);
-//   const formattedEndDate = format(endDate, DATE_FORMAT);
-
-//   const button1 = wrapper.findWhere(
-//     (node) =>
-//       node.type() === 'button' && node.text().includes(formattedStartDate)
-//   );
-//   const button2 = wrapper.findWhere(
-//     (node) => node.type() === 'button' && node.text().includes(formattedEndDate)
-//   );
-
-//   button1.simulate('click');
-//   button2.simulate('click');
-
-//   // const calendar = wrapper.find('[aria-label="Calendar"]').first();
-
-//   // calendar
-//   //   .props()
-//   //   .onDatesChange({startDate: moment(startDate), endDate: moment(endDate)});
-
-//   // wrapper.update();
-// }
 
 const DEFAULT_PROPS = {
   layout: 'fixed-height',
@@ -61,11 +31,6 @@ function DatePicker(props = {}) {
 }
 
 describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
-  // See require('react') comment above
-  beforeEach(() => {
-    // env.sandbox.stub(React);
-  });
-
   it('should render', () => {
     const wrapper = mount(<DatePicker />);
 
