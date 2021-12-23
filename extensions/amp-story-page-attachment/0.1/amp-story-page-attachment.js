@@ -81,33 +81,32 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   buildCallback() {
-    return super.buildCallback().then(() => {
-      this.maybeSetDarkThemeForElement_(this.headerEl);
-      this.maybeSetDarkThemeForElement_(this.element);
+    super.buildCallback();
+    this.maybeSetDarkThemeForElement_(this.headerEl);
+    this.maybeSetDarkThemeForElement_(this.element);
 
-      // Outlinks can be an amp-story-page-outlink or the legacy version,
-      // an amp-story-page-attachment with an href.
-      const isOutlink =
-        this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
-        this.element.hasAttribute('href');
-      this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
+    // Outlinks can be an amp-story-page-outlink or the legacy version,
+    // an amp-story-page-attachment with an href.
+    const isOutlink =
+      this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
+      this.element.hasAttribute('href');
+    this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
-      if (this.type_ === AttachmentType.INLINE) {
-        this.buildInline_(this.localizationService);
+    if (this.type_ === AttachmentType.INLINE) {
+      this.buildInline_(this.localizationService);
+    }
+
+    this.win.addEventListener('pageshow', (event) => {
+      // On browser back, Safari does not reload the page but resumes its cached
+      // version. This event's parameter lets us know when this happens so we
+      // can cleanup the remote opening animation.
+      if (event.persisted) {
+        this.closeInternal_(false /** shouldAnimate */);
       }
-
-      this.win.addEventListener('pageshow', (event) => {
-        // On browser back, Safari does not reload the page but resumes its cached
-        // version. This event's parameter lets us know when this happens so we
-        // can cleanup the remote opening animation.
-        if (event.persisted) {
-          this.closeInternal_(false /** shouldAnimate */);
-        }
-      });
-
-      toggle(this.element, true);
-      this.element.setAttribute('aria-live', 'assertive');
     });
+
+    toggle(this.element, true);
+    this.element.setAttribute('aria-live', 'assertive');
   }
 
   /**
@@ -393,18 +392,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       }
     };
 
-    this.storeServicePromise_.then((storeService) => {
-      const isMobileUI =
-        storeService.get(StateProperty.UI_STATE) === UIType.MOBILE;
-      if (!isMobileUI) {
+    const isMobileUI =
+      this.storeService.get(StateProperty.UI_STATE) === UIType.MOBILE;
+    if (!isMobileUI) {
+      programaticallyClickOnTarget();
+    } else {
+      // Timeout to shows post-tap animation on mobile only.
+      Services.timerFor(this.win).delay(() => {
         programaticallyClickOnTarget();
-      } else {
-        // Timeout to shows post-tap animation on mobile only.
-        Services.timerFor(this.win).delay(() => {
-          programaticallyClickOnTarget();
-        }, POST_TAP_ANIMATION_DURATION);
-      }
-    });
+      }, POST_TAP_ANIMATION_DURATION);
+    }
   }
 
   /**
@@ -440,10 +437,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.toggleBackgroundOverlay_(false);
 
-    this.storeServicePromise_.then((storeService) => {
-      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
-      storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
-    });
+    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
+    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const animationEl = storyEl.querySelector(
@@ -518,7 +513,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 }
 
-AMP.extension('amp-story-page-attachment', '1.0', () => {
+AMP.extension('amp-story-page-attachment', '0.1', (AMP) => {
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment, CSS);
   AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment);
 });
