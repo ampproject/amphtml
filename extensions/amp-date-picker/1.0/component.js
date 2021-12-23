@@ -1,4 +1,12 @@
-import {format as dateFnsFormat, isValid, parse} from 'date-fns';
+import {
+  addDays,
+  format as dateFnsFormat,
+  differenceInDays,
+  isAfter,
+  isSameDay,
+  isValid,
+  parse,
+} from 'date-fns';
 import {DayPicker} from 'react-day-picker';
 
 import {
@@ -11,7 +19,9 @@ import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 import './amp-date-picker.css';
+import {DatesList} from './dates-list';
 import {DayButton} from './day-button';
+import {AttributesContext} from './use-attributes';
 
 const DEFAULT_INPUT_SELECTOR = '#date';
 const DEFAULT_START_INPUT_SELECTOR = '#startdate';
@@ -64,17 +74,15 @@ export function BentoDatePicker({
   id,
   onError = DEFAULT_ON_ERROR,
   initialVisibleMonth,
-  blocked,
+  blocked = [],
+  allowBlockedRanges,
+  allowBlockedEndDate,
   ...rest
 }) {
   const wrapperRef = useRef();
   const onErrorRef = useRef(onError);
 
-  const dateInputRef = useRef();
-  const startDateInputRef = useRef();
-  const endDateInputRef = useRef();
-
-  const [date, setDate] = useState();
+  const [date, _setDate] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
@@ -89,6 +97,77 @@ export function BentoDatePicker({
   // state
   const [showChildren, setShowChildren] = useState(true);
 
+  const blockedDates = useMemo(() => {
+    return new DatesList(blocked);
+  }, [blocked]);
+
+  /**
+   * Iterate over the dates between a start and end date.
+   * @param {!Date} startDate
+   * @param {?Date} endDate
+   * @param {function(!Date)} cb
+   * @private
+   */
+  const iterateDateRange = useCallback((startDate, endDate, cb) => {
+    const normalizedEndDate = endDate || startDate;
+    if (
+      isSameDay(startDate, normalizedEndDate) ||
+      isAfter(startDate, normalizedEndDate)
+    ) {
+      return;
+    }
+
+    if (isSameDay(startDate, endDate)) {
+      return cb(startDate);
+    }
+
+    const days = differenceInDays(normalizedEndDate, startDate);
+    cb(startDate);
+
+    for (let i = 0; i < days; i++) {
+      cb(addDays(startDate, i + 1));
+    }
+  }, []);
+
+  /**
+   * Detect if a blocked date is between the start and end date, inclusively,
+   * accounting for the `allow-blocked-end-date` attribute.
+   * @param {?Date} startDate
+   * @param {?Date} endDate
+   * @return {boolean} True if the range should not be selected.
+   */
+  const isBlockedRange = useCallback(
+    (startDate, endDate) => {
+      if (!startDate || !endDate) {
+        return;
+      }
+
+      let blockedCount = 0;
+      if (!allowBlockedRanges) {
+        iterateDateRange(startDate, endDate, (date) => {
+          if (blockedDates.contains(date)) {
+            blockedCount++;
+          }
+        });
+      }
+
+      // If allow-blocked-end-date is enabled, we do not consider the range
+      // blocked when the end date is the only blocked date.
+      if (
+        blockedCount == 1 &&
+        allowBlockedEndDate &&
+        isSameDay(endDate, blockedDates.firstDateAfter(startDate))
+      ) {
+        return false;
+      }
+
+      // If there are any blocked dates in the range, it cannot
+      // be selected.
+      return blockedCount > 0;
+    },
+    [blockedDates, allowBlockedRanges, iterateDateRange, allowBlockedEndDate]
+  );
+
   const dateRange = useMemo(() => {
     return {
       from: startDate,
@@ -98,10 +177,23 @@ export function BentoDatePicker({
 
   const setDateRange = useCallback(
     ({from, to}) => {
+      if (isBlockedRange(from, to)) {
+        return;
+      }
       setStartDate(from);
       setEndDate(to);
     },
-    [setStartDate, setEndDate]
+    [setStartDate, setEndDate, isBlockedRange]
+  );
+
+  const setDate = useCallback(
+    (date) => {
+      if (blockedDates.contains(date)) {
+        return;
+      }
+      _setDate(date);
+    },
+    [blockedDates]
   );
 
   /**
@@ -187,7 +279,7 @@ export function BentoDatePicker({
         inputSelector
       );
       if (inputElement) {
-        setDate(parseDate(inputElement.value));
+        _setDate(parseDate(inputElement.value));
         setDateInputAttributes({
           name: inputElement.name,
           onClick: () => setIsOpen(true),
@@ -284,7 +376,16 @@ export function BentoDatePicker({
         onSelect={setDate}
       />
     );
-  }, [type, initialVisibleMonth, date, dateRange, setDateRange, isOpen]);
+  }, [
+    type,
+    initialVisibleMonth,
+    date,
+    dateRange,
+    setDateRange,
+    isOpen,
+    blocked,
+    setDate,
+  ]);
 
   const getInputProps = useCallback(
     (type) => {
@@ -349,7 +450,9 @@ export function BentoDatePicker({
           <input {...getInputProps(DateFieldType.END_DATE)} />
         </>
       )}
-      {calendarComponent}
+      <AttributesContext.Provider value={{blockedDates, allowBlockedEndDate}}>
+        {calendarComponent}
+      </AttributesContext.Provider>
     </ContainWrapper>
   );
 }

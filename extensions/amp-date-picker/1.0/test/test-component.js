@@ -514,5 +514,58 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
       expect(isSelectedEndDate(wrapper, blockedDate)).to.be.false;
     });
+
+    it('allows the user to select a range containing the blocked date if allowBlockedRanges is true', () => {
+      const blockedDate = new Date(2021, 0, 5);
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2021, 0)}
+          blocked={[blockedDate]}
+          allowBlockedRanges
+        ></DatePicker>
+      );
+
+      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(wrapper, new Date(2021, 0, 6));
+
+      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 6))).to.be.true;
+    });
+
+    it('does not allow the user to select a range containing a blocked date by default', () => {
+      const blockedDate = new Date(2021, 0, 5);
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2021, 0)}
+          blocked={[blockedDate]}
+        ></DatePicker>
+      );
+
+      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(wrapper, new Date(2021, 0, 6));
+
+      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 6))).to.be.false;
+    });
+
+    it('allows the user to select a range containing the first blocked date if allowBlockedEndDate is true', () => {
+      const blockedDate = new Date(2021, 0, 5);
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2021, 0)}
+          blocked={[blockedDate]}
+          allowBlockedEndDate
+        ></DatePicker>
+      );
+
+      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(wrapper, new Date(2021, 0, 5));
+
+      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 5))).to.be.true;
+    });
   });
 });
