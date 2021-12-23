@@ -1,5 +1,5 @@
 <!---
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ Provides support for [ads2.bid](https://ads2.bid/) widgets.
 
 ### Required parameters
 
--   `data-a2b-src`
--   `data-a2b-user-id`
--   `data-a2b-site-id`
+-   `src`
+-   `data-block-id`
+-   `data-site-id`
 
 ## Example
 
@@ -31,7 +31,7 @@ Provides support for [ads2.bid](https://ads2.bid/) widgets.
         height="690"
         type="ads2bid"
         data-site-id="11620"
-        data-block-id="36261"
-        data-src="https://web.adsbid-stage.techhprof.ru/">
+        data-block-id="123602,690"
+        src="https://kdunhltakb.ru">
 </amp-ad>
 ```
