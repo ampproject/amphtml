@@ -7,17 +7,11 @@ import {
 } from '#core/dom/query';
 
 import * as Preact from '#preact';
-import {
-  cloneElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
+import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 import './amp-date-picker.css';
+import {DayButton} from './day-button';
 
 const DEFAULT_INPUT_SELECTOR = '#date';
 const DEFAULT_START_INPUT_SELECTOR = '#startdate';
@@ -70,6 +64,7 @@ export function BentoDatePicker({
   id,
   onError = DEFAULT_ON_ERROR,
   initialVisibleMonth,
+  blocked,
   ...rest
 }) {
   const wrapperRef = useRef();
@@ -268,6 +263,7 @@ export function BentoDatePicker({
     const defaultProps = {
       'aria-label': 'Calendar',
       defaultMonth: initialVisibleMonth,
+      components: {Day: DayButton},
     };
     if (type === DatePickerType.RANGE) {
       return (

@@ -7,13 +7,18 @@ import * as Preact from '#preact';
 import {BentoDatePicker} from '../component';
 
 // Example: 1st December (Wednesday)
-const DATE_FORMAT = 'do LLLL (cccc)';
+// const DATE_FORMAT = 'do LLLL (cccc)';
+
+// Example: Wednesday, December 1, 2021
+const DATE_FORMAT = 'cccc, LLLL d, yyyy';
+
+function getDateButton(wrapper, date) {
+  const formattedDate = format(date, DATE_FORMAT);
+  return wrapper.find(`button[aria-label="${formattedDate}"]`);
+}
 
 function selectDate(wrapper, date) {
-  const formattedDate = format(date, DATE_FORMAT);
-  const button = wrapper.findWhere(
-    (node) => node.type() === 'button' && node.text().includes(formattedDate)
-  );
+  const button = getDateButton(wrapper, date);
 
   button.simulate('click');
 
@@ -240,7 +245,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       const selected = wrapper.find('button[aria-pressed=true]');
 
-      expect(selected.text()).to.contain(format(date, DATE_FORMAT));
+      expect(selected.prop('aria-label')).to.contain(format(date, DATE_FORMAT));
     });
 
     it('can set the initial visible month', () => {
@@ -333,10 +338,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(selected).to.have.lengthOf(2);
 
-      expect(selected.first().text()).to.contain(
+      expect(selected.first().prop('aria-label')).to.contain(
         format(startDate, DATE_FORMAT)
       );
-      expect(selected.last().text()).to.contain(format(endDate, DATE_FORMAT));
+      expect(selected.last().prop('aria-label')).to.contain(
+        format(endDate, DATE_FORMAT)
+      );
     });
 
     it('can set the initial visible month', () => {
@@ -411,6 +418,23 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       );
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+    });
+  });
+
+  describe('blocked dates', () => {
+    xit('disables blocked dates in the calendar view', () => {
+      const blockedDate = new Date(2021, 0, 5);
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2021, 0)}
+          blocked={[blockedDate]}
+        ></DatePicker>
+      );
+
+      const button = getDateButton(wrapper, blockedDate);
+
+      expect(button.prop('disabled')).to.be.true;
     });
   });
 });
