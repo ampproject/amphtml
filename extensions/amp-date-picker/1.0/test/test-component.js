@@ -1,10 +1,13 @@
 import {expect} from 'chai';
+import {format} from 'date-fns';
 import {mount} from 'enzyme';
-import moment from 'moment';
 
 import * as Preact from '#preact';
 
 import {BentoDatePicker} from '../component';
+
+// Example: 1st December (Wednesday)
+const DATE_FORMAT = 'do LLLL (cccc)';
 
 // TODO(becca-bailey): fix this
 // This is necessary in order to stub React for external libraries
@@ -13,22 +16,39 @@ import {BentoDatePicker} from '../component';
 const React = require('react');
 
 function selectDate(wrapper, date) {
-  const calendar = wrapper.find('[aria-label="Calendar"]').first();
+  const formattedDate = format(date, DATE_FORMAT);
+  const button = wrapper.findWhere(
+    (node) => node.type() === 'button' && node.text().includes(formattedDate)
+  );
 
-  calendar.props().onDateChange(moment(date));
-
-  wrapper.update();
-}
-
-function selectDates(wrapper, startDate, endDate) {
-  const calendar = wrapper.find('[aria-label="Calendar"]').first();
-
-  calendar
-    .props()
-    .onDatesChange({startDate: moment(startDate), endDate: moment(endDate)});
+  button.simulate('click');
 
   wrapper.update();
 }
+
+// function selectDates(wrapper, startDate, endDate) {
+//   const formattedStartDate = format(startDate, DATE_FORMAT);
+//   const formattedEndDate = format(endDate, DATE_FORMAT);
+
+//   const button1 = wrapper.findWhere(
+//     (node) =>
+//       node.type() === 'button' && node.text().includes(formattedStartDate)
+//   );
+//   const button2 = wrapper.findWhere(
+//     (node) => node.type() === 'button' && node.text().includes(formattedEndDate)
+//   );
+
+//   button1.simulate('click');
+//   button2.simulate('click');
+
+//   // const calendar = wrapper.find('[aria-label="Calendar"]').first();
+
+//   // calendar
+//   //   .props()
+//   //   .onDatesChange({startDate: moment(startDate), endDate: moment(endDate)});
+
+//   // wrapper.update();
+// }
 
 const DEFAULT_PROPS = {
   layout: 'fixed-height',
@@ -209,15 +229,17 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           mode="static"
           layout="fixed-height"
           height={360}
+          initialVisibleMonth={new Date(2021, 0)}
         />
       );
 
-      selectDate(wrapper, '2021-01-01');
+      selectDate(wrapper, new Date(2021, 0, 1));
 
       expect(wrapper.exists('[data-date="2021-01-01"]')).to.be.true;
     });
 
     it('sets the selected date as the input value', () => {
+      const date = new Date(2021, 0, 1);
       const wrapper = mount(
         <form>
           <DatePicker
@@ -225,11 +247,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
             mode="static"
             layout="fixed-height"
             height={360}
+            initialVisibleMonth={date}
           />
         </form>
       );
 
-      selectDate(wrapper, '2021-01-01');
+      selectDate(wrapper, date);
 
       const input = wrapper.find('input[type="hidden"]');
 
@@ -237,38 +260,36 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('sets the selected date in the calendar state', () => {
+      const date = new Date(2021, 0, 1);
       const wrapper = mount(
         <DatePicker
           type="single"
           mode="static"
           layout="fixed-height"
           height={360}
-          initialVisibleMonth={new Date('2021-01-01')}
+          initialVisibleMonth={date}
         />
       );
 
-      selectDate(wrapper, '2021-01-01');
+      selectDate(wrapper, date);
 
-      expect(wrapper.exists('[aria-label="Selected. Friday, January 1, 2021"]'))
-        .to.be.true;
+      const selected = wrapper.find('button[aria-pressed=true]');
+
+      expect(selected.text()).to.contain(format(date, DATE_FORMAT));
     });
 
     it('can set the initial visible month', () => {
       const wrapper = mount(
-        <form>
-          <DatePicker
-            type="single"
-            mode="static"
-            layout="fixed-height"
-            height={360}
-            initialVisibleMonth={new Date('2021-01-01')}
-          />
-        </form>
+        <DatePicker
+          type="single"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date(2021, 0)}
+        />
       );
 
-      const visibleMonth = wrapper.find('[data-visible=true]');
-
-      expect(visibleMonth.getDOMNode().innerHTML).to.contain('January 2021');
+      expect(wrapper.text()).to.contain('January 2021');
     });
   });
 
@@ -293,10 +314,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           mode="static"
           layout="fixed-height"
           height={360}
+          initialVisibleMonth={new Date(2021, 0)}
         />
       );
 
-      selectDates(wrapper, '2021-01-01', '2021-01-02');
+      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(wrapper, new Date(2021, 0, 2));
 
       expect(wrapper.exists('[data-startdate="2021-01-01"]')).to.be.true;
       expect(wrapper.exists('[data-enddate="2021-01-02"]')).to.be.true;
@@ -310,11 +333,13 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
             mode="static"
             layout="fixed-height"
             height={360}
+            initialVisibleMonth={new Date(2021, 0)}
           />
         </form>
       );
 
-      selectDates(wrapper, '2021-01-01', '2021-01-02');
+      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(wrapper, new Date(2021, 0, 2));
 
       const startDateInput = wrapper.find('input[name="start-date"]');
       const endDateInput = wrapper.find('input[name="end-date"]');
@@ -323,42 +348,44 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(endDateInput.prop('value')).to.equal('2021-01-02');
     });
 
-    xit('sets the selected date in the calendar state', () => {
+    it('sets the selected date in the calendar state', () => {
+      const startDate = new Date(2021, 0, 1);
+      const endDate = new Date(2021, 0, 2);
       const wrapper = mount(
         <DatePicker
           type="range"
           mode="static"
           layout="fixed-height"
           height={360}
-          initialVisibleMonth={new Date('2021-01-01')}
+          initialVisibleMonth={startDate}
         />
       );
 
-      selectDates(wrapper, '2021-01-01', '2021-01-02');
+      selectDate(wrapper, startDate);
+      selectDate(wrapper, endDate);
 
-      expect(wrapper.exists('[aria-label="Selected. Friday, January 1, 2021"]'))
-        .to.be.true;
-      expect(
-        wrapper.exists('[aria-label="Selected. Saturday, January 2, 2021"]')
-      ).to.be.true;
+      const selected = wrapper.find('button[aria-pressed=true]');
+
+      expect(selected).to.have.lengthOf(2);
+
+      expect(selected.first().text()).to.contain(
+        format(startDate, DATE_FORMAT)
+      );
+      expect(selected.last().text()).to.contain(format(endDate, DATE_FORMAT));
     });
 
     it('can set the initial visible month', () => {
       const wrapper = mount(
-        <form>
-          <DatePicker
-            type="range"
-            mode="static"
-            layout="fixed-height"
-            height={360}
-            initialVisibleMonth={new Date('2021-01-01')}
-          />
-        </form>
+        <DatePicker
+          type="range"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date(2021, 0)}
+        />
       );
 
-      const visibleMonth = wrapper.find('[data-visible=true]');
-
-      expect(visibleMonth.getDOMNode().innerHTML).to.contain('January 2021');
+      expect(wrapper.text()).to.contain('January 2021');
     });
   });
 

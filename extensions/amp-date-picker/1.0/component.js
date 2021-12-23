@@ -1,10 +1,5 @@
 import {format as dateFnsFormat, isValid, parse} from 'date-fns';
-import moment from 'moment';
-import {
-  DayPickerRangeController,
-  DayPickerSingleDateController,
-} from 'react-dates';
-import {END_DATE, START_DATE} from 'react-dates/constants';
+import {DayPicker} from 'react-day-picker';
 
 import {
   closestAncestorElementBySelector,
@@ -23,13 +18,11 @@ import {
 import {ContainWrapper} from '#preact/component';
 
 import './amp-date-picker.css';
-import 'react-dates/initialize';
 
 const DEFAULT_INPUT_SELECTOR = '#date';
 const DEFAULT_START_INPUT_SELECTOR = '#startdate';
 const DEFAULT_END_INPUT_SELECTOR = '#enddate';
 const ISO_8601 = 'yyyy-MM-dd';
-const DEFAULT_LOCALE = 'en';
 const FORM_INPUT_SELECTOR = 'form';
 // TODO: Check on this tag name
 const TAG = 'BentoDatePicker';
@@ -60,28 +53,6 @@ const DateFieldNameByType = {
 };
 
 /**
- * Formats a date as a moment object
- * TODO: Remove this once we are no longer using moment
- * @param {?Date} date
- * @return {moment}
- * @private
- */
-function asMoment(date) {
-  return moment.utc(date);
-}
-
-/**
- * Formats a moment object as a Date
- * TODO: Remove this once we are no longer using moment
- * @param {moment} moment
- * @return {Date}
- * @private
- */
-function asDate(moment) {
-  return moment.toDate();
-}
-
-/**
  * @param {!BentoDatePicker.Props} props
  * @return {PreactDef.Renderable}
  */
@@ -93,7 +64,6 @@ export function BentoDatePicker({
   startInputSelector = DEFAULT_START_INPUT_SELECTOR,
   endInputSelector = DEFAULT_END_INPUT_SELECTOR,
   format = ISO_8601,
-  // locale = DEFAULT_LOCALE,
   id,
   onError,
   initialVisibleMonth,
@@ -114,12 +84,27 @@ export function BentoDatePicker({
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
-  const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
+  // const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
 
   // This might not be the best way to handle this, but we need a way to get the initial
   // child nodes and their values, but then replace them with the controlled inputs from
   // state
   const [showChildren, setShowChildren] = useState(true);
+
+  const dateRange = useMemo(() => {
+    return {
+      from: startDate,
+      to: endDate,
+    };
+  }, [startDate, endDate]);
+
+  const setDateRange = useCallback(
+    ({from, to}) => {
+      setStartDate(from);
+      setEndDate(to);
+    },
+    [setStartDate, setEndDate]
+  );
 
   /**
    * Forgivingly parse an ISO8601 input string into a date object,
@@ -263,61 +248,30 @@ export function BentoDatePicker({
     [startInputSelector, endInputSelector, getHiddenInputId, mode, parseDate]
   );
 
-  const onDateChange = useCallback(
-    (dateAsMoment) => {
-      const _date = asDate(dateAsMoment);
-      setDate(_date);
-    },
-    [setDate]
-  );
-
-  const onDatesChange = useCallback(
-    ({endDate, startDate}) => {
-      const _startDate = asDate(startDate);
-      const _endDate = asDate(endDate);
-      setStartDate(_startDate);
-      setEndDate(_endDate);
-    },
-    [setStartDate, setEndDate]
-  );
-
   const calendarComponent = useMemo(() => {
-    const _initialVisibleMonth = initialVisibleMonth
-      ? () => asMoment(initialVisibleMonth)
-      : null;
     const defaultProps = {
       'aria-label': 'Calendar',
-      initialVisibleMonth: _initialVisibleMonth,
+      defaultMonth: initialVisibleMonth,
     };
     if (type === DatePickerType.RANGE) {
       return (
-        <DayPickerRangeController
+        <DayPicker
           {...defaultProps}
-          focusedInput={START_DATE}
-          startDate={asMoment(startDate)}
-          endDate={asMoment(endDate)}
-          onDatesChange={onDatesChange}
+          mode="range"
+          selected={dateRange}
+          onSelect={setDateRange}
         />
       );
     }
     return (
-      <DayPickerSingleDateController
+      <DayPicker
         {...defaultProps}
-        // This is necessary for the initialVisibleMonth prop to work
-        focused={true}
-        date={asMoment(date)}
-        onDateChange={onDateChange}
+        mode="single"
+        selected={date}
+        onSelect={setDate}
       />
     );
-  }, [
-    onDateChange,
-    onDatesChange,
-    type,
-    initialVisibleMonth,
-    startDate,
-    endDate,
-    date,
-  ]);
+  }, [type, initialVisibleMonth, date, dateRange, setDateRange]);
 
   useEffect(() => {
     const form = closestAncestorElementBySelector(
