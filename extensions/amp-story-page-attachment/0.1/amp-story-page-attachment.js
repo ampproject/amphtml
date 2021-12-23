@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {removeElement} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {closest} from '#core/dom/query';
