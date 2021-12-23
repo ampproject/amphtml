@@ -6,19 +6,35 @@ import * as Preact from '#preact';
 
 import {BentoDatePicker} from '../component';
 
-// Example: 1st December (Wednesday)
-// const DATE_FORMAT = 'do LLLL (cccc)';
-
 // Example: Wednesday, December 1, 2021
 const DATE_FORMAT = 'cccc, LLLL d, yyyy';
 
-function getDateButton(wrapper, date) {
-  const formattedDate = format(date, DATE_FORMAT);
+// TODO: Move this to a constants file
+const ISO_8601 = 'yyyy-MM-dd';
+
+function getDateButton(
+  wrapper,
+  date,
+  formatDate = (date) => format(date, DATE_FORMAT)
+) {
+  const formattedDate = formatDate(date);
   return wrapper.find(`button[aria-label="${formattedDate}"]`);
 }
 
-function selectDate(wrapper, date) {
-  const button = getDateButton(wrapper, date);
+function isSelectedDate(wrapper, date) {
+  return wrapper.exists(`[data-date="${format(date, ISO_8601)}"]`);
+}
+
+function isSelectedStartDate(wrapper, date) {
+  return wrapper.exists(`[data-startdate="${format(date, ISO_8601)}"]`);
+}
+
+function isSelectedEndDate(wrapper, date) {
+  return wrapper.exists(`[data-enddate="${format(date, ISO_8601)}"]`);
+}
+
+function selectDate(wrapper, date, formatDate) {
+  const button = getDateButton(wrapper, date, formatDate);
 
   button.simulate('click');
 
@@ -51,7 +67,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </DatePicker>
       );
 
-      expect(wrapper.exists('[data-date="2021-01-01"]')).to.be.true;
+      expect(isSelectedDate(wrapper, new Date(2021, 0, 1))).to.be.true;
     });
 
     it('should use the value of a range input at load-time', () => {
@@ -66,8 +82,8 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </DatePicker>
       );
 
-      expect(wrapper.exists('[data-startdate="2021-01-01"]')).to.be.true;
-      expect(wrapper.exists('[data-enddate="2021-01-02"]')).to.be.true;
+      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 2))).to.be.true;
     });
   });
 
@@ -205,7 +221,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       selectDate(wrapper, new Date(2021, 0, 1));
 
-      expect(wrapper.exists('[data-date="2021-01-01"]')).to.be.true;
+      expect(isSelectedDate(wrapper, new Date(2021, 0, 1))).to.be.true;
     });
 
     it('sets the selected date as the input value', () => {
@@ -291,8 +307,8 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       selectDate(wrapper, new Date(2021, 0, 1));
       selectDate(wrapper, new Date(2021, 0, 2));
 
-      expect(wrapper.exists('[data-startdate="2021-01-01"]')).to.be.true;
-      expect(wrapper.exists('[data-enddate="2021-01-02"]')).to.be.true;
+      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 2))).to.be.true;
     });
 
     it('sets the selected date as the input value', () => {
@@ -421,8 +437,24 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
   });
 
-  describe('blocked dates', () => {
-    xit('disables blocked dates in the calendar view', () => {
+  describe('blocked dates for a single date picker', () => {
+    it('disables blocked dates in the calendar view', () => {
+      const blockedDate = new Date(2021, 0, 5);
+      const formattedDate = format(blockedDate, DATE_FORMAT);
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2021, 0)}
+          blocked={[blockedDate]}
+        ></DatePicker>
+      );
+
+      expect(
+        wrapper.exists(`button[aria-label="Not available. ${formattedDate}"]`)
+      ).to.be.true;
+    });
+
+    it('does not allow the user to select a disabled date', () => {
       const blockedDate = new Date(2021, 0, 5);
       const wrapper = mount(
         <DatePicker
@@ -432,9 +464,55 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         ></DatePicker>
       );
 
-      const button = getDateButton(wrapper, blockedDate);
+      selectDate(
+        wrapper,
+        blockedDate,
+        (date) => `Not available. ${format(date, DATE_FORMAT)}`
+      );
 
-      expect(button.prop('disabled')).to.be.true;
+      expect(wrapper.exists('[data-date="2021-01-05"]')).to.be.false;
+    });
+  });
+
+  describe('blocked dates for a range', () => {
+    it('does not allow the user to select a blocked start date', () => {
+      const blockedDate = new Date(2021, 0, 5);
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2021, 0)}
+          blocked={[blockedDate]}
+        ></DatePicker>
+      );
+
+      selectDate(
+        wrapper,
+        blockedDate,
+        (date) => `Not available. ${format(date, DATE_FORMAT)}`
+      );
+
+      expect(isSelectedStartDate(wrapper, blockedDate)).to.be.false;
+    });
+
+    it('does not allow the user to select a blocked end date', () => {
+      const blockedDate = new Date(2021, 0, 5);
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2021, 0)}
+          blocked={[blockedDate]}
+        ></DatePicker>
+      );
+
+      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(
+        wrapper,
+        blockedDate,
+        (date) => `Not available. ${format(date, DATE_FORMAT)}`
+      );
+
+      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, blockedDate)).to.be.false;
     });
   });
 });

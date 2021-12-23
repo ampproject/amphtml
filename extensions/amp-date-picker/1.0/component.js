@@ -264,6 +264,7 @@ export function BentoDatePicker({
       'aria-label': 'Calendar',
       defaultMonth: initialVisibleMonth,
       components: {Day: DayButton},
+      disabled: blocked,
     };
     if (type === DatePickerType.RANGE) {
       return (

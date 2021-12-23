@@ -6,8 +6,8 @@ export default {
   title: 'DatePicker',
   component: BentoDatePicker,
   args: {
-    layout: 'fixed-height',
     type: 'single',
+    layout: 'fixed-height',
     mode: 'static',
     height: 360,
   },
@@ -17,22 +17,45 @@ export const _default = (args) => {
   return <BentoDatePicker {...args}></BentoDatePicker>;
 };
 
-export const withSingleInput = (args) => {
+export const WithSingleInput = (args) => {
   return (
-    <BentoDatePicker
-      initialVisibleMonth={new Date(Date.UTC(2021, 0, 1))}
-      {...args}
-    >
+    <BentoDatePicker {...args}>
       <input id="date" value="2021-01-01" />
     </BentoDatePicker>
   );
 };
 
-export const withRangeInput = (args) => {
+WithSingleInput.args = {
+  type: 'single',
+  initialVisibleMonth: new Date(2021, 0),
+};
+
+export const WithRangeInput = (args) => {
   return (
-    <BentoDatePicker {...args} type="range">
+    <BentoDatePicker {...args}>
       <input id="startdate" value="2021-01-01" />
       <input id="enddate" value="2021-01-02" />
     </BentoDatePicker>
   );
+};
+
+WithRangeInput.args = {
+  type: 'range',
+};
+
+// eslint-disable-next-line local/no-export-side-effect
+export const SingleWithBlockedDates = _default.bind({});
+
+SingleWithBlockedDates.args = {
+  initialVisibleMonth: new Date(2022, 0),
+  blocked: [new Date(2022, 0, 5)],
+};
+
+// eslint-disable-next-line local/no-export-side-effect
+export const RangeWithBlockedDates = _default.bind({});
+
+RangeWithBlockedDates.args = {
+  type: 'range',
+  initialVisibleMonth: new Date(2022, 0),
+  blocked: [new Date(2022, 0, 5)],
 };
