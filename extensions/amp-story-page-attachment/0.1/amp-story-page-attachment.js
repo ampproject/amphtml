@@ -94,7 +94,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
     if (this.type_ === AttachmentType.INLINE) {
-      this.buildInline_(this.localizationService);
+      this.buildInline_();
     }
 
     this.win.addEventListener('pageshow', (event) => {
