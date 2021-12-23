@@ -79,14 +79,13 @@ export function BentoDatePicker({
   const startDateInputRef = useRef();
   const endDateInputRef = useRef();
 
-  const [startDateElement, setStartDateElement] = useState();
-  const [endDateElement, setEndDateElement] = useState();
-
   const [date, setDate] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
   const [dateInputAttributes, setDateInputAttributes] = useState();
+  const [startInputAttributes, setStartInputAttributes] = useState();
+  const [endInputAttributes, setEndInputAttributes] = useState();
 
   // const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
 
@@ -220,32 +219,33 @@ export function BentoDatePicker({
       );
       if (startDateInputElement) {
         setStartDate(parseDate(startDateInputElement.value));
-        setStartDateElement(() => (
-          <input ref={startDateInputRef} value={startDateInputElement.value} />
-        ));
       } else if (mode === DatePickerMode.STATIC && !!form) {
-        setStartDateElement(() => (
-          <input
-            type="hidden"
-            name={getHiddenInputId(form, DateFieldType.START_DATE)}
-          />
-        ));
+        setStartInputAttributes({
+          type: 'hidden',
+          name: getHiddenInputId(form, DateFieldType.START_DATE),
+        });
       }
       if (endDateInputElement) {
         setEndDate(parseDate(endDateInputElement.value));
-        setEndDateElement(() => (
-          <input ref={endDateInputRef} value={endDateInputElement.value} />
-        ));
       } else if (mode === DatePickerMode.STATIC && !!form) {
-        setEndDateElement(() => (
-          <input
-            type="hidden"
-            name={getHiddenInputId(form, DateFieldType.END_DATE)}
-          />
-        ));
+        setEndInputAttributes({
+          type: 'hidden',
+          name: getHiddenInputId(form, DateFieldType.END_DATE),
+        });
+      } else if (mode === DatePickerMode.OVERLAY) {
+        onError(
+          `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
+        );
       }
     },
-    [startInputSelector, endInputSelector, getHiddenInputId, mode, parseDate]
+    [
+      startInputSelector,
+      endInputSelector,
+      getHiddenInputId,
+      mode,
+      parseDate,
+      onError,
+    ]
   );
 
   const calendarComponent = useMemo(() => {
@@ -283,14 +283,24 @@ export function BentoDatePicker({
       } else if (type === DateFieldType.START_DATE) {
         return {
           value: getFormattedDate(startDate),
+          ...startInputAttributes,
         };
       } else if (type === DateFieldType.END_DATE) {
         return {
           value: getFormattedDate(endDate),
+          ...endInputAttributes,
         };
       }
     },
-    [date, startDate, endDate, getFormattedDate, dateInputAttributes]
+    [
+      date,
+      startDate,
+      endDate,
+      getFormattedDate,
+      dateInputAttributes,
+      endInputAttributes,
+      startInputAttributes,
+    ]
   );
 
   useEffect(() => {
@@ -302,31 +312,13 @@ export function BentoDatePicker({
       setupSingleInput(form);
     } else if (type === DatePickerType.RANGE) {
       setupRangeInput(form);
-      if (
-        mode === DatePickerMode.OVERLAY &&
-        (!startDateElement || !endDateElement)
-      ) {
-        onError(
-          `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
-        );
-      }
     } else {
       onError(`Invalid picker type`);
     }
     setShowChildren(false);
     // TODO: Uncommenting these dependencies causes the unit tests not to complete
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    setupRangeInput,
-    setupSingleInput,
-    type,
-    // dateElement,
-    // startDateElement,
-    // endDateElement,
-    mode,
-    onError,
-    inputSelector,
-  ]);
+  }, [setupRangeInput, setupSingleInput, type, mode, onError, inputSelector]);
 
   return (
     <ContainWrapper
@@ -340,10 +332,12 @@ export function BentoDatePicker({
       {type === DatePickerType.SINGLE && (
         <input {...getInputProps(DateFieldType.DATE)} />
       )}
-      {startDateElement &&
-        cloneElement(startDateElement, {value: getFormattedDate(startDate)})}
-      {endDateElement &&
-        cloneElement(endDateElement, {value: getFormattedDate(endDate)})}
+      {type === DatePickerType.RANGE && (
+        <>
+          <input {...getInputProps(DateFieldType.START_DATE)} />
+          <input {...getInputProps(DateFieldType.END_DATE)} />
+        </>
+      )}
       {calendarComponent}
     </ContainWrapper>
   );
