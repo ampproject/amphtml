@@ -202,9 +202,10 @@ export const fakeWin = createConfigurableRunner((spec) => [
  *   amp: (!AmpTestEnv|undefined),
  * })} fn
  */
-export const realWin = createConfigurableRunner((spec) => {
-  return [new RealWinFixture(spec), new AmpFixture(spec)];
-});
+export const realWin = createConfigurableRunner((spec) => [
+  new RealWinFixture(spec),
+  new AmpFixture(spec),
+]);
 
 /**
  * A test that loads HTML markup in `spec.body` into an embedded iframe.
