@@ -67,9 +67,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super(element);
 
     /** @private @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = devAssert(
-      Services.storyAnalyticsService(this.win)
-    );
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
 
     /** @private @const {!../../../src/service/history-impl.History} */
     this.historyService_ = Services.historyForDoc(this.element);
