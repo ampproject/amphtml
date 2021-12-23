@@ -13,6 +13,14 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
+.amp-story-shopping-tag-inner-rtl {
+  flex-flow: row-reverse !important;
+}
+
+.amp-story-shopping-tag-dot-rtl {
+  margin-inline-start: 4px !important;
+}
+
 .amp-story-shopping-tag-inner {
   height: 36px !important;
   display: flex !important;
