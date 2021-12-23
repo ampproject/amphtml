@@ -2,6 +2,9 @@ import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
+import {AmpStoryStoreService} from 'extensions/amp-story/1.0/amp-story-store-service';
+import {registerServiceBuilder} from 'src/service-helpers';
+
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
@@ -19,9 +22,14 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     win.document.body.appendChild(storyEl);
 
     const localizationService = new LocalizationService(win.document.body);
-    env.sandbox
-      .stub(Services, 'localizationServiceForOrNull')
-      .returns(Promise.resolve(localizationService));
+    registerServiceBuilder(win, 'localization', function () {
+      return localizationService;
+    });
+
+    const storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     // Set up the attachment element for inline attachment testing.
     attachmentEl = win.document.createElement('amp-story-page-attachment');
