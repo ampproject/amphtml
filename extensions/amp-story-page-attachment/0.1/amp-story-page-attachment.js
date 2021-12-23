@@ -65,9 +65,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   constructor(element) {
     super(element);
 
-    /** @private @const {!Promise<!../../amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-    this.analyticsServicePromise_ = Services.storyAnalyticsServiceForOrNull(
-      this.win
+    /** @private @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = devAssert(
+      Services.storyAnalyticsService(this.win)
     );
 
     /** @private @const {!../../../src/service/history-impl.History} */
@@ -356,10 +356,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.toggleBackgroundOverlay_(true);
 
-    this.analyticsServicePromise_.then((analyticsService) => {
-      analyticsService.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
-      analyticsService.triggerEvent(StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER);
-    });
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+    );
 
     if (this.type_ === AttachmentType.OUTLINK) {
       this.openRemote_();
@@ -452,10 +452,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
-    this.analyticsServicePromise_.then((analyticsService) => {
-      analyticsService.triggerEvent(StoryAnalyticsEvent.CLOSE, this.element);
-      analyticsService.triggerEvent(StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT);
-    });
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.CLOSE,
+      this.element
+    );
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
+    );
   }
 
   /**
