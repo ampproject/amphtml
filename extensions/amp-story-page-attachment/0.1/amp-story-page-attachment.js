@@ -1,6 +1,7 @@
+import {devAssert} from '#core/assert';
 import {removeElement} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
-import {closest} from '#core/dom/query';
+import {closest, closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {getHistoryState} from '#core/window/history';
 
@@ -14,13 +15,15 @@ import {
   allowlistFormActions,
   setupResponseAttributeElements,
 } from './amp-story-form';
-
-import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
-import {getSourceOrigin} from '../../../src/url';
 import {
   AttachmentTheme,
   renderOutlinkLinkIconElement,
-} from '../../amp-story/1.0/amp-story-open-page-attachment';
+  renderPageAttachmentUI,
+} from './amp-story-open-page-attachment';
+
+import {CSS as pageAttachmentCss} from '../../../build/amp-story-open-page-attachment-0.1.css';
+import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
+import {getSourceOrigin} from '../../../src/url';
 import {
   Action,
   StateProperty,
@@ -28,7 +31,10 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {HistoryState, setHistoryState} from '../../amp-story/1.0/history';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
-import {triggerClickFromLightDom} from '../../amp-story/1.0/utils';
+import {
+  createShadowRootWithStyle,
+  triggerClickFromLightDom,
+} from '../../amp-story/1.0/utils';
 
 /**
  * Distance to swipe before opening attachment.
@@ -65,6 +71,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   constructor(element) {
     super(element);
 
+    /** @private @const {!Element} */
+    this.storyEl_ = devAssert(
+      closestAncestorElementBySelector(this.element, 'amp-story')
+    );
+
     /** @private @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = Services.storyAnalyticsService(this.win);
 
@@ -80,6 +91,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildCallback() {
     super.buildCallback();
+    this.buildOpenAttachmentUI_();
     this.maybeSetDarkThemeForElement_(this.headerEl);
     this.maybeSetDarkThemeForElement_(this.element);
 
@@ -115,6 +127,53 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // Outlink renders an image and must be built in layoutCallback.
     if (this.type_ === AttachmentType.OUTLINK) {
       this.buildOutlink_();
+    }
+  }
+
+  /** @private */
+  buildOpenAttachmentUI_() {
+    // To prevent 'title' attribute from being used by browser, copy value to 'data-title' and remove.
+    if (this.element.hasAttribute('title')) {
+      this.element.setAttribute(
+        'data-title',
+        this.element.getAttribute('title')
+      );
+      this.element.removeAttribute('title');
+    }
+
+    if (!this.openAttachmentEl_) {
+      this.openAttachmentEl_ = renderPageAttachmentUI(
+        this.storyEl_,
+        this.element
+      );
+
+      // This ensures `active` is set on first render.
+      // Otherwise setState may be called before this.openAttachmentEl_ exists.
+      if (this.storyEl_.hasAttribute('active')) {
+        this.openAttachmentEl_.setAttribute('active', '');
+      }
+
+      const container = (
+        <div
+          class="i-amphtml-story-page-open-attachment-host"
+          role="button"
+          onClick={(e) => {
+            // Prevent default so link can be opened programmatically after URL preview is shown.
+            e.preventDefault();
+            this.openAttachment();
+          }}
+        ></div>
+      );
+
+      this.mutateElement(() => {
+        this.element.appendChild(
+          createShadowRootWithStyle(
+            container,
+            this.openAttachmentEl_,
+            pageAttachmentCss
+          )
+        );
+      });
     }
   }
 

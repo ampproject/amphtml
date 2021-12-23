@@ -37,7 +37,7 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
+import {setTextBackgroundColor} from './utils';
 import {debounce, once} from '#core/types/function';
 import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
@@ -49,10 +49,8 @@ import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
-import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {toggle} from '#core/dom/style';
-import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
@@ -1594,50 +1592,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         'amp-story-page-attachment',
         '0.1'
       );
-    }
-
-    // To prevent 'title' attribute from being used by browser, copy value to 'data-title' and remove.
-    if (attachmentEl.hasAttribute('title')) {
-      attachmentEl.setAttribute(
-        'data-title',
-        attachmentEl.getAttribute('title')
-      );
-      attachmentEl.removeAttribute('title');
-    }
-
-    if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.element,
-        attachmentEl
-      );
-
-      // This ensures `active` is set on first render.
-      // Otherwise setState may be called before this.openAttachmentEl_ exists.
-      if (this.element.hasAttribute('active')) {
-        this.openAttachmentEl_.setAttribute('active', '');
-      }
-
-      const container = (
-        <div
-          class="i-amphtml-story-page-open-attachment-host"
-          role="button"
-          onClick={(e) => {
-            // Prevent default so link can be opened programmatically after URL preview is shown.
-            e.preventDefault();
-            this.openAttachment();
-          }}
-        ></div>
-      );
-
-      this.mutateElement(() => {
-        this.element.appendChild(
-          createShadowRootWithStyle(
-            container,
-            this.openAttachmentEl_,
-            pageAttachmentCSS
-          )
-        );
-      });
     }
   }
 
