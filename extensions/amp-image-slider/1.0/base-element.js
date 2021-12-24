@@ -11,12 +11,12 @@ BaseElement['Component'] = BentoImageSlider;
 /** @override */
 BaseElement['props'] = {
   firstImageAs: {
-    selector: 'img[slot="first-image"]' || 'amp-img[slot="first-image"]',
+    selector: 'amp-img[slot="first-image"]' || 'img[slot="first-image"]',
     single: true,
     as: true,
   },
   secondImageAs: {
-    selector: 'img[slot="second-image"]' || 'amp-img[slot="second-image"]',
+    selector: 'amp-img[slot="second-image"]' || 'img[slot="second-image"]',
     single: true,
     as: true,
   },
