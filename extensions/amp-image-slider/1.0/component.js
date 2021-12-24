@@ -522,7 +522,9 @@ export function BentoImageSliderWithRef(
         <DisplayAs
           as={secondImageAs}
           ref={rightImageRef}
-          containerClass={styles.imageSliderPushLeft}
+          containerClass={objstr({
+            [styles.imageSliderPushLeft]: true,
+          })}
         />
       </div>
 
