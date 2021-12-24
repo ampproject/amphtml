@@ -8,6 +8,7 @@ import {
 
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {Children} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {
@@ -24,7 +25,7 @@ import {DayButton} from './day-button';
  * @param {!DateInput.Props} props
  * @return {PreactDef.Renderable}
  */
-export function RangeDatePicker({
+export function DateRangePicker({
   allowBlockedEndDate,
   allowBlockedRanges,
   blockedDates,
@@ -47,8 +48,6 @@ export function RangeDatePicker({
   const containerRef = useRef();
 
   const [isOpen] = useState(mode === DatePickerMode.STATIC);
-
-  const [showChildren, setShowChildren] = useState(true);
 
   /**
    * Generate a name for a hidden input.
@@ -182,6 +181,20 @@ export function RangeDatePicker({
     };
   }, [endDate, endInputAttributes, format]);
 
+  const inputElements = useMemo(() => {
+    // TODO: We may need to pass additional props to these children based
+    // on their input type
+    if (Children.toArray(children).length > 0) {
+      return children;
+    }
+    return (
+      <>
+        <input {...startInputProps} />;
+        <input {...endInputProps} />;
+      </>
+    );
+  }, [children, endInputProps, startInputProps]);
+
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       containerRef.current,
@@ -221,7 +234,6 @@ export function RangeDatePicker({
         `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
       );
     }
-    setShowChildren(false);
   }, [
     containerRef,
     getHiddenInputId,
@@ -238,9 +250,7 @@ export function RangeDatePicker({
       data-startdate={getFormattedDate(startDate, format)}
       data-enddate={getFormattedDate(endDate, format)}
     >
-      {showChildren && children}
-      <input {...startInputProps} />;
-      <input {...endInputProps} />;
+      {inputElements}
       {isOpen && (
         <DayPicker
           aria-label="Calendar"

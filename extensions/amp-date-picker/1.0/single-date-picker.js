@@ -6,7 +6,15 @@ import {
 } from '#core/dom/query';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {
+  cloneElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from '#preact';
+import {Children} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {
@@ -43,7 +51,6 @@ export function SingleDatePicker({
 
   const [isOpen] = useState(mode === DatePickerMode.STATIC);
 
-  const [showChildren, setShowChildren] = useState(true);
   /**
    * Generate a name for a hidden input.
    * Date pickers not in a form don't need named hidden inputs.
@@ -89,10 +96,19 @@ export function SingleDatePicker({
 
   const inputProps = useMemo(() => {
     return {
-      value: getFormattedDate(date, format),
+      value: date && getFormattedDate(date, format),
       ...attributes,
     };
   }, [date, attributes, format]);
+
+  const inputElement = useMemo(() => {
+    if (Children.toArray(children).length > 0) {
+      return Children.map(children, (element) =>
+        cloneElement(element, attributes)
+      );
+    }
+    return <input {...inputProps} />;
+  }, [inputProps, children, attributes]);
 
   useEffect(() => {
     const form = closestAncestorElementBySelector(
@@ -116,7 +132,6 @@ export function SingleDatePicker({
     } else if (mode === DatePickerMode.OVERLAY) {
       onErrorRef.current(`Overlay single pickers must specify "inputSelector"`);
     }
-    setShowChildren(false);
   }, [containerRef, getHiddenInputId, inputSelector, mode, onErrorRef, format]);
 
   return (
@@ -125,8 +140,7 @@ export function SingleDatePicker({
       data-date={getFormattedDate(date, format)}
       {...rest}
     >
-      {showChildren && children}
-      <input {...inputProps} />;
+      {inputElement}
       {isOpen && (
         <DayPicker
           aria-label="Calendar"

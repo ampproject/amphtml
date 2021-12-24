@@ -136,13 +136,14 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       () => {
         const wrapper = mount(
           <form>
-            <DatePicker type="range" id="delivery">
-              <input type="hidden" name="start-date"></input>
-            </DatePicker>
+            <input type="hidden" name="start-date"></input>
+            <DatePicker type="range" id="delivery"></DatePicker>
           </form>
         );
 
-        expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
+        expect(
+          wrapper.find(DatePicker).find('input[type="hidden"]')
+        ).to.have.lengthOf(2);
         expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
         expect(wrapper.exists('input[name="end-date"]')).to.be.true;
       }
@@ -154,14 +155,15 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       () => {
         const wrapper = mount(
           <form>
-            <DatePicker type="range" id="delivery">
-              <input type="hidden" name="start-date"></input>
-              <input type="hidden" name="end-date"></input>
-            </DatePicker>
+            <input type="hidden" name="start-date"></input>
+            <input type="hidden" name="end-date"></input>
+            <DatePicker type="range" id="delivery"></DatePicker>
           </form>
         );
 
-        expect(wrapper.find('input[type="hidden"]')).to.have.lengthOf(2);
+        expect(
+          wrapper.find(DatePicker).find('input[type="hidden"]')
+        ).to.have.lengthOf(2);
         expect(wrapper.exists('input[name="delivery-start-date"]')).to.be.true;
         expect(wrapper.exists('input[name="delivery-end-date"]')).to.be.true;
       }

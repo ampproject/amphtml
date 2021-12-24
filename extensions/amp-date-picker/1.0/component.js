@@ -11,8 +11,8 @@ import {
   DatePickerType,
   ISO_8601,
 } from './constants';
+import {DateRangePicker} from './date-range-picker';
 import {DatesList} from './dates-list';
-import {RangeDatePicker} from './range-date-picker';
 import {SingleDatePicker} from './single-date-picker';
 import {AttributesContext} from './use-attributes';
 
@@ -62,7 +62,7 @@ export function BentoDatePicker({
         </SingleDatePicker>
       )}
       {type === DatePickerType.RANGE && (
-        <RangeDatePicker
+        <DateRangePicker
           blockedDates={blockedDates}
           format={format}
           id={id}
@@ -75,7 +75,7 @@ export function BentoDatePicker({
           allowBlockedRanges={allowBlockedRanges}
         >
           {children}
-        </RangeDatePicker>
+        </DateRangePicker>
       )}
     </AttributesContext.Provider>
   );
