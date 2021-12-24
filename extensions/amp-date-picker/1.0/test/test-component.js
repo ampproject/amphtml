@@ -396,18 +396,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
     });
-
-    it('shows the calendar view on click', () => {
-      const wrapper = mount(
-        <DatePicker type="single" mode="overlay" inputSelector="[name=date]">
-          <input type="text" name="date" />
-        </DatePicker>
-      );
-
-      wrapper.find('input[name="date"]').simulate('click');
-
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
-    });
   });
 
   describe('showing the date picker in overlay mode for a date range', () => {

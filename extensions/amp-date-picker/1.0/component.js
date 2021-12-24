@@ -1,63 +1,20 @@
-import {
-  addDays,
-  format as dateFnsFormat,
-  differenceInDays,
-  isAfter,
-  isSameDay,
-  isValid,
-  parse,
-} from 'date-fns';
-import {DayPicker} from 'react-day-picker';
-
-import {
-  closestAncestorElementBySelector,
-  scopedQuerySelector,
-} from '#core/dom/query';
-
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
-import {ContainWrapper} from '#preact/component';
+import {useMemo} from '#preact';
 
 import './amp-date-picker.css';
+import {
+  DEFAULT_END_INPUT_SELECTOR,
+  DEFAULT_INPUT_SELECTOR,
+  DEFAULT_ON_ERROR,
+  DEFAULT_START_INPUT_SELECTOR,
+  DatePickerMode,
+  DatePickerType,
+  ISO_8601,
+} from './constants';
 import {DatesList} from './dates-list';
-import {DayButton} from './day-button';
+import {RangeDatePicker} from './range-date-picker';
+import {SingleDatePicker} from './single-date-picker';
 import {AttributesContext} from './use-attributes';
-
-const DEFAULT_INPUT_SELECTOR = '#date';
-const DEFAULT_START_INPUT_SELECTOR = '#startdate';
-const DEFAULT_END_INPUT_SELECTOR = '#enddate';
-const ISO_8601 = 'yyyy-MM-dd';
-const FORM_INPUT_SELECTOR = 'form';
-// TODO: Check on this tag name
-const TAG = 'BentoDatePicker';
-const DEFAULT_ON_ERROR = (message) => {
-  throw new Error(message);
-};
-
-/** @enum {string} */
-const DatePickerMode = {
-  STATIC: 'static',
-  OVERLAY: 'overlay',
-};
-
-/** @enum {string} */
-const DatePickerType = {
-  SINGLE: 'single',
-  RANGE: 'range',
-};
-
-/** @enum {string} */
-const DateFieldType = {
-  DATE: 'input',
-  START_DATE: 'start-input',
-  END_DATE: 'end-input',
-};
-
-const DateFieldNameByType = {
-  [DateFieldType.DATE]: 'date',
-  [DateFieldType.START_DATE]: 'start-date',
-  [DateFieldType.END_DATE]: 'end-date',
-};
 
 /**
  * @param {!BentoDatePicker.Props} props
@@ -78,26 +35,7 @@ export function BentoDatePicker({
   allowBlockedRanges,
   allowBlockedEndDate,
   highlighted,
-  ...rest
 }) {
-  const wrapperRef = useRef();
-  const onErrorRef = useRef(onError);
-
-  const [date, _setDate] = useState();
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
-
-  const [dateInputAttributes, setDateInputAttributes] = useState();
-  const [startInputAttributes, setStartInputAttributes] = useState();
-  const [endInputAttributes, setEndInputAttributes] = useState();
-
-  const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
-
-  // This might not be the best way to handle this, but we need a way to get the initial
-  // child nodes and their values, but then replace them with the controlled inputs from
-  // state
-  const [showChildren, setShowChildren] = useState(true);
-
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
   }, [blocked]);
@@ -106,360 +44,39 @@ export function BentoDatePicker({
     return new DatesList(highlighted);
   }, [highlighted]);
 
-  /**
-   * Iterate over the dates between a start and end date.
-   * @param {!Date} startDate
-   * @param {?Date} endDate
-   * @param {function(!Date)} cb
-   * @private
-   */
-  const iterateDateRange = useCallback((startDate, endDate, cb) => {
-    const normalizedEndDate = endDate || startDate;
-    if (
-      isSameDay(startDate, normalizedEndDate) ||
-      isAfter(startDate, normalizedEndDate)
-    ) {
-      return;
-    }
-
-    if (isSameDay(startDate, endDate)) {
-      return cb(startDate);
-    }
-
-    const days = differenceInDays(normalizedEndDate, startDate);
-    cb(startDate);
-
-    for (let i = 0; i < days; i++) {
-      cb(addDays(startDate, i + 1));
-    }
-  }, []);
-
-  /**
-   * Detect if a blocked date is between the start and end date, inclusively,
-   * accounting for the `allow-blocked-end-date` attribute.
-   * @param {?Date} startDate
-   * @param {?Date} endDate
-   * @return {boolean} True if the range should not be selected.
-   */
-  const isBlockedRange = useCallback(
-    (startDate, endDate) => {
-      if (!startDate || !endDate) {
-        return;
-      }
-
-      let blockedCount = 0;
-      if (!allowBlockedRanges) {
-        iterateDateRange(startDate, endDate, (date) => {
-          if (blockedDates.contains(date)) {
-            blockedCount++;
-          }
-        });
-      }
-
-      // If allow-blocked-end-date is enabled, we do not consider the range
-      // blocked when the end date is the only blocked date.
-      if (
-        blockedCount == 1 &&
-        allowBlockedEndDate &&
-        isSameDay(endDate, blockedDates.firstDateAfter(startDate))
-      ) {
-        return false;
-      }
-
-      // If there are any blocked dates in the range, it cannot
-      // be selected.
-      return blockedCount > 0;
-    },
-    [blockedDates, allowBlockedRanges, iterateDateRange, allowBlockedEndDate]
-  );
-
-  const dateRange = useMemo(() => {
-    return {
-      from: startDate,
-      to: endDate,
-    };
-  }, [startDate, endDate]);
-
-  const setDateRange = useCallback(
-    ({from, to}) => {
-      if (isBlockedRange(from, to)) {
-        return;
-      }
-      setStartDate(from);
-      setEndDate(to);
-    },
-    [setStartDate, setEndDate, isBlockedRange]
-  );
-
-  const setDate = useCallback(
-    (date) => {
-      if (blockedDates.contains(date)) {
-        return;
-      }
-      _setDate(date);
-    },
-    [blockedDates]
-  );
-
-  /**
-   * Forgivingly parse an ISO8601 input string into a date object,
-   * preferring the date picker's configured format.
-   * @param {string} value
-   * @return {?Date} date
-   */
-  const parseDate = useCallback(
-    (value) => {
-      if (!value) {
-        return null;
-      }
-      const date = parse(value, format, new Date());
-      if (isValid(date)) {
-        return date;
-      }
-      return parse(value);
-    },
-    [format]
-  );
-
-  /**
-   * Formats a date in the page's locale and the element's configured format.
-   * @param {?Date} date
-   * @return {string}
-   * @private
-   */
-  const getFormattedDate = useCallback(
-    (date) => {
-      if (!date) {
-        return '';
-      }
-      // const isUnixTimestamp = format.match(/[Xx]/);
-      // const _locale = isUnixTimestamp ? DEFAULT_LOCALE : locale;
-      return dateFnsFormat(date, format);
-    },
-    [format]
-  );
-
-  /**
-   * Generate a name for a hidden input.
-   * Date pickers not in a form don't need named hidden inputs.
-   * @param {!Element} form
-   * @param {!DateFieldType} type
-   * @return {string}
-   * @private
-   */
-  const getHiddenInputId = useCallback(
-    (form, type) => {
-      const name = DateFieldNameByType[type];
-      if (!form) {
-        return '';
-      }
-
-      if (!form.elements[name]) {
-        return name;
-      }
-
-      const alternativeName = `${id}-${name}`;
-      if (id && !form.elements[alternativeName]) {
-        return alternativeName;
-      }
-
-      onErrorRef.current(
-        `Multiple date-pickers with implicit ${TAG} fields need to have IDs`
-      );
-
-      return '';
-    },
-    [id]
-  );
-
-  /**
-   * Sets up hidden input fields for a single input.
-   * @param {!Element} form
-   * @private
-   */
-  const setupSingleInput = useCallback(
-    (form) => {
-      const inputElement = scopedQuerySelector(
-        wrapperRef.current,
-        inputSelector
-      );
-      if (inputElement) {
-        _setDate(parseDate(inputElement.value));
-        setDateInputAttributes({
-          name: inputElement.name,
-          onClick: () => setIsOpen(true),
-        });
-      } else if (mode === DatePickerMode.STATIC && !!form) {
-        setDateInputAttributes({
-          type: 'hidden',
-          name: getHiddenInputId(form, DateFieldType.DATE),
-        });
-      } else if (mode === DatePickerMode.OVERLAY) {
-        onError(`Overlay single pickers must specify "inputSelector"`);
-      }
-    },
-    [inputSelector, getHiddenInputId, mode, parseDate, onError]
-  );
-
-  /**
-   * Sets up hidden input fields for a range input.
-   * @param {!Element} form
-   * @private
-   */
-  const setupRangeInput = useCallback(
-    (form) => {
-      const startDateInputElement = scopedQuerySelector(
-        wrapperRef.current,
-        startInputSelector
-      );
-      const endDateInputElement = scopedQuerySelector(
-        wrapperRef.current,
-        endInputSelector
-      );
-      if (startDateInputElement) {
-        setStartDate(parseDate(startDateInputElement.value));
-        setStartInputAttributes({
-          name: startDateInputElement.name,
-        });
-      } else if (mode === DatePickerMode.STATIC && !!form) {
-        setStartInputAttributes({
-          type: 'hidden',
-          name: getHiddenInputId(form, DateFieldType.START_DATE),
-        });
-      }
-      if (endDateInputElement) {
-        setEndDate(parseDate(endDateInputElement.value));
-        setEndInputAttributes({
-          name: endDateInputElement.name,
-        });
-      } else if (mode === DatePickerMode.STATIC && !!form) {
-        setEndInputAttributes({
-          type: 'hidden',
-          name: getHiddenInputId(form, DateFieldType.END_DATE),
-        });
-      } else if (mode === DatePickerMode.OVERLAY) {
-        onError(
-          `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
-        );
-      }
-    },
-    [
-      startInputSelector,
-      endInputSelector,
-      getHiddenInputId,
-      mode,
-      parseDate,
-      onError,
-    ]
-  );
-
-  const calendarComponent = useMemo(() => {
-    if (!isOpen) {
-      return null;
-    }
-    const defaultProps = {
-      'aria-label': 'Calendar',
-      defaultMonth: initialVisibleMonth,
-      components: {Day: DayButton},
-      disabled: blocked,
-    };
-    if (type === DatePickerType.RANGE) {
-      return (
-        <DayPicker
-          {...defaultProps}
-          mode="range"
-          selected={dateRange}
-          onSelect={setDateRange}
-        />
-      );
-    }
-    return (
-      <DayPicker
-        {...defaultProps}
-        mode="single"
-        selected={date}
-        onSelect={setDate}
-      />
-    );
-  }, [
-    type,
-    initialVisibleMonth,
-    date,
-    dateRange,
-    setDateRange,
-    isOpen,
-    blocked,
-    setDate,
-  ]);
-
-  const getInputProps = useCallback(
-    (type) => {
-      if (type === DateFieldType.DATE) {
-        return {
-          value: getFormattedDate(date),
-          ...dateInputAttributes,
-        };
-      } else if (type === DateFieldType.START_DATE) {
-        return {
-          value: getFormattedDate(startDate),
-          ...startInputAttributes,
-        };
-      } else if (type === DateFieldType.END_DATE) {
-        return {
-          value: getFormattedDate(endDate),
-          ...endInputAttributes,
-        };
-      }
-    },
-    [
-      date,
-      startDate,
-      endDate,
-      getFormattedDate,
-      dateInputAttributes,
-      endInputAttributes,
-      startInputAttributes,
-    ]
-  );
-
-  useEffect(() => {
-    const form = closestAncestorElementBySelector(
-      wrapperRef.current,
-      FORM_INPUT_SELECTOR
-    );
-    if (type === DatePickerType.SINGLE) {
-      setupSingleInput(form);
-    } else if (type === DatePickerType.RANGE) {
-      setupRangeInput(form);
-    } else {
-      onError(`Invalid picker type`);
-    }
-    setShowChildren(false);
-  }, [setupRangeInput, setupSingleInput, type, mode, onError, inputSelector]);
-
   return (
-    <ContainWrapper
-      ref={wrapperRef}
-      data-date={getFormattedDate(date)}
-      data-startdate={getFormattedDate(startDate)}
-      data-enddate={getFormattedDate(endDate)}
-      {...rest}
+    <AttributesContext.Provider
+      value={{blockedDates, highlightedDates, allowBlockedEndDate}}
     >
-      {showChildren && children}
       {type === DatePickerType.SINGLE && (
-        <input {...getInputProps(DateFieldType.DATE)} />
+        <SingleDatePicker
+          blockedDates={blockedDates}
+          format={format}
+          id={id}
+          initialVisibleMonth={initialVisibleMonth}
+          inputSelector={inputSelector}
+          mode={mode}
+          onError={onError}
+        >
+          {children}
+        </SingleDatePicker>
       )}
       {type === DatePickerType.RANGE && (
-        <>
-          <input {...getInputProps(DateFieldType.START_DATE)} />
-          <input {...getInputProps(DateFieldType.END_DATE)} />
-        </>
+        <RangeDatePicker
+          blockedDates={blockedDates}
+          format={format}
+          id={id}
+          initialVisibleMonth={initialVisibleMonth}
+          startInputSelector={startInputSelector}
+          endInputSelector={endInputSelector}
+          mode={mode}
+          onError={onError}
+          allowBlockedEndDate={allowBlockedEndDate}
+          allowBlockedRanges={allowBlockedRanges}
+        >
+          {children}
+        </RangeDatePicker>
       )}
-      <AttributesContext.Provider
-        value={{blockedDates, highlightedDates, allowBlockedEndDate}}
-      >
-        {calendarComponent}
-      </AttributesContext.Provider>
-    </ContainWrapper>
+    </AttributesContext.Provider>
   );
 }
