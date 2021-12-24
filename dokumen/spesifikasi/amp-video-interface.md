@@ -92,8 +92,7 @@ extension script must be present:
   async
   custom-element="amp-video-docking"
   src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"
-></script>
-```
+></script><script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>```
 
 For more details, see [documentation on the docking extension itself.](https://amp.dev/documentation/components/amp-video-docking)
 
