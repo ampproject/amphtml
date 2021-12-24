@@ -4,42 +4,16 @@ import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
 
+import {
+  DATE_FORMAT,
+  getDateButton,
+  isSelectedDate,
+  isSelectedEndDate,
+  isSelectedStartDate,
+  selectDate,
+} from './test-helpers';
+
 import {BentoDatePicker} from '../component';
-
-// Example: Wednesday, December 1, 2021
-const DATE_FORMAT = 'cccc, LLLL d, yyyy';
-
-// TODO: Move this to a constants file
-const ISO_8601 = 'yyyy-MM-dd';
-
-function getDateButton(
-  wrapper,
-  date,
-  getAriaLabel = (date) => format(date, DATE_FORMAT)
-) {
-  const label = getAriaLabel(date);
-  return wrapper.find(`button[aria-label="${label}"]`);
-}
-
-function isSelectedDate(wrapper, date) {
-  return wrapper.exists(`[data-date="${format(date, ISO_8601)}"]`);
-}
-
-function isSelectedStartDate(wrapper, date) {
-  return wrapper.exists(`[data-startdate="${format(date, ISO_8601)}"]`);
-}
-
-function isSelectedEndDate(wrapper, date) {
-  return wrapper.exists(`[data-enddate="${format(date, ISO_8601)}"]`);
-}
-
-function selectDate(wrapper, date, formatDate) {
-  const button = getDateButton(wrapper, date, formatDate);
-
-  button.simulate('click');
-
-  wrapper.update();
-}
 
 const DEFAULT_PROPS = {
   layout: 'fixed-height',
