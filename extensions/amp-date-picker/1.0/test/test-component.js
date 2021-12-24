@@ -500,6 +500,33 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         ).to.be.true;
       });
     });
+
+    it('disables dates using RFC 5545 RRULEs and Date objects', () => {
+      const expectedBlockedDates = [
+        new Date(2022, 0, 1),
+        new Date(2022, 0, 2),
+        new Date(2022, 0, 8),
+        new Date(2022, 0, 15),
+        new Date(2022, 0, 22),
+        new Date(2022, 0, 29),
+      ];
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          blocked={['FREQ=WEEKLY;WKST=SU;BYDAY=SA', new Date(2022, 0, 2)]}
+        ></DatePicker>
+      );
+
+      expectedBlockedDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
+    });
   });
 
   describe('blocked dates for a range', () => {
@@ -594,6 +621,70 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
       expect(isSelectedEndDate(wrapper, new Date(2021, 0, 5))).to.be.true;
+    });
+  });
+
+  describe('highlighted dates for a single date picker', () => {
+    it('shows a highlighted attribute', () => {
+      const highlightedDate = new Date(2021, 0, 5);
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2021, 0)}
+          highlighted={[highlightedDate]}
+        ></DatePicker>
+      );
+
+      expect(getDateButton(wrapper, highlightedDate).prop('data-highlighted'))
+        .to.be.true;
+    });
+
+    it('highlights dates using RFC 5545 RRULEs', () => {
+      const expectedHighlightedDates = [
+        new Date(2022, 0, 1),
+        new Date(2022, 0, 8),
+        new Date(2022, 0, 15),
+        new Date(2022, 0, 22),
+        new Date(2022, 0, 29),
+      ];
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          highlighted="FREQ=WEEKLY;WKST=SU;BYDAY=SA"
+        ></DatePicker>
+      );
+
+      expectedHighlightedDates.forEach((date) => {
+        expect(getDateButton(wrapper, date).prop('data-highlighted')).to.be
+          .true;
+      });
+    });
+  });
+
+  xdescribe('limiting the available days', () => {
+    it('disables all days before the min if a min is specified', () => {
+      const expectedDisbledDates = [
+        new Date(2022, 0, 1),
+        new Date(2022, 0, 2),
+        new Date(2022, 0, 3),
+        new Date(2022, 0, 4),
+      ];
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          min={new Date(2022, 0, 5)}
+        />
+      );
+      expectedDisbledDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
     });
   });
 });

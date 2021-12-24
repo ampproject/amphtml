@@ -18,7 +18,7 @@ export function useAttributes(date) {
   if (!context) {
     throw new Error('Must be wrapped in LabelContext.Provider component');
   }
-  const {allowBlockedEndDate, blockedDates} = context;
+  const {allowBlockedEndDate, blockedDates, highlightedDates} = context;
 
   const formattedDate = useMemo(() => {
     return format(date, DATE_FORMAT);
@@ -32,6 +32,10 @@ export function useAttributes(date) {
     return blockedDates.contains(date) && !allowBlocked;
   }, [date, blockedDates, allowBlocked]);
 
+  const isHighlighted = useMemo(() => {
+    return highlightedDates.contains(date);
+  }, [date, highlightedDates]);
+
   const label = useMemo(() => {
     if (isDisabled) {
       return `Not available. ${formattedDate}`;
@@ -40,5 +44,5 @@ export function useAttributes(date) {
     return formattedDate;
   }, [isDisabled, formattedDate]);
 
-  return {label, isDisabled};
+  return {label, isDisabled, isHighlighted};
 }

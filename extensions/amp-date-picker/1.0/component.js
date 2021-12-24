@@ -77,6 +77,7 @@ export function BentoDatePicker({
   blocked,
   allowBlockedRanges,
   allowBlockedEndDate,
+  highlighted,
   ...rest
 }) {
   const wrapperRef = useRef();
@@ -100,6 +101,10 @@ export function BentoDatePicker({
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
   }, [blocked]);
+
+  const highlightedDates = useMemo(() => {
+    return new DatesList(highlighted);
+  }, [highlighted]);
 
   /**
    * Iterate over the dates between a start and end date.
@@ -450,7 +455,9 @@ export function BentoDatePicker({
           <input {...getInputProps(DateFieldType.END_DATE)} />
         </>
       )}
-      <AttributesContext.Provider value={{blockedDates, allowBlockedEndDate}}>
+      <AttributesContext.Provider
+        value={{blockedDates, highlightedDates, allowBlockedEndDate}}
+      >
         {calendarComponent}
       </AttributesContext.Provider>
     </ContainWrapper>
