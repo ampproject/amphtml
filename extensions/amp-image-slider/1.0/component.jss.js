@@ -40,6 +40,7 @@ const imageSlider = {
 };
 
 const imageSliderPushLeft = {
+  height: '100%',
   transform: 'translateX(-50%)',
 };
 
