@@ -9,7 +9,7 @@ import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '#ads/google/a4a/line-delimited-response-handler';
-import {validateAdContentRating} from "#ads/google/a4a/shared/shared-util";
+import {validateAdContentRating} from '#ads/google/a4a/shared/shared-util';
 import {
   addAmpExperimentIdToElement,
   addExperimentIdToElement,
@@ -722,8 +722,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
       'ppid': (this.jsonTargeting && this.jsonTargeting['ppid']) || null,
-      'macr': validateAdContentRating(this.jsonTargeting && this.jsonTargeting['macr'])
-        ? (this.jsonTargeting && this.jsonTargeting['macr'])
+      'macr': validateAdContentRating(
+        this.jsonTargeting && this.jsonTargeting['maxAdContentRating']
+      )
+        ? this.jsonTargeting && this.jsonTargeting['maxAdContentRating']
         : null,
       ...googleBlockParameters(this),
     };

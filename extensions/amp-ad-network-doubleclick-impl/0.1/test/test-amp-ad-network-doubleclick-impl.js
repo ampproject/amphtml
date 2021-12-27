@@ -1230,7 +1230,7 @@ for (const {config, name} of [
 
         it('should set macr parameter if set in json', () => {
           impl.uiHandler = {isStickyAd: () => false};
-          element.setAttribute('json', '{"macr": "pg"}');
+          element.setAttribute('json', '{"maxAdContentRating": "pg"}');
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)macr=pg(&|$)/
           );
@@ -1238,20 +1238,15 @@ for (const {config, name} of [
 
         it('should be blank if macr is invalid', () => {
           impl.uiHandler = {isStickyAd: () => false};
-          element.setAttribute('json', '{"macr": "invalid"}');
-          return expect(impl.getAdUrl()).to.eventually.not.match(
-            /(\?|&)macr=/
-          );
+          element.setAttribute('json', '{"maxAdContentRating": "invalid"}');
+          return expect(impl.getAdUrl()).to.eventually.not.match(/(\?|&)macr=/);
         });
 
         it('should be blank if macr not set in json', () => {
           impl.uiHandler = {isStickyAd: () => false};
           element.setAttribute('json', '{}');
-          return expect(impl.getAdUrl()).to.eventually.not.match(
-            /(\?|&)macr=/
-          );
+          return expect(impl.getAdUrl()).to.eventually.not.match(/(\?|&)macr=/);
         });
-
       });
 
       describe('#getPageParameters', () => {

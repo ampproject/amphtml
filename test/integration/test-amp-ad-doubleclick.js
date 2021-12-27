@@ -51,6 +51,7 @@ describes.sandboxed('Rendering of one ad', {}, () => {
         expect(iframe.src).to.contain('categoryExclusions');
         expect(iframe.src).to.contain('health');
         expect(iframe.src).to.contain('tagForChildDirectedTreatment');
+        expect(iframe.src).to.contain('maxAdContentRating');
         expect(iframe.src).to.match(
           /http\:\/\/localhost:9876\/base\/dist\.3p\//
         );
@@ -85,6 +86,7 @@ describes.sandboxed('Rendering of one ad', {}, () => {
         expect(context.initialIntersection).to.exist;
         expect(context.initialIntersection.rootBounds).to.exist;
         expect(context.data.tagForChildDirectedTreatment).to.equal(0);
+        expect(context.data.maxAdContentRating).to.be.jsonEqual('pg');
         expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
         expect(context.data.targeting).to.be.jsonEqual({'amptest': 'true'});
         return poll(
