@@ -1,10 +1,11 @@
 import '../amp-beopinion';
-import {htmlFor} from '#core/dom/static-template';
-import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {serializeMessage} from '#core/3p-frame-messaging';
+import {createElementWithAttributes} from '#core/dom';
+
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/helpers/service';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 
 describes.realWin(
   'amp-beopinion-v1.0',
@@ -17,7 +18,6 @@ describes.realWin(
     let win;
     let doc;
     let element;
-    let html;
 
     const waitForRender = async () => {
       await element.buildInternal();
@@ -30,7 +30,6 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-      html = htmlFor(doc);
       toggleExperiment(win, 'bento-beopinion', true, true);
       // Override global window here because Preact uses global `createElement`.
       doNotLoadExternalResourcesInTest(window, env.sandbox);
@@ -48,8 +47,7 @@ describes.realWin(
       await waitForRender();
 
       expect(element.shadowRoot.querySelector('iframe').src).to.equal(
-        // 'http://ads.localhost:9876/dist.3p/current/frame.max.html'
-        'http://ads.localhost:8000/dist.3p/current/frame.max.html' // for local only
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
     });
 

@@ -1,7 +1,7 @@
-import * as Preact from '#preact';
 import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
 
+import * as Preact from '#preact';
 import {useCallback, useMemo, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';

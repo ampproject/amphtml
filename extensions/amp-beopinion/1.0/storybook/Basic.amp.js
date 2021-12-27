@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
-
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-beopinion-1_0',

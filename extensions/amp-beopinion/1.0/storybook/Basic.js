@@ -11,6 +11,6 @@ export default {
   },
 };
 
-export const _default = ({...args}) => {
+export const _default = (args) => {
   return <BentoBeopinion style={{width: 300, height: 200}} {...args} />;
 };
