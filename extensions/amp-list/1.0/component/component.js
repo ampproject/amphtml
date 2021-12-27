@@ -1,10 +1,10 @@
 import * as Preact from '#preact';
-import {useCallback, useEffect, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
 
 import {useStyles} from './component.jss';
+import {useAsync} from './useAsync';
 
 const listItemTemplate = (item) => <li>{item}</li>;
 const listWrapperTemplate = (list) => <ul>{list}</ul>;
@@ -31,9 +31,9 @@ export function BentoList({
     if (!renderable) {
       return null;
     }
-    const results = await fetchJson(src);
+    const results = await fetchJson(src).then((res) => res.json());
     return results;
-  }, [fetchJson, src]);
+  }, [fetchJson, src, renderable]);
 
   const items = results?.[itemsKey];
 
@@ -49,49 +49,4 @@ export function BentoList({
       {error && errorTemplate && errorTemplate(error)}
     </ContainWrapper>
   );
-}
-
-function useAsyncCallback(asyncCallback, dependencies) {
-  const [state, setState] = useState(() => ({
-    loading: false,
-    error: null,
-    results: null,
-  }));
-
-  const isMounted = useIsMountedRef();
-
-  const execute = useCallback(async () => {
-    setState((s) => ({...s, loading: true}));
-    try {
-      const results = await asyncCallback(...dependencies);
-      if (isMounted.current) {
-        setState((s) => ({...s, loading: false, error: null, results}));
-      }
-    } catch (error) {
-      if (isMounted.current) {
-        setState((s) => ({...s, loading: false, error}));
-      }
-    }
-  }, dependencies);
-
-  return {...state, execute};
-}
-function useAsync(asyncCallback, dependencies) {
-  const state = useAsyncCallback(asyncCallback, dependencies);
-  useEffect(() => {
-    state.execute();
-  }, dependencies);
-
-  return state;
-}
-function useIsMountedRef() {
-  const isMounted = useRef(false);
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-  return isMounted;
 }
