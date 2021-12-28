@@ -5,6 +5,8 @@ import {Services} from '#service';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
+  Action,
+  ShoppingConfigDataDef,
   ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
@@ -24,8 +26,17 @@ const FONTS_TO_LOAD = [
   },
 ];
 
-const renderShoppingTagTemplate = (tagData) => (
-  <div class="amp-story-shopping-tag-inner">
+/**
+ * @param {!ShoppingConfigDataDef} tagData
+ * @param {function(!ShoppingConfigDataDef): undefined} onClick
+ * @return {!Element}
+ */
+const renderShoppingTagTemplate = (tagData, onClick) => (
+  <div
+    class="amp-story-shopping-tag-inner"
+    role="button"
+    onClick={() => onClick(tagData)}
+  >
     <span class="amp-story-shopping-tag-dot"></span>
     <span class="amp-story-shopping-tag-pill">
       <span
@@ -50,6 +61,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     super(element);
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+
+    /** @param {boolean} element */
+    this.hasAppendedInnerShoppingTagEl_ = false;
   }
 
   /** @override */
@@ -87,6 +101,16 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     });
   }
 
+  /**
+   * @param {!ShoppingConfigDataDef} tagData
+   * @private
+   */
+  onClick_(tagData) {
+    this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+      'activeProductData': tagData,
+    });
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout_Enum.CONTAINER;
@@ -98,18 +122,21 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
-    if (!tagData) {
+    if (this.hasAppendedInnerShoppingTagEl_ || !tagData) {
       return;
     }
 
     this.mutateElement(() => {
-      this.shoppingTagEl_ = renderShoppingTagTemplate(tagData);
+      this.shoppingTagEl_ = renderShoppingTagTemplate(tagData, (tagData) =>
+        this.onClick_(tagData)
+      );
       this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
       createShadowRootWithStyle(
         this.element,
         this.shoppingTagEl_,
         shoppingTagCSS
       );
+      this.hasAppendedInnerShoppingTagEl_ = true;
     });
   }
 
