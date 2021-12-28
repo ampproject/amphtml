@@ -1,21 +1,23 @@
+import {devAssert} from '#core/assert';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
+import {Layout_Enum} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
+import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {CSS} from '../../../build/amp-story-draggable-drawer-header-0.1.css';
 import {
   Action,
   StateProperty,
   UIType,
-  getStoreService,
-} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-draggable-drawer-header-1.0.css';
-import {Layout_Enum} from '#core/dom/layout';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {closest} from '#core/dom/query';
-import {createShadowRootWithStyle} from './utils';
-import {dev} from '#utils/log';
-import {localize} from './amp-story-localization-service';
-import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {listen} from '#utils/event-helper';
-import {resetStyles, setImportantStyles, toggle} from '#core/dom/style';
+} from '../../amp-story/1.0/amp-story-store-service';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
@@ -87,8 +89,13 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @protected {!DrawerState} */
     this.state = DrawerState.CLOSED;
 
-    /** @protected @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService = getStoreService(this.win);
+    /** @protected @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService = devAssert(Services.storyStoreService(this.win));
+
+    /** @protected @const {!../../../src/services/localization.LocalizationService} */
+    this.localizationService = devAssert(
+      Services.localizationForDoc(this.element)
+    );
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -137,8 +144,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       <button
         role="button"
         class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
-        aria-label={localize(
-          this.element,
+        aria-label={this.localizationService.getLocalizedString(
           LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
         )}
       ></button>
