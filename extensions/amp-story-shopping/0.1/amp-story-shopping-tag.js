@@ -29,8 +29,8 @@ const FONTS_TO_LOAD = [
 /**
  * @param {!ShoppingConfigDataDef} tagData
  * @param {function(!ShoppingConfigDataDef): undefined} onClick
- * @param element
- * @param localizationService
+ * @param {!AmpElement} element
+ * @param {?../../../src/service/localization.LocalizationService} localizationService
  * @return {!Element}
  */
 const renderShoppingTagTemplate = (
