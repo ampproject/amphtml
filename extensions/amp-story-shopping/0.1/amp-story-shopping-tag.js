@@ -80,9 +80,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    rtlState
-      ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
-      : this.shoppingTagEl_.removeAttribute('dir');
+    this.mutateElement(() => {
+      rtlState
+        ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
+        : this.shoppingTagEl_.removeAttribute('dir');
+    });
   }
 
   /** @override */
@@ -99,12 +101,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!tagData) {
       return;
     }
-    const shopTagCSS = shoppingTagCSS;
 
     this.mutateElement(() => {
       this.shoppingTagEl_ = renderShoppingTagTemplate(tagData);
       this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
-      createShadowRootWithStyle(this.element, this.shoppingTagEl_, shopTagCSS);
+      createShadowRootWithStyle(
+        this.element,
+        this.shoppingTagEl_,
+        shoppingTagCSS
+      );
     });
   }
 
