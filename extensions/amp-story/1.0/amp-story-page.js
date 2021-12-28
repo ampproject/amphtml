@@ -1581,14 +1581,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       'amp-story-page-attachment',
       '0.1'
     );
-
-    // To prevent 'title' attribute from being used by browser, copy value to 'data-title' and remove.
-    if (attachmentEl.hasAttribute('title')) {
-      attachmentEl.setAttribute(
-        'data-title',
-        attachmentEl.getAttribute('title')
-      );
-    }
   }
 
   /**
