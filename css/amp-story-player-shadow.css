@@ -32,7 +32,7 @@
 
 .i-amphtml-story-player-main-container iframe:nth-of-type(1),
 .i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="0"] {
-  transform: translate3d(0, 0, 1px);
+  transform: translate3d(0, 0, 0);
 }
 
 .i-amphtml-story-player-main-container iframe:nth-of-type(2),
