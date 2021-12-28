@@ -1,9 +1,6 @@
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
-import {PageState} from 'extensions/amp-next-page/1.0/page';
 import {AmpStoryStoreService} from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
@@ -221,38 +218,6 @@ describes.realWin(
       );
 
       expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
-    });
-
-    it.only('should propogate the amp-story-page-attachment title attribute to the cta button', () => {
-      attachmentEl.setAttribute('layout', 'nodisplay');
-      attachmentEl.setAttribute('title', 'cta title');
-
-      attachment.buildCallback();
-      attachment.layoutCallback();
-
-      const openAttachmentEl = page.querySelector(
-        '.i-amphtml-story-page-open-attachment'
-      );
-
-      expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
-    });
-
-    it('should propogate the amp-story-page-outlink title attribute to the cta button', () => {
-      outlinkEl.setAttribute('layout', 'nodisplay');
-
-      const anchorChild = win.document.createElement('a');
-      anchorChild.setAttribute('href', 'google.com');
-      anchorChild.setAttribute('title', 'cta title');
-      outlinkEl.appendChild(anchorChild);
-
-      outlink.buildCallback();
-      outlink.layoutCallback();
-
-      const openAttachmentEl = page.querySelector(
-        '.i-amphtml-story-page-open-attachment'
-      );
-
-      expect(openAttachmentEl.getAttribute('title')).to.equal('cta title');
     });
   }
 );
