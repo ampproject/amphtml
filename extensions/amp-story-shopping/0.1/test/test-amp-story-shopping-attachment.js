@@ -2,6 +2,8 @@ import {expect} from 'chai';
 
 import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
+import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
@@ -9,7 +11,11 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story:1.0', 'amp-story-shopping:0.1'],
+      extensions: [
+        'amp-story:1.0',
+        'amp-story-shopping:0.1',
+        'amp-story-page-attachment:0.1',
+      ],
     },
   },
   (env) => {
