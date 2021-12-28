@@ -190,9 +190,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.errorMessageEl_ = null;
 
-    /** @private {?Element} */
-    this.openAttachmentEl_ = null;
-
     const deferred = new Deferred();
 
     /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
@@ -428,9 +425,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
-        if (this.openAttachmentEl_) {
-          this.openAttachmentEl_.removeAttribute('active');
-        }
         this.pause_();
         this.state_ = state;
         break;
@@ -438,9 +432,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
           this.resume_();
-          if (this.openAttachmentEl_) {
-            this.openAttachmentEl_.setAttribute('active', '');
-          }
         }
 
         if (this.state_ === PageState.PAUSED) {

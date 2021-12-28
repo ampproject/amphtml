@@ -76,6 +76,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       closestAncestorElementBySelector(this.element, 'amp-story')
     );
 
+    /** @private @const {!Element} */
+    this.pageEl_ = devAssert(
+      closestAncestorElementBySelector(this.element, 'amp-story-page')
+    );
+
     /** @private @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = Services.storyAnalyticsService(this.win);
 
@@ -330,6 +335,19 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   }
 
   /**
+   * Activate or deactivate open page attachment
+   * @param {boolean} isActive
+   */
+  setOpenAttachmentActive(isActive) {
+    console.log('setting attachment', isActive, this.pageEl_.id);
+    if (isActive) {
+      this.openAttachmentEl_.setAttribute('active', '');
+    } else {
+      this.openAttachmentEl_.removeAttribute('äctive');
+    }
+  }
+
+  /**
    * @override
    */
   initializeListeners_() {
@@ -380,6 +398,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         }
       });
     }
+
+    this.storeService.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => {
+        this.setOpenAttachmentActive(id === this.pageEl_.id);
+      },
+      true
+    );
   }
 
   /**
