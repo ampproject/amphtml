@@ -171,7 +171,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       );
 
       this.mutateElement(() => {
-        this.element.appendChild(
+        this.pageEl_.appendChild(
           createShadowRootWithStyle(
             container,
             this.openAttachmentEl_,
