@@ -1592,22 +1592,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Opens the attachment, if any.
-   * @param {boolean=} shouldAnimate
-   */
-  openAttachment(shouldAnimate = true) {
-    const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
-    );
-
-    if (!attachmentEl) {
-      return;
-    }
-
-    attachmentEl.getImpl().then((attachment) => attachment.open(shouldAnimate));
-  }
-
-  /**
    * check to see if this page is a wrapper for an ad
    * @return {boolean}
    */

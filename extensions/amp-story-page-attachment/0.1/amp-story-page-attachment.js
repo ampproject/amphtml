@@ -165,7 +165,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           onClick={(e) => {
             // Prevent default so link can be opened programmatically after URL preview is shown.
             e.preventDefault();
-            this.openAttachment();
+            this.open();
           }}
         ></div>
       );
@@ -339,7 +339,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {boolean} isActive
    */
   setOpenAttachmentActive(isActive) {
-    console.log('setting attachment', isActive, this.pageEl_.id);
     if (isActive) {
       this.openAttachmentEl_.setAttribute('active', '');
     } else {
