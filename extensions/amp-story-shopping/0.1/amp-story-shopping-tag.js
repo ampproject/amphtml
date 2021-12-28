@@ -69,13 +69,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
-      (rtlState) => {
-        this.onRtlStateUpdate_(rtlState);
-      },
-      true /** callToInitialize */
-    );
+    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
+      this.onRtlStateUpdate_(rtlState);
+    });
   }
 
   /**
@@ -84,15 +80,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    if (this.element.shadowRoot) {
-      this.element.shadowRoot
-        .querySelector('.amp-story-shopping-tag-inner')
-        .classList.toggle('amp-story-shopping-tag-rtl', rtlState);
-
-      this.element.shadowRoot
-        .querySelector('.amp-story-shopping-tag-dot')
-        .classList.toggle('amp-story-shopping-tag-dot-rtl', rtlState);
-    }
+    rtlState
+      ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
+      : this.shoppingTagEl_.removeAttribute('dir');
   }
 
   /** @override */
@@ -109,26 +99,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!tagData) {
       return;
     }
-    let shopTagCSS = shoppingTagCSS;
-    if (document['dir'] === 'rtl') {
-      shopTagCSS = shoppingTagCSS.replace(
-        '.amp-story-shopping-tag-inner{',
-        '.amp-story-shopping-tag-inner{flex-flow:row-reverse !important;'
-      );
-
-      shopTagCSS = shopTagCSS.replace(
-        '.amp-story-shopping-tag-dot{',
-        '.amp-story-shopping-tag-dot{margin-inline-start: 4px !important;'
-      );
-    }
+    const shopTagCSS = shoppingTagCSS;
 
     this.mutateElement(() => {
-      createShadowRootWithStyle(
-        this.element,
-        renderShoppingTagTemplate(tagData),
-        shopTagCSS
-      );
-      this.onRtlStateUpdate_(document['dir'] === 'rtl');
+      this.shoppingTagEl_ = renderShoppingTagTemplate(tagData);
+      this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
+      createShadowRootWithStyle(this.element, this.shoppingTagEl_, shopTagCSS);
     });
   }
 

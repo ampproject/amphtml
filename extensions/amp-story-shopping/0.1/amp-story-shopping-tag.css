@@ -13,11 +13,11 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
-.amp-story-shopping-tag-inner-rtl {
+[dir=rtl].amp-story-shopping-tag-inner {
   flex-flow: row-reverse !important;
 }
 
-.amp-story-shopping-tag-dot-rtl {
+[dir=rtl] .amp-story-shopping-tag-dot {
   margin-inline-start: 4px !important;
 }
 
