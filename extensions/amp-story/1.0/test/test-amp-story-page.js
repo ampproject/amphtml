@@ -14,6 +14,7 @@ import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed'
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {afterRenderPromise} from '#testing/helpers';
+import {expect} from 'chai';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -627,21 +628,26 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(playButtonEl.getAttribute('role')).to.eql('button');
   });
 
-  it('should build the open attachment UI if attachment', async () => {
+  it('should install the page-attachment extension if attachment', async () => {
+    const extensionSpy = env.sandbox.spy(
+      Services.extensionsFor(win),
+      'installExtensionForDoc'
+    );
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
-    page.appendChild(attachmentEl);
+    page.element.appendChild(attachmentEl);
 
     page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
-    const openAttachmentEl = page.querySelector(
-      '.i-amphtml-story-page-open-attachment'
+    expect(extensionSpy).to.have.been.calledWith(
+      env.sandbox.match.any,
+      'amp-story-page-attachment',
+      '0.1'
     );
-    expect(openAttachmentEl).to.exist;
   });
 
   it('should start tracking media performance when entering the page', async () => {
