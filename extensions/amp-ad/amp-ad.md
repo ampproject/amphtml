@@ -326,6 +326,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Content.ad](../../ads/vendors/contentad.md)
 -   [Criteo](../../ads/vendors/criteo.md)
 -   [CSA](../../ads/vendors/csa.md)
+-   [Digital exchange](../../ads/vendors/dex.js)
 -   [Digiteka](../../ads/vendors/digiteka.md)
 -   [Directadvert](../../ads/vendors/directadvert.md)
 -   [DistroScale](../../ads/vendors/distroscale.md)

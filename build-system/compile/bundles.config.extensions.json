@@ -872,6 +872,13 @@
     }
   },
   {
+    "name": "amp-story-page-attachment",
+    "version": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-story-panning-media",
     "version": "0.1",
     "options": {
