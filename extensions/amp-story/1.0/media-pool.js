@@ -158,6 +158,17 @@ export class MediaPool {
     this.sources_ = {};
 
     /**
+     * The audio context.
+     * @private {?AudioContext}
+     */
+    this.audioContext_ = null;
+    /**
+     * Maps a media element's ID to its audio source.
+     * @private @const {!Object<string, !MediaElementAudioSourceNode>}
+     */
+    this.audioSources_ = {};
+
+    /**
      * Maps a media element's ID to the element.  This is necessary, as elements
      * are kept in memory when they are swapped out of the DOM.
      * @private @const {!Object<string, !PlaceholderElementDef>}
@@ -850,9 +861,9 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    // When a video is muted, reset its volume to the default value of 1.
-    if (mediaType == MediaType.VIDEO) {
-      domMediaEl.volume = 1;
+    const audioSource = this.audioSources_[domMediaEl.id];
+    if (audioSource) {
+      audioSource.disconnect();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
@@ -880,7 +891,12 @@ export class MediaPool {
       if (ampVideoEl) {
         const volume = ampVideoEl.getAttribute('volume');
         if (volume) {
-          domMediaEl.volume = parseFloat(volume);
+          this.audioContext_ = this.audioContext_ || new AudioContext();
+          const audioSource = this.audioSources_[domMediaEl.id] || this.audioContext_.createMediaElementSource(domMediaEl);
+          this.audioSources_[domMediaEl.id] = audioSource;
+          const gainNode = this.audioContext_.createGain();
+          gainNode.gain.value = parseFloat(volume);
+          audioSource.connect(gainNode).connect(this.audioContext_.destination);
         }
       }
     }
