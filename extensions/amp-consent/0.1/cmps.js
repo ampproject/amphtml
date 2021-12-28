@@ -111,3 +111,16 @@ CMP_CONFIG['LiveRamp'] = {
   'checkConsentHref': 'https://api.privacymanager.io/amp/check-consent',
   'promptUISrc': 'https://amp-consent-tool.privacymanager.io/1/index.html',
 };
+
+CMP_CONFIG['googlefc'] = {
+  'consentInstanceId': 'googlefc',
+  'checkConsentHref':
+    'https://fundingchoicesmessages.google.com/amp/consent/check?pvid=PAGE_VIEW_ID_64&anonid=CONSENT_PAGE_VIEW_ID_64&href=SOURCE_URL',
+  'promptUISrc':
+    'https://fundingchoicesmessages.google.com/amp/consent/message?pvid=PAGE_VIEW_ID_64&anonid=CONSENT_PAGE_VIEW_ID_64&href=SOURCE_URL&clientConfig=CONSENT_INFO(clientConfig)',
+  'xssiPrefix': ")]}'",
+  'uiConfig': {
+    'overlay': true,
+  },
+  'clearDirtyBitOnResponse_dontUseThisItMightBeRemoved': true,
+};

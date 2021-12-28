@@ -93,9 +93,9 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {stubService} from './helpers/service';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {TestConfig} from './test-config';
-import {stubService} from './test-helper';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';

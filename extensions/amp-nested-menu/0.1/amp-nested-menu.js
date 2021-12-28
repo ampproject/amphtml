@@ -1,6 +1,6 @@
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {isRTL, tryFocus} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {
   closest,
   closestAncestorElementBySelector,
@@ -10,8 +10,9 @@ import {toArray} from '#core/types/array';
 
 import {Services} from '#service';
 
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-nested-menu-0.1.css';
-import {dev, userAssert} from '../../../src/log';
 
 const TAG = 'amp-nested-menu';
 
@@ -107,7 +108,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
   isLayoutSupported(layout) {
     // If support is added for other layouts, we should ensure that
     // lazy loading by sidebar does not cause FOUC when sidebar first opens.
-    return layout == Layout.FILL;
+    return layout == Layout_Enum.FILL;
   }
 
   /**
@@ -262,18 +263,18 @@ export class AmpNestedMenu extends AMP.BaseElement {
       return;
     }
     switch (e.key) {
-      case Keys.ENTER: /* fallthrough */
-      case Keys.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         this.handleClick_(e);
         return;
-      case Keys.LEFT_ARROW: /* fallthrough */
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.LEFT_ARROW: /* fallthrough */
+      case Keys_Enum.RIGHT_ARROW:
         this.handleMenuNavigation_(e);
         break;
-      case Keys.UP_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW:
-      case Keys.HOME:
-      case Keys.END:
+      case Keys_Enum.UP_ARROW: /* fallthrough */
+      case Keys_Enum.DOWN_ARROW:
+      case Keys_Enum.HOME:
+      case Keys_Enum.END:
         this.handleMenuItemNavigation_(e);
         break;
     }
@@ -285,7 +286,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @private
    */
   handleMenuNavigation_(e) {
-    let back = e.key == Keys.LEFT_ARROW;
+    let back = e.key == Keys_Enum.LEFT_ARROW;
     // Press right arrow key to go back if submenu opened from left.
     if (this.side_ == Side.LEFT) {
       back = !back;
@@ -316,13 +317,13 @@ export class AmpNestedMenu extends AMP.BaseElement {
     }
 
     let nextItem;
-    if (e.key === Keys.UP_ARROW) {
+    if (e.key === Keys_Enum.UP_ARROW) {
       nextItem = item.previousElementSibling;
-    } else if (e.key === Keys.DOWN_ARROW) {
+    } else if (e.key === Keys_Enum.DOWN_ARROW) {
       nextItem = item.nextElementSibling;
-    } else if (e.key === Keys.HOME) {
+    } else if (e.key === Keys_Enum.HOME) {
       nextItem = item.parentElement.firstElementChild;
-    } else if (e.key === Keys.END) {
+    } else if (e.key === Keys_Enum.END) {
       nextItem = item.parentElement.lastElementChild;
     } else {
       // not a recognized key

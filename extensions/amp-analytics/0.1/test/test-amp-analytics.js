@@ -1,8 +1,11 @@
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
 import {ClickEventTracker, VisibilityTracker} from '../events';
-import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
-import {LayoutPriority} from '#core/dom/layout';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '#testing/helpers/service';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {LinkerManager} from '../linker-manager';
 import {Services} from '#service';
 import {SessionManager} from '../session-manager';
@@ -2092,14 +2095,14 @@ describes.realWin(
 
       it('is 1 for non-inabox', () => {
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
-          LayoutPriority.METADATA
+          LayoutPriority_Enum.METADATA
         );
       });
 
       it('is 0 for inabox', () => {
         env.win.__AMP_MODE.runtime = 'inabox';
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
-          LayoutPriority.CONTENT
+          LayoutPriority_Enum.CONTENT
         );
       });
     });

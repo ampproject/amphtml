@@ -9,9 +9,9 @@ import {
   useMemo,
   useState,
 } from '#preact';
-import {toChildArray} from '#preact/compat';
+import {Children} from '#preact/compat';
 
-import {LightboxGalleryContext} from './context';
+import {BentoLightboxGalleryContext} from './context';
 
 const generateLightboxItemKey = sequentialIdGenerator();
 
@@ -33,10 +33,10 @@ const DEFAULT_ACTIVATION_PROPS = {
 const CLONE_CHILD = (child) => cloneElement(child);
 
 /**
- * @param {!LightboxGalleryDef.WithLightboxProps} props
+ * @param {!BentoLightboxGalleryDef.WithBentoLightboxGalleryProps} props
  * @return {PreactDef.Renderable}
  */
-export function WithLightbox({
+export function WithBentoLightboxGallery({
   alt,
   'aria-label': ariaLabel,
   as: Comp = 'div',
@@ -50,13 +50,13 @@ export function WithLightbox({
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
-  const {deregister, open, register} = useContext(LightboxGalleryContext);
+  const {deregister, open, register} = useContext(BentoLightboxGalleryContext);
   const render = useCallback(() => {
     if (renderProp) {
       return renderProp();
     }
     if (children) {
-      return toChildArray(children).map(CLONE_CHILD);
+      return Children.map(children, CLONE_CHILD);
     }
     return <Comp srcset={srcset} />;
   }, [children, renderProp, srcset]);

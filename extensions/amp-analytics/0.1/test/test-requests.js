@@ -1,6 +1,6 @@
 import * as ResourceTiming from '../resource-timing';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import * as log from '../../../../src/log';
+import * as log from '#utils/log';
 import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
 import {Services} from '#service';

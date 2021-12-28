@@ -1,6 +1,6 @@
 import {parseJson} from '#core/types/object/json';
 
-import {getData} from '../src/event-helper';
+import {getData} from '#utils/event-helper';
 
 /**
  * Send messages to parent frame. These should not contain user data.

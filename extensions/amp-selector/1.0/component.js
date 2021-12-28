@@ -1,6 +1,6 @@
 import objstr from 'obj-str';
 
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 import {mod} from '#core/math';
 
@@ -16,6 +16,7 @@ import {
   useState,
 } from '#preact';
 import {forwardRef} from '#preact/compat';
+import {propName} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 
@@ -35,7 +36,7 @@ export const KEYBOARD_SELECT_MODE = {
 };
 
 /**
- * @param {!SelectorDef.Props} props
+ * @param {!BentoSelectorDef.Props} props
  * @param {{current: ?SelectorDef.SelectorApi}} ref
  * @return {PreactDef.Renderable}
  */
@@ -51,7 +52,7 @@ function SelectorWithRef(
     name,
     onChange,
     role = 'listbox',
-    tabIndex,
+    [propName('tabIndex')]: tabIndex,
     children,
     ...rest
   },
@@ -211,12 +212,12 @@ function SelectorWithRef(
       const {key} = e;
       let dir;
       switch (key) {
-        case Keys.LEFT_ARROW: // Fallthrough.
-        case Keys.UP_ARROW:
+        case Keys_Enum.LEFT_ARROW: // Fallthrough.
+        case Keys_Enum.UP_ARROW:
           dir = -1;
           break;
-        case Keys.RIGHT_ARROW: // Fallthrough.
-        case Keys.DOWN_ARROW:
+        case Keys_Enum.RIGHT_ARROW: // Fallthrough.
+        case Keys_Enum.DOWN_ARROW:
           dir = 1;
           break;
         default:
@@ -241,7 +242,6 @@ function SelectorWithRef(
       aria-multiselectable={multiple}
       disabled={disabled}
       form={form}
-      keyboardSelectMode={keyboardSelectMode}
       multiple={multiple}
       name={name}
       onKeyDown={onKeyDown}
@@ -258,23 +258,23 @@ function SelectorWithRef(
   );
 }
 
-const Selector = forwardRef(SelectorWithRef);
-Selector.displayName = 'Selector'; // Make findable for tests.
-export {Selector};
+const BentoSelector = forwardRef(SelectorWithRef);
+BentoSelector.displayName = 'BentoSelector'; // Make findable for tests.
+export {BentoSelector};
 
 /**
  * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
-export function Option({
+export function BentoSelectorOption({
   as: Comp = 'div',
-  'class': className = '',
   disabled = false,
   focus: customFocus,
   index,
   option,
   role = 'option',
-  tabIndex,
+  [propName('class')]: className = '',
+  [propName('tabIndex')]: tabIndex,
   ...rest
 }) {
   const classes = useStyles();
@@ -334,7 +334,7 @@ export function Option({
 
   const onKeyDown = useCallback(
     (e) => {
-      if (e.key === Keys.ENTER || e.key === Keys.SPACE) {
+      if (e.key === Keys_Enum.ENTER || e.key === Keys_Enum.SPACE) {
         trySelect();
       }
     },

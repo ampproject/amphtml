@@ -1,7 +1,11 @@
-import {ReadyState} from '#core/constants/ready-state';
-import {removeElement} from '#core/dom';
+import {ReadyState_Enum} from '#core/constants/ready-state';
+import {isServerRendered, removeElement} from '#core/dom';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '#core/dom/img';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {scopedQuerySelector} from '#core/dom/query';
 import {propagateObjectFitStyles, setImportantStyles} from '#core/dom/style';
@@ -10,9 +14,10 @@ import * as mode from '#core/mode';
 import {Services} from '#service';
 import {registerElement} from '#service/custom-element-registry';
 
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {BaseElement} from '../../base-element';
-import {listen} from '../../event-helper';
-import {dev} from '../../log';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -29,6 +34,7 @@ export const ATTRIBUTES_TO_PROPAGATE = [
   'crossorigin',
   'referrerpolicy',
   'title',
+  'importance',
   'sizes',
   'srcset',
   'src',
@@ -132,7 +138,7 @@ export class AmpImg extends BaseElement {
       }
 
       if (AmpImg.R1() && !this.img_.complete) {
-        this.setReadyState(ReadyState.LOADING);
+        this.setReadyState(ReadyState_Enum.LOADING);
       }
     }
   }
@@ -182,7 +188,7 @@ export class AmpImg extends BaseElement {
     this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
 
     // For SSR, image will have been written directly to DOM so no need to recreate.
-    const serverRendered = this.element.hasAttribute('i-amphtml-ssr');
+    const serverRendered = isServerRendered(this.element);
     if (serverRendered) {
       this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
     }
@@ -264,7 +270,7 @@ export class AmpImg extends BaseElement {
     const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
     let defaultSize = width + 'px';
 
-    if (this.getLayout() !== Layout.FIXED) {
+    if (this.getLayout() !== Layout_Enum.FIXED) {
       const ratio = Math.round((width * 100) / viewportWidth);
       defaultSize = Math.max(ratio, 100) + 'vw';
     }
@@ -304,21 +310,21 @@ export class AmpImg extends BaseElement {
     const img = this.initialize_();
     if (!initialized) {
       listen(img, 'load', () => {
-        this.setReadyState(ReadyState.COMPLETE);
+        this.setReadyState(ReadyState_Enum.COMPLETE);
         this.firstLayoutCompleted();
         this.hideFallbackImg_();
       });
       listen(img, 'error', (reason) => {
-        this.setReadyState(ReadyState.ERROR, reason);
+        this.setReadyState(ReadyState_Enum.ERROR, reason);
         this.onImgLoadingError_();
       });
     }
     if (img.complete) {
-      this.setReadyState(ReadyState.COMPLETE);
+      this.setReadyState(ReadyState_Enum.COMPLETE);
       this.firstLayoutCompleted();
       this.hideFallbackImg_();
     } else {
-      this.setReadyState(ReadyState.LOADING);
+      this.setReadyState(ReadyState_Enum.LOADING);
     }
   }
 

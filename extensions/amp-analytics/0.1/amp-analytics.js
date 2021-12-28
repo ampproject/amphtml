@@ -1,7 +1,7 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
-import {ChunkPriority, chunk} from '../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
 import {Deferred} from '#core/data-structures/promise';
 import {
@@ -14,13 +14,13 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
 import {Services} from '#service';
 import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
 import {Transport} from './transport';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user} from '#utils/log';
 import {dict, hasOwn} from '#core/types/object';
 import {expandTemplate} from '#core/types/string';
 import {getMode} from '../../../src/mode';
@@ -105,7 +105,9 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
+    return this.isInabox_
+      ? LayoutPriority_Enum.CONTENT
+      : LayoutPriority_Enum.METADATA;
   }
 
   /** @override */
@@ -225,7 +227,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           // Chunk in inabox ad leads to activeview regression, handle seperately
           loadConfigTask();
         } else {
-          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
+          chunk(this.element, loadConfigTask, ChunkPriority_Enum.HIGH);
         }
         return loadConfigDeferred.promise;
       })
@@ -600,7 +602,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       // Chunk in inabox ad leads to activeview regression, handle seperately
       linkerTask();
     } else {
-      chunk(this.element, linkerTask, ChunkPriority.LOW);
+      chunk(this.element, linkerTask, ChunkPriority_Enum.LOW);
     }
   }
 
@@ -744,7 +746,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         // Chunk in inabox ad leads to activeview regression, handle seperately
         sampleInTask();
       } else {
-        chunk(this.element, sampleInTask, ChunkPriority.LOW);
+        chunk(this.element, sampleInTask, ChunkPriority_Enum.LOW);
       }
       return sampleDeferred.promise;
     }

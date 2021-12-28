@@ -61,7 +61,6 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
 
   it('should build the info dialog', async () => {
     await infoDialog.build();
-    expect(infoDialog.isBuilt()).to.be.true;
     expect(infoDialog.element_).to.exist;
   });
 
@@ -115,7 +114,9 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
   it('should not hide the info dialog on click on the inner container', async () => {
     await infoDialog.build();
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-    infoDialog.innerContainerEl_.dispatchEvent(new Event('click'));
+    parentEl
+      .querySelector('.i-amphtml-story-info-dialog-container')
+      .dispatchEvent(new Event('click'));
 
     expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
     expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;

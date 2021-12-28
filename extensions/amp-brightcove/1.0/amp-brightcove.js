@@ -7,7 +7,7 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-brightcove-1.0.css';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 import {Services} from '#service';
 
 /** @const {string} */

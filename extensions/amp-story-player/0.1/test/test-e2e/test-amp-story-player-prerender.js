@@ -51,7 +51,8 @@ describes.endtoend(
         'childElementCount'
       );
 
-      await expect(count).to.eql(0);
+      // 2 accounts for previous and next buttons in panel player.
+      await expect(count).to.eql(2);
     });
 
     it('when player becomes visible in viewport, first story starts playing', async () => {

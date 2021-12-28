@@ -1,7 +1,8 @@
+import {devAssert} from '#core/assert';
 import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {childElementsByTag, matches} from './query';
 
@@ -19,26 +20,25 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
  * @typedef {{
  *   bubbles: (boolean|undefined),
  *   cancelable: (boolean|undefined),
- * }}
+ * }} CustomEventOptionsDef;
  */
-export let CustomEventOptionsDef;
 
-/** @const {!CustomEventOptionsDef} */
+/** @const {CustomEventOptionsDef} */
 const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
- * @param {!Element} parent
- * @param {function(!Element):boolean} checkFunc
- * @param {function()} callback
+ * @param {Element} parent
+ * @param {function(Element):boolean} checkFunc
+ * @param {function():void} callback
  */
 export function waitForChild(parent, checkFunc, callback) {
   if (checkFunc(parent)) {
     callback();
     return;
   }
-  const win = toWin(parent.ownerDocument.defaultView);
+  const win = getWin(parent);
   if (mode.isEsm() || win.MutationObserver) {
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -60,20 +60,20 @@ export function waitForChild(parent, checkFunc, callback) {
 /**
  * Waits until the child element is constructed. Once the child is found, the
  * promise is resolved.
- * @param {!Element} parent
- * @param {function(!Element):boolean} checkFunc
- * @return {!Promise}
+ * @param {Element} parent
+ * @param {function(Element):boolean} checkFunc
+ * @return {Promise<void>}
  */
 export function waitForChildPromise(parent, checkFunc) {
   return new Promise((resolve) => {
-    waitForChild(parent, checkFunc, resolve);
+    waitForChild(parent, checkFunc, /** @type {function():void} */ (resolve));
   });
 }
 
 /**
  * Waits for document's body to be available and ready.
- * @param {!Document} doc
- * @param {function()} callback
+ * @param {Document} doc
+ * @param {function():void} callback
  */
 export function waitForBodyOpen(doc, callback) {
   waitForChild(doc.documentElement, () => !!doc.body, callback);
@@ -81,16 +81,18 @@ export function waitForBodyOpen(doc, callback) {
 
 /**
  * Waits for document's body to be available.
- * @param {!Document} doc
- * @return {!Promise}
+ * @param {Document} doc
+ * @return {Promise<void>}
  */
 export function waitForBodyOpenPromise(doc) {
-  return new Promise((resolve) => waitForBodyOpen(doc, resolve));
+  return new Promise((resolve) =>
+    waitForBodyOpen(doc, /** @type {function():void} */ (resolve))
+  );
 }
 
 /**
  * Removes the element.
- * @param {!Element} element
+ * @param {Element} element
  */
 export function removeElement(element) {
   element.parentElement?.removeChild(element);
@@ -98,7 +100,7 @@ export function removeElement(element) {
 
 /**
  * Removes all child nodes of the specified element.
- * @param {!Element|!DocumentFragment} parent
+ * @param {Element|DocumentFragment} parent
  */
 export function removeChildren(parent) {
   while (parent.firstChild) {
@@ -110,8 +112,8 @@ export function removeChildren(parent) {
  * Copies all children nodes of element "from" to element "to". Child nodes
  * are deeply cloned. Notice, that this method should be used with care and
  * preferably on smaller subtrees.
- * @param {!Element} from
- * @param {!Element|!DocumentFragment} to
+ * @param {Element} from
+ * @param {Element|DocumentFragment} to
  */
 export function copyChildren(from, to) {
   const frag = to.ownerDocument.createDocumentFragment();
@@ -124,8 +126,8 @@ export function copyChildren(from, to) {
 /**
  * Insert the element in the root after the element named after or
  * if that is null at the beginning.
- * @param {!Element|!ShadowRoot} root
- * @param {!Element} element
+ * @param {Element|ShadowRoot} root
+ * @param {Element} element
  * @param {?Node=} after
  */
 export function insertAfterOrAtStart(root, element, after = null) {
@@ -140,8 +142,8 @@ export function insertAfterOrAtStart(root, element, after = null) {
 /**
  * Insert the element in the root after the element named after or
  * if that is null at the beginning.
- * @param {!Element|!ShadowRoot} root
- * @param {!Element} element
+ * @param {Element|ShadowRoot} root
+ * @param {Element} element
  */
 export function insertAtStart(root, element) {
   root.insertBefore(element, root.firstChild);
@@ -149,9 +151,9 @@ export function insertAtStart(root, element) {
 
 /**
  * Add attributes to an element.
- * @param {!Element} element
- * @param {!JsonObject<string, string>} attributes
- * @return {!Element} created element
+ * @param {Element} element
+ * @param {Record<string, string>} attributes
+ * @return {Element} created element
  */
 export function addAttributesToElement(element, attributes) {
   for (const attr in attributes) {
@@ -162,10 +164,10 @@ export function addAttributesToElement(element, attributes) {
 
 /**
  * Create a new element on document with specified tagName and attributes.
- * @param {!Document} doc
+ * @param {Document} doc
  * @param {string} tagName
- * @param {!JsonObject<string, string>} attributes
- * @return {!Element} created element
+ * @param {Record<string, string>} attributes
+ * @return {Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
   const element = doc.createElement(tagName);
@@ -174,7 +176,7 @@ export function createElementWithAttributes(doc, tagName, attributes) {
 
 /**
  * Returns true if node is connected (attached).
- * @param {!Node} node
+ * @param {Node} node
  * @return {boolean}
  * @see https://dom.spec.whatwg.org/#connected
  */
@@ -188,8 +190,8 @@ export function isConnectedNode(node) {
   let n = node;
   do {
     n = rootNodeFor(n);
-    if (n.host) {
-      n = n.host;
+    if (/** @type {ShadowRoot} */ (n).host) {
+      n = /** @type {ShadowRoot} */ (n).host;
     } else {
       break;
     }
@@ -199,13 +201,15 @@ export function isConnectedNode(node) {
 
 /**
  * Returns the root for a given node. Does not cross shadow DOM boundary.
- * @param {!Node} node
- * @return {!Node}
+ * @param {Node} node
+ * @return {ShadowRoot|Document}
  */
 export function rootNodeFor(node) {
+  // https://developer.mozilla.org/en-US/docs/Web/API/Node/getRootNode
+  // @ts-ignore this always is truthy according to TS, but isn't in IE 11.
   if (Node.prototype.getRootNode) {
     // Type checker says `getRootNode` may return null.
-    return node.getRootNode() || node;
+    return /** @type {ShadowRoot|Document} */ (node.getRootNode());
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
@@ -214,7 +218,7 @@ export function rootNodeFor(node) {
     !!n.parentNode && !isShadowRoot(/** @type {HTMLElement} */ (n));
     n = n.parentNode
   ) {}
-  return n;
+  return /** @type {ShadowRoot|Document} */ (n);
 }
 
 /**
@@ -240,11 +244,11 @@ export function isShadowRoot(value) {
 /**
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
- * @param {!HTMLElement} element
+ * @param {HTMLElement} element
  * @param {function(string):string=} opt_computeParamNameFunc to compute the
  *    parameter name, get passed the camel-case parameter name.
- * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
- * @return {!JsonObject}
+ * @param {RegExp=} opt_paramPattern Regex pattern to match data attributes.
+ * @return {JsonObject}
  */
 export function getDataParamsFromAttributes(
   element,
@@ -270,18 +274,19 @@ export function getDataParamsFromAttributes(
  * This means either:
  *  a. The element itself has a nextSibling.
  *  b. Any of the element ancestors has a nextSibling.
- * @param {!Element} element
+ * @param {Element} element
  * @param {?Node} opt_stopNode
  * @return {boolean}
  */
 export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
+  /** @type {?Element} */
   let currentElement = element;
   do {
     if (currentElement.nextSibling) {
       return true;
     }
   } while (
-    (currentElement = currentElement.parentNode) &&
+    (currentElement = /** @type {?Element} */ (currentElement.parentNode)) &&
     currentElement != opt_stopNode
   );
   return false;
@@ -293,12 +298,12 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
  * Polyfill to replace .content access for browsers that do not support
  * HTMLTemplateElements natively.
  *
- * @param {!HTMLTemplateElement|!Element} template
- * @return {!DocumentFragment}
+ * @param {HTMLTemplateElement|Element} template
+ * @return {DocumentFragment}
  */
 export function templateContentClone(template) {
   if ('content' in template) {
-    return template.content.cloneNode(true);
+    return /** @type {DocumentFragment} */ (template.content.cloneNode(true));
   } else {
     const content = template.ownerDocument.createDocumentFragment();
     copyChildren(template, content);
@@ -309,8 +314,8 @@ export function templateContentClone(template) {
 /**
  * Iterate over an array-like.
  * Test cases: https://jsbench.github.io/#f638cacc866a1b2d6e517e6cfa900d6b
- * @param {!IArrayLike<T>} iterable
- * @param {function(T, number)} cb
+ * @param {ArrayLike<T>} iterable
+ * @param {function(T, number):void} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {
@@ -322,7 +327,7 @@ export function iterateCursor(iterable, cb) {
 
 /**
  * Whether the element is a script tag with application/json type.
- * @param {!Element} element
+ * @param {Element} element
  * @return {boolean}
  */
 export function isJsonScriptTag(element) {
@@ -334,7 +339,7 @@ export function isJsonScriptTag(element) {
 
 /**
  * Whether the element is a script tag with application/json type.
- * @param {!Element} element
+ * @param {Element} element
  * @return {boolean}
  */
 export function isJsonLdScriptTag(element) {
@@ -346,7 +351,7 @@ export function isJsonLdScriptTag(element) {
 
 /**
  * Whether the page's direction is right to left or not.
- * @param {!Document} doc
+ * @param {Document} doc
  * @return {boolean}
  */
 export function isRTL(doc) {
@@ -370,7 +375,7 @@ export function escapeHtml(text) {
 }
 
 /**
- * @param {string} c
+ * @param {keyof HTML_ESCAPE_CHARS} c
  * @return {string}
  */
 function escapeHtmlChar(c) {
@@ -380,7 +385,7 @@ function escapeHtmlChar(c) {
 /**
  * Tries to focus on the given element; fails silently if browser throws an
  * exception.
- * @param {!Element} element
+ * @param {HTMLElement} element
  */
 export function tryFocus(element) {
   try {
@@ -392,7 +397,7 @@ export function tryFocus(element) {
 
 /**
  * Whether the given window is in an iframe or not.
- * @param {!Window} win
+ * @param {Window} win
  * @return {boolean}
  */
 export function isIframed(win) {
@@ -403,7 +408,7 @@ export function isIframed(win) {
  * Returns true if node is not disabled.
  *
  * IE8 can return false positives, see {@link matches}.
- * @param {!HTMLInputElement} element
+ * @param {HTMLInputElement} element
  * @return {boolean}
  * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
  */
@@ -417,8 +422,8 @@ export function isEnabled(element) {
  * A parent node is sorted to be before a child.
  * See https://developer.mozilla.org/en-US/docs/Web/API/Node/compareDocumentPosition
  *
- * @param {!Element} element1
- * @param {!Element} element2
+ * @param {Element} element1
+ * @param {Element} element2
  * @return {number}
  */
 export function domOrderComparator(element1, element2) {
@@ -444,7 +449,7 @@ export function domOrderComparator(element1, element2) {
  * on by adding an attribute with an empty value, or toggles it off by removing
  * the attribute. This does not mutate the element if the new state matches
  * the existing state.
- * @param {!Element} element An element to toggle the attribute for.
+ * @param {Element} element An element to toggle the attribute for.
  * @param {string} name The name of the attribute.
  * @param {boolean=} forced Whether the attribute should be forced on/off. If
  *    not specified, it will be toggled from the current state.
@@ -481,7 +486,7 @@ export function parseBooleanAttribute(s) {
 }
 
 /**
- * @param {!Window} win
+ * @param {Window} win
  * @return {number} The width of the vertical scrollbar, in pixels.
  */
 export function getVerticalScrollbarWidth(win) {
@@ -494,17 +499,16 @@ export function getVerticalScrollbarWidth(win) {
 /**
  * Dispatches a custom event.
  *
- * @param {!Node} node
+ * @param {Node} node
  * @param {string} name
- * @param {!Object=} opt_data Event data.
- * @param {!CustomEventOptionsDef=} opt_options
+ * @param {Object=} opt_data Event data.
+ * @param {CustomEventOptionsDef=} opt_options
  */
 export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const data = opt_data || {};
   // Constructors of events need to come from the correct window. Sigh.
+  devAssert(node.ownerDocument);
   const event = node.ownerDocument.createEvent('Event');
-
-  // Technically .data is not a property of Event.
   event.data = data;
 
   const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
@@ -515,8 +519,8 @@ export function dispatchCustomEvent(node, name, opt_data, opt_options) {
 /**
  * Ensures the child is contained by the parent, but not the parent itself.
  *
- * @param {!Node} parent
- * @param {!Node} child
+ * @param {Node} parent
+ * @param {Node} child
  * @return {boolean}
  */
 export function containsNotSelf(parent, child) {
@@ -525,9 +529,9 @@ export function containsNotSelf(parent, child) {
 
 /**
  * Helper method to get the json config from an element <script> tag
- * @param {!Element} element
+ * @param {HTMLElement} element
  * @return {?JsonObject}
- * @throws {!Error} If element does not have exactly one <script> child
+ * @throws {Error} If element does not have exactly one <script> child
  * with type="application/json", or if the <script> contents are not valid JSON.
  */
 export function getChildJsonConfig(element) {
@@ -537,14 +541,39 @@ export function getChildJsonConfig(element) {
     throw new Error(`Found ${length} <script> children. Expected 1.`);
   }
 
-  const script = scripts[0];
+  const script = /** @type {HTMLScriptElement} */ (scripts[0]);
   if (!isJsonScriptTag(script)) {
     throw new Error('<script> child must have type="application/json"');
   }
 
   try {
-    return parseJson(script.textContent);
+    return parseJson(script.textContent ?? '');
   } catch {
     throw new Error('Failed to parse <script> contents. Is it valid JSON?');
+  }
+}
+
+/**
+ * Returns true if an element was server rendered.
+ * @param {Element} element
+ * @return {boolean}
+ */
+export function isServerRendered(element) {
+  return element.hasAttribute('i-amphtml-ssr');
+}
+
+/**
+ * Propagate the nonce found in <head> to a new script element.
+ * Recent browsers force nonce to be accessed via property instead of attribute.
+ *
+ * @param {Document} doc
+ * @param {HTMLScriptElement} scriptEl
+ */
+export function propagateNonce(doc, scriptEl) {
+  /** @type {?HTMLScriptElement} */
+  const currentScript = doc.head.querySelector('script[nonce]');
+  if (currentScript) {
+    const nonce = currentScript.nonce || currentScript.getAttribute('nonce');
+    scriptEl.setAttribute('nonce', nonce ?? '');
   }
 }

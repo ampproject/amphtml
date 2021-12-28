@@ -171,6 +171,8 @@ Use to denote that this is a sticky ad unit and specify the position of this uni
 -   top
 -   bottom
 -   bottom-right
+-   left
+-   right
 
 ### `data-foo-bar`
 
@@ -298,6 +300,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Affiliate-B](../../ads/vendors/affiliateb.md)
 -   [AJA](../../ads/vendors/aja.md)
 -   [AMoAd](../../ads/vendors/amoad.md)
+-   [Andbeyond](../../ads/vendors/andbeyond.md)
 -   [Aniview](../../ads/vendors/aniview.md)
 -   [AnyClip](../../ads/vendors/anyclip.md)
 -   [AppNexus](../../ads/vendors/appnexus.md)
@@ -317,11 +320,13 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [CA-ProFit-X](../../ads/vendors/caprofitx.md)
 -   [Cedato](../../ads/vendors/cedato.md)
 -   [Colombia](../../ads/vendors/colombia.md)
+-   [Colombiafeed](../../ads/vendors/colombiafeed.md)
 -   [Connatix](../../ads/vendors/connatix.md)
 -   [Conative](../../ads/vendors/conative.md)
 -   [Content.ad](../../ads/vendors/contentad.md)
 -   [Criteo](../../ads/vendors/criteo.md)
 -   [CSA](../../ads/vendors/csa.md)
+-   [Digital exchange](../../ads/vendors/dex.js)
 -   [Digiteka](../../ads/vendors/digiteka.md)
 -   [Directadvert](../../ads/vendors/directadvert.md)
 -   [DistroScale](../../ads/vendors/distroscale.md)
@@ -355,6 +360,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Imedia](../../ads/vendors/imedia.md)
 -   [Improve Digital](../../ads/vendors/improvedigital.md)
 -   [Insticator](../../ads/vendors/insticator.md)
+-   [InsurAds](../../ads/vendors/insurads.md)
 -   [Index Exchange](../../ads/vendors/ix.md)
 -   [Industrybrains](../../ads/vendors/industrybrains.md)
 -   [InMobi](../../ads/vendors/inmobi.md)
@@ -436,6 +442,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [rnetplus](../../ads/vendors/rnetplus.md)
 -   [Rubicon Project](../../ads/vendors/rubicon.md)
 -   [RUNative](../../ads/vendors/runative.md)
+-   [Sabavision](../../ads/vendors/sabavision.md)
 -   [SAS CI 360 Match](../../ads/vendors/sas.md)
 -   [Seeding Alliance](../../ads/vendors/seedingalliance.md)
 -   [Sekindo](../../ads/vendors/sekindo.md)
@@ -497,6 +504,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 
 -   [1wo](../../ads/vendors/1wo.md)
 -   [24smi](../../ads/vendors/24smi.md)
+-   [AdsKeeper](../../ads/vendors/adskeeper.md)
 -   [AdsLoom](../../ads/vendors/adsloom.md)
 -   [Bringhub](../../ads/vendors/bringhub.md)
 -   [Dable](../../ads/vendors/dable.md)

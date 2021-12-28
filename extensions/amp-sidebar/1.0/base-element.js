@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {PreactBaseElement} from '#preact/base-element';
-import {Sidebar} from './component';
+import {BentoSidebar} from './component';
 import {dict} from '#core/types/object';
 import {pauseAll} from '#core/dom/resource-container-helper';
 import {realChildNodes} from '#core/dom/query';
@@ -83,7 +83,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = Sidebar;
+BaseElement['Component'] = BentoSidebar;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
@@ -94,11 +94,11 @@ BaseElement['shadowCss'] = COMPONENT_CSS;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
-  'side': {attr: 'side', type: 'string'},
+  'side': {attr: 'side'},
 };
 
 /**
- * @param {!SidebarDef.ToolbarShimProps} props
+ * @param {!BentoSidebarDef.ToolbarShimProps} props
  */
 function ToolbarShim({
   domElement,

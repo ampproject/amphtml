@@ -1,4 +1,4 @@
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
@@ -6,10 +6,11 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {getSocialConfig} from './amp-social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {addParamsToUrl} from '../../../src/url';
 
@@ -165,7 +166,7 @@ class AmpSocialShare extends AMP.BaseElement {
    */
   handleKeyPress_(event) {
     const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
+    if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }

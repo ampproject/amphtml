@@ -6,6 +6,8 @@ import {dict} from '#core/types/object';
 import {setProp} from '#core/context';
 import {useContext, useLayoutEffect} from '#preact';
 
+export const TAG = 'bento-inline-gallery';
+
 export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {

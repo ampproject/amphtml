@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {
   createElementWithAttributes,
   isJsonScriptTag,
@@ -11,13 +11,12 @@ import {parseJson} from '#core/types/object/json';
 
 import {getExperimentBranch} from '#experiments';
 import {
-  AdvanceExpToTime,
-  StoryAdAutoAdvance,
-} from '#experiments/story-ad-auto-advance';
-import {
   BranchToTimeValues,
   StoryAdSegmentExp,
 } from '#experiments/story-ad-progress-segment';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
 
 import {
   AnalyticsEvents,
@@ -35,10 +34,8 @@ import {
 } from './story-ad-ui';
 import {getFrameDoc, localizeCtaText} from './utils';
 
-import {getData, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
@@ -309,22 +306,18 @@ export class StoryAdPage {
       'id': this.id_,
     });
 
-    const autoAdvanceExpBranch = getExperimentBranch(
-      this.win_,
-      StoryAdAutoAdvance.ID
-    );
     const segmentExpBranch = getExperimentBranch(
       this.win_,
       StoryAdSegmentExp.ID
     );
 
-    if (segmentExpBranch && segmentExpBranch !== StoryAdSegmentExp.CONTROL) {
-      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
-    } else if (
-      autoAdvanceExpBranch &&
-      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    if (
+      segmentExpBranch &&
+      segmentExpBranch !== StoryAdSegmentExp.CONTROL &&
+      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_BOTH &&
+      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_AD
     ) {
-      attributes['auto-advance-after'] = AdvanceExpToTime[autoAdvanceExpBranch];
+      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
     }
 
     const page = createElementWithAttributes(
@@ -358,7 +351,7 @@ export class StoryAdPage {
     this.adElement_
       .signals()
       // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(CommonSignals.INI_LOAD)
+      .whenSignal(CommonSignals_Enum.INI_LOAD)
       .then(() => this.onAdLoaded_());
 
     // Inabox custom event.

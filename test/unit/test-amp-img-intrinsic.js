@@ -1,12 +1,11 @@
 import {installImg} from '#builtins/amp-img/amp-img';
 
 import {createElementWithAttributes} from '#core/dom';
+import {applyStaticLayout} from '#core/static-layout';
 import {toArray} from '#core/types/array';
 
+import {BrowserController} from '#testing/helpers/service';
 import {createIframePromise} from '#testing/iframe';
-import {BrowserController} from '#testing/test-helper';
-
-import {applyStaticLayout} from '../../src/static-layout';
 
 describes.sandboxed('amp-img layout intrinsic', {}, () => {
   let fixture;

@@ -1,11 +1,12 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
 } from '#core/constants/async-input';
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {isAmp4Email} from '#core/document/format';
 import {
   createElementWithAttributes,
   iterateCursor,
@@ -27,6 +28,11 @@ import {toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInit, setupInput} from '#utils/xhr-utils';
+
 import {AmpFormTextarea} from './amp-form-textarea';
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
@@ -40,11 +46,7 @@ import {
 } from './form-verifiers';
 
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
-import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -54,11 +56,6 @@ import {
   isProxyOrigin,
   serializeQueryString,
 } from '../../../src/url';
-import {
-  setupAMPCors,
-  setupInit,
-  setupInput,
-} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -358,7 +355,7 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'submit') {
@@ -418,7 +415,7 @@ export class AmpForm {
     );
 
     this.form_.addEventListener(
-      AmpEvents.FORM_VALUE_CHANGE,
+      AmpEvents_Enum.FORM_VALUE_CHANGE,
       (e) => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onInput(e);
@@ -444,7 +441,7 @@ export class AmpForm {
                 this.triggerAction_(
                   FormEvents.VERIFY_ERROR,
                   errors,
-                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                  ActionTrust_Enum.DEFAULT // DEFAULT because async after gesture.
                 );
               });
             } else {
@@ -572,12 +569,12 @@ export class AmpForm {
     }
 
     // Submits caused by user input have high trust.
-    return this.submit_(ActionTrust.HIGH, event);
+    return this.submit_(ActionTrust_Enum.HIGH, event);
   }
 
   /**
    * Helper method that actual handles the different cases (post, get, xhr...).
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @param {?Event} event
    * @return {!Promise}
    * @private
@@ -596,7 +593,7 @@ export class AmpForm {
     // Get our special fields
     const varSubsFields = this.getVarSubsFields_();
     const asyncInputs = this.form_.getElementsByClassName(
-      AsyncInputClasses.ASYNC_INPUT
+      AsyncInputClasses_Enum.ASYNC_INPUT
     );
 
     this.dirtinessHandler_.onSubmitting();
@@ -642,7 +639,9 @@ export class AmpForm {
     iterateCursor(asyncInputs, (asyncInput) => {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
-        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+        asyncInput.classList.contains(
+          AsyncInputClasses_Enum.ASYNC_REQUIRED_ACTION
+        )
       ) {
         requiredActionPromises.push(asyncCall);
       } else {
@@ -667,7 +666,7 @@ export class AmpForm {
   /**
    * Handle form error for presubmit async calls.
    * @param {*} error
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {Promise}
    * @private
    */
@@ -691,7 +690,7 @@ export class AmpForm {
 
   /**
    * Handle successful presubmit tasks
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    */
   handlePresubmitSuccess_(trust) {
@@ -715,7 +714,11 @@ export class AmpForm {
       return Promise.resolve();
     }
     this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormEvents.VERIFY, /* detail */ null, ActionTrust.HIGH);
+    this.triggerAction_(
+      FormEvents.VERIFY,
+      /* detail */ null,
+      ActionTrust_Enum.HIGH
+    );
 
     return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
       this.doVerifyXhr_()
@@ -723,7 +726,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -746,7 +749,7 @@ export class AmpForm {
 
   /**
    * Handles the server side proxying and then rendering of the template.
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -821,7 +824,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit-success or submit-error state depending on the response status.
    * @param {!JsonObject} response
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -843,7 +846,7 @@ export class AmpForm {
 
   /**
    * Triggers the analytics and renders any template for submitting state.
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    */
   submittingWithTrust_(trust) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
@@ -889,7 +892,7 @@ export class AmpForm {
       .getImpl()
       .then((implementation) => implementation.getValue())
       .then((value) => {
-        const name = asyncInput.getAttribute(AsyncInputAttributes.NAME);
+        const name = asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME);
         let input = this.form_.querySelector(
           `input[name=${escapeCssSelectorIdent(name)}]`
         );
@@ -898,7 +901,7 @@ export class AmpForm {
             this.win_.document,
             'input',
             dict({
-              'name': asyncInput.getAttribute(AsyncInputAttributes.NAME),
+              'name': asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME),
               'hidden': 'true',
             })
           );
@@ -960,18 +963,18 @@ export class AmpForm {
 
   /**
    * Returns the action trust for submit-success and submit-error events.
-   * @param {!ActionTrust} incomingTrust
-   * @return {!ActionTrust}
+   * @param {!ActionTrust_Enum} incomingTrust
+   * @return {!ActionTrust_Enum}
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
     // Degrade trust across form submission.
-    return /** @type {!ActionTrust} */ (incomingTrust - 1);
+    return /** @type {!ActionTrust_Enum} */ (incomingTrust - 1);
   }
 
   /**
    * @param {!Response} response
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -995,7 +998,7 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject} result
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
@@ -1018,7 +1021,7 @@ export class AmpForm {
 
   /**
    * @param {*} e
-   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {!ActionTrust_Enum} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
@@ -1043,7 +1046,7 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
-   * @param {!ActionTrust} incomingTrust
+   * @param {!ActionTrust_Enum} incomingTrust
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
@@ -1184,7 +1187,7 @@ export class AmpForm {
    * Triggers an action e.g. submit success/error with response data.
    * @param {!FormEvents} name
    * @param {?JsonObject|!Array<{message: string, name: string}>} detail
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @private
    */
   triggerAction_(name, detail, trust) {
@@ -1283,7 +1286,7 @@ export class AmpForm {
                 container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
-                  AmpEvents.DOM_UPDATE,
+                  AmpEvents_Enum.DOM_UPDATE,
                   /* detail */ null,
                   {bubbles: true}
                 );
@@ -1646,7 +1649,7 @@ export class AmpFormService {
    * @private
    */
   installDomUpdateEventListener_(doc) {
-    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    doc.addEventListener(AmpEvents_Enum.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
   }
@@ -1660,7 +1663,7 @@ export class AmpFormService {
     doc.addEventListener('keydown', (e) => {
       if (
         e.defaultPrevented ||
-        e.key != Keys.ENTER ||
+        e.key != Keys_Enum.ENTER ||
         !(e.ctrlKey || e.metaKey) ||
         e.target.tagName !== 'TEXTAREA'
       ) {

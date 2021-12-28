@@ -14,10 +14,9 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {addAttributesToElement, removeElement} from '#core/dom';
-import {dict} from '#core/types/object';
+import {removeElement} from '#core/dom';
 import {matches} from '#core/dom/query';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /**
  * @type {string}
@@ -48,17 +47,17 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   setOrOverwriteAttributes_() {
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
-      addAttributesToElement(ctaLinks[i], dict({'target': '_blank'}));
+      ctaLinks[i].setAttribute('target', '_blank');
 
       if (!ctaLinks[i].getAttribute('role')) {
-        addAttributesToElement(ctaLinks[i], dict({'role': 'link'}));
+        ctaLinks[i].setAttribute('role', 'link');
       }
     }
 
     const ctaButtons = this.element.querySelectorAll('button');
     for (let i = 0; i < ctaButtons.length; i++) {
       if (!ctaButtons[i].getAttribute('role')) {
-        addAttributesToElement(ctaButtons[i], dict({'role': 'button'}));
+        ctaButtons[i].setAttribute('role', 'button');
       }
     }
   }

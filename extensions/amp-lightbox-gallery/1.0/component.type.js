@@ -1,7 +1,7 @@
 /** @externs */
 
 /** @const */
-var LightboxGalleryDef = {};
+var BentoLightboxGalleryDef = {};
 
 /**
  * @typedef {{
@@ -14,7 +14,7 @@ var LightboxGalleryDef = {};
  *   render: (function():PreactDef.Renderable|undefined),
  * }}
  */
-LightboxGalleryDef.Props;
+BentoLightboxGalleryDef.Props;
 
 /**
  * @typedef {{
@@ -25,7 +25,7 @@ LightboxGalleryDef.Props;
  *   render: (function():PreactDef.Renderable),
  * }}
  */
-LightboxGalleryDef.WithLightboxProps;
+BentoLightboxGalleryDef.WithBentoLightboxGalleryProps;
 
 /**
  * @typedef {{
@@ -34,4 +34,4 @@ LightboxGalleryDef.WithLightboxProps;
  *   open: (function():undefined),
  * }}
  */
-LightboxGalleryDef.ContextProps;
+BentoLightboxGalleryDef.ContextProps;

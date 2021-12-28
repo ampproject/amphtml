@@ -1,7 +1,8 @@
 import {Services} from '#service';
 import {installXhrService} from '#service/xhr-impl';
 
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
+
 import {getMode} from '../../../src/mode';
 import {
   ampWorkerForTesting,

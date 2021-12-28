@@ -1,6 +1,6 @@
 import {SwipeDef} from '../../../src/gesture-recognizers';
 import {delayAfterDeferringToEventLoop} from './utils';
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 import {setStyles} from '#core/dom/style';
 
 /**

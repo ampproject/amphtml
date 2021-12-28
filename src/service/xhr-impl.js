@@ -2,10 +2,7 @@ import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {isFormDataWrapper} from '../form-data-wrapper';
-import {dev, user} from '../log';
-import {getService, registerServiceBuilder} from '../service-helpers';
-import {getCorsUrl, parseUrlDeprecated} from '../url';
+import {dev, user} from '#utils/log';
 import {
   assertSuccess,
   getViewerInterceptResponse,
@@ -13,7 +10,11 @@ import {
   setupInit,
   setupInput,
   setupJsonFetchInit,
-} from '../utils/xhr-utils';
+} from '#utils/xhr-utils';
+
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {getService, registerServiceBuilder} from '../service-helpers';
+import {getCorsUrl, parseUrlDeprecated} from '../url';
 
 /**
  * A service that polyfills Fetch API for use within AMP.

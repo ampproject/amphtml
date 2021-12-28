@@ -1,3 +1,4 @@
+import {isAmp4Email} from '#core/document/format';
 import {dict} from '#core/types/object';
 
 import {
@@ -7,14 +8,15 @@ import {
   BIND_PREFIX,
   DENYLISTED_TAGS,
   EMAIL_ALLOWLISTED_AMP_TAGS,
+  EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
 } from '#purifier/sanitation';
 
+import {user} from '#utils/log';
+
 import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
 
-import {isAmp4Email} from './format';
-import {user} from './log';
 import {rewriteAttributeValue} from './url-rewrite';
 
 /** @private @const {string} */
@@ -242,19 +244,23 @@ export function sanitizeHtml(html, doc) {
  * We do so in sanitizeHtml which occurs after this initial sanitizing.
  *
  * @param {string} html
+ * @param {!Document} doc
  * @return {string}
  */
-export function sanitizeTagsForTripleMustache(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
+export function sanitizeTagsForTripleMustache(html, doc) {
+  return htmlSanitizer.sanitizeWithPolicy(html, (tagName, attribs) =>
+    tripleMustacheTagPolicy(tagName, attribs, doc)
+  );
 }
 
 /**
  * Tag policy for handling what is valid html in templates.
  * @param {string} tagName
  * @param {!Array<string>} attribs
+ * @param {!Document} doc
  * @return {?{tagName: string, attribs: !Array<string>}}
  */
-function tripleMustacheTagPolicy(tagName, attribs) {
+function tripleMustacheTagPolicy(tagName, attribs, doc) {
   if (tagName == 'template') {
     for (let i = 0; i < attribs.length; i += 2) {
       if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
@@ -265,7 +271,11 @@ function tripleMustacheTagPolicy(tagName, attribs) {
       }
     }
   }
-  if (!TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
+  if (isAmp4Email(doc)) {
+    if (!EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
+      return null;
+    }
+  } else if (!TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
     return null;
   }
   return {

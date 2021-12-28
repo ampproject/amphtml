@@ -1,7 +1,6 @@
 import * as Preact from '#preact';
 import {Bento__component_name_pascalcase__} from '../component';
 import {mount} from 'enzyme';
-import {waitFor} from '#testing/test-helper';
 
 describes.sandboxed('Bento__component_name_pascalcase__ preact component v1.0', {}, (env) => {
   // __do_not_submit__: This is example code only.

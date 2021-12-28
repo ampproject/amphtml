@@ -106,14 +106,6 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     );
   });
 
-  it('should show the sidebar control only if a sidebar exists', () => {
-    storeService.dispatch(Action.TOGGLE_HAS_SIDEBAR, true);
-    systemLayer.build();
-    expect(systemLayer.getShadowRoot()).to.have.attribute(
-      'i-amphtml-story-has-sidebar'
-    );
-  });
-
   it('should hide system layer on SYSTEM_UI_IS_VISIBLE_STATE change', () => {
     systemLayer.build();
     storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);

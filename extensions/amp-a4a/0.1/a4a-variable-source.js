@@ -6,7 +6,7 @@ import {
   getTimingDataSync,
 } from '#service/variable-source';
 
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '#utils/log';
 
 const ALLOWLISTED_VARIABLES = [
   'AMPDOC_HOST',

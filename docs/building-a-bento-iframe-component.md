@@ -271,7 +271,6 @@ function FantasticEmbedInternalWithRef(
   {
     allow,
     allowFullScreen,
-    allowTransparency,
     frameborder,
     loading,
     name,
@@ -287,7 +286,6 @@ function FantasticEmbedInternalWithRef(
       <iframe
         allow={allow}
         allowFullScreen={allowFullScreen}
-        allowTransparency={allowTransparency}
         frameborder="0"
         loading={loading}
         name={name}

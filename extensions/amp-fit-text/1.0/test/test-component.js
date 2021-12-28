@@ -3,7 +3,7 @@ import {BentoFitText, calculateFontSize, setOverflowStyle} from '../component';
 import {computedStyle} from '#core/dom/style';
 import {mount} from 'enzyme';
 import {useStyles} from '../component.jss';
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin('BentoFitText preact component v1.0', {}, (env) => {
   let win;

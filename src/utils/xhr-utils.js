@@ -6,8 +6,9 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {user} from '#utils/log';
+
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {user} from '../log';
 import {getMode} from '../mode';
 import {
   getCorsUrl,

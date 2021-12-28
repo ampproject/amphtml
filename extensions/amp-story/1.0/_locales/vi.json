@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Nhận Liên kết"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Thêm"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Bạn phải bật tính thử nghiệm amp-story để xem nội dung này."
   },
   "21": {
     "string": "Chúng tôi rất tiếc, có vẻ như trình duyệt của bạn không hỗ trợ trải nghiệm này"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Vẫn tiếp tục"
   },
-  "31": {
-    "string": "Tiếng bị tắt"
-  },
-  "32": {
-    "string": "Tiếng được bật"
-  },
-  "33": {
-    "string": "Trang này không có tiếng"
-  },
   "34": {
     "string": "Phát video"
   },
   "35": {
     "string": "Vuốt lên"
-  },
-  "36": {
-    "string": "Mở rộng Tweet"
-  },
-  "62": {
-    "string": "Bắt đầu chia sẻ từ trang này"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Chia sẻ câu chuyện"
-  },
-  "70": {
-    "string": "Chuyển đổi menu câu chuyện"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Mẹo"
-  },
-  "82": {
-    "string": "Trang trước"
   },
   "83": {
     "string": "Kích hoạt"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Đang mở"
+  },
+  "98": {
+    "string": "Biểu mẫu chưa được gửi đi, vui lòng thử lại"
+  },
+  "99": {
+    "string": "Biểu mẫu đã được gửi đi thành công"
   }
 }

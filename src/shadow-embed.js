@@ -2,18 +2,19 @@ import {iterateCursor} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
-  ShadowDomVersion,
+  ShadowDomVersion_Enum,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
 } from '#core/dom/web-components';
 import {toArray} from '#core/types/array';
-import {toWin} from '#core/window';
+import {getWin, toWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
 
-import {dev, devAssert} from './log';
 import {installCssTransformer} from './style-installer';
 import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 
@@ -37,7 +38,7 @@ let shadowDomStreamingSupported;
  * @return {!ShadowRoot}
  */
 export function createShadowRoot(hostElement) {
-  const win = toWin(hostElement.ownerDocument.defaultView);
+  const win = getWin(hostElement);
 
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
@@ -47,7 +48,7 @@ export function createShadowRoot(hostElement) {
 
   let shadowRoot;
   const shadowDomSupported = getShadowDomSupportedVersion();
-  if (shadowDomSupported == ShadowDomVersion.V1) {
+  if (shadowDomSupported == ShadowDomVersion_Enum.V1) {
     shadowRoot = hostElement.attachShadow({mode: 'open'});
     if (!shadowRoot.styleSheets) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
@@ -62,7 +63,7 @@ export function createShadowRoot(hostElement) {
         },
       });
     }
-  } else if (shadowDomSupported == ShadowDomVersion.V0) {
+  } else if (shadowDomSupported == ShadowDomVersion_Enum.V0) {
     shadowRoot = hostElement.createShadowRoot();
   } else {
     shadowRoot = createShadowRootPolyfill(hostElement);

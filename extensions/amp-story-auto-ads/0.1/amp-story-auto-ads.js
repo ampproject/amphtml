@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {svgFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
@@ -10,14 +10,12 @@ import {
   StoryAdAutoAdvance,
   divertStoryAdAutoAdvance,
 } from '#experiments/story-ad-auto-advance';
-import {divertStoryAdPageOutlink} from '#experiments/story-ad-page-outlink';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {
-  StoryAdSegmentExp,
-  ViewerSetTimeToBranch,
-} from '#experiments/story-ad-progress-segment';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
+
+import {dev, devAssert, userAssert} from '#utils/log';
 
 import {getPlacementAlgo} from './algorithm-utils';
 import {
@@ -33,7 +31,6 @@ import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
@@ -51,9 +48,25 @@ const AD_TAG = 'amp-ad';
 /** @const {string} */
 const MUSTACHE_TAG = 'amp-mustache';
 
+/**
+ * Map of experiment IDs that might be enabled by the player to
+ * their experiment names. Used to toggle client side experiment on.
+ * @const {Object<string, string>}
+ * @visibleForTesting
+ */
+export const RELEVANT_PLAYER_EXPS = {
+  [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.FOURTEEN_SECONDS]: StoryAdSegmentExp.ID,
+};
+
 /** @enum {string} */
 export const Attributes = {
   AD_SHOWING: 'ad-showing',
+  DESKTOP_FULLBLEED: 'desktop-fullbleed',
   DESKTOP_ONE_PANEL: 'desktop-one-panel',
   DIR: 'dir',
   PAUSED: 'paused',
@@ -97,6 +110,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // TODO(ccordry): properly block on this when #cap check is possible.
+    this.askPlayerForActiveExperiments_();
+
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         devAssert(storeService, 'Could not retrieve AmpStoryStoreService');
@@ -134,7 +150,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
     return this.ampStory_
       .signals()
-      .whenSignal(CommonSignals.INI_LOAD)
+      .whenSignal(CommonSignals_Enum.INI_LOAD)
       .then(() => this.handleConfig_())
       .then(() => {
         this.adPageManager_ = new StoryAdPageManager(
@@ -142,7 +158,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
-        divertStoryAdPageOutlink(this.win);
         divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
@@ -161,6 +176,37 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.maybeCreateProgressBar_();
         this.initializeListeners_();
         this.initializePages_();
+      });
+  }
+
+  /**
+   * Sends message to player asking for active experiments and enables
+   * the branch for any relevant experiments.
+   */
+  askPlayerForActiveExperiments_() {
+    const viewer = Services.viewerForDoc(this.doc_);
+    if (!viewer.isEmbedded()) {
+      return;
+    }
+    viewer
+      ./*OK*/ sendMessageAwaitResponse('playerExperiments')
+      .then((expObj) => {
+        const ids = expObj?.['experimentIds'];
+        if (ids) {
+          ids.forEach((id) => {
+            const relevantExp = RELEVANT_PLAYER_EXPS[id];
+            if (relevantExp) {
+              forceExperimentBranch(this.win, relevantExp, id.toString());
+            }
+          });
+        }
+      })
+      .catch((e) => {
+        dev().expectedError(
+          TAG,
+          'Player does not support `playerExperiments` message',
+          e
+        );
       });
   }
 
@@ -312,11 +358,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     this.mutateElement(() => {
-      const {DESKTOP_ONE_PANEL} = Attributes;
+      const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = Attributes;
+      this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
+      if (uiState === UIType.DESKTOP_FULLBLEED) {
+        this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
+      }
       if (uiState === UIType.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');
@@ -411,23 +461,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.win,
       StoryAdAutoAdvance.ID
     );
-    const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
-      'storyNextUp'
-    );
-    if (storyNextUpParam && ViewerSetTimeToBranch[storyNextUpParam]) {
-      // Actual progress bar creation handled in progress-bar.js.
-      forceExperimentBranch(
-        this.win,
-        StoryAdSegmentExp.ID,
-        ViewerSetTimeToBranch[storyNextUpParam]
-      );
+    if (getExperimentBranch(this.win, StoryAdSegmentExp.ID)) {
+      // In the viewer controlled experiment progress bar is created by
+      // progress-bar.js
+      return;
     } else if (
       autoAdvanceExpBranch &&
       autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
     ) {
       this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
-    } else if (storyNextUpParam) {
-      this.createProgressBar_(storyNextUpParam);
     }
   }
 

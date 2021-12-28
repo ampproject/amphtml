@@ -8,19 +8,21 @@
  * so it will return the same cached value even when the arguments are
  * different.
  *
- * @param {function(...):T} fn
- * @return {function(...):T}
  * @template T
+ * @param {(function(...any):T?)} fn
+ * @return {(function(...any):T?)}
  */
 export function once(fn) {
   let evaluated = false;
+  /** @type {T?} */
   let retValue = null;
   let callback = fn;
+
   return (...args) => {
     if (!evaluated) {
       retValue = callback.apply(self, args);
       evaluated = true;
-      callback = null; // GC
+      /** @type {?} */ (callback) = null; // GC
     }
     return retValue;
   };
@@ -31,7 +33,7 @@ export function once(fn) {
  * It throttles the calls so that no consequent calls have time interval
  * smaller than the given minimal interval.
  *
- * @param {!Window} win
+ * @param {Window} win
  * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
  * @return {function(...T)}
@@ -40,10 +42,12 @@ export function once(fn) {
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
+
+  /** @type {T[]?} */
   let nextCallArgs = null;
 
   /**
-   * @param {!Object} args
+   * @param {T[]} args
    */
   function fire(args) {
     nextCallArgs = null;
@@ -78,7 +82,7 @@ export function throttle(win, callback, minInterval) {
  * milliseconds must pass since the last call before the callback is actually
  * invoked.
  *
- * @param {!Window} win
+ * @param {Window} win
  * @param {function(...T):R} callback
  * @param {number} minInterval the minimum time interval in millisecond
  * @return {function(...T)}
@@ -88,10 +92,12 @@ export function throttle(win, callback, minInterval) {
 export function debounce(win, callback, minInterval) {
   let locker = 0;
   let timestamp = 0;
+
+  /** @type {T[]?} */
   let nextCallArgs = null;
 
   /**
-   * @param {?Array} args
+   * @param {T[]?} args
    */
   function fire(args) {
     nextCallArgs = null;

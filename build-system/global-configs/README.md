@@ -48,6 +48,41 @@ The resulting config is
 }
 ```
 
+# custom-flavors-config.json
+
+Additional release flavors can be defined in `build-system/global-configs/custom-flavors-config.json` and they will automatically be made available to `amp release`. This file should be an array of `DistFlavorDef` objects (see definition in [build-system/tasks/release/index.js](../tasks/release/index.js)). For example:
+
+```json
+[
+  {
+    "flavorType": "custom-exp",
+    "name": "Custom Experimental Release",
+    "environment": "AMP",
+    "rtvPrefixes": [ "00" ],
+    "command": "amp dist --noconfig"
+  },
+  {
+    "flavorType": "custom-prod",
+    "name": "Custom Production Release",
+    "environment": "AMP",
+    "rtvPrefixes": [ "01" ],
+    "command": "amp dist --noconfig"
+  }
+]
+```
+
+and then "Custom Production Release" could be built with:
+
+```sh
+amp release --flavor="custom-prod"
+```
+
+**Tips:**
+
+-   Be sure to pass flag `--noconfig` to `amp dist` in the flavor command, otherwise you will end up with multiple `AMP_CONFIG` definitions in entrypoint files (`v0.js`, `shadow-v0.js`, etc.).
+-   Flag `--version_override` is not supported.
+-   `AMP_CONFIG` can be customized with [`custom-config.json`](#custom-configjson) to further tailor the build.
+
 # client-side-experiments-config.json
 
 This config is used to run client side diverted experiments, adding runtime support for deploying AMP experiment configuration updates faster via the CDN and cache pages. It is complimentary to `{canary,prod,custom}-config.json` and takes precedence over them. (See I2I issue: [#34013](https://github.com/ampproject/amphtml/issues/34013))
@@ -77,3 +112,9 @@ Example:
 ```
 
 Once merged onto the `main` branch, this file is automatically picked up by the AMP CDN (usually within 1-2 hours from PR merge) and its content is injected into `v0.[m]js`. AMP caches can also inject the contents of this file verbatim into pages inside a `<script language=text/json id=__AMP_EXP>{...}</script>` element.
+
+# versioning.json
+
+Defines the routing between channels and RTVs (see [Versioning section in amp-framework-hosting.md](../../docs/spec/amp-framework-hosting.md#versioning) for an explanation of AMP versions and RTV numbers).
+
+Currently in testing in preparation for [#36152](https://github.com/ampproject/amphtml/issues/36152).

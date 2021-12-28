@@ -1,4 +1,4 @@
-import {userAssert} from '../../../../src/log';
+import {userAssert} from '#utils/log';
 
 /**
  * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests

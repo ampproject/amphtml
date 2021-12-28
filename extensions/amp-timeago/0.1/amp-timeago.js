@@ -1,12 +1,9 @@
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+
+import {userAssert} from '#utils/log';
 
 import {format, getLocale} from './locales';
-
-import {userAssert} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -27,6 +24,9 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.cutOffReached_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -68,15 +68,17 @@ export class AmpTimeAgo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallback_(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
     );
     return Promise.resolve();
   }
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     return false;
   }
 

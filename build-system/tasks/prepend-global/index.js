@@ -10,7 +10,7 @@ const {log} = require('../../common/logging');
 
 const exec = util.promisify(childProcess.exec);
 
-const {cyan, red} = colors;
+const {cyan, red, yellow} = colors;
 
 /**
  * List of unminified targets to which AMP_CONFIG should be written
@@ -22,10 +22,13 @@ const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
  */
 const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
 
-// custom-config.json overlays the active config. It is not part of checked-in
-// source (.gitignore'd). See:
-// https://github.com/ampproject/amphtml/blob/main/build-system/global-configs/README.md#custom-configjson
-const customConfigFile = 'build-system/global-configs/custom-config.json';
+/**
+ * Path to custom overlay config, see: build-system/global-configs/README.md
+ */
+const CUSTOM_OVERLAY_CONFIG_PATH = path.resolve(
+  __dirname,
+  '../../global-configs/custom-config.json'
+);
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -143,9 +146,6 @@ async function getConfig(
     opt_localBranch,
     opt_branch
   );
-  const overlayString = await fs.promises
-    .readFile(customConfigFile, 'utf8')
-    .catch(() => {});
 
   let configJson;
   try {
@@ -154,16 +154,20 @@ async function getConfig(
     log(red(`Error parsing config file: ${filename}`));
     throw e;
   }
-  if (overlayString) {
+
+  if (fs.existsSync(CUSTOM_OVERLAY_CONFIG_PATH)) {
+    const overlayFilename = path.basename(CUSTOM_OVERLAY_CONFIG_PATH);
     try {
-      const overlayJson = JSON.parse(overlayString);
+      const overlayJson = require(CUSTOM_OVERLAY_CONFIG_PATH);
       Object.assign(configJson, overlayJson);
-      log('Overlaid config with', cyan(path.basename(customConfigFile)));
-    } catch (e) {
       log(
-        red('Could not apply overlay from'),
-        cyan(path.basename(customConfigFile))
+        yellow('Notice:'),
+        cyan(type),
+        'config overlaid with',
+        cyan(overlayFilename)
       );
+    } catch (e) {
+      log(red('Could not apply overlay from'), cyan(overlayFilename));
     }
   }
   if (opt_localDev) {

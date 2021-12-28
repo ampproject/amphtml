@@ -163,6 +163,11 @@ export class ViewerInterface {
   setMessageDeliverer(deliverer, origin) {}
 
   /**
+   * @return {?function(string, (?JsonObject|string|undefined), boolean):(!Promise<*>|undefined)}
+   */
+  maybeGetMessageDeliverer() {}
+
+  /**
    * Sends the message to the viewer without waiting for any response.
    * If cancelUnsent is true, the previous message of the same message type will
    * be canceled.

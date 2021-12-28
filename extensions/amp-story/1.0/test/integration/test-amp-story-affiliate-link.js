@@ -1,4 +1,4 @@
-import {BrowserController, RequestBank} from '#testing/test-helper';
+import {BrowserController, RequestBank} from '#testing/helpers/service';
 
 const t = describes.sandboxed.configure().skipSafari().skipEdge();
 

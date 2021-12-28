@@ -4,12 +4,12 @@ import {computedStyle, px, setImportantStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {
   ViewportBindingDef,
   marginBottomOfLastChild,
 } from './viewport-binding-def';
-
-import {dev} from '../../log';
 
 const TAG_ = 'Viewport';
 

@@ -23,5 +23,5 @@ amp-story-panning-media amp-img {
 amp-story-grid-layer[template="fill"] amp-story-panning-media amp-img img {
   /* override for layout=fill */
   position: relative !important;
-  display: block !important;
+  display: inline-block !important;
 }

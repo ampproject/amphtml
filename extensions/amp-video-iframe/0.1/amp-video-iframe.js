@@ -10,28 +10,30 @@ import {measureIntersection} from '#core/dom/layout/intersection';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {once} from '#core/types/function';
 import {dict} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {getConsentDataToForward} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {
-  SandboxOptions,
+  SandboxOptions_Enum,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoEvents,
+  VideoEvents_Enum,
 } from '../../../src/video-interface';
 import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
@@ -43,11 +45,11 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @private @const */
 const SANDBOX = [
-  SandboxOptions.ALLOW_SCRIPTS,
-  SandboxOptions.ALLOW_SAME_ORIGIN,
-  SandboxOptions.ALLOW_POPUPS,
-  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
-  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
+  SandboxOptions_Enum.ALLOW_SCRIPTS,
+  SandboxOptions_Enum.ALLOW_SAME_ORIGIN,
+  SandboxOptions_Enum.ALLOW_POPUPS,
+  SandboxOptions_Enum.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SandboxOptions_Enum.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /**
@@ -76,6 +78,15 @@ function maybeAddAmpFragment(src) {
     return src;
   }
   return `${src}#amp=1`;
+}
+
+/**
+ * @param {!Node} root
+ * @return {?JsonObject}
+ */
+export function getJsonLd(root) {
+  const scriptTag = root.querySelector('script[type="application/ld+json"]');
+  return scriptTag && tryParseJson(scriptTag.textContent);
 }
 
 /** @implements {../../../src/video-interface.VideoInterface} */
@@ -159,13 +170,15 @@ class AmpVideoIframe extends AMP.BaseElement {
    */
   getMetadata_() {
     const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
-    const {documentElement, title} = this.getAmpDoc().getRootNode();
+    const rootNode = this.getAmpDoc().getRootNode();
+    const {documentElement, title} = rootNode;
 
     return dict({
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
       'title': title || null,
       'lang': documentElement?.lang || null,
+      'jsonLd': getJsonLd(rootNode),
     });
   }
 
@@ -173,7 +186,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
     Services.videoManagerForDoc(element).register(this);
-    dispatchCustomEvent(element, VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
   }
 
   /** @override */
@@ -356,7 +369,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     dispatchCustomEvent(
       this.element,
-      VideoEvents.CUSTOM_TICK,
+      VideoEvents_Enum.CUSTOM_TICK,
       dict({
         'eventType': eventType,
         'vars': vars,

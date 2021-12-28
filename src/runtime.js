@@ -18,17 +18,18 @@ import {
   stubLegacyElements,
 } from '#service/extensions-impl';
 
-import {BaseElement} from './base-element';
-import {startupChunk} from './chunk';
-import {config} from './config';
-import {reportErrorForWin} from './error-reporting';
 import {
-  LogLevel, // eslint-disable-line no-unused-vars
+  LogLevel_Enum, // eslint-disable-line no-unused-vars
   dev,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
-} from './log';
+} from '#utils/log';
+
+import {BaseElement} from './base-element';
+import {startupChunk} from './chunk';
+import {config} from './config';
+import {reportErrorForWin} from './error-reporting';
 import {getMode} from './mode';
 import {MultidocManager} from './multidoc-manager';
 import {hasRenderDelayingServices} from './render-delaying-services';
@@ -49,7 +50,7 @@ const TAG = 'runtime';
  *  canonicalUrl: (string|undefined),
  *  head: (Element|undefined),
  *  ampdoc: (!./service/ampdoc-impl.AmpDoc | undefined),
- *  setVisibilityState: (function(!VisibilityState)|undefined),
+ *  setVisibilityState: (function(!VisibilityState_Enum)|undefined),
  *  postMessage: (function()|undefined),
  *  onMessage: (function()|undefined),
  *  close: (function()|undefined),
@@ -148,7 +149,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!LogLevel} level
+   * @param {!LogLevel_Enum} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 

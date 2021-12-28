@@ -1,7 +1,7 @@
 import {prepareImageAnimation} from '@ampproject/animations';
 
-import {CommonSignals} from '#core/constants/common-signals';
-import {Keys} from '#core/constants/key-codes';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {getVerticalScrollbarWidth, toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
@@ -20,6 +20,10 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {getData, getDetail, isLoaded, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {LightboxCaption, OverflowState} from './lightbox-caption';
 import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
 import {
@@ -35,13 +39,10 @@ import {
 } from './utils';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {reportError} from '../../../src/error-reporting';
-import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {dev, devAssert, userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -61,7 +62,7 @@ const LightboxControlsModes = {
   CONTROLS_HIDDEN: 0,
 };
 
-// Use S Curves for entry and exit animations
+// Use S Curves_Enum for entry and exit animations
 const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
 
 // Keep in sync with [i-amphtml-lbg-fade]'s animation duration
@@ -760,7 +761,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.setupGestures_();
         this.setupEventListeners_();
 
-        return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
+        return this.carousel_.signals().whenSignal(CommonSignals_Enum.LOAD_END);
       })
       .then(() => this.openLightboxForElement_(element, expandDescription))
       .then(() => {
@@ -919,13 +920,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     };
 
     const mutate = () => {
-      if (enter) {
-        Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
-          this.element,
-          this.carousel_
-        );
-      }
-
       toggle(carousel, enter);
       // Undo opacity 0 from `openLightboxGallery_`
       setStyle(this.element, 'opacity', '');
@@ -1032,7 +1026,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.getCurrentElement_()
       .imageViewer.signals()
-      .whenSignal(CommonSignals.LOAD_END)
+      .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => this.transitionImgIn_(sourceElement));
   }
 
@@ -1185,13 +1179,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.ESCAPE:
+      case Keys_Enum.ESCAPE:
         this.close_();
         break;
-      case Keys.LEFT_ARROW:
+      case Keys_Enum.LEFT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ -1);
         break;
-      case Keys.RIGHT_ARROW:
+      case Keys_Enum.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:

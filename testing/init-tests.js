@@ -30,6 +30,7 @@ import {
   warnForConsoleError,
 } from './console-logging-setup';
 import * as describes from './describes';
+import {flush as flushPreactEffects} from './preact';
 import {TestConfig} from './test-config';
 import {installYieldIt} from './yield';
 
@@ -156,8 +157,10 @@ function resetTestingState() {
 
 /**
  * Cleans up global state added during tests.
+ * @return {Promise<void>}
  */
-function cleanupTestcase() {
+async function cleanupTestcase() {
+  await flushPreactEffects();
   setTestRunner(this);
   restoreConsoleSandbox();
   restoreConsoleError();

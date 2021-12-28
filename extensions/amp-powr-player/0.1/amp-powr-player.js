@@ -16,7 +16,9 @@ import {dict} from '#core/types/object';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   isJsonOrObj,
@@ -24,21 +26,20 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @private @const {string} */
 const TAG = 'amp-powr-player';
 
 /** @private @const {!Object.<string,string>} */
 const PLAYER_EVENT_MAP = {
-  'ready': VideoEvents.LOAD,
-  'playing': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
-  'ads-ad-started': VideoEvents.AD_START,
-  'ads-ad-ended': VideoEvents.AD_END,
+  'ready': VideoEvents_Enum.LOAD,
+  'playing': VideoEvents_Enum.PLAYING,
+  'pause': VideoEvents_Enum.PAUSE,
+  'ended': VideoEvents_Enum.ENDED,
+  'ads-ad-started': VideoEvents_Enum.AD_START,
+  'ads-ad-ended': VideoEvents_Enum.AD_END,
 };
 
 /** @implements {../../../src/video-interface.VideoInterface} */

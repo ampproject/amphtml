@@ -1,6 +1,6 @@
+import {isAmp4Email} from '#core/document/format';
 import {dict, map} from '#core/types/object';
 
-import {isAmp4Email} from '../format';
 import {isUrlAttribute} from '../url-rewrite';
 
 /** @const {string} */
@@ -96,7 +96,8 @@ export const EMAIL_ALLOWLISTED_AMP_TAGS = {
 };
 
 /**
- * Allowlist of tags allowed in triple mustache e.g. {{{name}}}.
+ * Allowlist of tags allowed in triple mustache in non-email format, e.g.
+ * {{{name}}}.
  * Very restrictive by design since the triple mustache renders unescaped HTML
  * which, unlike double mustache, won't be processed by the AMP Validator.
  * @const {!Array<string>}
@@ -158,6 +159,68 @@ export const TRIPLE_MUSTACHE_ALLOWLISTED_TAGS = [
   'ul',
 ];
 
+/**
+ * Same as `TRIPLE_MUSTACHE_ALLOWLISTED_TAGS` except for the email format. The
+ * email format has a different threat model and needs to evolve the allowlist
+ * independently from other formats, as certain tags can be considered safe in
+ * other formats but not in the email format.
+ * @const {!Array<string>}
+ */
+export const EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS = [
+  'a',
+  'article',
+  'aside',
+  'b',
+  'blockquote',
+  'br',
+  'caption',
+  'code',
+  'col',
+  'colgroup',
+  'dd',
+  'del',
+  'details',
+  'div',
+  'dl',
+  'dt',
+  'em',
+  'figcaption',
+  'figure',
+  'footer',
+  'h1',
+  'h2',
+  'h3',
+  'header',
+  'hr',
+  'i',
+  'ins',
+  'li',
+  'main',
+  'mark',
+  'nav',
+  'ol',
+  'p',
+  'pre',
+  'q',
+  's',
+  'section',
+  'small',
+  'span',
+  'strong',
+  'sub',
+  'summary',
+  'sup',
+  'table',
+  'tbody',
+  'td',
+  'tfoot',
+  'th',
+  'thead',
+  'time',
+  'tr',
+  'u',
+  'ul',
+];
 /**
  * Tag-agnostic attribute allowlisted used by both Caja and DOMPurify.
  * @const {!Array<string>}

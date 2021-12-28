@@ -1,8 +1,7 @@
 import {removeChildren, removeElement} from '#core/dom';
-import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
 
 // Class used for sections of text in the future (for ASR-style captions).
 const FUTURE_CUE_SECTION_CLASS = 'amp-story-captions-future';
@@ -75,13 +74,6 @@ export class TrackRenderer {
     this.cueTimestamps_.length = 0;
     toArray(this.track_.activeCues).forEach((cue) => {
       const cueElement = this.element_.ownerDocument.createElement('div');
-      setStyles(cueElement, {
-        'position': 'absolute',
-        'bottom': 0,
-        'left': 0,
-        'right': 0,
-      });
-
       const html = cue.getCueAsHTML();
       let section = this.element_.ownerDocument.createElement('span');
       cueElement.appendChild(section);

@@ -8,15 +8,15 @@ import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '#core/constants/consent-state';
 import {
-  Layout, // eslint-disable-line no-unused-vars
-  LayoutPriority,
+  LayoutPriority_Enum,
+  Layout_Enum, // eslint-disable-line no-unused-vars
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {clamp} from '#core/math';
 import {computedStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
@@ -34,11 +34,8 @@ import {
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {moveLayoutRect} from '#core/dom/layout/rect';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {toWin} from '#core/window';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {getWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -129,6 +126,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -136,7 +136,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -150,7 +150,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @override
    */
   isLayoutSupported(layout) {
@@ -396,7 +396,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
         const intersection = this.element.getIntersectionChangeEntry();
         const iframe = getIframe(
-          toWin(this.element.ownerDocument.defaultView),
+          getWin(this.element),
           this.element,
           this.type_,
           opt_context,
@@ -409,8 +409,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         return this.xOriginIframeHandler_.init(iframe);
       })
       .then(() => {
-        observeWithSharedInOb(this.element, (inViewport) =>
-          this.viewportCallback_(inViewport)
+        this.unobserveIntersections_ = observeIntersections(
+          this.element,
+          ({isIntersecting}) => this.viewportCallback_(isIntersecting)
         );
       });
     incrementLoadingAds(this.win, this.layoutPromise_);
@@ -436,7 +437,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   unlayoutCallback() {
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
 
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();

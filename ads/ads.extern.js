@@ -306,6 +306,19 @@ window.adpushup.initAmp = function (
   extras
 ) {};
 
+// andbeyond.js
+window.andbeyond = {};
+window.andbeyond.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots,
+  jsontargeting,
+  extras
+) {};
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -616,6 +629,12 @@ data.site;
 data.zone;
 data.callback;
 
+// seedtag.js
+data.adunitId;
+data.placement;
+data.publisherId;
+data.forceCreative;
+
 // sharethrough.js
 data.pkey;
 
@@ -673,9 +692,6 @@ data.extraParams;
 data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
-
-// verizonmedia.js
-window.jacData;
 
 // webediads.js
 var wads;

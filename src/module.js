@@ -1,4 +1,4 @@
-import {dev} from './log';
+import {dev} from '#utils/log';
 
 const TAG = 'AMP.require';
 

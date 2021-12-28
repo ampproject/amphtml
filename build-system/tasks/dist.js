@@ -5,6 +5,7 @@ const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
+  compileBentoRuntime,
   compileCoreRuntime,
   compileJs,
   endBuildStep,
@@ -23,6 +24,9 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -114,31 +118,34 @@ async function dist() {
   await runPreDistSteps(options);
 
   // These steps use closure compiler. Small ones before large (parallel) ones.
-  const steps = [];
   if (argv.core_runtime_only) {
-    steps.push(compileCoreRuntime(options));
+    await compileCoreRuntime(options);
+  } else if (argv.bento_runtime_only) {
+    await compileBentoRuntime(options);
   } else {
-    steps.push(buildExperiments());
-    steps.push(buildLoginDone('0.1'));
-    steps.push(buildWebPushPublisherFiles());
-    steps.push(buildCompiler());
-    steps.push(compileAllJs(options));
+    await Promise.all([
+      writeVersionFiles(),
+      buildExperiments(),
+      buildLoginDone('0.1'),
+      buildWebPushPublisherFiles(),
+      buildCompiler(),
+      compileAllJs(options),
+    ]);
   }
 
   // This step internally parses the various extension* flags.
-  steps.push(buildExtensions(options));
+  await buildExtensions(options);
 
   // This step is to be run only during a full `amp dist`.
   if (
     !argv.core_runtime_only &&
+    !argv.bento_runtime_only &&
     !argv.extensions &&
     !argv.extensions_from &&
     !argv.noextensions
   ) {
-    steps.push(buildVendorConfigs(options));
+    await buildVendorConfigs(options);
   }
-
-  await Promise.all(steps);
 
   // This step is required no matter which binaries are built.
   await formatExtractedMessages();
@@ -146,6 +153,26 @@ async function dist() {
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
+}
+
+/**
+ * Writes the verion.txt file.
+ * @return {!Promise}
+ */
+async function writeVersionFiles() {
+  // TODO: determine which of these are necessary and trim the rest via an I2D.
+  const paths = [
+    'dist',
+    'dist/v0',
+    'dist/v0/examples',
+    'dist.tools/experiments',
+    `dist.3p/${internalRuntimeVersion}`,
+    `dist.3p/${internalRuntimeVersion}/vendor`,
+  ].map((p) => path.join(...p.split('/'), 'version.txt'));
+
+  return Promise.all(
+    paths.map((p) => fs.outputFile(p, internalRuntimeVersion))
+  );
 }
 
 /**
@@ -176,13 +203,13 @@ function buildLoginDone(version) {
   const buildDir = `build/all/amp-access-${version}`;
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
-  const latestName = 'amp-login-done-latest.js';
+  const aliasName = 'amp-login-done-latest.js';
   return compileJs(`./${buildDir}`, builtName, './dist/v0/', {
     watch: argv.watch,
     includePolyfills: true,
     minify: true,
     minifiedName,
-    latestName,
+    aliasName,
     extraGlobs: [
       `${buildDir}/amp-login-done-0.1.max.js`,
       `${buildDir}/amp-login-done-dialog.js`,
@@ -364,7 +391,7 @@ module.exports = {
   runPreDistSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 dist.description =
   'Compile AMP production binaries and apply AMP_CONFIG to runtime files';
@@ -375,12 +402,15 @@ dist.flags = {
     'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
+  nomanglecache:
+    'Do not share the mangle cache between binaries, useful only in estimating size impacts of code changes.',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   coverage: 'Instrument code for collecting coverage information',
   extensions: 'Build only the listed extensions',
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
+  bento_runtime_only: 'Build only the standalone Bento runtime',
   full_sourcemaps: 'Include source code content in sourcemaps',
   sourcemap_url: 'Set a custom sourcemap URL with placeholder {version}',
   type: 'Point sourcemap to fetch files from the correct GitHub tag',

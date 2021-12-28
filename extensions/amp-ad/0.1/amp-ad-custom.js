@@ -1,6 +1,6 @@
 import {AmpAdUIHandler} from './amp-ad-ui';
-import {CommonSignals} from '#core/constants/common-signals';
-import {LayoutPriority, isLayoutSizeDefined} from '#core/dom/layout';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {LayoutPriority_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {Services} from '#service';
 import {addParamToUrl} from '../../../src/url';
 import {
@@ -9,7 +9,7 @@ import {
 } from '#core/dom/query';
 import {hasOwn} from '#core/types/object';
 import {removeChildren} from '#core/dom';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -42,7 +42,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Since this is AMPHTML we are trusting that it will load responsibly
-    return LayoutPriority.CONTENT;
+    return LayoutPriority_Enum.CONTENT;
   }
 
   /** @override */
@@ -116,7 +116,7 @@ export class AmpAdCustom extends AMP.BaseElement {
             // maybe used by other ad component.
             removeChildren(this.element);
             this.element.appendChild(renderedElement);
-            this.signals().signal(CommonSignals.INI_LOAD);
+            this.signals().signal(CommonSignals_Enum.INI_LOAD);
           });
       } catch (e) {
         this.uiHandler.applyNoContentUI();

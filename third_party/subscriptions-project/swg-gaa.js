@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.184 */
+/** Version: 0.1.22.197 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -162,6 +162,61 @@ const I18N_STRINGS = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
+ */
+
+/**
+ * Simple wrapper around JSON.parse that casts the return value
+ * to JsonObject.
+ * Create a new wrapper if an array return value is desired.
+ * @param {*} json JSON string to parse
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function parseJson(json) {
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /** @enum {number} */
 const AnalyticsEvent = {
   UNKNOWN: 0,
@@ -191,6 +246,15 @@ const AnalyticsEvent = {
   IMPRESSION_SWG_SUBSCRIPTION_MINI_PROMPT: 24,
   IMPRESSION_SWG_CONTRIBUTION_MINI_PROMPT: 25,
   IMPRESSION_CONTRIBUTION_OFFERS: 26,
+  IMPRESSION_TWG_COUNTER: 27,
+  IMPRESSION_TWG_SITE_SUPPORTER_WALL: 28,
+  IMPRESSION_TWG_PUBLICATION: 29,
+  IMPRESSION_TWG_STATIC_BUTTON: 30,
+  IMPRESSION_TWG_DYNAMIC_BUTTON: 31,
+  IMPRESSION_TWG_STICKER_SELECTION_SCREEN: 32,
+  IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
+  IMPRESSION_REGWALL_OPT_IN: 34,
+  IMPRESSION_NEWSLETTER_OPT_IN: 35,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -228,7 +292,30 @@ const AnalyticsEvent = {
   ACTION_CONTRIBUTION_OFFER_SELECTED: 1034,
   ACTION_SHOWCASE_REGWALL_GSI_CLICK: 1035,
   ACTION_SHOWCASE_REGWALL_EXISTING_ACCOUNT_CLICK: 1036,
+  ACTION_SUBSCRIPTION_OFFERS_CLOSED: 1037,
+  ACTION_CONTRIBUTION_OFFERS_CLOSED: 1038,
+  ACTION_TWG_STATIC_CTA_CLICK: 1039,
+  ACTION_TWG_DYNAMIC_CTA_CLICK: 1040,
+  ACTION_TWG_SITE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1041,
+  ACTION_TWG_DIALOG_SUPPORTER_WALL_CTA_CLICK: 1042,
+  ACTION_TWG_COUNTER_CLICK: 1043,
+  ACTION_TWG_SITE_SUPPORTER_WALL_ALL_THANKS_CLICK: 1044,
+  ACTION_TWG_PAID_STICKER_SELECTED_SCREEN_CLOSE_CLICK: 1045,
+  ACTION_TWG_PAID_STICKER_SELECTION_CLICK: 1046,
+  ACTION_TWG_FREE_STICKER_SELECTION_CLICK: 1047,
+  ACTION_TWG_MINI_SUPPORTER_WALL_CLICK: 1048,
+  ACTION_TWG_CREATOR_BENEFIT_CLICK: 1049,
+  ACTION_TWG_FREE_TRANSACTION_START_NEXT_BUTTON_CLICK: 1050,
+  ACTION_TWG_PAID_TRANSACTION_START_NEXT_BUTTON_CLICK: 1051,
+  ACTION_TWG_STICKER_SELECTION_SCREEN_CLOSE_CLICK: 1052,
+  ACTION_TWG_ARTICLE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1053,
+  ACTION_REGWALL_OPT_IN_BUTTON_CLICK: 1054,
+  ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
+  ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
+  ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   EVENT_PAYMENT_FAILED: 2000,
+  EVENT_REGWALL_OPT_IN_FAILED: 2001,
+  EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -244,6 +331,16 @@ const AnalyticsEvent = {
   EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_INELIGIBLE_PAYWALL: 3013,
   EVENT_UNLOCKED_FOR_CRAWLER: 3014,
+  EVENT_TWG_COUNTER_VIEW: 3015,
+  EVENT_TWG_SITE_SUPPORTER_WALL_VIEW: 3016,
+  EVENT_TWG_STATIC_BUTTON_VIEW: 3017,
+  EVENT_TWG_DYNAMIC_BUTTON_VIEW: 3018,
+  EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PRIVATE: 3019,
+  EVENT_TWG_POST_TRANSACTION_SETTING_PRIVATE: 3020,
+  EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PUBLIC: 3021,
+  EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
+  EVENT_REGWALL_OPTED_IN: 3023,
+  EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -256,29 +353,6 @@ const EventOriginator = {
   PUBLISHER_CLIENT: 5,
   SHOWCASE_CLIENT: 6,
 };
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param  {...*} var_args [description]
- */
-function warn(var_args) {
-  console.warn.apply(console, arguments);
-}
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -334,38 +408,6 @@ function findInArray(array, predicate) {
     }
   }
   return null;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @fileoverview This module declares JSON types as defined in the
- * {@link http://json.org/}.
- */
-
-/**
- * Simple wrapper around JSON.parse that casts the return value
- * to JsonObject.
- * Create a new wrapper if an array return value is desired.
- * @param {*} json JSON string to parse
- * @return {?JsonObject|undefined} May be extend to parse arrays.
- */
-function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -470,12 +512,6 @@ function parseUrl(url) {
 function parseUrlWithA(a, url) {
   a.href = url;
 
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
   /** @type {!LocationDef} */
   const info = {
     href: a.href,
@@ -488,22 +524,6 @@ function parseUrlWithA(a, url) {
     hash: a.hash,
     origin: '', // Set below.
   };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
@@ -881,6 +901,12 @@ const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
 /** ID for the Google Sign-In button element. */
 const GOOGLE_SIGN_IN_BUTTON_ID = 'swg-google-sign-in-button';
 
+/** ID for the third party Google Sign-In button element.  */
+const GOOGLE_3P_SIGN_IN_BUTTON_ID = 'swg-google-3p-sign-in-button';
+
+/** ID for the Google Sign-In button element. */
+const SIGN_IN_WITH_GOOGLE_BUTTON_ID = 'swg-sign-in-with-google-button';
+
 /** ID for the Publisher sign-in button element. */
 const PUBLISHER_SIGN_IN_BUTTON_ID = 'swg-publisher-sign-in-button';
 
@@ -909,125 +935,116 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--description,
   .gaa-metering-regwall--description strong,
   .gaa-metering-regwall--iframe,
-  .gaa-metering-regwall--casl,
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    all: initial;
-    box-sizing: border-box;
-    font-family: Roboto, arial, sans-serif;
+  .gaa-metering-regwall--casl {
+    all: initial !important;
+    box-sizing: border-box !important;
+    font-family: Roboto, arial, sans-serif !important;
   }
 
   .gaa-metering-regwall--dialog-spacer {
-    background: linear-gradient(0, #808080, transparent);
-    bottom: 0;
-    display: block;
-    position: fixed;
-    width: 100%;
+    background: linear-gradient(0, #808080, transparent) !important;
+    bottom: 0 !important;
+    display: block !important;
+    position: fixed !important;
+    width: 100% !important;
   }
 
   @keyframes slideUp {
-    from {transform: translate(0, 200px);}
-    to {transform: translate(0, 0);}
+    from {transform: translate(0, 200px) !important;}
+    to {transform: translate(0, 0) !important;}
   }
 
   .gaa-metering-regwall--dialog {
-    animation: slideUp 0.5s;
-    background: white;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3);
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    padding: 24px 20px;
-    pointer-events: auto;
-    width: 410px;
+    animation: slideUp 0.5s !important;
+    background: white !important;
+    border-radius: 12px 12px 0 0 !important;
+    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3) !important;
+    display: block !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    padding: 24px 20px !important;
+    pointer-events: auto !important;
+    width: 410px !important;
   }
 
   .gaa-metering-regwall--logo {
-    display: block;
-    margin: 0 auto 24px;
+    display: block !important;
+    margin: 0 auto 24px !important;
   }
 
   .gaa-metering-regwall--title {
-    color: #000;
-    display: block;
-    font-size: 16px;
-    margin: 0 0 8px;
-    outline: none !important;
+    color: #000 !important;
+    display: block !important;
+    font-size: 16px !important;
+    margin: 0 0 8px !important;
+    outline: none !important !important;
   }
-  
+
   .gaa-metering-regwall--description {
-    color: #646464;
-    display: block;
-    font-size: 14px;
-    line-height: 19px;
-    margin: 0 0 30px;
+    color: #646464 !important;
+    display: block !important;
+    font-size: 14px !important;
+    line-height: 19px !important;
+    margin: 0 0 30px !important;
   }
 
   .gaa-metering-regwall--description strong {
-    color: #646464;
-    font-size: 14px;
-    line-height: 19px;
-    font-weight: bold;
+    color: #646464 !important;
+    font-size: 14px !important;
+    line-height: 19px !important;
+    font-weight: bold !important;
   }
 
   .gaa-metering-regwall--iframe {
-    border: none;
-    display: block;
-    height: 36px;
-    margin: 0 0 30px;
-    width: 100%;
+    border: none !important;
+    display: block !important;
+    height: 44px !important;
+    margin: 0 0 30px !important;
+    width: 100% !important;
   }
 
   .gaa-metering-regwall--casl {
-    color: #646464;
-    display: block;
-    font-size: 12px;
-    text-align: center;
-    margin: -16px auto 32px;
+    color: #646464 !important;
+    display: block !important;
+    font-size: 12px !important;
+    text-align: center !important;
+    margin: -16px auto 32px !important;
   }
 
   .gaa-metering-regwall--casl a {
-    color: #1967d2;
+    color: #1967d2 !important;
   }
 
   .gaa-metering-regwall--line {
-    background-color: #ddd;
-    display: block;
-    height: 1px;
-    margin: 0 0 24px;
-  }
-
-  .gaa-metering-regwall--publisher-sign-in-button,
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    color: #1967d2;
-    display: block;
-    cursor: pointer;
-    font-size: 12px;
+    background-color: #ddd !important;
+    display: block !important;
+    height: 1px !important;
+    margin: 0 0 24px !important;
   }
 
   .gaa-metering-regwall--publisher-sign-in-button {
-  }
-
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    display: none;
-    float: right;
+    color: #1967d2 !important;
+    cursor: pointer !important;
+    display: block !important;
+    font-size: 12px !important;
+    text-decoration: underline !important;
   }
 
   .gaa-metering-regwall--google-sign-in-button {
-    height: 36px;
-    margin: 0 auto 30px;
+    height: 36px !important;
+    margin: 0 auto 30px !important;
   }
 
   .gaa-metering-regwall--google-sign-in-button > div {
-    animation: swgGoogleSignInButtonfadeIn 0.32s;
+    animation: swgGoogleSignInButtonfadeIn 0.32s !important;
   }
 
   @keyframes swgGoogleSignInButtonfadeIn {
     from {
-      opacity: 0;
+      opacity: 0 !important;
     }
     to {
-      opacity: 1;
+      opacity: 1 !important;
     }
   }
 </style>
@@ -1073,46 +1090,62 @@ const CASL_HTML = `
 </div>
 `;
 
-/** Styles for the Google Sign-In button iframe. */
+/** Base styles for both the Google and Google 3p Sign-In button iframes. */
 const GOOGLE_SIGN_IN_IFRAME_STYLES = `
-body {
-  margin: 0;
-  overflow: hidden;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} {
-  margin: 0 auto;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} > div {
-  animation: fadeIn 0.32s;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+  body {
+    margin: 0;
+    overflow: hidden;
   }
-  to {
-    opacity: 1;
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID},
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID},
+  #${GOOGLE_SIGN_IN_BUTTON_ID} {
+    margin: 0 auto;
   }
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue {
-  background-color: #1A73E8;
-  box-shadow: none;
-  -webkit-box-shadow: none;
-  border-radius: 4px;
-  width: 100% !important;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
-  display: none;
-}
-/** Hides default "Sign in with Google" text. */
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_] {
-  font-size: 0 !important;
-}
-/** Renders localized "Sign in with Google" text instead. */
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before {
-  content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
-  font-size: 15px;
-}
-`;
+
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID}{
+    width: 220px;
+  }
+
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} > div,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} > div,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} > div {
+    animation: fadeIn 0.32s;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} .abcRioButton.abcRioButtonBlue,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue {
+    background-color: #1A73E8;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    border-radius: 4px;
+    width: 100% !important;
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
+    display: none;
+  }
+  /** Hides default "Sign in with Google" text. */
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID}  .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_],
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID}  .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_],
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_] {
+    font-size: 0 !important;
+  }
+  /** Renders localized "Sign in with Google" text instead. */
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before,
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before,
+  #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before {
+    content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
+    font-size: 15px;
+  }`;
 
 /**
  * User object that Publisher JS receives after users sign in.
@@ -1201,14 +1234,17 @@ function queryStringHasFreshGaaParams(
 /** Renders Google Article Access (GAA) Metering Regwall. */
 class GaaMeteringRegwall {
   /**
-   * Returns a promise for a Google Sign-In user object.
-   * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
+   * Returns a promise for a Google user object.
+   * The user object will be a:
+   * - GaaUserDef, if you use the GaaGoogleSignInButton
+   * - GoogleIdentityV1, if you use the GaaSignInWithGoogleButton
+   * - Custom object, if you use the GaaGoogle3pSignInButton
    *
    * This method opens a metering regwall dialog,
    * where users can sign in with Google.
    * @nocollapse
    * @param {{ iframeUrl: string, caslUrl: string }} params
-   * @return {!Promise<!GaaUserDef>}
+   * @return {!Promise<!GaaUserDef|!GoogleIdentityV1|!Object>}
    */
   static show({iframeUrl, caslUrl}) {
     const queryString = GaaUtils.getQueryString();
@@ -1282,6 +1318,7 @@ class GaaMeteringRegwall {
     iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
 
     // Create and style container element.
+    // TODO: Consider using a FriendlyIframe here, to avoid CSS conflicts.
     const containerEl = /** @type {!HTMLDivElement} */ (
       self.document.createElement('div')
     );
@@ -1402,8 +1439,7 @@ class GaaMeteringRegwall {
       'script[type="application/ld+json"]'
     );
 
-    for (let i = 0; i < ldJsonElements.length; i++) {
-      const ldJsonElement = ldJsonElements[i];
+    for (const ldJsonElement of ldJsonElements) {
       let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
 
       if (!Array.isArray(ldJson)) {
@@ -1432,8 +1468,7 @@ class GaaMeteringRegwall {
       '[itemscope][itemtype][itemprop="publisher"] [itemprop="name"]'
     );
 
-    for (let i = 0; i < publisherNameElements.length; i++) {
-      const publisherNameElement = publisherNameElements[i];
+    for (const publisherNameElement of publisherNameElements) {
       const publisherName = publisherNameElement.content;
       if (publisherName) {
         return publisherName;
@@ -1474,8 +1509,8 @@ class GaaMeteringRegwall {
       self.addEventListener('message', (e) => {
         if (e.data.stamp === POST_MESSAGE_STAMP) {
           if (e.data.command === POST_MESSAGE_COMMAND_USER) {
-            // Pass along GAA user.
-            resolve(e.data.gaaUser);
+            // Pass along user details.
+            resolve(e.data.gaaUser || e.data.jwtPayload);
           }
 
           if (e.data.command === POST_MESSAGE_COMMAND_ERROR) {
@@ -1582,8 +1617,7 @@ class GaaGoogleSignInButton {
     }
 
     // Validate origins.
-    for (let i = 0; i < allowedOrigins.length; i++) {
-      const allowedOrigin = allowedOrigins[i];
+    for (const allowedOrigin of allowedOrigins) {
       const url = new URL(allowedOrigin);
 
       const isOrigin = url.origin === allowedOrigin;
@@ -1703,6 +1737,144 @@ function callSwg(callback) {
   (self.SWG = self.SWG || []).push(callback);
 }
 
+/** Styles for the third party Google Sign-In button iframe. */
+const GOOGLE_3P_SIGN_IN_IFRAME_STYLES =
+  GOOGLE_SIGN_IN_IFRAME_STYLES +
+  `
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButtonContents {
+    font-family: Roboto,arial,sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .21px;
+    margin-left: 6px;
+    margin-right: 6px;
+    vertical-align: top;
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButton {
+    border-radius: 1px;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 25%);
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-transition: background-color .218s,border-color .218s,box-shadow .218s;
+    transition: background-color .218s,border-color .218s,box-shadow .218s;
+    -webkit-user-select: none;
+    -webkit-appearance: none;
+    background-color: #fff;
+    background-image: none;
+    color: #262626;
+    cursor: pointer;
+    outline: none;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: auto;
+  }
+  #${GOOGLE_3P_SIGN_IN_BUTTON_ID} .abcRioButtonBlue {
+    border: none;
+    color: #fff;
+  }
+  `;
+
+const GOOGLE_3P_SIGN_IN_BUTTON_HTML = `
+<div style="height:36px;width:180px;" class="abcRioButton abcRioButtonBlue">
+  <span style="font-size:15px;line-height:34px;" class="abcRioButtonContents">
+    <span id="not_signed_in">Sign in with Google</span>
+  </span>
+</div>
+`;
+
+class GaaGoogle3pSignInButton {
+  /**
+   * Renders the third party Google Sign-In button for external authentication.
+   * @nocollapse
+   * @param {{ allowedOrigins: !Array<string>, authorizationUrl: string }} params
+   */
+  static show({allowedOrigins, authorizationUrl}) {
+    // Optionally grab language code from URL.
+    const queryString = GaaUtils.getQueryString();
+    const queryParams = parseQueryString(queryString);
+    const languageCode = queryParams['lang'] || 'en';
+
+    // Apply iframe styles.
+    const styleEl = self.document.createElement('style');
+    styleEl./*OK*/ innerText = GOOGLE_3P_SIGN_IN_IFRAME_STYLES.replace(
+      '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
+      msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
+    );
+    self.document.head.appendChild(styleEl);
+
+    // Render the third party Google Sign-In button.
+    const buttonEl = self.document.createElement('div');
+    buttonEl.id = GOOGLE_3P_SIGN_IN_BUTTON_ID;
+    buttonEl.tabIndex = 0;
+    buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
+    buttonEl.onclick = () => {
+      self.open(authorizationUrl);
+    };
+    self.document.body.appendChild(buttonEl);
+
+    // Promise a function that sends messages to the parent frame.
+    // Note: A function is preferable to a reference to the parent frame
+    // because referencing the parent frame outside of the 'message' event
+    // handler throws an Error. A function defined within the handler can
+    // effectively save a reference to the parent frame though.
+    const sendMessageToParentFnPromise = new Promise((resolve) => {
+      self.addEventListener('message', (e) => {
+        if (
+          allowedOrigins.indexOf(e.origin) !== -1 &&
+          e.data.stamp === POST_MESSAGE_STAMP &&
+          e.data.command === POST_MESSAGE_COMMAND_INTRODUCTION
+        ) {
+          resolve((message) => {
+            e.source.postMessage(message, e.origin);
+          });
+        }
+      });
+    });
+
+    function sendErrorMessageToParent() {
+      sendMessageToParentFnPromise.then((sendMessageToParent) => {
+        sendMessageToParent({
+          stamp: POST_MESSAGE_STAMP,
+          command: POST_MESSAGE_COMMAND_ERROR,
+        });
+      });
+    }
+
+    // Validate origins.
+    for (let i = 0; i < allowedOrigins.length; i++) {
+      const allowedOrigin = allowedOrigins[i];
+      const url = new URL(allowedOrigin);
+
+      const isOrigin = url.origin === allowedOrigin;
+      const protocolIsValid =
+        url.protocol === 'http:' || url.protocol === 'https:';
+      const isValidOrigin = isOrigin && protocolIsValid;
+
+      if (!isValidOrigin) {
+        warn(
+          `[swg-gaa.js:GaaGoogle3pSignInButton.show]: You specified an invalid origin: ${allowedOrigin}`
+        );
+        sendErrorMessageToParent();
+        return;
+      }
+    }
+
+    // Relay message to the parent frame (GAA Intervention).
+    self.addEventListener('message', (e) => {
+      if (
+        allowedOrigins.indexOf(e.origin) !== -1 &&
+        e.data.stamp === POST_MESSAGE_STAMP &&
+        e.data.command === POST_MESSAGE_COMMAND_USER
+      ) {
+        self.parent.postMessage(e.data, e.origin);
+      }
+    });
+  }
+}
+
 /**
  * Logs Showcase events.
  * @param {{
@@ -1744,4 +1916,4 @@ class GaaUtils {
   }
 }
 
-export { GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef };
+export { GaaGoogle3pSignInButton, GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef };

@@ -12,11 +12,8 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '#preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '#preact/context';
-import {forwardRef, toChildArray} from '#preact/compat';
-import {isRTL} from '#core/dom';
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {toWin} from '#core/window';
 import {
+  cloneElement,
   useCallback,
   useContext,
   useEffect,
@@ -26,6 +23,10 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {Children, forwardRef} from '#preact/compat';
+import {isRTL} from '#core/dom';
+import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {getWin} from '#core/window';
 import {useStyles} from './component.jss';
 import {mod} from '#core/math';
 
@@ -100,7 +101,7 @@ function BentoBaseCarouselWithRef(
   ref
 ) {
   const classes = useStyles();
-  const childrenArray = useMemo(() => toChildArray(children), [children]);
+  const childrenArray = useMemo(() => Children.toArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(
@@ -158,7 +159,7 @@ function BentoBaseCarouselWithRef(
     if (!shouldAutoAdvance || !containRef.current) {
       return;
     }
-    const win = toWin(containRef.current.ownerDocument.defaultView);
+    const win = getWin(containRef.current);
     const interval = win.setInterval(() => {
       const autoAdvanced = autoAdvance();
       if (!autoAdvanced) {
@@ -348,7 +349,7 @@ function BentoBaseCarouselWithRef(
               renderable={index == currentSlide}
               playable={index == currentSlide}
             >
-              {child}
+              {cloneElement(child, {...child.props, thumbnailSrc: undefined})}
             </WithAmpContext>
           );
         })}

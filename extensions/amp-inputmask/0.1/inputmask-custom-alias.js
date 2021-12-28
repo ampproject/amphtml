@@ -1,6 +1,6 @@
 import {dict} from '#core/types/object';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 /**
  * Installs an alias used by amp-inputmask that fixes a problem where

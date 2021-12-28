@@ -1,8 +1,9 @@
-import {LogLevel, dev} from '../../../src/log';
+import * as Preact from '#core/dom/jsx';
+import {LogLevel_Enum, dev} from '#utils/log';
 import {Services} from '#service';
-import {isArray} from '#core/types';
 import {removeChildren} from '#core/dom';
 import {toggle} from '#core/dom/style';
+import objstr from 'obj-str';
 
 /**
  * @param {!../../../src/service/vsync-impl.Vsync} vsync
@@ -17,22 +18,21 @@ function toggleHiddenAttribute(vsync, el, isHidden) {
 
 /**
  * @param {!Window} win
- * @param {string|!Array<string>} classNameOrList
+ * @param {string} className
  * @param {function(Event)} handler
  * @return {!Element}
  */
-function createButton(win, classNameOrList, handler) {
-  const button = win.document.createElement('div');
-  button.setAttribute('role', 'button');
-
-  if (isArray(classNameOrList)) {
-    classNameOrList.forEach((className) => button.classList.add(className));
-  } else {
-    button.classList.add(/** @type {string} */ (classNameOrList));
-  }
-  button.classList.add('i-amphtml-story-button');
-  button.addEventListener('click', handler);
-  return button;
+function createButton(win, className, handler) {
+  return (
+    <div
+      role="button"
+      class={objstr({
+        'i-amphtml-story-button': true,
+        [className]: true,
+      })}
+      onClick={handler}
+    ></div>
+  );
 }
 
 /**
@@ -76,26 +76,29 @@ export class DevelopmentModeLogButtonSet {
   build(logButtonActionFn) {
     this.errorButton_ = createButton(
       this.win_,
-      ['i-amphtml-story-error-button', 'i-amphtml-story-dev-logs-button'],
+      'i-amphtml-story-error-button i-amphtml-story-dev-logs-button',
       () => logButtonActionFn()
     );
 
     this.warningButton_ = createButton(
       this.win_,
-      ['i-amphtml-story-warning-button', 'i-amphtml-story-dev-logs-button'],
+      'i-amphtml-story-warning-button i-amphtml-story-dev-logs-button',
       () => logButtonActionFn()
     );
 
     this.successButton_ = createButton(
       this.win_,
-      ['i-amphtml-story-success-button', 'i-amphtml-story-dev-logs-button'],
+      'i-amphtml-story-success-button i-amphtml-story-dev-logs-button',
       () => logButtonActionFn()
     );
 
-    this.root_ = this.win_.document.createElement('div');
-    this.root_.appendChild(this.errorButton_);
-    this.root_.appendChild(this.warningButton_);
-    this.root_.appendChild(this.successButton_);
+    this.root_ = (
+      <div>
+        {this.errorButton_}
+        {this.warningButton_}
+        {this.successButton_}
+      </div>
+    );
 
     return this.root_;
   }
@@ -114,9 +117,9 @@ export class DevelopmentModeLogButtonSet {
     }
 
     switch (logEntry.level) {
-      case LogLevel.ERROR:
+      case LogLevel_Enum.ERROR:
         return this.errorButton_;
-      case LogLevel.WARN:
+      case LogLevel_Enum.WARN:
         return this.warningButton_;
       default:
         return null;
@@ -181,13 +184,9 @@ export class DevelopmentModeLog {
    * @return {?Element}
    */
   build() {
-    this.contextStringEl_ = this.win_.document.createElement('span');
-    this.contextStringEl_.classList.add(
-      'i-amphtml-story-developer-log-context'
+    this.contextStringEl_ = (
+      <span class="i-amphtml-story-developer-log-context"></span>
     );
-    const titleEl = this.win_.document.createElement('div');
-    titleEl.textContent = 'Developer logs for page ';
-    titleEl.appendChild(this.contextStringEl_);
 
     const closeDeveloperLogEl = createButton(
       this.win_,
@@ -195,35 +194,34 @@ export class DevelopmentModeLog {
       () => this.hide()
     );
 
-    const headerEl = this.win_.document.createElement('div');
-    headerEl.classList.add('i-amphtml-story-developer-log-header');
-    headerEl.appendChild(titleEl);
-    headerEl.appendChild(closeDeveloperLogEl);
+    this.entriesEl_ = <ul class="i-amphtml-story-developer-log-entries"></ul>;
 
-    this.entriesEl_ = this.win_.document.createElement('ul');
-    this.entriesEl_.classList.add('i-amphtml-story-developer-log-entries');
-
-    this.root_ = this.win_.document.createElement('div');
-    this.root_.classList.add('i-amphtml-story-developer-log');
-    toggle(this.root_, false);
-    this.root_.appendChild(headerEl);
-    this.root_.appendChild(this.entriesEl_);
+    this.root_ = (
+      <div class="i-amphtml-story-developer-log" hidden>
+        <div class="i-amphtml-story-developer-log-header">
+          <div>Developer logs for page {this.contextStringEl_}</div>
+          {closeDeveloperLogEl}
+        </div>
+        {this.entriesEl_}
+      </div>
+    );
 
     this.clear();
+
     return this.root_;
   }
 
   /**
-   * @param {!LogLevel} logLevel
+   * @param {!LogLevel_Enum} logLevel
    * @return {?string} The CSS class to be applied to the log entry, given the
    *     specified log level, or null if no class should be added.
    * @private
    */
   getCssLogLevelClass_(logLevel) {
     switch (logLevel) {
-      case LogLevel.WARN:
+      case LogLevel_Enum.WARN:
         return 'i-amphtml-story-developer-log-entry-warning';
-      case LogLevel.ERROR:
+      case LogLevel_Enum.ERROR:
         return 'i-amphtml-story-developer-log-entry-error';
       default:
         return null;
@@ -253,18 +251,18 @@ export class DevelopmentModeLog {
     const logLevelClass = this.getCssLogLevelClass_(logEntry.level);
     const conformanceClass = this.getCssConformanceClass_(logEntry.conforms);
 
-    const logEntryUi = this.win_.document.createElement('li');
-    logEntryUi.classList.add('i-amphtml-story-developer-log-entry');
+    const logEntryUi = (
+      <li
+        class={objstr({
+          'i-amphtml-story-developer-log-entry': true,
+          [logLevelClass]: !!logLevelClass,
+          [conformanceClass]: !!conformanceClass,
+        })}
+      >
+        {logEntry.message}
+      </li>
+    );
 
-    if (logLevelClass) {
-      logEntryUi.classList.add(logLevelClass);
-    }
-
-    if (conformanceClass) {
-      logEntryUi.classList.add(conformanceClass);
-    }
-
-    logEntryUi.textContent = logEntry.message;
     this.entriesEl_.appendChild(logEntryUi);
   }
 

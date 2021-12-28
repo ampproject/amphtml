@@ -6,9 +6,10 @@ import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {dev, userAssert} from '#utils/log';
+
 import {Messenger} from './iframe-api/messenger';
 
-import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 

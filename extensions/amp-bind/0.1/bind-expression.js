@@ -3,9 +3,10 @@ import {bindParser as parser} from '#build/parsers/bind-expr-impl';
 import {isArray, isObject} from '#core/types';
 import {dict, hasOwn, map} from '#core/types/object';
 
+import {devAssert, user} from '#utils/log';
+
 import {AstNodeType} from './bind-expr-defines';
 
-import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-bind';
@@ -14,7 +15,7 @@ const TAG = 'amp-bind';
  * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */
-const MAX_AST_SIZE = 100;
+const MAX_AST_SIZE = 250;
 
 /** @const @private {string} */
 const CUSTOM_FUNCTIONS = 'custom-functions';

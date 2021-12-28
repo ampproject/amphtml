@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Preuzmi vezu"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Više"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Morate omogućiti eksperiment amp-story za prikaz ovog sadržaja."
   },
   "21": {
     "string": "Nažalost, vaš preglednik ne podržava ovo iskustvo"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Svejedno nastavi"
   },
-  "31": {
-    "string": "Zvuk je isključen"
-  },
-  "32": {
-    "string": "Zvuk je uključen"
-  },
-  "33": {
-    "string": "Ova stranica nema zvuk"
-  },
   "34": {
     "string": "Reproduciraj videozapis"
   },
   "35": {
     "string": "Pređite prstom nagore"
-  },
-  "36": {
-    "string": "Proširi tweet"
-  },
-  "62": {
-    "string": "Podijeli počevši od ove stranice"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Podijeli priču"
-  },
-  "70": {
-    "string": "Uključi meni priče"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Savjet"
-  },
-  "82": {
-    "string": "Prethodna stranica"
   },
   "83": {
     "string": "Aktiviraj"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Otvaranje"
+  },
+  "98": {
+    "string": "Formular nije poslan, pokušajte ponovo"
+  },
+  "99": {
+    "string": "Formular uspješno poslan"
   }
 }
