@@ -8,10 +8,6 @@ import {
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {
-  DevelopmentModeLog,
-  DevelopmentModeLogButtonSet,
-} from './development-ui';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '#service';
@@ -249,12 +245,6 @@ export class SystemLayer {
 
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win, this.parentEl_);
-
-    /** @private {!DevelopmentModeLog} */
-    this.developerLog_ = DevelopmentModeLog.create(win);
-
-    /** @private {!DevelopmentModeLogButtonSet} */
-    this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
