@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-bento'}],
+      owners: [{name: 'ampproject/wg-bento'}, {name: 'AnuragVasanwala'}],
     },
   ],
 }
