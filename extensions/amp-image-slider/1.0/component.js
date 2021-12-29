@@ -142,6 +142,27 @@ export function BentoImageSliderWithRef(
   }, []);
 
   /**
+   * Limit percentage between 0 and 1
+   * @param {number} percentage
+   * @private
+   * @return {number}
+   */
+  const limitPercentage = useCallback((percentage) => {
+    return clamp(percentage, 0, 1);
+  }, []);
+
+  /**
+   * Set translateX of the element
+   * Only used in updatePositions_, which should be wrapped in mutateElement
+   * @param {Element} element
+   * @param {number} percentage
+   * @private
+   */
+  const updateTranslateX = useCallback((element, percentage) => {
+    setStyle(element, 'transform', `translateX(${percentage * 100}%)`);
+  }, []);
+
+  /**
    * Update element positions based on percentage
    * Should be wrapped inside mutateElement
    * @param {number} percentFromLeft
@@ -205,27 +226,6 @@ export function BentoImageSliderWithRef(
       animateHideHint();
     });
   }, [animateHideHint, pointerMoveX]);
-
-  /**
-   * Limit percentage between 0 and 1
-   * @param {number} percentage
-   * @private
-   * @return {number}
-   */
-  const limitPercentage = useCallback((percentage) => {
-    return clamp(percentage, 0, 1);
-  }, []);
-
-  /**
-   * Set translateX of the element
-   * Only used in updatePositions_, which should be wrapped in mutateElement
-   * @param {Element} element
-   * @param {number} percentage
-   * @private
-   */
-  const updateTranslateX = useCallback((element, percentage) => {
-    setStyle(element, 'transform', `translateX(${percentage * 100}%)`);
-  }, []);
 
   /**
    * Get current slider's percentage to the left
