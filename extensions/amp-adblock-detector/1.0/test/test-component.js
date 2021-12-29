@@ -1,14 +1,45 @@
-import * as Preact from '#preact';
-import {BentoAdblockDetector} from '../component';
 import {mount} from 'enzyme';
 
-describes.sandboxed('BentoAdblockDetector preact component v1.0', {}, (env) => {
-  // DO NOT SUBMIT: This is example code only.
-  it('should render', () => {
-    const wrapper = mount(<BentoAdblockDetector testProp={true} />);
+import * as Preact from '#preact';
+
+import {BentoAdblockDetector} from '../component';
+
+describes.realWin('BentoAdblockDetector preact component v1.0', {}, (env) => {
+  it('should show fallback', () => {
+    const wrapper = mount(
+      <BentoAdblockDetector
+        style={{width: 120, height: 600}}
+        ampAd={(props) => (
+          <amp-ad
+            width="120"
+            height="600"
+            type="doubleclick"
+            data-slot="/21730346048/test-skyscraper"
+            {...props}
+          >
+            <div fallback>This is AMP-Ad fallback.</div>
+          </amp-ad>
+        )}
+        fallbackDiv={(props) => (
+          <div
+            style={{
+              border: '2px solid red',
+              borderRadius: 10,
+              margin: 5,
+              padding: 5,
+            }}
+            {...props}
+          >
+            <h2>Ad Blocker Detected</h2>
+            <p>Please allow ads to run on this page.</p>
+          </div>
+        )}
+      ></BentoAdblockDetector>
+    );
 
     const component = wrapper.find(BentoAdblockDetector.name);
-    expect(component).to.have.lengthOf(1);
-    expect(component.prop('testProp')).to.be.true;
+    // console.log(component);
+    expect(component).to.equal(env);
+    // expect(component.prop('testProp')).to.be.true;
   });
 });
