@@ -34,6 +34,11 @@ export function BentoAdblockDetectorWithRef(
   },
   ref
 ) {
+  /** Constants */
+  const STATE_LOADING = 0;
+  const STATE_READY_NO_BLOCKER = 1;
+  const STATE_READY_BLOKER_DETECTED = 2;
+
   /** States */
   const [isBlockerDetected, setIsBlockerDetected] = useState(null);
 
@@ -55,8 +60,8 @@ export function BentoAdblockDetectorWithRef(
       window.adBlockExtension = {};
 
       /** Set loading state */
-      window.adBlockExtension.isLoading = true;
-    } else if (window.adBlockExtension.isLoading) {
+      window.adBlockExtension.state = STATE_LOADING;
+    } else if (window.adBlockExtension.state === STATE_LOADING) {
       /** If `adBlockExtension` exists, push this extension's `blockerDetectedCallback()` */
       window.adBlockExtension.fallbackFunctions =
         window.adBlockExtension.fallbackFunctions || [];
@@ -68,22 +73,33 @@ export function BentoAdblockDetectorWithRef(
       return;
     }
 
+    if (window.adBlockExtension.state !== STATE_LOADING) {
+      return;
+    }
+
     /** Try to fetch `adNetworkDomain` with `fetchOptions` */
     fetch(adNetworkDomain, fetchOptions)
       .catch(() => {
+        window.adBlockExtension.state = STATE_READY_BLOKER_DETECTED;
+
         /** AdBlocker won't allow to fetch from `url`, show `fallbackDiv` for the first extension */
         blockerDetectedCallback();
 
         /** show `fallbackDiv` for the rest of the extensions */
-        window.adBlockExtension.fallbackFunctions.forEach(
+        window.adBlockExtension.fallbackFunctions?.forEach(
           (fallbackFunction) => {
             fallbackFunction();
           }
         );
       })
       .finally(() => {
+        window.adBlockExtension.state =
+          window.adBlockExtension.state === STATE_LOADING
+            ? STATE_READY_NO_BLOCKER
+            : window.adBlockExtension.state;
+
         /** Cleanup resources */
-        window.adBlockExtension.isLoading = false;
+        window.adBlockExtension.state = false;
         window.adBlockExtension.fallbackFunctions = [];
       });
   }, [adNetworkDomain, blockerDetectedCallback, fetchOptions]);
