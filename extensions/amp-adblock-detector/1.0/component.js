@@ -72,7 +72,8 @@ export function BentoAdblockDetectorWithRef(
     fetch(adNetworkDomain, fetchOptions)
       .catch(() => {
         /** AdBlocker won't allow to fetch from `url`, show `fallbackDiv` for the first extension */
-        setIsBlockerDetected(true);
+        blockerDetectedCallback();
+
         /** show `fallbackDiv` for the rest of the extensions */
         window.adBlockExtension.fallbackFunctions.forEach(
           (fallbackFunction) => {
