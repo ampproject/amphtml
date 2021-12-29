@@ -1,6 +1,7 @@
 import {Keys_Enum} from '#core/constants/key-codes';
 
 import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
@@ -40,6 +41,11 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
       installExtensionForDoc,
     });
 
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationServiceForOrNull')
+      .returns(Promise.resolve(localizationService));
+
     hostEl = win.document.createElement('div');
     ampStory = win.document.createElement('amp-story');
     win.document.body.appendChild(ampStory);
@@ -47,42 +53,42 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     shareMenu = new AmpStoryShareMenu(hostEl);
   });
 
-  it('should build the sharing menu', () => {
-    shareMenu.build();
-    expect(shareMenu.element_).to.exist;
+  it('should build the sharing menu', async () => {
+    await shareMenu.buildCallback();
+    expect(shareMenu.rootEl_).to.exist;
   });
 
-  it('should show the share menu on store property update', () => {
-    shareMenu.build();
+  it('should show the share menu on store property update', async () => {
+    await shareMenu.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
-    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.rootEl_).to.have.class(VISIBLE_CLASS);
   });
 
-  it('should hide the share menu on click on the overlay', () => {
-    shareMenu.build();
+  it('should hide the share menu on click on the overlay', async () => {
+    await shareMenu.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
-    shareMenu.element_.dispatchEvent(new Event('click'));
+    shareMenu.rootEl_.dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.rootEl_).not.to.have.class(VISIBLE_CLASS);
     expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
   });
 
-  it('should not hide the share menu on click on the widget container', () => {
-    shareMenu.build();
+  it('should not hide the share menu on click on the widget container', async () => {
+    await shareMenu.buildCallback();
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     hostEl
       .querySelector('.i-amphtml-story-share-menu-container')
       .dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+    expect(shareMenu.rootEl_).to.have.class(VISIBLE_CLASS);
   });
 
-  it('should hide the share menu on escape key press', () => {
-    shareMenu.build();
+  it('should hide the share menu on escape key press', async () => {
+    await shareMenu.buildCallback();
 
     const clickCallbackSpy = env.sandbox.spy();
     win.addEventListener('keyup', clickCallbackSpy);
@@ -94,13 +100,5 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     win.dispatchEvent(keyupEvent);
 
     expect(clickCallbackSpy).to.have.been.calledOnce;
-  });
-
-  it('should load the amp-social-share extension', () => {
-    shareMenu.build();
-
-    expect(
-      installExtensionForDoc.withArgs(env.sandbox.match.any, 'amp-social-share')
-    ).to.have.been.called;
   });
 });

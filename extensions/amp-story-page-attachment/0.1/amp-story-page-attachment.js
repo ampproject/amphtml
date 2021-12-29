@@ -1,24 +1,34 @@
+import {removeElement} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
-import {Action, StateProperty, UIType} from './amp-story-store-service';
-import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
-import {HistoryState, setHistoryState} from './history';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
-import {renderOutlinkLinkIconElement} from './amp-story-open-page-attachment';
 import {closest} from '#core/dom/query';
-import {dev} from '#utils/log';
+import {toggle} from '#core/dom/style';
 import {getHistoryState} from '#core/window/history';
-import {localize} from './amp-story-localization-service';
-import {getSourceOrigin} from '../../../src/url';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
+
+import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {
   allowlistFormActions,
   setupResponseAttributeElements,
 } from './amp-story-form';
-import {removeElement} from '#core/dom';
-import {toggle} from '#core/dom/style';
 
-import {triggerClickFromLightDom} from './utils';
+import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
+import {getSourceOrigin} from '../../../src/url';
+import {
+  AttachmentTheme,
+  renderOutlinkLinkIconElement,
+} from '../../amp-story/1.0/amp-story-open-page-attachment';
+import {
+  Action,
+  StateProperty,
+  UIType,
+} from '../../amp-story/1.0/amp-story-store-service';
+import {HistoryState, setHistoryState} from '../../amp-story/1.0/history';
+import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
+import {triggerClickFromLightDom} from '../../amp-story/1.0/utils';
 
 /**
  * Distance to swipe before opening attachment.
@@ -40,15 +50,6 @@ const DRAG_CAP_PX = 56;
 const POST_TAP_ANIMATION_DURATION = 500;
 
 /**
- * @enum {string}
- */
-export const AttachmentTheme = {
-  LIGHT: 'light', // default
-  DARK: 'dark',
-  CUSTOM: 'custom',
-};
-
-/**
  * @enum
  */
 const AttachmentType = {
@@ -64,8 +65,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   constructor(element) {
     super(element);
 
-    /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win, this.element);
+    /** @private @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
 
     /** @private @const {!../../../src/service/history-impl.History} */
     this.historyService_ = Services.historyForDoc(this.element);
@@ -79,7 +80,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildCallback() {
     super.buildCallback();
-
     this.maybeSetDarkThemeForElement_(this.headerEl);
     this.maybeSetDarkThemeForElement_(this.element);
 
@@ -131,8 +131,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       <div class="i-amphtml-story-draggable-drawer-header-title-and-close">
         <button
           class="i-amphtml-story-page-attachment-close-button"
-          aria-label={localize(
-            this.element,
+          aria-label={this.localizationService.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
           )}
           role="button"
@@ -146,22 +145,25 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
       allowlistFormActions(this.win);
+
       forms.forEach((form) => {
         // Scroll each response attribute element into view, when displayed.
-        setupResponseAttributeElements(form).forEach((el) => {
-          // TODO(wg-stories): Share ResizeObserver for runtime performance.
-          new this.win.ResizeObserver((e) => {
-            if (
-              this.state === DrawerState.OPEN &&
-              e[0].contentRect.height > 0
-            ) {
-              el./*OK*/ scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-              });
-            }
-          }).observe(el);
-        });
+        setupResponseAttributeElements(form, this.localizationService).forEach(
+          (el) => {
+            // TODO(wg-stories): Share ResizeObserver for runtime performance.
+            new this.win.ResizeObserver((e) => {
+              if (
+                this.state === DrawerState.OPEN &&
+                e[0].contentRect.height > 0
+              ) {
+                el./*OK*/ scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'nearest',
+                });
+              }
+            }).observe(el);
+          }
+        );
       });
 
       // Page attachments that contain forms must display the page's publisher
@@ -230,8 +232,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         {image}
         <span class="i-amphtml-story-page-attachment-remote-title">
           <span>
-            {localize(
-              this.element,
+            {this.localizationService.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
             )}
           </span>
@@ -335,8 +336,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
     this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
-    this.toggleBackgroundOverlay_(true);
-
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
     if (this.type_ !== AttachmentType.OUTLINK) {
@@ -352,6 +351,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
       this.historyService_.push(() => this.closeInternal_(), historyState);
     }
+
+    this.toggleBackgroundOverlay_(true);
 
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
     this.analyticsService_.triggerEvent(
@@ -512,3 +513,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     return publisherOrigin.replace(/^http(s)?:\/\/(www.)?/, '');
   }
 }
+
+AMP.extension('amp-story-page-attachment', '0.1', (AMP) => {
+  AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment, CSS);
+  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment);
+});

@@ -81,6 +81,7 @@ export let ShoppingConfigDataDef;
 
 /**
  * @typedef {{
+ *  activeProductData: ShoppingConfigDataDef,
  *  items: !Map<string, !ShoppingConfigDataDef>,
  * }}
  */
