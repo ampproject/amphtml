@@ -11,10 +11,6 @@ import * as Preact from '#core/dom/jsx';
  */
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {
-  AFFILIATE_LINK_SELECTOR,
-  AmpStoryAffiliateLink,
-} from './amp-story-affiliate-link';
-import {
   Action,
   StateProperty,
   UIType,
@@ -655,7 +651,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   findAndPrepareEmbeddedComponents_() {
     this.addClickShieldToEmbeddedComponents_();
-    this.buildAffiliateLinks_();
   }
 
   /**
@@ -676,18 +671,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       componentEls.forEach((el) => {
         el.classList.add('i-amphtml-embedded-component');
       });
-    });
-  }
-
-  /**
-   * Initializes affiliate links.
-   */
-  buildAffiliateLinks_() {
-    toArray(
-      scopedQuerySelectorAll(this.element, AFFILIATE_LINK_SELECTOR)
-    ).forEach((el) => {
-      const link = new AmpStoryAffiliateLink(this.win, el);
-      link.build();
     });
   }
 
