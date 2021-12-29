@@ -22,6 +22,8 @@ BaseElement['props'] = {
   },
   firstLabelAs: {selector: 'div[slot="first-label"]', single: true, as: true},
   secondLabelAs: {selector: 'div[slot="second-label"]', single: true, as: true},
+  leftHintAs: {selector: 'div[slot="left-hint"]', single: true, as: true},
+  rightHintAs: {selector: 'div[slot="right-hint"]', single: true, as: true},
   initialPosition: {
     attr: 'initial-slider-position',
     type: 'number',

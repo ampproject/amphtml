@@ -84,15 +84,6 @@ const imageSliderLabelWrapper = {
   bottom: '0 !important',
   left: '0 !important',
   'z-index': '1 !important',
-  '& > [slot="first-label"]': {
-    position: 'absolute !important',
-  },
-  '& > [slot="second-label"]': {
-    position: 'absolute !important',
-  },
-  '& > .label': {
-    position: 'absolute !important',
-  },
 };
 
 const imageSliderHintHidden = {

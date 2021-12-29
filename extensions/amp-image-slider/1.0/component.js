@@ -1,5 +1,6 @@
 import objstr from 'obj-str';
 
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
 
@@ -34,7 +35,6 @@ installTimerService(global);
  * Displays given component with supplied props.
  * @param {*} props
  * @param {{current: ?Element}} ref
- * @param containerClass
  * @return {PreactDef.Renderable}
  */
 function DisplayAsWithRef({as: Comp = 'div', containerClass, ...rest}, ref) {
@@ -59,7 +59,8 @@ export function BentoImageSliderWithRef(
     firstImageAs,
     firstLabelAs,
     initialPosition,
-    labels,
+    leftHintAs,
+    rightHintAs,
     secondImageAs,
     secondLabelAs,
     stepSize = 0.1,
@@ -68,9 +69,7 @@ export function BentoImageSliderWithRef(
   ref
 ) {
   /** Common variables */
-  let containsAmpImages;
   const gesturesRef = useRef(null);
-  const [isEdge, setIsEdge] = useState();
   const isEventRegistered = false;
   const styles = useStyles();
 
@@ -141,36 +140,6 @@ export function BentoImageSliderWithRef(
       unlistenHandle = null;
     }
   }, []);
-
-  const unregisterTouchGestures = useCallback(() => {
-    if (gesturesRef.current == null) {
-      return;
-    }
-    gesturesRef.current.cleanup();
-    gesturesRef.current = null;
-  }, []);
-
-  /**
-   * Unregister events
-   * @private
-   */
-  const unregisterEvents = useCallback(() => {
-    unlisten(unlistenMouseDown.current);
-    unlisten(unlistenMouseMove.current);
-    unlisten(unlistenMouseUp.current);
-    unlisten(unlistenKeyDown.current);
-    unregisterTouchGestures();
-    isEventRegistered.current = false;
-    unregisterTouchGestures();
-  }, [
-    unlistenMouseDown,
-    unlistenMouseUp,
-    unlistenMouseMove,
-    unlistenKeyDown,
-    isEventRegistered,
-    unregisterTouchGestures,
-    unlisten,
-  ]);
 
   const pointerMoveX = useCallback(
     (pointerX) => {
@@ -327,7 +296,10 @@ export function BentoImageSliderWithRef(
   const onKeyDown = useCallback(
     (e) => {
       // Check if current element has focus
-      if (doc.current.activeElement !== containerRef?.current) {
+      if (
+        doc.current.activeElement !== containerRef?.current &&
+        doc.current.activeElement !== containerRef?.current?./*OK*/ offsetParent
+      ) {
         return;
       }
 
@@ -446,21 +418,39 @@ export function BentoImageSliderWithRef(
     registerTouchGestures,
   ]);
 
+  const viewportCallback_ = useCallback(
+    (isIntersecting) => {
+      if (isIntersecting && !displayHintOnce) {
+        animateShowHint();
+      }
+    },
+    [animateShowHint, displayHintOnce]
+  );
+
   useEffect(() => {
+    if (!checkProps(firstImageAs, secondImageAs)) {
+      return null;
+    }
     /** Common variables */
-    win.current = containerRef.current.ownerDocument.defaultView;
-    doc.current = containerRef.current.ownerDocument;
-    //setIsEdge(Services.platformFor(win).isEdge());
+    win.current = containerRef?.current?.ownerDocument?.defaultView;
+    doc.current = containerRef?.current?.ownerDocument;
 
-    // TODO (@AnuragVasanwala): Assert Error - Should not contain more than 2 images.
-    // TODO (@AnuragVasanwala): Assert error if images != 2
-    // TODO (@AnuragVasanwala): Assert Error - Should not contain div rather than first and second
+    observeIntersections(containerRef.current, ({isIntersecting}) =>
+      viewportCallback_(isIntersecting)
+    );
 
-    // Notice: hints are attached after amp-img finished loading
-    // buildHint();
-    // checkARIA();
     registerEvents();
-  }, [registerEvents]);
+    if (initialPosition) {
+      updatePositions(initialPosition);
+    }
+  }, [
+    registerEvents,
+    initialPosition,
+    updatePositions,
+    firstImageAs,
+    secondImageAs,
+    viewportCallback_,
+  ]);
 
   /** API Function */
   useImperativeHandle(
@@ -474,6 +464,11 @@ export function BentoImageSliderWithRef(
     [updatePositions]
   );
 
+  if (!checkProps(firstImageAs, secondImageAs)) {
+    displayWarning('2 images must be provided for comparison');
+    return null;
+  }
+
   return (
     <div
       ref={containerRef}
@@ -484,18 +479,13 @@ export function BentoImageSliderWithRef(
       tabIndex="0"
       autoFocus="true"
       onMouseDown={onMouseDown}
-      // onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       {...rest}
     >
       {/* Masks */}
       <div ref={leftMaskRef} class={styles.imageSliderLeftMask}>
         <div ref={leftLabelWrapperRef} class={styles.imageSliderLabelWrapper}>
-          <DisplayAs
-            as={firstLabelAs}
-            ref={leftLabelRef}
-            containerClass="label label-left-center"
-          />
+          <DisplayAs as={firstLabelAs} ref={leftLabelRef} />
         </div>
         <DisplayAs as={firstImageAs} ref={leftImageRef} />
       </div>
@@ -513,11 +503,7 @@ export function BentoImageSliderWithRef(
             [styles.imageSliderPushLeft]: true,
           })}
         >
-          <DisplayAs
-            ref={rightLabelRef}
-            containerClass="label label-right-center"
-            as={secondLabelAs}
-          />
+          <DisplayAs ref={rightLabelRef} as={secondLabelAs} />
         </div>
         <DisplayAs
           as={secondImageAs}
@@ -553,7 +539,11 @@ export function BentoImageSliderWithRef(
         })}
       >
         <div ref={leftHintWrapper} class={styles.imageSliderHintLeftWrapper}>
-          <div ref={leftHintArrowRef} class={styles.imageSliderHintLeft} />
+          <DisplayAs
+            as={leftHintAs}
+            ref={leftHintArrowRef}
+            class={styles.imageSliderHintLeft}
+          />
         </div>
       </div>
       <div
@@ -564,11 +554,38 @@ export function BentoImageSliderWithRef(
         })}
       >
         <div ref={rightHintWrapper} class={styles.imageSliderHintRightWrapper}>
-          <div ref={rightHintArrowRef} class={styles.imageSliderHintRight} />
+          <DisplayAs
+            as={rightHintAs}
+            ref={rightHintArrowRef}
+            class={styles.imageSliderHintRight}
+          />
         </div>
       </div>
     </div>
   );
+}
+
+/**
+ * Verify required props and throw error if necessary.
+ * @param {(function(*)|undefined} firstImageAs
+ * @param {(function(*)|undefined} secondImageAs
+ * @return {boolean} true on valid
+ */
+function checkProps(firstImageAs, secondImageAs) {
+  // Perform manual checking as assertion is not available for Bento: Issue #32739
+  if (firstImageAs == undefined || secondImageAs === undefined) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Display warning in browser console
+ * @param {?string} message Warning to be displayed
+ */
+function displayWarning(message) {
+  console /*OK*/
+    .warn(message);
 }
 
 const BentoImageSlider = forwardRef(BentoImageSliderWithRef);
