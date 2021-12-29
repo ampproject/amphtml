@@ -21,7 +21,17 @@ const DisplayAs = forwardRef(DisplayAsWithRef);
  * @return {PreactDef.Renderable}
  */
 export function BentoAdblockDetectorWithRef(
-  {ampAd, fallbackDiv, ...rest},
+  {
+    adNetworkDomain = 'https://doubleclick.net',
+    ampAd,
+    fallbackDiv,
+    fetchOptions = {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-store',
+    },
+    ...rest
+  },
   ref
 ) {
   /** States */
@@ -58,17 +68,11 @@ export function BentoAdblockDetectorWithRef(
       return;
     }
 
-    /** Try to fetch `https://doubleclick.net` */
-    const url = 'https://doubleclick.net';
-    fetch(url, {
-      method: 'HEAD',
-      mode: 'no-cors',
-      cache: 'no-store',
-    })
+    /** Try to fetch `adNetworkDomain` with `fetchOptions` */
+    fetch(adNetworkDomain, fetchOptions)
       .catch(() => {
         /** AdBlocker won't allow to fetch from `url`, show `fallbackDiv` for the first extension */
         setIsBlockerDetected(true);
-
         /** show `fallbackDiv` for the rest of the extensions */
         window.adBlockExtension.fallbackFunctions.forEach(
           (fallbackFunction) => {
@@ -81,7 +85,7 @@ export function BentoAdblockDetectorWithRef(
         window.adBlockExtension.isLoading = false;
         window.adBlockExtension.fallbackFunctions = [];
       });
-  }, [blockerDetectedCallback]);
+  }, [adNetworkDomain, blockerDetectedCallback, fetchOptions]);
 
   return (
     <ContainWrapper layout size paint {...rest} ref={containerWrapperRef}>

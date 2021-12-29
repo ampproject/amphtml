@@ -9,6 +9,7 @@ BaseElement['Component'] = BentoAdblockDetector;
 
 /** @override */
 BaseElement['props'] = {
+  adNetworkDomain: {attr: 'data-ad-network-domain', type: 'string'},
   ampAd: {
     as: true,
     clone: true,
@@ -21,6 +22,7 @@ BaseElement['props'] = {
     selector: 'div[status="blocked"]',
     single: true,
   },
+  fetchOptions: {attr: 'data-fetch-options'},
 };
 
 /** @override */
