@@ -242,8 +242,8 @@
   display: block !important;
 }
 
-.i-amphtml-story-system-layer:not([captions-on]) .i-amphtml-story-nocaptions-control,
-.i-amphtml-story-system-layer[captions-on] .i-amphtml-story-captions-control {
+[i-amphtml-current-page-has-captions]:not([captions-on]) .i-amphtml-story-nocaptions-control,
+[i-amphtml-current-page-has-captions][captions-on] .i-amphtml-story-captions-control {
   display: block !important;
 }
 
