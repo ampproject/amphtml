@@ -13,6 +13,7 @@ import {
   useState,
 } from '#preact';
 import {forwardRef} from '#preact/compat';
+import {ContainWrapper} from '#preact/component';
 
 import {installTimerService} from '#service/timer-impl';
 
@@ -470,7 +471,7 @@ export function BentoImageSliderWithRef(
   }
 
   return (
-    <div
+    <ContainWrapper
       ref={containerRef}
       class={styles.imageSliderContainer}
       layout
@@ -561,7 +562,7 @@ export function BentoImageSliderWithRef(
           />
         </div>
       </div>
-    </div>
+    </ContainWrapper>
   );
 }
 
