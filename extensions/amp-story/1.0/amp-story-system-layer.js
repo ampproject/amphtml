@@ -45,6 +45,15 @@ const PAUSED_ATTRIBUTE = 'paused';
 const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
 
 /** @private @const {string} */
+const CAPTIONS_CLASS = 'i-amphtml-story-captions-control';
+
+/** @private @const {string} */
+const NOCAPTIONS_CLASS = 'i-amphtml-story-nocaptions-control';
+
+/** @private @const {string} */
+const PAGE_HAS_CAPTIONS = 'i-amphtml-current-page-has-captions';
+
+/** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 /** @private @const {string} */
@@ -117,6 +126,16 @@ const renderSystemLayerElement = (element, children) => (
           LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
         )}
       />
+      <div class="i-amphtml-story-captions-display">
+        <button
+          class={CAPTIONS_CLASS + ' i-amphtml-story-button'}
+          aria-label="Captions on"
+        />
+        <button
+          class={NOCAPTIONS_CLASS + ' i-amphtml-story-button'}
+          aria-label="Captions off"
+        />
+      </div>
       <div class="i-amphtml-story-sound-display">
         <button
           class={UNMUTE_CLASS + ' i-amphtml-story-button'}
@@ -400,6 +419,12 @@ export class SystemLayer {
         this.onPausedClick_(true);
       } else if (matches(target, `.${PLAY_CLASS}, .${PLAY_CLASS} *`)) {
         this.onPausedClick_(false);
+      } else if (matches(target, `.${CAPTIONS_CLASS}, .${CAPTIONS_CLASS} *`)) {
+        this.onCaptionsClick_(false);
+      } else if (
+        matches(target, `.${NOCAPTIONS_CLASS}, .${NOCAPTIONS_CLASS} *`)
+      ) {
+        this.onCaptionsClick_(true);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
@@ -493,6 +518,18 @@ export class SystemLayer {
         this.onKeyboardActiveUpdate_(keyboardState);
       },
       true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_CAPTIONS_STATE,
+      (config) => this.onPageHasCaptionsState_(config),
+      true /* callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.CAPTIONS_STATE,
+      (config) => this.onCaptionsState_(config),
+      true /* callToInitialize */
     );
 
     this.storeService_.subscribe(
@@ -595,6 +632,15 @@ export class SystemLayer {
   }
 
   /**
+   * Toggles the captions.
+   * @param {boolean} toggleCaptions
+   * @private
+   */
+  onCaptionsClick_(toggleCaptions) {
+    this.storeService_.dispatch(Action.TOGGLE_CAPTIONS, toggleCaptions);
+  }
+
+  /**
    * Reacts to the presence of audio on a page to determine which audio messages
    * to display.
    * @param {boolean} pageHasAudio
@@ -614,6 +660,22 @@ export class SystemLayer {
             CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE
           );
     });
+  }
+
+  /**
+   * Toggles whether the active page has captions or not.
+   * @param {boolean} hasCaptions
+   */
+  onPageHasCaptionsState_(hasCaptions) {
+    this.systemLayerEl_.toggleAttribute(PAGE_HAS_CAPTIONS, hasCaptions);
+  }
+
+  /**
+   * Toggles whether the captions are active or not.
+   * @param {boolean} captions
+   */
+  onCaptionsState_(captions) {
+    this.systemLayerEl_.toggleAttribute('captions-on', captions);
   }
 
   /**

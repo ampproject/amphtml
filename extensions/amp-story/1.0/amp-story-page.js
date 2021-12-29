@@ -514,6 +514,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
+      this.checkPageHasCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -608,7 +609,10 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
+    return Promise.all(mediaPromises).then(() => {
+      this.markPageAsLoaded_();
+      this.initializeCaptionsListener_();
+    });
   }
 
   /**
@@ -1355,6 +1359,26 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Checks if the page has any captions and toggles them.
+   * @private
+   */
+  checkPageHasCaptions_() {
+    const pageHasCaptions = !!this.element.querySelector(
+      'track, amp-story-captions'
+    );
+    this.storeService_.dispatch(
+      Action.TOGGLE_PAGE_HAS_CAPTIONS,
+      pageHasCaptions
+    );
+
+    if (pageHasCaptions) {
+      this.toggleCaptions_(
+        this.storeService_.get(StateProperty.CAPTIONS_STATE)
+      );
+    }
+  }
+
+  /**
    * @private
    */
   reportDevModeErrors_() {
@@ -1750,5 +1774,39 @@ export class AmpStoryPage extends AMP.BaseElement {
         toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
       );
     });
+  }
+
+  /**
+   * Listens for changes on captions if there are tracks on videos and page is active.
+   * @private
+   */
+  initializeCaptionsListener_() {
+    if (!this.element.querySelector('track')) {
+      return;
+    }
+    this.storeService_.subscribe(
+      StateProperty.CAPTIONS_STATE,
+      (captionsOn) => {
+        if (this.isActive()) {
+          this.toggleCaptions_(captionsOn);
+        }
+      },
+      true
+    );
+  }
+
+  /**
+   * Shows or hides the captions for all elements that implement toggleCaptions.
+   * @param {boolean} captionsOn
+   * @return {!Promise}
+   */
+  toggleCaptions_(captionsOn) {
+    return this.getAllAmpVideos_().map((ampVideo) =>
+      ampVideo.getImpl().then((impl) => {
+        if (impl.toggleCaptions) {
+          impl.toggleCaptions(captionsOn);
+        }
+      })
+    );
   }
 }

@@ -163,6 +163,9 @@ export class AmpVideo extends AMP.BaseElement {
 
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {boolean} whether another element is in charge of the captions.*/
+    this.captionsAreDelegated_ = false;
   }
 
   /**
@@ -768,6 +771,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsElement) {
       return;
     }
+    this.captionsAreDelegated_ = true;
     captionsElement.getImpl().then((impl) => {
       if (impl.setVideoElement) {
         impl.setVideoElement(this.video_);
@@ -1027,6 +1031,22 @@ export class AmpVideo extends AMP.BaseElement {
   /** @override */
   seekTo(timeSeconds) {
     this.video_.currentTime = timeSeconds;
+  }
+
+  /**
+   * Shows or hides the captions.
+   * @param {boolean} captionsOn
+   * @public
+   */
+  toggleCaptions(captionsOn) {
+    toArray(this.video_.textTracks).forEach((track) => {
+      if (captionsOn) {
+        // If captions are delegated, hide instead of show.
+        track.mode = this.captionsAreDelegated_ ? 'hidden' : 'showing';
+      } else {
+        track.mode = 'disabled';
+      }
+    });
   }
 }
 
