@@ -98,7 +98,6 @@ export let ShoppingDataDef;
  *    canShowStoryUrlInfo: boolean,
  *    canShowSystemLayerButtons: boolean,
  *    viewerCustomControls: !Array<!Object>,
- *    accessState: boolean,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
@@ -147,7 +146,6 @@ export const StateProperty = {
   VIEWER_CUSTOM_CONTROLS: 'viewerCustomControls',
 
   // App States.
-  ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
@@ -196,7 +194,6 @@ export const Action = {
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
-  TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
@@ -297,18 +294,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.ACTIONS_ALLOWLIST]: newActionsAllowlist,
-      });
-    // Triggers the amp-acess paywall.
-    case Action.TOGGLE_ACCESS:
-      // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
-      if (state[StateProperty.ACCESS_STATE] === data) {
-        return state;
-      }
-
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.ACCESS_STATE]: !!data,
-        [StateProperty.PAUSED_STATE]: !!data,
       });
     case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({
@@ -552,7 +537,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_STORY_URL_INFO]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
-      [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.EDUCATION_STATE]: false,
