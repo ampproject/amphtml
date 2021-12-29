@@ -141,6 +141,29 @@ export function BentoImageSliderWithRef(
     }
   }, []);
 
+  /**
+   * Update element positions based on percentage
+   * Should be wrapped inside mutateElement
+   * @param {number} percentFromLeft
+   * @private
+   */
+  const updatePositions = useCallback(
+    (percentFromLeft) => {
+      percentFromLeft = limitPercentage(percentFromLeft);
+
+      updateTranslateX(barRef.current, percentFromLeft);
+      updateTranslateX(rightMaskRef.current, percentFromLeft);
+      updateTranslateX(rightImageRef.current, -percentFromLeft);
+      const adjustedDeltaFromLeft = percentFromLeft - 0.5;
+      updateTranslateX(leftHintBodyRef.current, adjustedDeltaFromLeft);
+      updateTranslateX(rightHintBodyRef.current, adjustedDeltaFromLeft);
+      if (rightLabelWrapperRef.current != null) {
+        updateTranslateX(rightLabelWrapperRef.current, -percentFromLeft);
+      }
+    },
+    [limitPercentage, updateTranslateX]
+  );
+
   const pointerMoveX = useCallback(
     (pointerX) => {
       // This is to address the "snap to leftmost" bug that occurs on
@@ -216,29 +239,6 @@ export function BentoImageSliderWithRef(
       containerRef.current./*OK*/ getBoundingClientRect();
     return (barLeft - boxLeft) / boxWidth;
   }, []);
-
-  /**
-   * Update element positions based on percentage
-   * Should be wrapped inside mutateElement
-   * @param {number} percentFromLeft
-   * @private
-   */
-  const updatePositions = useCallback(
-    (percentFromLeft) => {
-      percentFromLeft = limitPercentage(percentFromLeft);
-
-      updateTranslateX(barRef.current, percentFromLeft);
-      updateTranslateX(rightMaskRef.current, percentFromLeft);
-      updateTranslateX(rightImageRef.current, -percentFromLeft);
-      const adjustedDeltaFromLeft = percentFromLeft - 0.5;
-      updateTranslateX(leftHintBodyRef.current, adjustedDeltaFromLeft);
-      updateTranslateX(rightHintBodyRef.current, adjustedDeltaFromLeft);
-      if (rightLabelWrapperRef.current != null) {
-        updateTranslateX(rightLabelWrapperRef.current, -percentFromLeft);
-      }
-    },
-    [limitPercentage, updateTranslateX]
-  );
 
   /**
    * One step left
