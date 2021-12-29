@@ -35,7 +35,7 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(win.document.body);
+      localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationServiceForOrNull')
         .returns(Promise.resolve(localizationService));
