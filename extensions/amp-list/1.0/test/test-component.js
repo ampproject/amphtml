@@ -7,6 +7,8 @@ import {waitFor} from '#testing/helpers/service';
 
 import {BentoList} from '../component/component';
 
+const CONTENTS = '[test-id="contents"]';
+
 describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
   let dataStub;
   beforeEach(() => {
@@ -33,14 +35,14 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       const component = mount(<BentoList src="TEST.json" />);
       expect(component.text()).to.equal('Loading...');
 
-      expect(component.find('ul')).to.have.length(0);
+      expect(component.find('p')).to.have.length(0);
 
       await waitForData(component);
 
       expect(xhrUtils.fetchJson).calledWith('TEST.json');
 
-      expect(component.find('ul').html()).to.equal(
-        `<ul><li>one</li><li>two</li><li>three</li></ul>`
+      expect(component.find(CONTENTS).html()).to.equal(
+        `<p>one</p><p>two</p><p>three</p>`
       );
     });
 
@@ -49,8 +51,8 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       expect(component.text()).to.equal('Loading...');
 
       await waitForData(component);
-      expect(component.find('ul').html()).to.equal(
-        `<ul><li>one</li><li>two</li><li>three</li></ul>`
+      expect(component.find(CONTENTS).html()).to.equal(
+        `<p>one</p><p>two</p><p>three</p>`
       );
 
       dataStub.resolves({items: ['second', 'request']});
@@ -58,16 +60,16 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       // Prop doesn't change, no fetch:
       component.setProps({src: 'TEST.json'});
       expect(xhrUtils.fetchJson).callCount(1);
-      expect(component.find('ul').html()).to.equal(
-        `<ul><li>one</li><li>two</li><li>three</li></ul>`
+      expect(component.find(CONTENTS).html()).to.equal(
+        `<p>one</p><p>two</p><p>three</p>`
       );
 
       // Prop changes, new fetch:
       component.setProps({src: 'TEST2.json'});
       expect(xhrUtils.fetchJson).callCount(2).calledWith('TEST2.json');
       await waitForData(component, 2);
-      expect(component.find('ul').html()).to.equal(
-        `<ul><li>second</li><li>request</li></ul>`
+      expect(component.find(CONTENTS).html()).to.equal(
+        `<p>second</p><p>request</p>`
       );
     });
   });
@@ -88,16 +90,16 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="" />);
         await waitForData(component);
 
-        expect(component.find('ul').html()).to.equal(
-          '<ul><li>flat</li><li>array</li></ul>'
+        expect(component.find(CONTENTS).html()).to.equal(
+          '<p>flat</p><p>array</p>'
         );
       });
       it('itemsKey="." should also render the payload', async () => {
         const component = mount(<BentoList src="" itemsKey="." />);
         await waitForData(component);
 
-        expect(component.find('ul').html()).to.equal(
-          '<ul><li>flat</li><li>array</li></ul>'
+        expect(component.find(CONTENTS).html()).to.equal(
+          '<p>flat</p><p>array</p>'
         );
       });
     });
@@ -118,26 +120,26 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="NUMBERS" />);
         await waitForData(component);
 
-        expect(component.find('ul').html()).to.equal(
-          '<ul><li>1</li><li>2</li><li>3</li></ul>'
+        expect(component.find(CONTENTS).html()).to.equal(
+          '<p>1</p><p>2</p><p>3</p>'
         );
       });
       it('changing itemsKey should not require refetching the data', async () => {
         const component = mount(<BentoList src="" itemsKey="NUMBERS" />);
         await waitForData(component);
 
-        expect(component.find('ul').html()).to.equal(
-          '<ul><li>1</li><li>2</li><li>3</li></ul>'
+        expect(component.find(CONTENTS).html()).to.equal(
+          '<p>1</p><p>2</p><p>3</p>'
         );
 
         component.setProps({itemsKey: 'LETTERS'});
-        expect(component.find('ul').html()).to.equal(
-          '<ul><li>A</li><li>B</li><li>C</li></ul>'
+        expect(component.find(CONTENTS).html()).to.equal(
+          '<p>A</p><p>B</p><p>C</p>'
         );
 
         component.setProps({itemsKey: 'NUMBERS'});
-        expect(component.find('ul').html()).to.equal(
-          '<ul><li>1</li><li>2</li><li>3</li></ul>'
+        expect(component.find(CONTENTS).html()).to.equal(
+          '<p>1</p><p>2</p><p>3</p>'
         );
 
         // Ensure data was only fetched once!
@@ -150,8 +152,8 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
           );
           await waitForData(component);
 
-          expect(component.find('ul').html()).to.equal(
-            '<ul><li>ONE</li><li>TWO</li><li>THREE</li></ul>'
+          expect(component.find(CONTENTS).html()).to.equal(
+            '<p>ONE</p><p>TWO</p><p>THREE</p>'
           );
         });
         it('should fail gracefully when the properties are not defined', async () => {
@@ -180,5 +182,9 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         });
       });
     });
+  });
+
+  describe('template', () => {
+    it('should allow for custom rendering of the data', async () => {});
   });
 });

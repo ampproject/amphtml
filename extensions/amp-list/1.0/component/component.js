@@ -7,8 +7,8 @@ import {xhrUtils} from '#preact/utils/xhr';
 import {useStyles} from './component.jss';
 import {useAsync} from './useAsync';
 
-const defaultItemTemplate = (item) => <li>{String(item)}</li>;
-const defaultTemplate = (list) => <ul>{list}</ul>;
+const defaultItemTemplate = (item) => <p>{String(item)}</p>;
+const defaultWrapperTemplate = (list) => list;
 const defaultErrorTemplate = (error) => `Error: ${error.message}`;
 const defaultLoadingTemplate = () => `Loading...`;
 
@@ -55,7 +55,7 @@ export function BentoList({
   fetchItems = fetchItemsDefault,
   itemsKey = 'items',
   template: itemTemplate = defaultItemTemplate,
-  wrapper: wrapperTemplate = defaultTemplate,
+  wrapper: wrapperTemplate = defaultWrapperTemplate,
   loading: loadingTemplate = defaultLoadingTemplate,
   error: errorTemplate = defaultErrorTemplate,
   ...rest
@@ -82,9 +82,11 @@ export function BentoList({
 
   return (
     <ContainWrapper aria-live="polite" {...rest}>
-      {list && wrapperTemplate(list)}
-      {loading && loadingTemplate?.()}
-      {error && errorTemplate?.(error)}
+      <Fragment test-id="contents">
+        {list && wrapperTemplate(list)}
+        {loading && loadingTemplate?.()}
+        {error && errorTemplate?.(error)}
+      </Fragment>
     </ContainWrapper>
   );
 }
