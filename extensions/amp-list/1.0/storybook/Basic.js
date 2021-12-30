@@ -5,17 +5,14 @@ import {BentoList} from '../component/component';
 export default {
   title: 'List',
   component: BentoList,
-  args: {
-    wrapper: (list) => <ol>{list}</ol>,
-    template: (item) => <li>{item.toUpperCase()}</li>,
-  },
+  args: {},
 };
 
 export const SimpleList = (args) => {
   return (
     <BentoList
       {...args}
-      fetchJson={async () => ({items: ['one', 'two', 'three']})}
+      fetchItems={async () => ({items: ['one', 'two', 'three']})}
     />
   );
 };
@@ -23,7 +20,7 @@ export const LoadingState = (args) => {
   return (
     <BentoList
       {...args}
-      fetchJson={async () => {
+      fetchItems={async () => {
         await new Promise(() => {});
       }}
     />
@@ -33,7 +30,7 @@ export const ErrorState = (args) => {
   return (
     <BentoList
       {...args}
-      fetchJson={async () => {
+      fetchItems={async () => {
         throw new Error('Failed to fetch');
       }}
     />

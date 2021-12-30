@@ -5,7 +5,13 @@ var BentoListDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   src: (string|undefined),
+ *   fetchItems?: (function(): void),
+ *   itemsKey?: string,
+ *   template?: function(): PreactDef.Renderable,
+ *   wrapper?: function(): PreactDef.Renderable,
+ *   loading?: function(): PreactDef.Renderable,
+ *   error?: function(): PreactDef.Renderable,
  * }}
  */
 BentoListDef.Props;
