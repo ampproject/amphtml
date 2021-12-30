@@ -261,6 +261,7 @@ class AmpLightbox extends AMP.BaseElement {
   /**
    * @param {!ActionTrust_Enum} trust
    * @param {?Element} openerElement
+   * @return {!Promise}
    * @private
    */
   open_(trust, openerElement) {
@@ -281,7 +282,7 @@ class AmpLightbox extends AMP.BaseElement {
     }
 
     const {promise, resolve} = new Deferred();
-    this.getViewport()
+    return this.getViewport()
       .enterLightboxMode(this.element, promise)
       .then(() => this.finalizeOpen_(resolve, trust));
   }
