@@ -31,7 +31,12 @@ function getItemsFromResults(results, itemsKey) {
   if (!results) {
     return null;
   }
-  let items = itemsKey && itemsKey !== '.' ? results[itemsKey] : results;
+  let items = itemsKey.split('.').reduce((items, key) => {
+    if (!items || key === '') {
+      return items;
+    }
+    return items[key];
+  }, results);
   if (!items) {
     return null;
   }

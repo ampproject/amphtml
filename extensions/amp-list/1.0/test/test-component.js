@@ -14,33 +14,62 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     env.sandbox.stub(xhrUtils, 'fetchJson').resolves({json: dataStub});
   });
 
-  async function waitForData(component) {
+  async function waitForData(component, callCount = 1) {
     await waitFor(
-      () => dataStub.callCount >= 1,
+      () => dataStub.callCount === callCount,
       'expected fetchJson to have been called'
     );
     component.update();
   }
 
-  it('should render a "loading" state first', async () => {
-    const component = mount(<BentoList src="" />);
+  describe('default behavior', () => {
+    it('should render a "loading" state first', async () => {
+      const component = mount(<BentoList src="" />);
 
-    expect(component.text()).to.equal('Loading...');
-  });
+      expect(component.text()).to.equal('Loading...');
+    });
 
-  it('should load data, and display in a list', async () => {
-    const component = mount(<BentoList src="TEST.json" />);
-    expect(component.text()).to.equal('Loading...');
+    it('should load data, and display in a list', async () => {
+      const component = mount(<BentoList src="TEST.json" />);
+      expect(component.text()).to.equal('Loading...');
 
-    expect(component.find('ul')).to.have.length(0);
+      expect(component.find('ul')).to.have.length(0);
 
-    await waitForData(component);
+      await waitForData(component);
 
-    expect(xhrUtils.fetchJson).calledWith('TEST.json');
+      expect(xhrUtils.fetchJson).calledWith('TEST.json');
 
-    expect(component.find('ul').html()).to.equal(
-      `<ul><li>one</li><li>two</li><li>three</li></ul>`
-    );
+      expect(component.find('ul').html()).to.equal(
+        `<ul><li>one</li><li>two</li><li>three</li></ul>`
+      );
+    });
+
+    it("changing the 'src' should fetch the data", async () => {
+      const component = mount(<BentoList src="TEST.json" />);
+      expect(component.text()).to.equal('Loading...');
+
+      await waitForData(component);
+      expect(component.find('ul').html()).to.equal(
+        `<ul><li>one</li><li>two</li><li>three</li></ul>`
+      );
+
+      dataStub.resolves({items: ['second', 'request']});
+
+      // Prop doesn't change, no fetch:
+      component.setProps({src: 'TEST.json'});
+      expect(xhrUtils.fetchJson).callCount(1);
+      expect(component.find('ul').html()).to.equal(
+        `<ul><li>one</li><li>two</li><li>three</li></ul>`
+      );
+
+      // Prop changes, new fetch:
+      component.setProps({src: 'TEST2.json'});
+      expect(xhrUtils.fetchJson).callCount(2).calledWith('TEST2.json');
+      await waitForData(component, 2);
+      expect(component.find('ul').html()).to.equal(
+        `<ul><li>second</li><li>request</li></ul>`
+      );
+    });
   });
 
   describe('itemsKey', () => {
@@ -78,11 +107,11 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         dataStub.resolves({
           NUMBERS: [1, 2, 3],
           LETTERS: ['A', 'B', 'C'],
-          // NESTED: {
-          //   OBJECTS: {
-          //     TOO: ['ONE', 'TWO', 'THREE'],
-          //   },
-          // },
+          NESTED: {
+            OBJECTS: {
+              TOO: ['ONE', 'TWO', 'THREE'],
+            },
+          },
         });
       });
       it('should extract the correct property', async () => {
@@ -105,7 +134,50 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         expect(component.find('ul').html()).to.equal(
           '<ul><li>A</li><li>B</li><li>C</li></ul>'
         );
+
+        component.setProps({itemsKey: 'NUMBERS'});
+        expect(component.find('ul').html()).to.equal(
+          '<ul><li>1</li><li>2</li><li>3</li></ul>'
+        );
+
+        // Ensure data was only fetched once!
         expect(dataStub).callCount(1);
+      });
+      describe('dot-separated lists', () => {
+        it('should access dot-separated property lists', async () => {
+          const component = mount(
+            <BentoList src="" itemsKey="NESTED.OBJECTS.TOO" />
+          );
+          await waitForData(component);
+
+          expect(component.find('ul').html()).to.equal(
+            '<ul><li>ONE</li><li>TWO</li><li>THREE</li></ul>'
+          );
+        });
+        it('should fail gracefully when the properties are not defined', async () => {
+          const component = mount(<BentoList src="" itemsKey="invalid" />);
+          await waitForData(component);
+
+          expect(component.text()).to.equal('');
+
+          component.setProps({itemsKey: 'invalid.invalid'});
+          expect(component.text()).to.equal('');
+
+          component.setProps({itemsKey: 'LETTERS.invalid'});
+          expect(component.text()).to.equal('');
+
+          component.setProps({itemsKey: 'NESTED.invalid.invalid'});
+          expect(component.text()).to.equal('');
+
+          component.setProps({itemsKey: 'NESTED.OBJECTS.invalid'});
+          expect(component.text()).to.equal('');
+
+          component.setProps({itemsKey: 'NESTED.OBJECTS.TOO.invalid'});
+          expect(component.text()).to.equal('');
+
+          component.setProps({itemsKey: 'NESTED.OBJECTS.TOO'});
+          expect(component.text()).to.equal('ONETWOTHREE');
+        });
       });
     });
   });
