@@ -1,6 +1,8 @@
-import {CloseWatcherImpl} from '#utils/close-watcher-impl';
-import {Services} from '#service';
 import {Keys_Enum} from '#core/constants/key-codes';
+
+import {Services} from '#service';
+
+import {CloseWatcherImpl} from '#utils/close-watcher-impl';
 
 describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
   let doc, win, ampdoc;
@@ -23,14 +25,8 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
   });
 
   it('should push and pop history state', async () => {
-    historyMock
-      .expects('push')
-      .resolves('H1')
-      .once();
-    historyMock
-      .expects('pop')
-      .withArgs('H1')
-      .once();
+    historyMock.expects('push').resolves('H1').once();
+    historyMock.expects('pop').withArgs('H1').once();
     const watcher = new CloseWatcherImpl(ampdoc, handler);
     await Promise.resolve('H1');
     watcher.signalClosed();
@@ -41,13 +37,15 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
     let popHandler;
     historyMock
       .expects('push')
-      .withArgs(sinon.match((a) => {
-        popHandler = a;
-        return true;
-      }))
+      .withArgs(
+        env.sandbox.match((a) => {
+          popHandler = a;
+          return true;
+        })
+      )
       .resolves('H1')
       .once();
-    const watcher = new CloseWatcherImpl(ampdoc, handler);
+    new CloseWatcherImpl(ampdoc, handler);
     await Promise.resolve('H1');
     expect(popHandler).to.exist;
     popHandler();
@@ -55,15 +53,9 @@ describes.realWin('#CloseWatcherImpl', {amp: true}, (env) => {
   });
 
   it('should trigger on ESC key', async () => {
-    historyMock
-      .expects('push')
-      .resolves('H1')
-      .once();
-    historyMock
-      .expects('pop')
-      .withArgs('H1')
-      .once();
-    const watcher = new CloseWatcherImpl(ampdoc, handler);
+    historyMock.expects('push').resolves('H1').once();
+    historyMock.expects('pop').withArgs('H1').once();
+    new CloseWatcherImpl(ampdoc, handler);
     await Promise.resolve('H1');
 
     doc.documentElement.dispatchEvent(
