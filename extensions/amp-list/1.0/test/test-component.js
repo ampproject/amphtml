@@ -41,8 +41,17 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
 
       expect(xhrUtils.fetchJson).calledWith('TEST.json');
 
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>one</p><p>two</p><p>three</p></div>`
+      );
+    });
+    it('the list should have aria-roles defined', async () => {
+      const component = mount(<BentoList src="TEST.json" />);
+
+      await waitForData(component);
+
       expect(component.find(CONTENTS).html()).to.equal(
-        `<p>one</p><p>two</p><p>three</p>`
+        `<div role="list"><p role="listitem">one</p><p role="listitem">two</p><p role="listitem">three</p></div>`
       );
     });
 
@@ -51,8 +60,8 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       expect(component.text()).to.equal('Loading...');
 
       await waitForData(component);
-      expect(component.find(CONTENTS).html()).to.equal(
-        `<p>one</p><p>two</p><p>three</p>`
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
       dataStub.resolves({items: ['second', 'request']});
@@ -60,16 +69,16 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       // Prop doesn't change, no fetch:
       component.setProps({src: 'TEST.json'});
       expect(xhrUtils.fetchJson).callCount(1);
-      expect(component.find(CONTENTS).html()).to.equal(
-        `<p>one</p><p>two</p><p>three</p>`
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
       // Prop changes, new fetch:
       component.setProps({src: 'TEST2.json'});
       expect(xhrUtils.fetchJson).callCount(2).calledWith('TEST2.json');
       await waitForData(component, 2);
-      expect(component.find(CONTENTS).html()).to.equal(
-        `<p>second</p><p>request</p>`
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>second</p><p>request</p></div>`
       );
     });
   });
@@ -90,16 +99,16 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="" />);
         await waitForData(component);
 
-        expect(component.find(CONTENTS).html()).to.equal(
-          '<p>flat</p><p>array</p>'
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          '<div><p>flat</p><p>array</p></div>'
         );
       });
       it('itemsKey="." should also render the payload', async () => {
         const component = mount(<BentoList src="" itemsKey="." />);
         await waitForData(component);
 
-        expect(component.find(CONTENTS).html()).to.equal(
-          '<p>flat</p><p>array</p>'
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          '<div><p>flat</p><p>array</p></div>'
         );
       });
     });
@@ -120,26 +129,26 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="NUMBERS" />);
         await waitForData(component);
 
-        expect(component.find(CONTENTS).html()).to.equal(
-          '<p>1</p><p>2</p><p>3</p>'
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          '<div><p>1</p><p>2</p><p>3</p></div>'
         );
       });
       it('changing itemsKey should not require refetching the data', async () => {
         const component = mount(<BentoList src="" itemsKey="NUMBERS" />);
         await waitForData(component);
 
-        expect(component.find(CONTENTS).html()).to.equal(
-          '<p>1</p><p>2</p><p>3</p>'
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          '<div><p>1</p><p>2</p><p>3</p></div>'
         );
 
         component.setProps({itemsKey: 'LETTERS'});
-        expect(component.find(CONTENTS).html()).to.equal(
-          '<p>A</p><p>B</p><p>C</p>'
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          '<div><p>A</p><p>B</p><p>C</p></div>'
         );
 
         component.setProps({itemsKey: 'NUMBERS'});
-        expect(component.find(CONTENTS).html()).to.equal(
-          '<p>1</p><p>2</p><p>3</p>'
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          '<div><p>1</p><p>2</p><p>3</p></div>'
         );
 
         // Ensure data was only fetched once!
@@ -152,8 +161,8 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
           );
           await waitForData(component);
 
-          expect(component.find(CONTENTS).html()).to.equal(
-            '<p>ONE</p><p>TWO</p><p>THREE</p>'
+          expect(snapshot(component.find(CONTENTS))).to.equal(
+            '<div><p>ONE</p><p>TWO</p><p>THREE</p></div>'
           );
         });
         it('should fail gracefully when the properties are not defined', async () => {
@@ -177,6 +186,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
           component.setProps({itemsKey: 'NESTED.OBJECTS.TOO.invalid'});
           expect(component.text()).to.equal('');
 
+          // Just to ensure it DOES indeed work when valid:
           component.setProps({itemsKey: 'NESTED.OBJECTS.TOO'});
           expect(component.text()).to.equal('ONETWOTHREE');
         });
@@ -185,6 +195,15 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
   });
 
   describe('template', () => {
-    it('should allow for custom rendering of the data', async () => {});
+    it.skip('should allow for custom rendering of the data', async () => {});
   });
 });
+
+function snapshot(component, {keepAttributes = false} = {}) {
+  let html = component.html();
+  if (!keepAttributes) {
+    // Simple logic to clean attributes from HTML:
+    html = html.replace(/\s([-\w]+)(="[^"]*")?/g, '');
+  }
+  return html;
+}

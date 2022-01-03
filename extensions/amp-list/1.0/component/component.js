@@ -1,5 +1,5 @@
 import * as Preact from '#preact';
-import {Fragment, useMemo} from '#preact';
+import {Fragment, cloneElement, useMemo} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
@@ -8,7 +8,7 @@ import {useStyles} from './component.jss';
 import {useAsync} from './useAsync';
 
 const defaultItemTemplate = (item) => <p>{String(item)}</p>;
-const defaultWrapperTemplate = (list) => list;
+const defaultWrapperTemplate = (list) => <div>{list}</div>;
 const defaultErrorTemplate = (error) => `Error: ${error.message}`;
 const defaultLoadingTemplate = () => `Loading...`;
 
@@ -76,17 +76,39 @@ export function BentoList({
     return getItemsFromResults(results, itemsKey);
   }, [results, itemsKey]);
 
-  const list = items?.map((item, i) => (
-    <Fragment key={i}>{itemTemplate(item)}</Fragment>
-  ));
+  const list = items?.map((item, i) =>
+    augment(itemTemplate(item), {'key': i, 'role': 'listitem'})
+  );
 
   return (
     <ContainWrapper aria-live="polite" {...rest}>
       <Fragment test-id="contents">
-        {list && wrapperTemplate(list)}
+        {list && augment(wrapperTemplate(list), {'role': 'list'})}
         {loading && loadingTemplate?.()}
         {error && errorTemplate?.(error)}
       </Fragment>
     </ContainWrapper>
   );
+}
+
+/**
+ * Augments the component(s) with properties
+ *
+ * @param {PreactDef.Renderable} component
+ * @param {object} props
+ * @return {!PreactDef.Renderable}
+ */
+function augment(component, props) {
+  if (!isComponent(component)) {
+    return component;
+  }
+  return cloneElement(component, {...props, ...component.props});
+}
+
+/**
+ * @param {PreactDef.Renderable} component
+ * @return {component is PreactDef.VNode}
+ */
+function isComponent(component) {
+  return typeof component === 'object';
 }
