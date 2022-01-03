@@ -433,6 +433,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Realclick](../../ads/vendors/realclick.md)
 -   [recomAD](../../ads/vendors/recomad.md)
 -   [recreativ](../../ads/vendors/recreativ.md)
+-   [R9x](../../ads/vendors/r9x.md)
 -   [Red for Publishers](../../ads/vendors/rfp.md)
 -   [Relap](../../ads/vendors/relap.md)
 -   [RelapPro](../../ads/vendors/relappro.md)
