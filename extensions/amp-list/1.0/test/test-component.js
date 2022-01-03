@@ -197,6 +197,35 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
   describe('template', () => {
     it.skip('should allow for custom rendering of the data', async () => {});
   });
+
+  describe('API', () => {
+    let ref;
+    let component;
+    beforeEach(async () => {
+      ref = Preact.createRef();
+      component = mount(<BentoList src="TEST.json" ref={ref} />);
+      await waitForData(component);
+    });
+    describe('refresh', () => {
+      it('should be defined', () => {
+        expect(ref.current.refresh).to.be.a('function');
+      });
+      it('should refresh the data', async () => {
+        expect(dataStub).to.have.callCount(1);
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          `<div><p>one</p><p>two</p><p>three</p></div>`
+        );
+
+        dataStub.resolves({items: [1, 2, 3]});
+        ref.current.refresh();
+
+        await waitForData(component, 2);
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          `<div><p>1</p><p>2</p><p>3</p></div>`
+        );
+      });
+    });
+  });
 });
 
 function snapshot(component, {keepAttributes = false} = {}) {

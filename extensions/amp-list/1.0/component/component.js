@@ -1,5 +1,6 @@
 import * as Preact from '#preact';
-import {Fragment, cloneElement, useMemo} from '#preact';
+import {Fragment, cloneElement, useImperativeHandle, useMemo} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
@@ -48,23 +49,28 @@ function getItemsFromResults(results, itemsKey) {
 
 /**
  * @param {!BentoListDef.Props} props
+ * @param {BentoListDef.BentoListApi} ref
  * @return {PreactDef.Renderable}
  */
-export function BentoList({
-  src = null,
-  fetchItems = fetchItemsDefault,
-  itemsKey = 'items',
-  template: itemTemplate = defaultItemTemplate,
-  wrapper: wrapperTemplate = defaultWrapperTemplate,
-  loading: loadingTemplate = defaultLoadingTemplate,
-  error: errorTemplate = defaultErrorTemplate,
-  ...rest
-}) {
+export function BentoListWithRef(
+  {
+    src = null,
+    fetchItems = fetchItemsDefault,
+    itemsKey = 'items',
+    template: itemTemplate = defaultItemTemplate,
+    wrapper: wrapperTemplate = defaultWrapperTemplate,
+    loading: loadingTemplate = defaultLoadingTemplate,
+    error: errorTemplate = defaultErrorTemplate,
+    ...rest
+  },
+  ref
+) {
   const {renderable} = useAmpContext();
 
+  // eslint-disable-next-line no-unused-vars
   const styles = useStyles();
 
-  const {error, loading, results} = useAsync(async () => {
+  const {error, execute, loading, results} = useAsync(async () => {
     if (!renderable) {
       return null;
     }
@@ -80,6 +86,15 @@ export function BentoList({
     augment(itemTemplate(item), {'key': i, 'role': 'listitem'})
   );
 
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!BentoListDef.BentoListApi} */ ({
+        refresh: execute,
+      }),
+    [execute]
+  );
+
   return (
     <ContainWrapper aria-live="polite" {...rest}>
       <Fragment test-id="contents">
@@ -90,6 +105,10 @@ export function BentoList({
     </ContainWrapper>
   );
 }
+
+const BentoList = forwardRef(BentoListWithRef);
+BentoList.displayName = 'List';
+export {BentoList};
 
 /**
  * Augments the component(s) with properties

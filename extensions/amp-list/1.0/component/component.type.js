@@ -17,4 +17,6 @@ var BentoListDef = {};
 BentoListDef.Props;
 
 /** @interface */
-BentoListDef.BentoListApi = class {};
+BentoListDef.BentoListApi = class {
+  async refresh() {}
+};
