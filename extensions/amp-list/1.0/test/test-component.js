@@ -194,6 +194,23 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     });
   });
 
+  describe('maxItems', () => {
+    it('should limit the max number of items', async () => {
+      const component = mount(<BentoList src="TEST.json" maxItems={1} />);
+      await waitForData(component);
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>one</p></div>`
+      );
+    });
+    it('should do nothing if there are already fewer items', async () => {
+      const component = mount(<BentoList src="TEST.json" maxItems={99} />);
+      await waitForData(component);
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>one</p><p>two</p><p>three</p></div>`
+      );
+    });
+  });
+
   describe('template', () => {
     it.skip('should allow for custom rendering of the data', async () => {});
   });

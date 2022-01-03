@@ -26,9 +26,10 @@ async function fetchItemsDefault(src) {
  *
  * @param {object} results
  * @param {string} itemsKey
+ * @param {number} maxItems
  * @return {*}
  */
-function getItemsFromResults(results, itemsKey) {
+function getItemsFromResults(results, itemsKey, maxItems) {
   if (!results) {
     return null;
   }
@@ -44,6 +45,9 @@ function getItemsFromResults(results, itemsKey) {
   if (!Array.isArray(items)) {
     items = [items];
   }
+  if (maxItems && items.length > maxItems) {
+    items.length = maxItems;
+  }
   return items;
 }
 
@@ -57,6 +61,7 @@ export function BentoListWithRef(
     src = null,
     fetchItems = fetchItemsDefault,
     itemsKey = 'items',
+    maxItems = 0,
     template: itemTemplate = defaultItemTemplate,
     wrapper: wrapperTemplate = defaultWrapperTemplate,
     loading: loadingTemplate = defaultLoadingTemplate,
@@ -79,8 +84,8 @@ export function BentoListWithRef(
   }, [fetchItems, src, renderable]);
 
   const items = useMemo(() => {
-    return getItemsFromResults(results, itemsKey);
-  }, [results, itemsKey]);
+    return getItemsFromResults(results, itemsKey, maxItems);
+  }, [results, itemsKey, maxItems]);
 
   const list = items?.map((item, i) =>
     augment(itemTemplate(item), {'key': i, 'role': 'listitem'})
