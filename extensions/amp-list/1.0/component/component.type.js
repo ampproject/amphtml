@@ -9,6 +9,7 @@ var BentoListDef = {};
  *   fetchItems?: (function(): Promise<*>),
  *   itemsKey?: string,
  *   maxItems?: number,
+ *   resetOnRefresh?: boolean,
  *   template?: function(): PreactDef.Renderable,
  *   wrapper?: function(): PreactDef.Renderable,
  *   loading?: function(): PreactDef.Renderable,

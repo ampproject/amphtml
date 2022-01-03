@@ -62,6 +62,7 @@ export function BentoListWithRef(
     fetchItems = fetchItemsDefault,
     itemsKey = 'items',
     maxItems = 0,
+    resetOnRefresh = false,
     template: itemTemplate = defaultItemTemplate,
     wrapper: wrapperTemplate = defaultWrapperTemplate,
     loading: loadingTemplate = defaultLoadingTemplate,
@@ -100,11 +101,14 @@ export function BentoListWithRef(
     [execute]
   );
 
+  const showLoading = loading && (!list || resetOnRefresh);
+  const showResults = list && !showLoading;
+
   return (
     <ContainWrapper aria-live="polite" {...rest}>
       <Fragment test-id="contents">
-        {list && augment(wrapperTemplate(list), {'role': 'list'})}
-        {loading && loadingTemplate?.()}
+        {showLoading && loadingTemplate?.()}
+        {showResults && augment(wrapperTemplate(list), {'role': 'list'})}
         {error && errorTemplate?.(error)}
       </Fragment>
     </ContainWrapper>

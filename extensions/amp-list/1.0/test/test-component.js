@@ -211,6 +211,43 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     });
   });
 
+  describe('resetOnRefresh', () => {
+    async function testROR({expectedWhileRefreshing, render}) {
+      const ref = Preact.createRef();
+      const component = mount(render({ref}));
+      await waitForData(component);
+
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>one</p><p>two</p><p>three</p></div>`
+      );
+
+      dataStub.resolves({items: ['a', 'b', 'c']});
+      ref.current.refresh();
+      component.update();
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        expectedWhileRefreshing
+      );
+
+      await waitForData(component, 2);
+      expect(snapshot(component.find(CONTENTS))).to.equal(
+        `<div><p>a</p><p>b</p><p>c</p></div>`
+      );
+    }
+
+    it('should normally show old results while refreshing', async () => {
+      await testROR({
+        render: (p) => <BentoList {...p} src="TEST" resetOnRefresh={false} />,
+        expectedWhileRefreshing: `<div><p>one</p><p>two</p><p>three</p></div>`,
+      });
+    });
+    it("should show the 'Loading' indicator when resetOnRefresh is enabled", async () => {
+      await testROR({
+        render: (p) => <BentoList {...p} src="TEST" resetOnRefresh />,
+        expectedWhileRefreshing: `Loading...`,
+      });
+    });
+  });
+
   describe('template', () => {
     it.skip('should allow for custom rendering of the data', async () => {});
   });
